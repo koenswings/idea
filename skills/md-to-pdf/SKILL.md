@@ -5,8 +5,11 @@ description: Convert Markdown files to PDF using VS Code preview styles. Use whe
 
 # md-to-pdf
 
-Converts Markdown to PDF using VS Code preview styles. Uses `weasyprint` (already in the
-OpenClaw container) for rendering — no extra system dependencies required.
+Converts Markdown to PDF using VS Code preview styles.
+
+**Stack:** `python3-markdown` (Markdown → HTML) + `weasyprint` (HTML → PDF).
+Both are Python packages. `weasyprint` ships in the base OpenClaw image.
+`python3-markdown` must be present — see Container Setup below.
 
 ## Usage
 
@@ -21,22 +24,30 @@ OpenClaw container) for rendering — no extra system dependencies required.
 /home/node/workspace/skills/md-to-pdf/scripts/md-to-pdf.sh --all
 ```
 
-## One-time setup (after fresh clone)
+## Container setup
 
-The `node_modules` symlink must exist in `scripts/` (links to engine-dev's JS deps for
-Markdown parsing). Create it once after cloning the `idea` repo:
+`python3-markdown` is not in the base OpenClaw image. Add it to the OpenClaw
+container build by setting in `/home/pi/openclaw/.env`:
 
-```bash
-ln -s /home/node/workspace/agents/agent-engine-dev/node_modules \
-  /home/node/workspace/skills/md-to-pdf/scripts/node_modules
+```
+OPENCLAW_DOCKER_APT_PACKAGES=python3-markdown
 ```
 
-This is the only setup step. Weasyprint and all other dependencies are already in the container.
+This bakes it into the image at build time so it survives container rebuilds.
+It is currently installed manually in the running container (`apt-get install -y python3-markdown`).
 
 ## Notes
 
+- No npm dependencies, no symlinks, no post-clone setup steps
 - Run from the directory you want `--all` to scan (globs from cwd)
 - Internal heading links work as clickable PDF anchors
 - Excludes `node_modules/`, `dist/`, `tmp/`, and `docs/source-bundle.md` from `--all`
 - Styles are bundled in `assets/styles/` — no internet required
-- Depends on `zx` and `markdown-it` from `agent-engine-dev/node_modules` (via symlink)
+
+## Previous approach (Node.js / TypeScript)
+
+The skill was originally implemented in TypeScript (`md-to-pdf.mts`), using
+`zx` + `markdown-it` (from `agent-engine-dev/node_modules`) and Chromium for rendering.
+It was replaced by this Python implementation to eliminate all external dependencies.
+The `.mts` file is preserved alongside `md-to-pdf.py` as a fallback reference.
+See `md-to-pdf.sh` comments for how to revert.
