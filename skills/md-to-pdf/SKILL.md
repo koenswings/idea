@@ -5,7 +5,8 @@ description: Convert Markdown files to PDF using VS Code preview styles. Use whe
 
 # md-to-pdf
 
-Converts Markdown to PDF using VS Code preview styles and Chromium headless rendering.
+Converts Markdown to PDF using VS Code preview styles. Uses `weasyprint` (already in the
+OpenClaw container) for rendering — no extra system dependencies required.
 
 ## Usage
 
@@ -20,20 +21,17 @@ Converts Markdown to PDF using VS Code preview styles and Chromium headless rend
 /home/node/workspace/skills/md-to-pdf/scripts/md-to-pdf.sh --all
 ```
 
-## Setup (one-time, already done on this Pi)
+## One-time setup (after fresh clone)
 
-**Chromium** must be installed in the OpenClaw container:
-```bash
-apt-get install -y chromium
-```
+The `node_modules` symlink must exist in `scripts/` (links to engine-dev's JS deps for
+Markdown parsing). Create it once after cloning the `idea` repo:
 
-**node_modules symlink** must exist in `scripts/` (links to engine-dev deps):
 ```bash
 ln -s /home/node/workspace/agents/agent-engine-dev/node_modules \
   /home/node/workspace/skills/md-to-pdf/scripts/node_modules
 ```
 
-These are already done. Redo them only if the container is rebuilt.
+This is the only setup step. Weasyprint and all other dependencies are already in the container.
 
 ## Notes
 
@@ -41,4 +39,4 @@ These are already done. Redo them only if the container is rebuilt.
 - Internal heading links work as clickable PDF anchors
 - Excludes `node_modules/`, `dist/`, `tmp/`, and `docs/source-bundle.md` from `--all`
 - Styles are bundled in `assets/styles/` — no internet required
-- Depends on `zx` and `markdown-it` from `agent-engine-dev/node_modules`
+- Depends on `zx` and `markdown-it` from `agent-engine-dev/node_modules` (via symlink)

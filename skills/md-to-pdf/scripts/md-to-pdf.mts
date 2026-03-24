@@ -72,7 +72,7 @@ ${body}
 
   await fs.writeFile(tmpHtml, html)
   console.log(chalk.blue(`Generating: ${path.relative(process.cwd(), outputPath)}`))
-  await $`chromium --headless --no-sandbox --disable-gpu --no-pdf-header-footer --print-to-pdf=${outputPath} file://${tmpHtml}`
+  await $`python3 -c "import sys; from weasyprint import HTML; HTML(filename=sys.argv[1]).write_pdf(sys.argv[2])" ${tmpHtml} ${outputPath}`
   await fs.rm(tmpHtml)
   console.log(chalk.green(`  ✓ ${path.relative(process.cwd(), outputPath)}`))
 }
