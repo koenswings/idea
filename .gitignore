@@ -1,0 +1,9 @@
+# Agent workspaces are independent git repos — not part of this repo
+agents/
+engine/
+
+# Transient logs
+logs/
+
+# Environment files
+.env
