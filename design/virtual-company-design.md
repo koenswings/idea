@@ -21,6 +21,7 @@ This document describes how OpenClaw is configured to run the IDEA virtual compa
 - [The Org Root — idea/](#the-org-root--idea)
 - [File System Structure](#file-system-structure)
 - [AGENTS.md — The Role Definition File](#agentsmd--the-role-definition-file)
+- [CLAUDE.md — CLI Fallback](#claudemd--cli-fallback) — pointer list for `claude` CLI; OpenClaw handles this automatically
 - [Shared Agent Knowledge — CONTEXT.md](#shared-agent-knowledge--contextmd)
 - [CEO Approval — Two Layers](#ceo-approval--two-layers)
 - [Mission Control](#mission-control)
@@ -245,6 +246,47 @@ Each workspace has an `AGENTS.md` that shapes the agent's behaviour. For example
 - Store no API keys, credentials, or tokens in any document or log file
 
 > **Note — earlier agent composition**: An earlier version of this plan used seven agents with three separate roles covering this ground: **teacher** (offline guide writing for rural schools), **communications** (external comms, brand voice, website and newsletter content), and **fundraising** (grant research, donor tracking, proposal writing). These were merged into the programme-manager because all three require deep knowledge of school contexts and strong communication skills; because the ground truth from field visits should flow directly into supporter communications and fundraising without handoffs between agents; and because a lean five-agent composition suits a small charity better than seven. The teacher role's core principle — simple, concrete, offline-first documentation for people with limited technology experience — is preserved as a guiding constraint on the programme-manager's guide-writing work.
+
+---
+
+## CLAUDE.md — CLI Fallback
+
+Each agent workspace contains a `CLAUDE.md`. The `claude` CLI reads this automatically when
+started in the agent's directory, giving every agent a working fallback if OpenClaw is unavailable.
+
+`CLAUDE.md` contains only a list of files to read — nothing else. OpenClaw injects identity
+files (`AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `USER.md`, `TOOLS.md`) automatically; in a `claude`
+CLI session the agent reads them manually from this list. `AGENTS.md` remains the single source
+of truth for the role definition and startup checklist.
+
+**`CLAUDE.md` must never contain role instructions, prose, or anything that could drift from
+`AGENTS.md`.** If it does, the two files will diverge — worse than no fallback at all.
+
+### Per-agent file lists
+
+| Agent | Additional files beyond the common set |
+|-------|----------------------------------------|
+| **Atlas** | `../../design/virtual-company-design.md` · `MEMORY.md` |
+| **Axle** | `docs/SOLUTION_DESCRIPTION.md` |
+| **Pixel** | — |
+| **Beacon** | — |
+| **Marco** | `../../standups/` (latest) |
+
+Common set (all agents): `AGENTS.md` · `SOUL.md` · `IDENTITY.md` · `USER.md` · `TOOLS.md` ·
+`../../CONTEXT.md` · `../../BACKLOG.md` · `memory/YYYY-MM-DD.md` (today + yesterday)
+
+### How to use
+
+```bash
+ssh koen@openclaw-pi.tail2d60.ts.net
+cd /home/pi/idea/agents/agent-engine-dev   # or any agent workspace
+claude                                      # CLAUDE.md is picked up automatically
+```
+
+### Maintenance
+
+`CLAUDE.md` only needs updating if the set of OpenClaw-injected files changes, or if an
+agent-specific startup file is added or removed. It does not need updating when `AGENTS.md` evolves.
 
 ---
 
