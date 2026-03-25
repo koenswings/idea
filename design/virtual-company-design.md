@@ -21,6 +21,7 @@ This document describes how OpenClaw is configured to run the IDEA virtual compa
 - [The Org Root — idea/](#the-org-root--idea)
 - [File System Structure](#file-system-structure)
 - [AGENTS.md — The Role Definition File](#agentsmd--the-role-definition-file)
+- [CLAUDE.md — CLI Fallback](#claudemd--cli-fallback) — fallback when OpenClaw is down; thin bootstrap, self-enforced plan mode
 - [Shared Agent Knowledge — CONTEXT.md](#shared-agent-knowledge--contextmd)
 - [CEO Approval — Two Layers](#ceo-approval--two-layers)
 - [Mission Control](#mission-control)
@@ -244,6 +245,73 @@ Each workspace has an `AGENTS.md` that shapes the agent's behaviour. For example
 - Store no API keys, credentials, or tokens in any document or log file
 
 > **Note — earlier agent composition**: An earlier version of this plan used seven agents with three separate roles covering this ground: **teacher** (offline guide writing for rural schools), **communications** (external comms, brand voice, website and newsletter content), and **fundraising** (grant research, donor tracking, proposal writing). These were merged into the programme-manager because all three require deep knowledge of school contexts and strong communication skills; because the ground truth from field visits should flow directly into supporter communications and fundraising without handoffs between agents; and because a lean five-agent composition suits a small charity better than seven. The teacher role's core principle — simple, concrete, offline-first documentation for people with limited technology experience — is preserved as a guiding constraint on the programme-manager's guide-writing work.
+
+---
+
+## CLAUDE.md — CLI Fallback
+
+Each agent workspace contains a `CLAUDE.md` file. The `claude` CLI reads this file automatically
+when started in the agent's directory, giving every agent a viable fallback mode if OpenClaw
+becomes unavailable.
+
+### Design principle: thin bootstrap, not a duplicate
+
+`CLAUDE.md` is not a copy of `AGENTS.md`. Its only job is to bootstrap a `claude` CLI session
+to approximately the same starting state as an OpenClaw session. `AGENTS.md` remains the single
+source of truth for the role definition. `CLAUDE.md` says "load these files in this order, then
+follow `AGENTS.md`." If `CLAUDE.md` ever duplicated role instructions, the two files would
+inevitably drift apart — worse than having no fallback at all.
+
+### What CLAUDE.md does
+
+1. **Warns** the agent it is in fallback mode (no platform enforcement, no Telegram, no cron)
+2. **Gives the startup sequence** — the ordered list of files to read, mirroring what OpenClaw
+   injects automatically: `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `USER.md`, `TOOLS.md`, then the
+   agent-specific reads from the "Every Session" checklist in `AGENTS.md`
+3. **Self-enforces plan mode** — OpenClaw's `DEFAULT_PERMISSION_MODE=plan` does not apply in
+   the `claude` CLI. `CLAUDE.md` contains an explicit rule: state the full plan, wait for CEO
+   approval, only then execute. No exceptions.
+
+### What fallback mode cannot replicate
+
+| OpenClaw capability | Fallback status |
+|---------------------|----------------|
+| Plan-mode enforcement | Self-enforced via `CLAUDE.md` instruction |
+| Telegram ↔ agent binding | Absent — CEO communicates via terminal |
+| Heartbeat and cron | Suspended — no autonomous scheduled behaviour |
+| Session persistence | Not available — context resets each `claude` invocation |
+| Multi-agent coordination | Not available — no cross-agent messaging |
+
+### Axle (engine-dev) — special case
+
+Axle already had a `CLAUDE.md` containing the full Engine project guide (architecture, commands,
+key files). To avoid collision with the CLI fallback bootstrap, that file was renamed to
+`PROJECT.md`. Axle's `AGENTS.md` was updated accordingly. Axle's new `CLAUDE.md` includes a
+step to read `PROJECT.md` as part of its startup sequence — so no project knowledge is lost.
+
+### How to use the fallback
+
+```bash
+# SSH into the Pi
+ssh koen@openclaw-pi.tail2d60.ts.net
+
+# Navigate to the agent you need
+cd /home/pi/idea/agents/agent-engine-dev    # or any other agent
+
+# Start the CLI session — CLAUDE.md is picked up automatically
+claude
+```
+
+The agent will read `CLAUDE.md` on startup, load its identity files, and then follow its normal
+startup checklist. The session is fully functional for task work; it just lacks the platform-level
+features listed above.
+
+### Maintenance rule
+
+`CLAUDE.md` files do not need to be updated when `AGENTS.md` evolves. They are stable: the
+startup sequence (load identity files → follow `AGENTS.md`) does not change. The only reason to
+update a `CLAUDE.md` is if the set of auto-injected files changes, or if a new agent-specific
+file needs to be added to the startup sequence (as with Axle's `PROJECT.md`).
 
 ---
 
