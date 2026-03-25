@@ -1,7 +1,7 @@
 # IDEA Virtual Company — Configuration Design
 
-**Status:** Approved · Partially Implemented (see [What Needs to Happen](#what-needs-to-happen-in-order))
-**Proposed by:** Compass (agent-researcher)
+**Status:** Approved · Implemented
+**Proposed by:** Compass (agent-researcher) · Maintained by Atlas (agent-operations-manager)
 **Approved:** 2026-03-22
 **Last updated:** 2026-03-25
 
