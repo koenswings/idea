@@ -37,12 +37,11 @@ idea/
 
 | Agent | Repo | Role |
 |-------|------|------|
-| Axle | [agent-engine-dev](https://github.com/koenswings/agent-engine-dev) | Engine software: TypeScript, Node.js, Automerge, Docker, Raspberry Pi |
-| Pixel | [agent-console-dev](https://github.com/koenswings/agent-console-dev) | Console UI: Solid.js, Chrome Extension |
-| Beacon | [agent-site-dev](https://github.com/koenswings/agent-site-dev) | Public website: static site, GitHub Pages |
-| Veri | [agent-quality-manager](https://github.com/koenswings/agent-quality-manager) | PR review across all code repos; cross-project consistency |
-| Marco | [agent-programme-manager](https://github.com/koenswings/agent-programme-manager) | Field coordination, teacher guides, supporter comms, fundraising |
-| Compass | [agent-researcher](https://github.com/koenswings/agent-researcher) | Strategic advisor to CEO — org structure, governance (CEO-only) |
+| Atlas 🗺️ | [agent-operations-manager](https://github.com/koenswings/agent-operations-manager) | COO & Quality Manager — org design, operations, PR review across all repos |
+| Axle ⚙️ | [agent-engine-dev](https://github.com/koenswings/agent-engine-dev) | Engine software: TypeScript, Node.js, Automerge, Docker, Raspberry Pi |
+| Pixel 🖥️ | [agent-console-dev](https://github.com/koenswings/agent-console-dev) | Console UI: Solid.js, Chrome Extension |
+| Beacon 🌐 | [agent-site-dev](https://github.com/koenswings/agent-site-dev) | Public website: static site, GitHub Pages |
+| Marco 📋 | [agent-programme-manager](https://github.com/koenswings/agent-programme-manager) | Field coordination, teacher guides, supporter comms, fundraising |
 
 The CEO (Koen) is the sole human. He approves all plans before execution and merges all PRs.
 
@@ -105,5 +104,5 @@ communication with the CEO. Mission Control provides a Kanban board for task dis
 approval management.
 
 Access (Tailscale required):
-- Mission Control: `https://openclaw-pi.tail2d60.ts.net:4000`
+- Mission Control: `https://openclaw-pi.tail2d60.ts.net:8000`
 - OpenClaw UI: `https://openclaw-pi.tail2d60.ts.net`
