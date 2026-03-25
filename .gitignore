@@ -7,3 +7,13 @@ logs/
 
 # Environment files
 .env
+
+# OpenClaw and Claude runtime state
+.openclaw/
+.claude/
+
+# Temporary files
+tmp/
+
+# Backups
+_backups/

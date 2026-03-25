@@ -45,7 +45,7 @@ Draft → Proposed → Approved → Implemented
 ### When implementing
 - Updating the relevant authoritative docs is **part of the same PR as the code change**
 - Update the design doc status to `Implemented` in that same PR
-- Veri verifies both as part of PR review
+- Atlas (COO & Quality Manager) verifies both as part of PR review
 
 ### When a design is rejected or superseded
 - Add a one-sentence rationale to the status field
@@ -57,4 +57,4 @@ Draft → Proposed → Approved → Implemented
 
 | File | Status | Summary |
 |---|---|---|
-| _(none yet — all current designs are repo-local)_ | | |
+| `virtual-company-design.md` | Approved · Partially Implemented | IDEA virtual company on OpenClaw — agent roster, org structure, workflows, infrastructure |

@@ -8,21 +8,20 @@ he approves all plans before execution and merges all PRs.
 
 ## Agent Roster
 
-| Repo | Agent id | Workspace (container) | Scope |
-|------|----------|-----------------------|-------|
-| `koenswings/idea` | — | `/home/node/workspace` | Org root: CONTEXT.md, ROLES.md, BACKLOG.md, PROCESS.md, standups/, skills/ |
-| `koenswings/agent-engine-dev` | `engine-dev` | `/home/node/workspace/agents/agent-engine-dev` | Engine software: TypeScript, Automerge, Docker, Raspberry Pi |
-| `koenswings/agent-console-dev` | `console-dev` | `/home/node/workspace/agents/agent-console-dev` | Console UI: Solid.js, Chrome Extension |
-| `koenswings/agent-site-dev` | `site-dev` | `/home/node/workspace/agents/agent-site-dev` | Public website: Astro/Hugo, GitHub Pages |
-| `koenswings/agent-quality-manager` | `quality-manager` | `/home/node/workspace/agents/agent-quality-manager` | PR review across all code repos; cross-project consistency |
-| `koenswings/agent-programme-manager` | `programme-manager` | `/home/node/workspace/agents/agent-programme-manager` | Field coordination, teacher guides, supporter comms, fundraising |
-| `koenswings/agent-researcher` | `researcher` | `/home/node/workspace/agents/agent-researcher` | Strategic advisor to CEO — org structure, governance (CEO-only) |
+| Repo | Agent id | Name | Workspace (container) | Scope |
+|------|----------|------|-----------------------|-------|
+| `koenswings/agent-operations-manager` | `operations-manager` | Atlas 🗺️ | `/home/node/workspace/agents/agent-operations-manager` | COO & Quality Manager — org structure, operations, quality review |
+| `koenswings/agent-engine-dev` | `engine-dev` | Axle ⚙️ | `/home/node/workspace/agents/agent-engine-dev` | Engine software: TypeScript, Automerge, Docker, Raspberry Pi |
+| `koenswings/agent-console-dev` | `console-dev` | Pixel 🖥️ | `/home/node/workspace/agents/agent-console-dev` | Console UI: Solid.js, Chrome Extension |
+| `koenswings/agent-site-dev` | `site-dev` | Beacon 🌐 | `/home/node/workspace/agents/agent-site-dev` | Public website: Astro/Hugo, GitHub Pages |
+| `koenswings/agent-programme-manager` | `programme-manager` | Marco 📋 | `/home/node/workspace/agents/agent-programme-manager` | Field coordination, teacher guides, supporter comms, fundraising |
 
 > **Note:** Repos are currently under `koenswings` while the GitHub organisation name is being
 > finalised. Once the org is created, all repos will be transferred and these paths will update.
 
-The `idea` repo (this repo) is the shared org root: `CONTEXT.md`, `ROLES.md`, `BACKLOG.md`,
-`PROCESS.md`, `standups/`, `discussions/`, `design/`, `proposals/`.
+The `idea` repo (this repo) is the shared org root — not an agent workspace:
+`CONTEXT.md`, `ROLES.md`, `BACKLOG.md`, `PROCESS.md`, `standups/`, `discussions/`, `design/`,
+`docs/`, `proposals/`, `skills/`.
 
 ---
 
@@ -43,7 +42,8 @@ All agents read `CONTEXT.md` (this repo root) at the start of each session. That
 
 **Plan mode is always on.** No agent acts without first showing its plan to the CEO.
 
-**All changes go via PR.** No agent commits directly to `main` in any repo.
+**All changes go via PR.** No agent commits directly to `main` in any repo (except the `idea`
+org root, which can be pushed to directly from the Pi host for operational updates).
 
 **The backlog is the source of truth.** Agents only work on approved items in `BACKLOG.md`,
 unless given explicit in-session instruction.
@@ -55,12 +55,12 @@ See `PROCESS.md` for the full pipeline.
 
 ## Role Boundaries
 
+- `operations-manager` (Atlas) defines operations, maintains org-level docs, and reviews all agent
+  outputs for quality. It does not produce code, external content, or public communications.
 - `engine-dev` and `console-dev` write code. They do not write external content.
-- `quality-manager` reviews code and documents. It does not write features or content.
 - `programme-manager` handles field coordination, teacher guides, supporter comms, and fundraising.
   It does not make external contact without CEO approval.
 - `site-dev` builds the website. Content comes from `programme-manager` via PRs to `content-drafts/`.
-- `researcher` advises the CEO on organisation structure. It does not participate in daily operations.
 
 When a task spans roles (e.g., programme-manager needs a UX assessment from console-dev), it goes
 through a proposal PR. See `PROCESS.md`.
