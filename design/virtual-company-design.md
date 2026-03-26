@@ -302,26 +302,34 @@ Suggested naming convention: `claude-<agent-role>` (e.g. `claude-engine`, `claud
 
 [Tabby](https://tabby.sh) is a free, open-source, cross-platform terminal (Mac/Windows/Linux) with native SSH profile management. The recommended setup opens one tab per agent, each automatically attaching to its named tmux session on the Pi.
 
-**Install:** `brew install --cask tabby` (Mac) or download from [tabby.sh](https://tabby.sh).
+#### First-time setup
 
-**Before opening Tabby for the first time** (or after a Pi reboot), SSH in and spin up all sessions:
+1. **Install Tabby** — `brew install --cask tabby` (Mac) or download from [tabby.sh](https://tabby.sh).
 
-```bash
-ssh koen@openclaw-pi.tail2d60.ts.net
-bash /home/pi/idea/scripts/start-agents.sh
-```
+2. **Start all agent sessions on the Pi** — SSH in and run:
 
-**Profile setup** — create 5 SSH profiles in *Settings → Profiles & Connections*. For each profile set the host to `openclaw-pi.tail2d60.ts.net`, username to `koen`, and set the *Initial command* field to the command shown:
+   ```bash
+   ssh koen@openclaw-pi.tail2d60.ts.net
+   bash /home/pi/idea/scripts/start-agents.sh
+   ```
 
-| Profile name | Initial command |
-|---|---|
-| IDEA — Atlas | `tmux new-session -A -s claude-operations -c /home/pi/idea/agents/agent-operations-manager 'claude; exec bash -l'` |
-| IDEA — Axle | `tmux new-session -A -s claude-engine -c /home/pi/idea/agents/agent-engine-dev 'claude; exec bash -l'` |
-| IDEA — Pixel | `tmux new-session -A -s claude-console -c /home/pi/idea/agents/agent-console-dev 'claude; exec bash -l'` |
-| IDEA — Beacon | `tmux new-session -A -s claude-site -c /home/pi/idea/agents/agent-site-dev 'claude; exec bash -l'` |
-| IDEA — Marco | `tmux new-session -A -s claude-programme -c /home/pi/idea/agents/agent-programme-manager 'claude; exec bash -l'` |
+   This creates all 5 named tmux sessions. Only needed after initial setup or Pi reboot.
 
-The `-A` flag on `tmux new-session` means: attach if the session already exists, create if not. Each tab is therefore self-sufficient — opening it either picks up where you left off or starts a fresh `claude` session in the right directory.
+3. **Create 5 SSH profiles in Tabby** — *Settings → Profiles & Connections*. For each profile: host `openclaw-pi.tail2d60.ts.net`, username `koen`, and set the *Initial command* field:
+
+   | Profile name | Initial command |
+   |---|---|
+   | IDEA — Atlas | `tmux new-session -A -s claude-operations -c /home/pi/idea/agents/agent-operations-manager 'claude; exec bash -l'` |
+   | IDEA — Axle | `tmux new-session -A -s claude-engine -c /home/pi/idea/agents/agent-engine-dev 'claude; exec bash -l'` |
+   | IDEA — Pixel | `tmux new-session -A -s claude-console -c /home/pi/idea/agents/agent-console-dev 'claude; exec bash -l'` |
+   | IDEA — Beacon | `tmux new-session -A -s claude-site -c /home/pi/idea/agents/agent-site-dev 'claude; exec bash -l'` |
+   | IDEA — Marco | `tmux new-session -A -s claude-programme -c /home/pi/idea/agents/agent-programme-manager 'claude; exec bash -l'` |
+
+4. **Open all 5 tabs** — each tab auto-attaches to its running session or creates a new one if needed (the `-A` flag handles both cases).
+
+#### Day-to-day use
+
+Just open Tabby. Each tab reconnects to its agent's running session. `start-agents.sh` is only needed again after a Pi reboot.
 
 ### Maintenance
 
