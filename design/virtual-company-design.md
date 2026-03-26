@@ -447,7 +447,7 @@ Optional: weekly visibility check
   └─ CEO reviews; adjusts any agent's direction at next interaction
 ```
 
-**Key mental model:** You are always the initiating trigger and the final gate. Agents act when you start them and stop when you approve their output. The only automated behaviour is: reviewer agents respond to review tasks without CEO intervention (bounded, one round, no further chaining).
+**Key mental model:** You are always the initiating trigger and the final gate. Agents act when you start them and stop when you approve their output. The only automated behaviour is: agents respond to cross-agent requests without CEO intervention (bounded, one round, no further chaining).
 
 ---
 
@@ -538,15 +538,15 @@ Every piece of work follows the same cycle, initiated by the CEO:
 CEO → Agent A: "Start task: [description]"
 Agent A: shows plan → CEO approves → executes
 Agent A: produces output (PR / design doc / proposal / report)
-Agent A: creates a review task on Atlas's (or relevant reviewer's) board [auto-review tag]
+Agent A: creates a cross-agent request on the target agent's board [cross-agent tag]
   └─ pi cron detects the new task (every 2 min, no LLM)
-  └─ wakes reviewer in isolated session
-  └─ reviewer reads output, writes response (PR comment / annotation), marks task done
-CEO: reviews Agent A's output + reviewer's annotation
+  └─ wakes target agent in isolated session
+  └─ target agent reads request, writes response (PR comment / answer / opinion), marks task done
+CEO: reviews Agent A's output + target agent's response
 CEO: approve → task Done | amend → Agent A revises | reject → task Cancelled
 ```
 
-The one automated step — reviewer agent responding to review tasks — runs without CEO intervention. It is bounded: one round, no further chaining. See "Cross-agent review mechanism" below.
+The one automated step — target agent responding to cross-agent requests — runs without CEO intervention. It is bounded: one round, no further chaining. See "Cross-agent requests" below.
 
 ### Output types
 
@@ -557,27 +557,33 @@ The one automated step — reviewer agent responding to review tasks — runs wi
 | **Proposal** | New backlog item identified | Any agent (Marco most often) | Approve by merging PR → creates MC task |
 | **Report** | Field updates, grants, quality summary, standup contributions | Marco, Atlas | Read and decide; may prompt new cycle |
 
-### Cross-agent review mechanism
+### Cross-agent requests
 
-When Agent A finishes primary work, it creates a review task on the reviewer's board via the MC API:
+Any agent can send a cross-agent request to any other agent — not only for review, but for opinions, domain questions, feasibility checks, or any input that requires another agent's expertise. Agent A creates a task on Agent B's board via the MC API:
 
 ```
-POST /api/v1/agent/boards/{reviewer_board_id}/tasks
+POST /api/v1/agent/boards/{target_board_id}/tasks
 {
-  "title": "Review: [task description]",
-  "description": "...[fully self-contained: what, where, what to respond with]...\n\n⚠ This is a depth-1 auto-review task. Do not create further tasks.",
-  "tags": ["auto-review"]
+  "title": "[Request type]: [description]",
+  "description": "...[fully self-contained: context, what is needed, what to respond with]...\n\n⚠ This is a depth-1 cross-agent request. Do not create further tasks.",
+  "tags": ["cross-agent"]
 }
 ```
 
-The pi cron (`scripts/check-new-tasks.sh`, runs every 2 minutes) detects tasks tagged `auto-review` in `inbox` status, immediately marks them `in_progress` (prevents double-trigger), logs the task ID to `logs/triggered-tasks.log`, and fires an isolated gateway session for the reviewer agent.
+**Request types** (use in the task title):
+- `Review:` — quality check on a PR, design doc, or proposal
+- `Question:` — domain question (e.g. "Does the Engine expose usage metrics?")
+- `Opinion:` — input on a decision that touches another agent's domain
+- `Feasibility:` — technical or field viability check before committing to a backlog item
+
+The pi cron (`scripts/check-new-tasks.sh`, runs every 2 minutes) detects tasks tagged `cross-agent` in `inbox` status, immediately marks them `in_progress` (prevents double-trigger), logs the task ID to `logs/triggered-tasks.log`, and fires an isolated gateway session for the target agent.
 
 **Cycle prevention — three guards:**
-1. **Instruction**: reviewer SOUL.md hard-codes that auto-review sessions must not create tasks
-2. **Tag propagation**: cron only fires for `auto-review` tasks — creating a further auto-review task requires two simultaneous violations
+1. **Instruction**: target agent's AGENTS.md instructs that cross-agent sessions must not create further tasks
+2. **Tag propagation**: cron only fires for `cross-agent` tasks — creating a further request requires two simultaneous violations
 3. **Triggered log**: each task ID is only ever triggered once regardless of status changes
 
-**Default reviewer assignments:**
+**Default routing:**
 - All developer PRs and design docs → Atlas (Operations Manager)
 - Programme Manager technical feasibility questions → Axle (Engine Dev)
 - Proposals → Atlas for cross-cutting consistency
@@ -618,7 +624,7 @@ Standup output does not create tasks and does not gate any work. The CEO follows
 
 | Script | Schedule | Purpose |
 |--------|----------|---------|
-| `scripts/check-new-tasks.sh` | Every 2 min, always | Detect `auto-review` tasks; trigger reviewer agents |
+| `scripts/check-new-tasks.sh` | Every 2 min, always | Detect `cross-agent` tasks; trigger target agents |
 | `scripts/standup.sh` | On demand (CEO `/standup`) | Runs standup-seed.sh + chains agent contributions |
 | heartbeat scripts | When re-enabled per agent | External event detection only |
 
@@ -843,7 +849,7 @@ just not the one chosen. Marking it `Rejected` would misrepresent the decision.
 
 Agents cannot talk to each other directly. Coordination happens through three mechanisms:
 
-1. **Review tasks** — the primary mechanism. Agent A creates a scoped review task on Agent B's board. Agent B responds automatically (one round, no chaining). This is the default for all work output.
+1. **Cross-agent requests** — the primary mechanism. Agent A creates a scoped request on Agent B's board (review, question, opinion, or feasibility). Agent B responds automatically (one round, no chaining). This is the default for all inter-agent coordination.
 
 2. **Discussion threads** — for topics that need more depth than a single review round. Any agent opens `discussions/YYYY-MM-DD-<topic>.md` at the org root, tags relevant agents with `@agent-id`. The CEO opens each tagged agent's tab to gather their input. Threads stay open until the CEO closes them with a decision.
 
