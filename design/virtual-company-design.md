@@ -21,7 +21,7 @@ This document describes how OpenClaw is configured to run the IDEA virtual compa
 - [The Org Root — idea/](#the-org-root--idea)
 - [File System Structure](#file-system-structure)
 - [AGENTS.md — The Role Definition File](#agentsmd--the-role-definition-file)
-- [CLAUDE.md — CLI Fallback](#claudemd--cli-fallback) — pointer list for `claude` CLI; OpenClaw handles this automatically
+- [CLAUDE.md — CLI Fallback](#claudemd--cli-fallback) — pointer list for `claude` CLI; Tabby is the recommended terminal client
 - [Shared Agent Knowledge — CONTEXT.md](#shared-agent-knowledge--contextmd)
 - [CEO Approval — Two Layers](#ceo-approval--two-layers)
 - [Mission Control](#mission-control)
@@ -38,7 +38,6 @@ This document describes how OpenClaw is configured to run the IDEA virtual compa
 - [Complementary Open Source Tools](#complementary-open-source-tools)
 - [app-openclaw — Platform as an App Disk](#app-openclaw--platform-as-an-app-disk)
 - [Project Repositories](#project-repositories)
-- [What Needs to Happen (in order)](#what-needs-to-happen-in-order)
 - [Current Backlog](#current-backlog)
 
 ---
@@ -278,10 +277,59 @@ Common set (all agents): `AGENTS.md` · `SOUL.md` · `IDENTITY.md` · `USER.md` 
 ### How to use
 
 ```bash
-ssh koen@openclaw-pi.tail2d60.ts.net
+ssh pi@openclaw-pi.tail2d60.ts.net
 cd /home/pi/idea/agents/agent-engine-dev   # or any agent workspace
 claude                                      # CLAUDE.md is picked up automatically
 ```
+
+### Session persistence across SSH disconnects
+
+`claude` is a process. If the SSH connection drops or the terminal is closed, the process — and its entire in-memory conversation context — is lost.
+
+Wrap each agent session in a named tmux session to prevent this:
+
+```bash
+tmux new-session -s claude-engine          # start (first time)
+tmux attach -t claude-engine               # resume after reconnect
+claude
+```
+
+The tmux session keeps running on the Pi after you disconnect. Re-attaching with `tmux attach` picks up the same running `claude` process with all its context intact.
+
+Suggested naming convention: `claude-<agent-role>` (e.g. `claude-engine`, `claude-console`, `claude-site`, `claude-programme`, `claude-operations`).
+
+### Recommended terminal client — Tabby
+
+[Tabby](https://tabby.sh) is a free, open-source, cross-platform terminal (Mac/Windows/Linux) with native SSH profile management. The recommended setup opens one tab per agent, each automatically attaching to its named tmux session on the Pi.
+
+#### First-time setup
+
+1. **Install Tabby** — `brew install --cask tabby` (Mac) or download from [tabby.sh](https://tabby.sh).
+
+2. **Start all agent sessions on the Pi** — SSH in and run:
+
+   ```bash
+   ssh pi@openclaw-pi.tail2d60.ts.net
+   bash /home/pi/idea/scripts/start-agents.sh
+   ```
+
+   This creates all 5 named tmux sessions. Only needed after initial setup or Pi reboot.
+
+3. **Create 5 SSH profiles in Tabby** — *Settings → Profiles & Connections*. For each profile: host `openclaw-pi.tail2d60.ts.net`, username `pi`, and set the *Initial command* field:
+
+   | Profile name | Initial command |
+   |---|---|
+   | IDEA — Atlas | `tmux new-session -A -s claude-operations -c /home/pi/idea/agents/agent-operations-manager 'claude; exec bash -l'` |
+   | IDEA — Axle | `tmux new-session -A -s claude-engine -c /home/pi/idea/agents/agent-engine-dev 'claude; exec bash -l'` |
+   | IDEA — Pixel | `tmux new-session -A -s claude-console -c /home/pi/idea/agents/agent-console-dev 'claude; exec bash -l'` |
+   | IDEA — Beacon | `tmux new-session -A -s claude-site -c /home/pi/idea/agents/agent-site-dev 'claude; exec bash -l'` |
+   | IDEA — Marco | `tmux new-session -A -s claude-programme -c /home/pi/idea/agents/agent-programme-manager 'claude; exec bash -l'` |
+
+4. **Open all 5 tabs** — each tab auto-attaches to its running session or creates a new one if needed (the `-A` flag handles both cases).
+
+#### Day-to-day use
+
+Just open Tabby. Each tab reconnects to its agent's running session. `start-agents.sh` is only needed again after a Pi reboot.
 
 ### Maintenance
 
@@ -397,7 +445,7 @@ Agents read `BACKLOG.md` at session start via HEARTBEAT.md. It is versioned and 
 | **Telegram** | Day-to-day agent interaction — message any agent directly from your phone | Daily — the primary conversational interface |
 | **Mission Control** | Kanban across all 5 operational agents; task dispatch; approval management; activity timeline | When you need the broader operational view |
 | **GitHub** | Review and merge PRs (code, documents, identity files) | Whenever agents raise PRs |
-| **Terminal (SSH / Tailscale SSH)** | Pi administration, Docker, logs | Occasional |
+| **Tabby (SSH / Tailscale SSH)** | Claude CLI sessions for all agents — one tab per agent, each auto-attaching to its tmux session | Occasional — CLI fallback or deep debugging |
 | **OpenClaw Control UI** | Low-level fallback if Mission Control is unavailable | Rarely |
 
 Access Mission Control at `https://openclaw-pi.tail2d60.ts.net:8000`. OpenClaw Control UI at `https://openclaw-pi.tail2d60.ts.net`.
@@ -1202,42 +1250,12 @@ Total: **8 repos** — 1 org root + 5 operational agent repos + 1 researcher rep
 
 ---
 
-## What Needs to Happen (in order)
-
-1. ✅ Set up project repos: `engine`, `openclaw`, `idea-proposal` on GitHub
-2. ✅ Set up VS Code / Claude Code / tmux per-project session pattern across all three projects
-3. ✅ Review and approve the full proposal — implemented 2026-03-22
-4. ✅ Create `/home/pi/idea/` directory structure on the Pi: org root files + `agents/` subfolder
-5. ✅ Move existing repos into new structure:
-   - `/home/pi/projects/engine` → `/home/pi/idea/agents/agent-engine-dev/`
-   - `/home/pi/projects/idea-proposal` → `/home/pi/idea/agents/agent-researcher/`
-6. ✅ Update Docker volume mount in `compose.yaml`: `/home/pi/projects` → `/home/pi/idea`
-7. ✅ (partial) Rename repos on GitHub under `koenswings`: `engine` → `agent-engine-dev`, `openclaw` → `app-openclaw`, `console` → `agent-console-dev`. GitHub org creation and repo transfers deferred until org name is decided.
-8. ✅ Create new agent workspace directories: `agents/agent-console-dev/`, `agents/agent-site-dev/`, `agents/agent-quality-manager/`, `agents/agent-programme-manager/`; initialise as git repos cloned from GitHub
-9. ✅ Copy approved `AGENTS.md` files from proposal into each workspace
-10. ✅ Apply updated `openclaw.json` (rename existing agents + add new ones with updated workspace paths)
-11. ✅ Identity files (SOUL, AGENTS, HEARTBEAT, IDENTITY, USER, TOOLS, BOOTSTRAP) committed to each agent repo — all PRs merged
-12. ✅ Bring OpenClaw up briefly — verify all 6 agents visible — bring back down
-12a. ✅ Deploy Mission Control: standalone stack at `/home/pi/openclaw/mission-control`; IDEA org + board groups created via API; gateway + boards require CEO live session (board creation requires gateway_id, gateway registration requires browser WSS context)
-12b. ✅ Workspace migration: all agents now use code repos as workspace (not workspace-lead dirs); workspace-lead-* dirs archived to /home/pi/obsolete/
-12c. ✅ Memory in git: memory files committed to all 6 agent repos; memory written directly into workspace going forward
-12d. ✅ Telegram channel live: all 6 agents (5 board leads + Compass) bound to dedicated groups via @Idea911Bot
-12e. ✅ Sandbox removed from all pre-configured agents: direct filesystem access, consistent with board leads
-13. ✅ Set up branch protection on `main` in each GitHub repo (CEO-only merge) — all 6 repos protected; researcher unprotected by design
-14. ✅ CEO live: agents accessible via Telegram and MC UI
-15. ✅ CEO live: BOOTSTRAP sessions complete — all 5 board leads active
-16. ✅ Create `app-openclaw` repo — repo synced with running system; mission-control added as submodule; openclaw.json template committed; MC has restart: unless-stopped; PR #2 open for review
-17. ✅ CEO ↔ agent introduction conversations complete; heartbeat schedule defined; BACKLOG.md items migrated to Mission Control
-18. ✅ Restructure: agent-researcher → agent-operations-manager (Atlas, COO + Quality Manager); agent-quality-manager archived; Atlas workspace moved to agents/agent-operations-manager/; design docs migrated to idea/design/
-
----
-
 ## Current Backlog
 
 ### HQ / Setup
 - [x] Decide GitHub org name → decision deferred; proceeding under `koenswings` while name is finalised (candidates: `ideabora`, `ideamoja`, `ideaweza`, `ideakazi`, `edufrica`)
 - [x] Set up `engine`, `openclaw`, `idea-proposal` repos on GitHub (under `koenswings`); renamed to `agent-engine-dev`, `app-openclaw`, `agent-console-dev`
-- [x] Set up VS Code / Claude Code / tmux per-project session pattern
+- [x] Set up per-project Claude Code session pattern (SSH; tmux for session persistence)
 - [x] AGENTS.md file structure → one repo per agent (see File System Structure section)
 - [x] Shared knowledge → single `CONTEXT.md` at org root (see Shared Agent Knowledge section)
 - [x] Standup model → roundtable format + discussion threads (see Multi-Agent Dialogue section)
