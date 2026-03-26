@@ -21,7 +21,7 @@ This document describes how OpenClaw is configured to run the IDEA virtual compa
 - [The Org Root — idea/](#the-org-root--idea)
 - [File System Structure](#file-system-structure)
 - [AGENTS.md — The Role Definition File](#agentsmd--the-role-definition-file)
-- [CLAUDE.md — CLI Fallback](#claudemd--cli-fallback) — pointer list for `claude` CLI; OpenClaw handles this automatically
+- [CLAUDE.md — CLI Fallback](#claudemd--cli-fallback) — pointer list for `claude` CLI; Tabby is the recommended terminal client
 - [Shared Agent Knowledge — CONTEXT.md](#shared-agent-knowledge--contextmd)
 - [CEO Approval — Two Layers](#ceo-approval--two-layers)
 - [Mission Control](#mission-control)
@@ -298,6 +298,31 @@ The tmux session keeps running on the Pi after you disconnect. Re-attaching with
 
 Suggested naming convention: `claude-<agent-role>` (e.g. `claude-engine`, `claude-console`, `claude-site`, `claude-programme`, `claude-operations`).
 
+### Recommended terminal client — Tabby
+
+[Tabby](https://tabby.sh) is a free, open-source, cross-platform terminal (Mac/Windows/Linux) with native SSH profile management. The recommended setup opens one tab per agent, each automatically attaching to its named tmux session on the Pi.
+
+**Install:** `brew install --cask tabby` (Mac) or download from [tabby.sh](https://tabby.sh).
+
+**Before opening Tabby for the first time** (or after a Pi reboot), SSH in and spin up all sessions:
+
+```bash
+ssh koen@openclaw-pi.tail2d60.ts.net
+bash /home/pi/idea/scripts/start-agents.sh
+```
+
+**Profile setup** — create 5 SSH profiles in *Settings → Profiles & Connections*. For each profile set the host to `openclaw-pi.tail2d60.ts.net`, username to `koen`, and set the *Initial command* field to the command shown:
+
+| Profile name | Initial command |
+|---|---|
+| IDEA — Atlas | `tmux new-session -A -s claude-operations -c /home/pi/idea/agents/agent-operations-manager 'claude; exec bash -l'` |
+| IDEA — Axle | `tmux new-session -A -s claude-engine -c /home/pi/idea/agents/agent-engine-dev 'claude; exec bash -l'` |
+| IDEA — Pixel | `tmux new-session -A -s claude-console -c /home/pi/idea/agents/agent-console-dev 'claude; exec bash -l'` |
+| IDEA — Beacon | `tmux new-session -A -s claude-site -c /home/pi/idea/agents/agent-site-dev 'claude; exec bash -l'` |
+| IDEA — Marco | `tmux new-session -A -s claude-programme -c /home/pi/idea/agents/agent-programme-manager 'claude; exec bash -l'` |
+
+The `-A` flag on `tmux new-session` means: attach if the session already exists, create if not. Each tab is therefore self-sufficient — opening it either picks up where you left off or starts a fresh `claude` session in the right directory.
+
 ### Maintenance
 
 `CLAUDE.md` only needs updating if the set of OpenClaw-injected files changes, or if an
@@ -412,7 +437,7 @@ Agents read `BACKLOG.md` at session start via HEARTBEAT.md. It is versioned and 
 | **Telegram** | Day-to-day agent interaction — message any agent directly from your phone | Daily — the primary conversational interface |
 | **Mission Control** | Kanban across all 5 operational agents; task dispatch; approval management; activity timeline | When you need the broader operational view |
 | **GitHub** | Review and merge PRs (code, documents, identity files) | Whenever agents raise PRs |
-| **Terminal (SSH / Tailscale SSH)** | Pi administration, Docker, logs | Occasional |
+| **Tabby (SSH / Tailscale SSH)** | Claude CLI sessions for all agents — one tab per agent, each auto-attaching to its tmux session | Occasional — CLI fallback or deep debugging |
 | **OpenClaw Control UI** | Low-level fallback if Mission Control is unavailable | Rarely |
 
 Access Mission Control at `https://openclaw-pi.tail2d60.ts.net:8000`. OpenClaw Control UI at `https://openclaw-pi.tail2d60.ts.net`.
