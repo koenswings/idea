@@ -277,7 +277,7 @@ Common set (all agents): `AGENTS.md` · `SOUL.md` · `IDENTITY.md` · `USER.md` 
 ### How to use
 
 ```bash
-ssh koen@openclaw-pi.tail2d60.ts.net
+ssh pi@openclaw-pi.tail2d60.ts.net
 cd /home/pi/idea/agents/agent-engine-dev   # or any agent workspace
 claude                                      # CLAUDE.md is picked up automatically
 ```
@@ -309,13 +309,13 @@ Suggested naming convention: `claude-<agent-role>` (e.g. `claude-engine`, `claud
 2. **Start all agent sessions on the Pi** — SSH in and run:
 
    ```bash
-   ssh koen@openclaw-pi.tail2d60.ts.net
+   ssh pi@openclaw-pi.tail2d60.ts.net
    bash /home/pi/idea/scripts/start-agents.sh
    ```
 
    This creates all 5 named tmux sessions. Only needed after initial setup or Pi reboot.
 
-3. **Create 5 SSH profiles in Tabby** — *Settings → Profiles & Connections*. For each profile: host `openclaw-pi.tail2d60.ts.net`, username `koen`, and set the *Initial command* field:
+3. **Create 5 SSH profiles in Tabby** — *Settings → Profiles & Connections*. For each profile: host `openclaw-pi.tail2d60.ts.net`, username `pi`, and set the *Initial command* field:
 
    | Profile name | Initial command |
    |---|---|
