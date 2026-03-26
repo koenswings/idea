@@ -670,6 +670,8 @@ accumulates silently.
 
 **Session logs** (`memory/YYYY-MM-DD.md` and `MEMORY.md` in each workspace) are committed to git alongside `outputs/`. Together they form the permanent record: `outputs/` holds the substantive responses; `memory/` holds the agent's running operational notes and durable decisions.
 
+**When to write memory:** After each substantive exchange — not at session end. Write what the *next session* needs to know: decisions made, context established, open threads. Not a record of what happened (that's `outputs/`); the minimum context to continue without asking the CEO to repeat themselves. Append to `memory/YYYY-MM-DD.md` and push immediately alongside the output file.
+
 ### Memory commit workflow
 
 All repos are branch-protected — no direct pushes to `main`. Memory updates flow through a persistent branch (`memory/updates`): the agent pushes each session's memory files there; a single long-lived PR stays open on GitHub accumulating commits. The CEO merges whenever they want to review what has been logged. After a merge, the agent opens a fresh `memory/updates` branch.
@@ -702,14 +704,13 @@ Limits: 20,000 chars per file; 150,000 chars total across all files (silent trun
 
 ⚠️ **Do not list `SOUL.md`, `USER.md`, or `IDENTITY.md` in any agent's startup checklist** — they are already in context. Listing them wastes tokens.
 
-**2. Explicitly read by the agent** — the agent calls `read` on startup, instructed to do so by `AGENTS.md`:
+**2. Explicitly read by the agent** — the agent calls `read` on startup, instructed to do so by `AGENTS.md`. This happens **unconditionally at every session start, before the first response** — not triggered by `/init`, not skipped when the first message seems urgent:
 
 | File | Read by |
 |------|---------|
 | `../../CONTEXT.md` | All agents — every session |
 | `../../BACKLOG.md` | All agents |
 | `memory/YYYY-MM-DD.md` (today + yesterday) | All agents |
-| `CLAUDE.md` | Engine Dev |
 | `docs/SOLUTION_DESCRIPTION.md` | Engine Dev |
 | `../../standups/` (latest) | Atlas, Programme Manager |
 | `../../design/virtual-company-design.md` | Atlas |
@@ -720,7 +721,7 @@ Limits: 20,000 chars per file; 150,000 chars total across all files (silent trun
 | Agent | Reads at session start |
 |-------|----------------------|
 | **Atlas** | `CONTEXT.md` · `design/virtual-company-design.md` · `BACKLOG.md` · `memory/` (today + yesterday) · `MEMORY.md` |
-| **Axle** | `CONTEXT.md` · `SOLUTION_DESCRIPTION.md` · `CLAUDE.md` · `BACKLOG.md` · `memory/` |
+| **Axle** | `CONTEXT.md` · `SOLUTION_DESCRIPTION.md` · `BACKLOG.md` · `memory/` |
 | **Pixel** | `CONTEXT.md` · `BACKLOG.md` · `memory/` · `design/` (before feature work) |
 | **Beacon** | `CONTEXT.md` · `BACKLOG.md` · `content-drafts/` · `memory/` |
 | **Marco** | `CONTEXT.md` · `BACKLOG.md` · `standups/` (latest) · `memory/` |
@@ -731,10 +732,7 @@ Every agent recognises `/init` as a recovery command. When the CEO sends `/init`
 Telegram group, the agent immediately re-runs its full startup read sequence regardless of the
 current session state.
 
-**Why it exists:** OpenClaw sessions sometimes start without completing the startup sequence — for
-example, after a gateway restart, when a session was woken by a cron job before receiving a message,
-or when a new session context has lost prior state. `/init` is the reliable reset that brings any
-agent back to a fully-loaded, contextually-aware state without needing to restart OpenClaw.
+**Why it exists:** Startup reads are unconditional — agents read on every session start without being asked. `/init` is a *recovery* command for the rare cases where that didn't happen: after a gateway restart, when a session was woken by a cron job before receiving a message, or when context was lost. It forces a re-read without needing to restart OpenClaw. It is not the normal trigger for startup reads.
 
 **What each agent does on `/init`:**
 
