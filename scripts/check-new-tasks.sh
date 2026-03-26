@@ -33,21 +33,20 @@ TOKEN=$(cat "$TOKEN_FILE")
 # Board IDs: the MC board UUID for each agent
 # Agent IDs: the OpenClaw agent ID used to fire isolated sessions
 #
-# NOTE: atlas board ID needs to be confirmed — Veri's board (d0cfa49e) may be
-# repurposed. Verify via MC UI before enabling atlas entry.
+# Board IDs: Atlas reuses Veri's former board (d0cfa49e) — same board, new agent.
 declare -A BOARDS
+BOARDS["atlas"]="d0cfa49e-edcb-4a23-832b-c2ae2c99bf67"
 BOARDS["axle"]="6bddb9d2-c06f-444d-8b18-b517aeaa6aa8"
 BOARDS["pixel"]="ac508766-e9e3-48a0-b6a5-54c6ffcdc1a3"
 BOARDS["beacon"]="7cc2a1cf-fa22-485f-b842-bb22cb758257"
 BOARDS["marco"]="3f1be9c8-87e7-4a5d-9d3b-99756c35e3a9"
-# BOARDS["atlas"]="<board-id-to-confirm>"   # ← uncomment once board ID verified
 
 declare -A AGENTS
+AGENTS["atlas"]="operations-manager"
 AGENTS["axle"]="lead-6bddb9d2-c06f-444d-8b18-b517aeaa6aa8"
 AGENTS["pixel"]="lead-ac508766-e9e3-48a0-b6a5-54c6ffcdc1a3"
 AGENTS["beacon"]="lead-7cc2a1cf-fa22-485f-b842-bb22cb758257"
 AGENTS["marco"]="lead-3f1be9c8-87e7-4a5d-9d3b-99756c35e3a9"
-# AGENTS["atlas"]="operations-manager"       # ← uncomment once board ID verified
 
 # ── Process each board ────────────────────────────────────────────────────────
 for NAME in "${!BOARDS[@]}"; do
