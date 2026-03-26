@@ -626,21 +626,41 @@ Standup output does not create tasks and does not gate any work. The CEO follows
 
 ## Session Documentation
 
-**Every agent documents every session.** At the end of every substantive session, each agent writes a summary to `outputs/YYYY-MM-DD-HHMM-<topic>.md` in its own workspace, then commits and pushes.
+Every agent writes an output file for every substantive response — immediately after delivering it, not at session end.
 
-This creates a permanent, searchable record of every conversation across all agents. Format:
+### What counts as substantive
+
+**Write a file for:** any response containing analysis, a decision, a plan, a recommendation, a design, or a work product.
+
+**Exempt:** one-liner confirmations, status ACKs ("Done, pushed"), and pure yes/no answers. These add noise without audit value.
+
+### Format
 
 ```
 outputs/YYYY-MM-DD-HHMM-<short-topic>.md
-
-> **Task/Question:** <what was asked or assigned>
-
-[Body: what was done, decisions made, outputs produced]
 ```
 
-For all agents, session outputs go to `outputs/` and session memory goes to `memory/YYYY-MM-DD.md`. Both are committed to git at session end.
+```markdown
+> **Task/Question:** <the user's exact message>
 
-The `outputs/` directory in each repo is committed to git and included in the normal PR/push flow. It is the human-readable conversation history for that agent.
+[Body: analysis, decisions, reasoning, work produced]
+```
+
+The `<short-topic>` slug is 2–4 words in kebab-case describing the content, not the format:
+`outputs-policy`, `claude-fallback-design`, `pr-review-engine-automerge`.
+
+### Rules
+
+1. Write the file **immediately** after delivering the response — not at session end
+2. Commit and push to `memory/updates` right after writing
+3. This applies to every session and every interface (Telegram, Mission Control, terminal)
+4. Commit message format: `outputs: YYYY-MM-DD <short-topic>`
+
+### Purpose
+
+Output files are the permanent, searchable record of what every agent said, decided, and produced — and why. Memory files capture what agents *know*; output files capture what they *said*. Together they give full auditability without needing to reconstruct decisions from conversation logs.
+
+The `outputs/` directory flows through the same `memory/updates` branch and long-lived PR as memory files — one PR per agent, merged by the CEO on their own schedule.
 
 ---
 
