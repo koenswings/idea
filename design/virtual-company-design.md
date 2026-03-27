@@ -3,7 +3,7 @@
 **Status:** Approved · Implemented
 **Proposed by:** Compass (agent-researcher) · Maintained by Atlas (agent-operations-manager)
 **Approved:** 2026-03-22
-**Last updated:** 2026-03-25
+**Last updated:** 2026-03-27
 
 ---
 
@@ -326,16 +326,17 @@ For complex engine or console changes, a third gate applies:
 
 [openclaw-mission-control](https://github.com/abhi1693/openclaw-mission-control) is a purpose-built
 dashboard for running OpenClaw at team scale. It provides a Kanban board, structured task dispatch,
-real-time agent monitoring, and built-in approval flows on top of the OpenClaw gateway. It runs as
-a Next.js application (port 8000), connects to the OpenClaw gateway via WebSocket (port 18789),
-persists state in SQLite, and deploys as a Docker container alongside OpenClaw.
+real-time agent monitoring, and built-in approval flows on top of the OpenClaw gateway. The backend
+API runs on port 8000 (FastAPI/Python), the frontend on port 3000(externally mapped to 4000). It
+connects to the OpenClaw gateway via WebSocket (port 18789), persists state in PostgreSQL 16, and
+runs as part of the unified IDEA Platform stack.
 
 ### Setup
 
-- Mission Control runs as an additional Docker container added to `compose.yaml`
-- A bearer token (`LOCAL_AUTH_TOKEN`, minimum 50 characters) links it to the OpenClaw gateway
+- Mission Control runs as part of the unified IDEA Platform stack (`idea/platform/compose.yaml`) — 6 services on a shared `idea-net` Docker network alongside `openclaw-gateway`
+- A local auth token (`MC_LOCAL_AUTH_TOKEN` in `platform/.env`) authenticates all API calls. All agents share the same token value; it is stored as `AUTH_TOKEN` in each agent's `.env` (gitignored)
 - The board hierarchy is configured once in the MC UI: **IDEA org → Board Groups (Engineering, HQ) → Boards per agent or project → Tasks**
-- Accessible at `https://openclaw-pi.tail2d60.ts.net:8000`
+- Frontend accessible at `https://openclaw-pi.tail2d60.ts.net:4000`; backend API at `http://mission-control-backend:8000` (internal) or `http://172.18.0.1:8000` (host bridge, also works)
 
 The rest of the setup is unaffected: `openclaw.json`, `AGENTS.md` files, sandbox files, and the HQ directory structure on disk are unchanged.
 
@@ -1129,13 +1130,16 @@ idea/
   platform/
     compose.yaml      ← unified: OpenClaw + Mission Control (6 services, one network)
     openclaw.json     ← agent roster, model config, Telegram bindings — no secrets
+    .env              ← MC credentials (gitignored, never commit)
     .env.template     ← credential placeholders (copy to .env, gitignored)
     secrets/          ← API keys and tokens as files — gitignored, never commit
   scripts/
     setup.sh          ← full install: dependencies, repos, platform, Tailscale
     apply-config.sh   ← apply openclaw.json changes to the running system
-    MIGRATE.md        ← runbook for migrating from the standalone setup
+    MIGRATE.md        ← runbook for migrating from the standalone setup (completed 2026-03-27)
 ```
+
+> **Current status (as of 2026-03-27):** The unified platform is live on `openclaw-pi`. The migration from the old standalone stacks (`/home/pi/openclaw/` + `/home/pi/openclaw/mission-control/`) to `idea/platform/compose.yaml` was completed on 2026-03-27. All 6 services are running on `idea-net`. See `agents/agent-operations-manager/outputs/2026-03-27-1805-platform-migration.md` for the full migration log.
 
 Install on a fresh Pi:
 
@@ -1163,17 +1167,19 @@ The `app-openclaw` repo is a generic, reusable Docker Compose package of OpenCla
 
 All repos under `idea-edu-africa` GitHub org. Repos currently under personal account `koenswings` will be transferred when the org is created.
 
-| Repo | Target URL | Current URL | Status |
-|------|-----------|-------------|--------|
-| `idea` | `idea-edu-africa/idea` | (to create) | Org root / coordination hub |
-| `agent-engine-dev` | `idea-edu-africa/agent-engine-dev` | `koenswings/engine` | Rename + transfer |
-| `agent-console-dev` | `idea-edu-africa/agent-console-dev` | (to create) | New |
-| `agent-site-dev` | `idea-edu-africa/agent-site-dev` | (to create) | New |
-| `agent-quality-manager` | `idea-edu-africa/agent-quality-manager` | (to create) | New |
-| `agent-programme-manager` | `idea-edu-africa/agent-programme-manager` | (to create) | New |
-| `agent-researcher` | `idea-edu-africa/agent-researcher` | `koenswings/idea-proposal` | Rename + transfer |
-| `openclaw` | `idea-edu-africa/openclaw` | `koenswings/openclaw` | Transfer only |
-| `app-openclaw` | `idea-edu-africa/app-openclaw` | (to create) | New — App Disk packaging OpenClaw + Mission Control + Tailscale |
+| Repo | Current URL | Status |
+|------|-------------|--------|
+| `idea` | `koenswings/idea` | ✅ Active — org root / coordination hub |
+| `agent-operations-manager` | `koenswings/agent-operations-manager` | ✅ Active — Atlas (COO & Quality Manager) |
+| `agent-engine-dev` | `koenswings/agent-engine-dev` | ✅ Active — Axle (Engine Dev) |
+| `agent-console-dev` | `koenswings/agent-console-dev` | ✅ Active — Pixel (Console Dev) |
+| `agent-site-dev` | `koenswings/agent-site-dev` | ✅ Active — Beacon (Site Dev) |
+| `agent-programme-manager` | `koenswings/agent-programme-manager` | ✅ Active — Marco (Programme Manager) |
+| `app-openclaw` | `koenswings/app-openclaw` | ✅ Active — generic OpenClaw platform reference |
+| `agent-quality-manager` | `koenswings/agent-quality-manager` | 🗄️ Archived — role merged into Atlas |
+| `agent-researcher` | `koenswings/agent-researcher` | 🗄️ Archived — role merged into Atlas; folder at `/home/pi/obsolete/` |
+
+All repos under personal account `koenswings` pending GitHub org creation (name TBD — candidates: `ideabora`, `ideamoja`, `ideaweza`).
 
 Total: **8 repos** — 1 org root + 5 operational agent repos + 1 researcher repo + `openclaw` platform config + `app-openclaw` App Disk.
 

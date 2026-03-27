@@ -39,7 +39,15 @@ services:
     image: ghcr.io/openclaw/openclaw:latest
     container_name: openclaw-gateway
     restart: unless-stopped
+    user: root
     entrypoint: ["/entrypoint.sh"]
+    command:
+      - "node"
+      - "dist/index.js"
+      - "gateway"
+      - "--port"
+      - "18789"
+      - "--allow-unconfigured"
     networks:
       - idea-net
     ports:
@@ -55,6 +63,15 @@ services:
     environment:
       - OPENCLAW_LOG_LEVEL=info
       - OPENCLAW_WORKSPACE=/home/node/workspace
+      - OPENCLAW_VERSION=2026.2.17
+      - CLAUDE_CODE_MCP_ENABLED=true
+      - DEFAULT_PERMISSION_MODE=plan
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:18789 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # ─────────────────────────────────────────────────────────────────────────
   # Mission Control — task and board management
@@ -114,6 +131,7 @@ services:
         condition: service_healthy
     environment:
       - AUTH_MODE=local
+      - LOCAL_AUTH_TOKEN=${MC_LOCAL_AUTH_TOKEN}
       - ENVIRONMENT=dev
       - DATABASE_URL=postgresql+psycopg://postgres:${MC_DB_PASSWORD}@mission-control-db:5432/mission_control
       - RQ_REDIS_URL=redis://mission-control-redis:6379/0
@@ -145,9 +163,13 @@ services:
       mission-control-redis:
         condition: service_healthy
     environment:
+      - AUTH_MODE=local
+      - LOCAL_AUTH_TOKEN=${MC_LOCAL_AUTH_TOKEN}
       - DATABASE_URL=postgresql+psycopg://postgres:${MC_DB_PASSWORD}@mission-control-db:5432/mission_control
       - RQ_REDIS_URL=redis://mission-control-redis:6379/0
       - RQ_QUEUE_NAME=default
+      - RQ_DISPATCH_MAX_RETRIES=3
+      - RQ_DISPATCH_THROTTLE_SECONDS=2.0
 
   mission-control-frontend:
     image: openclaw-mission-control-frontend
