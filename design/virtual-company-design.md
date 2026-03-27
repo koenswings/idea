@@ -38,7 +38,6 @@ This document describes how OpenClaw is configured to run the IDEA virtual compa
 - [Complementary Open Source Tools](#complementary-open-source-tools)
 - [Installing IDEA](#installing-idea)
 - [Project Repositories](#project-repositories)
-- [What Needs to Happen (in order)](#what-needs-to-happen-in-order)
 - [Current Backlog](#current-backlog)
 
 ---
@@ -1136,10 +1135,8 @@ idea/
   scripts/
     setup.sh          ← full install: dependencies, repos, platform, Tailscale
     apply-config.sh   ← apply openclaw.json changes to the running system
-    MIGRATE.md        ← runbook for migrating from the standalone setup (completed 2026-03-27)
+    MIGRATE.md        ← runbook for migrating from the standalone setup
 ```
-
-> **Current status (as of 2026-03-27):** The unified platform is live on `openclaw-pi`. The migration from the old standalone stacks (`/home/pi/openclaw/` + `/home/pi/openclaw/mission-control/`) to `idea/platform/compose.yaml` was completed on 2026-03-27. All 6 services are running on `idea-net`. See `agents/agent-operations-manager/outputs/2026-03-27-1805-platform-migration.md` for the full migration log.
 
 Install on a fresh Pi:
 
@@ -1182,38 +1179,6 @@ All repos under `idea-edu-africa` GitHub org. Repos currently under personal acc
 All repos under personal account `koenswings` pending GitHub org creation (name TBD — candidates: `ideabora`, `ideamoja`, `ideaweza`).
 
 Total: **8 repos** — 1 org root + 5 operational agent repos + 1 researcher repo + `openclaw` platform config + `app-openclaw` App Disk.
-
----
-
-## What Needs to Happen (in order)
-
-1. ✅ Set up project repos: `engine`, `openclaw`, `idea-proposal` on GitHub
-2. ✅ Set up VS Code / Claude Code / tmux per-project session pattern across all three projects
-3. ✅ Review and approve the full proposal — implemented 2026-03-22
-4. ✅ Create `/home/pi/idea/` directory structure on the Pi: org root files + `agents/` subfolder
-5. ✅ Move existing repos into new structure:
-   - `/home/pi/projects/engine` → `/home/pi/idea/agents/agent-engine-dev/`
-   - `/home/pi/projects/idea-proposal` → `/home/pi/idea/agents/agent-researcher/`
-6. ✅ Update Docker volume mount in `compose.yaml`: `/home/pi/projects` → `/home/pi/idea`
-7. ✅ (partial) Rename repos on GitHub under `koenswings`: `engine` → `agent-engine-dev`, `openclaw` → `app-openclaw`, `console` → `agent-console-dev`. GitHub org creation and repo transfers deferred until org name is decided.
-8. ✅ Create new agent workspace directories: `agents/agent-console-dev/`, `agents/agent-site-dev/`, `agents/agent-quality-manager/`, `agents/agent-programme-manager/`; initialise as git repos cloned from GitHub
-9. ✅ Copy approved `AGENTS.md` files from proposal into each workspace
-10. ✅ Apply updated `openclaw.json` (rename existing agents + add new ones with updated workspace paths)
-11. ✅ Identity files (SOUL, AGENTS, HEARTBEAT, IDENTITY, USER, TOOLS, BOOTSTRAP) committed to each agent repo — all PRs merged
-12. ✅ Bring OpenClaw up briefly — verify all 6 agents visible — bring back down
-12a. ✅ Deploy Mission Control: standalone stack at `/home/pi/openclaw/mission-control`; IDEA org + board groups created via API; gateway + boards require CEO live session (board creation requires gateway_id, gateway registration requires browser WSS context)
-12b. ✅ Workspace migration: all agents now use code repos as workspace (not workspace-lead dirs); workspace-lead-* dirs archived to /home/pi/obsolete/
-12c. ✅ Memory in git: memory files committed to all 6 agent repos; memory written directly into workspace going forward
-12d. ✅ Telegram channel live: all 6 agents (5 board leads + Compass) bound to dedicated groups via @Idea911Bot
-12e. ✅ Sandbox removed from all pre-configured agents: direct filesystem access, consistent with board leads
-13. ✅ Set up branch protection on `main` in each GitHub repo (CEO-only merge) — all 6 repos protected; researcher unprotected by design
-14. ✅ CEO live: agents accessible via Telegram and MC UI
-15. ✅ CEO live: BOOTSTRAP sessions complete — all 5 board leads active
-16. ✅ Create `app-openclaw` repo — repo synced with running system; mission-control added as submodule; openclaw.json template committed; MC has restart: unless-stopped; PR #2 open for review
-17. ✅ CEO ↔ agent introduction conversations complete; heartbeat schedule defined; BACKLOG.md items migrated to Mission Control
-18. ✅ Restructure: agent-researcher → agent-operations-manager (Atlas, COO + Quality Manager); agent-quality-manager archived; Atlas workspace moved to agents/agent-operations-manager/; design docs migrated to idea/design/
-
----
 
 ## Current Backlog
 
