@@ -1183,42 +1183,14 @@ Total: **8 repos** — 1 org root + 5 operational agent repos + 1 researcher rep
 ## Current Backlog
 
 ### HQ / Setup
-- [x] Decide GitHub org name → decision deferred; proceeding under `koenswings` while name is finalised (candidates: `ideabora`, `ideamoja`, `ideaweza`, `ideakazi`, `edufrica`)
-- [x] Set up `engine`, `openclaw`, `idea-proposal` repos on GitHub (under `koenswings`); renamed to `agent-engine-dev`, `app-openclaw`, `agent-console-dev`
-- [x] Set up VS Code / Claude Code / tmux per-project session pattern
-- [x] AGENTS.md file structure → one repo per agent (see File System Structure section)
-- [x] Shared knowledge → single `CONTEXT.md` at org root (see Shared Agent Knowledge section)
-- [x] Standup model → roundtable format + discussion threads (see Multi-Agent Dialogue section)
-- [x] Operating layer → Mission Control from day one (see Mission Control section)
-- [x] BACKLOG.md → auto-export from MC via script (see Mission Control section)
-- [x] Review and approve proposal in `/home/pi/idea/agents/agent-researcher/`
-- [x] Create `/home/pi/idea/` directory structure on Pi; move `engine` → `/home/pi/idea/agents/agent-engine-dev/` (Claude memory copied; git remote updated); `agent-researcher` already in place
-- [x] Update Docker volume mount in `compose.yaml`: `/home/pi/projects` → `/home/pi/idea`
-- [x] Create `CONTEXT.md` at org root — draft covering mission, solution overview, key concepts, guiding principles
-- [x] Create `prompting-guide-opus.md` at org root — Opus 4.6 prompting best practices from Anthropic docs
-- [x] Update `ROLES.md` to link to all 7 repos (1 org root + 5 operational agents + researcher)
-- [x] Design standup template (`standups/TEMPLATE.md`) and enhance `./standup` script: seed file with context, support @-mention scanning after each agent pass
-- [x] Write `scripts/export-backlog.sh` — queries MC REST API, generates BACKLOG.md
-- [x] Rename repos under `koenswings`: `engine` → `agent-engine-dev`, `openclaw` → `app-openclaw`, `console` → `agent-console-dev`
-- [x] Initialise `idea/` as a git repo on the host and push to `koenswings/idea` on GitHub — done 2026-03-24
-- [ ] Create GitHub organisation (once name decided); transfer all repos; create new repos: `agent-site-dev`, `agent-quality-manager`, `agent-programme-manager` (idea repo now exists under `koenswings`)
-- [x] Create new agent workspace directories under `agents/`; initialise from GitHub (agent-console-dev, agent-site-dev, agent-quality-manager, agent-programme-manager)
-- [x] Configure OpenClaw agents in `openclaw.json`: rename existing entries, add new agents, update all workspace paths to `/home/node/workspace/agents/agent-<role>`
-- [x] Copy sandbox files (IDENTITY, SOUL, USER, TOOLS, HEARTBEAT, BOOTSTRAP) to each agent
-- [x] Set up branch protection on `main` across all 7 repos (all repos made public; enforce_admins=true, PRs required, force pushes blocked)
-- [x] Deploy Mission Control alongside OpenClaw; configure board hierarchy (IDEA org → Engineering / HQ boards → per-agent boards)
-- [ ] Migrate existing backlog items from BACKLOG.md into Mission Control
-- [ ] BOOTSTRAP sessions for all new agents
-- [x] Define OpenClaw cron and heartbeat schedule for all agents: morning standup seed, BACKLOG.md export, and per-agent heartbeat intervals and active hours
-- [x] Compass session context: `AGENTS.md` updated to read `CLAUDE.md` and `virtual-company-design.md` at every session start. Correct startup checklist documented in Agent Memory section of this doc.
+- [ ] Create GitHub organisation (name TBD — candidates: `ideabora`, `ideamoja`, `ideaweza`, `ideakazi`, `edufrica`); transfer `idea` + 5 active agent repos; archived repos stay under `koenswings`
+- [ ] Bootstrap sessions for Axle, Pixel, Beacon, Marco (Atlas is live)
+- [ ] Migrate operational backlog items into Mission Control
 
-### app-openclaw / Platform
-- [x] Rename `openclaw` → `app-openclaw` on GitHub (history preserved); local git remote updated
-- [x] Add `idea/openclaw/` to `idea` repo: `openclaw.json` (agent roster, no tokens), `.env.template`, README
-- [x] Write `idea/scripts/setup.sh` — full install script: dependencies, agent repos, OpenClaw Docker setup, config apply, Tailscale
-- [ ] Sync current running config at `/home/pi/openclaw/` back to `app-openclaw` repo (strip IDEA-specific content; keep as generic platform reference)
-- [x] Write `idea/scripts/setup.sh`: clones all agent repos, installs OpenClaw via Docker, applies IDEA openclaw config, connects Tailscale
-- [x] Write `idea/openclaw/README.md`: step-by-step installation guide
+### Platform
+- [ ] Test `scripts/setup.sh` on a fresh Pi — end-to-end install not yet verified
+- [ ] Decide fate of `app-openclaw` repo: sync as a generic platform reference (strip IDEA-specific content), or formally retire it
+- [ ] Enable and configure heartbeats for relevant agents — all currently disabled; decide which agents poll what and at what schedule
 
 ### Engine
 - [ ] Test permanently attached USB SSD as system disk: provision trivial app with `build-app-instance`, reboot Pi, confirm instance auto-starts via existing chokidar/udev mechanism; if startup gap found, submit PR adding device scan to `src/start.ts`
@@ -1231,21 +1203,16 @@ Total: **8 repos** — 1 org root + 5 operational agent repos + 1 researcher rep
 - [ ] Review run architecture: which user? File ownership and permissions?
 
 ### Console UI
-- [ ] Create repo and AGENTS.md
 - [ ] Document architecture: Solid.js, Chrome Extension, Engine API contract
 - [ ] First version of UI from Solution Description outline
 
 ### Website
-- [x] Decide technology → static site on GitHub Pages
 - [ ] Confirm framework: Astro or Hugo
-- [ ] Create repo and AGENTS.md
 - [ ] Set up GitHub Actions deploy to GitHub Pages
 - [ ] First version: mission, how it works, how to support
 
 ### Programme Manager
-- [ ] Create repo and AGENTS.md
 - [ ] Define brand voice and key messages (`brand/tone-of-voice.md`, `brand/key-messages.md`)
-- [x] Decide teacher guide delivery → all three (Engine-served, Console-embedded, printable PDF)
 - [ ] Define teacher guide delivery pipeline and PDF generation approach
 - [ ] Getting Started guide
 - [ ] App guides: Kolibri, Nextcloud, Wikipedia
