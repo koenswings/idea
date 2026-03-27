@@ -36,7 +36,7 @@ This document describes how OpenClaw is configured to run the IDEA virtual compa
 - [Security Practices for External Content Ingestion](#security-practices-for-external-content-ingestion)
 - [Prompt Engineering Guide](#prompt-engineering-guide)
 - [Complementary Open Source Tools](#complementary-open-source-tools)
-- [app-openclaw](#app-openclaw)
+- [Installing IDEA](#installing-idea)
 - [Project Repositories](#project-repositories)
 - [What Needs to Happen (in order)](#what-needs-to-happen-in-order)
 - [Current Backlog](#current-backlog)
@@ -1120,13 +1120,9 @@ Visibility into Pi health (CPU, memory, temperature, disk usage) — relevant fo
 
 ---
 
-## app-openclaw
+## Installing IDEA
 
-`app-openclaw` is a generic, reusable Docker Compose package of OpenClaw + Mission Control + Tailscale. It is the platform IDEA runs on, but it contains no IDEA-specific configuration.
-
-**IDEA's configuration of OpenClaw lives in this repo** (`idea/openclaw/`), not in `app-openclaw`. The App Disk packaging model (docking via Engine) is the right approach for school apps like Kolibri and Nextcloud — where physical management by non-technical users is the design goal. For the IDEA development environment, a direct install via `setup.sh` is simpler and does not depend on Engine.
-
-### IDEA OpenClaw setup
+IDEA's OpenClaw configuration lives in this repo (`idea/openclaw/`). Installing IDEA on a fresh Pi is a single script invocation.
 
 ```
 idea/
@@ -1138,7 +1134,7 @@ idea/
     setup.sh          ← full install: dependencies, repos, OpenClaw, Tailscale
 ```
 
-To install IDEA on a fresh Pi:
+Clone the repo and run the script:
 
 ```bash
 git clone https://github.com/koenswings/idea /home/pi/idea
@@ -1148,9 +1144,9 @@ bash scripts/setup.sh
 
 `setup.sh` installs Docker and system dependencies, clones all agent repos, prompts for credentials, runs OpenClaw's `docker-setup.sh` with the IDEA workspace mount (`/home/pi/idea:/home/node/workspace`), applies `idea/openclaw/openclaw.json`, and connects Tailscale.
 
-### app-openclaw repo
+### app-openclaw
 
-The `app-openclaw` repo holds the generic platform definition: `compose.yaml` (OpenClaw + MC + Tailscale services) and a README. It is maintained separately so other organisations can use OpenClaw without inheriting IDEA-specific configuration.
+The `app-openclaw` repo is a generic, reusable Docker Compose package of OpenClaw + Mission Control + Tailscale — maintained separately so other organisations can run OpenClaw without inheriting IDEA-specific configuration.
 
 ---
 
