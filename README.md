@@ -17,6 +17,11 @@ under `agents/`. This repo holds what the whole team shares:
 
 ```
 idea/
+├── platform/               ← IDEA Platform: unified Docker stack (OpenClaw + Mission Control)
+│   ├── compose.yaml        ← 6 services on a shared network — the single source of truth
+│   ├── openclaw.json       ← Agent roster and config (no secrets)
+│   ├── .env.template       ← Credential placeholders (copy to .env, gitignored)
+│   └── secrets/            ← API keys as files (gitignored, never commit)
 ├── CONTEXT.md              ← Shared knowledge: mission, system, key concepts (read by all agents)
 ├── ROLES.md                ← Agent roster with repo links and scope
 ├── PROCESS.md              ← How work flows: proposals, approvals, task dispatch
@@ -26,7 +31,7 @@ idea/
 ├── discussions/            ← Multi-agent dialogue threads
 ├── design/                 ← RFC-style design docs for complex features
 ├── proposals/              ← New ideas awaiting CEO approval
-├── scripts/                ← Shared scripts (standup, task checks, backlog export)
+├── scripts/                ← Shared scripts (standup, task checks, backlog export, setup)
 ├── skills/                 ← Shared OpenClaw skills available to all agents
 └── agents/                 ← Agent workspaces (independent git repos, nested here for mounting)
 ```
@@ -98,11 +103,11 @@ principles. Updating `CONTEXT.md` propagates new knowledge to all agents simulta
 
 ## Infrastructure
 
-The virtual company runs on a Raspberry Pi 5 using [OpenClaw](https://github.com/koenswings/app-openclaw) —
-a self-hosted AI agent platform. Each agent has a dedicated Telegram group for direct
-communication with the CEO. Mission Control provides a Kanban board for task dispatch and
-approval management.
+The virtual company runs on a Raspberry Pi 5 using the **IDEA Platform** — OpenClaw (AI agent
+runtime) and Mission Control (task management), deployed together as a unified Docker stack defined
+in `platform/compose.yaml`. Each agent has a dedicated Telegram group for direct communication
+with the CEO.
 
 Access (Tailscale required):
-- Mission Control: `https://openclaw-pi.tail2d60.ts.net:8000`
+- Mission Control: `https://openclaw-pi.tail2d60.ts.net:4000`
 - OpenClaw UI: `https://openclaw-pi.tail2d60.ts.net`
