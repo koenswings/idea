@@ -110,3 +110,19 @@ print(f"Written {total} tasks across {len(boards)} boards to {outfile}")
 PYEOF
 
 echo "Done. BACKLOG.md updated."
+
+# Commit and push if changed
+GITHUB_TOKEN=$(grep GITHUB_TOKEN /home/node/workspace/agents/agent-operations-manager/.env | cut -d= -f2)
+cd "$REPO_ROOT"
+git config user.email "atlas@idea-charity.org" 2>/dev/null || true
+git config user.name "Atlas" 2>/dev/null || true
+git add BACKLOG.md
+if git diff --cached --quiet; then
+  echo "BACKLOG.md unchanged — nothing to push."
+else
+  git commit -m "chore: export backlog $(date -u '+%Y-%m-%d')"
+  git remote set-url origin "https://koenswings:${GITHUB_TOKEN}@github.com/koenswings/idea.git"
+  git push origin HEAD
+  git remote set-url origin "https://github.com/koenswings/idea.git"
+  echo "BACKLOG.md committed and pushed."
+fi
