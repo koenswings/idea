@@ -22,9 +22,13 @@ networks:
     driver: bridge
 
 volumes:
-  openclaw-data:      # OpenClaw config, session state, agent data
-  mc-db-data:         # Mission Control PostgreSQL data
-  mc-redis-data:      # Mission Control Redis data
+  openclaw-data:                # OpenClaw config, session state, agent data
+    external: true
+    name: openclaw_openclaw-data        # reuse existing volume — confirmed from docker volume ls
+  mc-db-data:                   # Mission Control PostgreSQL data
+    external: true
+    name: openclaw-mission-control_postgres_data  # reuse existing volume — NO DATA LOSS
+  mc-redis-data: {}             # Redis is a cache/queue — fresh volume is fine
 
 # ─────────────────────────────────────────────────────────────────────────────
 # OpenClaw — AI agent runtime
@@ -113,8 +117,10 @@ services:
       - ENVIRONMENT=dev
       - DATABASE_URL=postgresql+psycopg://postgres:${MC_DB_PASSWORD}@mission-control-db:5432/mission_control
       - RQ_REDIS_URL=redis://mission-control-redis:6379/0
-      # OpenClaw gateway — reachable by service name now (no more host bridge IP)
-      - BASE_URL=http://openclaw-gateway:18790
+      # MC backend's own base URL — used for webhook callbacks and URL formation.
+      # Within the unified network, the backend is its own service name.
+      # (Previously http://172.18.0.1:8000 — the Docker host bridge IP)
+      - BASE_URL=http://mission-control-backend:8000
       - CORS_ORIGINS=http://wizardly-hugle.local:4000,https://openclaw-pi.tail2d60.ts.net:4000
       - DB_AUTO_MIGRATE=true
       - LOG_LEVEL=INFO

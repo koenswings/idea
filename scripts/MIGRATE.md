@@ -244,7 +244,23 @@ The database volumes are untouched by either compose down (no `-v` flag), so no 
 | | Before | After |
 |---|---|---|
 | OpenClaw image | `ghcr.io/openclaw/openclaw:latest` | same |
-| MC → OpenClaw URL | `http://172.18.0.1:8000` | `http://openclaw-gateway:18790` |
+| MC `BASE_URL` | `http://172.18.0.1:8000` | `http://mission-control-backend:8000` |
 | Network | two separate networks | single `idea-net` |
 | Secrets location | `/home/pi/openclaw/secrets/` | `/home/pi/idea/platform/secrets/` |
 | Compose location | `/home/pi/openclaw/` + `/home/pi/openclaw/mission-control/` | `/home/pi/idea/platform/compose.yaml` |
+
+## ⚠️ Volume safety — read before running anything
+
+The compose.yaml uses `external: true` with exact volume names to reuse existing data:
+
+| Volume in compose | Existing Docker volume | Contains |
+|---|---|---|
+| `openclaw-data` | `openclaw_openclaw-data` | OpenClaw config, sessions, agent state |
+| `mc-db-data` | `openclaw-mission-control_postgres_data` | **All MC board/task data** |
+| `mc-redis-data` | *(new)* | Redis cache — safe to recreate |
+
+Before Step 4, verify these volumes exist:
+```bash
+docker volume ls | grep -E "openclaw_openclaw-data|openclaw-mission-control_postgres"
+```
+Expected output: both volumes listed. If either is missing, **stop and investigate**.
