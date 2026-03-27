@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# check-new-tasks.sh — auto-trigger reviewer agents for `auto-review` tagged tasks.
+# check-new-tasks.sh — auto-trigger reviewer agents for `cross-agent` tagged tasks.
 # Runs every 2 minutes via pi cron. No LLM involved — pure shell + MC API.
 #
 # For each agent board:
-#   - Finds tasks tagged "auto-review" with status "inbox"
+#   - Finds tasks tagged "cross-agent" with status "inbox"
 #   - Checks triggered-tasks.log to avoid double-triggering
 #   - Marks task in_progress (prevents a second cron run from firing the same task)
 #   - Appends task ID to triggered-tasks.log
@@ -11,7 +11,7 @@
 
 set -euo pipefail
 
-MC_URL="http://172.18.0.1:8000"
+MC_URL="http://172.18.0.1:8000"  # also reachable as http://mission-control-backend:8000 from within idea-net
 LOG_DIR="/home/pi/idea/logs"
 TRIGGERED_LOG="$LOG_DIR/triggered-tasks.log"
 SCRIPT_LOG="$LOG_DIR/check-new-tasks.log"
@@ -34,7 +34,7 @@ declare -A BOARDS
 BOARDS["axle"]="6bddb9d2-c06f-444d-8b18-b517aeaa6aa8"
 BOARDS["pixel"]="ac508766-e9e3-48a0-b6a5-54c6ffcdc1a3"
 BOARDS["beacon"]="7cc2a1cf-fa22-485f-b842-bb22cb758257"
-BOARDS["veri"]="d0cfa49e-edcb-4a23-832b-c2ae2c99bf67"
+BOARDS["atlas"]="d0cfa49e-edcb-4a23-832b-c2ae2c99bf67"
 BOARDS["marco"]="3f1be9c8-87e7-4a5d-9d3b-99756c35e3a9"
 
 # Agent IDs for session invocation (board lead agents)
@@ -42,7 +42,7 @@ declare -A AGENTS
 AGENTS["axle"]="8a0b3f32-8ebd-4b9b-93ff-1aad53269be3"
 AGENTS["pixel"]="bd2b264f-4727-4799-8522-66114cc59a1c"
 AGENTS["beacon"]="70404eba-4e1c-4d2d-bcb5-f34bfd32ad7b"
-AGENTS["veri"]="ac172302-3c45-4a51-bdb3-dc233a0f65e8"
+AGENTS["atlas"]="ac172302-3c45-4a51-bdb3-dc233a0f65e8"
 AGENTS["marco"]="c1aeb3f8-a258-448f-afcb-f518bdc47bca"
 
 # ── Process each board ────────────────────────────────────────────────────────
@@ -50,10 +50,10 @@ for NAME in "${!BOARDS[@]}"; do
   BOARD_ID="${BOARDS[$NAME]}"
   AGENT_ID="${AGENTS[$NAME]}"
 
-  # Fetch inbox tasks tagged "auto-review"
+  # Fetch inbox tasks tagged "cross-agent"
   RESPONSE=$(curl -sf \
     -H "Authorization: Bearer $TOKEN" \
-    "$MC_URL/api/v1/boards/$BOARD_ID/tasks?status=inbox&tag=auto-review" \
+    "$MC_URL/api/v1/boards/$BOARD_ID/tasks?status=inbox&tag=cross-agent" \
     2>/dev/null || echo "")
 
   if [[ -z "$RESPONSE" ]]; then
@@ -66,7 +66,7 @@ for NAME in "${!BOARDS[@]}"; do
     continue
   fi
 
-  log "$NAME board: $TASK_COUNT auto-review inbox task(s) found"
+  log "$NAME board: $TASK_COUNT cross-agent inbox task(s) found"
 
   # Process each task
   echo "$RESPONSE" | jq -c '.items[]' | while IFS= read -r TASK_JSON; do
@@ -99,7 +99,7 @@ for NAME in "${!BOARDS[@]}"; do
     echo "$TASK_ID" >> "$TRIGGERED_LOG"
 
     # Build the prompt
-    PROMPT=$(printf 'You have an auto-review task.\n\nTitle: %s\n\n%s\n\nPlease:\n1. Read the artifact referenced above\n2. Write your review response (PR comment, annotation, or flag)\n3. Mark task %s as done via the MC API\n\n⚠ This is a depth-1 auto-review session. Do not create any tasks.' \
+    PROMPT=$(printf 'You have a cross-agent task.\n\nTitle: %s\n\n%s\n\nPlease:\n1. Read the artifact referenced above\n2. Write your response (PR comment, annotation, answer, or flag)\n3. Mark task %s as done via the MC API\n\n⚠ This is a depth-1 cross-agent session. Do not create any further tasks.' \
       "$TASK_TITLE" "$TASK_DESC" "$TASK_ID")
 
     # Fire isolated session via OpenClaw gateway

@@ -538,7 +538,7 @@ Every piece of work follows the same cycle, initiated by the CEO:
 CEO → Agent A: "Start task: [description]"
 Agent A: shows plan → CEO approves → executes
 Agent A: produces output (PR / design doc / proposal / report)
-Agent A: creates a review task on Atlas's (or relevant reviewer's) board [auto-review tag]
+Agent A: creates a cross-agent task on Atlas's (or relevant reviewer's) board [cross-agent tag, From prefix in title]
   └─ pi cron detects the new task (every 2 min, no LLM)
   └─ wakes reviewer in isolated session
   └─ reviewer reads output, writes response (PR comment / annotation), marks task done
@@ -559,22 +559,39 @@ The one automated step — reviewer agent responding to review tasks — runs wi
 
 ### Cross-agent review mechanism
 
-When Agent A finishes primary work, it creates a review task on the reviewer's board via the MC API:
+When Agent A finishes primary work, it creates a task on the reviewer's board via the MC API.
+
+**Required format — every cross-agent task must follow this exactly:**
 
 ```
 POST /api/v1/agent/boards/{reviewer_board_id}/tasks
 {
-  "title": "Review: [task description]",
-  "description": "...[fully self-contained: what, where, what to respond with]...\n\n⚠ This is a depth-1 auto-review task. Do not create further tasks.",
-  "tags": ["auto-review"]
+  "title": "[From <AgentName>] <Type>: <short description>",
+  "description": "**From:** <AgentName> <emoji>\n**Type:** Review | Question | Opinion | Feasibility\n**Date:** YYYY-MM-DD\n\n---\n\n<fully self-contained body: what to review, where to find it, what to respond with>\n\n⚠ This is a depth-1 cross-agent task. Do not create further tasks.",
+  "tags": ["cross-agent"]
 }
 ```
 
-The pi cron (`scripts/check-new-tasks.sh`, runs every 2 minutes) detects tasks tagged `auto-review` in `inbox` status, immediately marks them `in_progress` (prevents double-trigger), logs the task ID to `logs/triggered-tasks.log`, and fires an isolated gateway session for the reviewer agent.
+**Title prefix is mandatory.** The `[From Axle]` prefix is the primary identification signal — it is visible at a glance on the MC Kanban board and in BACKLOG.md without opening the task. Never omit it.
+
+**Types:**
+- `Review` — assess an artefact (PR, design doc, proposal, draft) and raise concerns
+- `Question` — request a factual answer or technical opinion before proceeding
+- `Opinion` — ask for a broader perspective; no specific action required in response
+- `Feasibility` — assess whether a proposed approach is technically achievable
+
+**Example:**
+```
+title: "[From Axle] Review: test setup design — disk dock/undock and multi-engine scenarios"
+description: "**From:** Axle ⚙️\n**Type:** Review\n**Date:** 2026-03-27\n\n---\n\nReview the test setup design in PR #9 (agent-engine-dev). Verify that automated tests cover disk dock/undock and multi-engine scenarios. Raise concerns as PR comments.\n\n⚠ Depth-1 cross-agent task. Do not create further tasks."
+tags: ["cross-agent"]
+```
+
+The pi cron (`scripts/check-new-tasks.sh`, runs every 2 minutes) detects tasks tagged `cross-agent` in `inbox` status, immediately marks them `in_progress` (prevents double-trigger), logs the task ID to `logs/triggered-tasks.log`, and fires an isolated gateway session for the reviewer agent.
 
 **Cycle prevention — three guards:**
-1. **Instruction**: reviewer SOUL.md hard-codes that auto-review sessions must not create tasks
-2. **Tag propagation**: cron only fires for `auto-review` tasks — creating a further auto-review task requires two simultaneous violations
+1. **Instruction**: reviewer AGENTS.md hard-codes that cross-agent sessions must not create further tasks
+2. **Tag propagation**: cron only fires for `cross-agent` tasks — creating a further cross-agent task requires two simultaneous violations
 3. **Triggered log**: each task ID is only ever triggered once regardless of status changes
 
 **Default reviewer assignments:**
@@ -618,7 +635,7 @@ Standup output does not create tasks and does not gate any work. The CEO follows
 
 | Script | Schedule | Purpose |
 |--------|----------|---------|
-| `scripts/check-new-tasks.sh` | Every 2 min, always | Detect `auto-review` tasks; trigger reviewer agents |
+| `scripts/check-new-tasks.sh` | Every 2 min, always | Detect `cross-agent` tasks; trigger reviewer agents |
 | `scripts/standup.sh` | On demand (CEO `/standup`) | Runs standup-seed.sh + chains agent contributions |
 | heartbeat scripts | When re-enabled per agent | External event detection only |
 
