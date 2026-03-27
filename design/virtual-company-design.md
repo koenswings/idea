@@ -1202,40 +1202,12 @@ Total: **8 repos** — 1 org root + 5 operational agent repos + 1 researcher rep
 ### HQ / Setup
 - [ ] Create GitHub organisation (name TBD — candidates: `ideabora`, `ideamoja`, `ideaweza`, `ideakazi`, `edufrica`); transfer `idea` + 5 active agent repos; archived repos stay under `koenswings`
 - [ ] Bootstrap sessions for Axle, Pixel, Beacon, Marco (Atlas is live)
-- [ ] Migrate operational backlog items into Mission Control
 
 ### Platform
 - [ ] Test `scripts/setup.sh` on a fresh Pi — end-to-end install not yet verified
 - [ ] Decide fate of `app-openclaw` repo: sync as a generic platform reference (strip IDEA-specific content), or formally retire it
 - [ ] Enable and configure heartbeats for relevant agents — all currently disabled; decide which agents poll what and at what schedule
 
-### Engine
-- [ ] Test permanently attached USB SSD as system disk: provision trivial app with `build-app-instance`, reboot Pi, confirm instance auto-starts via existing chokidar/udev mechanism; if startup gap found, submit PR adding device scan to `src/start.ts`
-- [ ] Review and improve Solution Description
-- [ ] Update Architecture doc from Solution Description
-- [ ] Remove Docker dev environment support from docs and code
-- [ ] Test setup design review — automated tests, simulate disk dock/undock, multi-engine scenarios
-- [ ] Refactor `script/` to `scripts/`
-- [ ] Scan Solution Description for unimplemented features
-- [ ] Review run architecture: which user? File ownership and permissions?
+### Agent task backlogs
 
-### Console UI
-- [ ] Document architecture: Solid.js, Chrome Extension, Engine API contract
-- [ ] First version of UI from Solution Description outline
-
-### Website
-- [ ] Confirm framework: Astro or Hugo
-- [ ] Set up GitHub Actions deploy to GitHub Pages
-- [ ] First version: mission, how it works, how to support
-
-### Programme Manager
-- [ ] Define brand voice and key messages (`brand/tone-of-voice.md`, `brand/key-messages.md`)
-- [ ] Define teacher guide delivery pipeline and PDF generation approach
-- [ ] Getting Started guide
-- [ ] App guides: Kolibri, Nextcloud, Wikipedia
-- [ ] Research applicable grant programmes
-- [ ] Create grant tracking document (`opportunities.md`, `grant-tracker.md`)
-- [ ] Draft first funding opportunity brief
-- [ ] Draft website content: mission, how it works, how to support
-- [ ] Create donor newsletter template
-- [ ] Create impact report template
+Agent task backlogs (Engine, Console, Website, Programme Manager, Quality Manager) are tracked in Mission Control and mirrored to `BACKLOG.md` at the org root. Do not duplicate them here — `BACKLOG.md` is the authoritative readable view.
