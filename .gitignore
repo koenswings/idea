@@ -8,6 +8,10 @@ logs/
 # Environment files
 .env
 
+# Platform secrets (API keys, tokens, passwords as files)
+platform/secrets/
+platform/entrypoint.sh
+
 # OpenClaw and Claude runtime state
 .openclaw/
 .claude/
