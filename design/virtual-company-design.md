@@ -1194,19 +1194,22 @@ Visibility into Pi health (CPU, memory, temperature, disk usage) — relevant fo
 
 ## Installing IDEA
 
-IDEA's OpenClaw configuration lives in this repo (`idea/openclaw/`). Installing IDEA on a fresh Pi is a single script invocation.
+The IDEA virtual company platform is OpenClaw + Mission Control, configured and installed as a single unified stack. Everything lives in `idea/platform/`.
 
 ```
 idea/
-  openclaw/
+  platform/
+    compose.yaml      ← unified: OpenClaw + Mission Control (6 services, one network)
     openclaw.json     ← agent roster, model config, Telegram bindings — no secrets
     .env.template     ← credential placeholders (copy to .env, gitignored)
-    README.md
+    secrets/          ← API keys and tokens as files — gitignored, never commit
   scripts/
-    setup.sh          ← full install: dependencies, repos, OpenClaw, Tailscale
+    setup.sh          ← full install: dependencies, repos, platform, Tailscale
+    apply-config.sh   ← apply openclaw.json changes to the running system
+    MIGRATE.md        ← runbook for migrating from the standalone setup
 ```
 
-Clone the repo and run the script:
+Install on a fresh Pi:
 
 ```bash
 git clone https://github.com/koenswings/idea /home/pi/idea
@@ -1214,7 +1217,13 @@ cd /home/pi/idea
 bash scripts/setup.sh
 ```
 
-`setup.sh` installs Docker and system dependencies, clones all agent repos, prompts for credentials, runs OpenClaw's `docker-setup.sh` with the IDEA workspace mount (`/home/pi/idea:/home/node/workspace`), applies `idea/openclaw/openclaw.json`, and connects Tailscale.
+`setup.sh` installs Docker and system dependencies, clones all agent repos, prompts for credentials, starts the platform via `platform/compose.yaml`, and connects Tailscale.
+
+To apply config changes after merging `openclaw.json`:
+
+```bash
+bash /home/pi/idea/scripts/apply-config.sh
+```
 
 ### app-openclaw
 

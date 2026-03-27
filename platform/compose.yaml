@@ -1,0 +1,165 @@
+# IDEA Platform — Docker Compose
+#
+# Runs the full IDEA virtual company platform: OpenClaw (AI agent runtime)
+# and Mission Control (task/board management), on a shared network.
+#
+# Usage:
+#   docker compose up -d          # start all services
+#   docker compose down           # stop (keeps volumes)
+#   docker compose down -v        # stop + delete volumes (DATA LOSS — use with care)
+#   docker compose restart openclaw-gateway   # apply config changes
+#
+# Before first run:
+#   bash /home/pi/idea/scripts/setup.sh
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# NOTE: This file is the target state after migration.
+# See: idea/scripts/MIGRATE.md for the migration runbook.
+# ─────────────────────────────────────────────────────────────────────────────
+
+networks:
+  idea-net:
+    driver: bridge
+
+volumes:
+  openclaw-data:                # OpenClaw config, session state, agent data
+    external: true
+    name: openclaw_openclaw-data        # reuse existing volume — confirmed from docker volume ls
+  mc-db-data:                   # Mission Control PostgreSQL data
+    external: true
+    name: openclaw-mission-control_postgres_data  # reuse existing volume — NO DATA LOSS
+  mc-redis-data: {}             # Redis is a cache/queue — fresh volume is fine
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OpenClaw — AI agent runtime
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  openclaw-gateway:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: openclaw-gateway
+    restart: unless-stopped
+    entrypoint: ["/entrypoint.sh"]
+    networks:
+      - idea-net
+    ports:
+      - "18789:18790"
+    volumes:
+      - /home/pi/idea:/home/node/workspace:rw
+      - openclaw-data:/root/.openclaw
+      - /home/pi/idea/platform/secrets/anthropic_api_key.txt:/run/secrets/anthropic_api_key:ro
+      - /home/pi/idea/platform/secrets/openclaw_gateway_token.txt:/run/secrets/openclaw_gateway_token:ro
+      - /usr/bin/docker:/usr/bin/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/pi/idea/platform/entrypoint.sh:/entrypoint.sh:ro
+    environment:
+      - OPENCLAW_LOG_LEVEL=info
+      - OPENCLAW_WORKSPACE=/home/node/workspace
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Mission Control — task and board management
+  # Source: /home/pi/openclaw/mission-control/docker-compose.yml
+  #
+  # The service definitions below were derived from the running containers.
+  # Verify volumes and any additional env vars against the source compose
+  # before applying.
+  # ─────────────────────────────────────────────────────────────────────────
+
+  mission-control-db:
+    image: postgres:16-alpine
+    container_name: openclaw-mission-control-db-1
+    restart: unless-stopped
+    networks:
+      - idea-net
+    volumes:
+      - mc-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=mission_control
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD_FILE=/run/secrets/mc_db_password
+    secrets:
+      - mc_db_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mission-control-redis:
+    image: redis:7-alpine
+    container_name: openclaw-mission-control-redis-1
+    restart: unless-stopped
+    networks:
+      - idea-net
+    volumes:
+      - mc-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mission-control-backend:
+    image: openclaw-mission-control-backend
+    container_name: openclaw-mission-control-backend-1
+    restart: unless-stopped
+    networks:
+      - idea-net
+    ports:
+      - "8000:8000"
+    depends_on:
+      mission-control-db:
+        condition: service_healthy
+      mission-control-redis:
+        condition: service_healthy
+    environment:
+      - AUTH_MODE=local
+      - ENVIRONMENT=dev
+      - DATABASE_URL=postgresql+psycopg://postgres:${MC_DB_PASSWORD}@mission-control-db:5432/mission_control
+      - RQ_REDIS_URL=redis://mission-control-redis:6379/0
+      # MC backend's own base URL — used for webhook callbacks and URL formation.
+      # Within the unified network, the backend is its own service name.
+      # (Previously http://172.18.0.1:8000 — the Docker host bridge IP)
+      - BASE_URL=http://mission-control-backend:8000
+      - CORS_ORIGINS=http://wizardly-hugle.local:4000,https://openclaw-pi.tail2d60.ts.net:4000
+      - DB_AUTO_MIGRATE=true
+      - LOG_LEVEL=INFO
+      - LOG_FORMAT=text
+      - LOG_USE_UTC=false
+      - RQ_QUEUE_NAME=default
+      - RQ_DISPATCH_MAX_RETRIES=3
+      - RQ_DISPATCH_THROTTLE_SECONDS=15.0
+      - GATEWAY_MIN_VERSION=2026.02.9
+      - REQUEST_LOG_SLOW_MS=1000
+      - REQUEST_LOG_INCLUDE_HEALTH=false
+
+  mission-control-webhook-worker:
+    image: openclaw-mission-control-webhook-worker
+    container_name: openclaw-mission-control-webhook-worker-1
+    restart: unless-stopped
+    networks:
+      - idea-net
+    depends_on:
+      mission-control-db:
+        condition: service_healthy
+      mission-control-redis:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+psycopg://postgres:${MC_DB_PASSWORD}@mission-control-db:5432/mission_control
+      - RQ_REDIS_URL=redis://mission-control-redis:6379/0
+      - RQ_QUEUE_NAME=default
+
+  mission-control-frontend:
+    image: openclaw-mission-control-frontend
+    container_name: openclaw-mission-control-frontend-1
+    restart: unless-stopped
+    networks:
+      - idea-net
+    ports:
+      - "4000:3000"
+    depends_on:
+      - mission-control-backend
+
+secrets:
+  mc_db_password:
+    file: /home/pi/idea/platform/secrets/mc_db_password.txt
