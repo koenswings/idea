@@ -36,7 +36,7 @@ This document describes how OpenClaw is configured to run the IDEA virtual compa
 - [Security Practices for External Content Ingestion](#security-practices-for-external-content-ingestion)
 - [Prompt Engineering Guide](#prompt-engineering-guide)
 - [Complementary Open Source Tools](#complementary-open-source-tools)
-- [app-openclaw — Platform as an App Disk](#app-openclaw--platform-as-an-app-disk)
+- [Installing IDEA](#installing-idea)
 - [Project Repositories](#project-repositories)
 - [Current Backlog](#current-backlog)
 
@@ -1192,41 +1192,33 @@ Visibility into Pi health (CPU, memory, temperature, disk usage) — relevant fo
 
 ---
 
-## app-openclaw — Platform as an App Disk
+## Installing IDEA
 
-The OpenClaw + Mission Control + Tailscale combination is packaged as an App Disk following the standard `app-*` repo template. When provisioned onto a permanently attached USB SSD, it turns any Pi into a full AI-assisted development machine.
-
-### Repo structure
+IDEA's OpenClaw configuration lives in this repo (`idea/openclaw/`). Installing IDEA on a fresh Pi is a single script invocation.
 
 ```
-app-openclaw/
-├── compose.yaml        ← OpenClaw + Mission Control + Tailscale services,
-│                         with x-app metadata block (name, version, title, etc.)
-├── init_data.tar.gz    ← Platform-only bootstrap: empty openclaw.json template,
-│                         startup hooks — no IDEA-specific content
-└── README.md           ← References idea/scripts/setup.sh for org configuration
+idea/
+  openclaw/
+    openclaw.json     ← agent roster, model config, Telegram bindings — no secrets
+    .env.template     ← credential placeholders (copy to .env, gitignored)
+    README.md
+  scripts/
+    setup.sh          ← full install: dependencies, repos, OpenClaw, Tailscale
 ```
 
-### System disk model
+Clone the repo and run the script:
 
-Unlike school apps (Kolibri, Nextcloud) which run from a dockable USB disk and stop when it is removed, OpenClaw must run persistently. The solution is a **permanently attached USB SSD** used as the system disk:
+```bash
+git clone https://github.com/koenswings/idea /home/pi/idea
+cd /home/pi/idea
+bash scripts/setup.sh
+```
 
-1. Provision the SSD using `build-app-instance`: `./build-app-instance openclaw --disk sda --instance idea --git idea-edu-africa --tag 1.0.0`
-2. The Engine detects the SSD on every boot via the udev rule and chokidar file watcher — the app auto-starts
-3. Run `idea/scripts/setup.sh` once to layer the IDEA-specific workspace on top
-4. Enter credentials manually (Tailscale auth key, WhatsApp QR scan, bearer token)
+`setup.sh` installs Docker and system dependencies, clones all agent repos, prompts for credentials, runs OpenClaw's `docker-setup.sh` with the IDEA workspace mount (`/home/pi/idea:/home/node/workspace`), applies `idea/openclaw/openclaw.json`, and connects Tailscale.
 
-### Startup behaviour — one open question
+### app-openclaw
 
-The Engine's USB monitor uses chokidar to watch `/dev/engine`. By default, chokidar fires `add` events for files that already exist when the watcher starts — meaning an already-attached SSD would be processed on every Engine boot. This is the expected behaviour but **has not yet been tested** in this configuration.
-
-If the initial scan is suppressed, a small addition to `src/start.ts` closes the gap: process any devices present in `/dev/engine` that are not yet in the Automerge store. This is a minimal Engine PR, not an architectural change.
-
-**A test with a trivial app on a permanently attached USB drive must be completed before building app-openclaw around this pattern.**
-
-### IDEA-specific configuration
-
-IDEA-specific config (agent roster, workspace structure, setup script) lives in the `idea` repo under `idea/openclaw/` — not baked into the App Disk. This keeps `app-openclaw` generic and reusable, while `idea` remains the single source of truth for how the org is configured.
+The `app-openclaw` repo is a generic, reusable Docker Compose package of OpenClaw + Mission Control + Tailscale — maintained separately so other organisations can run OpenClaw without inheriting IDEA-specific configuration.
 
 ---
 
@@ -1283,13 +1275,12 @@ Total: **8 repos** — 1 org root + 5 operational agent repos + 1 researcher rep
 - [x] Compass session context: `AGENTS.md` updated to read `CLAUDE.md` and `virtual-company-design.md` at every session start. Correct startup checklist documented in Agent Memory section of this doc.
 
 ### app-openclaw / Platform
-- [ ] **Test first:** validate permanently attached USB SSD as system disk — provision a trivial app with `build-app-instance`, reboot, confirm instance auto-starts; if not, submit Engine PR to process existing `/dev/engine` devices on startup
 - [x] Rename `openclaw` → `app-openclaw` on GitHub (history preserved); local git remote updated
-- [ ] Restructure `app-openclaw` repo: add `x-app` metadata block to `compose.yaml`; add `init_data.tar.gz` (platform bootstrap only, no IDEA-specific content)
-- [ ] Write `compose.yaml` with `x-app` metadata block; write `init_data.tar.gz` — platform bootstrap only (empty `openclaw.json` template, startup hooks), no IDEA-specific content
-- [ ] Add `idea/openclaw/` folder to `idea` repo: `openclaw.json` (agent roster, no tokens), `compose-additions.yaml` (Mission Control service block)
-- [ ] Write `idea/scripts/setup.sh`: clones `idea` + all agent repos, applies IDEA openclaw config, configures Mission Control board hierarchy
-- [ ] Write `idea/openclaw/README.md`: step-by-step installation guide — attach USB SSD → provision with `build-app-instance` → reboot → run setup script → enter credentials (Tailscale, WhatsApp, tokens) → bootstrap agent sessions
+- [x] Add `idea/openclaw/` to `idea` repo: `openclaw.json` (agent roster, no tokens), `.env.template`, README
+- [x] Write `idea/scripts/setup.sh` — full install script: dependencies, agent repos, OpenClaw Docker setup, config apply, Tailscale
+- [ ] Sync current running config at `/home/pi/openclaw/` back to `app-openclaw` repo (strip IDEA-specific content; keep as generic platform reference)
+- [x] Write `idea/scripts/setup.sh`: clones all agent repos, installs OpenClaw via Docker, applies IDEA openclaw config, connects Tailscale
+- [x] Write `idea/openclaw/README.md`: step-by-step installation guide
 
 ### Engine
 - [ ] Test permanently attached USB SSD as system disk: provision trivial app with `build-app-instance`, reboot Pi, confirm instance auto-starts via existing chokidar/udev mechanism; if startup gap found, submit PR adding device scan to `src/start.ts`
