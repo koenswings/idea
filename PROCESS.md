@@ -113,3 +113,18 @@ the output to the `idea` repo.
 
 This is not bureaucracy. It is how we ensure that systems running in unattended schools with no
 IT support are built carefully.
+
+---
+
+## Communication Standards
+
+### Tables in Telegram
+
+Do not send markdown tables or ASCII art tables in Telegram messages. Both render poorly:
+markdown tables don't render on the Mac desktop app; ASCII tables are too wide for iPhone.
+
+**Always use the `telegram-table` skill** to render tables as PNG images instead.
+For simple label/value pairs, use plain bullets or bold labels — no image needed.
+
+The skill is at `/home/node/workspace/skills/telegram-table/`. It uses ImageMagick
+(`convert`), which is available in the sandbox. See the SKILL.md for usage.
