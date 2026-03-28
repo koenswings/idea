@@ -1,4 +1,4 @@
-<!-- Auto-exported from Mission Control 2026-03-27 19:55 UTC. Do not edit manually. -->
+<!-- Auto-exported from Mission Control 2026-03-28 06:00 UTC. Do not edit manually. -->
 
 # BACKLOG.md — IDEA Agent Task Board
 
@@ -44,8 +44,3 @@ To propose a new item, follow the process in `PROCESS.md`.
 - [ ] Research applicable grant programmes
 - [ ] Write Getting Started guide for teachers
 - [ ] Write app guides: Kolibri, Nextcloud, offline Wikipedia
-
-## Quality Manager (Atlas)
-
-### Inbox
-- [ ] Test setup design review — automated tests, simulate disk dock/undock, multi-engine scenarios
