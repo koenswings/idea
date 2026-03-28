@@ -46,32 +46,34 @@ responsibilities:
 
 ## File System Structure
 
-All Kit-managed repos live under `/home/pi/idea/agents/` alongside the agent workspaces.
-This keeps the IDEA file system flat and consistent.
+The app repos live **inside Kit's workspace** (`agent-app-dev/`), as git submodules. Each
+app repo remains an independent GitHub repo (`koenswings/app-kolibri`, etc.) but is linked
+into Kit's workspace so Kit has everything it needs in one place.
 
 ```
 /home/pi/idea/agents/
-  agent-app-dev/          ← Kit's workspace (identity, memory, outputs, harness)
-    harness/              ← shared test harness (inside Kit's repo, not a separate repo)
+  agent-app-dev/                ← Kit's workspace
+    harness/                    ← shared test harness (part of this repo)
+    app-kolibri/                ← git submodule → koenswings/app-kolibri
+    app-nextcloud/              ← git submodule → koenswings/app-nextcloud
+    app-kiwix/                  ← git submodule → koenswings/app-kiwix
+    app-kolibri-studio/         ← git submodule → koenswings/app-kolibri-studio
+    app-seafile/                ← git submodule → koenswings/app-seafile
     AGENTS.md
     MEMORY.md
     ...
-  agent-engine-dev/       ← Axle
-  agent-console-dev/      ← Pixel
-  agent-site-dev/         ← Beacon
-  agent-programme-manager/ ← Marco
-  agent-operations-manager/ ← Atlas
-  app-kolibri/            ← app repo (sibling, cloned and maintained by Kit)
-  app-nextcloud/
-  app-kiwix/
-  app-kolibri-studio/
-  app-seafile/
+  agent-engine-dev/             ← Axle
+  agent-console-dev/            ← Pixel
+  agent-site-dev/               ← Beacon
+  agent-programme-manager/      ← Marco
+  agent-operations-manager/     ← Atlas
 ```
 
 Each app repo structure:
 ```
 app-kolibri/
   compose.yaml            ← service definitions; Kit keeps all image versions current
+  monitoring.yaml         ← version monitoring strategy + compatibility matrix
   build-instance          ← Pi-based build script; Kit owns and runs this
   tests/
     smoke.ts              ← HTTP health check
@@ -215,7 +217,8 @@ keep scope bounded.
 
 **Existing repos with structural additions:**
 - `app-kolibri`, `app-nextcloud`, `app-kiwix`, `app-kolibri-studio`, `app-seafile` — each
-  gets `tests/`, `test-data/`, and `monitoring.yaml` added by Kit in a bootstrap PR
+  gets `tests/`, `test-data/`, and `monitoring.yaml` added by Kit in a bootstrap PR;
+  each is linked as a git submodule inside `agent-app-dev/`
 - Each gets `build-instance` reviewed and standardised
 
 **Agents affected:**

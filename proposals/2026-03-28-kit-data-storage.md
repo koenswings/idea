@@ -133,13 +133,10 @@ repo (or a dedicated folder in the idea org root) into `apps/nextcloud-<version>
 Marco is responsible for keeping that source folder current. Kit picks them up at
 build time — no manual step for Kit beyond running `build-instance`.
 
-**Open question for this proposal:** Where exactly does Marco's canonical presentation
-folder live? Options:
-- `agent-programme-manager/presentations/` (Marco's workspace, already version-controlled)
-- `idea/content/presentations/` (org root, more neutral)
-
-Recommendation: `agent-programme-manager/presentations/` — Marco owns the content; the
-path makes that ownership explicit.
+**Decided:** Marco's canonical presentations folder lives at
+`agents/agent-programme-manager/presentations/`. Marco owns the content; the path makes
+that ownership explicit. Kit's `build-instance` script for Nextcloud reads from this path
+at build time.
 
 ---
 
