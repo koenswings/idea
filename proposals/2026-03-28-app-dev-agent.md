@@ -9,11 +9,10 @@
 ## Problem
 
 IDEA's educational apps (Kolibri, Nextcloud, Kiwix, etc.) are distributed on App Disks.
-Each disk contains a `compose.yaml` referencing a Docker image and a version number. When
-an upstream project releases a new version, nothing currently happens — there is no agent
-responsible for monitoring, updating, testing, or proposing new apps. The app repos
-(`app-kolibri`, `app-nextcloud`, `app-kiwix`, `app-kolibri-studio`, `app-seafile`) exist
-but are unattended.
+Each disk contains a `compose.yaml` referencing one or more Docker images. When upstream
+projects release new versions — or when a supporting service (MariaDB, Redis, etc.) gets a
+security fix — nothing currently happens. There is no agent responsible for monitoring,
+building, testing, or maintaining the app stack. The app repos are unattended.
 
 This creates two risks: schools receive outdated software with known bugs or security issues;
 and new apps that could benefit teachers never get evaluated or integrated.
@@ -22,189 +21,210 @@ and new apps that could benefit teachers never get evaluated or integrated.
 
 ## Proposed Solution
 
-Add a sixth operational agent — **Kit 🎒**, App Developer & Maintainer — with four
+Add a sixth operational agent — **Kit 🎒**, App Developer & Maintainer — with the following
 responsibilities:
 
-1. **Version monitoring** — detect new upstream releases of existing apps and initiate the
-   update cycle
-2. **App updates** — update `compose.yaml`, bump the IDEA version number, run compatibility
-   tests, and open a PR for CEO review
-3. **New app proposals** — identify and evaluate new apps suitable for offline African schools
-4. **Test framework** — own and maintain the shared compatibility test harness; run upgrade
-   tests across all apps before any release
+1. **Version monitoring** — detect new versions of all services in each app's compose stack,
+   including supporting services (MariaDB, Redis, etc.) and IDEA-developed services
+2. **Building** — build updated Docker images on the Pi via `build-instance`; no CI pipeline
+3. **Testing** — run the compatibility test suite before any release
+4. **Maintenance** — own the full service stack of each app, not just the top-level image
+5. **New app proposals** — identify and evaluate apps suitable for offline African schools
 
 ---
 
-## Agent Design
-
-### Identity
+## Agent Identity
 
 - **Name:** Kit 🎒
 - **Role title:** App Developer & Maintainer
 - **Agent ID:** `app-dev` (proposed)
-- **Workspace repo:** `agent-app-dev` (new — identity files and memory only, consistent with
-  other agent repos)
+- **Workspace repo:** `agent-app-dev`
 - **Telegram group:** New dedicated group, same pattern as all other agents
 - **MC board:** New board in the Engineering board group
 
-### Repo Structure
+---
+
+## File System Structure
+
+All Kit-managed repos live under `/home/pi/idea/agents/` alongside the agent workspaces.
+This keeps the IDEA file system flat and consistent.
 
 ```
-koenswings/
-  agent-app-dev/          ← Kit's workspace (identity, memory, outputs)
-  app-harness/            ← Shared test harness (new repo — owned by Kit)
-  app-kolibri/
-    tests/                ← Kolibri-specific tests (Kit adds this structure)
-    test-data/            ← Test data snapshots (see Open Questions on size)
-    compose.yaml
+/home/pi/idea/agents/
+  agent-app-dev/          ← Kit's workspace (identity, memory, outputs, harness)
+    harness/              ← shared test harness (inside Kit's repo, not a separate repo)
+    AGENTS.md
+    MEMORY.md
+    ...
+  agent-engine-dev/       ← Axle
+  agent-console-dev/      ← Pixel
+  agent-site-dev/         ← Beacon
+  agent-programme-manager/ ← Marco
+  agent-operations-manager/ ← Atlas
+  app-kolibri/            ← app repo (sibling, cloned and maintained by Kit)
   app-nextcloud/
-    tests/
-    test-data/
-    compose.yaml
   app-kiwix/
-    tests/
-    test-data/
-    compose.yaml
   app-kolibri-studio/
-    tests/
-    test-data/
-    compose.yaml
   app-seafile/
-    tests/
-    test-data/
-    compose.yaml
 ```
 
-The shared test harness (`app-harness`) provides primitives that all app test suites can
-depend on. Axle's engine test infrastructure (`testMode`, disk simulation) is available
-as a dependency — Kit does not duplicate it.
+Each app repo structure:
+```
+app-kolibri/
+  compose.yaml            ← service definitions; Kit keeps all image versions current
+  build-instance          ← Pi-based build script; Kit owns and runs this
+  tests/
+    smoke.ts              ← HTTP health check
+    ui/homepage.spec.ts   ← Playwright UI test
+  test-data/              ← initial data for test runs (see data storage proposal)
+  META.yaml               ← app disk metadata (diskId, version, etc.)
+  apps/
+    kolibri-1.0/
+      compose.yaml
+```
 
-### Version Monitoring
+The test harness (`agent-app-dev/harness/`) provides scaffolding shared across all apps:
+start a test engine in testMode, dock a fixture disk, wait for Running, hand off to the
+app's own test suite. It builds on Axle's engine test primitives (`testMode`, disk
+simulation) — Kit depends on these; Axle maintains them.
 
-Kit uses the Docker Hub public tags API (no auth required for public images) to detect
-new upstream versions. A manifest file in `app-harness` (e.g., `apps/versions.yaml`)
-tracks the current IDEA version of each app alongside the upstream image it is pinned to.
+---
 
-Monitoring runs as an OpenClaw **cron job** (daily). When a new upstream tag is detected:
-1. Kit opens a branch in the relevant app repo
-2. Updates `compose.yaml` with the new image tag
-3. Bumps the IDEA version (minor bump for upstream minor/patch; major bump for major)
-4. Runs the compatibility test suite (see below)
-5. If tests pass: opens a PR with a structured description and test results
-6. If tests fail: opens a PR marked `[FAILING TESTS]` so CEO knows review is needed
+## What Kit Monitors
 
-The CEO merges the PR. A GitHub Actions pipeline in the app repo builds the Docker image
-and pushes it to DockerHub under `koenswings` (see Open Questions on namespace).
+### Monthly cadence (all apps)
 
-### Compatibility Test Framework
+Kit monitors the full service stack of each app, not just the primary image. For a
+typical app this means checking every image reference in `compose.yaml`:
 
-Tests use the engine test infrastructure Axle has already built (testMode + disk simulation
-from `agent-engine-dev`). Kit adds the app-level layer on top:
+- Primary application image (e.g. `learningequality/kolibri:v0.15`)
+- Database services (e.g. `mariadb:10.6`, `postgres:15`)
+- Cache / proxy services (e.g. `redis:7`, `nginx:1.25`)
+- Any other service in the compose file
+
+When a new version is detected for any service, Kit assesses whether the update is:
+- **Patch/minor** — update, test, build, open PR
+- **Major** — assess for breaking changes first; may require a `[From Kit] Feasibility`
+  task to Axle if engine compatibility could be affected
+
+### IDEA-developed services (service-specific monitoring)
+
+Some apps depend on services IDEA has built rather than off-the-shelf images. For these,
+version monitoring cannot use Docker Hub — it is service-specific and requires research.
+
+**Example — Kolibri:** Kolibri is distributed as a Pex file (Python executable). Monitoring
+a new Kolibri version means checking for a new Pex file at the Learning Equality release
+page, not Docker Hub. Kit must know the correct monitoring strategy per service and apply
+it. This strategy is documented per app in a `monitoring.yaml` file in each app repo.
+
+---
+
+## Building
+
+All Docker image builds run **on the Pi** using `build-instance`. There is no CI pipeline —
+this was a deliberate decision to avoid cross-platform compilation complexity (building ARM
+images on GitHub Actions is fragile; building on the Pi itself is reliable).
+
+Kit runs `build-instance` after a version update passes tests. The resulting image is pushed
+to DockerHub under `koenswings`. The App Disk is then updated with the new image reference.
+
+DockerHub namespace: **`koenswings`** (personal account; migration to an org deferred until
+GitHub org name is decided).
+
+---
+
+## Compatibility Test Framework
+
+Tests use the engine test infrastructure Axle has already built (testMode + disk simulation).
+Kit adds the app-level layer on top via `agent-app-dev/harness/`:
 
 - **Smoke tests** — HTTP health check against the running container
 - **UI tests** — Playwright: load key pages, assert core content visible
-- **Data migration tests** — for major upgrades: confirm existing data survives the upgrade
-- **Offline test** — confirm the container starts and serves with no outbound network access
+- **Data migration tests** — for major upgrades: confirm existing data survives
+- **Offline test** — confirm the container starts and serves with no outbound network
 
-App-specific tests live in each app repo (`app-kolibri/tests/`). The shared harness in
-`app-harness` provides the scaffolding: start a test engine, dock a fixture disk, wait for
-the instance to reach `Running`, then hand off to the app's test suite.
+App-specific tests live in each app repo (`app-kolibri/tests/`). See the data storage
+sub-proposal (`2026-03-28-kit-data-storage.md`) for how initial test data is handled.
 
-Axle maintains the engine primitives; Kit maintains the app-level harness and the
-per-app test suites.
+---
 
-### New App Proposals
+## Initial Data
 
-When Kit identifies a candidate app (from the Docker Hub ecosystem, educational software
-registries, or Marco's field feedback), the process is:
+Each app may require initial data to function — a pre-seeded database, a set of files,
+or configuration. For Nextcloud specifically, Marco's presentations must be present in a
+designated folder on every deployment.
 
-1. Kit assesses: offline capability, container size, complexity for teachers, licence
-2. `[From Kit] Opinion` cross-agent task to Marco — field viability (is this useful for
-   African schools?)
-3. If Marco concurs: Kit creates a proposal in `idea/proposals/`
-4. CEO approves by merging the proposal PR → creates a task on Kit's MC board
-5. Kit builds the initial app repo structure, test suite, and first App Disk version
+See the data storage sub-proposal: `proposals/2026-03-28-kit-data-storage.md`.
 
-### Interfaces with Other Agents
+---
+
+## Interfaces with Other Agents
 
 **Axle (Engine Dev)**
-- Kit depends on Axle's engine test primitives (`testMode`, disk simulation) — Axle
-  maintains these as part of the engine; Kit imports them
-- When an app major version requires engine changes: `[From Kit] Feasibility` task on
-  Axle's board — assessment of whether the engine needs to change before the app can land
-- When the engine changes in ways that affect app compatibility: `[From Axle] Review` task
-  on Kit's board — Kit runs the full app test suite against the new engine version
+- Kit depends on Axle's engine test primitives (`testMode`, disk simulation)
+- Major app version bumps that may affect engine compatibility: `[From Kit] Feasibility` task
+- Engine changes that affect app compatibility: `[From Axle] Review` task to Kit to re-run tests
 
 **Marco (Programme Manager)**
-- `[From Kit] Opinion` tasks to Marco for new app field viability assessments
-- Kit notifies Marco (via cross-agent task or direct message) when a new app version lands,
-  so Marco can update teacher guides and training materials
-- Marco's field feedback is the primary signal for new app proposals
+- `[From Kit] Opinion` tasks for field viability of new app proposals
+- Kit notifies Marco when a new app version lands so Marco can update teacher guides
+- Marco's presentations are pre-loaded into every Nextcloud deployment (see data storage proposal)
 
 **Atlas (Operations Manager)**
-- Standard PR review: Atlas reviews Kit's PRs (app repo changes, harness changes)
-  for architectural consistency and offline-resilience before the CEO merges
-- Kit is a sixth operational agent — Atlas owns the org design and quality review for it
-  like any other
+- Standard PR review for all Kit PRs (app repo changes, harness changes)
+
+---
+
+## Compatibility Matrix
+
+See the compatibility matrix sub-proposal: `proposals/2026-03-28-kit-compatibility-matrix.md`.
+
+---
+
+## New App Proposals
+
+When Kit identifies a candidate app, the process is:
+1. Kit assesses: offline capability, container size, teacher complexity, licence
+2. `[From Kit] Opinion` to Marco — field viability
+3. If Marco concurs: Kit creates a proposal in `idea/proposals/`
+4. CEO approves by merging → creates a task on Kit's MC board
+5. Kit creates the app repo, `monitoring.yaml`, test suite, and first App Disk
+
+Kit-initiated proposals (without a Marco request) are limited to one per quarter to
+keep scope bounded.
+
+---
+
+## Decisions (from open questions)
+
+1. **DockerHub namespace:** `koenswings` — continue with personal account; migrate when
+   GitHub org is decided
+2. **Image builds:** On the Pi via `build-instance`; no CI pipeline
+3. **Initial data storage:** See sub-proposal `2026-03-28-kit-data-storage.md`
+4. **App disk build script:** Already exists — called `build-instance` (in each app repo)
+5. **Compatibility matrix:** See sub-proposal `2026-03-28-kit-compatibility-matrix.md`
+6. **App repos current state:** Audit each repo and open a bootstrap PR before monitoring begins
+7. **Scope of new app proposals:** Bounded — Marco identifies need first; Kit-initiated max 1/quarter
 
 ---
 
 ## Affected Repos / Agents
 
-**New repos:**
-- `koenswings/agent-app-dev` — Kit's workspace
-- `koenswings/app-harness` — shared test harness
+**New repos (GitHub):**
+- `koenswings/agent-app-dev` — Kit's workspace (includes `harness/` subdirectory)
 
 **Existing repos with structural additions:**
 - `app-kolibri`, `app-nextcloud`, `app-kiwix`, `app-kolibri-studio`, `app-seafile` — each
-  gets a `tests/` and `test-data/` directory added by Kit in a bootstrap PR
+  gets `tests/`, `test-data/`, and `monitoring.yaml` added by Kit in a bootstrap PR
+- Each gets `build-instance` reviewed and standardised
 
 **Agents affected:**
 - Axle — provides engine test primitives; receives feasibility questions on major bumps
-- Marco — field viability input on new apps; receives version release notifications
-- Atlas — quality reviews Kit's PRs; updates org design doc to add Kit
+- Marco — field viability input; receives release notifications; presentations on Nextcloud
+- Atlas — quality reviews Kit's PRs; updates org design to add Kit
 
 **Infrastructure:**
-- New OpenClaw agent config entry (in `openclaw.json`)
+- New OpenClaw agent config entry in `openclaw.json`
 - New MC board in Engineering group
 - New Telegram group
-- Daily cron job for version monitoring (OpenClaw cron scheduler)
-- GitHub Actions in app repos (may need to be added if not present)
-
----
-
-## Open Questions
-
-1. **DockerHub namespace.** Images are currently planned for `koenswings/`. This is a
-   personal account. Should IDEA have a dedicated DockerHub organisation before Kit starts
-   building images? If `koenswings` is used now, migrating later breaks any disk that
-   references the old image path.
-
-2. **Image builds in CI.** Building Docker images requires internet access (to pull base
-   images). This cannot happen on the Pi. Does IDEA have GitHub Actions configured on any
-   app repo today? If not, this is a prerequisite before Kit can complete an update cycle.
-
-3. **Test data size.** App test-data snapshots (a populated Kolibri database, a Nextcloud
-   instance with test files) could be hundreds of MB or more. Git is not appropriate for
-   large binaries. Options: git-lfs, external object storage, or ship test data inside the
-   Docker image itself (cleanest for offline use). This policy needs to be decided before
-   Kit adds `test-data/` to any app repo.
-
-4. **App disk build.** Kit updates `compose.yaml` in the app repo, but the App Disk
-   itself is a directory structure on a physical USB drive. Is there a `build-disk` script
-   that creates this from the repo? If not, Kit needs to design and build one as a
-   prerequisite.
-
-5. **Compatibility matrix format.** Which IDEA Engine version does each app version require?
-   A machine-readable manifest (`apps/versions.yaml`) should track this so the Engine can
-   warn when an incompatible disk is inserted. Needs a defined schema before Kit starts
-   versioning apps.
-
-6. **App repos' current state.** The five existing app repos may have no CI, no tests, and
-   no standard structure. Kit should audit these and open a bootstrap PR per repo before
-   beginning any version monitoring work.
-
-7. **Scope of "propose new apps."** Left unbounded this could be an infinite research task.
-   Recommend a bounded trigger: Marco identifies an educational need first; Kit is only
-   engaged to assess technical feasibility for an app that Marco has specifically requested.
-   Kit-initiated proposals (no Marco request) should be limited to one per quarter.
+- Monthly cron job for version monitoring (OpenClaw cron scheduler)
