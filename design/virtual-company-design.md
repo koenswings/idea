@@ -1075,44 +1075,101 @@ Growing the backlog is a collaborative, PR-driven process. Full details in `PROC
 
 ## Agent Skills
 
-OpenClaw skills are named, reusable workflows invocable by `/skill-name` from chat or triggered
-by another agent. They differ from tools (bash, browser, file system) which are lower-level
-capabilities. A skill orchestrates a sequence of tool calls and instructions into a repeatable,
-nameable unit.
+OpenClaw skills are named, reusable workflows triggered automatically when the task matches their
+description, or invoked explicitly by an agent. They differ from tools (bash, browser, file
+system) in that a skill packages multi-step procedural knowledge — instructions, scripts, and
+assets — into a single unit any agent can reuse.
+
+All shared skills live at `/home/node/workspace/skills/`. Each skill is a directory containing
+a `SKILL.md` (the trigger description and instructions) and optional `scripts/`, `references/`,
+and `assets/`.
 
 Skills add genuine value when a workflow is **multi-step, repeatable, and shared across agents
 or sessions**. Where AGENTS.md instructions are sufficient, a skill is overhead.
 
-### Skills to configure
+### Live Skills
 
-| Skill | Agents | Reason |
-|---|---|---|
-| `/council-review [PR-url]` | operations-manager | Complex multi-step workflow; too easy to skip steps without it |
-| `/propose [topic]` | all 5 | Shared workflow; enforces consistent naming and template |
-| `/standup` | all 5 | Identical steps for every agent; ensures no deviation |
-| `/research [topic]` | programme-manager | Bakes in security rules for external content ingestion |
+These skills exist and are available to all agents today.
+
+---
+
+**`mc-api`** — all agents
+`/home/node/workspace/skills/mc-api/`
+
+Gives agents a consistent, discoverable way to interact with the Mission Control REST API:
+reading and updating tasks, posting comments, checking board state, fetching approvals.
+Includes a refresh script (`scripts/mc-refresh.sh`) that fetches the live OpenAPI spec and
+generates an `agent-lead-operations.tsv` discovery file so agents always work from the actual
+API surface rather than hardcoded paths. Each agent's credentials (`AUTH_TOKEN`, `BOARD_ID`)
+live in their own `.env` and `TOOLS.md`.
+
+*Use when:* reading tasks from your board, updating task status, posting task comments, or
+fetching approvals before a risky action.
+
+---
+
+**`md-to-pdf`** — all agents
+`/home/node/workspace/skills/md-to-pdf/`
+
+Converts any Markdown file to a styled PDF using VS Code preview styles. Stack:
+`python3-markdown` (Markdown → HTML) + `weasyprint` (HTML → PDF). No npm dependencies, no
+internet required. Run from any agent workspace.
+
+```bash
+/home/node/workspace/skills/md-to-pdf/scripts/md-to-pdf.sh input.md
+/home/node/workspace/skills/md-to-pdf/scripts/md-to-pdf.sh input.md output.pdf
+```
+
+*Use when:* asked to export, print, save, or generate a PDF from any `.md` file.
+
+Note: `python3-markdown` must be present in the container. Add
+`OPENCLAW_DOCKER_APT_PACKAGES=python3-markdown` to `/home/pi/openclaw/.env` to bake it into
+future image builds.
+
+---
+
+**`telegram-table`** — all agents
+`/home/node/workspace/skills/telegram-table/`
+
+Renders a data table as a PNG image using ImageMagick (`convert`) and sends it via the
+`message` tool. Raw markdown tables and ASCII art tables both render poorly on Telegram
+(Mac desktop app and iPhone). This skill is the standard solution.
+
+```bash
+python3 /home/node/workspace/skills/telegram-table/scripts/render_table.py \
+    --out /tmp/table.png \
+    --headers "Col A,Col B,Col C" \
+    --rows "R1A,R1B,R1C" "R2A,R2B,R2C"
+```
+
+*Use when:* any table needs to be sent in a Telegram message. For simple label/value pairs,
+plain bullets are preferred — no image needed.
+
+See also: Communication Standards in `PROCESS.md`.
+
+---
+
+### Planned Skills
+
+These skills are not yet built. They are documented here as a roadmap.
 
 **`/council-review [PR-url]`** — operations-manager only
-The council pattern (4 parallel perspectives → synthesis) is complex enough to warrant a skill.
-Without it, Atlas needs explicit prompting to run the full council each time. With it, one
-invocation reliably triggers the whole structured workflow.
+The quality review council pattern (4 parallel specialist perspectives → synthesis) is complex
+enough to warrant a skill. Without it, Atlas needs explicit prompting to run the full council
+each time.
 
 **`/propose [topic]`** — all agents
 Every agent can surface a proposal. The mechanics are always the same: create
-`../../proposals/YYYY-MM-DD-<topic>.md` (at the org root), fill in the standard template, open a PR.
-A shared skill ensures consistent naming and structure regardless of which agent uses it.
+`proposals/YYYY-MM-DD-<topic>.md` at the org root, fill in the standard template, open a PR.
+A shared skill ensures consistent naming and structure.
 
 **`/standup`** — all agents
-The standup contribution workflow is identical for every agent: read the current standup file,
-read own workspace context, contribute the four sections, commit. A shared skill means agents
-always follow the exact same steps rather than improvising.
+Standup contribution is identical for every agent: read the standup file, read own workspace
+context, contribute the four sections, commit. A shared skill prevents improvisation.
 
 **`/research [topic]`** — programme-manager
-The programme-manager spends significant time on structured external research — grant databases,
-funder websites, partner materials — which carries the prompt injection risk already documented.
-A skill bakes in the security rules — summarise-don't-parrot, no raw content passed verbatim —
-so the behaviour is consistent and does not depend on the agent remembering its AGENTS.md
-instructions each time.
+Bakes in the security rules for external content ingestion (summarise-don't-parrot, no raw
+content passed verbatim) so the behaviour is consistent regardless of session state.
 
 ### Where skills are not used
 
