@@ -634,6 +634,9 @@ The pi cron (`scripts/check-new-tasks.sh`, runs every 2 minutes) detects tasks t
 - Programme Manager technical feasibility questions → Axle (Engine Dev)
 - Proposals → Atlas for cross-cutting consistency
 
+**MC status tracking — current convention:**
+Atlas posts the completed review as a GitHub PR comment. That is the deliverable. Atlas does not attempt to update the MC task status after completing a review — the MC status gate requires tasks to pass through `in_progress → review` before they can be closed, which requires CEO action in the MC UI. Since MC is not currently used as an active workflow surface, the MC task is treated as informational only. The CEO can delete or advance it in the MC UI at any time. This convention holds until MC is adopted more actively.
+
 ### Heartbeat — external event polling only
 
 Heartbeats are **not** periodic status checks. They are probes for external events the agent cannot be told about directly.
