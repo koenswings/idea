@@ -334,11 +334,77 @@ For complex engine or console changes, a third gate applies:
 ## Mission Control
 
 [openclaw-mission-control](https://github.com/abhi1693/openclaw-mission-control) is a purpose-built
-dashboard for running OpenClaw at team scale. It provides a Kanban board, structured task dispatch,
-real-time agent monitoring, and built-in approval flows on top of the OpenClaw gateway. The backend
-API runs on port 8000 (FastAPI/Python), the frontend on port 3000(externally mapped to 4000). It
-connects to the OpenClaw gateway via WebSocket (port 18789), persists state in PostgreSQL 16, and
-runs as part of the unified IDEA Platform stack.
+dashboard for running OpenClaw at team scale. It connects to the OpenClaw gateway via WebSocket
+(port 18789), persists state in PostgreSQL 16, and runs as part of the unified IDEA Platform stack.
+The backend API runs on port 8000 (FastAPI/Python), the frontend externally on port 4000.
+
+### Feature Map
+
+MC's API surface is significantly richer than its Kanban UI suggests. Features are grouped below;
+those marked ✅ are in active use, 🔲 are available but not yet adopted.
+
+**Kanban & Tasks** ✅
+- Boards, board groups, tasks, task comments, tags, custom fields, status columns
+- Real-time task streaming via SSE
+
+**Approvals** 🔲 (Layer 3 — see CEO Approval section)
+- Agents post structured approval requests before irreversible actions
+- SSE stream for real-time notification in MC UI
+- CEO approves/rejects; agent polls for result
+- Good for: Marco sending a briefing to an external contact, Axle wiping a disk partition — one-shot decisions that belong in a formal audit trail rather than buried in a Telegram thread
+
+**Board Memory** 🔲
+- Per-board persistent key-value / note store, separate from git
+- Agents can write durable operational state (e.g. "last deployment", "current framework decision") and read it back across sessions
+- Visible in MC UI; complements but does not replace git-based memory files (which provide version history and offline access)
+
+**Board Group Memory** 🔲
+- Shared memory space across all boards in a group (e.g. Engineering, HQ)
+- Cross-agent shared state without going through git or a shared file
+- Streams in real time; useful for broadcast coordination notes
+
+**Activity Feed** ✅ (passive — visible in MC UI, not yet read by agents)
+- Cross-board task comment feed
+- Real-time SSE stream — scanning it each morning gives a quick view of overnight activity
+
+**Agent Roster & Lifecycle** 🔲
+- Create, update, delete agents via API
+- Read and write agent SOUL templates from MC (alternative to git-based SOUL.md edits)
+- Agent heartbeat reporting: agents signal liveness and status to MC
+
+**Nudge** 🔲
+- Atlas (as quality manager) can send a targeted nudge to a specific agent on a board
+- Lightweight re-engagement signal — useful when a task is stalled
+
+**Onboarding** 🔲
+- Guided onboarding flow per board: structured Q&A that initialises an agent's board context
+- Relevant for bootstrap sessions (Axle, Pixel, Beacon, Marco)
+
+**Webhooks** 🔲
+- Boards can receive inbound webhook events from external sources
+- Enables GitHub PR events → MC board updates (PR opened → task moves to Review; PR merged → task moves to Done)
+- Closes the GitHub↔MC loop without manual task management
+
+**Gateways API** 🔲
+- MC can list all connected OpenClaw gateways, their sessions, and session history
+- MC can send a message into any gateway session — agents can be orchestrated from MC, not just via task assignment
+- Gateway template sync: push config templates from MC to gateway
+
+**Escalation & Messaging** 🔲
+- *Ask User*: agent posts a blocking question to MC; it is routed to the CEO via the gateway main channel (Telegram). More structured than an ad-hoc Telegram message; the question and resolution are logged in MC.
+- *Message Board Lead*: direct MC-to-agent message routing (agent-to-agent via MC, not Telegram)
+- *Lead Broadcast*: send one message from MC to all board leads simultaneously — useful for org-wide sync or Atlas distributing a briefing to all agents
+
+**Skills Marketplace** 🔲
+- MC has its own skills system (install/uninstall skill packs)
+- Separate from the `/skills/` folder in the idea repo; relationship to be clarified
+
+**Souls Directory** 🔲
+- Searchable directory of agent soul templates
+- Atlas can read any agent's SOUL.md equivalent without filesystem access
+
+**Dashboard Metrics** 🔲
+- Usage and activity statistics across all boards
 
 ### Setup
 
@@ -361,7 +427,7 @@ The proposal and PR flow is unaffected by MC. MC tasks are the implementation-le
 
 ### BACKLOG.md Export
 
-Mission Control persists task state in SQLite — outside git and not human-readable without the MC UI. `BACKLOG.md` at the org root is kept as an auto-exported mirror of the Kanban board so that agents have a readable task list and git retains an audit trail.
+Mission Control persists task state in PostgreSQL — outside git and not human-readable without the MC UI. `BACKLOG.md` at the org root is kept as an auto-exported mirror of the Kanban board so that agents have a readable task list and git retains an audit trail.
 
 **Mechanism:**
 - `scripts/export-backlog.sh` (org root) queries the MC REST API and regenerates `BACKLOG.md` in standard
