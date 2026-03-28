@@ -338,73 +338,16 @@ dashboard for running OpenClaw at team scale. It connects to the OpenClaw gatewa
 (port 18789), persists state in PostgreSQL 16, and runs as part of the unified IDEA Platform stack.
 The backend API runs on port 8000 (FastAPI/Python), the frontend externally on port 4000.
 
-### Feature Map
+### What We Actually Use
 
-MC's API surface is significantly richer than its Kanban UI suggests. Features are grouped below;
-those marked ✅ are in active use, 🔲 are available but not yet adopted.
+MC is intentionally used in a minimal, lightweight way. The current active use is exactly two things:
 
-**Kanban & Tasks** ✅
-- Boards, board groups, tasks, task comments, tags, custom fields, status columns
-- Real-time task streaming via SSE
+1. **Kanban boards as task tracker** — tasks are created and updated there; the board gives a single-screen view of all 5 agents' work
+2. **BACKLOG.md export** — `scripts/export-backlog.sh` queries the MC API and writes a git-traceable snapshot to the org root; agents read this at session start
 
-**Approvals** 🔲 (Layer 3 — see CEO Approval section)
-- Agents post structured approval requests before irreversible actions
-- SSE stream for real-time notification in MC UI
-- CEO approves/rejects; agent polls for result
-- Good for: Marco sending a briefing to an external contact, Axle wiping a disk partition — one-shot decisions that belong in a formal audit trail rather than buried in a Telegram thread
+Everything else — agent chat, plan approval, activity timeline, escalation, messaging — happens in **Telegram and GitHub**. MC is not the primary interaction surface; it is the task register.
 
-**Board Memory** 🔲
-- Per-board persistent key-value / note store, separate from git
-- Agents can write durable operational state (e.g. "last deployment", "current framework decision") and read it back across sessions
-- Visible in MC UI; complements but does not replace git-based memory files (which provide version history and offline access)
-
-**Board Group Memory** 🔲
-- Shared memory space across all boards in a group (e.g. Engineering, HQ)
-- Cross-agent shared state without going through git or a shared file
-- Streams in real time; useful for broadcast coordination notes
-
-**Activity Feed** ✅ (passive — visible in MC UI, not yet read by agents)
-- Cross-board task comment feed
-- Real-time SSE stream — scanning it each morning gives a quick view of overnight activity
-
-**Agent Roster & Lifecycle** 🔲
-- Create, update, delete agents via API
-- Read and write agent SOUL templates from MC (alternative to git-based SOUL.md edits)
-- Agent heartbeat reporting: agents signal liveness and status to MC
-
-**Nudge** 🔲
-- Atlas (as quality manager) can send a targeted nudge to a specific agent on a board
-- Lightweight re-engagement signal — useful when a task is stalled
-
-**Onboarding** 🔲
-- Guided onboarding flow per board: structured Q&A that initialises an agent's board context
-- Relevant for bootstrap sessions (Axle, Pixel, Beacon, Marco)
-
-**Webhooks** 🔲
-- Boards can receive inbound webhook events from external sources
-- Enables GitHub PR events → MC board updates (PR opened → task moves to Review; PR merged → task moves to Done)
-- Closes the GitHub↔MC loop without manual task management
-
-**Gateways API** 🔲
-- MC can list all connected OpenClaw gateways, their sessions, and session history
-- MC can send a message into any gateway session — agents can be orchestrated from MC, not just via task assignment
-- Gateway template sync: push config templates from MC to gateway
-
-**Escalation & Messaging** 🔲
-- *Ask User*: agent posts a blocking question to MC; it is routed to the CEO via the gateway main channel (Telegram). More structured than an ad-hoc Telegram message; the question and resolution are logged in MC.
-- *Message Board Lead*: direct MC-to-agent message routing (agent-to-agent via MC, not Telegram)
-- *Lead Broadcast*: send one message from MC to all board leads simultaneously — useful for org-wide sync or Atlas distributing a briefing to all agents
-
-**Skills Marketplace** 🔲
-- MC has its own skills system (install/uninstall skill packs)
-- Separate from the `/skills/` folder in the idea repo; relationship to be clarified
-
-**Souls Directory** 🔲
-- Searchable directory of agent soul templates
-- Atlas can read any agent's SOUL.md equivalent without filesystem access
-
-**Dashboard Metrics** 🔲
-- Usage and activity statistics across all boards
+This is a deliberate choice. The current Telegram + GitHub workflow is simple, well-understood, and works from a phone. MC's richer features are documented below as a reference for when the time comes to evaluate whether switching makes sense.
 
 ### Setup
 
@@ -419,11 +362,37 @@ The rest of the setup is unaffected: `openclaw.json`, `AGENTS.md` files, sandbox
 
 Task dispatch happens in the Kanban board. Create a task, assign it to the relevant agent. The board columns — `Planning → Inbox → Assigned → In Progress → Review → Done` — give a single-screen view of all 5 operational agents' work simultaneously.
 
-Plan approval happens in Mission Control's agent chat. After assigning a task, open the agent's chat within MC to read and approve its plan before anything executes. `DEFAULT_PERMISSION_MODE=plan` is unchanged — MC is both the dispatch and the approval layer.
+Once a task is created, all interaction with the agent happens in **Telegram**. Agents are not expected to poll MC actively; they read `BACKLOG.md` (the exported snapshot) at session start. Plan approval, feedback, and iteration all happen in Telegram chat. GitHub is used for the final PR merge. MC is the record, not the channel.
 
-The activity timeline is a real-time SSE-fed log across all agents. Scanning it each morning gives a quick view of overnight activity. The roundtable standup (below) provides the deeper daily dialogue; MC's timeline provides the live pulse.
+### Feature Map — Available for Future Use
 
-The proposal and PR flow is unaffected by MC. MC tasks are the implementation-level view; GitHub PR-based proposals and reviews remain the approval layer for finished work.
+MC's API surface is significantly richer than its Kanban UI suggests. These features are documented here so we understand what is available if and when we decide to use more of MC. None of the following are currently active.
+
+**Approvals** — Agents post structured approval requests before irreversible actions; CEO approves/rejects in the MC UI; the decision is logged. Good for one-shot decisions that warrant a formal audit trail rather than an ad-hoc Telegram message — for example, Marco sending a briefing to an external contact, or Axle wiping a disk partition. (See also: CEO Approval — Layer 3.)
+
+**Board Memory** — Per-board persistent key-value store, separate from git. Agents can write and read durable operational state (e.g. "current framework decision", "last PR reviewed") across sessions. Visible in the MC UI. Would complement, not replace, git-based memory files (which provide version history and offline access).
+
+**Board Group Memory** — Shared memory space across all boards in a group (Engineering or HQ). Cross-agent shared state without going through git or a shared file; streams in real time.
+
+**Activity Feed** — Cross-board task comment feed with real-time SSE streaming. Currently visible passively in the MC UI but not actively used.
+
+**Agent Roster & Lifecycle** — Create, update, and delete agents via API; read and write agent SOUL templates from MC (alternative to git-based SOUL.md edits); agents can report heartbeat and status to MC.
+
+**Nudge** — Atlas (as quality manager) can send a targeted re-engagement signal to a specific stalled agent on a board without going through Telegram.
+
+**Onboarding** — Guided Q&A onboarding flow per board that initialises an agent's board context. Potentially relevant for bootstrap sessions (Axle, Pixel, Beacon, Marco).
+
+**Webhooks** — Boards can receive inbound events from external sources. Enables GitHub PR events → MC board updates (PR opened → task moves to Review; PR merged → task moves to Done). Would close the GitHub↔MC loop without manual task management.
+
+**Gateways API** — MC can list all connected OpenClaw gateways, their sessions, and session history. MC can send a message into any gateway session — enabling agent orchestration from MC rather than just task assignment. Also supports gateway template sync.
+
+**Escalation & Messaging** — Three routing primitives: (1) *Ask User*: agent posts a blocking question to MC, routed to the CEO via the gateway main channel; question and resolution are logged in MC. (2) *Message Board Lead*: direct agent-to-agent routing via MC. (3) *Lead Broadcast*: one message from Atlas routed simultaneously to all five board leads.
+
+**Skills Marketplace** — MC has its own skills install system, separate from the `/skills/` folder in the idea repo. Relationship between the two to be clarified before building further agent skills.
+
+**Souls Directory** — Searchable directory of agent soul templates; allows Atlas to read any agent's SOUL equivalent without filesystem access.
+
+**Dashboard Metrics** — Usage and activity statistics across all boards.
 
 ### BACKLOG.md Export
 
@@ -468,60 +437,52 @@ Agents read `BACKLOG.md` at session start via HEARTBEAT.md. It is versioned and 
 
 ### Tool Stack
 
-| Tool | Purpose | When you use it |
-|------|---------|-----------------|
-| **Telegram** | Day-to-day agent interaction — message any agent directly from your phone | Daily — the primary conversational interface |
-| **Mission Control** | Kanban across all 5 operational agents; task dispatch; approval management; activity timeline | When you need the broader operational view |
-| **GitHub** | Review and merge PRs (code, documents, identity files) | Whenever agents raise PRs |
-| **Terminal (SSH / Tailscale SSH)** | Pi administration, Docker, logs | Occasional |
-| **OpenClaw Control UI** | Low-level fallback if Mission Control is unavailable | Rarely |
+- **Telegram** — primary interface for all agent interaction, every day. Message any agent directly from your phone. Plan approval, feedback, and iteration all happen here.
+- **GitHub** — review and merge PRs (code, documents, identity files). The final gate for any change landing in `main`.
+- **Mission Control** — task register. Create and track tasks across all 5 agents. Read the Kanban for a broader operational view. Not a conversation surface.
+- **Terminal (SSH / Tailscale SSH)** — Pi administration, Docker, logs. Occasional.
+- **OpenClaw Control UI** — low-level fallback. Rarely needed.
 
-Access Mission Control at `https://openclaw-pi.tail2d60.ts.net:8000`. OpenClaw Control UI at `https://openclaw-pi.tail2d60.ts.net`.
+Mission Control: `https://openclaw-pi.tail2d60.ts.net:4000`. OpenClaw Control UI: `https://openclaw-pi.tail2d60.ts.net`.
 
-### Using Mission Control + Agent Tabs
+### How a Work Cycle Works
 
-**Task dispatch happens in Mission Control.** Create a task, assign it to the relevant agent. The Kanban board gives a single-screen view of all 5 operational agents' work simultaneously.
+1. **Start** — message the relevant agent in Telegram: "I'd like you to [task description]"
+2. **Approve plan** — agent proposes what it will do before acting (`DEFAULT_PERMISSION_MODE=plan`); you approve or redirect in Telegram
+3. **Observe** — agent works; you can watch progress in the Telegram thread or check later
+4. **Review** — agent opens a PR and tells you in Telegram; you read the diff on GitHub and send feedback back to the agent in Telegram; agent pushes updates to the same branch; repeat until right
+5. **Merge** — merge the PR on GitHub; this is the only step that requires GitHub
 
-**Plan approval happens in Mission Control's agent chat.** After assigning a task, open the agent's chat within MC to read and approve its plan before anything executes. `DEFAULT_PERMISSION_MODE=plan` is unchanged — agents always stop and wait for your approval.
+Mission Control is used at step 1 to optionally log the task, and at the end to mark it done. The conversation itself stays in Telegram throughout.
 
-| Step | Where | What you do |
-|------|-------|-------------|
-| **Assign** | Mission Control | Create task, assign to agent, set priority |
-| **Approve plan** | Mission Control (agent chat) | Read plan, type "go ahead" or modify |
-| **Observe** | Mission Control (agent chat) | Watch tool calls, file edits, git operations stream in real time |
-| **Review** | Telegram or MC (agent chat) | Send feedback — high-level direction or specific corrections. Agent pushes to same branch, PR updates automatically. Repeat until right. |
-| **Merge** | GitHub | Review the final diff, merge to `main` |
+### Which agent to message for what
 
-**Which agent tab to use for what:**
+- **Axle** (engine-dev) — Engine software: disk management, content sync, offline resilience
+- **Pixel** (console-dev) — Console UI: the teacher/admin interface running on the school Pi
+- **Beacon** (site-dev) — Website: IDEA's public-facing presence
+- **Marco** (programme-manager) — Programme work: school visits, donor communications, grant research, training materials
+- **Atlas** (operations-manager) — Cross-project quality review, operational advice, org structure questions
 
-| Agent tab | Use it to... |
-|-----------|-------------|
-| `engine-dev` | Assign Engine coding tasks, review technical proposals |
-| `console-dev` | Assign Console UI tasks |
-| `site-dev` | Assign website content and build tasks |
-| `operations-manager` | Request a cross-project review, quality report, or operational advice |
-| `programme-manager` | "Plan next school visit", "Draft donor update", "What grants should we apply for?", "Write a Kolibri guide for teachers" |
-
-### A Typical CEO Interaction
+### A Typical CEO Day
 
 ```
-Start a work cycle
-  └─ Open the relevant agent's tab in Mission Control (or message via Telegram)
-  └─ "Start task: [description]" — agent shows plan, CEO approves, work begins
-  └─ Agent produces output (PR / design doc / proposal / report) + auto-triggers a reviewer
-  └─ CEO reviews the final output (agent's work + reviewer's annotation)
-  └─ GitHub: merge if output is code; approve via chat otherwise
+Morning
+  └─ Scan Telegram for any overnight agent messages or alerts
+  └─ Check BACKLOG.md (or MC Kanban) for task state across all agents
+  └─ Message any agent where direction is needed
 
-Check for alerts (Telegram)
-  └─ Heartbeat alerts from CI failures or grant deadlines appear in Telegram
-  └─ CEO decides whether to act; opens the relevant agent tab if so
+Work cycle
+  └─ "I'd like you to [task]" → agent proposes plan → you approve → work begins
+  └─ Agent delivers PR + notifies you in Telegram
+  └─ You review, give feedback in Telegram, agent iterates
+  └─ Merge on GitHub when satisfied
 
-Optional: weekly visibility check
+Optional weekly
   └─ Send /standup in Telegram → all agents contribute current status
-  └─ CEO reviews; adjusts any agent's direction at next interaction
+  └─ Adjust direction as needed
 ```
 
-**Key mental model:** You are always the initiating trigger and the final gate. Agents act when you start them and stop when you approve their output. The only automated behaviour is: reviewer agents respond to review tasks without CEO intervention (bounded, one round, no further chaining).
+**Key mental model:** You are always the initiating trigger and the final gate. Agents propose before acting and stop for approval at every consequential step. The only automated behaviour is: Atlas may respond to a cross-agent review request from another agent without CEO initiation — bounded to one round, no further chaining.
 
 ---
 
