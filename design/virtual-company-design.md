@@ -21,7 +21,7 @@ This document describes how OpenClaw is configured to run the IDEA virtual compa
 - [The Org Root — idea/](#the-org-root--idea)
 - [File System Structure](#file-system-structure)
 - [AGENTS.md — The Role Definition File](#agentsmd--the-role-definition-file)
-- [CLAUDE.md — CLI Fallback](#claudemd--cli-fallback) — pointer list for `claude` CLI; OpenClaw handles this automatically
+- [CLAUDE.md — CLI Fallback](#claudemd--cli-fallback) — pointer list for `claude` CLI; Tabby is the recommended terminal client
 - [Shared Agent Knowledge — CONTEXT.md](#shared-agent-knowledge--contextmd)
 - [CEO Approval — Two Layers](#ceo-approval--two-layers)
 - [Mission Control](#mission-control)
@@ -277,10 +277,59 @@ Common set (all agents): `AGENTS.md` · `SOUL.md` · `IDENTITY.md` · `USER.md` 
 ### How to use
 
 ```bash
-ssh koen@openclaw-pi.tail2d60.ts.net
+ssh pi@openclaw-pi.tail2d60.ts.net
 cd /home/pi/idea/agents/agent-engine-dev   # or any agent workspace
 claude                                      # CLAUDE.md is picked up automatically
 ```
+
+### Session persistence across SSH disconnects
+
+`claude` is a process. If the SSH connection drops or the terminal is closed, the process — and its entire in-memory conversation context — is lost.
+
+Wrap each agent session in a named tmux session to prevent this:
+
+```bash
+tmux new-session -s claude-engine          # start (first time)
+tmux attach -t claude-engine               # resume after reconnect
+claude
+```
+
+The tmux session keeps running on the Pi after you disconnect. Re-attaching with `tmux attach` picks up the same running `claude` process with all its context intact.
+
+Suggested naming convention: `claude-<agent-role>` (e.g. `claude-engine`, `claude-console`, `claude-site`, `claude-programme`, `claude-operations`).
+
+### Recommended terminal client — Tabby
+
+[Tabby](https://tabby.sh) is a free, open-source, cross-platform terminal (Mac/Windows/Linux) with native SSH profile management. The recommended setup opens one tab per agent, each automatically attaching to its named tmux session on the Pi.
+
+#### First-time setup
+
+1. **Install Tabby** — `brew install --cask tabby` (Mac) or download from [tabby.sh](https://tabby.sh).
+
+2. **Start all agent sessions on the Pi** — SSH in and run:
+
+   ```bash
+   ssh pi@openclaw-pi.tail2d60.ts.net
+   bash /home/pi/idea/scripts/start-agents.sh
+   ```
+
+   This creates all 5 named tmux sessions. Only needed after initial setup or Pi reboot.
+
+3. **Create 5 SSH profiles in Tabby** — *Settings → Profiles & Connections*. For each profile: host `openclaw-pi.tail2d60.ts.net`, username `pi`, and set the *Initial command* field:
+
+   | Profile name | Initial command |
+   |---|---|
+   | IDEA — Atlas | `tmux new-session -A -s claude-operations -c /home/pi/idea/agents/agent-operations-manager 'claude; exec bash -l'` |
+   | IDEA — Axle | `tmux new-session -A -s claude-engine -c /home/pi/idea/agents/agent-engine-dev 'claude; exec bash -l'` |
+   | IDEA — Pixel | `tmux new-session -A -s claude-console -c /home/pi/idea/agents/agent-console-dev 'claude; exec bash -l'` |
+   | IDEA — Beacon | `tmux new-session -A -s claude-site -c /home/pi/idea/agents/agent-site-dev 'claude; exec bash -l'` |
+   | IDEA — Marco | `tmux new-session -A -s claude-programme -c /home/pi/idea/agents/agent-programme-manager 'claude; exec bash -l'` |
+
+4. **Open all 5 tabs** — each tab auto-attaches to its running session or creates a new one if needed (the `-A` flag handles both cases).
+
+#### Day-to-day use
+
+Just open Tabby. Each tab reconnects to its agent's running session. `start-agents.sh` is only needed again after a Pi reboot.
 
 ### Maintenance
 
@@ -482,7 +531,7 @@ Optional weekly
   └─ Adjust direction as needed
 ```
 
-**Key mental model:** You are always the initiating trigger and the final gate. Agents propose before acting and stop for approval at every consequential step. The only automated behaviour is: Atlas may respond to a cross-agent review request from another agent without CEO initiation — bounded to one round, no further chaining.
+**Key mental model:** You are always the initiating trigger and the final gate. Agents propose before acting and stop for approval at every consequential step. The only automated behaviour is: agents respond to cross-agent requests without CEO intervention — bounded to one round, no further chaining.
 
 ---
 
@@ -573,15 +622,15 @@ Every piece of work follows the same cycle, initiated by the CEO:
 CEO → Agent A: "Start task: [description]"
 Agent A: shows plan → CEO approves → executes
 Agent A: produces output (PR / design doc / proposal / report)
-Agent A: creates a cross-agent task on Atlas's (or relevant reviewer's) board [cross-agent tag, From prefix in title]
+Agent A: creates a cross-agent request on the target agent's board [cross-agent tag, From prefix in title]
   └─ pi cron detects the new task (every 2 min, no LLM)
-  └─ wakes reviewer in isolated session
-  └─ reviewer reads output, writes response (PR comment / annotation), marks task done
-CEO: reviews Agent A's output + reviewer's annotation
+  └─ wakes target agent in isolated session
+  └─ target agent reads request, writes response (PR comment / answer / opinion), marks task done
+CEO: reviews Agent A's output + target agent's response
 CEO: approve → task Done | amend → Agent A revises | reject → task Cancelled
 ```
 
-The one automated step — reviewer agent responding to review tasks — runs without CEO intervention. It is bounded: one round, no further chaining. See "Cross-agent review mechanism" below.
+The one automated step — target agent responding to cross-agent requests — runs without CEO intervention. It is bounded: one round, no further chaining. See "Cross-agent requests" below.
 
 ### Output types
 
@@ -592,14 +641,14 @@ The one automated step — reviewer agent responding to review tasks — runs wi
 | **Proposal** | New backlog item identified | Any agent (Marco most often) | Approve by merging PR → creates MC task |
 | **Report** | Field updates, grants, quality summary, standup contributions | Marco, Atlas | Read and decide; may prompt new cycle |
 
-### Cross-agent review mechanism
+### Cross-agent requests
 
-When Agent A finishes primary work, it creates a task on the reviewer's board via the MC API.
+Any agent can send a cross-agent request to any other agent — not only for review, but for opinions, domain questions, feasibility checks, or any input that requires another agent's expertise. Agent A creates a task on Agent B's board via the MC API.
 
 **Required format — every cross-agent task must follow this exactly:**
 
 ```
-POST /api/v1/agent/boards/{reviewer_board_id}/tasks
+POST /api/v1/agent/boards/{target_board_id}/tasks
 {
   "title": "[From <AgentName>] <Type>: <short description>",
   "description": "**From:** <AgentName> <emoji>\n**Type:** Review | Question | Opinion | Feasibility\n**Date:** YYYY-MM-DD\n\n---\n\n<fully self-contained body: what to review, where to find it, what to respond with>\n\n⚠ This is a depth-1 cross-agent task. Do not create further tasks.",
@@ -622,14 +671,14 @@ description: "**From:** Axle ⚙️\n**Type:** Review\n**Date:** 2026-03-27\n\n-
 tags: ["cross-agent"]
 ```
 
-The pi cron (`scripts/check-new-tasks.sh`, runs every 2 minutes) detects tasks tagged `cross-agent` in `inbox` status, immediately marks them `in_progress` (prevents double-trigger), logs the task ID to `logs/triggered-tasks.log`, and fires an isolated gateway session for the reviewer agent.
+The pi cron (`scripts/check-new-tasks.sh`, runs every 2 minutes) detects tasks tagged `cross-agent` in `inbox` status, immediately marks them `in_progress` (prevents double-trigger), logs the task ID to `logs/triggered-tasks.log`, and fires an isolated gateway session for the target agent.
 
 **Cycle prevention — three guards:**
-1. **Instruction**: reviewer AGENTS.md hard-codes that cross-agent sessions must not create further tasks
+1. **Instruction**: target agent's AGENTS.md instructs that cross-agent sessions must not create further tasks
 2. **Tag propagation**: cron only fires for `cross-agent` tasks — creating a further cross-agent task requires two simultaneous violations
 3. **Triggered log**: each task ID is only ever triggered once regardless of status changes
 
-**Default reviewer assignments:**
+**Default routing:**
 - All developer PRs and design docs → Atlas (Operations Manager)
 - Programme Manager technical feasibility questions → Axle (Engine Dev)
 - Proposals → Atlas for cross-cutting consistency
@@ -673,7 +722,7 @@ Standup output does not create tasks and does not gate any work. The CEO follows
 
 | Script | Schedule | Purpose |
 |--------|----------|---------|
-| `scripts/check-new-tasks.sh` | Every 2 min, always | Detect `cross-agent` tasks; trigger reviewer agents |
+| `scripts/check-new-tasks.sh` | Every 2 min, always | Detect `cross-agent` tasks; trigger target agents |
 | `scripts/standup.sh` | On demand (CEO `/standup`) | Runs standup-seed.sh + chains agent contributions |
 | heartbeat scripts | When re-enabled per agent | External event detection only |
 
@@ -681,21 +730,41 @@ Standup output does not create tasks and does not gate any work. The CEO follows
 
 ## Session Documentation
 
-**Every agent documents every session.** At the end of every substantive session, each agent writes a summary to `outputs/YYYY-MM-DD-HHMM-<topic>.md` in its own workspace, then commits and pushes.
+Every agent writes an output file for every substantive response — immediately after delivering it, not at session end.
 
-This creates a permanent, searchable record of every conversation across all agents. Format:
+### What counts as substantive
+
+**Write a file for:** any response containing analysis, a decision, a plan, a recommendation, a design, or a work product.
+
+**Exempt:** one-liner confirmations, status ACKs ("Done, pushed"), and pure yes/no answers. These add noise without audit value.
+
+### Format
 
 ```
 outputs/YYYY-MM-DD-HHMM-<short-topic>.md
-
-> **Task/Question:** <what was asked or assigned>
-
-[Body: what was done, decisions made, outputs produced]
 ```
 
-For all agents, session outputs go to `outputs/` and session memory goes to `memory/YYYY-MM-DD.md`. Both are committed to git at session end.
+```markdown
+> **Task/Question:** <the user's exact message>
 
-The `outputs/` directory in each repo is committed to git and included in the normal PR/push flow. It is the human-readable conversation history for that agent.
+[Body: analysis, decisions, reasoning, work produced]
+```
+
+The `<short-topic>` slug is 2–4 words in kebab-case describing the content, not the format:
+`outputs-policy`, `claude-fallback-design`, `pr-review-engine-automerge`.
+
+### Rules
+
+1. Write the file **immediately** after delivering the response — not at session end
+2. Commit and push to `memory/updates` right after writing
+3. This applies to every session and every interface (Telegram, Mission Control, terminal)
+4. Commit message format: `outputs: YYYY-MM-DD <short-topic>`
+
+### Purpose
+
+Output files are the permanent, searchable record of what every agent said, decided, and produced — and why. Memory files capture what agents *know*; output files capture what they *said*. Together they give full auditability without needing to reconstruct decisions from conversation logs.
+
+The `outputs/` directory flows through the same `memory/updates` branch and long-lived PR as memory files — one PR per agent, merged by the CEO on their own schedule.
 
 ---
 
@@ -718,6 +787,8 @@ The same principle applies to shared knowledge. New facts about the product go i
 accumulates silently.
 
 **Session logs** (`memory/YYYY-MM-DD.md` and `MEMORY.md` in each workspace) are committed to git alongside `outputs/`. Together they form the permanent record: `outputs/` holds the substantive responses; `memory/` holds the agent's running operational notes and durable decisions.
+
+**When to write memory:** After each substantive exchange — not at session end. Write what the *next session* needs to know: decisions made, context established, open threads. Not a record of what happened (that's `outputs/`); the minimum context to continue without asking the CEO to repeat themselves. Append to `memory/YYYY-MM-DD.md` and push immediately alongside the output file.
 
 ### Memory commit workflow
 
@@ -751,14 +822,13 @@ Limits: 20,000 chars per file; 150,000 chars total across all files (silent trun
 
 ⚠️ **Do not list `SOUL.md`, `USER.md`, or `IDENTITY.md` in any agent's startup checklist** — they are already in context. Listing them wastes tokens.
 
-**2. Explicitly read by the agent** — the agent calls `read` on startup, instructed to do so by `AGENTS.md`:
+**2. Explicitly read by the agent** — the agent calls `read` on startup, instructed to do so by `AGENTS.md`. This happens **unconditionally at every session start, before the first response** — not triggered by `/init`, not skipped when the first message seems urgent:
 
 | File | Read by |
 |------|---------|
 | `../../CONTEXT.md` | All agents — every session |
 | `../../BACKLOG.md` | All agents |
 | `memory/YYYY-MM-DD.md` (today + yesterday) | All agents |
-| `CLAUDE.md` | Engine Dev |
 | `docs/SOLUTION_DESCRIPTION.md` | Engine Dev |
 | `../../standups/` (latest) | Atlas, Programme Manager |
 | `../../design/virtual-company-design.md` | Atlas |
@@ -769,7 +839,7 @@ Limits: 20,000 chars per file; 150,000 chars total across all files (silent trun
 | Agent | Reads at session start |
 |-------|----------------------|
 | **Atlas** | `CONTEXT.md` · `design/virtual-company-design.md` · `BACKLOG.md` · `memory/` (today + yesterday) · `MEMORY.md` |
-| **Axle** | `CONTEXT.md` · `SOLUTION_DESCRIPTION.md` · `CLAUDE.md` · `BACKLOG.md` · `memory/` |
+| **Axle** | `CONTEXT.md` · `SOLUTION_DESCRIPTION.md` · `BACKLOG.md` · `memory/` |
 | **Pixel** | `CONTEXT.md` · `BACKLOG.md` · `memory/` · `design/` (before feature work) |
 | **Beacon** | `CONTEXT.md` · `BACKLOG.md` · `content-drafts/` · `memory/` |
 | **Marco** | `CONTEXT.md` · `BACKLOG.md` · `standups/` (latest) · `memory/` |
@@ -780,10 +850,7 @@ Every agent recognises `/init` as a recovery command. When the CEO sends `/init`
 Telegram group, the agent immediately re-runs its full startup read sequence regardless of the
 current session state.
 
-**Why it exists:** OpenClaw sessions sometimes start without completing the startup sequence — for
-example, after a gateway restart, when a session was woken by a cron job before receiving a message,
-or when a new session context has lost prior state. `/init` is the reliable reset that brings any
-agent back to a fully-loaded, contextually-aware state without needing to restart OpenClaw.
+**Why it exists:** Startup reads are unconditional — agents read on every session start without being asked. `/init` is a *recovery* command for the rare cases where that didn't happen: after a gateway restart, when a session was woken by a cron job before receiving a message, or when context was lost. It forces a re-read without needing to restart OpenClaw. It is not the normal trigger for startup reads.
 
 **What each agent does on `/init`:**
 
@@ -898,7 +965,7 @@ just not the one chosen. Marking it `Rejected` would misrepresent the decision.
 
 Agents cannot talk to each other directly. Coordination happens through three mechanisms:
 
-1. **Review tasks** — the primary mechanism. Agent A creates a scoped review task on Agent B's board. Agent B responds automatically (one round, no chaining). This is the default for all work output.
+1. **Cross-agent requests** — the primary mechanism. Agent A creates a scoped request on Agent B's board (review, question, opinion, or feasibility). Agent B responds automatically (one round, no chaining). This is the default for all inter-agent coordination.
 
 2. **Discussion threads** — for topics that need more depth than a single review round. Any agent opens `discussions/YYYY-MM-DD-<topic>.md` at the org root, tags relevant agents with `@agent-id`. The CEO opens each tagged agent's tab to gather their input. Threads stay open until the CEO closes them with a decision.
 
@@ -1292,11 +1359,14 @@ All repos under personal account `koenswings` pending GitHub org creation (name 
 
 Total: **8 repos** — 1 org root + 5 operational agent repos + 1 researcher repo + `openclaw` platform config + `app-openclaw` App Disk.
 
+---
+
 ## Current Backlog
 
 ### HQ / Setup
 - [ ] Create GitHub organisation (name TBD — candidates: `ideabora`, `ideamoja`, `ideaweza`, `ideakazi`, `edufrica`); transfer `idea` + 5 active agent repos; archived repos stay under `koenswings`
 - [ ] Bootstrap sessions for Axle, Pixel, Beacon, Marco (Atlas is live)
+- [ ] Migrate operational backlog items into Mission Control
 
 ### Platform
 - [ ] Test `scripts/setup.sh` on a fresh Pi — end-to-end install not yet verified
