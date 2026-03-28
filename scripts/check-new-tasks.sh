@@ -11,7 +11,7 @@
 
 set -euo pipefail
 
-MC_URL="http://172.18.0.1:8000"
+MC_URL="http://172.18.0.1:8000"  # also reachable as http://mission-control-backend:8000 from within idea-net
 LOG_DIR="/home/pi/idea/logs"
 TRIGGERED_LOG="$LOG_DIR/triggered-tasks.log"
 SCRIPT_LOG="$LOG_DIR/check-new-tasks.log"

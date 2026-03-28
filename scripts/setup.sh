@@ -257,12 +257,30 @@ with open(deployed_path, 'w') as f:
 print(f"  Applied to {deployed_path}")
 PYEOF
 
-  # Restart gateway to pick up new config
+  # Apply cron jobs
+  apply_cron_jobs
+
+  # Restart gateway to pick up new config and cron jobs
   info "Restarting openclaw-gateway..."
   cd "${OPENCLAW_DIR}"
   docker compose restart openclaw-gateway
   cd - >/dev/null
   ok "openclaw-gateway restarted with IDEA config"
+}
+
+apply_cron_jobs() {
+  local cron_template="${IDEA_DIR}/platform/cron-jobs.json"
+  local cron_dir="${HOME}/.openclaw/cron"
+  local cron_file="${cron_dir}/jobs.json"
+
+  if [[ ! -f "${cron_template}" ]]; then
+    warn "platform/cron-jobs.json not found — skipping cron setup"
+    return
+  fi
+
+  mkdir -p "${cron_dir}"
+  cp "${cron_template}" "${cron_file}"
+  ok "Cron jobs applied ($(python3 -c "import json; d=json.load(open('${cron_file}')); print(len(d['jobs']),'jobs')"))"
 }
 
 # ── Step 6: Tailscale ─────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@
 # Run from your agent workspace root before any API-heavy session.
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://172.18.0.1:8000}"
+BASE_URL="${BASE_URL:-http://mission-control-backend:8000}"
 SPEC_DIR="${1:-api}"   # optional: pass a different output dir
 
 mkdir -p "$SPEC_DIR"

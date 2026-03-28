@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "jobs": [
+    {
+      "id": "58071c04-d319-4c54-b6ac-8dfcb54de507",
+      "agentId": "lead-3f1be9c8-87e7-4a5d-9d3b-99756c35e3a9",
+      "sessionKey": "agent:lead-3f1be9c8-87e7-4a5d-9d3b-99756c35e3a9:main",
+      "name": "Marco heartbeat (DISABLED)",
+      "enabled": false,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 3600000,
+        "anchorMs": 1772403943479
+      },
+      "sessionTarget": "main",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "systemEvent",
+        "text": "Heartbeat: run your board lead loop per HEARTBEAT.md — pre-flight checks, task review, delivery status update. Return HEARTBEAT_OK if nothing needs attention."
+      }
+    },
+    {
+      "id": "1b7ed94a-7fbd-464e-aaae-a1eb77777f37",
+      "agentId": "lead-d0cfa49e-edcb-4a23-832b-c2ae2c99bf67",
+      "sessionKey": "agent:lead-d0cfa49e-edcb-4a23-832b-c2ae2c99bf67:main",
+      "name": "Standup — Operations Manager (07:35)",
+      "enabled": true,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 86400000,
+        "anchorMs": 1773902100000
+      },
+      "sessionTarget": "main",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "systemEvent",
+        "text": "Standup synthesis. Get today's date, then read ../../standups/<TODAY>.md. First check if the standup file for today contains STANDUP_SKIPPED. If it does, stop immediately and do nothing. Otherwise: (1) append a ## Summary section: cross-project synthesis of the Context — which PRs need attention, what is moving, what is blocked, anything time-sensitive. Keep it to 5-8 bullet points. (2) append a ## quality-manager section with four subsections: ### Working on / ### New insight — may affect others / ### Question for the team / ### Response to [agent name]. (3) append a ## Standup cost subsection under quality-manager estimating your input tokens, output tokens, tool calls, and model used. Commit the standup file."
+      }
+    },
+    {
+      "id": "c89601f1-bc1d-414f-963d-51ee7d1e72a3",
+      "agentId": "lead-6bddb9d2-c06f-444d-8b18-b517aeaa6aa8",
+      "sessionKey": "agent:lead-6bddb9d2-c06f-444d-8b18-b517aeaa6aa8:main",
+      "name": "Standup — engine-dev (07:45)",
+      "enabled": true,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 86400000,
+        "anchorMs": 1773902700000
+      },
+      "sessionTarget": "main",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "systemEvent",
+        "text": "Standup contribution. Get today's date, then read ../../standups/<TODAY>.md (full file). First check if the standup file for today contains STANDUP_SKIPPED. If it does, stop immediately and do nothing. Otherwise read the entire file including any prior sections, then append your ## engine-dev section with four subsections: ### Working on (what you are currently doing and why it matters) / ### New insight — may affect others (leave blank if nothing) / ### Question for the team (use @agent-id to be specific) / ### Response to [agent name] (only if a prior section raised something relevant to your domain). Append a brief cost estimate (input tokens / output tokens / tool calls / model). Commit the standup file."
+      }
+    },
+    {
+      "id": "3c6874a5-e377-46fa-8d39-74efb62085c8",
+      "agentId": "lead-ac508766-e9e3-48a0-b6a5-54c6ffcdc1a3",
+      "sessionKey": "agent:lead-ac508766-e9e3-48a0-b6a5-54c6ffcdc1a3:main",
+      "name": "Standup — console-dev (07:55)",
+      "enabled": true,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 86400000,
+        "anchorMs": 1773903300000
+      },
+      "sessionTarget": "main",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "systemEvent",
+        "text": "Standup contribution. Get today's date, then read ../../standups/<TODAY>.md (full file). First check if the standup file for today contains STANDUP_SKIPPED. If it does, stop immediately and do nothing. Otherwise read the entire file including any prior sections, then append your ## console-dev section with four subsections: ### Working on / ### New insight — may affect others / ### Question for the team / ### Response to [agent name]. Append a brief cost estimate. Commit the standup file."
+      }
+    },
+    {
+      "id": "561c833e-74bf-4679-bd62-75c91bd0de94",
+      "agentId": "lead-7cc2a1cf-fa22-485f-b842-bb22cb758257",
+      "sessionKey": "agent:lead-7cc2a1cf-fa22-485f-b842-bb22cb758257:main",
+      "name": "Standup — site-dev (08:05)",
+      "enabled": true,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 86400000,
+        "anchorMs": 1773903900000
+      },
+      "sessionTarget": "main",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "systemEvent",
+        "text": "Standup contribution. Get today's date, then read ../../standups/<TODAY>.md (full file). First check if the standup file for today contains STANDUP_SKIPPED. If it does, stop immediately and do nothing. Otherwise read the entire file including any prior sections, then append your ## site-dev section with four subsections: ### Working on / ### New insight — may affect others / ### Question for the team / ### Response to [agent name]. Append a brief cost estimate. Commit the standup file."
+      }
+    },
+    {
+      "id": "a5f87ac5-db22-4297-ae21-2a291838b3dd",
+      "agentId": "lead-3f1be9c8-87e7-4a5d-9d3b-99756c35e3a9",
+      "sessionKey": "agent:lead-3f1be9c8-87e7-4a5d-9d3b-99756c35e3a9:main",
+      "name": "Standup — programme-manager (08:15)",
+      "enabled": true,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 86400000,
+        "anchorMs": 1773904500000
+      },
+      "sessionTarget": "main",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "systemEvent",
+        "text": "Standup contribution. Get today's date, then read ../../standups/<TODAY>.md (full file). First check if the standup file for today contains STANDUP_SKIPPED. If it does, stop immediately and do nothing. Otherwise read the entire file including any prior sections, then append your ## programme-manager section with four subsections: ### Working on / ### New insight — may affect others / ### Question for the team / ### Response to [agent name]. Append a brief cost estimate. Commit the standup file."
+      }
+    },
+    {
+      "id": "c54c09e7-bf2f-40b4-9848-00020dc0cde8",
+      "agentId": "operations-manager",
+      "sessionKey": "agent:operations-manager:telegram:group:-5105695997",
+      "name": "Daily BACKLOG.md export",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 6 * * *",
+        "tz": "UTC"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Run the backlog export: bash /home/node/workspace/scripts/export-backlog.sh\n\nThat's all. No other work needed."
+      },
+      "delivery": {
+        "mode": "none"
+      }
+    }
+  ]
+}

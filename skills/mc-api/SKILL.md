@@ -13,7 +13,7 @@ Credentials and agent-specific IDs live in each agent's `TOOLS.md` and `.env`.
 ```bash
 # 1. Load credentials
 source .env                    # loads AUTH_TOKEN
-BASE_URL=http://172.18.0.1:8000
+BASE_URL=http://mission-control-backend:8000
 
 # 2. Refresh the OpenAPI spec (do this at the start of any API-heavy session)
 /home/node/workspace/skills/mc-api/scripts/mc-refresh.sh
@@ -40,7 +40,7 @@ Each agent stores their own values in `TOOLS.md`:
 
 | Key | Description |
 |-----|-------------|
-| `BASE_URL` | `http://172.18.0.1:8000` (same for all agents) |
+| `BASE_URL` | `http://mission-control-backend:8000` (Docker service name — all agents) |
 | `AUTH_TOKEN` | Agent-specific token — load from `.env`, never commit |
 | `AGENT_ID` | UUID identifying this agent in Mission Control |
 | `BOARD_ID` | UUID of this agent's task board |
