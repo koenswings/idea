@@ -309,15 +309,25 @@ Any factual update to the product propagates to all agents by editing one file. 
 
 ---
 
-## CEO Approval — Two Layers
+## CEO Approval — Three Layers
 
-**Layer 1 — Plan mode (already active):** Every agent shows its plan before acting. You approve or modify before it executes. This applies to all work.
+**Layer 1 — Plan mode (always active):** Every agent shows its plan before acting. You approve or modify before it executes. This applies to all work.
 
-**Layer 2 — GitHub PRs (to be set up):** All code and document changes land on feature branches. The agent opens a PR. You review on GitHub and merge (or request changes). Branch protection on `main` in every repo enforces this mechanically.
+**Layer 2 — GitHub PRs:** All code and document changes land on feature branches. The PR review loop works as follows:
+
+1. Agent completes work on a feature branch and opens a PR
+2. You read the PR and send any feedback to the agent in its chat (Telegram or Mission Control)
+3. Agent updates the branch — the PR reflects the new state automatically (no new PR opened)
+4. Steps 2–3 repeat until the output is right
+5. You merge on GitHub — this is the only action that requires the GitHub UI
+
+**PR review happens in chat, not via GitHub inline comments.** What matters is a well-documented final solution, not a documented correction process. GitHub is used only for the final merge.
 
 For complex engine or console changes, a third gate applies:
 1. Agent proposes a design doc in `design/` (org root) → you approve via PR merge
 2. Implementation PR is raised only after the design is merged
+
+**Layer 3 — MC Approvals (for runtime actions):** The MC API has a formal approval request mechanism separate from PRs. An agent can pause before taking any irreversible runtime action — sending an external message, deleting data, deploying — and post an approval request to Mission Control. You see it in the MC UI, approve or reject, and the agent proceeds or aborts. This is not a substitute for PRs; it gates *actions*, not code changes. Use it when you want a structured audit trail of decisions that don't go through git (e.g. Marco sending a briefing to an external contact, Axle wiping a disk partition).
 
 ---
 
@@ -413,10 +423,8 @@ Access Mission Control at `https://openclaw-pi.tail2d60.ts.net:8000`. OpenClaw C
 | **Assign** | Mission Control | Create task, assign to agent, set priority |
 | **Approve plan** | Mission Control (agent chat) | Read plan, type "go ahead" or modify |
 | **Observe** | Mission Control (agent chat) | Watch tool calls, file edits, git operations stream in real time |
-| **Review** | Mission Control (agent chat) | Describe changes needed at whatever level of detail is useful — high-level direction or specific corrections. The agent implements, pushes to the same branch, the PR updates automatically. |
-| **Merge** | GitHub | Review the final diff, merge to main |
-
-**PR review happens in chat, not via GitHub inline comments.** What matters is a well-documented final solution, not a documented correction process. Describe the change you want — the agent updates the branch, the PR reflects the new state. GitHub is used only for the final merge. The agent never opens a new PR for the same change; it always pushes to the existing branch.
+| **Review** | Telegram or MC (agent chat) | Send feedback — high-level direction or specific corrections. Agent pushes to same branch, PR updates automatically. Repeat until right. |
+| **Merge** | GitHub | Review the final diff, merge to `main` |
 
 **Which agent tab to use for what:**
 
