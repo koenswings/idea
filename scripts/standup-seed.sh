@@ -16,10 +16,10 @@ STANDUP_FILE="$STANDUPS_DIR/$TODAY.md"
 LOG_TAG="[standup-seed $TODAY]"
 
 AGENT_REPOS=(
+  "agents/agent-operations-manager"
   "agents/agent-engine-dev"
   "agents/agent-console-dev"
   "agents/agent-site-dev"
-  "agents/agent-quality-manager"
   "agents/agent-programme-manager"
 )
 
@@ -96,8 +96,9 @@ if [[ "$CURRENT_HASH" == "$STORED_HASH" ]] && [[ "$FORCE_RUN" == "false" ]]; the
 
 No changes detected since yesterday. Standup skipped — downstream agent jobs will do nothing.
 EOF
+  cp "$STANDUP_FILE" "$STANDUPS_DIR/LATEST.md"
   cd "$IDEA_DIR"
-  git add "standups/$TODAY.md" 2>/dev/null || true
+  git add "standups/$TODAY.md" "standups/LATEST.md" 2>/dev/null || true
   git commit -m "Standup $TODAY: skipped (no changes)" 2>/dev/null || true
   git push 2>/dev/null || true
   echo "$LOG_TAG Done — skipped"
@@ -176,8 +177,10 @@ EOF
 
 # ── Commit and push ──────────────────────────────────────────────────────────
 
+cp "$STANDUP_FILE" "$STANDUPS_DIR/LATEST.md"
+
 cd "$IDEA_DIR"
-git add "standups/$TODAY.md" "standups/.last-context-hash" 2>/dev/null || true
+git add "standups/$TODAY.md" "standups/LATEST.md" "standups/.last-context-hash" 2>/dev/null || true
 git commit -m "Standup seed: $TODAY" 2>/dev/null || true
 git push 2>/dev/null || true
 

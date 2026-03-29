@@ -128,3 +128,31 @@ For simple label/value pairs, use plain bullets or bold labels — no image need
 
 The skill is at `/home/node/workspace/skills/telegram-table/`. It uses ImageMagick
 (`convert`), which is available in the sandbox. See the SKILL.md for usage.
+
+---
+
+## Documentation Index Maintenance
+
+Every design doc, proposal, and authoritative doc must have a corresponding entry in the
+relevant INDEX.md. **Updating the index is not optional — it is part of the same commit as
+the doc itself.**
+
+| New file location | Index to update |
+|---|---|
+| `idea/design/*.md` | `idea/design/INDEX.md` |
+| `idea/docs/*.md` | `idea/docs/INDEX.md` |
+| `idea/proposals/*.md` | `idea/proposals/INDEX.md` |
+| `agents/<repo>/design/*.md` | `agents/<repo>/design/INDEX.md` |
+| `agents/<repo>/docs/*.md` | `agents/<repo>/docs/INDEX.md` |
+
+**Index entry format** (keep compact — one heading, one metadata line, two sentences max):
+
+```markdown
+## filename.md
+**Status:** Draft | Proposed | Implemented | Superseded  ·  **Date:** YYYY-MM-DD  ·  **Author:** Name
+One-sentence description of what this doc covers or decided.
+Second sentence if needed for context.
+→ [path/filename.md](filename.md)
+```
+
+When a doc is superseded or its status changes, update the index entry — do not delete it.
