@@ -228,12 +228,57 @@ The following connections exist or will exist across the IDEA system.
 **IDEA technical team → School Pi (field debugging)**
 - Currently not available — school Pis have no remote access by design (offline-first).
   Any debugging is done physically, on-site.
-- Future consideration: a Tailscale-enabled field debug mode (disabled by default;
-  activated on-site when a coordinator needs remote support). Not yet designed.
+- Future consideration: a **Tailscale-enabled field debug mode** — see design sketch below.
 
 **GitHub Actions self-hosted runner → (none)**
 - A self-hosted runner on the Pi connects outbound to GitHub — GitHub does not SSH
   into the Pi. No inbound SSH required for CI.
+
+---
+
+### Tailscale debug mode (design sketch)
+
+School Pis are offline by design — no Tailscale running, no remote access. But field
+support occasionally requires a shell on the Pi without physically traveling to the school.
+The Tailscale debug mode is a **latent remote-access capability**: installed but dormant,
+activated only on demand, and reverted cleanly afterwards.
+
+**How it would work:**
+
+1. Tailscale is installed on the school Pi at imaging time but the service is disabled
+   (`systemctl disable --now tailscaled`). The Pi does not phone home to Tailscale.
+2. A Tailscale auth key (scoped to this Pi, short-lived or one-time-use) is pre-provisioned
+   and stored on the Pi at imaging time, not transmitted at activation time.
+3. When a coordinator needs remote support, they activate debug mode — either:
+   - Via the Console UI ("Enable remote support mode") — requires a physical device on
+     the school LAN, so can't be triggered silently from outside
+   - Via a signed command on a USB stick, executed locally
+4. The Pi runs `sudo tailscale up --authkey <stored-key>` and joins the IDEA Tailnet.
+5. IDEA technical staff can now SSH in via the Pi's Tailscale hostname.
+6. When the session is complete, the coordinator (or staff) runs `sudo tailscale down`
+   and the service is disabled again.
+
+**Design constraints:**
+
+- **Off by default, always.** No internet exposure unless deliberately activated by
+  someone physically present at the school (or on the school LAN).
+- **No silent remote activation.** The trigger must require local action — a Console
+  button, a USB script, or similar. It cannot be initiated from outside the school network.
+- **Short-lived auth keys.** Auth keys expire and are single-use where possible. A leaked
+  key should not grant persistent access.
+- **Clean revocation.** `tailscale down` immediately removes the Pi from the Tailnet.
+  No lingering access.
+
+**Open design questions (not yet resolved):**
+
+- How does the coordinator know to activate debug mode — does IDEA staff call them? Text them?
+- Who provisions the auth key — is it baked into the disk image or delivered per-school?
+- What happens when an auth key expires before it's ever used? (Pi needs a way to receive
+  a fresh key without already having remote access.)
+- How does the Console UI trigger `tailscale up` without giving the Console full sudo access?
+  (A narrow `sudoers` rule for exactly this command is the likely answer.)
+
+**Status:** Not yet designed. Worth doing before IDEA has active field deployments.
 
 ---
 
@@ -345,6 +390,38 @@ device is lost, replaced, or access is no longer needed.
 Move to **Option B** (CA) when IDEA operates more than one Pi with shared access —
 for example, if field coordinators are given SSH access to their school Pi for remote
 support. At that point, distributing individual keys becomes unmanageable.
+
+---
+
+### Rotating or revoking a key via Telegram command
+
+IDEA's operational agents (Atlas and others) can be commanded directly via Telegram to
+assist with SSH key rotation. The work is split between what the agent can do autonomously
+and what requires Koen to run a command on the Pi.
+
+**What Atlas can do from a Telegram command:**
+- Generate a new Ed25519 key pair inside the OpenClaw container (`ssh-keygen`)
+- Output the ready-to-paste `authorized_keys` line — with `command=`, `restrict`, and
+  `from=` options already formatted correctly for the key's purpose
+- Prepare the exact line to remove from `authorized_keys` when revoking a key
+- Update the relevant `.env` file (e.g. `TEST_SSH_KEY` path in Axle's workspace)
+- Update `platform/keys.md` (the key registry) with the new or removed entry
+
+**What Koen must do on the Pi:**
+- Append the new public key to `/home/pi/.ssh/authorized_keys`
+- Remove the old or revoked line from that file
+
+Atlas cannot modify files on the Pi host directly. However, the agent delivers the exact
+command to run — typically a single `echo "..." >> ~/.ssh/authorized_keys` or an `sed -i`
+line — so the Pi-side step is copy-paste.
+
+**Example Telegram commands:**
+- "Rotate the engine test SSH key"
+- "Revoke the `openclaw-container→pi-host-tests` key"
+- "Generate a new Kit test key"
+
+**Scope note:** This covers *machine-to-machine* keys (OpenClaw container → Pi host).
+Koen's personal laptop key is outside Atlas's scope — that is managed by Koen directly.
 
 ---
 
