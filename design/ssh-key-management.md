@@ -236,49 +236,50 @@ The following connections exist or will exist across the IDEA system.
 
 ---
 
-### Tailscale debug mode (design sketch)
+### Tailscale debug mode
 
 School Pis are offline by design — no Tailscale running, no remote access. But field
 support occasionally requires a shell on the Pi without physically traveling to the school.
 The Tailscale debug mode is a **latent remote-access capability**: installed but dormant,
 activated only on demand, and reverted cleanly afterwards.
 
-**How it would work:**
+The full design is in [`design/tailscale-remote-management.md`](tailscale-remote-management.md).
+Key points relevant to SSH key management:
 
-1. Tailscale is installed on the school Pi at imaging time but the service is disabled
-   (`systemctl disable --now tailscaled`). The Pi does not phone home to Tailscale.
-2. A Tailscale auth key (scoped to this Pi, short-lived or one-time-use) is pre-provisioned
-   and stored on the Pi at imaging time, not transmitted at activation time.
-3. When a coordinator needs remote support, they activate debug mode — either:
-   - Via the Console UI ("Enable remote support mode") — requires a physical device on
-     the school LAN, so can't be triggered silently from outside
-   - Via a signed command on a USB stick, executed locally
-4. The Pi runs `sudo tailscale up --authkey <stored-key>` and joins the IDEA Tailnet.
-5. IDEA technical staff can now SSH in via the Pi's Tailscale hostname.
-6. When the session is complete, the coordinator (or staff) runs `sudo tailscale down`
-   and the service is disabled again.
+**Auth key type: reusable ephemeral.**
+School Pis use a Tailscale **ephemeral** auth key. When the Pi disconnects (`tailscale down`),
+Tailscale automatically removes it from the Tailnet — no manual cleanup, no device count
+accumulation. A **reusable** ephemeral key is baked into the disk image at imaging time so the
+same key works for any number of future support sessions without reprovisioning.
 
-**Design constraints:**
+```bash
+# Joining the Tailnet (activation step):
+sudo tailscale up \
+  --authkey "$(cat /etc/tailscale/debug-authkey)" \
+  --ephemeral \
+  --advertise-tags=tag:school-pi
 
-- **Off by default, always.** No internet exposure unless deliberately activated by
-  someone physically present at the school (or on the school LAN).
-- **No silent remote activation.** The trigger must require local action — a Console
-  button, a USB script, or similar. It cannot be initiated from outside the school network.
-- **Short-lived auth keys.** Auth keys expire and are single-use where possible. A leaked
-  key should not grant persistent access.
-- **Clean revocation.** `tailscale down` immediately removes the Pi from the Tailnet.
-  No lingering access.
+# Ending the session (cleanup step — Pi leaves Tailnet automatically):
+sudo tailscale down
+```
 
-**Open design questions (not yet resolved):**
+**SSH access key for debug sessions.**
+The SSH key used by IDEA staff to connect to a school Pi in debug mode is:
+- Ed25519, no passphrase (machine key — stored on IDEA ops devices)
+- Restricted in `authorized_keys` with `from=<IDEA-Tailnet-IP-range>` (no `command=`
+  restriction — a full shell is needed for debugging)
+- Recorded in `platform/keys.md` with purpose: `field-debug`
 
-- How does the coordinator know to activate debug mode — does IDEA staff call them? Text them?
-- Who provisions the auth key — is it baked into the disk image or delivered per-school?
-- What happens when an auth key expires before it's ever used? (Pi needs a way to receive
-  a fresh key without already having remote access.)
-- How does the Console UI trigger `tailscale up` without giving the Console full sudo access?
-  (A narrow `sudoers` rule for exactly this command is the likely answer.)
+The Tailscale ACL (`tag:idea-ops` → `tag:school-pi:22` only) provides equivalent isolation
+to a `command=` restriction: the key is only reachable via Tailscale from IDEA devices.
 
-**Status:** Not yet designed. Worth doing before IDEA has active field deployments.
+**Key storage on the Pi:**
+```bash
+/etc/tailscale/debug-authkey   # permissions: 600, owned by root
+```
+
+**Status:** Designed — see `design/tailscale-remote-management.md`. Phase 1 (USB script)
+implementable without Engine or Console changes.
 
 ---
 
@@ -295,7 +296,7 @@ OpenClaw container
 
 School Pi
   │── No inbound SSH (by design)
-  │── Future: Tailscale debug mode (not yet designed)
+  │── Debug mode: Tailscale (ephemeral, activation-only) → IDEA ops SSH in via tag:idea-ops
 
 GitHub
   │── HTTPS/token (current) ───────────────► github.com (git push/pull from Pi)
@@ -335,10 +336,12 @@ For a small system like IDEA, a structured manual approach is the right level of
 **Key registry format** (`platform/keys.md`):
 
 ```markdown
-| Key name | From | To | Command restriction | Created | Status |
+| Key name | From | To | Restriction | Created | Status |
 |---|---|---|---|---|---|
 | `id_ed25519_koen` | Koen's laptop | Pi host | None (full shell) | 2026-03-01 | Active |
-| `id_ed25519_ocl_tests` | OpenClaw container | Pi host | `pnpm test:unit` | 2026-03-28 | Planned |
+| `id_ed25519_ocl_tests` | OpenClaw container | Pi host | `command=pnpm test:unit` + `restrict` | 2026-03-28 | Planned |
+| `id_ed25519_field_debug` | IDEA ops devices | School Pi | `from=<Tailnet-range>` (full shell) | TBD | Planned |
+| `tailscale-school-pi-authkey` | School Pi | IDEA Tailnet | Ephemeral, `tag:school-pi`, reusable | TBD | Planned |
 ```
 
 **Pros:** Simple. No new infrastructure. Works well for 1–3 machines.
