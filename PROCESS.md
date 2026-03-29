@@ -116,6 +116,58 @@ IT support are built carefully.
 
 ---
 
+## Infrastructure Discipline
+
+These rules exist because the Pi runs unattended in schools. Drift between what git knows
+and what is on the filesystem is a silent failure mode — it shows up weeks later, in the
+field, when no one is watching.
+
+### No direct writes to the Pi filesystem
+
+Agents must not write files into git-tracked directories on the Pi host — not via SSH,
+not via `scp`, not via any remote command.
+
+All file changes reach the Pi through one path only:
+1. Commit to a feature branch
+2. PR → CEO merges to `main`
+3. Pi pulls from `main` (`git pull` in the relevant repo)
+
+**Exceptions** (explicitly listed, not improvised):
+- `.env` files and other secrets — written once during setup, never via git
+- `~/.ssh/authorized_keys` — managed by the SSH key design doc procedure
+- Files in `~/.openclaw/` — managed by `apply-config.sh`
+
+### Merge before you reference
+
+If a piece of live system config (e.g., `authorized_keys`, `compose.yaml`, a cron script)
+references a file, that file must be in `main` before the config change is applied.
+
+**Wrong order:**
+1. Apply `authorized_keys` with `command="/path/to/run-tests.sh"`
+2. Open PR to add `run-tests.sh`
+
+**Right order:**
+1. Open PR to add `run-tests.sh`
+2. CEO merges PR → Pi pulls `main`
+3. Apply `authorized_keys` with `command="/path/to/run-tests.sh"`
+
+If the merge can't happen immediately, the config change waits. A config that references
+a missing file is worse than a config that doesn't restrict yet.
+
+### Agent repo scope
+
+Each agent owns one repo. Agents must not commit to, modify, or write into another
+agent's repo directory — even via SSH on the Pi host.
+
+The shared `idea` repo is not an agent repo. Changes to it require a PR; agents can open
+PRs against it but cannot push to `main` directly.
+
+Atlas is the only agent authorised to commit to other agents' `memory/updates` branches
+(for quality review and cross-agent coordination), using the `git worktree` procedure
+documented in Atlas's `TOOLS.md`. All other cross-agent repo operations require a PR.
+
+---
+
 ## Communication Standards
 
 ### Tables in Telegram
