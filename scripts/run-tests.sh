@@ -12,14 +12,14 @@
 
 set -euo pipefail
 
-ENGINE_DIR="/home/pi/idea/agent-engine-dev"
+ENGINE_DIR="/home/pi/idea/agents/agent-engine-dev"
 
 echo "[run-tests] Starting engine test run on $(hostname) at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 # Pull latest engine code
 echo "[run-tests] Pulling latest code..."
 cd "$ENGINE_DIR"
-git pull --ff-only
+git pull --ff-only origin $(git rev-parse --abbrev-ref HEAD)
 
 # Install dependencies if needed
 echo "[run-tests] Installing dependencies..."
