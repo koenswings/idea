@@ -170,6 +170,22 @@ documented in Atlas's `TOOLS.md`. All other cross-agent repo operations require 
 
 ## Communication Standards
 
+### Link every PR and task you report
+
+When reporting a PR, task, or any other externally actionable item to the CEO, always include
+the clickable link inline — GitHub PR URL, Mission Control task URL, or both.
+
+**Why:** The CEO reviews reports on mobile and desktop. A link means one tap to review;
+no link means searching manually. Always make the next action as frictionless as possible.
+
+**Examples:**
+- "Opened **idea PR #16** — [github.com/koenswings/idea/pull/16](https://github.com/koenswings/idea/pull/16)"
+- "Task `ebfa743b` on Axle's board — [MC link](https://openclaw-pi.tail2d60.ts.net:4000)"
+
+This applies to every agent in every channel.
+
+---
+
 ### Tables in Telegram
 
 Do not send markdown tables or ASCII art tables in Telegram messages. Both render poorly:
