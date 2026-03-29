@@ -1,4 +1,4 @@
-<!-- Auto-exported from Mission Control 2026-03-28 06:00 UTC. Do not edit manually. -->
+<!-- Auto-exported from Mission Control 2026-03-29 06:00 UTC. Do not edit manually. -->
 
 # BACKLOG.md — IDEA Agent Task Board
 
@@ -10,6 +10,8 @@ To propose a new item, follow the process in `PROCESS.md`.
 ## Engine Dev (Axle)
 
 ### Inbox
+- [ ] Fix extractAppVersion for hyphenated app names
+- [ ] Plan and implement SSH key-based access for field Pis
 - [ ] Refactor script/ to scripts/
 - [ ] Remove Docker dev environment support from docs and code
 - [ ] Review and improve Solution Description
