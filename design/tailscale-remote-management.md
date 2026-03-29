@@ -328,6 +328,146 @@ These were identified during design and are not yet resolved:
 
 ---
 
+## Part 5 — Field Upgrade: Retrofitting Existing Engines
+
+Field engines deployed before this design was implemented (tagged `Zimbabwe26012026` and
+earlier) do not have Tailscale installed. This section covers how to bring them up to the
+design without reimaging, using a physical USB upgrade package that a field coordinator can
+apply on-site.
+
+### What the upgrade adds
+
+Each field Pi needs:
+- Tailscale binaries (`tailscale` + `tailscaled`) installed to `/usr/sbin/`
+- A systemd service file for `tailscaled` (service disabled and not started by default)
+- The IDEA Tailnet auth key stored at `/etc/tailscale/debug-authkey` (600, root)
+- The USB activation script installed at `/usr/local/bin/tailscale-debug-activate.sh`
+
+None of this affects normal Pi operation. The Engine, Docker, and all apps continue as before.
+Tailscale is dormant until a coordinator explicitly activates it.
+
+---
+
+### Internet connectivity requirement
+
+**Important:** `tailscale up` requires internet access at the time of activation — it must
+reach Tailscale's coordination server to register on the Tailnet. School Pis are normally
+offline.
+
+**Resolution for activation:** the field coordinator brings a **4G mobile hotspot** to the
+school when remote support is needed. They connect the Pi to the hotspot via USB-C tethering
+or ethernet adapter, then activate Tailscale. IDEA staff SSH in. When done, the Pi returns to
+its normal offline state.
+
+The **upgrade itself** (installing the binaries) requires no internet — everything is on the
+USB drive.
+
+---
+
+### Preparing the upgrade USB drive
+
+Done once by Koen (or IDEA technical staff) on an internet-connected machine, then shared
+with field coordinators.
+
+**Step 1 — Download Tailscale for ARM64:**
+```bash
+# Find the current stable version
+TSVER=$(curl -s https://pkgs.tailscale.com/stable/ | grep -oP 'tailscale_\K[\d.]+(?=_arm64.tgz)' | head -1)
+curl -L "https://pkgs.tailscale.com/stable/tailscale_${TSVER}_arm64.tgz" -o tailscale_arm64.tgz
+```
+
+**Step 2 — Structure the USB drive:**
+```
+/upgrade-tailscale/
+  install.sh                  ← runs the upgrade
+  tailscale_arm64.tgz         ← Tailscale static binaries
+  tailscaled.service          ← systemd service file
+  debug-authkey               ← provisioned Tailscale auth key (reusable ephemeral)
+  tailscale-debug-activate.sh ← the activation script (Phase 1)
+```
+
+The `install.sh`, `tailscaled.service`, and `tailscale-debug-activate.sh` are in the idea
+repo at `scripts/upgrade-tailscale/`. The `debug-authkey` is provisioned in the Tailscale
+admin console (see key registry at `platform/keys.md`) and added by Koen before handing
+the USB to the coordinator.
+
+**Step 3 — Sign the USB (optional, future):** A SHA256 checksum file can verify the package
+was not tampered with in transit. Not required for Phase 1.
+
+---
+
+### What the install.sh does
+
+`scripts/upgrade-tailscale/install.sh` (field version):
+
+1. Extracts `tailscale_arm64.tgz` → copies `tailscale` and `tailscaled` binaries to `/usr/sbin/`
+2. Installs `tailscaled.service` to `/etc/systemd/system/`
+3. Runs `systemctl daemon-reload` — does NOT enable or start the service
+4. Copies `debug-authkey` to `/etc/tailscale/debug-authkey` with permissions 600, owner root
+5. Copies `tailscale-debug-activate.sh` to `/usr/local/bin/` with permissions 755
+6. Writes an upgrade receipt to `/home/pi/upgrade-tailscale.log` (date, version, success/fail)
+7. Prints "Tailscale debug mode installed. Service is disabled — no change to normal operation."
+
+**Idempotent:** running the script a second time (e.g., for a key rotation) overwrites the
+existing files cleanly without side effects.
+
+---
+
+### Test procedure (run on Koen's Pi before distributing to field)
+
+Run the full upgrade on the current OpenClaw Pi to validate the script before handing USB
+to Tapiwa. The OpenClaw Pi is internet-connected, making it ideal for a full end-to-end test.
+
+```bash
+# On the Pi host (via SSH):
+
+# 1. Mount the USB drive
+sudo mkdir -p /mnt/usb && sudo mount /dev/sda1 /mnt/usb
+
+# 2. Run the install script
+sudo bash /mnt/usb/upgrade-tailscale/install.sh
+
+# 3. Verify: binaries present, service disabled, key stored
+ls -la /usr/sbin/tailscale /usr/sbin/tailscaled
+systemctl is-enabled tailscaled   # should print "disabled"
+sudo ls -la /etc/tailscale/debug-authkey  # should be 600 root
+
+# 4. Run the activation script (simulates a coordinator activating debug mode)
+sudo /usr/local/bin/tailscale-debug-activate.sh
+# Expected: prints Tailscale IP; Pi appears in Tailscale admin console
+
+# 5. From Koen's laptop: SSH in via Tailscale
+ssh pi@<tailscale-ip>  # or ssh pi@openclaw-pi.tail2d60.ts.net (already known)
+
+# 6. Confirm normal ops unaffected
+docker ps   # all containers still running
+curl -s http://localhost:8000/health  # MC still responding
+
+# 7. End the session (coordinator presses Enter on activation script)
+# Tailscale down; Pi leaves Tailnet; verified in admin console
+
+# 8. Verify the service is stopped and disabled
+systemctl is-active tailscaled   # should print "inactive"
+```
+
+**Pass criteria:**
+- Install completes without errors
+- Service is disabled and does not start on its own
+- Activation connects to Tailnet and Pi appears with `tag:school-pi`
+- SSH session works from IDEA ops device
+- Deactivation removes Pi from Tailnet (ephemeral key)
+- Docker and Engine unaffected throughout
+
+---
+
+### Field coordinator upgrade procedure (Tapiwa)
+
+See `field/tailscale-debug-upgrade-tapiwa.md` in the programme manager workspace for the
+plain-language guide written for Tapiwa. It covers: what the upgrade does, step-by-step
+installation, what to say to school staff, what to do if something looks wrong.
+
+---
+
 ## Implementation Plan
 
 ### Phase 1 (no Engine/Console changes required)
