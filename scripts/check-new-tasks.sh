@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-new-tasks.sh — auto-trigger reviewer agents for `cross-agent` tagged tasks.
+# check-new-tasks.sh — auto-trigger agents for `cross-agent` tagged tasks.
 # Runs every 2 minutes via pi cron. No LLM involved — pure shell + MC API.
 #
 # For each agent board:
@@ -7,7 +7,7 @@
 #   - Checks triggered-tasks.log to avoid double-triggering
 #   - Marks task in_progress (prevents a second cron run from firing the same task)
 #   - Appends task ID to triggered-tasks.log
-#   - Fires an isolated OpenClaw gateway session for the reviewer agent
+#   - Fires an isolated OpenClaw gateway session for the target agent
 
 set -euo pipefail
 
@@ -30,20 +30,24 @@ fi
 TOKEN=$(cat "$TOKEN_FILE")
 
 # ── Agent boards ──────────────────────────────────────────────────────────────
+# Board IDs: the MC board UUID for each agent
+# Agent IDs: the OpenClaw agent ID used to fire isolated sessions
+#
+# Board IDs: Atlas reuses Veri's former board (d0cfa49e) — same board, new agent.
 declare -A BOARDS
+BOARDS["atlas"]="d0cfa49e-edcb-4a23-832b-c2ae2c99bf67"
 BOARDS["axle"]="6bddb9d2-c06f-444d-8b18-b517aeaa6aa8"
 BOARDS["pixel"]="ac508766-e9e3-48a0-b6a5-54c6ffcdc1a3"
 BOARDS["beacon"]="7cc2a1cf-fa22-485f-b842-bb22cb758257"
-BOARDS["atlas"]="d0cfa49e-edcb-4a23-832b-c2ae2c99bf67"
+
 BOARDS["marco"]="3f1be9c8-87e7-4a5d-9d3b-99756c35e3a9"
 
-# Agent IDs for session invocation (board lead agents)
 declare -A AGENTS
-AGENTS["axle"]="8a0b3f32-8ebd-4b9b-93ff-1aad53269be3"
-AGENTS["pixel"]="bd2b264f-4727-4799-8522-66114cc59a1c"
-AGENTS["beacon"]="70404eba-4e1c-4d2d-bcb5-f34bfd32ad7b"
-AGENTS["atlas"]="ac172302-3c45-4a51-bdb3-dc233a0f65e8"
-AGENTS["marco"]="c1aeb3f8-a258-448f-afcb-f518bdc47bca"
+AGENTS["atlas"]="operations-manager"
+AGENTS["axle"]="lead-6bddb9d2-c06f-444d-8b18-b517aeaa6aa8"
+AGENTS["pixel"]="lead-ac508766-e9e3-48a0-b6a5-54c6ffcdc1a3"
+AGENTS["beacon"]="lead-7cc2a1cf-fa22-485f-b842-bb22cb758257"
+AGENTS["marco"]="lead-3f1be9c8-87e7-4a5d-9d3b-99756c35e3a9"
 
 # ── Process each board ────────────────────────────────────────────────────────
 for NAME in "${!BOARDS[@]}"; do
@@ -99,7 +103,7 @@ for NAME in "${!BOARDS[@]}"; do
     echo "$TASK_ID" >> "$TRIGGERED_LOG"
 
     # Build the prompt
-    PROMPT=$(printf 'You have a cross-agent task.\n\nTitle: %s\n\n%s\n\nPlease:\n1. Read the artifact referenced above\n2. Write your response (PR comment, annotation, answer, or flag)\n3. Mark task %s as done via the MC API\n\n⚠ This is a depth-1 cross-agent session. Do not create any further tasks.' \
+    PROMPT=$(printf 'You have a cross-agent request.\n\nTitle: %s\n\n%s\n\nPlease:\n1. Read any artifact or context referenced above\n2. Write your response (review comment, answer, opinion, or feasibility assessment)\n3. Mark task %s as done via the MC API\n\n⚠ This is a depth-1 cross-agent request. Do not create any further tasks.' \
       "$TASK_TITLE" "$TASK_DESC" "$TASK_ID")
 
     # Fire isolated session via OpenClaw gateway

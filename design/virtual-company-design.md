@@ -21,7 +21,7 @@ This document describes how OpenClaw is configured to run the IDEA virtual compa
 - [The Org Root — idea/](#the-org-root--idea)
 - [File System Structure](#file-system-structure)
 - [AGENTS.md — The Role Definition File](#agentsmd--the-role-definition-file)
-- [CLAUDE.md — CLI Fallback](#claudemd--cli-fallback) — pointer list for `claude` CLI; OpenClaw handles this automatically
+- [CLAUDE.md — CLI Fallback](#claudemd--cli-fallback) — pointer list for `claude` CLI; Tabby is the recommended terminal client
 - [Shared Agent Knowledge — CONTEXT.md](#shared-agent-knowledge--contextmd)
 - [CEO Approval — Two Layers](#ceo-approval--two-layers)
 - [Mission Control](#mission-control)
@@ -85,8 +85,9 @@ Each IDEA role becomes one agent entry in `openclaw.json`, with its own workspac
 | `console-dev` | Pixel 🖥️ | `/home/pi/idea/agents/agent-console-dev` | Console UI developer (Solid.js, Chrome Extension) |
 | `site-dev` | Beacon 🌐 | `/home/pi/idea/agents/agent-site-dev` | Builds and maintains the IDEA public website |
 | `programme-manager` | Marco 📋 | `/home/pi/idea/agents/agent-programme-manager` | Field coordination, school support, teacher guides, supporter comms, fundraising |
+| `app-dev` | Kit 🎒 | `/home/pi/idea/agents/agent-app-dev` | App Developer & Maintainer — version monitoring, building, testing, maintaining the full app stack |
 
-All five agents have their own dedicated git repository. Each has a full set of identity files (`AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `USER.md`, `TOOLS.md`, `HEARTBEAT.md`, `BOOTSTRAP.md`) at the repo root, committed to git and managed via the normal PR flow for protected repos.
+All six agents have their own dedicated git repository. Each has a full set of identity files (`AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `USER.md`, `TOOLS.md`, `HEARTBEAT.md`, `BOOTSTRAP.md`) at the repo root, committed to git and managed via the normal PR flow for protected repos.
 
 **Atlas (operations-manager)** is both the COO and the quality manager. The separate `quality-manager` role (Veri) has been merged into Atlas — all quality review and PR oversight is Atlas's responsibility. Atlas's workspace is `/home/node/workspace/agents/agent-operations-manager/`.
 
@@ -134,9 +135,16 @@ idea/                             ← /home/node/workspace/ inside container
     agent-console-dev/            ← console-dev workspace (independent git repo; Pixel)
     agent-site-dev/               ← site-dev workspace (independent git repo; Beacon)
     agent-programme-manager/      ← programme-manager workspace (independent git repo; Marco)
+    agent-app-dev/                ← app-dev workspace (independent git repo; Kit)
+      harness/                    ← shared app test harness (part of this repo)
+      app-kolibri/                ← git submodule → koenswings/app-kolibri
+      app-nextcloud/              ← git submodule → koenswings/app-nextcloud
+      app-kiwix/                  ← git submodule → koenswings/app-kiwix
+      app-kolibri-studio/         ← git submodule → koenswings/app-kolibri-studio
+      app-seafile/                ← git submodule → koenswings/app-seafile
 ```
 
-Each agent repo is independent — its own git history, its own GitHub remote. Nesting them under `agents/` is a filesystem organisation only; git treats each as a standalone repo. The `idea/` root repo holds no agent workspace content.
+Each agent repo is independent — its own git history, its own GitHub remote. Nesting them under `agents/` is a filesystem organisation only; git treats each as a standalone repo. Kit's workspace is an exception: it contains the app repos as git submodules, keeping all app-related code within a single place Kit controls. The `idea/` root repo holds no agent workspace content.
 
 From any agent workspace (e.g. `agents/agent-engine-dev/`), org root files are two levels up: `../../CONTEXT.md`, `../../BACKLOG.md`, etc.
 
@@ -167,9 +175,16 @@ Every agent has its own dedicated git repository with `AGENTS.md` at the repo ro
     agent-console-dev/                 ← console-dev workspace (independent git repo; Pixel)
     agent-site-dev/                    ← site-dev workspace (independent git repo; Beacon)
     agent-programme-manager/           ← programme-manager workspace (independent git repo; Marco)
+    agent-app-dev/                     ← app-dev workspace (independent git repo; Kit)
+      harness/                         ← shared app test harness (part of this repo)
+      app-kolibri/                     ← git submodule → koenswings/app-kolibri
+      app-nextcloud/                   ← git submodule → koenswings/app-nextcloud
+      app-kiwix/                       ← git submodule → koenswings/app-kiwix
+      app-kolibri-studio/              ← git submodule → koenswings/app-kolibri-studio
+      app-seafile/                     ← git submodule → koenswings/app-seafile
 ```
 
-**GitHub org (`idea-edu-africa`) repo names:**
+**GitHub repos (under `koenswings/`):**
 
 | Repo | Agent id | Role |
 |------|----------|------|
@@ -179,8 +194,14 @@ Every agent has its own dedicated git repository with `AGENTS.md` at the repo ro
 | `agent-console-dev` | `console-dev` | Console UI developer (Pixel) |
 | `agent-site-dev` | `site-dev` | Website developer (Beacon) |
 | `agent-programme-manager` | `programme-manager` | Field coordination, comms, fundraising (Marco) |
+| `agent-app-dev` | `app-dev` | App Developer & Maintainer (Kit) |
+| `app-kolibri` | — | Kolibri app repo (submodule inside agent-app-dev) |
+| `app-nextcloud` | — | Nextcloud app repo (submodule inside agent-app-dev) |
+| `app-kiwix` | — | Kiwix app repo (submodule inside agent-app-dev) |
+| `app-kolibri-studio` | — | Kolibri Studio app repo (submodule inside agent-app-dev) |
+| `app-seafile` | — | Seafile app repo (submodule inside agent-app-dev) |
 
-The `AGENTS.md` at each agent repo root applies uniformly without exceptions. Each agent's git history is clean and scoped. Adding a new agent means creating a new `agent-<role>/` repo.
+The `AGENTS.md` at each agent repo root applies uniformly. Each agent's git history is clean and scoped. Adding a new agent means creating a new `agent-<role>/` repo. Kit's workspace additionally contains the app repos as git submodules.
 
 All repos are mounted into the same Docker container at `/home/node/workspace/`, so every agent can read and write across the full project tree regardless of repo boundaries. Separate repos means separate git histories, not filesystem isolation.
 
@@ -277,10 +298,59 @@ Common set (all agents): `AGENTS.md` · `SOUL.md` · `IDENTITY.md` · `USER.md` 
 ### How to use
 
 ```bash
-ssh koen@openclaw-pi.tail2d60.ts.net
+ssh pi@openclaw-pi.tail2d60.ts.net
 cd /home/pi/idea/agents/agent-engine-dev   # or any agent workspace
 claude                                      # CLAUDE.md is picked up automatically
 ```
+
+### Session persistence across SSH disconnects
+
+`claude` is a process. If the SSH connection drops or the terminal is closed, the process — and its entire in-memory conversation context — is lost.
+
+Wrap each agent session in a named tmux session to prevent this:
+
+```bash
+tmux new-session -s claude-engine          # start (first time)
+tmux attach -t claude-engine               # resume after reconnect
+claude
+```
+
+The tmux session keeps running on the Pi after you disconnect. Re-attaching with `tmux attach` picks up the same running `claude` process with all its context intact.
+
+Suggested naming convention: `claude-<agent-role>` (e.g. `claude-engine`, `claude-console`, `claude-site`, `claude-programme`, `claude-operations`).
+
+### Recommended terminal client — Tabby
+
+[Tabby](https://tabby.sh) is a free, open-source, cross-platform terminal (Mac/Windows/Linux) with native SSH profile management. The recommended setup opens one tab per agent, each automatically attaching to its named tmux session on the Pi.
+
+#### First-time setup
+
+1. **Install Tabby** — `brew install --cask tabby` (Mac) or download from [tabby.sh](https://tabby.sh).
+
+2. **Start all agent sessions on the Pi** — SSH in and run:
+
+   ```bash
+   ssh pi@openclaw-pi.tail2d60.ts.net
+   bash /home/pi/idea/scripts/start-agents.sh
+   ```
+
+   This creates all 6 named tmux sessions. Only needed after initial setup or Pi reboot.
+
+3. **Create 5 SSH profiles in Tabby** — *Settings → Profiles & Connections*. For each profile: host `openclaw-pi.tail2d60.ts.net`, username `pi`, and set the *Initial command* field:
+
+   | Profile name | Initial command |
+   |---|---|
+   | IDEA — Atlas | `tmux new-session -A -s claude-operations -c /home/pi/idea/agents/agent-operations-manager 'claude; exec bash -l'` |
+   | IDEA — Axle | `tmux new-session -A -s claude-engine -c /home/pi/idea/agents/agent-engine-dev 'claude; exec bash -l'` |
+   | IDEA — Pixel | `tmux new-session -A -s claude-console -c /home/pi/idea/agents/agent-console-dev 'claude; exec bash -l'` |
+   | IDEA — Beacon | `tmux new-session -A -s claude-site -c /home/pi/idea/agents/agent-site-dev 'claude; exec bash -l'` |
+   | IDEA — Marco | `tmux new-session -A -s claude-programme -c /home/pi/idea/agents/agent-programme-manager 'claude; exec bash -l'` |
+
+4. **Open all 6 tabs** — each tab auto-attaches to its running session or creates a new one if needed (the `-A` flag handles both cases).
+
+#### Day-to-day use
+
+Just open Tabby. Each tab reconnects to its agent's running session. `start-agents.sh` is only needed again after a Pi reboot.
 
 ### Maintenance
 
@@ -360,7 +430,7 @@ The rest of the setup is unaffected: `openclaw.json`, `AGENTS.md` files, sandbox
 
 ### How task management works
 
-Task dispatch happens in the Kanban board. Create a task, assign it to the relevant agent. The board columns — `Planning → Inbox → Assigned → In Progress → Review → Done` — give a single-screen view of all 5 operational agents' work simultaneously.
+Task dispatch happens in the Kanban board. Create a task, assign it to the relevant agent. The board columns — `Planning → Inbox → Assigned → In Progress → Review → Done` — give a single-screen view of all 6 operational agents' work simultaneously.
 
 Once a task is created, all interaction with the agent happens in **Telegram**. Agents are not expected to poll MC actively; they read `BACKLOG.md` (the exported snapshot) at session start. Plan approval, feedback, and iteration all happen in Telegram chat. GitHub is used for the final PR merge. MC is the record, not the channel.
 
@@ -386,7 +456,7 @@ MC's API surface is significantly richer than its Kanban UI suggests. These feat
 
 **Gateways API** — MC can list all connected OpenClaw gateways, their sessions, and session history. MC can send a message into any gateway session — enabling agent orchestration from MC rather than just task assignment. Also supports gateway template sync.
 
-**Escalation & Messaging** — Three routing primitives: (1) *Ask User*: agent posts a blocking question to MC, routed to the CEO via the gateway main channel; question and resolution are logged in MC. (2) *Message Board Lead*: direct agent-to-agent routing via MC. (3) *Lead Broadcast*: one message from Atlas routed simultaneously to all five board leads.
+**Escalation & Messaging** — Three routing primitives: (1) *Ask User*: agent posts a blocking question to MC, routed to the CEO via the gateway main channel; question and resolution are logged in MC. (2) *Message Board Lead*: direct agent-to-agent routing via MC. (3) *Lead Broadcast*: one message from Atlas routed simultaneously to all six board leads.
 
 **Skills Marketplace** — MC has its own skills install system, separate from the `/skills/` folder in the idea repo. Relationship between the two to be clarified before building further agent skills.
 
@@ -439,7 +509,7 @@ Agents read `BACKLOG.md` at session start via HEARTBEAT.md. It is versioned and 
 
 - **Telegram** — primary interface for all agent interaction, every day. Message any agent directly from your phone. Plan approval, feedback, and iteration all happen here.
 - **GitHub** — review and merge PRs (code, documents, identity files). The final gate for any change landing in `main`.
-- **Mission Control** — task register. Create and track tasks across all 5 agents. Read the Kanban for a broader operational view. Not a conversation surface.
+- **Mission Control** — task register. Create and track tasks across all 6 agents. Read the Kanban for a broader operational view. Not a conversation surface.
 - **Terminal (SSH / Tailscale SSH)** — Pi administration, Docker, logs. Occasional.
 - **OpenClaw Control UI** — low-level fallback. Rarely needed.
 
@@ -461,6 +531,7 @@ Mission Control is used at step 1 to optionally log the task, and at the end to 
 - **Pixel** (console-dev) — Console UI: the teacher/admin interface running on the school Pi
 - **Beacon** (site-dev) — Website: IDEA's public-facing presence
 - **Marco** (programme-manager) — Programme work: school visits, donor communications, grant research, training materials
+- **Kit** (app-dev) — App maintenance: version updates, Docker builds, compatibility testing, new app proposals
 - **Atlas** (operations-manager) — Cross-project quality review, operational advice, org structure questions
 
 ### A Typical CEO Day
@@ -482,7 +553,7 @@ Optional weekly
   └─ Adjust direction as needed
 ```
 
-**Key mental model:** You are always the initiating trigger and the final gate. Agents propose before acting and stop for approval at every consequential step. The only automated behaviour is: Atlas may respond to a cross-agent review request from another agent without CEO initiation — bounded to one round, no further chaining.
+**Key mental model:** You are always the initiating trigger and the final gate. Agents propose before acting and stop for approval at every consequential step. The only automated behaviour is: agents respond to cross-agent requests without CEO intervention — bounded to one round, no further chaining.
 
 ---
 
@@ -573,15 +644,15 @@ Every piece of work follows the same cycle, initiated by the CEO:
 CEO → Agent A: "Start task: [description]"
 Agent A: shows plan → CEO approves → executes
 Agent A: produces output (PR / design doc / proposal / report)
-Agent A: creates a cross-agent task on Atlas's (or relevant reviewer's) board [cross-agent tag, From prefix in title]
+Agent A: creates a cross-agent request on the target agent's board [cross-agent tag, From prefix in title]
   └─ pi cron detects the new task (every 2 min, no LLM)
-  └─ wakes reviewer in isolated session
-  └─ reviewer reads output, writes response (PR comment / annotation), marks task done
-CEO: reviews Agent A's output + reviewer's annotation
+  └─ wakes target agent in isolated session
+  └─ target agent reads request, writes response (PR comment / answer / opinion), marks task done
+CEO: reviews Agent A's output + target agent's response
 CEO: approve → task Done | amend → Agent A revises | reject → task Cancelled
 ```
 
-The one automated step — reviewer agent responding to review tasks — runs without CEO intervention. It is bounded: one round, no further chaining. See "Cross-agent review mechanism" below.
+The one automated step — target agent responding to cross-agent requests — runs without CEO intervention. It is bounded: one round, no further chaining. See "Cross-agent requests" below.
 
 ### Output types
 
@@ -592,14 +663,14 @@ The one automated step — reviewer agent responding to review tasks — runs wi
 | **Proposal** | New backlog item identified | Any agent (Marco most often) | Approve by merging PR → creates MC task |
 | **Report** | Field updates, grants, quality summary, standup contributions | Marco, Atlas | Read and decide; may prompt new cycle |
 
-### Cross-agent review mechanism
+### Cross-agent requests
 
-When Agent A finishes primary work, it creates a task on the reviewer's board via the MC API.
+Any agent can send a cross-agent request to any other agent — not only for review, but for opinions, domain questions, feasibility checks, or any input that requires another agent's expertise. Agent A creates a task on Agent B's board via the MC API.
 
 **Required format — every cross-agent task must follow this exactly:**
 
 ```
-POST /api/v1/agent/boards/{reviewer_board_id}/tasks
+POST /api/v1/agent/boards/{target_board_id}/tasks
 {
   "title": "[From <AgentName>] <Type>: <short description>",
   "description": "**From:** <AgentName> <emoji>\n**Type:** Review | Question | Opinion | Feasibility\n**Date:** YYYY-MM-DD\n\n---\n\n<fully self-contained body: what to review, where to find it, what to respond with>\n\n⚠ This is a depth-1 cross-agent task. Do not create further tasks.",
@@ -622,14 +693,14 @@ description: "**From:** Axle ⚙️\n**Type:** Review\n**Date:** 2026-03-27\n\n-
 tags: ["cross-agent"]
 ```
 
-The pi cron (`scripts/check-new-tasks.sh`, runs every 2 minutes) detects tasks tagged `cross-agent` in `inbox` status, immediately marks them `in_progress` (prevents double-trigger), logs the task ID to `logs/triggered-tasks.log`, and fires an isolated gateway session for the reviewer agent.
+The pi cron (`scripts/check-new-tasks.sh`, runs every 2 minutes) detects tasks tagged `cross-agent` in `inbox` status, immediately marks them `in_progress` (prevents double-trigger), logs the task ID to `logs/triggered-tasks.log`, and fires an isolated gateway session for the target agent.
 
 **Cycle prevention — three guards:**
-1. **Instruction**: reviewer AGENTS.md hard-codes that cross-agent sessions must not create further tasks
+1. **Instruction**: target agent's AGENTS.md instructs that cross-agent sessions must not create further tasks
 2. **Tag propagation**: cron only fires for `cross-agent` tasks — creating a further cross-agent task requires two simultaneous violations
 3. **Triggered log**: each task ID is only ever triggered once regardless of status changes
 
-**Default reviewer assignments:**
+**Default routing:**
 - All developer PRs and design docs → Atlas (Operations Manager)
 - Programme Manager technical feasibility questions → Axle (Engine Dev)
 - Proposals → Atlas for cross-cutting consistency
@@ -673,7 +744,7 @@ Standup output does not create tasks and does not gate any work. The CEO follows
 
 | Script | Schedule | Purpose |
 |--------|----------|---------|
-| `scripts/check-new-tasks.sh` | Every 2 min, always | Detect `cross-agent` tasks; trigger reviewer agents |
+| `scripts/check-new-tasks.sh` | Every 2 min, always | Detect `cross-agent` tasks; trigger target agents |
 | `scripts/standup.sh` | On demand (CEO `/standup`) | Runs standup-seed.sh + chains agent contributions |
 | heartbeat scripts | When re-enabled per agent | External event detection only |
 
@@ -681,21 +752,41 @@ Standup output does not create tasks and does not gate any work. The CEO follows
 
 ## Session Documentation
 
-**Every agent documents every session.** At the end of every substantive session, each agent writes a summary to `outputs/YYYY-MM-DD-HHMM-<topic>.md` in its own workspace, then commits and pushes.
+Every agent writes an output file for every substantive response — immediately after delivering it, not at session end.
 
-This creates a permanent, searchable record of every conversation across all agents. Format:
+### What counts as substantive
+
+**Write a file for:** any response containing analysis, a decision, a plan, a recommendation, a design, or a work product.
+
+**Exempt:** one-liner confirmations, status ACKs ("Done, pushed"), and pure yes/no answers. These add noise without audit value.
+
+### Format
 
 ```
 outputs/YYYY-MM-DD-HHMM-<short-topic>.md
-
-> **Task/Question:** <what was asked or assigned>
-
-[Body: what was done, decisions made, outputs produced]
 ```
 
-For all agents, session outputs go to `outputs/` and session memory goes to `memory/YYYY-MM-DD.md`. Both are committed to git at session end.
+```markdown
+> **Task/Question:** <the user's exact message>
 
-The `outputs/` directory in each repo is committed to git and included in the normal PR/push flow. It is the human-readable conversation history for that agent.
+[Body: analysis, decisions, reasoning, work produced]
+```
+
+The `<short-topic>` slug is 2–4 words in kebab-case describing the content, not the format:
+`outputs-policy`, `claude-fallback-design`, `pr-review-engine-automerge`.
+
+### Rules
+
+1. Write the file **immediately** after delivering the response — not at session end
+2. Commit and push to `memory/updates` right after writing
+3. This applies to every session and every interface (Telegram, Mission Control, terminal)
+4. Commit message format: `outputs: YYYY-MM-DD <short-topic>`
+
+### Purpose
+
+Output files are the permanent, searchable record of what every agent said, decided, and produced — and why. Memory files capture what agents *know*; output files capture what they *said*. Together they give full auditability without needing to reconstruct decisions from conversation logs.
+
+The `outputs/` directory flows through the same `memory/updates` branch and long-lived PR as memory files — one PR per agent, merged by the CEO on their own schedule.
 
 ---
 
@@ -718,6 +809,8 @@ The same principle applies to shared knowledge. New facts about the product go i
 accumulates silently.
 
 **Session logs** (`memory/YYYY-MM-DD.md` and `MEMORY.md` in each workspace) are committed to git alongside `outputs/`. Together they form the permanent record: `outputs/` holds the substantive responses; `memory/` holds the agent's running operational notes and durable decisions.
+
+**When to write memory:** After each substantive exchange — not at session end. Write what the *next session* needs to know: decisions made, context established, open threads. Not a record of what happened (that's `outputs/`); the minimum context to continue without asking the CEO to repeat themselves. Append to `memory/YYYY-MM-DD.md` and push immediately alongside the output file.
 
 ### Memory commit workflow
 
@@ -751,14 +844,13 @@ Limits: 20,000 chars per file; 150,000 chars total across all files (silent trun
 
 ⚠️ **Do not list `SOUL.md`, `USER.md`, or `IDENTITY.md` in any agent's startup checklist** — they are already in context. Listing them wastes tokens.
 
-**2. Explicitly read by the agent** — the agent calls `read` on startup, instructed to do so by `AGENTS.md`:
+**2. Explicitly read by the agent** — the agent calls `read` on startup, instructed to do so by `AGENTS.md`. This happens **unconditionally at every session start, before the first response** — not triggered by `/init`, not skipped when the first message seems urgent:
 
 | File | Read by |
 |------|---------|
 | `../../CONTEXT.md` | All agents — every session |
 | `../../BACKLOG.md` | All agents |
 | `memory/YYYY-MM-DD.md` (today + yesterday) | All agents |
-| `CLAUDE.md` | Engine Dev |
 | `docs/SOLUTION_DESCRIPTION.md` | Engine Dev |
 | `../../standups/` (latest) | Atlas, Programme Manager |
 | `../../design/virtual-company-design.md` | Atlas |
@@ -769,7 +861,7 @@ Limits: 20,000 chars per file; 150,000 chars total across all files (silent trun
 | Agent | Reads at session start |
 |-------|----------------------|
 | **Atlas** | `CONTEXT.md` · `design/virtual-company-design.md` · `BACKLOG.md` · `memory/` (today + yesterday) · `MEMORY.md` |
-| **Axle** | `CONTEXT.md` · `SOLUTION_DESCRIPTION.md` · `CLAUDE.md` · `BACKLOG.md` · `memory/` |
+| **Axle** | `CONTEXT.md` · `SOLUTION_DESCRIPTION.md` · `BACKLOG.md` · `memory/` |
 | **Pixel** | `CONTEXT.md` · `BACKLOG.md` · `memory/` · `design/` (before feature work) |
 | **Beacon** | `CONTEXT.md` · `BACKLOG.md` · `content-drafts/` · `memory/` |
 | **Marco** | `CONTEXT.md` · `BACKLOG.md` · `standups/` (latest) · `memory/` |
@@ -780,10 +872,7 @@ Every agent recognises `/init` as a recovery command. When the CEO sends `/init`
 Telegram group, the agent immediately re-runs its full startup read sequence regardless of the
 current session state.
 
-**Why it exists:** OpenClaw sessions sometimes start without completing the startup sequence — for
-example, after a gateway restart, when a session was woken by a cron job before receiving a message,
-or when a new session context has lost prior state. `/init` is the reliable reset that brings any
-agent back to a fully-loaded, contextually-aware state without needing to restart OpenClaw.
+**Why it exists:** Startup reads are unconditional — agents read on every session start without being asked. `/init` is a *recovery* command for the rare cases where that didn't happen: after a gateway restart, when a session was woken by a cron job before receiving a message, or when context was lost. It forces a re-read without needing to restart OpenClaw. It is not the normal trigger for startup reads.
 
 **What each agent does on `/init`:**
 
@@ -898,7 +987,7 @@ just not the one chosen. Marking it `Rejected` would misrepresent the decision.
 
 Agents cannot talk to each other directly. Coordination happens through three mechanisms:
 
-1. **Review tasks** — the primary mechanism. Agent A creates a scoped review task on Agent B's board. Agent B responds automatically (one round, no chaining). This is the default for all work output.
+1. **Cross-agent requests** — the primary mechanism. Agent A creates a scoped request on Agent B's board (review, question, opinion, or feasibility). Agent B responds automatically (one round, no chaining). This is the default for all inter-agent coordination.
 
 2. **Discussion threads** — for topics that need more depth than a single review round. Any agent opens `discussions/YYYY-MM-DD-<topic>.md` at the org root, tags relevant agents with `@agent-id`. The CEO opens each tagged agent's tab to gather their input. Threads stay open until the CEO closes them with a decision.
 
@@ -1290,13 +1379,17 @@ All repos under `idea-edu-africa` GitHub org. Repos currently under personal acc
 
 All repos under personal account `koenswings` pending GitHub org creation (name TBD — candidates: `ideabora`, `ideamoja`, `ideaweza`).
 
-Total: **8 repos** — 1 org root + 5 operational agent repos + 1 researcher repo + `openclaw` platform config + `app-openclaw` App Disk.
+Total: **14 repos** — 1 org root + 6 operational agent repos + 5 app repos (submodules in agent-app-dev) + 1 researcher repo (archived) + `app-openclaw`.
+
+---
 
 ## Current Backlog
 
 ### HQ / Setup
 - [ ] Create GitHub organisation (name TBD — candidates: `ideabora`, `ideamoja`, `ideaweza`, `ideakazi`, `edufrica`); transfer `idea` + 5 active agent repos; archived repos stay under `koenswings`
-- [ ] Bootstrap sessions for Axle, Pixel, Beacon, Marco (Atlas is live)
+- [ ] Bootstrap sessions for Axle, Pixel, Beacon, Marco, Kit (Atlas is live)
+- [ ] Migrate operational backlog items into Mission Control
+- [ ] Set up Kit 🎒 — create `agent-app-dev` repo, Telegram group, MC board; link app repos as submodules; run bootstrap session
 
 ### Platform
 - [ ] Test `scripts/setup.sh` on a fresh Pi — end-to-end install not yet verified
