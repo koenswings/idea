@@ -134,11 +134,11 @@ without giving it a full interactive shell.
 # Full unrestricted access (for human users):
 ssh-ed25519 AAAA... koen-laptop [2026-03-28]
 
-# Restricted to one command only (for machine-to-machine):
-command="pnpm build && IDEA_TEST_MODE=true pnpm test:unit",no-pty,no-agent-forwarding,no-x11-forwarding,restrict ssh-ed25519 AAAA... openclaw-container→pi-host-tests [2026-03-28]
+# Restricted to a wrapper script (preferred for machine-to-machine):
+command="/home/pi/idea/scripts/run-tests.sh",no-pty,no-agent-forwarding,no-x11-forwarding,restrict ssh-ed25519 AAAA... openclaw-container→pi-host-tests [2026-03-28]
 
-# Restricted by source IP as well:
-from="100.x.x.x",command="...",restrict ssh-ed25519 AAAA... ...
+# Restricted by source subnet as well:
+from="172.20.0.0/24",command="/home/pi/idea/scripts/run-tests.sh",restrict ssh-ed25519 AAAA... ...
 ```
 
 **Key options explained:**
@@ -148,11 +148,26 @@ from="100.x.x.x",command="...",restrict ssh-ed25519 AAAA... ...
 - `restrict` — disables all forwarding (TCP, X11, agent) and PTY allocation. A safe default
   for machine keys.
 - `no-pty` — prevents the connection from allocating a pseudo-terminal (interactive shell).
-- `from="host_or_IP"` — only allows connections from a specific IP or hostname.
-  Combined with `command`, this gives very tight control.
+- `from="subnet"` — only allows connections from the specified IP range. Use a subnet
+  (`172.20.0.0/24`) rather than a specific IP — container IPs can change across Docker
+  restarts depending on network ordering, and a hardcoded IP will silently break.
+
+**Use a wrapper script as the `command=` target, not an inline command.**
+Hardcoding the full command chain in `authorized_keys` (e.g. `command="git pull && pnpm build
+&& pnpm test:unit"`) is fragile: any change to the test sequence requires editing
+`authorized_keys` on the Pi. Instead, point the key to a script on the Pi:
+
+```
+command="/home/pi/idea/scripts/run-tests.sh",restrict ssh-ed25519 AAAA... ...
+```
+
+The script handles the full sequence internally. Updating the test steps is a code change to
+the script, not an `authorized_keys` change. This is especially important when the sequence
+includes a `git pull` step before the build — the wrapper script can handle that cleanly.
 
 **Rule for IDEA:** any key used by a machine (agent container, automation script) must
-have a `command=` restriction. Only human operator keys get unrestricted shell access.
+have a `command=` restriction pointing to a wrapper script. Only human operator keys get
+unrestricted shell access.
 
 ---
 
@@ -199,8 +214,12 @@ The following connections exist or will exist across the IDEA system.
 - Purpose: Run engine test suite on the Pi where `docker compose` is available
 - Decided: 2026-03-28 (Axle architecture decision)
 - Key type: Ed25519, no passphrase (automated)
-- Restriction: `command="cd /path/to/engine && pnpm build && IDEA_TEST_MODE=true pnpm test:unit"` + `restrict`
+- Restriction: `command="/home/pi/idea/scripts/run-tests.sh"` + `restrict` + `from="172.20.0.0/24"`
+  (subnet rather than specific IP — container IP can shift across Docker restarts)
+- Wrapper script `scripts/run-tests.sh` handles `git pull && pnpm build && IDEA_TEST_MODE=true pnpm test:unit`
 - Status: Planned — implementation task on Axle's board (task 904feb39)
+- Note: existing installed key has comment `openclaw-axle@idea` — to be updated to
+  `openclaw-container→pi-host-tests [2026-03-28]` when `command=` restriction is applied
 
 **OpenClaw container → Engine Pi (if separate device)**
 - Purpose: Same as above, but when the engine test Pi is a separate device from the Pi
@@ -212,9 +231,11 @@ The following connections exist or will exist across the IDEA system.
 **OpenClaw container → Pi host (Kit tests, future)**
 - Purpose: Run app compatibility tests (Kit 🎒) — same boundary problem as the engine:
   app containers need `docker compose` on the host
-- Decision: Kit should reuse the same SSH mechanism Axle establishes, not build a
-  separate parallel approach. One key, one authorised command set that covers both
-  engine and app test execution.
+- Decision: Kit uses the same SSH **mechanism** as Axle establishes, but with a **separate
+  key and separate `command=` restriction** pointing to its own wrapper script
+  (`scripts/run-app-tests.sh`). Sharing the engine test key is not acceptable: separate
+  keys give separate audit trails and independent revocation. Revoking the engine test key
+  must not break Kit tests and vice versa.
 - Status: Future — to be addressed during Kit bootstrap
 
 ---
@@ -339,7 +360,8 @@ For a small system like IDEA, a structured manual approach is the right level of
 | Key name | From | To | Restriction | Created | Status |
 |---|---|---|---|---|---|
 | `id_ed25519_koen` | Koen's laptop | Pi host | None (full shell) | 2026-03-01 | Active |
-| `id_ed25519_ocl_tests` | OpenClaw container | Pi host | `command=pnpm test:unit` + `restrict` | 2026-03-28 | Planned |
+| `openclaw-container→pi-host-tests` | OpenClaw container | Pi host | `command=run-tests.sh` + `from=172.20.0.0/24` + `restrict` | 2026-03-28 | Active (⚠ restriction pending) |
+| `openclaw-container→pi-host-app-tests` | OpenClaw container | Pi host | `command=run-app-tests.sh` + `from=172.20.0.0/24` + `restrict` | TBD | Planned (Kit bootstrap) |
 | `id_ed25519_field_debug` | IDEA ops devices | School Pi | `from=<Tailnet-range>` (full shell) | TBD | Planned |
 | `tailscale-school-pi-authkey` | School Pi | IDEA Tailnet | Ephemeral, `tag:school-pi`, reusable | TBD | Planned |
 ```
@@ -432,12 +454,14 @@ Koen's personal laptop key is outside Atlas's scope — that is managed by Koen 
 
 In priority order:
 
-1. **Generate the OpenClaw container → Pi host key** for test execution (Axle task 904feb39)
-   - Generate Ed25519 key pair inside the OpenClaw container (or at container build time)
-   - Install public key in `/home/pi/.ssh/authorized_keys` on the Pi host with a
-     `command=` restriction to the test command and `restrict`
-   - Add `from=` restriction using the container's IP if it is predictable (Docker bridge)
-   - Store the private key path in Axle's `.env` as `TEST_SSH_KEY`
+1. **Set up the OpenClaw container → Pi host key** for test execution (Axle task 904feb39)
+   - Key already generated; stored at `/home/pi/idea/.ssh/` on the Pi and in Axle's workspace
+   - **Remaining steps:**
+     a. Write `scripts/run-tests.sh` on the Pi (wrapper: `git pull && pnpm build && IDEA_TEST_MODE=true pnpm test:unit`)
+     b. Update `authorized_keys` on the Pi: add `command="/home/pi/idea/scripts/run-tests.sh"`,
+        `from="172.20.0.0/24"`, `restrict` to the existing key entry; update key comment
+        from `openclaw-axle@idea` to `openclaw-container→pi-host-tests [2026-03-28]`
+     c. Add `TEST_SSH_KEY=/home/node/workspace/.ssh/id_ed25519` to Axle's `.env`
 
 2. **Create `platform/keys.md`** — the key registry
    - Document all existing keys (starting with Koen's laptop key)
