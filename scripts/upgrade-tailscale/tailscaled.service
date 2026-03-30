@@ -1,17 +1,15 @@
 [Unit]
 Description=Tailscale node agent
 Documentation=https://tailscale.com/kb/
-After=network-pre.target NetworkManager.service systemd-resolved.service
+After=network-pre.target
 Wants=network-pre.target
 
 [Service]
-Type=notify
-ExecStart=/usr/sbin/tailscaled --state=/var/lib/tailscale/tailscaled.state
+ExecStart=/usr/sbin/tailscaled
 Restart=on-failure
+RestartSec=5
 RuntimeDirectory=tailscale
 RuntimeDirectoryMode=0755
-StateDirectory=tailscale
-StateDirectoryMode=0700
 
 [Install]
 WantedBy=multi-user.target

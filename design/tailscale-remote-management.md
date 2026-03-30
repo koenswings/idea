@@ -410,34 +410,31 @@ the session ends.
 #### Option A — wlan0 to Starlink hotspot (recommended for simplicity)
 
 The Raspberry Pi 4 has built-in WiFi (`wlan0`). In normal school operation this interface is
-unused — the Pi serves content via ethernet to the TP-Link RE450. The activation script
-temporarily connects `wlan0` to Tapiwa's Starlink hotspot.
+unused — the Pi serves content via ethernet to the TP-Link RE450. `install.sh` configures `wlan0` with a persistent connection to Tapiwa's Starlink.
+After this, the Pi auto-connects whenever his Starlink is in range.
 
-The Starlink SSID and password are stored on the USB drive in a small config file:
-```
-/upgrade-tailscale/starlink.conf
-STARLINK_SSID="<ssid>"
-STARLINK_PASSWORD="<password>"
-```
+The Starlink SSID and password are stored on the USB drive in `starlink.conf`.
+`install.sh` reads this and configures `wlan0` as a **persistent connection** — not just for
+the current session:
 
-The activation script reads this file and connects `wlan0`:
 ```bash
 source /mnt/usb/upgrade-tailscale/starlink.conf
 nmcli device wifi connect "$STARLINK_SSID" password "$STARLINK_PASSWORD" ifname wlan0
 ```
 
-Linux routing handles the dual-homed setup automatically: Tailscale traffic goes out via
-`wlan0` (Starlink); school client traffic continues via `eth0` (TP-Link). The school's
-`appnet` WiFi is unaffected during the session.
+**The connection is kept after the session ends.** Whenever Tapiwa's Starlink is in range —
+during upgrades, support visits, or a temporary leave period at the school — the Pi
+automatically reconnects and has internet. When Starlink leaves, `wlan0` sits configured but
+idle, waiting for the SSID to reappear. No manual cleanup from Tapiwa.
 
-After the session:
-```bash
-nmcli connection delete "$STARLINK_SSID"
-```
+Linux routing handles the dual-homed setup automatically: Tailscale (and any internet traffic)
+goes out via `wlan0`; school client traffic continues via `eth0` to the TP-Link. The school's
+`appnet` WiFi is completely unaffected.
 
-**Limitation:** The Pi 4's built-in WiFi antenna is modest. If the Starlink hotspot is more
-than a few metres away, throughput may be low. Sufficient for SSH; not suitable for large
-file transfers. Tapiwa should keep his Starlink device close to the Pi during the session.
+Heat and CPU impact are negligible — the Pi 4's WiFi chip is idle when no data is flowing.
+
+**Limitation:** The Pi 4's built-in WiFi antenna is modest. Sufficient for SSH and Tailscale;
+not suitable for bulk transfers. Keep the Starlink device within a few metres of the Pi.
 
 ---
 
@@ -686,10 +683,11 @@ Koen asks him to activate it for a specific support session.
 
 - [ ] Generate reusable ephemeral auth key in Tailscale admin console; tag `tag:school-pi`
 - [ ] Set ACL in Tailscale admin console: `tag:idea-ops` → `tag:school-pi:22` only
-- [ ] Write `scripts/upgrade-tailscale/install.sh` — installs Tailscale binaries, service file, auth key, activation script
-- [ ] Write `scripts/upgrade-tailscale/tailscale-debug-activate.sh` — SSH-based activation script
-- [ ] Write `scripts/validate-tailscale-upgrade.sh` — automated validation script (run by Atlas)
-- [ ] Pre-populate `scripts/upgrade-tailscale/starlink.conf` with Tapiwa's Starlink SSID/password (Koen provides)
+- [x] Write `scripts/upgrade-tailscale/install.sh` — installs binaries, service, auth key, activation script, configures wlan0
+- [x] Write `scripts/upgrade-tailscale/tailscale-debug-activate.sh` — SSH-based activation script
+- [x] Write `scripts/validate-tailscale-upgrade.sh` — automated validation script (Atlas runs this)
+- [x] Write `scripts/prepare-usb-stick.sh` — builds the USB package on Koen's laptop (downloads Tailscale, copies scripts, prompts for credentials)
+- [ ] Koen runs `scripts/prepare-usb-stick.sh` on his laptop — provides Starlink SSID/password and Tailscale auth key when prompted
 - [ ] Koen provisions test Pi; Atlas runs `validate-tailscale-upgrade.sh` remotely and reports pass/fail
 - [ ] Generate SSH debug key pair; install public key in school Pi image's `authorized_keys`
       (with `from=` restriction to IDEA Tailnet IP range)
