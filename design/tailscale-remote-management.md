@@ -170,6 +170,25 @@ a full interactive shell is needed for field debugging. It is instead restricted
 
 This gives equivalent protection to a `command=` restriction without limiting the shell.
 
+### Current SSH access model (transitional)
+
+**Current state:** Field Pis deployed before this design was implemented are accessible over
+SSH using the default `pi` user with password authentication enabled. This is the access model
+Tapiwa uses for the field upgrade procedure described in Part 5.
+
+**This is intentional and required for the current upgrade cycle.** The field coordinators
+need SSH access to existing engines to run the Tailscale upgrade, and no key infrastructure
+is yet in place on those machines.
+
+**Future state:** Once the SSH key management design (`design/ssh-key-management.md`) is
+implemented and deployed in a production release, password authentication will be disabled
+on all school Pis. The `pi` user password will be rotated. All SSH access will require key
+authentication. This is a prerequisite for that release and is tracked as a future work item.
+
+**Until that release, the password access door remains open by design.** IDEA accepts this
+risk for the current deployment cohort, mitigated by the fact that school Pis operate on
+isolated school LANs with no internet exposure.
+
 ---
 
 ## Activation Mechanisms
@@ -177,25 +196,44 @@ This gives equivalent protection to a `command=` restriction without limiting th
 Debug mode must be activatable only by someone physically present at the school or on the
 school LAN. Two mechanisms are designed here, in phases.
 
-### Phase 1 — USB activation script (immediate, no Console changes needed)
+### Phase 1 — SSH-based activation (immediate, no Console changes needed)
 
-A USB drive contains a shell script. When inserted and run on the school Pi, it:
+Each field Pi has a well-known mDNS hostname (`engine-1.local`). Tapiwa (or any field
+coordinator) can reach it over the school LAN using the default `pi` credentials:
+
+```bash
+ssh pi@engine-1.local
+```
+
+Once logged in, Tapiwa runs the activation script — either directly from the Pi or after
+mounting the USB drive that was used for the Tailscale upgrade:
+
+```bash
+sudo /usr/local/bin/tailscale-debug-activate.sh
+```
+
+The script:
 
 1. Reads the auth key from `/etc/tailscale/debug-authkey`
 2. Starts the Tailscale service: `sudo systemctl start tailscaled`
 3. Joins the Tailnet: `sudo tailscale up --authkey "$(cat /etc/tailscale/debug-authkey)" --ephemeral --advertise-tags=tag:school-pi`
-4. Prints the Pi's Tailscale IP address for the coordinator to relay to IDEA staff
+4. Prints the Pi's Tailscale IP address to the terminal (visible in Tapiwa's SSH session)
 5. Waits for a keypress, then runs `sudo tailscale down && sudo systemctl stop tailscaled`
 
-The coordinator runs the script, calls or messages IDEA staff with the IP, stays present while
-the session runs, and presses a key to close it when done.
+Tapiwa reads the Tailscale IP from her terminal, relays it to IDEA staff via phone or
+WhatsApp, stays present while the session runs, and presses a key to close it when done.
 
-**Pros:** No Engine or Console changes required. Can be deployed immediately.
-**Cons:** Requires a USB stick. Less convenient than a UI button. Coordinator must remain
-present (can't walk away and leave it active).
+**No physical screen required.** Tapiwa's SSH terminal is the interaction surface — she does
+not need to be at the Pi console. The USB drive is only needed if the activation script
+wasn't installed directly to the Pi during the upgrade.
 
-**The USB stick approach is acceptable for early deployments.** It is simple to explain to a
-coordinator and makes the activation intentional and visible.
+**Pros:** No Engine or Console changes required. Can be deployed immediately. Works without
+a screen attached to the Pi.
+**Cons:** Requires SSH access to the school LAN (Tapiwa must be on-site or on the school
+network). Coordinator must remain present (can't walk away and leave it active).
+
+**The SSH approach is the standard for early deployments.** It is simple, auditable (the
+session is visible in Tapiwa's terminal), and makes activation intentional.
 
 ### Phase 2 — Console UI button (better UX, requires Engine API work)
 
@@ -229,28 +267,31 @@ This is the minimal privilege needed. The Engine cannot run any other privileged
 ## Session Flow (end to end)
 
 ```
-Coordinator                   IDEA staff (remote)            School Pi
-───────────                   ──────────────────             ─────────
+Coordinator (Tapiwa)          IDEA staff (remote)            School Pi
+────────────────────          ──────────────────             ─────────
 1. Notices a problem.
    Contacts IDEA.
-                              ← 2. Asks coordinator to
+                              ← 2. Asks Tapiwa to
                                     activate debug mode.
-3. Runs USB script
-   (or Console button).
+3. ssh pi@engine-1.local
+   (default credentials,
+   school LAN).
+   Runs activation script.
                                                               4. tailscaled starts.
                                                                  tailscale up --ephemeral
                                                                  Pi joins Tailnet as
                                                                  tag:school-pi.
 5. Reads Tailscale IP
-   from script output.
-   Sends IP to IDEA staff.
+   from SSH terminal.
+   Sends IP to IDEA staff
+   via phone / WhatsApp.
                               6. ssh pi@<tailscale-ip>  →
                                                               7. Shell session open.
                                                                  Staff diagnose/fix.
                               8. Logs off.
-9. Presses key on USB
-   script (or Console
-   "Stop" button).
+9. Presses Enter in her
+   SSH terminal (or Console
+   "Stop" button in Phase 2).
                                                              10. tailscale down.
                                                                  tailscaled stops.
                                                                  Device removed from
@@ -305,9 +346,9 @@ grant shell access on its own.
 
 These were identified during design and are not yet resolved:
 
-1. **Coordinator IP relay**: The USB script prints the Tailscale IP. How does the coordinator
-   send this to IDEA staff? Phone call, WhatsApp message, typed into a form? Needs a
-   defined process in the field coordinator handbook.
+1. **Coordinator IP relay**: ~~Resolved.~~ Tapiwa SSHes into the Pi via `engine-1.local` and
+   runs the activation script in her terminal. The Tailscale IP is printed there. She relays
+   it to IDEA staff via phone call or WhatsApp. No screen on the Pi is required.
 
 2. **Per-Pi vs per-batch auth keys**: Using one shared key for all school Pis is simpler but
    means revoking the key removes debug access from all Pis simultaneously. Per-batch keys
@@ -432,9 +473,10 @@ ls -la /usr/sbin/tailscale /usr/sbin/tailscaled
 systemctl is-enabled tailscaled   # should print "disabled"
 sudo ls -la /etc/tailscale/debug-authkey  # should be 600 root
 
-# 4. Run the activation script (simulates a coordinator activating debug mode)
+# 4. Run the activation script (simulates Tapiwa activating debug mode over SSH)
+#    This is run from the SSH terminal — no screen on the Pi needed
 sudo /usr/local/bin/tailscale-debug-activate.sh
-# Expected: prints Tailscale IP; Pi appears in Tailscale admin console
+# Expected: prints Tailscale IP in terminal; Pi appears in Tailscale admin console
 
 # 5. From Koen's laptop: SSH in via Tailscale
 ssh pi@<tailscale-ip>  # or ssh pi@openclaw-pi.tail2d60.ts.net (already known)
@@ -465,6 +507,14 @@ systemctl is-active tailscaled   # should print "inactive"
 See `field/tailscale-debug-upgrade-tapiwa.md` in the programme manager workspace for the
 plain-language guide written for Tapiwa. It covers: what the upgrade does, step-by-step
 installation, what to say to school staff, what to do if something looks wrong.
+
+**Access model for the upgrade:** Tapiwa connects to each Pi via `ssh pi@engine-1.local`
+using the default credentials. No screen or keyboard needs to be attached to the Pi. She
+runs the install script over SSH from her laptop while connected to the school WiFi.
+
+The upgrade changes nothing about how Tapiwa accesses the Pi — she continues using the same
+default SSH credentials for any follow-up visits. The Tailscale capability is dormant until
+Koen asks her to activate it for a specific support session.
 
 ---
 
