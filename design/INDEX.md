@@ -20,6 +20,14 @@ IDEA SSH access map (human + machine-to-machine), key registry format, and Teleg
 rotation procedure. Key registry lives at `platform/keys.md`.
 → [design/ssh-key-management.md](ssh-key-management.md)
 
+## openclaw-native-migration.md
+**Status:** Proposed (PR pending)  ·  **Date:** 2026-03-30  ·  **Author:** Atlas
+Trade-off analysis: OpenClaw Docker vs native install. Covers UID mismatch problem, Option A
+(--user 1000:1000 patch), Option B (native install), path preservation via symlink, and
+recommendation. Migration runbook at `platform/MIGRATE-NATIVE.md`; CLAUDE.md at repo root
+for standalone Claude Code execution.
+→ [design/openclaw-native-migration.md](openclaw-native-migration.md) _(not yet on main)_
+
 ## tailscale-remote-management.md
 **Status:** Draft (PR #12 — pending merge)  ·  **Date:** 2026-03-29
 Latent Tailscale debug mode for school Pis: design principles, ephemeral auth keys, ACL tag
