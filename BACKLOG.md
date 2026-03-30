@@ -1,4 +1,4 @@
-<!-- Auto-exported from Mission Control 2026-03-28 06:00 UTC. Do not edit manually. -->
+<!-- Auto-exported from Mission Control 2026-03-30 06:00 UTC. Do not edit manually. -->
 
 # BACKLOG.md — IDEA Agent Task Board
 
@@ -10,13 +10,18 @@ To propose a new item, follow the process in `PROCESS.md`.
 ## Engine Dev (Axle)
 
 ### Inbox
+- [ ] Find logical inconsistencies between architecture, solution description and current code
+- [ ] Fix extractAppVersion for hyphenated app names
+- [ ] Plan and implement SSH key-based access for field Pis
 - [ ] Refactor script/ to scripts/
+- [ ] Remove App concept: an instance IS the app (cloned version)
 - [ ] Remove Docker dev environment support from docs and code
 - [ ] Review and improve Solution Description
 - [ ] Review run architecture: which user? File ownership and permissions?
 - [ ] Scan Solution Description for unimplemented features
 - [ ] Test permanently attached USB SSD as system disk
 - [ ] Update Architecture doc from Solution Description
+- [ ] Upgrade zx from v7 to v8 (CVE-2025-13437)
 
 ## Console Dev (Pixel)
 
