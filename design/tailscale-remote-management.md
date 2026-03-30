@@ -220,10 +220,10 @@ The script:
 4. Prints the Pi's Tailscale IP address to the terminal (visible in Tapiwa's SSH session)
 5. Waits for a keypress, then runs `sudo tailscale down && sudo systemctl stop tailscaled`
 
-Tapiwa reads the Tailscale IP from her terminal, relays it to IDEA staff via phone or
+Tapiwa reads the Tailscale IP from his terminal, relays it to IDEA staff via phone or
 WhatsApp, stays present while the session runs, and presses a key to close it when done.
 
-**No physical screen required.** Tapiwa's SSH terminal is the interaction surface — she does
+**No physical screen required.** Tapiwa's SSH terminal is the interaction surface — he does
 not need to be at the Pi console. The USB drive is only needed if the activation script
 wasn't installed directly to the Pi during the upgrade.
 
@@ -276,6 +276,9 @@ Coordinator (Tapiwa)          IDEA staff (remote)            School Pi
 3. ssh pi@engine-1.local
    (default credentials,
    school LAN).
+   Gives Pi internet access
+   (Option A/B/C — see
+   connectivity section).
    Runs activation script.
                                                               4. tailscaled starts.
                                                                  tailscale up --ephemeral
@@ -395,13 +398,112 @@ Tailscale is dormant until a coordinator explicitly activates it.
 reach Tailscale's coordination server to register on the Tailnet. School Pis are normally
 offline.
 
-**Resolution for activation:** the field coordinator brings a **4G mobile hotspot** to the
-school when remote support is needed. They connect the Pi to the hotspot via USB-C tethering
-or ethernet adapter, then activate Tailscale. IDEA staff SSH in. When done, the Pi returns to
-its normal offline state.
-
 The **upgrade itself** (installing the binaries) requires no internet — everything is on the
-USB drive.
+USB drive. Only the activation step needs connectivity.
+
+Tapiwa carries a **Starlink roaming device** to school visits. Three options exist for giving
+the Pi temporary internet access. All three leave the Pi in its normal isolated state once
+the session ends.
+
+---
+
+#### Option A — wlan0 to Starlink hotspot (recommended for simplicity)
+
+The Raspberry Pi 4 has built-in WiFi (`wlan0`). In normal school operation this interface is
+unused — the Pi serves content via ethernet to the TP-Link RE450. The activation script
+temporarily connects `wlan0` to Tapiwa's Starlink hotspot.
+
+The Starlink SSID and password are stored on the USB drive in a small config file:
+```
+/upgrade-tailscale/starlink.conf
+STARLINK_SSID="<ssid>"
+STARLINK_PASSWORD="<password>"
+```
+
+The activation script reads this file and connects `wlan0`:
+```bash
+source /mnt/usb/upgrade-tailscale/starlink.conf
+nmcli device wifi connect "$STARLINK_SSID" password "$STARLINK_PASSWORD" ifname wlan0
+```
+
+Linux routing handles the dual-homed setup automatically: Tailscale traffic goes out via
+`wlan0` (Starlink); school client traffic continues via `eth0` (TP-Link). The school's
+`appnet` WiFi is unaffected during the session.
+
+After the session:
+```bash
+nmcli connection delete "$STARLINK_SSID"
+```
+
+**Limitation:** The Pi 4's built-in WiFi antenna is modest. If the Starlink hotspot is more
+than a few metres away, throughput may be low. Sufficient for SSH; not suitable for large
+file transfers. Tapiwa should keep his Starlink device close to the Pi during the session.
+
+---
+
+#### Option B — RE450 in range extender mode
+
+The TP-Link RE450 can be switched from Access Point mode (current) to Range Extender mode.
+In this mode its ethernet port delivers internet from the upstream WiFi network, giving the
+Pi internet via its existing ethernet cable. This avoids the Pi's WiFi antenna limitation.
+
+**Trade-off:** The school's `appnet` WiFi is unavailable while the RE450 is in extender mode.
+Students cannot access the Pi during the support session. Plan sessions outside school hours
+or inform the school before reconfiguring.
+
+**Steps to switch the RE450 to range extender mode:**
+
+1. Connect Tapiwa's laptop to the RE450 (either via WiFi — connect to the current `appnet`
+   network — or via a direct ethernet cable to one of the RE450's LAN ports).
+
+2. Open a browser and go to `http://tplinkrepeater.net` (or `http://192.168.0.254` if the
+   hostname doesn't resolve). Log in with the admin password (default: `admin`; check the
+   label on the device if it has been changed).
+
+3. Navigate to **Settings → Advanced Settings → Operating Mode**.
+
+4. Select **Range Extender** and click **Save**. The device will reboot.
+
+5. After reboot, connect to the RE450's temporary setup WiFi (or navigate back to the web UI
+   — it may broadcast a default `TP-Link_XXXX` SSID temporarily).
+
+6. Navigate to **Settings → Wireless → Connect to Network** (or the Quick Setup wizard if
+   it launches). Click **Scan**, select Tapiwa's Starlink SSID, enter the password, and
+   save. The RE450 will connect to Starlink WiFi.
+
+7. The Pi, connected via ethernet to the RE450, now gets an IP from Starlink's DHCP. Verify:
+   ```bash
+   ip addr show eth0   # should show a Starlink-range IP
+   curl -s https://api.ipify.org  # should return a public IP
+   ```
+
+**To restore AP mode after the session:**
+
+1. Navigate back to `http://tplinkrepeater.net`.
+2. **Settings → Advanced Settings → Operating Mode → Access Point**. Save.
+3. The RE450 reboots, reconnects to the Pi via ethernet, and `appnet` WiFi is restored.
+4. The Pi resumes its role as DHCP server for school clients.
+
+> ⚠️ Firmware versions vary. The exact menu paths above match RE450 v3 (firmware 201203).
+> If the menus look different, use the Quick Setup wizard on the RE450's web UI — it walks
+> through mode selection and WiFi configuration in the same logical order.
+
+---
+
+#### Option C — USB tethering from Tapiwa's phone
+
+If Tapiwa has a smartphone with a data connection (or connected to Starlink WiFi):
+
+1. Connect the phone to the Pi via USB cable.
+2. On the phone: **Settings → Mobile Hotspot & Tethering → USB Tethering** (Android) or
+   **Settings → Personal Hotspot** with USB connected (iPhone).
+3. The Pi detects the phone as a network interface (`usb0`) and gets internet automatically.
+4. No WiFi reconfiguration. No disruption to `eth0` or `appnet`.
+5. After the session: disable tethering and unplug.
+
+**This is the least disruptive option** — the school's `appnet` WiFi stays up throughout.
+It requires only a USB cable and a phone with data. If Tapiwa is already carrying a phone
+connected to Starlink WiFi, this is the preferred choice.
 
 ---
 
@@ -502,6 +604,66 @@ systemctl is-active tailscaled   # should print "inactive"
 
 ---
 
+### Automated validation
+
+Rather than running the test procedure manually, Atlas can execute it remotely via SSH once
+Koen provisions a test Pi on the Tailscale network (or on the local LAN with SSH exposed).
+
+**What Atlas does:**
+
+1. Koen provisions a fresh Pi and provides its SSH address and credentials (e.g.
+   `pi@<tailscale-ip>` or `pi@<lan-ip>`) and the path to the USB upgrade package on the Pi
+   or a way to transfer it.
+
+2. Atlas SSHes in, runs `scripts/upgrade-tailscale/install.sh`, and verifies each pass
+   criterion programmatically:
+
+```bash
+# Run via: ssh pi@<test-pi-ip> 'bash -s' < validate-tailscale-upgrade.sh
+
+set -euo pipefail
+PASS=0; FAIL=0
+
+check() {
+  local desc="$1"; shift
+  if eval "$@" &>/dev/null; then
+    echo "  PASS: $desc"; ((PASS++))
+  else
+    echo "  FAIL: $desc"; ((FAIL++))
+  fi
+}
+
+echo "=== Tailscale upgrade validation ==="
+
+check "tailscale binary present"       "test -x /usr/sbin/tailscale"
+check "tailscaled binary present"      "test -x /usr/sbin/tailscaled"
+check "systemd service file present"   "test -f /etc/systemd/system/tailscaled.service"
+check "service is disabled"            "! systemctl is-enabled tailscaled"
+check "service is not running"         "! systemctl is-active tailscaled"
+check "auth key present and private"   "sudo test -f /etc/tailscale/debug-authkey"
+check "auth key permissions"           "[ \$(sudo stat -c '%a' /etc/tailscale/debug-authkey) = '600' ]"
+check "activation script present"      "test -x /usr/local/bin/tailscale-debug-activate.sh"
+check "upgrade log written"            "test -f /home/pi/upgrade-tailscale.log"
+check "docker still running"           "docker ps &>/dev/null"
+check "Engine containers up"           "docker ps --format '{{.Names}}' | grep -q engine"
+
+echo ""
+echo "Result: $PASS passed, $FAIL failed"
+[ "$FAIL" -eq 0 ] && echo "STATUS: PASS" || echo "STATUS: FAIL"
+```
+
+3. Atlas reports the full output back to Koen. If all pass, the upgrade package is cleared
+   for distribution to Tapiwa.
+
+4. The activation end-to-end test (steps 4–8 in the manual procedure) still requires a
+   provisioned Tailscale auth key and a real Tailscale account — Atlas runs this only if
+   Koen has pre-provisioned the test Pi with a valid `debug-authkey`.
+
+**To use:** Koen tells Atlas the test Pi's IP address and credentials. Atlas runs the
+validation script and reports pass/fail per criterion. No manual steps for Koen.
+
+---
+
 ### Field coordinator upgrade procedure (Tapiwa)
 
 See `field/tailscale-debug-upgrade-tapiwa.md` in the programme manager workspace for the
@@ -510,11 +672,11 @@ installation, what to say to school staff, what to do if something looks wrong.
 
 **Access model for the upgrade:** Tapiwa connects to each Pi via `ssh pi@engine-1.local`
 using the default credentials. No screen or keyboard needs to be attached to the Pi. She
-runs the install script over SSH from her laptop while connected to the school WiFi.
+runs the install script over SSH from his laptop while connected to the school WiFi.
 
-The upgrade changes nothing about how Tapiwa accesses the Pi — she continues using the same
+The upgrade changes nothing about how Tapiwa accesses the Pi — he continues using the same
 default SSH credentials for any follow-up visits. The Tailscale capability is dormant until
-Koen asks her to activate it for a specific support session.
+Koen asks him to activate it for a specific support session.
 
 ---
 
@@ -524,11 +686,15 @@ Koen asks her to activate it for a specific support session.
 
 - [ ] Generate reusable ephemeral auth key in Tailscale admin console; tag `tag:school-pi`
 - [ ] Set ACL in Tailscale admin console: `tag:idea-ops` → `tag:school-pi:22` only
-- [ ] Write USB activation script (`scripts/tailscale-debug-activate.sh`)
+- [ ] Write `scripts/upgrade-tailscale/install.sh` — installs Tailscale binaries, service file, auth key, activation script
+- [ ] Write `scripts/upgrade-tailscale/tailscale-debug-activate.sh` — SSH-based activation script
+- [ ] Write `scripts/validate-tailscale-upgrade.sh` — automated validation script (run by Atlas)
+- [ ] Pre-populate `scripts/upgrade-tailscale/starlink.conf` with Tapiwa's Starlink SSID/password (Koen provides)
+- [ ] Koen provisions test Pi; Atlas runs `validate-tailscale-upgrade.sh` remotely and reports pass/fail
 - [ ] Generate SSH debug key pair; install public key in school Pi image's `authorized_keys`
       (with `from=` restriction to IDEA Tailnet IP range)
 - [ ] Add auth key storage to Pi image build: `/etc/tailscale/debug-authkey`
-- [ ] Document activation procedure for field coordinators (plain language, in coordinator handbook)
+- [ ] Document activation procedure for Tapiwa (plain language, in coordinator handbook)
 - [ ] Add key entries to `platform/keys.md` registry
 
 ### Phase 2 (Engine + Console work, cross-agent)
