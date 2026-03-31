@@ -1,0 +1,4 @@
+# Never commit these — they contain secrets
+debug-authkey
+starlink.conf
+tailscale_arm64.tgz
