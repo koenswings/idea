@@ -1,4 +1,4 @@
-<!-- Auto-exported from Mission Control 2026-03-30 06:00 UTC. Do not edit manually. -->
+<!-- Auto-exported from Mission Control 2026-03-31 06:00 UTC. Do not edit manually. -->
 
 # BACKLOG.md — IDEA Agent Task Board
 
@@ -12,6 +12,7 @@ To propose a new item, follow the process in `PROCESS.md`.
 ### Inbox
 - [ ] Find logical inconsistencies between architecture, solution description and current code
 - [ ] Fix extractAppVersion for hyphenated app names
+- [ ] Implement cross-disk upgrade detection and proposal
 - [ ] Plan and implement SSH key-based access for field Pis
 - [ ] Refactor script/ to scripts/
 - [ ] Remove App concept: an instance IS the app (cloned version)
