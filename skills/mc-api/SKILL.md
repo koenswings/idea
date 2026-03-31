@@ -36,14 +36,50 @@ before making any API call. Do not guess at endpoints.
 
 ## Credentials reference
 
-Each agent stores their own values in `TOOLS.md`:
+Each agent stores their own values in `TOOLS.md` and `.env`:
 
 | Key | Description |
 |-----|-------------|
 | `BASE_URL` | `http://mission-control-backend:8000` (Docker service name — all agents) |
-| `AUTH_TOKEN` | Agent-specific token — load from `.env`, never commit |
+| `AUTH_TOKEN` | Agent-specific token — write access to **own board only** |
+| `MC_PLATFORM_TOKEN` | Platform admin token — write access to **any board** (cross-agent tasks) |
 | `AGENT_ID` | UUID identifying this agent in Mission Control |
 | `BOARD_ID` | UUID of this agent's task board |
+
+## Cross-board writes (cross-agent tasks)
+
+Agent tokens (`AUTH_TOKEN`) are **board-scoped** — they only allow writes to the agent's own board.
+To post a task on **another agent's board**, use `MC_PLATFORM_TOKEN` and the admin route:
+
+```bash
+# POST a task to another agent's board
+python3 -c "
+import urllib.request, json, os
+token = os.environ['MC_PLATFORM_TOKEN']
+base = 'http://mission-control-backend:8000'
+board_id = '<TARGET_BOARD_ID>'
+payload = json.dumps({
+    'title': '[From YourName] Type: Short description',
+    'description': '...',
+    'status': 'inbox',
+    'tags': ['cross-agent']
+}).encode()
+req = urllib.request.Request(
+    f'{base}/api/v1/boards/{board_id}/tasks',
+    data=payload,
+    headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'},
+    method='POST')
+with urllib.request.urlopen(req) as r:
+    print(json.load(r).get('id'))
+"
+```
+
+Key differences from the agent route:
+- Path: `/api/v1/boards/{board_id}/tasks` (not `/api/v1/agent/boards/...`)
+- Auth: `MC_PLATFORM_TOKEN` (not `AUTH_TOKEN`)
+
+Follow the cross-agent task convention in `virtual-company-design.md` for title format and
+description header (`[From Atlas]`, type, date, self-contained body, depth-1 guard).
 
 ## Common operations (examples only — always derive from spec)
 
