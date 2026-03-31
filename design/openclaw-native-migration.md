@@ -181,10 +181,67 @@ Test it first — if OpenClaw's startup requires root, fall back and prioritise 
 migration instead.
 
 **Short-term:** Execute Option B (native install) as a planned migration. The migration is
-self-contained and reversible. It should be done in a standalone Claude Code session outside
-OpenClaw to avoid losing the agent session mid-migration.
+self-contained and reversible.
 
 See [`platform/MIGRATE-NATIVE.md`](../platform/MIGRATE-NATIVE.md) for the complete runbook.
+
+---
+
+## Executing the Migration with Claude Code
+
+The migration **must be executed from a Claude Code session on the Pi host**, not from inside
+an OpenClaw agent session (Atlas, Axle, or any other). Here is why, and how.
+
+### Why not from inside OpenClaw
+
+OpenClaw is the thing being migrated. The process looks like this:
+
+1. Stop the `openclaw-gateway` Docker container
+2. Install and start native OpenClaw
+3. Remove `openclaw-gateway` from `compose.yaml`
+
+Step 1 kills every agent session — including the one that issued the command. An agent that
+starts this process cannot complete it. This is a fundamental constraint: you cannot migrate
+a running system from inside itself.
+
+Even using OpenClaw's `gateway restart` tooling does not help here — it restarts the
+container, not the host daemon. Once the container is stopped, the agent is gone.
+
+### Why Claude Code
+
+Claude Code (`claude`) is an independent process on the Pi host. It runs outside the OpenClaw
+container, directly as the `pi` user, with full access to the filesystem, systemd, and
+Docker. It is not affected by OpenClaw being stopped or restarted.
+
+This makes it the natural executor for a migration that requires:
+- Running `docker compose stop` against the OpenClaw service
+- Installing and enabling a new systemd daemon
+- Verifying OpenClaw comes back up under the new process model
+- Removing the old service from `compose.yaml`
+
+### How to start the session
+
+```bash
+ssh pi@<pi-hostname>
+tmux new -s migration        # or attach to an existing session
+cd /home/pi/idea
+claude                        # Claude Code picks up CLAUDE.md automatically
+```
+
+The `CLAUDE.md` file at the repo root is a pointer list for exactly this scenario. It gives
+Claude Code the full context it needs: OpenClaw architecture, the migration runbook path,
+and the three open questions to resolve before executing. No re-explanation needed.
+
+### Session flow
+
+1. Claude Code reads `CLAUDE.md`, then `platform/MIGRATE-NATIVE.md`
+2. It resolves the three open questions (Option A test, `/home/node` check, Node version)
+3. It executes the runbook step-by-step, verifying each step before continuing
+4. On success: OpenClaw is running natively as `pi`, all agent sessions resume
+5. On failure: rollback instructions in `MIGRATE-NATIVE.md` restore Docker in under 2 minutes
+
+The tmux session ensures the migration survives any SSH disconnect. The ~60 seconds of
+OpenClaw downtime during the switchover is the only interruption to agent availability.
 
 ---
 
