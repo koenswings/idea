@@ -13,27 +13,26 @@
 
 set -euo pipefail
 
-WORKSPACE="/home/pi/idea/agents"
-BACKUP_REPO="/home/pi/agent-identities"
+# Workspace path works both from container (/home/node/workspace) and Pi host (/home/pi/idea)
+WORKSPACE="${WORKSPACE_ROOT:-/home/node/workspace}/agents"
+BACKUP_REPO="/tmp/agent-identities-backup-$$"
 ATLAS_CHAT="-5105695997"
 AGENTS="agent-operations-manager agent-engine-dev agent-console-dev agent-site-dev agent-programme-manager"
 IDENTITY_FILES="AGENTS.md SOUL.md IDENTITY.md USER.md TOOLS.md HEARTBEAT.md"
 
-# Load Telegram bot token from OpenClaw config
+# Load GitHub token and Telegram bot token
+GITHUB_TOKEN="${GITHUB_TOKEN:-$(grep GITHUB_TOKEN "${WORKSPACE_ROOT:-/home/node/workspace}/agents/agent-operations-manager/.env" 2>/dev/null | cut -d= -f2 || echo '')}"
 BOT_TOKEN="$(jq -r '.channels.telegram.botToken' /root/.openclaw/openclaw.json 2>/dev/null || echo '')"
 
 log() { echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] $*"; }
 
 log "Starting agent identity backup"
 
-# Ensure backup repo exists
-if [ ! -d "$BACKUP_REPO/.git" ]; then
-  log "ERROR: $BACKUP_REPO is not a git repo. Clone koenswings/agent-identities there first."
-  exit 1
-fi
-
-cd "$BACKUP_REPO"
-git pull --ff-only origin main 2>/dev/null || log "Warning: could not pull latest — continuing"
+# Clone backup repo fresh to temp dir
+trap "rm -rf '$BACKUP_REPO'" EXIT
+git clone "https://koenswings:${GITHUB_TOKEN}@github.com/koenswings/agent-identities.git" "$BACKUP_REPO" 2>/dev/null
+git -C "$BACKUP_REPO" config user.email "atlas@idea-platform.org"
+git -C "$BACKUP_REPO" config user.name "Atlas"
 
 DRIFT_SUMMARY=""
 
