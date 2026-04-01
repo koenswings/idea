@@ -162,9 +162,14 @@ agent's repo directory — even via SSH on the Pi host.
 The shared `idea` repo is not an agent repo. Changes to it require a PR; agents can open
 PRs against it but cannot push to `main` directly.
 
-Atlas is the only agent authorised to commit to other agents' `memory/updates` branches
-(for quality review and cross-agent coordination), using the `git worktree` procedure
-documented in Atlas's `TOOLS.md`. All other cross-agent repo operations require a PR.
+Atlas is the only agent authorised to make `ops:` commits directly to other agents' repos
+(for AGENTS.md updates, identity file changes, and cross-agent coordination), using the
+`git worktree` procedure documented in Atlas's `TOOLS.md`.
+
+Memory and identity files (AGENTS.md, SOUL.md, IDENTITY.md, USER.md, TOOLS.md, HEARTBEAT.md,
+MEMORY.md, memory/, outputs/) are backed up nightly by the Pi cron to the `agent-identities`
+repo — not tracked in agent code repos. Agents write memory files to disk directly; no commits
+or PRs are needed for memory or outputs.
 
 ---
 
