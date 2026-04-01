@@ -243,10 +243,6 @@ flowchart TD
     F --> G([rsync workspace → agent-identities\nno diff alert for memory files])
     G --> H([Commit + push to\nagent-identities main])
     H --> I([Retained indefinitely\nno pruning])
-
-    J([Re-hosting / Recovery]) --> K([Clone agent-identities])
-    K --> L([Restore files to new workspace])
-    L --> M([Agent resumes with\nfull memory intact])
 ```
 
 ### Flow 4 — Nightly Backup Cron
@@ -263,6 +259,42 @@ flowchart LR
     F --> H([git commit + push\nto agent-identities])
     G --> H
 ```
+
+---
+
+## Re-hosting and Recovery
+
+When a Pi is replaced, reimaged, or an agent needs to move to a new machine, the `agent-identities` repo provides a complete restore point. All identity and memory files are present, versioned, and immediately deployable.
+
+### Recovery flow
+
+```mermaid
+flowchart TD
+    A([Trigger:\nnew Pi / reimaged machine / agent migration]) --> B([Clone agent-identities repo\nto new host])
+    B --> C([Copy each agent subdirectory\nto its workspace path\n/home/pi/idea/agents/agent-X/])
+    C --> D([Restore identity files:\nAGENTS.md SOUL.md IDENTITY.md\nUSER.md TOOLS.md HEARTBEAT.md])
+    D --> E([Restore memory files:\nMEMORY.md memory/ outputs/])
+    E --> F([Start OpenClaw])
+    F --> G([Agent reads workspace at session start\nFinds all files at expected paths])
+    G --> H([Agent resumes with full context\nNo re-briefing needed])
+
+    I([Gap since last backup?\ne.g. last nightly was yesterday]) --> J([Agent fills in from session\nmemory at end of first session])
+    H --> I
+```
+
+### What is preserved
+
+- All identity files (role, persona, tooling conventions, user notes)
+- Full MEMORY.md (long-term facts, board IDs, tokens, key decisions)
+- All daily session logs (`memory/YYYY-MM-DD.md`)
+- All output files (`outputs/`)
+- At most ~24 hours of work may be lost if a Pi dies between backups — the agent notes what it remembers at next session start
+
+### What is not preserved
+
+- Uncommitted working tree changes in code repos (those are in GitHub)
+- Files outside the workspace (`.env` tokens must be re-provisioned on the new host)
+- The agent's OS-level environment (tools, Docker, OpenClaw itself — separate setup)
 
 ---
 
