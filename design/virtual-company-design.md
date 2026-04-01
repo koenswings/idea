@@ -531,7 +531,7 @@ Optional weekly
   └─ Adjust direction as needed
 ```
 
-**Key mental model:** You are always the initiating trigger and the final gate. Agents propose before acting and stop for approval at every consequential step. The only automated behaviour is: agents respond to cross-agent requests without CEO intervention — bounded to one round, no further chaining.
+**Key mental model:** You are always the initiating trigger and the final gate. Agents propose before acting and stop for approval at every consequential step. All cross-agent communication is relayed through you — no agent talks to another without your involvement.
 
 ---
 
@@ -622,15 +622,15 @@ Every piece of work follows the same cycle, initiated by the CEO:
 CEO → Agent A: "Start task: [description]"
 Agent A: shows plan → CEO approves → executes
 Agent A: produces output (PR / design doc / proposal / report)
-Agent A: creates a cross-agent request on the target agent's board [cross-agent tag, From prefix in title]
-  └─ pi cron detects the new task (every 2 min, no LLM)
-  └─ wakes target agent in isolated session
-  └─ target agent reads request, writes response (PR comment / answer / opinion), marks task done
-CEO: reviews Agent A's output + target agent's response
+  └─ if cross-agent input needed:
+       Agent A sends 📨 For [Agent]: [message] in its own Telegram group
+       CEO reads it, forwards to target agent's Telegram group
+       Target agent responds; CEO forwards reply back to Agent A if needed
+CEO: reviews Agent A's output
 CEO: approve → task Done | amend → Agent A revises | reject → task Cancelled
 ```
 
-The one automated step — target agent responding to cross-agent requests — runs without CEO intervention. It is bounded: one round, no further chaining. See "Cross-agent requests" below.
+All cross-agent communication is manual and Koen-relayed. There is no automated agent-to-agent channel. See "Cross-agent communication" below.
 
 ### Output types
 
@@ -641,50 +641,60 @@ The one automated step — target agent responding to cross-agent requests — r
 | **Proposal** | New backlog item identified | Any agent (Marco most often) | Approve by merging PR → creates MC task |
 | **Report** | Field updates, grants, quality summary, standup contributions | Marco, Atlas | Read and decide; may prompt new cycle |
 
-### Cross-agent requests
+### Cross-agent communication
 
-Any agent can send a cross-agent request to any other agent — not only for review, but for opinions, domain questions, feasibility checks, or any input that requires another agent's expertise. Agent A creates a task on Agent B's board via the MC API.
+All cross-agent communication goes through Koen. There is no direct agent-to-agent channel and no automation involved.
 
-**Required format — every cross-agent task must follow this exactly:**
+**The pattern:**
 
 ```
-POST /api/v1/agent/boards/{target_board_id}/tasks
+Agent A needs input from Agent B
+  └─ Agent A sends in its own Telegram group:
+       📨 For [Agent B]: [self-contained message — question, review request, etc.]
+  └─ Koen reads it, forwards to Agent B's Telegram group
+  └─ Agent B responds in its own group
+  └─ Koen forwards the reply back to Agent A if needed
+```
+
+**Rules:**
+- Never attempt to message another agent directly (no shared group IDs, no API calls to peer sessions)
+- All cross-agent messages — requests AND responses — go via your own Telegram group addressed to Koen
+- Make every message self-contained: include all context the recipient needs to act without follow-up
+- Koen decides what to forward and when; he may decline, delay, or rephrase
+
+**Why Koen is the hub:**
+Koen has full visibility into every cross-agent exchange, acts as the approval gate, and tracks communication frequency and content. No autonomous agent-to-agent loops are possible.
+
+**Default routing guidance (for Koen's reference):**
+- Developer PRs and design docs → Atlas reviews
+- Programme Manager technical feasibility questions → Axle
+- Proposals → Atlas for cross-cutting consistency
+
+---
+
+### Cross-agent communication via MC boards (future / currently inactive)
+
+The MC board task mechanism exists and is fully implemented but is not the active protocol.
+It is documented here for future adoption when the team matures and Koen-relayed communication
+becomes a bottleneck.
+
+**How it works (when activated):**
+Agent A creates a task on Agent B's board via the MC API, tagged `cross-agent`. The pi cron
+(`scripts/check-new-tasks.sh`) detects it, marks it `in_progress`, and fires an isolated
+OpenClaw session for Agent B. Agent B responds (PR comment / task comment / answer), marks
+the task done. One round, no chaining.
+
+**Required task format:**
+```json
 {
   "title": "[From <AgentName>] <Type>: <short description>",
-  "description": "**From:** <AgentName> <emoji>\n**Type:** Review | Question | Opinion | Feasibility\n**Date:** YYYY-MM-DD\n\n---\n\n<fully self-contained body: what to review, where to find it, what to respond with>\n\n⚠ This is a depth-1 cross-agent task. Do not create further tasks.",
+  "description": "**From:** <AgentName>\n**Type:** Review | Question | Opinion | Feasibility\n**Date:** YYYY-MM-DD\n\n---\n\n<self-contained body>\n\n⚠ Depth-1. Do not create further tasks.",
   "tags": ["cross-agent"]
 }
 ```
 
-**Title prefix is mandatory.** The `[From Axle]` prefix is the primary identification signal — it is visible at a glance on the MC Kanban board and in BACKLOG.md without opening the task. Never omit it.
-
-**Types:**
-- `Review` — assess an artefact (PR, design doc, proposal, draft) and raise concerns
-- `Question` — request a factual answer or technical opinion before proceeding
-- `Opinion` — ask for a broader perspective; no specific action required in response
-- `Feasibility` — assess whether a proposed approach is technically achievable
-
-**Example:**
-```
-title: "[From Axle] Review: test setup design — disk dock/undock and multi-engine scenarios"
-description: "**From:** Axle ⚙️\n**Type:** Review\n**Date:** 2026-03-27\n\n---\n\nReview the test setup design in PR #9 (agent-engine-dev). Verify that automated tests cover disk dock/undock and multi-engine scenarios. Raise concerns as PR comments.\n\n⚠ Depth-1 cross-agent task. Do not create further tasks."
-tags: ["cross-agent"]
-```
-
-The pi cron (`scripts/check-new-tasks.sh`, runs every 2 minutes) detects tasks tagged `cross-agent` in `inbox` status, immediately marks them `in_progress` (prevents double-trigger), logs the task ID to `logs/triggered-tasks.log`, and fires an isolated gateway session for the target agent.
-
-**Cycle prevention — three guards:**
-1. **Instruction**: target agent's AGENTS.md instructs that cross-agent sessions must not create further tasks
-2. **Tag propagation**: cron only fires for `cross-agent` tasks — creating a further cross-agent task requires two simultaneous violations
-3. **Triggered log**: each task ID is only ever triggered once regardless of status changes
-
-**Default routing:**
-- All developer PRs and design docs → Atlas (Operations Manager)
-- Programme Manager technical feasibility questions → Axle (Engine Dev)
-- Proposals → Atlas for cross-cutting consistency
-
-**MC status tracking — current convention:**
-Atlas posts the completed review as a GitHub PR comment. That is the deliverable. Atlas does not attempt to update the MC task status after completing a review — the MC status gate requires tasks to pass through `in_progress → review` before they can be closed, which requires CEO action in the MC UI. Since MC is not currently used as an active workflow surface, the MC task is treated as informational only. The CEO can delete or advance it in the MC UI at any time. This convention holds until MC is adopted more actively.
+**To activate:** re-enable `scripts/check-new-tasks.sh` in the Pi crontab and update all
+agents' AGENTS.md cross-agent sections to use the MC board mechanism instead of Telegram relay.
 
 ### Heartbeat — external event polling only
 
@@ -722,7 +732,7 @@ Standup output does not create tasks and does not gate any work. The CEO follows
 
 | Script | Schedule | Purpose |
 |--------|----------|---------|
-| `scripts/check-new-tasks.sh` | Every 2 min, always | Detect `cross-agent` tasks; trigger target agents |
+| `scripts/check-new-tasks.sh` | Every 2 min — **currently disabled** | Detect `cross-agent` MC tasks; trigger target agents (inactive — see future phase) |
 | `scripts/standup.sh` | On demand (CEO `/standup`) | Runs standup-seed.sh + chains agent contributions |
 | heartbeat scripts | When re-enabled per agent | External event detection only |
 
@@ -963,15 +973,17 @@ just not the one chosen. Marking it `Rejected` would misrepresent the decision.
 
 ### How agents coordinate
 
-Agents cannot talk to each other directly. Coordination happens through three mechanisms:
+Agents cannot talk to each other directly. All cross-agent coordination goes through Koen.
 
-1. **Cross-agent requests** — the primary mechanism. Agent A creates a scoped request on Agent B's board (review, question, opinion, or feasibility). Agent B responds automatically (one round, no chaining). This is the default for all inter-agent coordination.
+1. **Telegram relay (current)** — the active mechanism. Agent A sends a message addressed to Koen in its own Telegram group (`📨 For [Agent]: [message]`). Koen forwards to Agent B. Agent B responds; Koen relays back. Koen decides what to forward and when — he is the gate and the log.
 
-2. **Discussion threads** — for topics that need more depth than a single review round. Any agent opens `discussions/YYYY-MM-DD-<topic>.md` at the org root, tags relevant agents with `@agent-id`. The CEO opens each tagged agent's tab to gather their input. Threads stay open until the CEO closes them with a decision.
+2. **Discussion threads** — for topics that need more depth than a single exchange. Any agent opens `discussions/YYYY-MM-DD-<topic>.md` at the org root, tags relevant agents with `@agent-id`. The CEO opens each tagged agent's tab to gather their input. Threads stay open until the CEO closes them with a decision.
 
 3. **@-mention convention** — in any shared document (proposal, design doc, standup), agents use `@agent-id` to signal that a specific agent's input is needed. The CEO reads @-mentions as a guide for which tab to open next.
 
-The CEO acts as **facilitator**: they decide when a discussion has reached a useful conclusion and what the decision is.
+4. **MC board tasks (future)** — when Telegram relay becomes a bottleneck, the MC board `cross-agent` task mechanism replaces it. See "Cross-agent communication via MC boards" above.
+
+The CEO acts as **facilitator and relay**: they decide when a discussion has reached a useful conclusion, what the decision is, and which cross-agent messages to forward.
 
 ---
 
