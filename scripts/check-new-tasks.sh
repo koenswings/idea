@@ -8,6 +8,13 @@
 #   - Marks task in_progress (prevents a second cron run from firing the same task)
 #   - Appends task ID to triggered-tasks.log
 #   - Fires an isolated OpenClaw gateway session for the target agent
+#
+# ── CURRENTLY DISABLED ───────────────────────────────────────────────────────
+# Cross-agent communication is handled via Telegram relay (Koen as hub).
+# The MC board task mechanism is reserved for a future phase.
+# To re-enable: remove the exit 0 below and update agents' AGENTS.md files.
+# ─────────────────────────────────────────────────────────────────────────────
+exit 0
 
 set -euo pipefail
 
