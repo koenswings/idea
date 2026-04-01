@@ -33,3 +33,11 @@ for standalone Claude Code execution.
 Latent Tailscale debug mode for school Pis: design principles, ephemeral auth keys, ACL tag
 model, Phase 1 USB activation script, Phase 2 Console UI toggle, session flow, key lifecycle.
 → [design/tailscale-remote-management.md](tailscale-remote-management.md) _(not yet on main)_
+
+## agent-identity-memory-architecture.md
+**Status:** Proposed (PR pending)  ·  **Date:** 2026-04-01  ·  **Author:** Atlas
+Separates identity, memory, and code into distinct layers. Agent code repos become pure code;
+identity and memory files back up to a single `agent-identities` GitHub repo via nightly Pi
+cron. Atlas governs identity changes; unauthorized drift triggers Telegram alert. MEMORY.md
+extended to all agents. Replaces memory/updates branch + PR flow.
+→ [design/agent-identity-memory-architecture.md](agent-identity-memory-architecture.md) _(not yet on main)_
