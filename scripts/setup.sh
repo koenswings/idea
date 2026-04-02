@@ -43,6 +43,8 @@ AGENT_REPOS=(
   "agent-programme-manager"
 )
 
+AGENT_IDENTITIES_REPO="agent-identities"
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 info()    { echo -e "\033[1;34m[INFO]\033[0m  $*"; }
@@ -50,6 +52,16 @@ ok()      { echo -e "\033[1;32m[OK]\033[0m    $*"; }
 warn()    { echo -e "\033[1;33m[WARN]\033[0m  $*"; }
 die()     { echo -e "\033[1;31m[ERROR]\033[0m $*" >&2; exit 1; }
 heading() { echo -e "\n\033[1m$*\033[0m"; }
+
+# Set a key=value in a .env file — replaces existing line, appends if absent
+set_env_var() {
+  local file="$1" key="$2" value="$3"
+  if grep -q "^${key}=" "${file}" 2>/dev/null; then
+    sed -i "s|^${key}=.*|${key}=${value}|" "${file}"
+  else
+    echo "${key}=${value}" >> "${file}"
+  fi
+}
 
 require_root_or_sudo() {
   if [[ $EUID -ne 0 ]] && ! sudo -n true 2>/dev/null; then
@@ -134,7 +146,6 @@ configure_credentials() {
   heading "Step 3 — Credentials"
 
   local env_file="${IDEA_DIR}/openclaw/.env"
-  local template="${IDEA_DIR}/openclaw/.env.template"
 
   if [[ -f "${env_file}" ]]; then
     warn ".env already exists at ${env_file} — skipping"
@@ -142,20 +153,70 @@ configure_credentials() {
     return
   fi
 
-  cp "${template}" "${env_file}"
+  mkdir -p "${IDEA_DIR}/openclaw"
 
   echo ""
   echo "  Enter your credentials. Input is hidden."
   echo ""
 
-  local key val
-  for key in ANTHROPIC_API_KEY TELEGRAM_BOT_TOKEN GITHUB_TOKEN; do
-    read -rsp "  ${key}: " val; echo ""
-    sed -i "s|^${key}=.*|${key}=${val}|" "${env_file}"
-  done
+  local anthropic_key telegram_token github_token
+  read -rsp "  ANTHROPIC_API_KEY: " anthropic_key; echo ""
+  read -rsp "  TELEGRAM_BOT_TOKEN: " telegram_token; echo ""
+  read -rsp "  GITHUB_TOKEN: " github_token; echo ""
+
+  # Auto-generate the Mission Control platform token (no user input needed)
+  local mc_token
+  mc_token=$(python3 -c "import secrets; print(secrets.token_urlsafe(48))")
+
+  cat > "${env_file}" <<EOF
+ANTHROPIC_API_KEY=${anthropic_key}
+TELEGRAM_BOT_TOKEN=${telegram_token}
+GITHUB_TOKEN=${github_token}
+MC_PLATFORM_TOKEN=${mc_token}
+EOF
 
   ok "Credentials written to ${env_file}"
+  ok "MC_PLATFORM_TOKEN auto-generated"
   warn "Back this file up securely — it is gitignored and not in any repo."
+}
+
+# ── Step 3b: Restore identity and memory files from agent-identities ──────────
+
+restore_identity_files() {
+  heading "Step 3b — Restore identity & memory files"
+
+  local identities_dir="${IDEA_DIR}/agent-identities-restore"
+
+  if [[ ! -d "${identities_dir}/.git" ]]; then
+    info "Cloning agent-identities backup repo..."
+    git clone "https://github.com/${GITHUB_ACCOUNT}/${AGENT_IDENTITIES_REPO}.git" "${identities_dir}"
+  else
+    ok "agent-identities already present — pulling latest"
+    git -C "${identities_dir}" pull --ff-only origin main
+  fi
+
+  local identity_files="AGENTS.md SOUL.md IDENTITY.md USER.md TOOLS.md HEARTBEAT.md MEMORY.md"
+
+  for repo in "${AGENT_REPOS[@]}"; do
+    local src="${identities_dir}/${repo}"
+    local dest="${AGENTS_DIR}/${repo}"
+
+    if [[ ! -d "${src}" ]]; then
+      warn "No identity backup found for ${repo} — skipping"
+      continue
+    fi
+
+    for f in ${identity_files}; do
+      [[ -f "${src}/${f}" ]] && cp "${src}/${f}" "${dest}/${f}"
+    done
+
+    [[ -d "${src}/memory" ]]  && rsync -a "${src}/memory/"  "${dest}/memory/"
+    [[ -d "${src}/outputs" ]] && rsync -a "${src}/outputs/" "${dest}/outputs/"
+
+    ok "Restored identity + memory for ${repo}"
+  done
+
+  rm -rf "${identities_dir}"
 }
 
 # ── Step 4: Write agent .env files ────────────────────────────────────────────
@@ -212,7 +273,7 @@ start_openclaw() {
 }
 
 apply_openclaw_config() {
-  local template="${IDEA_DIR}/openclaw/openclaw.json"
+  local template="${IDEA_DIR}/platform/openclaw.json"
   local deployed="${HOME}/.openclaw/openclaw.json"
   local env_file="${IDEA_DIR}/openclaw/.env"
 
@@ -283,6 +344,151 @@ apply_cron_jobs() {
   ok "Cron jobs applied ($(python3 -c "import json; d=json.load(open('${cron_file}')); print(len(d['jobs']),'jobs')"))"
 }
 
+# ── Step 5b: Mission Control platform ────────────────────────────────────────
+
+start_mission_control() {
+  heading "Step 5b — Mission Control"
+
+  local platform_dir="${IDEA_DIR}/platform"
+
+  if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "mission-control"; then
+    ok "Mission Control already running"
+    return
+  fi
+
+  if [[ ! -f "${platform_dir}/compose.yaml" ]]; then
+    die "platform/compose.yaml not found — cannot start Mission Control"
+  fi
+
+  # Write platform/.env from openclaw/.env if needed
+  if [[ ! -f "${platform_dir}/.env" ]]; then
+    info "Writing platform/.env..."
+    source "${IDEA_DIR}/openclaw/.env"
+    echo "MC_LOCAL_AUTH_TOKEN=${MC_PLATFORM_TOKEN}" > "${platform_dir}/.env"
+    ok "platform/.env written (MC_LOCAL_AUTH_TOKEN set)"
+  else
+    ok "platform/.env already present"
+  fi
+
+  info "Starting Mission Control platform..."
+  docker compose -f "${platform_dir}/compose.yaml" up -d
+  ok "Mission Control started"
+}
+
+# ── Step 5c: Pi crontab for nightly identity backup ───────────────────────────
+
+setup_backup_cron() {
+  heading "Step 5c — Nightly identity backup cron"
+
+  local cron_line="0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> /var/log/agent-backup.log 2>&1"
+
+  if crontab -l 2>/dev/null | grep -q "backup-agent-identities"; then
+    ok "Backup cron already present"
+  else
+    (crontab -l 2>/dev/null; echo "${cron_line}") | crontab -
+    ok "Nightly backup cron added (03:00 UTC daily)"
+  fi
+}
+
+# ── Step 5d: Provision per-agent MC auth tokens ───────────────────────────────
+#
+# Generates a fresh AUTH_TOKEN for each board lead agent, hashes it with
+# PBKDF2-SHA256, updates the MC database, and writes the plaintext token to
+# each agent's .env file.
+#
+# Requires: Mission Control DB must be running (Step 5b).
+# Works for restore scenarios where agents already exist in the DB.
+# On a true fresh install (no existing DB), agents won't be present yet —
+# this step skips them gracefully; re-run after /init bootstraps all agents.
+
+provision_agent_tokens() {
+  heading "Step 5d — Agent MC tokens"
+
+  # Map repo name → MC agent display name (must match agents.name in DB)
+  declare -A AGENT_NAMES=(
+    ["agent-operations-manager"]="Atlas"
+    ["agent-engine-dev"]="Axle"
+    ["agent-console-dev"]="Pixel"
+    ["agent-site-dev"]="Beacon"
+    ["agent-programme-manager"]="Marco"
+  )
+
+  source "${IDEA_DIR}/openclaw/.env"
+  local mc_platform_token="${MC_PLATFORM_TOKEN}"
+
+  # Wait for MC DB to be healthy
+  info "Waiting for Mission Control DB..."
+  local retries=30
+  until docker exec openclaw-mission-control-db-1 pg_isready -U postgres &>/dev/null 2>&1; do
+    retries=$((retries - 1))
+    [[ ${retries} -le 0 ]] && die "Mission Control DB did not become ready in time"
+    sleep 2
+  done
+  ok "MC DB ready"
+
+  local any_provisioned=false
+
+  for repo in "${AGENT_REPOS[@]}"; do
+    local agent_name="${AGENT_NAMES[${repo}]:-}"
+    local dest="${AGENTS_DIR}/${repo}/.env"
+
+    if [[ -z "${agent_name}" ]]; then
+      warn "No agent name mapping for ${repo} — skipping"
+      continue
+    fi
+
+    # Check agent exists as board lead in DB
+    local agent_count
+    agent_count=$(docker exec openclaw-mission-control-db-1 psql -U postgres mission_control \
+      -tAc "SELECT COUNT(*) FROM agents WHERE name='${agent_name}' AND is_board_lead=true" \
+      | tr -d '[:space:]')
+
+    if [[ "${agent_count:-0}" -eq 0 ]]; then
+      warn "${agent_name} — not in MC DB yet (re-run after /init bootstraps agents)"
+      continue
+    fi
+
+    # Look up board_id
+    local board_id
+    board_id=$(docker exec openclaw-mission-control-db-1 psql -U postgres mission_control \
+      -tAc "SELECT board_id FROM agents WHERE name='${agent_name}' AND is_board_lead=true LIMIT 1" \
+      | tr -d '[:space:]')
+
+    # Generate fresh random token
+    local token
+    token=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")
+
+    # Hash with PBKDF2-SHA256 (Django-compatible, 200000 iterations)
+    local token_hash
+    token_hash=$(echo "${token}" | python3 - << 'PYEOF'
+import sys, hashlib, base64, os
+pw = sys.stdin.readline().strip()
+salt = base64.urlsafe_b64encode(os.urandom(16)).decode().rstrip('=')
+dk = hashlib.pbkdf2_hmac('sha256', pw.encode(), salt.encode(), 200000)
+print("pbkdf2_sha256$200000$" + salt + "$" + base64.b64encode(dk).decode())
+PYEOF
+)
+
+    # Update the DB
+    docker exec openclaw-mission-control-db-1 psql -U postgres mission_control \
+      -c "UPDATE agents SET agent_token_hash='${token_hash}' \
+          WHERE name='${agent_name}' AND is_board_lead=true" &>/dev/null
+
+    # Write/update agent .env (idempotent — replaces existing values)
+    set_env_var "${dest}" "AUTH_TOKEN"        "${token}"
+    set_env_var "${dest}" "MC_PLATFORM_TOKEN" "${mc_platform_token}"
+    set_env_var "${dest}" "BOARD_ID"          "${board_id}"
+
+    ok "${agent_name} — AUTH_TOKEN provisioned, BOARD_ID=${board_id}"
+    any_provisioned=true
+  done
+
+  if [[ "${any_provisioned}" == "false" ]]; then
+    warn "No agents provisioned — MC DB may be empty (fresh install)"
+    warn "After first /init in each agent group, re-run: bash scripts/setup.sh"
+  fi
+}
+
 # ── Step 6: Tailscale ─────────────────────────────────────────────────────────
 
 setup_tailscale() {
@@ -347,8 +553,12 @@ main() {
   install_deps
   clone_agent_repos
   configure_credentials
+  restore_identity_files
   configure_agent_envs
   start_openclaw
+  start_mission_control
+  provision_agent_tokens
+  setup_backup_cron
   setup_tailscale
   print_summary
 }
