@@ -53,6 +53,16 @@ warn()    { echo -e "\033[1;33m[WARN]\033[0m  $*"; }
 die()     { echo -e "\033[1;31m[ERROR]\033[0m $*" >&2; exit 1; }
 heading() { echo -e "\n\033[1m$*\033[0m"; }
 
+# Set a key=value in a .env file — replaces existing line, appends if absent
+set_env_var() {
+  local file="$1" key="$2" value="$3"
+  if grep -q "^${key}=" "${file}" 2>/dev/null; then
+    sed -i "s|^${key}=.*|${key}=${value}|" "${file}"
+  else
+    echo "${key}=${value}" >> "${file}"
+  fi
+}
+
 require_root_or_sudo() {
   if [[ $EUID -ne 0 ]] && ! sudo -n true 2>/dev/null; then
     warn "This script will run some commands with sudo. You may be prompted for your password."
@@ -154,13 +164,19 @@ configure_credentials() {
   read -rsp "  TELEGRAM_BOT_TOKEN: " telegram_token; echo ""
   read -rsp "  GITHUB_TOKEN: " github_token; echo ""
 
+  # Auto-generate the Mission Control platform token (no user input needed)
+  local mc_token
+  mc_token=$(python3 -c "import secrets; print(secrets.token_urlsafe(48))")
+
   cat > "${env_file}" <<EOF
 ANTHROPIC_API_KEY=${anthropic_key}
 TELEGRAM_BOT_TOKEN=${telegram_token}
 GITHUB_TOKEN=${github_token}
+MC_PLATFORM_TOKEN=${mc_token}
 EOF
 
   ok "Credentials written to ${env_file}"
+  ok "MC_PLATFORM_TOKEN auto-generated"
   warn "Back this file up securely — it is gitignored and not in any repo."
 }
 
@@ -344,10 +360,14 @@ start_mission_control() {
     die "platform/compose.yaml not found — cannot start Mission Control"
   fi
 
-  # Write platform .env if needed (MC_LOCAL_AUTH_TOKEN = MC_PLATFORM_TOKEN)
+  # Write platform/.env from openclaw/.env if needed
   if [[ ! -f "${platform_dir}/.env" ]]; then
-    warn "platform/.env not found. MC_LOCAL_AUTH_TOKEN must be set for agent authentication."
-    warn "Generate a token and write it manually: echo 'MC_LOCAL_AUTH_TOKEN=<token>' > ${platform_dir}/.env"
+    info "Writing platform/.env..."
+    source "${IDEA_DIR}/openclaw/.env"
+    echo "MC_LOCAL_AUTH_TOKEN=${MC_PLATFORM_TOKEN}" > "${platform_dir}/.env"
+    ok "platform/.env written (MC_LOCAL_AUTH_TOKEN set)"
+  else
+    ok "platform/.env already present"
   fi
 
   info "Starting Mission Control platform..."
@@ -367,6 +387,105 @@ setup_backup_cron() {
   else
     (crontab -l 2>/dev/null; echo "${cron_line}") | crontab -
     ok "Nightly backup cron added (03:00 UTC daily)"
+  fi
+}
+
+# ── Step 5d: Provision per-agent MC auth tokens ───────────────────────────────
+#
+# Generates a fresh AUTH_TOKEN for each board lead agent, hashes it with
+# PBKDF2-SHA256, updates the MC database, and writes the plaintext token to
+# each agent's .env file.
+#
+# Requires: Mission Control DB must be running (Step 5b).
+# Works for restore scenarios where agents already exist in the DB.
+# On a true fresh install (no existing DB), agents won't be present yet —
+# this step skips them gracefully; re-run after /init bootstraps all agents.
+
+provision_agent_tokens() {
+  heading "Step 5d — Agent MC tokens"
+
+  # Map repo name → MC agent display name (must match agents.name in DB)
+  declare -A AGENT_NAMES=(
+    ["agent-operations-manager"]="Atlas"
+    ["agent-engine-dev"]="Axle"
+    ["agent-console-dev"]="Pixel"
+    ["agent-site-dev"]="Beacon"
+    ["agent-programme-manager"]="Marco"
+  )
+
+  source "${IDEA_DIR}/openclaw/.env"
+  local mc_platform_token="${MC_PLATFORM_TOKEN}"
+
+  # Wait for MC DB to be healthy
+  info "Waiting for Mission Control DB..."
+  local retries=30
+  until docker exec openclaw-mission-control-db-1 pg_isready -U postgres &>/dev/null 2>&1; do
+    retries=$((retries - 1))
+    [[ ${retries} -le 0 ]] && die "Mission Control DB did not become ready in time"
+    sleep 2
+  done
+  ok "MC DB ready"
+
+  local any_provisioned=false
+
+  for repo in "${AGENT_REPOS[@]}"; do
+    local agent_name="${AGENT_NAMES[${repo}]:-}"
+    local dest="${AGENTS_DIR}/${repo}/.env"
+
+    if [[ -z "${agent_name}" ]]; then
+      warn "No agent name mapping for ${repo} — skipping"
+      continue
+    fi
+
+    # Check agent exists as board lead in DB
+    local agent_count
+    agent_count=$(docker exec openclaw-mission-control-db-1 psql -U postgres mission_control \
+      -tAc "SELECT COUNT(*) FROM agents WHERE name='${agent_name}' AND is_board_lead=true" \
+      | tr -d '[:space:]')
+
+    if [[ "${agent_count:-0}" -eq 0 ]]; then
+      warn "${agent_name} — not in MC DB yet (re-run after /init bootstraps agents)"
+      continue
+    fi
+
+    # Look up board_id
+    local board_id
+    board_id=$(docker exec openclaw-mission-control-db-1 psql -U postgres mission_control \
+      -tAc "SELECT board_id FROM agents WHERE name='${agent_name}' AND is_board_lead=true LIMIT 1" \
+      | tr -d '[:space:]')
+
+    # Generate fresh random token
+    local token
+    token=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")
+
+    # Hash with PBKDF2-SHA256 (Django-compatible, 200000 iterations)
+    local token_hash
+    token_hash=$(echo "${token}" | python3 - << 'PYEOF'
+import sys, hashlib, base64, os
+pw = sys.stdin.readline().strip()
+salt = base64.urlsafe_b64encode(os.urandom(16)).decode().rstrip('=')
+dk = hashlib.pbkdf2_hmac('sha256', pw.encode(), salt.encode(), 200000)
+print("pbkdf2_sha256$200000$" + salt + "$" + base64.b64encode(dk).decode())
+PYEOF
+)
+
+    # Update the DB
+    docker exec openclaw-mission-control-db-1 psql -U postgres mission_control \
+      -c "UPDATE agents SET agent_token_hash='${token_hash}' \
+          WHERE name='${agent_name}' AND is_board_lead=true" &>/dev/null
+
+    # Write/update agent .env (idempotent — replaces existing values)
+    set_env_var "${dest}" "AUTH_TOKEN"        "${token}"
+    set_env_var "${dest}" "MC_PLATFORM_TOKEN" "${mc_platform_token}"
+    set_env_var "${dest}" "BOARD_ID"          "${board_id}"
+
+    ok "${agent_name} — AUTH_TOKEN provisioned, BOARD_ID=${board_id}"
+    any_provisioned=true
+  done
+
+  if [[ "${any_provisioned}" == "false" ]]; then
+    warn "No agents provisioned — MC DB may be empty (fresh install)"
+    warn "After first /init in each agent group, re-run: bash scripts/setup.sh"
   fi
 }
 
@@ -438,6 +557,7 @@ main() {
   configure_agent_envs
   start_openclaw
   start_mission_control
+  provision_agent_tokens
   setup_backup_cron
   setup_tailscale
   print_summary
