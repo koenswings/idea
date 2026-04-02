@@ -43,6 +43,8 @@ AGENT_REPOS=(
   "agent-programme-manager"
 )
 
+AGENT_IDENTITIES_REPO="agent-identities"
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 info()    { echo -e "\033[1;34m[INFO]\033[0m  $*"; }
@@ -134,7 +136,6 @@ configure_credentials() {
   heading "Step 3 — Credentials"
 
   local env_file="${IDEA_DIR}/openclaw/.env"
-  local template="${IDEA_DIR}/openclaw/.env.template"
 
   if [[ -f "${env_file}" ]]; then
     warn ".env already exists at ${env_file} — skipping"
@@ -142,20 +143,64 @@ configure_credentials() {
     return
   fi
 
-  cp "${template}" "${env_file}"
+  mkdir -p "${IDEA_DIR}/openclaw"
 
   echo ""
   echo "  Enter your credentials. Input is hidden."
   echo ""
 
-  local key val
-  for key in ANTHROPIC_API_KEY TELEGRAM_BOT_TOKEN GITHUB_TOKEN; do
-    read -rsp "  ${key}: " val; echo ""
-    sed -i "s|^${key}=.*|${key}=${val}|" "${env_file}"
-  done
+  local anthropic_key telegram_token github_token
+  read -rsp "  ANTHROPIC_API_KEY: " anthropic_key; echo ""
+  read -rsp "  TELEGRAM_BOT_TOKEN: " telegram_token; echo ""
+  read -rsp "  GITHUB_TOKEN: " github_token; echo ""
+
+  cat > "${env_file}" <<EOF
+ANTHROPIC_API_KEY=${anthropic_key}
+TELEGRAM_BOT_TOKEN=${telegram_token}
+GITHUB_TOKEN=${github_token}
+EOF
 
   ok "Credentials written to ${env_file}"
   warn "Back this file up securely — it is gitignored and not in any repo."
+}
+
+# ── Step 3b: Restore identity and memory files from agent-identities ──────────
+
+restore_identity_files() {
+  heading "Step 3b — Restore identity & memory files"
+
+  local identities_dir="${IDEA_DIR}/agent-identities-restore"
+
+  if [[ ! -d "${identities_dir}/.git" ]]; then
+    info "Cloning agent-identities backup repo..."
+    git clone "https://github.com/${GITHUB_ACCOUNT}/${AGENT_IDENTITIES_REPO}.git" "${identities_dir}"
+  else
+    ok "agent-identities already present — pulling latest"
+    git -C "${identities_dir}" pull --ff-only origin main
+  fi
+
+  local identity_files="AGENTS.md SOUL.md IDENTITY.md USER.md TOOLS.md HEARTBEAT.md MEMORY.md"
+
+  for repo in "${AGENT_REPOS[@]}"; do
+    local src="${identities_dir}/${repo}"
+    local dest="${AGENTS_DIR}/${repo}"
+
+    if [[ ! -d "${src}" ]]; then
+      warn "No identity backup found for ${repo} — skipping"
+      continue
+    fi
+
+    for f in ${identity_files}; do
+      [[ -f "${src}/${f}" ]] && cp "${src}/${f}" "${dest}/${f}"
+    done
+
+    [[ -d "${src}/memory" ]]  && rsync -a "${src}/memory/"  "${dest}/memory/"
+    [[ -d "${src}/outputs" ]] && rsync -a "${src}/outputs/" "${dest}/outputs/"
+
+    ok "Restored identity + memory for ${repo}"
+  done
+
+  rm -rf "${identities_dir}"
 }
 
 # ── Step 4: Write agent .env files ────────────────────────────────────────────
@@ -212,7 +257,7 @@ start_openclaw() {
 }
 
 apply_openclaw_config() {
-  local template="${IDEA_DIR}/openclaw/openclaw.json"
+  local template="${IDEA_DIR}/platform/openclaw.json"
   local deployed="${HOME}/.openclaw/openclaw.json"
   local env_file="${IDEA_DIR}/openclaw/.env"
 
@@ -283,6 +328,48 @@ apply_cron_jobs() {
   ok "Cron jobs applied ($(python3 -c "import json; d=json.load(open('${cron_file}')); print(len(d['jobs']),'jobs')"))"
 }
 
+# ── Step 5b: Mission Control platform ────────────────────────────────────────
+
+start_mission_control() {
+  heading "Step 5b — Mission Control"
+
+  local platform_dir="${IDEA_DIR}/platform"
+
+  if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "mission-control"; then
+    ok "Mission Control already running"
+    return
+  fi
+
+  if [[ ! -f "${platform_dir}/compose.yaml" ]]; then
+    die "platform/compose.yaml not found — cannot start Mission Control"
+  fi
+
+  # Write platform .env if needed (MC_LOCAL_AUTH_TOKEN = MC_PLATFORM_TOKEN)
+  if [[ ! -f "${platform_dir}/.env" ]]; then
+    warn "platform/.env not found. MC_LOCAL_AUTH_TOKEN must be set for agent authentication."
+    warn "Generate a token and write it manually: echo 'MC_LOCAL_AUTH_TOKEN=<token>' > ${platform_dir}/.env"
+  fi
+
+  info "Starting Mission Control platform..."
+  docker compose -f "${platform_dir}/compose.yaml" up -d
+  ok "Mission Control started"
+}
+
+# ── Step 5c: Pi crontab for nightly identity backup ───────────────────────────
+
+setup_backup_cron() {
+  heading "Step 5c — Nightly identity backup cron"
+
+  local cron_line="0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> /var/log/agent-backup.log 2>&1"
+
+  if crontab -l 2>/dev/null | grep -q "backup-agent-identities"; then
+    ok "Backup cron already present"
+  else
+    (crontab -l 2>/dev/null; echo "${cron_line}") | crontab -
+    ok "Nightly backup cron added (03:00 UTC daily)"
+  fi
+}
+
 # ── Step 6: Tailscale ─────────────────────────────────────────────────────────
 
 setup_tailscale() {
@@ -347,8 +434,11 @@ main() {
   install_deps
   clone_agent_repos
   configure_credentials
+  restore_identity_files
   configure_agent_envs
   start_openclaw
+  start_mission_control
+  setup_backup_cron
   setup_tailscale
   print_summary
 }
