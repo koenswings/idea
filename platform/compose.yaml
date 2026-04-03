@@ -139,7 +139,7 @@ services:
       # Within the unified network, the backend is its own service name.
       # (Previously http://172.18.0.1:8000 — the Docker host bridge IP)
       - BASE_URL=http://mission-control-backend:8000
-      - CORS_ORIGINS=http://wizardly-hugle.local:4000,https://openclaw-pi.tail2d60.ts.net:4000
+      - CORS_ORIGINS=http://idea.local:4000,https://idea.tail2d60.ts.net:4000
       - DB_AUTO_MIGRATE=true
       - LOG_LEVEL=INFO
       - LOG_FORMAT=text
