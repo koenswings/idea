@@ -123,7 +123,7 @@ services:
     networks:
       - idea-net
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       mission-control-db:
         condition: service_healthy
@@ -178,7 +178,7 @@ services:
     networks:
       - idea-net
     ports:
-      - "4000:3000"
+      - "127.0.0.1:4000:3000"
     depends_on:
       - mission-control-backend
 
