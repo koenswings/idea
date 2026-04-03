@@ -181,6 +181,9 @@ services:
       - "127.0.0.1:4000:3000"
     depends_on:
       - mission-control-backend
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "find /app/.next/static -name '*.js' -exec sed -i 's/openclaw-pi\\.tail2d60\\.ts\\.net/idea.tail2d60.ts.net/g' {} + && exec npm run start"
 
 secrets:
   mc_db_password:
