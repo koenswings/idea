@@ -17,6 +17,8 @@
 # See: idea/scripts/MIGRATE.md for the migration runbook.
 # ─────────────────────────────────────────────────────────────────────────────
 
+name: openclaw
+
 networks:
   idea-net:
     driver: bridge
