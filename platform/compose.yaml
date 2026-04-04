@@ -17,6 +17,8 @@
 # See: idea/scripts/MIGRATE.md for the migration runbook.
 # ─────────────────────────────────────────────────────────────────────────────
 
+name: openclaw
+
 networks:
   idea-net:
     driver: bridge
@@ -123,7 +125,7 @@ services:
     networks:
       - idea-net
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       mission-control-db:
         condition: service_healthy
@@ -139,7 +141,7 @@ services:
       # Within the unified network, the backend is its own service name.
       # (Previously http://172.18.0.1:8000 — the Docker host bridge IP)
       - BASE_URL=http://mission-control-backend:8000
-      - CORS_ORIGINS=http://wizardly-hugle.local:4000,https://openclaw-pi.tail2d60.ts.net:4000
+      - CORS_ORIGINS=http://openclaw-pi.local:4000,https://openclaw-pi.tail2d60.ts.net:4000
       - DB_AUTO_MIGRATE=true
       - LOG_LEVEL=INFO
       - LOG_FORMAT=text
@@ -178,7 +180,7 @@ services:
     networks:
       - idea-net
     ports:
-      - "4000:3000"
+      - "127.0.0.1:4000:3000"
     depends_on:
       - mission-control-backend
 
