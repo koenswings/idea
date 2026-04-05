@@ -1,4 +1,4 @@
-<!-- Auto-exported from Mission Control 2026-04-04 06:00 UTC. Do not edit manually. -->
+<!-- Auto-exported from Mission Control 2026-04-05 06:00 UTC. Do not edit manually. -->
 
 # BACKLOG.md — IDEA Agent Task Board
 
@@ -12,6 +12,17 @@ To propose a new item, follow the process in `PROCESS.md`.
 ### Inbox
 - [ ] Find logical inconsistencies between architecture, solution description and current code
 - [ ] Fix extractAppVersion for hyphenated app names
+- [ ] Group A: Implement ejectDisk command
+- [ ] Group B: Implement copyApp + moveApp + rsync infrastructure
+- [ ] Group C: Implement backupApp + restoreApp + Backup Disk type
+- [ ] Group D: Implement upgradeApp + minor upgrade proposal
+- [ ] Group E: Implement upgradeEngine + Engine self-upgrade detection
+- [ ] Group F: Implement Files Disk type + network filesystem mount
+- [ ] Group G: Implement Empty Disk detection + Console provisioning flow
+- [ ] Group H: Implement Engine Disk upgrade flow
+- [ ] Group I: USB Gadget — LAN access for non-host computers
+- [ ] Group J: Offline Docker image loading — add test coverage
+- [ ] Group K: Per-engine SSH keypair
 - [ ] Implement cross-disk upgrade detection and proposal
 - [ ] Plan and implement SSH key-based access for field Pis
 - [ ] Refactor script/ to scripts/
