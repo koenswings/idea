@@ -1,21 +1,16 @@
 # IDEA Platform — Docker Compose
 #
-# Runs the full IDEA virtual company platform: OpenClaw (AI agent runtime)
-# and Mission Control (task/board management), on a shared network.
+# Runs Mission Control (task/board management) on a shared network.
+# OpenClaw runs natively as a systemd service (pi user) — not in Docker.
+# See: platform/MIGRATE-NATIVE.md for migration history.
 #
 # Usage:
 #   docker compose up -d          # start all services
 #   docker compose down           # stop (keeps volumes)
 #   docker compose down -v        # stop + delete volumes (DATA LOSS — use with care)
-#   docker compose restart openclaw-gateway   # apply config changes
 #
 # Before first run:
 #   bash /home/pi/idea/scripts/setup.sh
-#
-# ─────────────────────────────────────────────────────────────────────────────
-# NOTE: This file is the target state after migration.
-# See: idea/scripts/MIGRATE.md for the migration runbook.
-# ─────────────────────────────────────────────────────────────────────────────
 
 name: openclaw
 
@@ -24,57 +19,12 @@ networks:
     driver: bridge
 
 volumes:
-  openclaw-data:                # OpenClaw config, session state, agent data
-    external: true
-    name: openclaw_openclaw-data        # reuse existing volume — confirmed from docker volume ls
   mc-db-data:                   # Mission Control PostgreSQL data
     external: true
     name: openclaw-mission-control_postgres_data  # reuse existing volume — NO DATA LOSS
   mc-redis-data: {}             # Redis is a cache/queue — fresh volume is fine
 
-# ─────────────────────────────────────────────────────────────────────────────
-# OpenClaw — AI agent runtime
-# ─────────────────────────────────────────────────────────────────────────────
-
 services:
-  openclaw-gateway:
-    image: ghcr.io/openclaw/openclaw:latest
-    container_name: openclaw-gateway
-    restart: unless-stopped
-    user: root
-    entrypoint: ["/entrypoint.sh"]
-    command:
-      - "node"
-      - "dist/index.js"
-      - "gateway"
-      - "--port"
-      - "18789"
-      - "--allow-unconfigured"
-    networks:
-      - idea-net
-    ports:
-      - "18789:18790"
-    volumes:
-      - /home/pi/idea:/home/node/workspace:rw
-      - openclaw-data:/root/.openclaw
-      - /home/pi/idea/platform/secrets/anthropic_api_key.txt:/run/secrets/anthropic_api_key:ro
-      - /home/pi/idea/platform/secrets/openclaw_gateway_token.txt:/run/secrets/openclaw_gateway_token:ro
-      - /usr/bin/docker:/usr/bin/docker:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /home/pi/idea/platform/entrypoint.sh:/entrypoint.sh:ro
-    environment:
-      - OPENCLAW_LOG_LEVEL=info
-      - OPENCLAW_WORKSPACE=/home/node/workspace
-      - OPENCLAW_VERSION=2026.2.17
-      - CLAUDE_CODE_MCP_ENABLED=true
-      - DEFAULT_PERMISSION_MODE=plan
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:18789 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-
   # ─────────────────────────────────────────────────────────────────────────
   # Mission Control — task and board management
   # Source: /home/pi/openclaw/mission-control/docker-compose.yml

@@ -12,12 +12,11 @@
 # WHAT THIS DOES
 #   1. Installs system dependencies (Docker, git, tmux, Node.js, Tailscale)
 #   2. Clones all 5 agent repos into agents/
-#   3. Prompts for credentials and writes openclaw/.env
-#   4. Installs OpenClaw via Docker (clones openclaw repo, runs docker-setup.sh)
+#   3. Prompts for credentials and writes secrets/ files
+#   4. Installs OpenClaw natively (npm install -g, systemd daemon as pi user)
 #   5. Applies IDEA's openclaw.json (agent roster, Telegram bindings)
-#   6. Configures the Telegram channel
-#   7. Connects to Tailscale
-#   8. Prints first-run instructions
+#   6. Connects to Tailscale
+#   7. Prints first-run instructions
 #
 # IDEMPOTENT
 #   Safe to re-run. Each step checks whether it has already been done.
@@ -31,8 +30,8 @@ set -euo pipefail
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 IDEA_DIR="/home/pi/idea"
-OPENCLAW_DIR="/home/pi/openclaw"
 AGENTS_DIR="${IDEA_DIR}/agents"
+SECRETS_DIR="${IDEA_DIR}/platform/secrets"
 GITHUB_ACCOUNT="koenswings"
 
 AGENT_REPOS=(
@@ -145,39 +144,41 @@ clone_agent_repos() {
 configure_credentials() {
   heading "Step 3 — Credentials"
 
-  local env_file="${IDEA_DIR}/openclaw/.env"
+  # Secrets are stored in platform/secrets/ as individual files (root-owned)
+  # so they can be bind-mounted selectively by Docker services.
+  sudo mkdir -p "${SECRETS_DIR}"
 
-  if [[ -f "${env_file}" ]]; then
-    warn ".env already exists at ${env_file} — skipping"
-    warn "Delete it and re-run to reconfigure credentials."
+  local need_input=false
+  [[ ! -f "${SECRETS_DIR}/anthropic_api_key.txt" ]] && need_input=true
+  [[ ! -f "${SECRETS_DIR}/mc_db_password.txt" ]]    && need_input=true
+
+  if [[ "${need_input}" == "false" ]]; then
+    ok "Secrets already present in ${SECRETS_DIR} — skipping"
     return
   fi
-
-  mkdir -p "${IDEA_DIR}/openclaw"
 
   echo ""
   echo "  Enter your credentials. Input is hidden."
   echo ""
 
-  local anthropic_key telegram_token github_token
-  read -rsp "  ANTHROPIC_API_KEY: " anthropic_key; echo ""
-  read -rsp "  TELEGRAM_BOT_TOKEN: " telegram_token; echo ""
-  read -rsp "  GITHUB_TOKEN: " github_token; echo ""
+  if [[ ! -f "${SECRETS_DIR}/anthropic_api_key.txt" ]]; then
+    local anthropic_key
+    read -rsp "  ANTHROPIC_API_KEY: " anthropic_key; echo ""
+    echo -n "${anthropic_key}" | sudo tee "${SECRETS_DIR}/anthropic_api_key.txt" >/dev/null
+    sudo chown pi:pi "${SECRETS_DIR}/anthropic_api_key.txt"
+    sudo chmod 600   "${SECRETS_DIR}/anthropic_api_key.txt"
+    ok "anthropic_api_key.txt written"
+  fi
 
-  # Auto-generate the Mission Control platform token (no user input needed)
-  local mc_token
-  mc_token=$(python3 -c "import secrets; print(secrets.token_urlsafe(48))")
+  if [[ ! -f "${SECRETS_DIR}/mc_db_password.txt" ]]; then
+    local mc_db_password
+    mc_db_password=$(python3 -c "import secrets; print(secrets.token_urlsafe(16))")
+    echo -n "${mc_db_password}" | sudo tee "${SECRETS_DIR}/mc_db_password.txt" >/dev/null
+    sudo chmod 600 "${SECRETS_DIR}/mc_db_password.txt"
+    ok "mc_db_password.txt written (auto-generated)"
+  fi
 
-  cat > "${env_file}" <<EOF
-ANTHROPIC_API_KEY=${anthropic_key}
-TELEGRAM_BOT_TOKEN=${telegram_token}
-GITHUB_TOKEN=${github_token}
-MC_PLATFORM_TOKEN=${mc_token}
-EOF
-
-  ok "Credentials written to ${env_file}"
-  ok "MC_PLATFORM_TOKEN auto-generated"
-  warn "Back this file up securely — it is gitignored and not in any repo."
+  warn "Back up ${SECRETS_DIR}/ securely — these files are gitignored."
 }
 
 # ── Step 3b: Restore identity and memory files from agent-identities ──────────
@@ -224,91 +225,105 @@ restore_identity_files() {
 configure_agent_envs() {
   heading "Step 4 — Agent .env files"
 
-  local env_src="${IDEA_DIR}/openclaw/.env"
+  local api_key
+  api_key=$(cat "${SECRETS_DIR}/anthropic_api_key.txt")
 
   for repo in "${AGENT_REPOS[@]}"; do
     local dest="${AGENTS_DIR}/${repo}/.env"
     if [[ -f "${dest}" ]]; then
       ok "${repo}/.env — already present"
     else
-      cp "${env_src}" "${dest}"
+      echo "ANTHROPIC_API_KEY=${api_key}" > "${dest}"
       ok "Wrote ${repo}/.env"
     fi
   done
 }
 
-# ── Step 5: Install and start OpenClaw ────────────────────────────────────────
+# ── Step 5: Install and start OpenClaw (native) ───────────────────────────────
 
 start_openclaw() {
-  heading "Step 5 — OpenClaw"
+  heading "Step 5 — OpenClaw (native)"
 
-  # Clone the OpenClaw repo if not already present
-  if [[ ! -d "${OPENCLAW_DIR}/.git" ]]; then
-    info "Cloning OpenClaw into ${OPENCLAW_DIR}..."
-    git clone https://github.com/openclaw/openclaw.git "${OPENCLAW_DIR}"
+  # Install OpenClaw globally if not already present
+  if ! command -v openclaw &>/dev/null; then
+    info "Installing OpenClaw natively..."
+    npm install -g openclaw@latest
+    ok "OpenClaw installed: $(openclaw --version)"
   else
-    ok "OpenClaw repo already present at ${OPENCLAW_DIR}"
+    ok "OpenClaw already installed: $(openclaw --version)"
   fi
 
-  # Run docker-setup.sh if the gateway container is not yet running
-  if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^openclaw-gateway$"; then
-    ok "openclaw-gateway already running"
+  # Create workspace symlink so agent path refs (/home/node/workspace/...) resolve
+  if [[ ! -L /home/node/workspace ]]; then
+    info "Creating /home/node/workspace symlink..."
+    sudo mkdir -p /home/node
+    sudo ln -sfn "${IDEA_DIR}" /home/node/workspace
+    ok "Symlink: /home/node/workspace -> ${IDEA_DIR}"
   else
-    info "Running OpenClaw Docker setup..."
-    info "  The setup wizard will prompt you for an Anthropic API key."
-    info "  Use the key from ${IDEA_DIR}/openclaw/.env (ANTHROPIC_API_KEY)."
-    echo ""
-
-    source "${IDEA_DIR}/openclaw/.env"
-    export OPENCLAW_EXTRA_MOUNTS="${IDEA_DIR}:/home/node/workspace:rw"
-    export ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY}"
-
-    cd "${OPENCLAW_DIR}"
-    bash docker-setup.sh
-    cd - >/dev/null
+    ok "Symlink /home/node/workspace already present"
   fi
 
-  # Apply IDEA's openclaw.json on top of the auto-generated config
+  # Apply IDEA's openclaw config
   apply_openclaw_config
+
+  # Install and start systemd daemon
+  if systemctl --user is-active openclaw-gateway &>/dev/null; then
+    ok "openclaw-gateway service already running — restarting to pick up new config..."
+    systemctl --user restart openclaw-gateway
+  else
+    info "Installing openclaw-gateway systemd service..."
+    openclaw gateway install
+
+    # Inject ANTHROPIC_API_KEY into the service environment
+    local api_key
+    api_key=$(cat "${SECRETS_DIR}/anthropic_api_key.txt")
+    local dropin_dir="${HOME}/.config/systemd/user/openclaw-gateway.service.d"
+    mkdir -p "${dropin_dir}"
+    printf '[Service]\nEnvironment="ANTHROPIC_API_KEY=%s"\n' "${api_key}" > "${dropin_dir}/env.conf"
+    chmod 600 "${dropin_dir}/env.conf"
+
+    systemctl --user daemon-reload
+    systemctl --user start openclaw-gateway
+    ok "openclaw-gateway started"
+  fi
 }
 
 apply_openclaw_config() {
   local template="${IDEA_DIR}/platform/openclaw.json"
   local deployed="${HOME}/.openclaw/openclaw.json"
-  local env_file="${IDEA_DIR}/openclaw/.env"
 
-  source "${env_file}"
+  if [[ ! -f "${template}" ]]; then
+    warn "platform/openclaw.json not found — skipping config apply"
+    return
+  fi
 
   info "Applying IDEA openclaw.json..."
+  mkdir -p "${HOME}/.openclaw"
 
-  # Use Python to merge configs:
-  #   - Start from the IDEA template (strips JSON5 comments)
-  #   - Preserve gateway.remote.token from the auto-generated config
-  #   - Substitute {{TELEGRAM_BOT_TOKEN}}
-  python3 - "${template}" "${deployed}" "${TELEGRAM_BOT_TOKEN}" << 'PYEOF'
-import sys, re, json
+  python3 - "${template}" "${deployed}" << 'PYEOF'
+import sys, re, json, os
 
-template_path, deployed_path, bot_token = sys.argv[1], sys.argv[2], sys.argv[3]
+template_path, deployed_path = sys.argv[1], sys.argv[2]
 
 def load_json5(path):
     with open(path) as f:
         content = f.read()
-    content = re.sub(r'//[^\n]*', '', content)   # strip // comments
-    content = re.sub(r',(\s*[}\]])', r'\1', content)  # strip trailing commas
+    content = re.sub(r'//[^\n]*', '', content)
+    content = re.sub(r',(\s*[}\]])', r'\1', content)
     return json.loads(content)
 
-# Load IDEA template
 config = load_json5(template_path)
 
-# Substitute bot token
-config['channels']['telegram']['botToken'] = bot_token
-
-# Preserve auto-generated gateway token if present
+# Preserve existing gateway tokens if present
 try:
     existing = json.load(open(deployed_path))
-    if existing.get('gateway', {}).get('remote', {}).get('token'):
+    gw = existing.get('gateway', {})
+    if gw.get('remote', {}).get('token'):
         config.setdefault('gateway', {}).setdefault('remote', {})
-        config['gateway']['remote']['token'] = existing['gateway']['remote']['token']
+        config['gateway']['remote']['token'] = gw['remote']['token']
+    if gw.get('auth', {}).get('token'):
+        config.setdefault('gateway', {}).setdefault('auth', {})
+        config['gateway']['auth'] = gw['auth']
 except (FileNotFoundError, json.JSONDecodeError):
     pass
 
@@ -320,13 +335,7 @@ PYEOF
 
   # Apply cron jobs
   apply_cron_jobs
-
-  # Restart gateway to pick up new config and cron jobs
-  info "Restarting openclaw-gateway..."
-  cd "${OPENCLAW_DIR}"
-  docker compose restart openclaw-gateway
-  cd - >/dev/null
-  ok "openclaw-gateway restarted with IDEA config"
+  ok "openclaw.json applied"
 }
 
 apply_cron_jobs() {
@@ -360,12 +369,16 @@ start_mission_control() {
     die "platform/compose.yaml not found — cannot start Mission Control"
   fi
 
-  # Write platform/.env from openclaw/.env if needed
+  # Write platform/.env if needed (MC_LOCAL_AUTH_TOKEN + MC_DB_PASSWORD)
   if [[ ! -f "${platform_dir}/.env" ]]; then
     info "Writing platform/.env..."
-    source "${IDEA_DIR}/openclaw/.env"
-    echo "MC_LOCAL_AUTH_TOKEN=${MC_PLATFORM_TOKEN}" > "${platform_dir}/.env"
-    ok "platform/.env written (MC_LOCAL_AUTH_TOKEN set)"
+    local mc_token mc_db_password
+    mc_token=$(python3 -c "import secrets; print(secrets.token_urlsafe(48))")
+    mc_db_password=$(cat "${SECRETS_DIR}/mc_db_password.txt")
+    printf 'MC_LOCAL_AUTH_TOKEN=%s\nMC_DB_PASSWORD=%s\n' "${mc_token}" "${mc_db_password}" \
+      | sudo tee "${platform_dir}/.env" >/dev/null
+    sudo chmod 600 "${platform_dir}/.env"
+    ok "platform/.env written"
   else
     ok "platform/.env already present"
   fi
@@ -413,8 +426,8 @@ provision_agent_tokens() {
     ["agent-programme-manager"]="Marco"
   )
 
-  source "${IDEA_DIR}/openclaw/.env"
-  local mc_platform_token="${MC_PLATFORM_TOKEN}"
+  local mc_platform_token
+  mc_platform_token=$(sudo grep -Po '(?<=MC_LOCAL_AUTH_TOKEN=)\S+' "${IDEA_DIR}/platform/.env" 2>/dev/null || echo "")
 
   # Wait for MC DB to be healthy
   info "Waiting for Mission Control DB..."
@@ -520,23 +533,22 @@ print_summary() {
   echo " IDEA — Setup Complete"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
-  echo "  OpenClaw UI:      https://${ts_ip}"
+  echo "  OpenClaw UI:      http://${ts_ip}:18789"
   echo "  Mission Control:  http://${ts_ip}:8000"
   echo ""
   echo "  Next steps:"
   echo ""
-  echo "  1. Open OpenClaw UI and paste the gateway token"
-  echo "     (token is in ${OPENCLAW_DIR}/.env as OPENCLAW_GATEWAY_TOKEN)"
+  echo "  1. Check OpenClaw gateway:  openclaw gateway status"
+  echo "     Check Telegram:           openclaw channels status"
   echo ""
   echo "  2. Start all agent claude sessions:"
   echo "     bash ${IDEA_DIR}/scripts/start-agents.sh"
   echo ""
   echo "  3. Open Tabby — connect to all 5 agent tabs"
-  echo "     (see idea/openclaw/README.md → Tabby setup)"
   echo ""
   echo "  4. Run /init in each agent's Telegram group to bootstrap"
   echo ""
-  echo "  Credentials: ${IDEA_DIR}/openclaw/.env   ← keep this safe"
+  echo "  Secrets: ${IDEA_DIR}/platform/secrets/   ← keep this safe"
   echo ""
 }
 
