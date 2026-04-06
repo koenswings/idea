@@ -2,7 +2,8 @@
 
 **Author:** Atlas 🗺️  
 **Date:** 2026-03-30  
-**Status:** Proposed  
+**Status:** Implemented  
+**Implemented:** 2026-04-06  
 
 ---
 

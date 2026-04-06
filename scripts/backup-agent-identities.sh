@@ -5,7 +5,7 @@
 #
 # Expects:
 #   /home/pi/agent-identities/  — local clone of koenswings/agent-identities (no branch protection)
-#   /root/.openclaw/openclaw.json — OpenClaw config (for Telegram bot token)
+#   /home/pi/.openclaw/openclaw.json — OpenClaw config (for Telegram bot token)
 #   GITHUB_TOKEN env var — or set in /home/pi/agent-identities/.git/config credentials
 #
 # Schedule (Pi crontab):
@@ -22,7 +22,7 @@ IDENTITY_FILES="AGENTS.md SOUL.md IDENTITY.md USER.md TOOLS.md HEARTBEAT.md"
 
 # Load GitHub token and Telegram bot token
 GITHUB_TOKEN="${GITHUB_TOKEN:-$(grep GITHUB_TOKEN "${WORKSPACE_ROOT:-/home/node/workspace}/agents/agent-operations-manager/.env" 2>/dev/null | cut -d= -f2 || echo '')}"
-BOT_TOKEN="$(jq -r '.channels.telegram.botToken' /root/.openclaw/openclaw.json 2>/dev/null || echo '')"
+BOT_TOKEN="$(jq -r '.channels.telegram.botToken' /home/pi/.openclaw/openclaw.json 2>/dev/null || echo '')"
 
 log() { echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] $*"; }
 
