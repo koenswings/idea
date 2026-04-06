@@ -246,10 +246,44 @@ OpenClaw downtime during the switchover is the only interruption to agent availa
 
 ---
 
-## Open Questions
+## Open Questions (resolved at execution)
 
-1. Does `user: "1000:1000"` break OpenClaw's Docker container startup? — Test on Pi before
-   applying to production.
-2. Is `/home/node` already used on the Pi for anything? — Check before creating symlink.
-3. Node version on Pi: currently 22 (setup.sh). Native OpenClaw recommends Node 24. Should
-   setup.sh be updated to Node 24 as part of this migration?
+1. **`user: "1000:1000"` test** — skipped; Option A was never tested. Migration went directly to Option B (native).
+2. **`/home/node` on Pi** — did not exist; symlink created cleanly at `/home/node/workspace → /home/pi/idea`.
+3. **Node version** — Node 22 used; not upgraded to 24. OpenClaw 2026.4.2 works on Node 22.
+
+---
+
+## Execution Notes (2026-04-06)
+
+Migration executed by Claude Code in a tmux SSH session. Deviations from runbook:
+
+**1. Config was in a Docker named volume, not a bind-mount.**
+The runbook assumes `~/.openclaw/` was accessible on the host as a bind-mount. In the actual
+setup it was a named Docker volume (`openclaw_openclaw-data`). Extraction required:
+```bash
+docker cp openclaw-gateway:/root/.openclaw /tmp/openclaw-data
+```
+Followed by a Python script to rewrite all internal path references from `/root/.openclaw/`
+to `/home/pi/.openclaw/`. The runbook Step 1 backup (`cp ~/.openclaw/`) would have been empty.
+
+**2. `gateway.mode=local` required.**
+OpenClaw 2026.4.2 refuses to start without `gateway.mode` set to `"local"`. This key was
+absent in the Docker-era config. The runbook Step 4 states "no config migration needed" —
+that was incorrect for this version.
+
+**3. `ANTHROPIC_API_KEY` via systemd drop-in.**
+Added at `~/.config/systemd/user/openclaw-gateway.service.d/env.conf` rather than the main
+service unit. This matches the `setup.sh` native flow.
+
+**4. Root-owned workspace** — discovered post-reboot (not during migration).
+The Docker container ran as root, so all files created during that period were root-owned on
+the host. Fixed with `sudo chown -R pi:pi /home/pi/idea` after the first nightly reboot.
+
+**Post-migration state:**
+- Service: `~/.config/systemd/user/openclaw-gateway.service` (user service, enabled, auto-starts)
+- Version: OpenClaw 2026.4.2
+- Config: `~/.openclaw/openclaw.json` with `gateway.mode=local`
+- Workspace symlink: `/home/node/workspace → /home/pi/idea` (✅ verified)
+- `setup.sh`: updated to native install flow (no Docker for OpenClaw)
+- `platform/compose.yaml`: `openclaw-gateway` service removed (PR #29)
