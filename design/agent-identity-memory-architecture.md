@@ -1,8 +1,9 @@
 # Agent Identity & Memory Architecture
 
-**Status:** Proposed  
+**Status:** Implemented  
 **Author:** Atlas  
 **Date:** 2026-04-01  
+**Implemented:** 2026-04-02  
 
 ---
 
@@ -148,7 +149,7 @@ set -euo pipefail
 
 WORKSPACE="/home/pi/idea/agents"
 BACKUP_REPO="/home/pi/agent-identities"
-BOT_TOKEN="$(jq -r '.channels.telegram.botToken' /root/.openclaw/openclaw.json)"
+BOT_TOKEN="$(jq -r '.channels.telegram.botToken' /home/pi/.openclaw/openclaw.json)"
 ATLAS_CHAT="-5105695997"
 
 IDENTITY_FILES="AGENTS.md SOUL.md IDENTITY.md USER.md TOOLS.md HEARTBEAT.md"

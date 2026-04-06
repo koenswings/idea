@@ -86,7 +86,7 @@ Each IDEA role becomes one agent entry in `openclaw.json`, with its own workspac
 | `site-dev` | Beacon 🌐 | `/home/pi/idea/agents/agent-site-dev` | Builds and maintains the IDEA public website |
 | `programme-manager` | Marco 📋 | `/home/pi/idea/agents/agent-programme-manager` | Field coordination, school support, teacher guides, supporter comms, fundraising |
 
-All five agents have their own dedicated git repository. Each has a full set of identity files (`AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `USER.md`, `TOOLS.md`, `HEARTBEAT.md`, `BOOTSTRAP.md`) at the repo root, committed to git and managed via the normal PR flow for protected repos.
+All five agents have their own dedicated git repository. Each has a full set of identity files (`AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `USER.md`, `TOOLS.md`, `HEARTBEAT.md`, `BOOTSTRAP.md`) at the repo root. These files are **gitignored in the code repos** — they live in the workspace and are backed up nightly to the `agent-identities` repo. See [Identity Files — Gitignored, Backed Up Nightly](#identity-files--gitignored-backed-up-nightly).
 
 **Atlas (operations-manager)** is both the COO and the quality manager. The separate `quality-manager` role (Veri) has been merged into Atlas — all quality review and PR oversight is Atlas's responsibility. Atlas's workspace is `/home/node/workspace/agents/agent-operations-manager/`.
 
@@ -200,9 +200,22 @@ Every agent repo contains a full set of identity files at the repo root:
 | `HEARTBEAT.md` | External event polling checklist (disabled by default) |
 | `BOOTSTRAP.md` | First-session setup guide — deleted after first run |
 
-All identity files are committed to git and version-controlled. All six repos are branch-protected (`required_approving_review_count: 0`, `enforce_admins: true`). Identity file updates go through a PR — opened by the agent and merged by the CEO (no approvals required; PRs serve as the audit trail).
+## Identity Files — Gitignored, Backed Up Nightly
 
-The `memory/` folder (`MEMORY.md` + daily logs) is committed to git — it is part of the permanent record of each agent's operational history.
+Identity and memory files are **not tracked in agent code repos**. They are gitignored and live directly in the agent workspace. A nightly cron at 03:00 UTC backs them up to the `agent-identities` GitHub repo (not branch-protected — Atlas pushes directly).
+
+**File classification:**
+
+| Category | Files | Governed by |
+|----------|-------|--------------|
+| **Identity** | `AGENTS.md` `SOUL.md` `IDENTITY.md` `USER.md` `TOOLS.md` `HEARTBEAT.md` | Atlas only |
+| **Memory** | `MEMORY.md` `memory/` `outputs/` | Agent (free writes) |
+
+**Why gitignored?** Mixing live operational files with code creates friction — memory writes require PR ceremony, and identity changes can drift silently. Separating them means agents write memory freely, identity changes go through Atlas, and the code repos stay clean.
+
+**Drift detection:** The nightly backup script compares identity file diffs. If any identity file changed without Atlas authorisation, Atlas receives a Telegram alert and can revert from the `agent-identities` repo.
+
+Full design: `design/agent-identity-memory-architecture.md`
 
 ---
 
@@ -766,15 +779,12 @@ The `<short-topic>` slug is 2–4 words in kebab-case describing the content, no
 ### Rules
 
 1. Write the file **immediately** after delivering the response — not at session end
-2. Commit and push to `memory/updates` right after writing
+2. No commit or PR needed — the nightly backup captures it automatically
 3. This applies to every session and every interface (Telegram, Mission Control, terminal)
-4. Commit message format: `outputs: YYYY-MM-DD <short-topic>`
 
 ### Purpose
 
 Output files are the permanent, searchable record of what every agent said, decided, and produced — and why. Memory files capture what agents *know*; output files capture what they *said*. Together they give full auditability without needing to reconstruct decisions from conversation logs.
-
-The `outputs/` directory flows through the same `memory/updates` branch and long-lived PR as memory files — one PR per agent, merged by the CEO on their own schedule.
 
 ---
 
@@ -785,28 +795,21 @@ know**. OpenClaw's built-in automatic memory system — which accumulates notes 
 them silently into a MEMORY.md — is not used. It grows without CEO visibility, lives outside git,
 and drifts from the documented role definitions in `AGENTS.md`.
 
-**Structured documents in git are the memory layer.**
+**Live workspace files are the memory layer.**
 
-When an agent discovers something worth retaining — a pattern in the codebase, a lesson from a
-failed deployment, a preference about how grant proposals should be structured — it proposes an
-update to its own `AGENTS.md` as a PR. The CEO reviews and merges. That is memory: deliberate,
-auditable, and CEO-approved.
+Memory and identity files live in each agent's workspace and are active immediately — no commit or PR required. Agents write `memory/YYYY-MM-DD.md`, `MEMORY.md`, and `outputs/` freely during sessions. The nightly backup cron (03:00 UTC) syncs everything to the `agent-identities` GitHub repo.
 
-The same principle applies to shared knowledge. New facts about the product go into
-`CONTEXT.md` (org root) via PR. New operational patterns go into the relevant `AGENTS.md`. Nothing
-accumulates silently.
+For durable shared knowledge: new facts about the product go into `CONTEXT.md` (org root) via PR. Structural changes to how an agent works go into `AGENTS.md` — but routed through Atlas, not opened as a PR by the agent itself.
 
-**Session logs** (`memory/YYYY-MM-DD.md` and `MEMORY.md` in each workspace) are committed to git alongside `outputs/`. Together they form the permanent record: `outputs/` holds the substantive responses; `memory/` holds the agent's running operational notes and durable decisions.
+**When to write memory:** After each substantive exchange — not at session end. Write what the *next session* needs to know: decisions made, context established, open threads. Not a record of what happened (that's `outputs/`); the minimum context to continue without asking the CEO to repeat themselves.
 
-**When to write memory:** After each substantive exchange — not at session end. Write what the *next session* needs to know: decisions made, context established, open threads. Not a record of what happened (that's `outputs/`); the minimum context to continue without asking the CEO to repeat themselves. Append to `memory/YYYY-MM-DD.md` and push immediately alongside the output file.
+### Memory flow
 
-### Memory commit workflow
+1. Agent writes to `memory/YYYY-MM-DD.md` and `MEMORY.md` in its workspace — **immediately active**
+2. Nightly cron at 03:00 UTC backs up all memory + identity files to `agent-identities` repo
+3. No PR, no branch, no CEO action needed for memory to persist
 
-All repos are branch-protected — no direct pushes to `main`. Memory updates flow through a persistent branch (`memory/updates`): the agent pushes each session's memory files there; a single long-lived PR stays open on GitHub accumulating commits. The CEO merges whenever they want to review what has been logged. After a merge, the agent opens a fresh `memory/updates` branch.
-
-This keeps memory visible and reviewable without generating PR noise. The CEO sees all memory updates in one place and merges on their own schedule.
-
-**Future improvement — auto-merge for memory-only PRs:** A GitHub Actions workflow (`.github/workflows/auto-merge-memory.yml`) can detect when a PR touches only `memory/` paths and merge it automatically — no CEO action required. Requires one manual PR to add the workflow file; thereafter all memory PRs merge without friction. Deferred until the value of manual memory review is confirmed.
+Full design: `design/agent-identity-memory-architecture.md`
 
 ---
 

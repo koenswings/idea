@@ -21,11 +21,11 @@ rotation procedure. Key registry lives at `platform/keys.md`.
 → [design/ssh-key-management.md](ssh-key-management.md)
 
 ## openclaw-native-migration.md
-**Status:** On hold  ·  **Date:** 2026-03-30  ·  **Author:** Atlas
+**Status:** Implemented  ·  **Date:** 2026-03-30  ·  **Implemented:** 2026-04-06  ·  **Author:** Atlas
 Trade-off analysis: OpenClaw Docker vs native install. Covers UID mismatch problem, Option A
 (--user 1000:1000 patch), Option B (native install), path preservation via symlink, and
-recommendation. Migration runbook at `platform/MIGRATE-NATIVE.md`.
-→ [design/openclaw-native-migration.md](openclaw-native-migration.md) _(PR #18 — on hold)_
+recommendation. Migration runbook at `platform/MIGRATE-NATIVE.md`. Executed by Claude 2026-04-06.
+→ [design/openclaw-native-migration.md](openclaw-native-migration.md)
 
 ## tailscale-remote-management.md
 **Status:** Implemented  ·  **Date:** 2026-03-29
@@ -34,9 +34,9 @@ model, Phase 1 USB activation script, Phase 2 Console UI toggle, session flow, k
 → [design/tailscale-remote-management.md](tailscale-remote-management.md)
 
 ## agent-identity-memory-architecture.md
-**Status:** Implemented  ·  **Date:** 2026-04-01  ·  **Author:** Atlas
+**Status:** Implemented  ·  **Date:** 2026-04-01  ·  **Implemented:** 2026-04-02  ·  **Author:** Atlas
 Separates identity, memory, and code into distinct layers. Agent code repos become pure code;
-identity and memory files back up to a single `agent-identities` GitHub repo via nightly Pi
-cron. Atlas governs identity changes; unauthorized drift triggers Telegram alert. MEMORY.md
-extended to all agents. Replaces memory/updates branch + PR flow.
+identity and memory files backed up to `agent-identities` GitHub repo via nightly Pi cron (03:00 UTC).
+Atlas governs identity changes; unauthorized drift triggers Telegram alert. MEMORY.md extended to
+all agents. Replaces memory/updates branch + PR flow entirely.
 → [design/agent-identity-memory-architecture.md](agent-identity-memory-architecture.md)
