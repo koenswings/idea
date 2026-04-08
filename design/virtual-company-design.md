@@ -416,7 +416,7 @@ This is a deliberate choice. The current Telegram + GitHub workflow is simple, w
 - Mission Control runs as part of the unified IDEA Platform stack (`idea/platform/compose.yaml`) — 6 services on a shared `idea-net` Docker network alongside `openclaw-gateway`
 - A local auth token (`MC_LOCAL_AUTH_TOKEN` in `platform/.env`) authenticates all API calls. All agents share the same token value; it is stored as `AUTH_TOKEN` in each agent's `.env` (gitignored)
 - The board hierarchy is configured once in the MC UI: **IDEA org → Board Groups (Engineering, HQ) → Boards per agent or project → Tasks**
-- Frontend accessible at `https://openclaw-pi.tail2d60.ts.net:4000`; backend API at `http://mission-control-backend:8000` (internal) or `http://172.18.0.1:8000` (host bridge, also works)
+- Frontend accessible at `https://openclaw-pi.tail2d60.ts.net:4000`; backend API at `http://127.0.0.1:8000` (host-bound port — OpenClaw runs natively, not in Docker, so the container hostname does not resolve)
 
 The rest of the setup is unaffected: `openclaw.json`, `AGENTS.md` files, sandbox files, and the HQ directory structure on disk are unchanged.
 
