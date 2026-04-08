@@ -12,7 +12,8 @@
 # Before first run:
 #   bash /home/pi/idea/scripts/setup.sh
 
-name: openclaw
+# project name defaults to 'platform' (directory name) — do not set 'name:' here,
+# as existing containers and volumes were created under that project name.
 
 networks:
   idea-net:

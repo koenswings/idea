@@ -121,6 +121,48 @@ install_deps() {
   ok "python3: $(python3 --version)"
 }
 
+# ── Step 1b: Docker DNS configuration ───────────────────────────────────────────
+#
+# Tailscale rewrites /etc/resolv.conf on the host to use its own nameserver
+# (100.100.100.100). Docker inherits this, causing container DNS to miss
+# Docker-internal service names like 'mission-control-db'.
+# Locking Docker's daemon DNS to 127.0.0.11 (Docker's embedded resolver)
+# prevents this permanently, regardless of Tailscale state.
+
+configure_docker_dns() {
+  heading "Step 1b — Docker DNS configuration"
+
+  local daemon_json="/etc/docker/daemon.json"
+
+  if sudo python3 -c "
+import json
+with open('${daemon_json}') as f:
+    d = json.load(f)
+print('ok' if d.get('dns') == ['127.0.0.11'] else 'missing')
+" 2>/dev/null | grep -q '^ok$'; then
+    ok "Docker DNS already set to 127.0.0.11"
+    return
+  fi
+
+  info "Setting Docker DNS to 127.0.0.11 in ${daemon_json}..."
+  sudo python3 -c "
+import json
+try:
+    with open('${daemon_json}') as f:
+        d = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    d = {}
+d['dns'] = ['127.0.0.11']
+with open('${daemon_json}', 'w') as f:
+    json.dump(d, f, indent=2)
+"
+
+  info "Restarting Docker to apply DNS config..."
+  sudo systemctl restart docker
+  sleep 3
+  ok "Docker DNS configured and restarted"
+}
+
 # ── Step 2: Clone agent repos ─────────────────────────────────────────────────
 
 clone_agent_repos() {
@@ -563,6 +605,7 @@ main() {
 
   require_root_or_sudo
   install_deps
+  configure_docker_dns
   clone_agent_repos
   configure_credentials
   restore_identity_files
