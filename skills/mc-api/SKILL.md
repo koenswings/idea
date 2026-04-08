@@ -13,7 +13,7 @@ Credentials and agent-specific IDs live in each agent's `TOOLS.md` and `.env`.
 ```bash
 # 1. Load credentials
 source .env                    # loads AUTH_TOKEN
-BASE_URL=http://mission-control-backend:8000
+BASE_URL=http://127.0.0.1:8000
 
 # 2. Refresh the OpenAPI spec (do this at the start of any API-heavy session)
 /home/node/workspace/skills/mc-api/scripts/mc-refresh.sh
@@ -40,7 +40,7 @@ Each agent stores their own values in `TOOLS.md` and `.env`:
 
 | Key | Description |
 |-----|-------------|
-| `BASE_URL` | `http://mission-control-backend:8000` (Docker service name — all agents) |
+| `BASE_URL` | `http://127.0.0.1:8000` (Docker service name — all agents) |
 | `AUTH_TOKEN` | Agent-specific token — write access to **own board only** |
 | `MC_PLATFORM_TOKEN` | Platform admin token — write access to **any board** (cross-agent tasks) |
 | `AGENT_ID` | UUID identifying this agent in Mission Control |
@@ -56,7 +56,7 @@ To post a task on **another agent's board**, use `MC_PLATFORM_TOKEN` and the adm
 python3 -c "
 import urllib.request, json, os
 token = os.environ['MC_PLATFORM_TOKEN']
-base = 'http://mission-control-backend:8000'
+base = 'http://127.0.0.1:8000'
 board_id = '<TARGET_BOARD_ID>'
 payload = json.dumps({
     'title': '[From YourName] Type: Short description',
