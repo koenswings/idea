@@ -53,14 +53,14 @@ for agent in $AGENTS; do
   [ -d "$SRC/outputs" ] && rsync -a --delete "$SRC/outputs/" "$DEST/outputs/" 2>/dev/null || true
 
   # Check for identity file drift (exclude memory/ outputs/ MEMORY.md — those change freely)
-  CHANGED=$(git diff --name-only -- "$agent/" 2>/dev/null \
+  CHANGED=$(git -C "$BACKUP_REPO" diff --name-only -- "$agent/" 2>/dev/null \
     | grep -v "^$agent/memory/" \
     | grep -v "^$agent/outputs/" \
     | grep -v "^$agent/MEMORY\.md" \
     || true)
 
   if [ -n "$CHANGED" ]; then
-    STATS=$(git diff --stat -- "$agent/" 2>/dev/null \
+    STATS=$(git -C "$BACKUP_REPO" diff --stat -- "$agent/" 2>/dev/null \
       | grep "|" \
       | grep -v "memory/" \
       | grep -v "outputs/" \
@@ -73,12 +73,12 @@ for agent in $AGENTS; do
 done
 
 # Commit and push everything
-git add -A
-if git diff --cached --quiet; then
+git -C "$BACKUP_REPO" add -A
+if git -C "$BACKUP_REPO" diff --cached --quiet; then
   log "No changes — nothing to commit"
 else
-  git commit -m "backup: $(date -u '+%Y-%m-%d')"
-  git push origin main
+  git -C "$BACKUP_REPO" commit -m "backup: $(date -u '+%Y-%m-%d')"
+  git -C "$BACKUP_REPO" push origin main
   log "Backup committed and pushed"
 fi
 
