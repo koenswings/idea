@@ -428,6 +428,50 @@ start_mission_control() {
   info "Starting Mission Control platform..."
   docker compose -f "${platform_dir}/compose.yaml" up -d
   ok "Mission Control started"
+
+  # Install the socat proxy that bridges the Docker network to the gateway
+  install_mc_proxy
+}
+
+# ── MC gateway proxy (socat) ──────────────────────────────────────────────────
+# MC backend runs in Docker and connects to the OpenClaw gateway via WebSocket.
+# Tailscale Serve strips ?token= query params on WS upgrades, so we can't route
+# through it. Instead a socat proxy listens on the Docker bridge (172.20.0.1:18790)
+# and forwards to the loopback gateway (127.0.0.1:18789).
+install_mc_proxy() {
+  local service_file="${HOME}/.config/systemd/user/openclaw-mc-proxy.service"
+
+  if systemctl --user is-active openclaw-mc-proxy &>/dev/null; then
+    ok "openclaw-mc-proxy already running"
+    return
+  fi
+
+  if ! command -v socat &>/dev/null; then
+    info "Installing socat..."
+    sudo apt-get install -y -q socat
+  fi
+
+  info "Installing openclaw-mc-proxy systemd service..."
+  mkdir -p "${HOME}/.config/systemd/user"
+  cat > "${service_file}" << 'UNIT'
+[Unit]
+Description=OpenClaw MC Gateway Proxy (Docker bridge -> loopback:18789)
+After=network.target openclaw-gateway.service
+PartOf=openclaw-gateway.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/socat TCP-LISTEN:18790,bind=172.20.0.1,reuseaddr,fork TCP:127.0.0.1:18789
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
+UNIT
+
+  systemctl --user daemon-reload
+  systemctl --user enable --now openclaw-mc-proxy
+  ok "openclaw-mc-proxy started (172.20.0.1:18790 → 127.0.0.1:18789)"
 }
 
 # ── Step 5c: Pi crontab for nightly identity backup ───────────────────────────
@@ -435,7 +479,7 @@ start_mission_control() {
 setup_backup_cron() {
   heading "Step 5c — Nightly identity backup cron"
 
-  local cron_line="0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> /var/log/agent-backup.log 2>&1"
+  local cron_line="0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> /home/pi/idea/logs/agent-backup.log 2>&1"
 
   if crontab -l 2>/dev/null | grep -q "backup-agent-identities"; then
     ok "Backup cron already present"
