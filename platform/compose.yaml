@@ -78,7 +78,7 @@ services:
     ports:
       - "127.0.0.1:8000:8000"  # Tailscale Serve proxies this to https://openclaw-pi.tail2d60.ts.net:8000
     extra_hosts:
-      - "openclaw-pi.tail2d60.ts.net:host-gateway"
+      - "openclaw-pi.tail2d60.ts.net:100.115.60.6"  # Tailscale IP — routable from Docker; Serve proxies to gateway
     depends_on:
       mission-control-db:
         condition: service_healthy
@@ -113,7 +113,7 @@ services:
     networks:
       - idea-net
     extra_hosts:
-      - "openclaw-pi.tail2d60.ts.net:host-gateway"
+      - "openclaw-pi.tail2d60.ts.net:100.115.60.6"  # Tailscale IP — routable from Docker; Serve proxies to gateway
     depends_on:
       mission-control-db:
         condition: service_healthy
@@ -127,6 +127,7 @@ services:
       - RQ_QUEUE_NAME=default
       - RQ_DISPATCH_MAX_RETRIES=3
       - RQ_DISPATCH_THROTTLE_SECONDS=2.0
+      - BASE_URL=http://mission-control-backend:8000
 
   mission-control-frontend:
     image: openclaw-mission-control-frontend
