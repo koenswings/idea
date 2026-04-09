@@ -9,7 +9,7 @@
 #   GITHUB_TOKEN env var — or set in /home/pi/agent-identities/.git/config credentials
 #
 # Schedule (Pi crontab):
-#   0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> /var/log/agent-backup.log 2>&1
+#   0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> /home/pi/idea/logs/agent-backup.log 2>&1
 
 set -euo pipefail
 
