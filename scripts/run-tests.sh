@@ -23,15 +23,14 @@ git pull --ff-only origin $(git rev-parse --abbrev-ref HEAD)
 
 # Clear any root-owned build artefacts left by sandbox builds.
 # The OpenClaw sandbox runs as root and shares the Pi's filesystem. When a sandbox
-# build leaves dist/ owned by root, pnpm clean (rm -fr dist/*) fails as the pi user.
-# sudo rm -rf is safe here: dist/ is gitignored and always rebuilt fresh.
-echo "[run-tests] Cleaning dist/..."
+# build leaves dist/ or node_modules/ owned by root, pnpm clean and pnpm install fail
+# as the pi user. sudo rm -rf is safe here: both dirs are gitignored and always rebuilt.
+echo "[run-tests] Cleaning dist/ and node_modules/..."
 sudo rm -rf "$ENGINE_DIR/dist/"
+sudo rm -rf "$ENGINE_DIR/node_modules/"
 
-# Install dependencies if needed.
-# CI=true: allows pnpm to remove/reinstall node_modules without a TTY. Required when
-# the lockfile changed since the last install (e.g. a new devDependency was added in
-# the sandbox and the updated pnpm-lock.yaml was pushed to the branch).
+# Install dependencies.
+# CI=true: allows pnpm to install without a TTY.
 echo "[run-tests] Installing dependencies..."
 CI=true pnpm install --frozen-lockfile
 
