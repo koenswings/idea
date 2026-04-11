@@ -9,7 +9,7 @@
 #   GITHUB_TOKEN env var — or set in /home/pi/agent-identities/.git/config credentials
 #
 # Schedule (Pi crontab):
-#   0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> /var/log/agent-backup.log 2>&1
+#   0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> /home/pi/idea/logs/agent-backup.log 2>&1
 
 set -euo pipefail
 
@@ -95,5 +95,19 @@ Reply RATIFY <agent> or REVERT <agent> to act."
     > /dev/null
   log "Drift alert sent to Atlas"
 fi
+
+# MC PostgreSQL backup — runs inside the DB container, no host pg client needed
+backup_mc_db() {
+    local DUMP_PATH="$BACKUP_REPO/mc-database.dump"
+    local DB_CONTAINER="openclaw-mission-control-db-1"
+    docker exec "$DB_CONTAINER" \
+        pg_dump -U postgres -d mission_control --format=custom -f /tmp/mc-backup.dump 2>/dev/null \
+        && docker cp "$DB_CONTAINER":/tmp/mc-backup.dump "$DUMP_PATH" 2>/dev/null \
+        && docker exec "$DB_CONTAINER" rm /tmp/mc-backup.dump 2>/dev/null \
+        && log "MC DB dump: OK ($(du -sh "$DUMP_PATH" | cut -f1))" \
+        || log "MC DB dump: FAILED"
+}
+
+backup_mc_db
 
 log "Backup complete"

@@ -479,13 +479,17 @@ UNIT
 setup_backup_cron() {
   heading "Step 5c — Nightly identity backup cron"
 
-  local cron_line="0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> /home/pi/idea/logs/agent-backup.log 2>&1"
+  local log_dir="/home/pi/idea/logs"
+  local log_file="${log_dir}/agent-backup.log"
+  local cron_line="0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> ${log_file} 2>&1"
+
+  mkdir -p "${log_dir}"
 
   if crontab -l 2>/dev/null | grep -q "backup-agent-identities"; then
     ok "Backup cron already present"
   else
     (crontab -l 2>/dev/null; echo "${cron_line}") | crontab -
-    ok "Nightly backup cron added (03:00 UTC daily)"
+    ok "Nightly backup cron added (03:00 UTC daily) → logs: ${log_file}"
   fi
 }
 

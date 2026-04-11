@@ -1,4 +1,4 @@
-<!-- Auto-exported from Mission Control 2026-04-08 06:00 UTC. Do not edit manually. -->
+<!-- Auto-exported from Mission Control 2026-04-11 06:00 UTC. Do not edit manually. -->
 
 # BACKLOG.md — IDEA Agent Task Board
 
@@ -23,6 +23,9 @@ To propose a new item, follow the process in `PROCESS.md`.
 - [ ] Group I: USB Gadget — LAN access for non-host computers
 - [ ] Group J: Offline Docker image loading — add test coverage
 - [ ] Group K: Per-engine SSH keypair
+- [ ] Group P: Concurrent operation safety — per-resource locking
+- [ ] Group Q: Cross-engine integration tests
+- [ ] Group R: Interrupted task recovery
 - [ ] Implement cross-disk upgrade detection and proposal
 - [ ] Plan and implement SSH key-based access for field Pis
 - [ ] Refactor script/ to scripts/
