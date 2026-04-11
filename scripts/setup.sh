@@ -474,10 +474,70 @@ UNIT
   ok "openclaw-mc-proxy started (172.20.0.1:18790 → 127.0.0.1:18789)"
 }
 
-# ── Step 5c: Pi crontab for nightly identity backup ───────────────────────────
+# ── Step 5c: Restore MC PostgreSQL database from agent-identities backup ────────
+#
+# If agent-identities contains a mc-database.dump, restore it into the running
+# MC PostgreSQL container. Runs after start_mission_control so the DB is up.
+# Idempotent: skips if no dump found in backup repo.
+
+restore_mc_db() {
+  heading "Step 5c — Restore MC database"
+
+  local dump_url="https://raw.githubusercontent.com/${GITHUB_ACCOUNT}/${AGENT_IDENTITIES_REPO}/main/mc-database.dump"
+  local tmp_dump="/tmp/mc-database-restore-$$.dump"
+  local db_container="openclaw-mission-control-db-1"
+
+  # Download dump from agent-identities (raw binary via git archive is cleaner but this works)
+  info "Checking for MC database backup in agent-identities..."
+  local github_token
+  github_token=$(cat "${SECRETS_DIR}/../../agents/agent-operations-manager/.env" 2>/dev/null \
+    | grep GITHUB_TOKEN | cut -d= -f2 | tr -d '\n\r' || echo '')
+
+  local http_code
+  http_code=$(curl -sf -o "${tmp_dump}" \
+    -H "Authorization: token ${github_token}" \
+    -H "Accept: application/octet-stream" \
+    -w "%{http_code}" \
+    "${dump_url}" 2>/dev/null || echo "000")
+
+  if [[ "$http_code" != "200" ]] || [[ ! -s "${tmp_dump}" ]]; then
+    info "No MC database backup found — fresh MC install (no restore needed)"
+    rm -f "${tmp_dump}"
+    return
+  fi
+
+  info "MC database dump found — waiting for DB to be healthy..."
+  local attempts=0
+  until docker exec "${db_container}" pg_isready -U postgres -q 2>/dev/null; do
+    sleep 2
+    attempts=$((attempts + 1))
+    [[ $attempts -ge 15 ]] && { warn "DB not ready after 30s — skipping MC restore"; rm -f "${tmp_dump}"; return; }
+  done
+
+  info "Restoring MC database from backup..."
+  docker cp "${tmp_dump}" "${db_container}":/tmp/mc-restore.dump
+  rm -f "${tmp_dump}"
+
+  # Drop and recreate DB cleanly, then restore
+  docker exec "${db_container}" psql -U postgres -c "DROP DATABASE IF EXISTS mission_control;" postgres
+  docker exec "${db_container}" psql -U postgres -c "CREATE DATABASE mission_control;" postgres
+  docker exec "${db_container}" pg_restore -U postgres -d mission_control \
+    --no-owner --no-acl /tmp/mc-restore.dump 2>/dev/null || true
+  docker exec "${db_container}" rm /tmp/mc-restore.dump
+
+  ok "MC database restored from backup"
+
+  # Restart backend + worker so they reconnect to restored DB
+  info "Restarting MC backend and worker..."
+  docker compose -f "${IDEA_DIR}/platform/compose.yaml" restart \
+    mission-control-backend mission-control-webhook-worker 2>/dev/null || true
+  ok "MC backend and worker restarted"
+}
+
+# ── Step 5d: Pi crontab for nightly identity backup ───────────────────────────
 
 setup_backup_cron() {
-  heading "Step 5c — Nightly identity backup cron"
+  heading "Step 5d — Nightly identity backup cron"
 
   local log_dir="/home/pi/idea/logs"
   local log_file="${log_dir}/agent-backup.log"
@@ -493,7 +553,7 @@ setup_backup_cron() {
   fi
 }
 
-# ── Step 5d: Provision per-agent MC auth tokens ───────────────────────────────
+# ── Step 5e: Pi crontab for nightly identity backup ───────────────────────────────
 #
 # Generates a fresh AUTH_TOKEN for each board lead agent, hashes it with
 # PBKDF2-SHA256, updates the MC database, and writes the plaintext token to
@@ -505,7 +565,7 @@ setup_backup_cron() {
 # this step skips them gracefully; re-run after /init bootstraps all agents.
 
 provision_agent_tokens() {
-  heading "Step 5d — Agent MC tokens"
+  heading "Step 5e — Agent MC tokens"
 
   # Map repo name → MC agent display name (must match agents.name in DB)
   declare -A AGENT_NAMES=(
@@ -660,6 +720,7 @@ main() {
   configure_agent_envs
   start_openclaw
   start_mission_control
+  restore_mc_db
   provision_agent_tokens
   setup_backup_cron
   setup_tailscale
