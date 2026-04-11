@@ -253,29 +253,44 @@ Send a test message to one agent group via Telegram. Confirm response.
 
 ---
 
-## Step 9 — Remove openclaw-gateway from compose.yaml
+## Step 9 — Remove openclaw-gateway from compose.yaml and restart MC cleanly
 
 Once native is confirmed stable, remove the Docker service from compose so it doesn't
-accidentally get started again:
+accidentally get started again. This is also the moment to fix the MC Docker networking —
+a clean restart puts all MC services on the same `openclaw_idea-net` network.
 
 ```bash
 cd /home/pi/idea
 ```
 
 Edit `platform/compose.yaml` — remove the `openclaw-gateway` service block entirely.
-Keep all MC services.
+Keep all MC services. Verify `extra_hosts` is present on `mission-control-backend` and
+`mission-control-webhook-worker` (needed for gateway connectivity):
+```yaml
+    extra_hosts:
+      - "openclaw-pi.tail2d60.ts.net:host-gateway"
+```
 
-Then:
+Then do a clean MC restart (stops all containers, starts fresh on unified `openclaw_idea-net`):
 ```bash
-# Validate the updated compose
-docker compose -f platform/compose.yaml config
+# Stop all MC containers (data volumes are preserved)
+docker compose -f platform/compose.yaml down
 
-# Commit the change
-git config user.email "koen@idea.org"
-git config user.name "Koen"
+# Start all MC containers fresh (clean networking, all on openclaw_idea-net)
+docker compose -f platform/compose.yaml up -d
+
+# Verify all services healthy
+docker compose -f platform/compose.yaml ps
+
+# Verify MC API reachable
+sleep 10 && curl -s http://localhost:8000/api/v1/health && echo OK
+```
+
+Then commit the compose.yaml change:
+```bash
 git add platform/compose.yaml
 git commit -m "platform: remove openclaw-gateway from Docker compose (now native)"
-git push origin main   # or open a PR — follow the branch protection policy
+# Open PR per PROCESS.md — do not push directly to main
 ```
 
 ---
