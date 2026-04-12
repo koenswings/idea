@@ -1,4 +1,4 @@
-<!-- Auto-exported from Mission Control 2026-04-11 06:00 UTC. Do not edit manually. -->
+<!-- Auto-exported from Mission Control 2026-04-12 06:00 UTC. Do not edit manually. -->
 
 # BACKLOG.md — IDEA Agent Task Board
 
@@ -10,11 +10,6 @@ To propose a new item, follow the process in `PROCESS.md`.
 ## Engine Dev (Axle)
 
 ### Inbox
-- [ ] Find logical inconsistencies between architecture, solution description and current code
-- [ ] Fix extractAppVersion for hyphenated app names
-- [ ] Group A: Implement ejectDisk command
-- [ ] Group B: Implement copyApp + moveApp + rsync infrastructure
-- [ ] Group C: Implement backupApp + restoreApp + Backup Disk type
 - [ ] Group D: Implement upgradeApp + minor upgrade proposal
 - [ ] Group E: Implement upgradeEngine + Engine self-upgrade detection
 - [ ] Group F: Implement Files Disk type + network filesystem mount
@@ -24,7 +19,6 @@ To propose a new item, follow the process in `PROCESS.md`.
 - [ ] Group J: Offline Docker image loading — add test coverage
 - [ ] Group K: Per-engine SSH keypair
 - [ ] Group P: Concurrent operation safety — per-resource locking
-- [ ] Group Q: Cross-engine integration tests
 - [ ] Group R: Interrupted task recovery
 - [ ] Implement cross-disk upgrade detection and proposal
 - [ ] Plan and implement SSH key-based access for field Pis
@@ -36,7 +30,6 @@ To propose a new item, follow the process in `PROCESS.md`.
 - [ ] Scan Solution Description for unimplemented features
 - [ ] Test permanently attached USB SSD as system disk
 - [ ] Update Architecture doc from Solution Description
-- [ ] Upgrade zx from v7 to v8 (CVE-2025-13437)
 
 ## Console Dev (Pixel)
 
