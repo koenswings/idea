@@ -1,0 +1,1471 @@
+{
+  "nodes": [
+    {
+      "id": "g0",
+      "type": "group",
+      "label": "Offline Product Core",
+      "x": 0,
+      "y": 0,
+      "width": 1100,
+      "height": 720,
+      "color": "1"
+    },
+    {
+      "id": "n_app_test_harness",
+      "type": "file",
+      "file": "App Compatibility Test Harness.md",
+      "x": 20,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_app_disk",
+      "type": "file",
+      "file": "App Disk.md",
+      "x": 220,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_automerge_sync",
+      "type": "file",
+      "file": "Automerge State Sync.md",
+      "x": 420,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_console",
+      "type": "file",
+      "file": "Console UI.md",
+      "x": 20,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_docker_hub",
+      "type": "file",
+      "file": "DockerHub Image Registry.md",
+      "x": 220,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_engine",
+      "type": "file",
+      "file": "Engine (Raspberry Pi App).md",
+      "x": 420,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_infrastructure_discipline",
+      "type": "file",
+      "file": "Infrastructure Discipline Rules.md",
+      "x": 20,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_kit_agent",
+      "type": "file",
+      "file": "Kit (App Dev Agent Proposal).md",
+      "x": 220,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_offline_first",
+      "type": "file",
+      "file": "Offline-First Design.md",
+      "x": 420,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openclaw_docker",
+      "type": "file",
+      "file": "OpenClaw Docker Deploy (Legacy).md",
+      "x": 20,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openclaw_native",
+      "type": "file",
+      "file": "OpenClaw Native Systemd Install.md",
+      "x": 220,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_physical_web_app_mgmt",
+      "type": "file",
+      "file": "Physical Web App Management.md",
+      "x": 420,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_reliability_principle",
+      "type": "file",
+      "file": "Reliability Over Features.md",
+      "x": 20,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ssh_key_auth",
+      "type": "file",
+      "file": "SSH Key Authentication.md",
+      "x": 220,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_systemd_service",
+      "type": "file",
+      "file": "Systemd User Service.md",
+      "x": 420,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tailscale_remote",
+      "type": "file",
+      "file": "Tailscale Remote Access (Latent).md",
+      "x": 20,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_version_monitoring",
+      "type": "file",
+      "file": "Upstream Version Monitoring.md",
+      "x": 220,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g1",
+      "type": "group",
+      "label": "Agent Team & Governance",
+      "x": 1180,
+      "y": 0,
+      "width": 880,
+      "height": 620,
+      "color": "2"
+    },
+    {
+      "id": "n_atlas",
+      "type": "file",
+      "file": "Atlas (Operations Manager).md",
+      "x": 1200,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_axle",
+      "type": "file",
+      "file": "Axle (Engine Dev).md",
+      "x": 1400,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_beacon",
+      "type": "file",
+      "file": "Beacon (Site Dev).md",
+      "x": 1600,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ceo_approval",
+      "type": "file",
+      "file": "CEO Approval Loop.md",
+      "x": 1200,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_cross_agent_comms",
+      "type": "file",
+      "file": "Cross-Agent Communication via Koen.md",
+      "x": 1400,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_koen",
+      "type": "file",
+      "file": "Koen (CEO).md",
+      "x": 1600,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_pr_review_cycle",
+      "type": "file",
+      "file": "PR Review Cycle.md",
+      "x": 1200,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_plan_permission_mode",
+      "type": "file",
+      "file": "Plan Permission Mode.md",
+      "x": 1400,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_proposal_flow",
+      "type": "file",
+      "file": "Proposal PR Flow.md",
+      "x": 1600,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_standup_2026_03_19",
+      "type": "file",
+      "file": "Standup 2026-03-19.md",
+      "x": 1200,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_standup_2026_03_20",
+      "type": "file",
+      "file": "Standup 2026-03-20.md",
+      "x": 1400,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_standup_2026_03_30",
+      "type": "file",
+      "file": "Standup 2026-03-30 (Latest).md",
+      "x": 1600,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_standup_format",
+      "type": "file",
+      "file": "Standup Format.md",
+      "x": 1200,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_idea_repo",
+      "type": "file",
+      "file": "idea Org Root Repo.md",
+      "x": 1400,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g2",
+      "type": "group",
+      "label": "Platform Infrastructure",
+      "x": 2140,
+      "y": 0,
+      "width": 880,
+      "height": 520,
+      "color": "3"
+    },
+    {
+      "id": "n_mc_backend",
+      "type": "file",
+      "file": "MC Backend Service.md",
+      "x": 2160,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_mc_frontend",
+      "type": "file",
+      "file": "MC Frontend Service.md",
+      "x": 2360,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_mc_kanban",
+      "type": "file",
+      "file": "MC Kanban Board.md",
+      "x": 2560,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_mc_db",
+      "type": "file",
+      "file": "MC PostgreSQL DB.md",
+      "x": 2160,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_mission_control",
+      "type": "file",
+      "file": "Mission Control.md",
+      "x": 2360,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tailscale",
+      "type": "file",
+      "file": "Tailscale Network.md",
+      "x": 2560,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tailscale_serve",
+      "type": "file",
+      "file": "Tailscale Serve Proxy.md",
+      "x": 2160,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_idea_net",
+      "type": "file",
+      "file": "idea-net Docker Network.md",
+      "x": 2360,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_readme",
+      "type": "file",
+      "file": "idea Repo README.md",
+      "x": 2560,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_mc_api_skill",
+      "type": "file",
+      "file": "mc-api Skill.md",
+      "x": 2160,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_compose_yaml",
+      "type": "file",
+      "file": "platformcompose.yaml.md",
+      "x": 2360,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g3",
+      "type": "group",
+      "label": "OpenClaw & Skills",
+      "x": 3100,
+      "y": 0,
+      "width": 660,
+      "height": 420,
+      "color": "4"
+    },
+    {
+      "id": "n_agent_skills",
+      "type": "file",
+      "file": "Agent Skills System.md",
+      "x": 3120,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_heartbeat_polling",
+      "type": "file",
+      "file": "Heartbeat Polling.md",
+      "x": 3320,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openclaw",
+      "type": "file",
+      "file": "OpenClaw Platform.md",
+      "x": 3520,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_telegram_comms",
+      "type": "file",
+      "file": "Telegram Communication.md",
+      "x": 3120,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_md_to_pdf_skill",
+      "type": "file",
+      "file": "md-to-pdf Skill.md",
+      "x": 3320,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openclaw_json",
+      "type": "file",
+      "file": "openclaw.json Config.md",
+      "x": 3520,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_telegram_table_skill",
+      "type": "file",
+      "file": "telegram-table Skill.md",
+      "x": 3120,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_telegram_table_node",
+      "type": "file",
+      "file": "telegram-table Skill (node).md",
+      "x": 3320,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g4",
+      "type": "group",
+      "label": "Backlog & Task Management",
+      "x": 0,
+      "y": 800,
+      "width": 660,
+      "height": 420,
+      "color": "5"
+    },
+    {
+      "id": "n_backlog_md",
+      "type": "file",
+      "file": "BACKLOG.md",
+      "x": 20,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_console_backlog",
+      "type": "file",
+      "file": "Console Dev Backlog Tasks.md",
+      "x": 220,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_engine_backlog",
+      "type": "file",
+      "file": "Engine Dev Backlog Tasks.md",
+      "x": 420,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_marco",
+      "type": "file",
+      "file": "Marco (Programme Manager).md",
+      "x": 20,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_pixel",
+      "type": "file",
+      "file": "Pixel (Console Dev).md",
+      "x": 220,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_programme_mgr_backlog",
+      "type": "file",
+      "file": "Programme Manager Backlog Tasks.md",
+      "x": 420,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_whatsapp_outbound",
+      "type": "file",
+      "file": "WhatsApp Outbound Communication.md",
+      "x": 20,
+      "y": 1040,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g5",
+      "type": "group",
+      "label": "Agent Identity & Memory",
+      "x": 1180,
+      "y": 800,
+      "width": 660,
+      "height": 400,
+      "color": "6"
+    },
+    {
+      "id": "n_agents_md",
+      "type": "file",
+      "file": "AGENTS.md Role File.md",
+      "x": 1200,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_agent_memory_layer",
+      "type": "file",
+      "file": "Agent Memory Layer.md",
+      "x": 1400,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_prompting_guide",
+      "type": "file",
+      "file": "Claude Prompting Best Practices.md",
+      "x": 1600,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_identity_files",
+      "type": "file",
+      "file": "Identity Files (Atlas-governed).md",
+      "x": 1200,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_memory_files",
+      "type": "file",
+      "file": "Memory Files (Agent-governed).md",
+      "x": 1400,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_soul_md",
+      "type": "file",
+      "file": "SOUL.md Persona File.md",
+      "x": 1600,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g6",
+      "type": "group",
+      "label": "Table Rendering Script",
+      "x": 2140,
+      "y": 800,
+      "width": 660,
+      "height": 400,
+      "color": "1"
+    },
+    {
+      "id": "n_scripts_render_table_rationale_26",
+      "type": "file",
+      "file": "Rough character-based width estimate (DejaVu Sans, px per char at given pt)..md",
+      "x": 2160,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_render_table_build_table_image",
+      "type": "file",
+      "file": "build_table_image().md",
+      "x": 2360,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_render_table_main",
+      "type": "file",
+      "file": "main().md",
+      "x": 2560,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_render_table_measure_text_width",
+      "type": "file",
+      "file": "measure_text_width().md",
+      "x": 2160,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_telegram_table_scripts_render_table_py",
+      "type": "file",
+      "file": "render_table.py.md",
+      "x": 2360,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g7",
+      "type": "group",
+      "label": "PDF Conversion Script",
+      "x": 3100,
+      "y": 800,
+      "width": 660,
+      "height": 400,
+      "color": "2"
+    },
+    {
+      "id": "n_scripts_md_to_pdf_add_heading_ids",
+      "type": "file",
+      "file": "add_heading_ids().md",
+      "x": 3120,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_md_to_pdf_build_html",
+      "type": "file",
+      "file": "build_html().md",
+      "x": 3320,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_md_to_pdf_convert",
+      "type": "file",
+      "file": "convert().md",
+      "x": 3520,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_md_to_pdf_main",
+      "type": "file",
+      "file": "main()_1.md",
+      "x": 3120,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_md_to_pdf_scripts_md_to_pdf_py",
+      "type": "file",
+      "file": "md-to-pdf.py.md",
+      "x": 3320,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g8",
+      "type": "group",
+      "label": "IDEA Mission & Values",
+      "x": 0,
+      "y": 1300,
+      "width": 600,
+      "height": 400,
+      "color": "3"
+    },
+    {
+      "id": "n_idea_mission",
+      "type": "file",
+      "file": "IDEA Mission.md",
+      "x": 20,
+      "y": 1380,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_rural_schools",
+      "type": "file",
+      "file": "Rural African Schools.md",
+      "x": 220,
+      "y": 1380,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_teacher_friendly",
+      "type": "file",
+      "file": "Teacher-Friendly Principle.md",
+      "x": 420,
+      "y": 1380,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g9",
+      "type": "group",
+      "label": "Nightly Backup System",
+      "x": 1180,
+      "y": 1300,
+      "width": 600,
+      "height": 400,
+      "color": "4"
+    },
+    {
+      "id": "n_drift_detection",
+      "type": "file",
+      "file": "Identity Drift Detection.md",
+      "x": 1200,
+      "y": 1380,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_nightly_backup",
+      "type": "file",
+      "file": "Nightly Backup Cron (0300 UTC).md",
+      "x": 1400,
+      "y": 1380,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_agent_identities_repo",
+      "type": "file",
+      "file": "agent-identities Backup Repo.md",
+      "x": 1600,
+      "y": 1380,
+      "width": 180,
+      "height": 60
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_telegram_table_scripts_render_table_py_scripts_render_table_measure_text_width",
+      "fromNode": "n_telegram_table_scripts_render_table_py",
+      "toNode": "n_scripts_render_table_measure_text_width",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_telegram_table_scripts_render_table_py_scripts_render_table_build_table_image",
+      "fromNode": "n_telegram_table_scripts_render_table_py",
+      "toNode": "n_scripts_render_table_build_table_image",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_telegram_table_scripts_render_table_py_scripts_render_table_main",
+      "fromNode": "n_telegram_table_scripts_render_table_py",
+      "toNode": "n_scripts_render_table_main",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_render_table_measure_text_width_scripts_render_table_build_table_image",
+      "fromNode": "n_scripts_render_table_measure_text_width",
+      "toNode": "n_scripts_render_table_build_table_image",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_render_table_measure_text_width_scripts_render_table_rationale_26",
+      "fromNode": "n_scripts_render_table_measure_text_width",
+      "toNode": "n_scripts_render_table_rationale_26",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_render_table_build_table_image_scripts_render_table_main",
+      "fromNode": "n_scripts_render_table_build_table_image",
+      "toNode": "n_scripts_render_table_main",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_md_to_pdf_scripts_md_to_pdf_py_scripts_md_to_pdf_build_html",
+      "fromNode": "n_md_to_pdf_scripts_md_to_pdf_py",
+      "toNode": "n_scripts_md_to_pdf_build_html",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_md_to_pdf_scripts_md_to_pdf_py_scripts_md_to_pdf_add_heading_ids",
+      "fromNode": "n_md_to_pdf_scripts_md_to_pdf_py",
+      "toNode": "n_scripts_md_to_pdf_add_heading_ids",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_md_to_pdf_scripts_md_to_pdf_py_scripts_md_to_pdf_convert",
+      "fromNode": "n_md_to_pdf_scripts_md_to_pdf_py",
+      "toNode": "n_scripts_md_to_pdf_convert",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_md_to_pdf_scripts_md_to_pdf_py_scripts_md_to_pdf_main",
+      "fromNode": "n_md_to_pdf_scripts_md_to_pdf_py",
+      "toNode": "n_scripts_md_to_pdf_main",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_md_to_pdf_build_html_scripts_md_to_pdf_convert",
+      "fromNode": "n_scripts_md_to_pdf_build_html",
+      "toNode": "n_scripts_md_to_pdf_convert",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_md_to_pdf_add_heading_ids_scripts_md_to_pdf_convert",
+      "fromNode": "n_scripts_md_to_pdf_add_heading_ids",
+      "toNode": "n_scripts_md_to_pdf_convert",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_md_to_pdf_convert_scripts_md_to_pdf_main",
+      "fromNode": "n_scripts_md_to_pdf_convert",
+      "toNode": "n_scripts_md_to_pdf_main",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_idea_mission_rural_schools",
+      "fromNode": "n_idea_mission",
+      "toNode": "n_rural_schools",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_engine_app_disk",
+      "fromNode": "n_engine",
+      "toNode": "n_app_disk",
+      "label": "processes [EXTRACTED]"
+    },
+    {
+      "id": "e_engine_console",
+      "fromNode": "n_engine",
+      "toNode": "n_console",
+      "label": "serves [EXTRACTED]"
+    },
+    {
+      "id": "e_engine_automerge_sync",
+      "fromNode": "n_engine",
+      "toNode": "n_automerge_sync",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_engine_offline_first",
+      "fromNode": "n_engine",
+      "toNode": "n_offline_first",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_engine_reliability_principle",
+      "fromNode": "n_engine",
+      "toNode": "n_reliability_principle",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_engine_atlas",
+      "fromNode": "n_engine",
+      "toNode": "n_atlas",
+      "label": "conceptually_related_to [INFERRED]"
+    },
+    {
+      "id": "e_engine_infrastructure_discipline",
+      "fromNode": "n_engine",
+      "toNode": "n_infrastructure_discipline",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_engine_app_test_harness",
+      "fromNode": "n_engine",
+      "toNode": "n_app_test_harness",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_engine_tailscale_remote",
+      "fromNode": "n_engine",
+      "toNode": "n_tailscale_remote",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_console_offline_first",
+      "fromNode": "n_console",
+      "toNode": "n_offline_first",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_app_disk_physical_web_app_mgmt",
+      "fromNode": "n_app_disk",
+      "toNode": "n_physical_web_app_mgmt",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_app_disk_kit_agent",
+      "fromNode": "n_app_disk",
+      "toNode": "n_kit_agent",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_offline_first_openclaw_native",
+      "fromNode": "n_offline_first",
+      "toNode": "n_openclaw_native",
+      "label": "rationale_for [INFERRED]"
+    },
+    {
+      "id": "e_offline_first_tailscale_remote",
+      "fromNode": "n_offline_first",
+      "toNode": "n_tailscale_remote",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_rural_schools_teacher_friendly",
+      "fromNode": "n_rural_schools",
+      "toNode": "n_teacher_friendly",
+      "label": "rationale_for [INFERRED]"
+    },
+    {
+      "id": "e_atlas_axle",
+      "fromNode": "n_atlas",
+      "toNode": "n_axle",
+      "label": "conceptually_related_to [EXTRACTED]"
+    },
+    {
+      "id": "e_atlas_pixel",
+      "fromNode": "n_atlas",
+      "toNode": "n_pixel",
+      "label": "conceptually_related_to [EXTRACTED]"
+    },
+    {
+      "id": "e_atlas_marco",
+      "fromNode": "n_atlas",
+      "toNode": "n_marco",
+      "label": "conceptually_related_to [EXTRACTED]"
+    },
+    {
+      "id": "e_atlas_beacon",
+      "fromNode": "n_atlas",
+      "toNode": "n_beacon",
+      "label": "conceptually_related_to [EXTRACTED]"
+    },
+    {
+      "id": "e_atlas_koen",
+      "fromNode": "n_atlas",
+      "toNode": "n_koen",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_atlas_idea_repo",
+      "fromNode": "n_atlas",
+      "toNode": "n_idea_repo",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_atlas_pr_review_cycle",
+      "fromNode": "n_atlas",
+      "toNode": "n_pr_review_cycle",
+      "label": "implements [INFERRED]"
+    },
+    {
+      "id": "e_atlas_plan_permission_mode",
+      "fromNode": "n_atlas",
+      "toNode": "n_plan_permission_mode",
+      "label": "rationale_for [INFERRED]"
+    },
+    {
+      "id": "e_atlas_standup_format",
+      "fromNode": "n_atlas",
+      "toNode": "n_standup_format",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_atlas_identity_files",
+      "fromNode": "n_atlas",
+      "toNode": "n_identity_files",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_atlas_drift_detection",
+      "fromNode": "n_atlas",
+      "toNode": "n_drift_detection",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_atlas_kit_agent",
+      "fromNode": "n_atlas",
+      "toNode": "n_kit_agent",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_atlas_standup_2026_03_19",
+      "fromNode": "n_atlas",
+      "toNode": "n_standup_2026_03_19",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_atlas_standup_2026_03_30",
+      "fromNode": "n_atlas",
+      "toNode": "n_standup_2026_03_30",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_atlas_prompting_guide",
+      "fromNode": "n_atlas",
+      "toNode": "n_prompting_guide",
+      "label": "references [INFERRED]"
+    },
+    {
+      "id": "e_axle_kit_agent",
+      "fromNode": "n_axle",
+      "toNode": "n_kit_agent",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_axle_standup_2026_03_19",
+      "fromNode": "n_axle",
+      "toNode": "n_standup_2026_03_19",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_axle_standup_2026_03_20",
+      "fromNode": "n_axle",
+      "toNode": "n_standup_2026_03_20",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_axle_engine_backlog",
+      "fromNode": "n_axle",
+      "toNode": "n_engine_backlog",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_pixel_console_backlog",
+      "fromNode": "n_pixel",
+      "toNode": "n_console_backlog",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_marco_whatsapp_outbound",
+      "fromNode": "n_marco",
+      "toNode": "n_whatsapp_outbound",
+      "label": "references [INFERRED]"
+    },
+    {
+      "id": "e_marco_kit_agent",
+      "fromNode": "n_marco",
+      "toNode": "n_kit_agent",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_marco_programme_mgr_backlog",
+      "fromNode": "n_marco",
+      "toNode": "n_programme_mgr_backlog",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_koen_idea_repo",
+      "fromNode": "n_koen",
+      "toNode": "n_idea_repo",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_koen_telegram_comms",
+      "fromNode": "n_koen",
+      "toNode": "n_telegram_comms",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_koen_ceo_approval",
+      "fromNode": "n_koen",
+      "toNode": "n_ceo_approval",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_koen_cross_agent_comms",
+      "fromNode": "n_koen",
+      "toNode": "n_cross_agent_comms",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_koen_standup_format",
+      "fromNode": "n_koen",
+      "toNode": "n_standup_format",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_idea_repo_readme",
+      "fromNode": "n_idea_repo",
+      "toNode": "n_readme",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_mission_control_backlog_md",
+      "fromNode": "n_mission_control",
+      "toNode": "n_backlog_md",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_mission_control_mc_kanban",
+      "fromNode": "n_mission_control",
+      "toNode": "n_mc_kanban",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_mission_control_compose_yaml",
+      "fromNode": "n_mission_control",
+      "toNode": "n_compose_yaml",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_mission_control_mc_api_skill",
+      "fromNode": "n_mission_control",
+      "toNode": "n_mc_api_skill",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_mission_control_readme",
+      "fromNode": "n_mission_control",
+      "toNode": "n_readme",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backlog_md_engine_backlog",
+      "fromNode": "n_backlog_md",
+      "toNode": "n_engine_backlog",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backlog_md_console_backlog",
+      "fromNode": "n_backlog_md",
+      "toNode": "n_console_backlog",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_backlog_md_programme_mgr_backlog",
+      "fromNode": "n_backlog_md",
+      "toNode": "n_programme_mgr_backlog",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_proposal_flow_ceo_approval",
+      "fromNode": "n_proposal_flow",
+      "toNode": "n_ceo_approval",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_ceo_approval_pr_review_cycle",
+      "fromNode": "n_ceo_approval",
+      "toNode": "n_pr_review_cycle",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_ceo_approval_plan_permission_mode",
+      "fromNode": "n_ceo_approval",
+      "toNode": "n_plan_permission_mode",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_telegram_comms_telegram_table_skill",
+      "fromNode": "n_telegram_comms",
+      "toNode": "n_telegram_table_skill",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_telegram_comms_openclaw",
+      "fromNode": "n_telegram_comms",
+      "toNode": "n_openclaw",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_telegram_comms_telegram_table_node",
+      "fromNode": "n_telegram_comms",
+      "toNode": "n_telegram_table_node",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_telegram_table_skill_telegram_table_node",
+      "fromNode": "n_telegram_table_skill",
+      "toNode": "n_telegram_table_node",
+      "label": "semantically_similar_to [INFERRED]"
+    },
+    {
+      "id": "e_openclaw_openclaw_json",
+      "fromNode": "n_openclaw",
+      "toNode": "n_openclaw_json",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_openclaw_agent_skills",
+      "fromNode": "n_openclaw",
+      "toNode": "n_agent_skills",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_openclaw_heartbeat_polling",
+      "fromNode": "n_openclaw",
+      "toNode": "n_heartbeat_polling",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_openclaw_openclaw_native",
+      "fromNode": "n_openclaw",
+      "toNode": "n_openclaw_native",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_openclaw_readme",
+      "fromNode": "n_openclaw",
+      "toNode": "n_readme",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_agents_md_plan_permission_mode",
+      "fromNode": "n_agents_md",
+      "toNode": "n_plan_permission_mode",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_agents_md_agent_memory_layer",
+      "fromNode": "n_agents_md",
+      "toNode": "n_agent_memory_layer",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_agents_md_soul_md",
+      "fromNode": "n_agents_md",
+      "toNode": "n_soul_md",
+      "label": "semantically_similar_to [INFERRED]"
+    },
+    {
+      "id": "e_agents_md_identity_files",
+      "fromNode": "n_agents_md",
+      "toNode": "n_identity_files",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_agents_md_md_to_pdf_skill",
+      "fromNode": "n_agents_md",
+      "toNode": "n_md_to_pdf_skill",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_agents_md_prompting_guide",
+      "fromNode": "n_agents_md",
+      "toNode": "n_prompting_guide",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_agent_memory_layer_memory_files",
+      "fromNode": "n_agent_memory_layer",
+      "toNode": "n_memory_files",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_soul_md_identity_files",
+      "fromNode": "n_soul_md",
+      "toNode": "n_identity_files",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_agent_skills_mc_api_skill",
+      "fromNode": "n_agent_skills",
+      "toNode": "n_mc_api_skill",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_agent_skills_md_to_pdf_skill",
+      "fromNode": "n_agent_skills",
+      "toNode": "n_md_to_pdf_skill",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_agent_skills_telegram_table_node",
+      "fromNode": "n_agent_skills",
+      "toNode": "n_telegram_table_node",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_standup_format_standup_2026_03_19",
+      "fromNode": "n_standup_format",
+      "toNode": "n_standup_2026_03_19",
+      "label": "rationale_for [INFERRED]"
+    },
+    {
+      "id": "e_agent_identities_repo_nightly_backup",
+      "fromNode": "n_agent_identities_repo",
+      "toNode": "n_nightly_backup",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_nightly_backup_drift_detection",
+      "fromNode": "n_nightly_backup",
+      "toNode": "n_drift_detection",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_openclaw_native_openclaw_docker",
+      "fromNode": "n_openclaw_native",
+      "toNode": "n_openclaw_docker",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_openclaw_native_systemd_service",
+      "fromNode": "n_openclaw_native",
+      "toNode": "n_systemd_service",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_compose_yaml_mc_backend",
+      "fromNode": "n_compose_yaml",
+      "toNode": "n_mc_backend",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_compose_yaml_mc_db",
+      "fromNode": "n_compose_yaml",
+      "toNode": "n_mc_db",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_compose_yaml_mc_frontend",
+      "fromNode": "n_compose_yaml",
+      "toNode": "n_mc_frontend",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_compose_yaml_idea_net",
+      "fromNode": "n_compose_yaml",
+      "toNode": "n_idea_net",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_mc_backend_mc_db",
+      "fromNode": "n_mc_backend",
+      "toNode": "n_mc_db",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_mc_backend_mc_frontend",
+      "fromNode": "n_mc_backend",
+      "toNode": "n_mc_frontend",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_mc_backend_tailscale_serve",
+      "fromNode": "n_mc_backend",
+      "toNode": "n_tailscale_serve",
+      "label": "references [INFERRED]"
+    },
+    {
+      "id": "e_mc_frontend_tailscale_serve",
+      "fromNode": "n_mc_frontend",
+      "toNode": "n_tailscale_serve",
+      "label": "references [INFERRED]"
+    },
+    {
+      "id": "e_tailscale_serve_tailscale",
+      "fromNode": "n_tailscale_serve",
+      "toNode": "n_tailscale",
+      "label": "references [INFERRED]"
+    },
+    {
+      "id": "e_kit_agent_version_monitoring",
+      "fromNode": "n_kit_agent",
+      "toNode": "n_version_monitoring",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_kit_agent_app_test_harness",
+      "fromNode": "n_kit_agent",
+      "toNode": "n_app_test_harness",
+      "label": "implements [EXTRACTED]"
+    },
+    {
+      "id": "e_version_monitoring_docker_hub",
+      "fromNode": "n_version_monitoring",
+      "toNode": "n_docker_hub",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_ssh_key_auth_tailscale_remote",
+      "fromNode": "n_ssh_key_auth",
+      "toNode": "n_tailscale_remote",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_ssh_key_auth_tailscale",
+      "fromNode": "n_ssh_key_auth",
+      "toNode": "n_tailscale",
+      "label": "references [EXTRACTED]"
+    },
+    {
+      "id": "e_tailscale_readme",
+      "fromNode": "n_tailscale",
+      "toNode": "n_readme",
+      "label": "references [EXTRACTED]"
+    }
+  ]
+}

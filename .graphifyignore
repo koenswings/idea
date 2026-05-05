@@ -1,0 +1,13 @@
+# Agent memory/identity — sensitive, not useful for code nav
+agents/*/memory/
+agents/*/MEMORY.md
+agents/*/.git/
+
+# Build artifacts
+**/node_modules/
+**/dist/
+**/.next/
+**/target/
+
+# Graphify output (don't recurse into its own output)
+graphify-out/
