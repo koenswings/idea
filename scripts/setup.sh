@@ -428,50 +428,8 @@ start_mission_control() {
   info "Starting Mission Control platform..."
   docker compose -f "${platform_dir}/compose.yaml" up -d
   ok "Mission Control started"
-
-  # Install the socat proxy that bridges the Docker network to the gateway
-  install_mc_proxy
-}
-
-# ── MC gateway proxy (socat) ──────────────────────────────────────────────────
-# MC backend runs in Docker and connects to the OpenClaw gateway via WebSocket.
-# Tailscale Serve strips ?token= query params on WS upgrades, so we can't route
-# through it. Instead a socat proxy listens on the Docker bridge (172.20.0.1:18790)
-# and forwards to the loopback gateway (127.0.0.1:18789).
-install_mc_proxy() {
-  local service_file="${HOME}/.config/systemd/user/openclaw-mc-proxy.service"
-
-  if systemctl --user is-active openclaw-mc-proxy &>/dev/null; then
-    ok "openclaw-mc-proxy already running"
-    return
-  fi
-
-  if ! command -v socat &>/dev/null; then
-    info "Installing socat..."
-    sudo apt-get install -y -q socat
-  fi
-
-  info "Installing openclaw-mc-proxy systemd service..."
-  mkdir -p "${HOME}/.config/systemd/user"
-  cat > "${service_file}" << 'UNIT'
-[Unit]
-Description=OpenClaw MC Gateway Proxy (Docker bridge -> loopback:18789)
-After=network.target openclaw-gateway.service
-PartOf=openclaw-gateway.service
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/socat TCP-LISTEN:18790,bind=172.20.0.1,reuseaddr,fork TCP:127.0.0.1:18789
-Restart=always
-RestartSec=3
-
-[Install]
-WantedBy=default.target
-UNIT
-
-  systemctl --user daemon-reload
-  systemctl --user enable --now openclaw-mc-proxy
-  ok "openclaw-mc-proxy started (172.20.0.1:18790 → 127.0.0.1:18789)"
+  # MC backend connects to the OpenClaw gateway directly via Docker bridge
+  # (172.17.0.1:18789) — no socat proxy needed (gateway.bind: lan)
 }
 
 # ── Step 5c: Restore MC PostgreSQL database from agent-identities backup ────────
@@ -534,23 +492,60 @@ restore_mc_db() {
   ok "MC backend and worker restarted"
 }
 
-# ── Step 5d: Pi crontab for nightly identity backup ───────────────────────────
+# ── Step 5d-pre: Graphify Python venv ───────────────────────────────────────
+#
+# Graphify runs as a CLI tool inside a dedicated venv at /home/pi/graphify-env/.
+# The post-commit hook and hash-watching cron (check-graph-stale.sh) both
+# source this venv before calling `graphify`. Reinstall on every setup run so
+# a missing or broken venv is always healed.
+
+install_graphify() {
+  heading "Step 5d-pre — Graphify venv"
+
+  local venv_dir="/home/pi/graphify-env"
+
+  if [[ -x "${venv_dir}/bin/graphify" ]]; then
+    ok "Graphify already installed: $(${venv_dir}/bin/graphify --version)"
+    return
+  fi
+
+  info "Creating Python venv at ${venv_dir}..."
+  python3 -m venv "${venv_dir}"
+
+  info "Installing graphifyy (PyPI package for the graphify CLI)..."
+  # anthropic is needed by graphify's Claude semantic extraction backend
+  "${venv_dir}/bin/pip" install --upgrade --quiet pip graphifyy anthropic
+
+  ok "Graphify installed: $(${venv_dir}/bin/graphify --version)"
+}
+
+# ── Step 5d: Pi crontab entries ───────────────────────────────────────────────
 
 setup_backup_cron() {
-  heading "Step 5d — Nightly identity backup cron"
+  heading "Step 5d — Crontab entries"
 
   local log_dir="/home/pi/idea/logs"
-  local log_file="${log_dir}/agent-backup.log"
-  local cron_line="0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> ${log_file} 2>&1"
-
   mkdir -p "${log_dir}"
 
-  if crontab -l 2>/dev/null | grep -q "backup-agent-identities"; then
-    ok "Backup cron already present"
-  else
-    (crontab -l 2>/dev/null; echo "${cron_line}") | crontab -
-    ok "Nightly backup cron added (03:00 UTC daily) → logs: ${log_file}"
-  fi
+  # Helper: add a cron line if not already present (match on script name)
+  add_cron() {
+    local marker="$1" line="$2"
+    if crontab -l 2>/dev/null | grep -q "${marker}"; then
+      ok "Cron already present: ${marker}"
+    else
+      (crontab -l 2>/dev/null; echo "${line}") | crontab -
+      ok "Cron added: ${marker}"
+    fi
+  }
+
+  add_cron "backup-agent-identities" \
+    "0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> ${log_dir}/agent-backup.log 2>&1"
+
+  add_cron "check-graph-stale" \
+    "*/5 * * * * bash /home/pi/idea/scripts/check-graph-stale.sh"
+
+  add_cron "backup-platform" \
+    "30 3 * * * bash /home/pi/idea/scripts/backup-platform.sh >> ${log_dir}/backup.log 2>&1"
 }
 
 # ── Step 5e: Pi crontab for nightly identity backup ───────────────────────────────
@@ -667,24 +662,52 @@ setup_tailscale() {
 
   echo ""
   read -rsp "  Tailscale auth key (tskey-auth-...): " ts_key; echo ""
-  sudo tailscale up --auth-key="${ts_key}" --hostname="openclaw-pi"
+  sudo tailscale up --auth-key="${ts_key}" --hostname="idea"
 
   ok "Tailscale connected: $(tailscale ip -4 2>/dev/null)"
+}
+
+# ── Step 6b: Tailscale Serve (HTTPS) ─────────────────────────────────────────
+
+setup_tailscale_serve() {
+  heading "Step 6b — Tailscale Serve (HTTPS)"
+
+  local serve_status
+  serve_status=$(tailscale serve status 2>/dev/null || true)
+
+  local all_configured=true
+  echo "${serve_status}" | grep -q "18789" || all_configured=false
+  echo "${serve_status}" | grep -q "4000"  || all_configured=false
+  echo "${serve_status}" | grep -q "8000"  || all_configured=false
+
+  if [[ "${all_configured}" == "true" ]]; then
+    ok "Tailscale Serve already configured"
+    return
+  fi
+
+  info "Configuring Tailscale Serve (HTTPS)..."
+  tailscale serve --https=18789 --bg localhost:18789
+  tailscale serve --https=4000  --bg localhost:4000
+  tailscale serve --https=8000  --bg localhost:8000
+  ok "Tailscale Serve configured"
 }
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 
 print_summary() {
-  local ts_ip
-  ts_ip=$(tailscale ip -4 2>/dev/null || echo "<tailscale-ip>")
+  local ts_host
+  ts_host=$(tailscale status --json 2>/dev/null \
+    | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('Self',{}).get('DNSName','').rstrip('.'))" \
+    2>/dev/null || echo "idea.tail2d60.ts.net")
 
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo " IDEA — Setup Complete"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
-  echo "  OpenClaw UI:      http://${ts_ip}:18789"
-  echo "  Mission Control:  http://${ts_ip}:8000"
+  echo "  OpenClaw UI:      https://${ts_host}:18789"
+  echo "  Mission Control:  https://${ts_host}:4000"
+  echo "  MC backend API:   https://${ts_host}:8000"
   echo ""
   echo "  Next steps:"
   echo ""
@@ -722,8 +745,10 @@ main() {
   start_mission_control
   restore_mc_db
   provision_agent_tokens
+  install_graphify
   setup_backup_cron
   setup_tailscale
+  setup_tailscale_serve
   print_summary
 }
 
