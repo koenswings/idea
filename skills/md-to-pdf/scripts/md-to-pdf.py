@@ -102,7 +102,7 @@ def add_heading_ids(html: str) -> str:
 def convert(input_path: Path, output_path: Path) -> None:
     md_text  = input_path.read_text(encoding="utf-8")
     md_parser = markdown.Markdown(
-        extensions=["fenced_code", "tables", "toc", "nl2br"],
+        extensions=["fenced_code", "tables", "toc"],
         extension_configs={"toc": {"permalink": False}},
     )
     body     = add_heading_ids(md_parser.convert(md_text))
