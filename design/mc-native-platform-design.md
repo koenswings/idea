@@ -1093,9 +1093,17 @@ PGPASSWORD=$(cat /home/pi/idea/platform/secrets/mc_db_password.txt) \
 # 2. Restore OpenClaw state
 tar xzf /path/to/openclaw-YYYYMMDD.tar.gz -C /
 
-# 3. Re-link MC to new OpenClaw gateway token
-# POST to MC API: /api/v1/gateways/<gateway_id>/templates/sync?rotate_tokens=true
-# (After gateway is running and MC can connect to it)
+# 3. Re-provision all agent AUTH_TOKENs
+# The MC database is restored but the agent .env files on disk may be stale
+# or absent. Re-run setup.sh's token provisioning step to regenerate tokens,
+# write fresh hashes into the MC database, and update each agent's .env:
+#
+#   bash /home/pi/idea/scripts/setup.sh --only-tokens
+#
+# If --only-tokens is not supported, run the full setup.sh — it is idempotent
+# and will skip steps that are already in place. Token provisioning is Step 5e.
+# This replaces the previously documented /api/v1/gateways/.../sync?rotate_tokens=true
+# endpoint, which does not exist. setup.sh is the token authority.
 
 # 4. Restart OpenClaw
 openclaw gateway restart
