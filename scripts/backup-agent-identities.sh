@@ -15,9 +15,9 @@ set -euo pipefail
 
 # Workspace path works both from container (/home/node/workspace) and Pi host (/home/pi/idea)
 WORKSPACE="${WORKSPACE_ROOT:-/home/node/workspace}/agents"
-BACKUP_REPO="/tmp/agent-identities-backup-$$"
+BACKUP_REPO="/home/pi/agent-identities"
 ATLAS_CHAT="-5105695997"
-AGENTS="agent-operations-manager agent-engine-dev agent-console-dev agent-site-dev agent-programme-manager"
+AGENTS="agent-operations-manager agent-engine-dev agent-console-dev agent-site-dev agent-programme-manager agent-app-dev"
 IDENTITY_FILES="AGENTS.md SOUL.md IDENTITY.md USER.md TOOLS.md HEARTBEAT.md"
 
 # Load GitHub token and Telegram bot token
@@ -28,9 +28,11 @@ log() { echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] $*"; }
 
 log "Starting agent identity backup"
 
-# Clone backup repo fresh to temp dir
-trap "rm -rf '$BACKUP_REPO'" EXIT
-git clone "https://koenswings:${GITHUB_TOKEN}@github.com/koenswings/agent-identities.git" "$BACKUP_REPO" 2>/dev/null
+# Use existing local clone, pull latest
+cd "$BACKUP_REPO"
+git remote set-url origin "https://koenswings:${GITHUB_TOKEN}@github.com/koenswings/agent-identities.git" 2>/dev/null || true
+git fetch origin main --depth=1 2>/dev/null || true
+git reset --hard origin/main 2>/dev/null || true
 git -C "$BACKUP_REPO" config user.email "atlas@idea-platform.org"
 git -C "$BACKUP_REPO" config user.name "Atlas"
 

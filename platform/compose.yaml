@@ -76,9 +76,7 @@ services:
     networks:
       - idea-net
     ports:
-      - "127.0.0.1:8000:8000"  # Tailscale Serve proxies this to https://openclaw-pi.tail2d60.ts.net:8000
-    extra_hosts:
-      - "openclaw-pi.tail2d60.ts.net:100.115.60.6"  # Tailscale IP — routable from Docker; Serve proxies to gateway
+      - "127.0.0.1:8000:8000"  # Tailscale Serve proxies this to https://idea.tail2d60.ts.net:8000
     depends_on:
       mission-control-db:
         condition: service_healthy
@@ -94,7 +92,8 @@ services:
       # Within the unified network, the backend is its own service name.
       # (Previously http://172.18.0.1:8000 — the Docker host bridge IP)
       - BASE_URL=http://mission-control-backend:8000
-      - CORS_ORIGINS=http://openclaw-pi.local:4000,https://openclaw-pi.tail2d60.ts.net:4000,https://openclaw-pi.tail2d60.ts.net:8000
+      - GATEWAY_URL=http://172.17.0.1:18789
+      - CORS_ORIGINS=http://openclaw-pi.local:4000,https://idea.tail2d60.ts.net:4000,https://idea.tail2d60.ts.net:8000
       - DB_AUTO_MIGRATE=true
       - LOG_LEVEL=INFO
       - LOG_FORMAT=text
@@ -112,8 +111,6 @@ services:
     restart: unless-stopped
     networks:
       - idea-net
-    extra_hosts:
-      - "openclaw-pi.tail2d60.ts.net:100.115.60.6"  # Tailscale IP — routable from Docker; Serve proxies to gateway
     depends_on:
       mission-control-db:
         condition: service_healthy
@@ -136,9 +133,9 @@ services:
     networks:
       - idea-net
     ports:
-      - "127.0.0.1:4000:3000"  # Tailscale Serve proxies this to https://openclaw-pi.tail2d60.ts.net:4000
+      - "127.0.0.1:4000:3000"  # Tailscale Serve proxies this to https://idea.tail2d60.ts.net:4000
     environment:
-      - NEXT_PUBLIC_API_URL=https://openclaw-pi.tail2d60.ts.net:8000
+      - NEXT_PUBLIC_API_URL=auto  # runtime auto-resolve: uses window.location.hostname:8000
       - NEXT_PUBLIC_AUTH_MODE=local
     depends_on:
       - mission-control-backend
