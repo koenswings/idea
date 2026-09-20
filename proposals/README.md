@@ -1,43 +1,61 @@
-# proposals/ — New Backlog Items
+# Proposals
 
-Proposals are new ideas awaiting CEO approval. Any agent (or the CEO) can open a proposal.
+A proposal is a request for a decision. It captures what you want to change, why, and what the options are — before any implementation work starts.
 
-## Format
+---
 
-Filename: `YYYY-MM-DD-<topic>.md`
+## When to open a proposal
 
-## Template
+Open a proposal when:
+
+- A feature or change touches more than one repo
+- A decision has architectural implications
+- You want to explore alternatives before committing to one
+- Koen should approve the direction before work begins
+
+For small bug fixes and isolated changes, Lead Bot's agreed-approach comment on the GitHub issue is sufficient. No proposal needed.
+
+---
+
+## What a proposal contains
 
 ```markdown
-# Proposal: <Title>
+# Title: short description of what is being proposed
 
-**Proposed by:** <agent-id>
+**Author:** <Bot or Koen>
 **Date:** YYYY-MM-DD
-**Status:** Draft | Proposed
+**Status:** Draft
 
-## Problem
+## What
+What is being proposed. One clear paragraph.
 
-What need or issue does this address?
+## Why
+The problem it solves or the opportunity it creates.
 
-## Proposed solution
+## Affected areas
+Which repos, components, or workflows are affected.
 
-What should be built or changed?
-
-## Affected repos / agents
-
-Who needs to be involved?
+## Approach
+The proposed solution. If there are meaningful alternatives, describe them briefly and explain why this one is preferred.
 
 ## Open questions
-
-What needs to be resolved before implementation?
+What still needs input or decision before implementation starts.
 ```
 
-## Process
+---
 
-1. Create `proposals/YYYY-MM-DD-<topic>.md` and open a PR on the `idea` repo
-2. Tag relevant agents in the PR description for cross-team input
-3. CEO merges (approved) or closes (declined)
-4. On merge: CEO creates a task in Mission Control and assigns it to the relevant agent
-5. `scripts/export-backlog.sh` regenerates `BACKLOG.md`
+## How it works
 
-See `PROCESS.md` for the full backlog growth process.
+1. Lead Bot drafts the proposal and posts it to the **IDEA Design Review** group chat. All Dev Bots review from their domain perspective and respond.
+2. Lead Bot synthesises the feedback and refines the proposal.
+3. Lead Bot opens a PR to this folder (`proposals/<YYYY-MM-DD>-<topic>.md`).
+4. Koen reviews the PR. Merging it means the proposal is approved.
+5. Lead Bot creates implementation GitHub issues based on the merged proposal.
+
+A declined proposal is closed with a comment explaining why. It stays in the PR history as a record.
+
+---
+
+## Relationship to `design/`
+
+`proposals/` is for decisions not yet made. `design/` is for reasoning already captured — past decisions, alternatives considered, ideas explored. A merged proposal may or may not produce a design doc; simple proposals don't need one.
