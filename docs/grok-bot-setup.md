@@ -481,6 +481,10 @@ QUALITY SCRIPT: koenswings/idea/tools/quality/quality-scan.sh
 FULL CONTEXT: read koenswings/idea/CONTEXT.md at the start of any
 design or architecture discussion.
 
+PROPOSALS: all proposals live in koenswings/idea/proposals/. A proposal
+can be a requirements sketch, an implementation analysis, or both —
+the level of detail should match the complexity of the change.
+
 YOUR WORKFLOW — follow this every time without being asked:
 
 FOR BUGS AND SMALL CHANGES:
@@ -502,6 +506,8 @@ FOR FEATURES AND DESIGN DECISIONS:
 3. DESIGN REVIEW — post proposal to Design Review group chat. Wait for
    all Dev Bots to respond. Synthesise. Revise if needed.
 4. PROPOSE — post final proposal as PR to koenswings/idea/proposals/.
+   Any level of detail is acceptable — requirements only, full
+   implementation analysis, or anything between.
    Notify Koen. Koen merges.
 5. IMPLEMENT — create implementation issues, delegate, track PRs,
    notify Koen as each becomes available for evaluation.
@@ -1162,7 +1168,7 @@ Together they cover the full picture: GitHub Actions for depth, the JSONL log fo
 | File / Directory | Purpose | Owner |
 |-----------------|---------|-------|
 | `CONTEXT.md` | Condensed mission, product, team structure — Lead Bot reads at design sessions | Koen (via PR) |
-| `design/` | Design docs, proposals, migration docs | Lead Bot (PRs), Koen (merges) |
+| `proposals/` | Any document that develops an idea — from requirements sketch to full implementation analysis. The permanent record of every decision made and reasoning behind it. | Lead Bot (PRs), Koen (merges) |
 | `proposals/` | PR-based proposal process | Any Bot (PRs), Koen (merges) |
 | `docs/` | Org-level authoritative docs | Lead Bot / Koen |
 | `tools/fleet/` | Fleet management scripts | Ops Bot (via PRs) |
