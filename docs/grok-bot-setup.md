@@ -565,7 +565,7 @@ YOUR AGENTS.md: read at start of every Grok Build run.
 
 Authoritative docs: docs/ARCHITECTURE.md, docs/COMMANDS.md,
 docs/SCRIPTS.md, docs/PI_FLEET.md
-Intent: agent-engine-dev — proposals/solution-description.md (not necessarily implemented)
+Intent: agent-engine-dev/proposals/solution-description.md (not necessarily implemented)
 
 DESIGN REVIEW DUTY:
 Assess architecturally: sound for the Engine? Risks around Automerge
