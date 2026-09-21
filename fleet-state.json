@@ -1,4 +1,13 @@
 {
   "_comment": "Managed by tools/fleet/update-fleet-state.sh — do not edit manually",
-  "_discovered": "Run tools/fleet/idea-setup.sh to populate with actual fleet Pis"
+  "idea02": {
+    "role": "review",
+    "domain": "console",
+    "pr": null,
+    "status": "idle",
+    "host": "192.168.0.180",
+    "tailscale": "100.85.108.118",
+    "runner": "online",
+    "grok_build": "1.0.40"
+  }
 }
