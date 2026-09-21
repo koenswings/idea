@@ -1062,7 +1062,7 @@ compose.yaml        App Disk manifest — x-app metadata + x-app-version
 app.yaml            Build approach, upstream monitoring sources
 app/                Dockerfile + source (custom build only)
 docs/               Authoritative docs for this App
-design/             Design docs and reasoning
+proposals/          Proposals and historical design reasoning
 ```
 
 **Version monitoring**
