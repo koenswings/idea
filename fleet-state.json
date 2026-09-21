@@ -1,8 +1,9 @@
 {
   "_comment": "Managed by tools/fleet/update-fleet-state.sh — do not edit manually",
+  "_note": "Single-Pi mode: idea02 handles all domains as overflow. idea01/03/04 added when online.",
   "idea02": {
     "role": "review",
-    "domain": "console",
+    "domain": "any",
     "pr": null,
     "status": "idle",
     "host": "192.168.0.180",
