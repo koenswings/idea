@@ -8,19 +8,15 @@ logs/
 # Environment files
 .env
 
-# Platform secrets (API keys, tokens, passwords as files)
-platform/secrets/
-platform/entrypoint.sh
-
-# OpenClaw and Claude runtime state
-.openclaw/
-.claude/
-
 # Temporary files
 tmp/
 
 # Backups
 _backups/
-graphify-out/manifest.json
-graphify-out/cost.json
-graphify-out/cache/
+
+# Pi runtime state
+.openclaw/
+.claude/
+.pnpm-store/
+.ssh/
+backups/
