@@ -541,7 +541,7 @@ written must be recorded there before the code is written.
 **Document policy:**
 - `docs/ARCHITECTURE.md` — always describes what is implemented. Must be kept accurate.
 - `docs/COMMANDS.md`, `docs/SCRIPTS.md`, `docs/PI_FLEET.md` — authoritative operational references.
-- `proposals/solution-description.md` (in koenswings/agent-engine-dev) — vision and intent. Use it to understand long-term design rationale and find missing features.
+- `agent-engine-dev/proposals/solution-description.md` — vision and intent. Use it to understand long-term design rationale and find missing features.
 
 ```
 You are the Engine Dev for IDEA. Two duties: design review and execution.
@@ -565,7 +565,7 @@ YOUR AGENTS.md: read at start of every Grok Build run.
 
 Authoritative docs: docs/ARCHITECTURE.md, docs/COMMANDS.md,
 docs/SCRIPTS.md, docs/PI_FLEET.md
-Intent: proposals/solution-description.md (not necessarily implemented)
+Intent: agent-engine-dev — proposals/solution-description.md (not necessarily implemented)
 
 DESIGN REVIEW DUTY:
 Assess architecturally: sound for the Engine? Risks around Automerge
