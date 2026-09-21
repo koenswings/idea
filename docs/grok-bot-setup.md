@@ -392,7 +392,7 @@ Documents in `design/` express design intent, past reasoning, alternatives consi
 
 Routines are scheduled or event-triggered workflows that run independently of direct Koen requests. They keep the system healthy, documentation current, and apps up to date.
 
-![Scheduled Routines](/home/node/workspace/agents/agent-operations-manager/design/routines.png)
+![Scheduled Routines](https://raw.githubusercontent.com/koenswings/idea/main/proposals/routines.png)
 
 | Trigger | Owner | Routine | Outcome |
 |---------|-------|---------|---------|
@@ -541,7 +541,7 @@ written must be recorded there before the code is written.
 **Document policy:**
 - `docs/ARCHITECTURE.md` — always describes what is implemented. Must be kept accurate.
 - `docs/COMMANDS.md`, `docs/SCRIPTS.md`, `docs/PI_FLEET.md` — authoritative operational references.
-- `design/SOLUTION_DESCRIPTION.md` — vision and intent. Use it to understand long-term design rationale and find missing features.
+- `proposals/solution-description.md` — vision and intent. Use it to understand long-term design rationale and find missing features.
 
 ```
 You are the Engine Dev for IDEA. Two duties: design review and execution.
@@ -565,7 +565,7 @@ YOUR AGENTS.md: read at start of every Grok Build run.
 
 Authoritative docs: docs/ARCHITECTURE.md, docs/COMMANDS.md,
 docs/SCRIPTS.md, docs/PI_FLEET.md
-Intent: design/SOLUTION_DESCRIPTION.md (not necessarily implemented)
+Intent: proposals/solution-description.md (not necessarily implemented)
 
 DESIGN REVIEW DUTY:
 Assess architecturally: sound for the Engine? Risks around Automerge
@@ -879,7 +879,7 @@ test/
   testresults/     Test logs (gitignored)
 script/            Provisioning and utility scripts
 docs/              Authoritative docs — .md, .pdf, .png, .svg ONLY
-design/            Design docs, reasoning, intent — not updated with code
+proposals/         Proposals and historical design reasoning
 dist/              Compiled output (gitignored)
 config.yaml        Runtime configuration
 store-template.json  Automerge bootstrap — NEVER MODIFY
@@ -965,7 +965,7 @@ src/
 test/                  Vitest unit tests
 dist/                  Built output (gitignored)
 docs/                  Authoritative docs — .md, .pdf, .png, .svg ONLY
-design/                Design docs, reasoning, intent
+proposals/             Proposals and historical design reasoning
 scripts/
   deploy-fleet.sh      Build + deploy to all fleet Pis
 ```
@@ -1053,7 +1053,7 @@ apps/
   app-harness/      Integration test framework
 scripts/            Fleet provisioning utilities
 docs/               Authoritative docs — .md, .pdf, .png, .svg ONLY
-design/             Design docs, reasoning, intent
+proposals/          Proposals and historical design reasoning
 ```
 
 Each App repo (e.g. koenswings/app-kolibri):

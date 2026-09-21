@@ -16,7 +16,6 @@ idea/
 ├── fleet-state.json        ← Live Pi fleet state (managed by tools/fleet/ scripts)
 ├── docs/                   ← Authoritative documentation — describes the system as it is
 │   └── grok-bot-setup.md   ← Complete Grok Bot setup: team, workflow, Bot descriptions
-├── design/                 ← Design docs, past reasoning, migration history
 ├── proposals/              ← New ideas awaiting Koen's approval (see proposals/README.md)
 ├── tools/
 │   ├── fleet/              ← Fleet management scripts (Pi allocation, deploy, health)
@@ -69,6 +68,6 @@ Tasks tracked as GitHub Issues on this repo. Labels: `engine`, `console`, `app-d
 
 Full documentation: [`docs/grok-bot-setup.md`](docs/grok-bot-setup.md)
 
-For the migration from the prior OpenClaw setup: [`design/grok-bot-migration-v4.md`](design/grok-bot-migration-v4.md)
+For the migration from the prior OpenClaw setup: [`proposals/grok-bot-migration.md`](proposals/grok-bot-migration.md)
 
 Rollback to the prior setup: `git checkout v-openclaw-final`
