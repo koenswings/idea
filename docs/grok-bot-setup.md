@@ -378,9 +378,9 @@ Lead Bot checks if CONTEXT.md needs updating and offers to draft the edit.
 
 Every file in `docs/` describes the system as it currently exists. Must be kept accurate. Any PR that changes implemented behaviour must update the relevant `docs/` file in the same PR. `docs/INDEX.md` lists every authoritative document.
 
-**`design/` — Intent, reasoning, historical record**
+**`proposals/`** — Decisions and reasoning
 
-Documents in `design/` express design intent, past reasoning, alternatives considered, or ideas not yet (or never) implemented. They do not need updating when code changes. A newer design doc may supersede an older one — note this at the top of the newer doc. Never delete old design docs; they are a reasoning trail.
+Proposals capture the reasoning behind requirements and implementation choices. Any level of detail is acceptable — from a brief requirements sketch to a full implementation analysis. Once approved and implemented, they are the permanent record of why the system works the way it does.
 
 ### 5.5 AGENTS.md as the Build Procedure Contract
 
