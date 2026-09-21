@@ -1,7 +1,7 @@
 # Authoritative Documentation Index — IDEA (Org Level)
 
 Authoritative descriptions of IDEA's organisation, infrastructure, and operations **as they
-currently exist** — not as they are intended or planned (that's `design/`).
+currently exist** — not as they are intended or planned (that's `proposals/`).
 
 Update this file whenever an authoritative doc is added or significantly revised.
 

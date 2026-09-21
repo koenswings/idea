@@ -1,61 +1,82 @@
 # Proposals
 
-A proposal is a request for a decision. It captures what you want to change, why, and what the options are — before any implementation work starts.
+A proposal is any document that develops an idea — from a brief requirements sketch to a detailed implementation analysis — up to the point where Koen can decide to proceed.
+
+Proposals are how the team thinks on paper before acting. They are always optional: a simple change can go straight from conversation to code. But when a change is complex, cross-domain, or uncertain, writing it down first makes the decision better.
 
 ---
 
-## When to open a proposal
+## What a proposal can be
 
-Open a proposal when:
+A proposal can sit anywhere on this spectrum — the level of detail should match the complexity and risk of the change:
 
-- A feature or change touches more than one repo
-- A decision has architectural implications
-- You want to explore alternatives before committing to one
-- Koen should approve the direction before work begins
+**Requirements only** — *"Should we add X? Here's the problem it solves, here's the user experience after the change, here are the tradeoffs."* Koen approves the direction; implementation details come later.
 
-For small bug fixes and isolated changes, Lead Bot's agreed-approach comment on the GitHub issue is sufficient. No proposal needed.
+**Implementation analysis** — *"We want to do X. Here are the two ways we could implement it, the tradeoffs, and which one we recommend."* Koen approves the approach; execution follows.
+
+**Full specification** — *"We want to do X this way for these reasons."* Everything needed to start coding is in the doc. Koen approves and work begins immediately.
+
+The same document can start at requirements level, get refined through discussion, and end up at full specification — all before the PR is merged.
 
 ---
 
-## What a proposal contains
+## What proposals cover
+
+- New features or changes to existing behaviour
+- Architecture decisions with significant implications
+- Ideas that span multiple repos or domains
+- Anything the team wants to think through before committing
+
+Bots can open proposals too — for operational improvements, new app candidates, quality issues, or anything they believe is worth Koen's attention. The format is the same.
+
+---
+
+## Format
 
 ```markdown
-# Title: short description of what is being proposed
+# Title: short description
 
 **Author:** <Bot or Koen>
 **Date:** YYYY-MM-DD
-**Status:** Draft
+**Status:** Draft | Approved | Declined | Superseded by <link>
 
-## What
-What is being proposed. One clear paragraph.
+## Problem or opportunity
+What situation prompted this proposal.
 
-## Why
-The problem it solves or the opportunity it creates.
+## Proposed approach
+What we want to do. If there are meaningful alternatives, describe them briefly and explain the recommendation.
 
-## Affected areas
-Which repos, components, or workflows are affected.
+## User experience / outcome
+What the system or user experience looks like after this is implemented.
 
-## Approach
-The proposed solution. If there are meaningful alternatives, describe them briefly and explain why this one is preferred.
+## Implementation notes (optional)
+How it would be built, at whatever level of detail is needed for the decision.
 
 ## Open questions
-What still needs input or decision before implementation starts.
+What still needs input before work starts.
 ```
 
 ---
 
-## How it works
+## Lifecycle
 
-1. Lead Bot drafts the proposal and posts it to the **IDEA Design Review** group chat. All Dev Bots review from their domain perspective and respond.
-2. Lead Bot synthesises the feedback and refines the proposal.
-3. Lead Bot opens a PR to this folder (`proposals/<YYYY-MM-DD>-<topic>.md`).
-4. Koen reviews the PR. Merging it means the proposal is approved.
-5. Lead Bot creates implementation GitHub issues based on the merged proposal.
-
-A declined proposal is closed with a comment explaining why. It stays in the PR history as a record.
+1. An agent or Koen drafts a proposal and opens a PR to this folder (`proposals/<YYYY-MM-DD>-<topic>.md`)
+2. For changes affecting multiple domains: Lead Bot posts it to the Design Review group chat for domain assessment
+3. Lead Bot synthesises feedback and refines the proposal
+4. Koen reviews the PR and either merges (approved) or closes with a comment (declined)
+5. Merged: Lead Bot creates implementation GitHub issues. Work begins.
+6. Declined: PR closes. The proposal stays in the PR history as a permanent record of what was considered and why it was declined.
 
 ---
 
-## Relationship to `design/`
+## After approval
 
-`proposals/` is for decisions not yet made. `design/` is for reasoning already captured — past decisions, alternatives considered, ideas explored. A merged proposal may or may not produce a design doc; simple proposals don't need one.
+Once implemented, the proposal stays in this folder unchanged. It is the permanent record of the reasoning behind the decision — useful for anyone who later asks *"why does the system work this way?"*
+
+A proposal that supersedes an earlier one notes this at the top (`**Status:** Supersedes <link>`). Both are kept.
+
+---
+
+## Relationship to `docs/`
+
+`docs/` describes what the system *is now*. `proposals/` captures the reasoning behind *how it got there* and *where it might go next*. They serve different questions: docs answer "what does this do?", proposals answer "why was this decided?".

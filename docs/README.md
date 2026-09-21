@@ -14,7 +14,7 @@ operations **as they currently exist** — not as they are intended or planned.
 **Authoritative docs describe only what is implemented.** No `[planned]` sections, no
 future-tense descriptions. If it is not live, it is not here.
 
-Design intent belongs in `design/`. Product knowledge (Engine, Console, App Disks) belongs in
+Design intent and decision history belong in `proposals/`. Product knowledge (Engine, Console, App Disks) belongs in
 `CONTEXT.md`. This directory is for the org itself: who is deployed, how we work, what is
 running.
 
