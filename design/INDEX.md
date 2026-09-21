@@ -1,42 +1,4 @@
-# Design Document Index — IDEA (Org Level)
+# Design Document Index — IDEA
 
-All org-level design documents. Read this index at boot; pull the full doc when working on
-something it constrains. See `design/README.md` for scope guidance (org-level vs repo-level).
-
-Update this file whenever a design doc is added, superseded, or its status changes.
-
----
-
-## virtual-company-design.md
-**Status:** Implemented  ·  **Date:** 2026-03-25 (ongoing)
-The authoritative org design: agent roles and responsibilities, cross-agent task convention,
-MC usage model, output file policy, communication standards, and approved backlog.
-→ [design/virtual-company-design.md](virtual-company-design.md)
-
-## ssh-key-management.md
-**Status:** Implemented  ·  **Date:** 2026-03-28
-SSH key types, the wrapper-script `command=` convention, `authorized_keys` restrictions,
-IDEA SSH access map (human + machine-to-machine), key registry format, and Telegram-triggered
-rotation procedure. Key registry lives at `platform/keys.md`.
-→ [design/ssh-key-management.md](ssh-key-management.md)
-
-## openclaw-native-migration.md
-**Status:** Implemented  ·  **Date:** 2026-03-30  ·  **Implemented:** 2026-04-06  ·  **Author:** Atlas
-Trade-off analysis: OpenClaw Docker vs native install. Covers UID mismatch problem, Option A
-(--user 1000:1000 patch), Option B (native install), path preservation via symlink, and
-recommendation. Migration runbook at `platform/MIGRATE-NATIVE.md`. Executed by Claude 2026-04-06.
-→ [design/openclaw-native-migration.md](openclaw-native-migration.md)
-
-## tailscale-remote-management.md
-**Status:** Implemented  ·  **Date:** 2026-03-29
-Latent Tailscale debug mode for school Pis: design principles, ephemeral auth keys, ACL tag
-model, Phase 1 USB activation script, Phase 2 Console UI toggle, session flow, key lifecycle.
-→ [design/tailscale-remote-management.md](tailscale-remote-management.md)
-
-## agent-identity-memory-architecture.md
-**Status:** Implemented  ·  **Date:** 2026-04-01  ·  **Implemented:** 2026-04-02  ·  **Author:** Atlas
-Separates identity, memory, and code into distinct layers. Agent code repos become pure code;
-identity and memory files backed up to `agent-identities` GitHub repo via nightly Pi cron (03:00 UTC).
-Atlas governs identity changes; unauthorized drift triggers Telegram alert. MEMORY.md extended to
-all agents. Replaces memory/updates branch + PR flow entirely.
-→ [design/agent-identity-memory-architecture.md](agent-identity-memory-architecture.md)
+> The `design/` folder at the org level has been retired. All proposals and historical design docs
+> are now in `proposals/`. See `proposals/INDEX.md`.
