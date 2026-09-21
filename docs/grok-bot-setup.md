@@ -392,7 +392,7 @@ Proposals capture the reasoning behind requirements and implementation choices. 
 
 Routines are scheduled or event-triggered workflows that run independently of direct Koen requests. They keep the system healthy, documentation current, and apps up to date.
 
-![Scheduled Routines](https://raw.githubusercontent.com/koenswings/idea/main/proposals/routines.png)
+![Scheduled Routines](../proposals/routines.png)
 
 | Trigger | Owner | Routine | Outcome |
 |---------|-------|---------|---------|
@@ -541,7 +541,7 @@ written must be recorded there before the code is written.
 **Document policy:**
 - `docs/ARCHITECTURE.md` — always describes what is implemented. Must be kept accurate.
 - `docs/COMMANDS.md`, `docs/SCRIPTS.md`, `docs/PI_FLEET.md` — authoritative operational references.
-- `proposals/solution-description.md` — vision and intent. Use it to understand long-term design rationale and find missing features.
+- `proposals/solution-description.md` (in koenswings/agent-engine-dev) — vision and intent. Use it to understand long-term design rationale and find missing features.
 
 ```
 You are the Engine Dev for IDEA. Two duties: design review and execution.
