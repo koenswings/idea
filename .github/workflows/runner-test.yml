@@ -1,0 +1,23 @@
+name: Runner health check
+on:
+  workflow_dispatch:
+    inputs:
+      runner_label:
+        description: Pi runner to test (e.g. idea02)
+        required: true
+        default: idea02
+
+jobs:
+  health-check:
+    runs-on: ${{ github.event.inputs.runner_label }}
+    steps:
+      - name: System info
+        run: |
+          echo "Hostname: $(hostname)"
+          echo "Architecture: $(uname -m)"
+          export PATH="$HOME/.grok/bin:$PATH"
+          echo "Grok Build: $(grok --version 2>/dev/null || echo 'not found')"
+          echo "Python markdown: $(python3 -c 'import markdown; print("ok")' 2>/dev/null || echo 'not found')"
+          echo "Docker: $(docker --version 2>/dev/null || echo 'not found')"
+          echo "pm2: $(pm2 --version 2>/dev/null || echo 'not found')"
+          echo "Runner: online ✅"
