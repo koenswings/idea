@@ -306,84 +306,64 @@ After each teardown, `check-fleet-health.sh` is called to verify the freed Pi is
 
 ## 5. Quality Control
 
-Quality operates at two levels: a per-PR gate that blocks bad code from merging, and a continuous background scan that catches drift across the whole codebase over time. Both are grounded in the same rules — the gate enforces them on the PR being reviewed, the scan enforces them on everything that has already merged.
+Quality is maintained through two mechanisms that enforce the same rules: a per-PR gate that runs before any code merges, and a scheduled scan that runs those same rules across everything already merged. The rules are not different between the two — the gate applies them to the current PR, the scan applies them to the full codebase.
 
-Deterministic checks (file structure, staleness, test counts) are done by scripts in `tools/quality/`. Bots invoke the scripts and act on the JSON output — they do not reimplement the logic.
+All checks are implemented in `tools/quality/quality-scan.sh`. Bots invoke the script and act on the JSON output. They do not reimplement the logic.
 
-### 5.1 The QC Gate (Dev Bots, every PR)
+### 5.1 The Rules
 
-No PR reaches Koen without passing the full QC gate. Dev Bots enforce this before notifying Atlas.
+These rules apply both at the PR gate and in the scheduled scan:
 
-**Tests**
+**Tests must pass**
 
-Grok Build runs on a GitHub Actions self-hosted runner on the domain Pi — all test commands run natively on ARM hardware.
-
-- Engine: `pnpm test:full` (builds then runs vitest; results in `test/testresults/`; include log filename in PR description)
+- Engine: `pnpm test:full` — builds then runs vitest on ARM hardware; results written to `test/testresults/`
 - Console: `pnpm test` + `pnpm typecheck`
-- App Dev: App Harness (`node tests/<app>/smoke.mjs`) — spawns a real Engine process and verifies the container reaches Running state
-- No reduction in passing tests without explicit justification in the PR description
+- App Dev: App Harness (`node tests/<app>/smoke.mjs`) — spawns a real Engine and verifies containers reach Running state
 
-**Structure and code hygiene**
+**Structure**
 
 - No source files (`.ts`, `.js`, `.tsx`, `.jsx`) in any `docs/` folder
-- No `.md` documentation files in `src/`
-- Test files must live in `test/` — not mixed into `src/`
+- No `.md` files in `src/`
+- Test files live in `test/` only
+
+**Code hygiene**
+
 - No hardcoded credentials — `process.env` or `import.meta.env` only
 - No `console.log` in production code paths
-- No commented-out code blocks longer than 5 lines without an explanatory comment
-- No new `TODO` or `FIXME` without a linked GitHub issue number
+- No commented-out blocks longer than 5 lines without an explanatory comment
+- No `TODO` or `FIXME` without a linked GitHub issue number
 
-**Documentation**
+**Documentation currency**
 
-Every file in `docs/` must describe the system as it currently exists. The gate enforces:
+- Every file in `docs/` describes the system as it currently exists. If a PR changes implemented behaviour, the affected `docs/` files must be updated in the same PR.
+- If a PR adds a new file to `docs/`, `docs/INDEX.md` must be updated in the same PR.
+- `AGENTS.md` must be updated in any PR that changes build, test, or deploy procedures.
 
-- If a PR changes implemented behaviour: every affected file in `docs/` must be updated in the same PR
-- If a PR changes build/test/deploy procedure: `AGENTS.md` must be updated in the same PR — no exceptions
-- If a PR adds a new file to `docs/`: `docs/INDEX.md` must be updated in the same PR
+**Staleness** (scan only — cannot be checked at PR time):
 
-**Failure handling:** Dev Bot retries once. Still failing: escalate to Lead Bot with diagnosis. Never open a PR on failing QC.
-
-### 5.2 Continuous Quality Scan
-
-Lead Bot invokes `tools/quality/quality-scan.sh` after every merge and on a weekly schedule (Monday). The script scans all IDEA repos and returns a JSON report. Lead Bot reads the report and files GitHub issues for any violations.
-
-The scan covers all repos: `idea`, `agent-engine-dev`, `agent-console-dev`, `agent-app-dev`, and all app repos (`app-kolibri`, `app-nextcloud`, `app-kiwix`, `app-milkwise`).
-
-**Structural checks** (label: `quality`):
-
-- Any source file (`.ts`, `.js`) in a `docs/` folder
-- Any `.md` file in a `src/` folder
-- Any file in `docs/` not listed in `docs/INDEX.md`
-- Any `TODO` or `FIXME` that appeared since the last scan without a linked issue number
-
-**Documentation staleness** (label: `docs-review`):
-
-- Any file in any `docs/` folder across all repos whose last-modified date is more than 30 days older than the most recent source commit that would logically affect it. This applies to every file in every docs/ folder — not just ARCHITECTURE.md.
+- Any file in any `docs/` folder whose last-modified date is more than 30 days older than the most recent source commit that would logically affect it.
 - Any `AGENTS.md` whose last-modified date is more than 14 days older than the most recent build-related source commit in that repo.
 
-**Test health** (immediate Koen notification):
+### 5.2 The PR Gate
 
-- If `pnpm test:full` fails on main in the Engine repo after any merge, Lead Bot notifies Koen immediately — this takes priority over everything else.
+Dev Bots invoke `quality-scan.sh --pr <repo> <branch>` before opening any PR. The script checks the PR branch against all the rules above (except staleness, which only applies to the full codebase). If any check fails, the Dev Bot fixes it and retries once. After two failures, the Dev Bot escalates to Lead Bot with the script output — it never opens a PR on failing checks.
 
-**App version monitoring** — Kid calls `tools/quality/check-app-versions.sh` as part of the weekly scan. The script reads each app's `app.yaml`, queries DockerHub and GitHub for latest upstream versions, and returns a JSON diff. Kid files issues (label: `app-update`) for any new versions found.
+### 5.3 The Scheduled Scan
 
-### 5.3 Scheduled Reviews (Lead Bot)
+`quality-scan.sh` runs on two triggers:
 
-Some quality activities require judgment or Koen's input and cannot be fully automated:
+1. **After every merge to main** — Lead Bot invokes it automatically
+2. **Every Monday morning** — Lead Bot invokes it on schedule
 
-**Monthly** — Lead Bot reviews CONTEXT.md and all docs/ files at the org level for accuracy, cross-referencing recent proposals and PRs. Files docs-review issues for anything stale or inaccurate.
+The script scans all IDEA repos: `idea`, `agent-engine-dev`, `agent-console-dev`, `agent-app-dev`, and all app repos (`app-kolibri`, `app-nextcloud`, `app-kiwix`, `app-milkwise`).
 
-**After every proposal merge** — Lead Bot checks whether CONTEXT.md needs updating and offers to draft the edit.
+It returns a JSON report. Lead Bot reads the report and files GitHub issues for any violations:
 
-**Quarterly** — Lead Bot prompts Koen to review all Bot descriptions. Analyses the last 3 months, suggests diffs, presents for Koen's approval. No description changes without explicit Koen approval.
+- Structural and code hygiene violations → label: `quality`
+- Stale docs/ files or AGENTS.md → label: `docs-review`
+- Engine tests failing on main → Lead Bot notifies Koen immediately, before filing any issues
 
-### 5.4 Document Folder Policy
-
-**`docs/`** — authoritative. Every file describes the system as it currently exists. Kept accurate by the QC gate and the continuous scan. `docs/INDEX.md` lists every authoritative document in that repo.
-
-**`proposals/`** — decisions and reasoning. Any document from requirements sketch to full implementation analysis. Permanent record of why the system works the way it does. Does not need updating when code changes.
-
-**`AGENTS.md`** — operational manual for Grok Build. Read automatically at the start of every run. Must be updated in the same PR as any build/test/deploy procedure change — enforced by the QC gate and checked by the continuous scan.
+Kid (App Dev Bot) additionally calls `tools/quality/check-app-versions.sh` as part of the Monday scan. That script reads each app's `app.yaml`, queries DockerHub and GitHub for latest upstream versions, and returns a JSON diff. Kid files issues (label: `app-update`) for any new versions found.
 
 
 ## 6. Routines
