@@ -23,12 +23,18 @@ Status: stub files. Full implementation in Phase 2.
 
 Quality scan and version monitoring scripts. Lead Bot and App Dev Bot call these.
 
-| Script | Purpose |
-|--------|---------|
-| `quality-scan.sh` | Structural checks across repos — source files in docs/, AGENTS.md freshness, TODO count. Returns JSON report. |
-| `check-app-versions.sh` | Read app.yaml files, query upstream APIs, return JSON diff of new versions |
+| Script | Purpose | Status |
+|--------|---------|--------|
+| `quality-scan.sh` | Full/PR quality gate: structure, hygiene, docs currency, domain bake-ins, staleness (full only), domain tests via Pi selection. JSON report on stdout; audit line in `audit/`. | **Implemented** |
+| `check-app-versions.sh` | Read app.yaml files, query upstream APIs, return JSON diff of new versions | Stub (Phase 2) |
+| `selftest.sh` | Runs `quality-scan.sh` against `testdata/` fixtures (structural; no Pi required) | **Implemented** |
 
-Status: stub files. Full implementation in Phase 2.
+```bash
+./tools/quality/quality-scan.sh
+./tools/quality/quality-scan.sh --repos idea,agent-engine-dev
+./tools/quality/quality-scan.sh --pr --repo agent-engine-dev --base <sha> --head <sha>
+./tools/quality/selftest.sh
+```
 
 ## pdf/
 
