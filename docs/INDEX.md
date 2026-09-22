@@ -7,9 +7,13 @@ Update this file whenever an authoritative doc is added or significantly revised
 
 ---
 
-_No authoritative docs yet. This directory will be populated as the organisation matures._
+## grok-bot-setup.md
+**Status:** Authoritative  ·  **Maintained by:** Atlas / Steve
+IDEA development setup on Grok Bot: platform, fleet scripts, workflows, quality control
+(§5), routines, team structure, and Bot descriptions.
+→ [docs/grok-bot-setup.md](grok-bot-setup.md)
 
-_Expected first entries:_
-- _Platform infrastructure reference (compose, networking, services)_
-- _Agent roster and access map_
-- _Field coordinator handbook_
+## README.md
+**Status:** Authoritative  ·  **Maintained by:** Koen / Steve
+Short orientation for the `docs/` folder.
+→ [docs/README.md](README.md)

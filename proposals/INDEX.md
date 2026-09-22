@@ -6,6 +6,10 @@ Update this file whenever a proposal is added, approved, declined, or superseded
 
 ---
 
+## quality-scan-implementation.md
+**Status:** Draft · **Author:** Steve
+Implement `tools/quality/quality-scan.sh` from grok-bot-setup §5 (d05695a): one script for PR gate and scheduled scan; JSON report; audit line. Design Review complete; open questions resolved with Koen except as noted in the draft.
+
 ## app-dev-agent.md
 **Status:** Approved · **Author:** Atlas
 Proposes Kit as the App Developer agent. Covers role definition, app repos, harness, monitoring, Docker builds on Pi, data storage.
