@@ -306,87 +306,85 @@ After each teardown, `check-fleet-health.sh` is called to verify the freed Pi is
 
 ## 5. Quality Control
 
-Quality is not a separate phase — it is the mechanism that gates each step of the workflow. It operates at three levels. Deterministic checking is done by scripts; Bots interpret results and act.
+Quality operates at two levels: a per-PR gate that blocks bad code from merging, and a continuous background scan that catches drift across the whole codebase over time. Both are grounded in the same rules — the gate enforces them on the PR being reviewed, the scan enforces them on everything that has already merged.
+
+Deterministic checks (file structure, staleness, test counts) are done by scripts in `tools/quality/`. Bots invoke the scripts and act on the JSON output — they do not reimplement the logic.
 
 ### 5.1 The QC Gate (Dev Bots, every PR)
 
-No PR reaches Koen without passing the full QC gate. Dev Bots enforce this before notifying Ops Bot.
+No PR reaches Koen without passing the full QC gate. Dev Bots enforce this before notifying Atlas.
 
 **Tests**
 
 Grok Build runs on a GitHub Actions self-hosted runner on the domain Pi — all test commands run natively on ARM hardware.
 
-- Engine: `pnpm test:full` on the runner (builds then runs vitest; results in `test/testresults/`; include log filename in PR description)
-- Console: `pnpm test` + `pnpm typecheck` on the runner
+- Engine: `pnpm test:full` (builds then runs vitest; results in `test/testresults/`; include log filename in PR description)
+- Console: `pnpm test` + `pnpm typecheck`
 - App Dev: App Harness (`node tests/<app>/smoke.mjs`) — spawns a real Engine process and verifies the container reaches Running state
-- No reduction in passing tests without explicit justification
+- No reduction in passing tests without explicit justification in the PR description
 
-**Structural rules**
+**Structure and code hygiene**
 
 - No source files (`.ts`, `.js`, `.tsx`, `.jsx`) in any `docs/` folder
 - No `.md` documentation files in `src/`
 - Test files must live in `test/` — not mixed into `src/`
-
-**Code hygiene**
-
-- No hardcoded credentials, tokens, or API keys — `process.env` or `import.meta.env` only
+- No hardcoded credentials — `process.env` or `import.meta.env` only
 - No `console.log` in production code paths
 - No commented-out code blocks longer than 5 lines without an explanatory comment
 - No new `TODO` or `FIXME` without a linked GitHub issue number
 
 **Documentation**
 
-All files in `docs/` are authoritative — they describe the system as it currently exists (see Section 5.4 for the full docs/design policy). The QC gate enforces:
+Every file in `docs/` must describe the system as it currently exists. The gate enforces:
 
 - If a PR changes implemented behaviour: every affected file in `docs/` must be updated in the same PR
 - If a PR changes build/test/deploy procedure: `AGENTS.md` must be updated in the same PR — no exceptions
-- If a PR adds a new file to `docs/`: `docs/INDEX.md` must be updated
+- If a PR adds a new file to `docs/`: `docs/INDEX.md` must be updated in the same PR
 
-**Failure handling:** Dev Bot retries once. If QC fails after retry, Dev Bot escalates to Lead Bot — never opens a PR on failing QC.
+**Failure handling:** Dev Bot retries once. Still failing: escalate to Lead Bot with diagnosis. Never open a PR on failing QC.
 
-### 5.2 Post-Merge Quality Scan
+### 5.2 Continuous Quality Scan
 
-After every merge and weekly on Monday, Lead Bot invokes `quality-scan.sh` across all IDEA repos. The script performs structural checks and returns a JSON report; Lead Bot reads the report and files GitHub issues (label: `quality`) for any violations.
+Lead Bot invokes `tools/quality/quality-scan.sh` after every merge and on a weekly schedule (Monday). The script scans all IDEA repos and returns a JSON report. Lead Bot reads the report and files GitHub issues for any violations.
 
-`quality-scan.sh` checks:
+The scan covers all repos: `idea`, `agent-engine-dev`, `agent-console-dev`, `agent-app-dev`, and all app repos (`app-kolibri`, `app-nextcloud`, `app-kiwix`, `app-milkwise`).
 
-- Any `.ts`/`.js` file in a `docs/` folder
+**Structural checks** (label: `quality`):
+
+- Any source file (`.ts`, `.js`) in a `docs/` folder
 - Any `.md` file in a `src/` folder
 - Any file in `docs/` not listed in `docs/INDEX.md`
-- `docs/ARCHITECTURE.md` last-modified date vs last significant source commit: if gap >30 days, files a `docs-review` issue
-- `AGENTS.md` last-modified date vs last build-related source commit: if gap >14 days, files a `docs-review` issue
-- `TODO`/`FIXME` count week-over-week — increase triggers an issue listing new additions
-- Engine tests on main branch after any merge: if `pnpm test:full` fails, Lead Bot immediately notifies Koen
+- Any `TODO` or `FIXME` that appeared since the last scan without a linked issue number
 
-### 5.3 Living Documents Review (Lead Bot, scheduled)
+**Documentation staleness** (label: `docs-review`):
 
-**Authoritative docs in `koenswings/idea/docs/`** — monthly
-Lead Bot scans each doc, cross-references against recent PRs and issues, reports staleness. Flagged docs get a GitHub issue with label `docs-review`.
+- Any file in any `docs/` folder across all repos whose last-modified date is more than 30 days older than the most recent source commit that would logically affect it. This applies to every file in every docs/ folder — not just ARCHITECTURE.md.
+- Any `AGENTS.md` whose last-modified date is more than 14 days older than the most recent build-related source commit in that repo.
 
-**App Service version monitoring** — weekly (App Dev Bot calls `check-app-versions.sh`)
-The script reads each app's `app.yaml`, queries DockerHub and GitHub for latest upstream versions, and returns a JSON diff. App Dev Bot reads the diff and creates GitHub issues (label: `app-update`) for any new versions found.
+**Test health** (immediate Koen notification):
 
-**Bot descriptions in Grok Bot** — quarterly
-Lead Bot prompts Koen, analyses the last 3 months of work, and suggests diffs for each Bot description. Koen approves before any description changes.
+- If `pnpm test:full` fails on main in the Engine repo after any merge, Lead Bot notifies Koen immediately — this takes priority over everything else.
 
-**CONTEXT.md** — after every proposal merge
-Lead Bot checks if CONTEXT.md needs updating and offers to draft the edit.
+**App version monitoring** — Kid calls `tools/quality/check-app-versions.sh` as part of the weekly scan. The script reads each app's `app.yaml`, queries DockerHub and GitHub for latest upstream versions, and returns a JSON diff. Kid files issues (label: `app-update`) for any new versions found.
+
+### 5.3 Scheduled Reviews (Lead Bot)
+
+Some quality activities require judgment or Koen's input and cannot be fully automated:
+
+**Monthly** — Lead Bot reviews CONTEXT.md and all docs/ files at the org level for accuracy, cross-referencing recent proposals and PRs. Files docs-review issues for anything stale or inaccurate.
+
+**After every proposal merge** — Lead Bot checks whether CONTEXT.md needs updating and offers to draft the edit.
+
+**Quarterly** — Lead Bot prompts Koen to review all Bot descriptions. Analyses the last 3 months, suggests diffs, presents for Koen's approval. No description changes without explicit Koen approval.
 
 ### 5.4 Document Folder Policy
 
-**`docs/` — Authoritative, always current**
+**`docs/`** — authoritative. Every file describes the system as it currently exists. Kept accurate by the QC gate and the continuous scan. `docs/INDEX.md` lists every authoritative document in that repo.
 
-Every file in `docs/` describes the system as it currently exists. Must be kept accurate. Any PR that changes implemented behaviour must update the relevant `docs/` file in the same PR. `docs/INDEX.md` lists every authoritative document.
+**`proposals/`** — decisions and reasoning. Any document from requirements sketch to full implementation analysis. Permanent record of why the system works the way it does. Does not need updating when code changes.
 
-**`proposals/`** — Decisions and reasoning
+**`AGENTS.md`** — operational manual for Grok Build. Read automatically at the start of every run. Must be updated in the same PR as any build/test/deploy procedure change — enforced by the QC gate and checked by the continuous scan.
 
-Proposals capture the reasoning behind requirements and implementation choices. Any level of detail is acceptable — from a brief requirements sketch to a full implementation analysis. Once approved and implemented, they are the permanent record of why the system works the way it does.
-
-### 5.5 AGENTS.md as the Build Procedure Contract
-
-`AGENTS.md` in each repo is the canonical build, test, and deploy procedure. Grok Build reads it automatically on every run. A PR that changes build-related files without updating AGENTS.md does not pass QC.
-
----
 
 ## 6. Routines
 
