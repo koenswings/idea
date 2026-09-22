@@ -11,5 +11,9 @@
     "runner": "online",
     "grok_build": "1.0.40",
     "Tailscale": "100.85.108.118"
+  },
+  "queue": {
+    "engine": "agent-engine-dev#109",
+    "engine_requested": "2026-09-22T21:21:21Z"
   }
 }
