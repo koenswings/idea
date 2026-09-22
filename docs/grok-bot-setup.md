@@ -96,14 +96,14 @@ All deterministic fleet operations are implemented as scripts in `koenswings/ide
 | `set-golden-pi.sh` | Designate the most recently idle Pi as the new golden instance |
 | `check-fleet-health.sh` | HTTP health check all deployed Pis, return JSON status |
 | `update-fleet-state.sh <pi> <field> <value>` | Atomic read-modify-write of `fleet-state.json` (no race conditions) |
-| `quality-scan.sh <repos...>` | Structural checks: source files in docs/, AGENTS.md freshness, TODO count. Returns JSON report. |
-| `check-app-versions.sh` | Read app.yaml files, query DockerHub/GitHub APIs for latest versions, compare with current. Returns JSON diff. |
 
 All scripts are idempotent. They write their results to stdout as structured JSON for Bot consumption.
 
 Fleet and quality scripts also append one JSON event line to `audit/audit-<YYYY>.jsonl` in `koenswings/idea` after every significant action. This provides a permanent, inspectable record of all system-level events (see the Audit Trail section below for the full design).
 
 **Installation:** scripts live in `koenswings/idea/tools/fleet/`. They run on any Pi that has the idea repo cloned. Dependencies: `bash`, `jq`, `curl`, `ssh`, `tailscale`. All standard on fleet Pis.
+
+Quality scripts (`quality-scan.sh`, `check-app-versions.sh`) live under `koenswings/idea/tools/quality/`, not under `tools/fleet/`. See Section 5 and `tools/README.md`.
 
 ### 2.5 GitHub as Source of Truth
 
