@@ -69,3 +69,21 @@ Development conversations happen in Grok Bot chat. Code lives on GitHub. Builds 
 | `koenswings/app-<name>` | Per-App repos (Kolibri, Nextcloud, Kiwix, …) |
 
 Tasks: GitHub Issues on `koenswings/idea` — labels: `engine`, `console`, `app-dev`, `ops`, `quality`, `docs-review`, `app-update`, `new-app-proposal`.
+
+---
+
+## Quality Control
+
+All platform quality checks live in `tools/quality/quality-scan.sh`. Bots invoke the script and act on its JSON output — they do not reimplement the rules.
+
+| Mode | When | Who |
+|------|------|-----|
+| `--pr` | Before opening a PR | Dev Bot for that domain |
+| Full scan | After merges + weekly Monday | Lead Bot |
+
+Rules cover tests, structure, hygiene, docs currency (every file under every `docs/`, plus `AGENTS.md`), and PR-gate vs scheduled-scan differences. Failed checks become GitHub issues with labels `quality` or `docs-review`.
+
+App upstream version checks stay separate: Kid runs `tools/quality/check-app-versions.sh` on Mondays (`app-update` issues).
+
+**Full quality policy:** `docs/grok-bot-setup.md` §5 · **Implementation proposal:** `proposals/quality-scan-implementation.md`
+
