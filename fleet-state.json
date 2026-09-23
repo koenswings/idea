@@ -3,13 +3,13 @@
   "_note": "Single-Pi mode: idea02 handles all domains as overflow. idea01/03/04 added when online.",
   "idea02": {
     "role": "review",
-    "domain": "console",
-    "pr": "agent-console-dev#116",
+    "domain": "engine",
+    "pr": "agent-engine-dev#109",
     "status": "busy",
-    "host": "192.168.0.180",
+    "host": "100.85.108.118",
     "tailscale": "100.85.108.118",
     "runner": "online",
     "grok_build": "1.0.40",
-    "Tailscale": "100.85.108.118"
+    "lan": "192.168.0.180"
   }
 }

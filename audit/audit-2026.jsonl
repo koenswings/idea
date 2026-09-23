@@ -1,1 +1,9 @@
 # IDEA audit log — appended by fleet scripts after every system event
+{"ts":"2026-09-23T10:30:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"status","value":"busy"}
+{"ts":"2026-09-23T10:30:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"domain","value":"engine"}
+{"ts":"2026-09-23T10:30:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"pr","value":"agent-engine-dev#109"}
+{"ts":"2026-09-23T10:30:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"host","value":"100.85.108.118"}
+{"ts":"2026-09-23T10:30:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"lan","value":"192.168.0.180"}
+{"ts":"2026-09-23T10:30:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"role","value":"review"}
+{"ts":"2026-09-23T10:30:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"Tailscale","value":"DELETED (erroneous capital-T key)"}
+{"ts":"2026-09-23T10:30:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"queue","field":"engine","value":"CLEARED (engine review live on idea02)"}
