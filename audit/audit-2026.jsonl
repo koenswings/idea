@@ -7,3 +7,7 @@
 {"ts":"2026-09-23T10:30:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"role","value":"review"}
 {"ts":"2026-09-23T10:30:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"Tailscale","value":"DELETED (erroneous capital-T key)"}
 {"ts":"2026-09-23T10:30:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"queue","field":"engine","value":"CLEARED (engine review live on idea02)"}
+{"ts":"2026-09-23T19:58:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"status","value":"idle"}
+{"ts":"2026-09-23T19:58:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"pr","value":"null"}
+{"ts":"2026-09-23T19:58:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"domain","value":"engine"}
+{"ts":"2026-09-23T19:58:23Z","bot":"Ops Bot","action":"engine_restore_main","pi":"idea02","from":"7e6138e17731122bbfdc81f2bbf0cd38f43e74e6","to":"5509f791ca6d501aa49f30460e66f6f77170b86e","pr":"agent-engine-dev#109","health":"ok"}
