@@ -3,9 +3,9 @@
   "_note": "Single-Pi mode: idea02 handles all domains as overflow. idea01/03/04 added when online.",
   "idea02": {
     "role": "review",
-    "domain": "engine",
-    "pr": "agent-engine-dev#109",
-    "status": "busy",
+    "domain": "any",
+    "pr": null,
+    "status": "idle",
     "host": "100.85.108.118",
     "tailscale": "100.85.108.118",
     "runner": "online",
