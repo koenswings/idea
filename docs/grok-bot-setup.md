@@ -390,7 +390,7 @@ These rules apply both at the PR gate and in the scheduled scan:
 
 ### 5.2 The PR Gate
 
-Dev Bots invoke `quality-scan.sh --pr <repo> <branch>` before opening any PR. The script checks the PR branch against all the rules above (except staleness, which only applies to the full codebase). If any check fails, the Dev Bot fixes it and retries once. After two failures, the Dev Bot escalates to Lead Bot with the script output — it never opens a PR on failing checks.
+Dev Bots invoke `quality-scan.sh --pr --repo <name> --base <sha> --head <sha>` before opening any PR, where `<base>` is the commit on `main` the branch starts from and `<head>` is the branch tip. The script checks the changes in `<base>..<head>` against all the rules above (except staleness, which only applies to the full codebase). If any check fails, the Dev Bot fixes it and retries once. After two failures, the Dev Bot escalates to Lead Bot with the script output — it never opens a PR on failing checks.
 
 ### 5.3 The Scheduled Scan
 
