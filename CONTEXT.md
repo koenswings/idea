@@ -68,22 +68,25 @@ Development conversations happen in Grok Bot chat. Code lives on GitHub. Builds 
 | `koenswings/agent-app-dev` | App Disk workspace and harness |
 | `koenswings/app-<name>` | Per-App repos (Kolibri, Nextcloud, Kiwix, …) |
 
+Checkout layout (Pis and local/box checkouts alike): `idea` at the root (`/home/pi/idea` on a Pi), agent repos nested at `idea/agents/<repo>`, and App repos nested under `idea/agents/agent-app-dev/app-<name>`. See `proposals/pi-checkout-layout.md` and `docs/grok-bot-setup.md` §2.3.1.
+
 Tasks: GitHub Issues on `koenswings/idea` — labels: `engine`, `console`, `app-dev`, `ops`, `quality`, `docs-review`, `app-update`, `new-app-proposal`.
 
 ---
 
 ## Quality Control
 
-All platform quality checks live in `tools/quality/quality-scan.sh`. Bots invoke the script and act on its JSON output — they do not reimplement the rules.
+All platform quality checks live in `tools/quality/quality-scan.sh`. Bots invoke the script and act on its JSON report (stdout) — they do not reimplement the rules.
 
-| Mode | When | Who |
-|------|------|-----|
-| `--pr` | Before opening a PR | Dev Bot for that domain |
-| Full scan | After merges + weekly Monday | Lead Bot |
+| Mode | Invocation | When | Who |
+|------|------------|------|-----|
+| PR gate | `quality-scan.sh --pr --repo <name> --base <sha> --head <sha>` | Before opening a PR | Dev Bot for that domain |
+| Full scan | `quality-scan.sh` (optionally `--repos a,b,c`) | After merges + weekly Monday | Lead Bot |
 
-Rules cover tests, structure, hygiene, docs currency (every file under every `docs/`, plus `AGENTS.md`), and PR-gate vs scheduled-scan differences. Failed checks become GitHub issues with labels `quality` or `docs-review`.
+Checks: structure, hygiene, docs currency (every file under `docs/` listed in `docs/INDEX.md`; `--pr` also requires `docs/INDEX.md` / `AGENTS.md` updates when relevant), domain bake-ins (Engine `store-template.json` untouched; Console `<For>` lists keyed by ID), staleness (full scan only), and domain tests on a fleet Pi. Exit code: `0` clean, `1` violations, `2` script error; each run appends a line to `audit/audit-<year>.jsonl`. Findings carry the label `quality` or `docs-review` for the resulting GitHub issues.
 
-App upstream version checks stay separate: Kid runs `tools/quality/check-app-versions.sh` on Mondays (`app-update` issues).
+Repo paths follow the nested layout: `agent-*-dev` at `idea/agents/<repo>`, `app-*` at `idea/agents/agent-app-dev/<repo>`. Remote tests run over SSH on the selected Pi in the same tree (`/home/pi/idea/agents/…`). `tools/quality/selftest.sh` runs the scanner against fixtures in `tools/quality/testdata/agents/` (no Pi needed).
 
-**Full quality policy:** `docs/grok-bot-setup.md` §5 · **Implementation proposal:** `proposals/quality-scan-implementation.md`
+App upstream version checks are separate: App Dev Bot runs `tools/quality/check-app-versions.sh` in the Monday scan (`app-update` issues); that script is still a Phase 2 stub.
 
+**Full quality policy:** `docs/grok-bot-setup.md` §5 · **Implementation proposal:** `proposals/quality-scan-implementation.md` · **Layout:** `proposals/pi-checkout-layout.md`
