@@ -708,8 +708,13 @@ run_tests_for_repo() {
     else
       remote_path="/home/pi/idea/agents/${repo}"
     fi
+    # Quote each argv for the remote shell (idea#69): ${cmd[*]} drops the
+    # quotes around bash -c 'pnpm test && pnpm typecheck', so SSH ran bare
+    # `pnpm` (help text, rc=1) and falsely reported tests.failed.
+    local remote_cmd
+    printf -v remote_cmd '%q ' "${cmd[@]}"
     out="$(ssh -o BatchMode=yes -o ConnectTimeout=30 "pi@${host}" \
-      "cd ${remote_path} && ${cmd[*]}" 2>&1)"
+      "cd ${remote_path} && ${remote_cmd}" 2>&1)"
     rc=$?
     set -e
     detail="ssh pi@${host}"
