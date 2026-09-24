@@ -9,7 +9,9 @@
 #            Engine config consolePath =
 #            /home/pi/idea/agents/agent-console-dev/dist
 #            (no separate /home/pi/console-dist as primary)
-#   App Disk: rsync under agents trees as needed
+#   App Disk: App checkouts under
+#            /home/pi/idea/agents/agent-app-dev/<app-*>
+#            (not agents/<app-*> siblings; not under apps/ harness dir)
 # See: proposals/pi-checkout-layout.md, docs/grok-bot-setup.md §4.3
 #
 # TODO: implement in Phase 2

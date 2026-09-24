@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # quality-scan.sh — IDEA platform quality gate (PR + full/scheduled scan)
 # Spec: proposals/quality-scan-implementation.md / docs/grok-bot-setup.md §5
-# Layout: agent repos at ${IDEA_ROOT}/agents/<name> (see proposals/pi-checkout-layout.md)
+# Layout: agent-*-dev at ${IDEA_ROOT}/agents/<name>; app-* at …/agents/agent-app-dev/<name>
+# See proposals/pi-checkout-layout.md
 # Exit: 0 clean, 1 violations (error/critical/docs-review), 2 script error
 set -euo pipefail
 
@@ -44,9 +45,10 @@ Usage:
 
 Paths (canonical Pi / local layout):
   idea            → <IDEA_ROOT>
-  other repos     → <IDEA_ROOT>/agents/<name>
+  agent-*-dev     → <IDEA_ROOT>/agents/<name>
+  app-*           → <IDEA_ROOT>/agents/agent-app-dev/<name>
   --repo-root DIR → override parent of agents/ (fixtures: DIR/agents/<name>)
-  remote tests    → /home/pi/idea/agents/<name>
+  remote tests    → same nesting under /home/pi/idea/
 EOF
 }
 
@@ -70,7 +72,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # --repo-root overrides the parent of agents/ (default: IDEA_ROOT itself).
-# Canonical: agents live at ${IDEA_ROOT}/agents/<name>, not as siblings of idea.
+# Canonical: agent-*-dev at ${IDEA_ROOT}/agents/<name>; app-* under agents/agent-app-dev/.
 if [[ -z "$REPO_ROOT" ]]; then
   REPO_ROOT="$IDEA_ROOT"
 fi
@@ -112,12 +114,16 @@ add_finding() {
 
 # --- Helpers ---
 repo_path() {
-  # idea → IDEA_ROOT; all agent/app repos → ${REPO_ROOT}/agents/<name>
+  # idea → IDEA_ROOT
+  # app-* → ${REPO_ROOT}/agents/agent-app-dev/<name>
+  # other agent repos → ${REPO_ROOT}/agents/<name>
   # REPO_ROOT defaults to IDEA_ROOT (nested layout). Override with --repo-root
   # for fixtures (e.g. tools/quality/testdata/agents/<fixture>).
   local name="$1"
   if [[ "$name" == "idea" ]]; then
     echo "$IDEA_ROOT"
+  elif [[ "$name" == app-* ]]; then
+    echo "${REPO_ROOT}/agents/agent-app-dev/${name}"
   else
     echo "${REPO_ROOT}/agents/${name}"
   fi
@@ -694,8 +700,14 @@ run_tests_for_repo() {
         '{status:"skipped",reason:"pi_unreachable",pi:$pi,host:$host}'
       return
     fi
-    # Remote path: nested under idea/agents (Koen locked layout 2026-09-24)
-    local remote_path="/home/pi/idea/agents/${repo}"
+    # Remote path: nested under idea/agents (Koen locked layout 2026-09-24;
+    # app-* under agent-app-dev — Koen correction same day)
+    local remote_path
+    if [[ "$repo" == app-* ]]; then
+      remote_path="/home/pi/idea/agents/agent-app-dev/${repo}"
+    else
+      remote_path="/home/pi/idea/agents/${repo}"
+    fi
     out="$(ssh -o BatchMode=yes -o ConnectTimeout=30 "pi@${host}" \
       "cd ${remote_path} && ${cmd[*]}" 2>&1)"
     rc=$?

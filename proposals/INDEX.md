@@ -8,7 +8,7 @@ Update this file whenever a proposal is added, approved, declined, or superseded
 
 ## pi-checkout-layout.md
 **Status:** Decided · **Author:** Steve
-Koen locked 2026-09-24: nest agent/app checkouts under `idea/agents/` for test/dev/prod. Retires `/home/pi/projects/engine`, `/home/pi/console-dist`, and sibling `/home/pi/agent-*` heuristics. Fixes quality-scan remote path assumption behind #62/#63.
+Koen locked 2026-09-24: nest agent checkouts under `idea/agents/`; App repos (`app-*`) nest under `agents/agent-app-dev/`. Retires `/home/pi/projects/engine`, `/home/pi/console-dist`, sibling `/home/pi/agent-*` heuristics, and `app-*` as agents siblings. Fixes quality-scan remote path assumption behind #62/#63.
 
 ## quality-scan-implementation.md
 **Status:** Draft · **Author:** Steve

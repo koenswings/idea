@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # update-golden.sh <component> <version>
 # Deploy merged main of a component onto the golden Pi.
-# Operates under /home/pi/idea/agents/<component-repo>
-# (engine → agent-engine-dev, console → agent-console-dev, …).
+# Operates under nested checkout:
+#   engine/console/app-dev → /home/pi/idea/agents/<agent-*-dev>
+#   app-disk / app-*       → /home/pi/idea/agents/agent-app-dev/<app-*>
 # See: proposals/pi-checkout-layout.md
 #
 # TODO: implement in Phase 2

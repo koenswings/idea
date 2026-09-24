@@ -84,18 +84,18 @@ Each Pi runs:
 
 ### 2.3.1 Pi filesystem layout (canonical — test, dev, production)
 
-Koen locked this tree on 2026-09-24. The same nesting applies on fleet Pis, local quality-scan / box checkouts, and production. Agent and App repos live **under** `idea/agents/`, not as siblings of `idea`.
+Koen locked this tree on 2026-09-24 (revised same day: App repos nest under `agent-app-dev`). The same nesting applies on fleet Pis, local quality-scan / box checkouts, and production. Agent repos live **under** `idea/agents/`, not as siblings of `idea`. App GitHub repos are **direct children of `agent-app-dev/`** (not siblings of `agent-engine-dev` / `agent-console-dev`, and not under `agent-app-dev/apps/` — that folder is in-repo harness content).
 
 ```
 /home/pi/idea/                          # clone of koenswings/idea
   agents/
     agent-engine-dev/                   # Engine source + runtime (pm2 cwd)
     agent-console-dev/                  # Console source; serve built dist from here
-    agent-app-dev/
-    app-kolibri/
-    app-nextcloud/
-    app-kiwix/
-    app-milkwise/
+    agent-app-dev/                      # koenswings/agent-app-dev workspace
+      app-kolibri/                      # clone of koenswings/app-kolibri
+      app-nextcloud/
+      app-kiwix/
+      app-milkwise/
 ```
 
 | Role | Canonical path |
@@ -103,14 +103,17 @@ Koen locked this tree on 2026-09-24. The same nesting applies on fleet Pis, loca
 | Engine pm2 cwd / `ENGINE_CWD` | `/home/pi/idea/agents/agent-engine-dev` |
 | `ENGINE_BIN` | `/home/pi/idea/agents/agent-engine-dev/dist/src/index.js` |
 | Console `consolePath` (Vite build output) | `/home/pi/idea/agents/agent-console-dev/dist` |
-| quality-scan remote test cwd | `/home/pi/idea/agents/<repo>` |
-| quality-scan local `repo_path` (non-idea) | `${IDEA_ROOT}/agents/<name>` |
+| quality-scan remote test cwd (`agent-*-dev`) | `/home/pi/idea/agents/<repo>` |
+| quality-scan remote test cwd (`app-*`) | `/home/pi/idea/agents/agent-app-dev/<repo>` |
+| quality-scan local `repo_path` (`agent-*-dev`) | `${IDEA_ROOT}/agents/<name>` |
+| quality-scan local `repo_path` (`app-*`) | `${IDEA_ROOT}/agents/agent-app-dev/<name>` |
 
 **Retired as primary** (migrate away; do not document as the path to use):
 
 - `/home/pi/projects/engine`
 - `/home/pi/console-dist`
 - `/home/pi/agent-engine-dev` / `/home/pi/agent-console-dev` as siblings of `idea` (or of `/home/pi`)
+- `app-*` as siblings of `agent-*-dev` under `idea/agents/`
 
 Optional during migration: keep a symlink from an old path to the new tree, then remove it once fleet scripts and Engine `config.yaml` point at the nested paths.
 
@@ -287,7 +290,7 @@ Ops Bot calls the script, reads the result, and acts. It does not reimplement th
 
 ### 4.3 Deployment
 
-`deploy.sh <pi> <component> <repo> <branch>` handles the full deploy sequence for each component type. All git/build work happens **inside** `/home/pi/idea/agents/<repo>` (see §2.3.1). There is no separate primary rsync target at `/home/pi/console-dist`.
+`deploy.sh <pi> <component> <repo> <branch>` handles the full deploy sequence for each component type. Agent git/build work happens **inside** `/home/pi/idea/agents/<repo>`; App repos use `/home/pi/idea/agents/agent-app-dev/<app-*>` (see §2.3.1). There is no separate primary rsync target at `/home/pi/console-dist`.
 
 **Engine** (pm2, not Docker):
 ```
@@ -349,7 +352,7 @@ Quality is maintained through two mechanisms that enforce the same rules: a per-
 
 All checks are implemented in `tools/quality/quality-scan.sh`. Bots invoke the script and act on the JSON output. They do not reimplement the logic.
 
-`quality-scan.sh` resolves non-`idea` repos to `${IDEA_ROOT}/agents/<name>` locally, and runs remote domain tests under `/home/pi/idea/agents/<name>` on the selected Pi — the same nested layout as production (§2.3.1).
+`quality-scan.sh` resolves `agent-*-dev` repos to `${IDEA_ROOT}/agents/<name>` and `app-*` repos to `${IDEA_ROOT}/agents/agent-app-dev/<name>` locally; remote domain tests use the same nesting on the selected Pi (`/home/pi/idea/agents/…`) — the same layout as production (§2.3.1).
 
 ### 5.1 The Rules
 
@@ -396,7 +399,7 @@ Dev Bots invoke `quality-scan.sh --pr <repo> <branch>` before opening any PR. Th
 1. **After every merge to main** — Lead Bot invokes it automatically
 2. **Every Monday morning** — Lead Bot invokes it on schedule
 
-The script scans all IDEA repos: `idea`, `agent-engine-dev`, `agent-console-dev`, `agent-app-dev`, and all app repos (`app-kolibri`, `app-nextcloud`, `app-kiwix`, `app-milkwise`).
+The script scans all IDEA repos: `idea`, `agent-engine-dev`, `agent-console-dev`, `agent-app-dev`, and all app repos under `agent-app-dev/` (`app-kolibri`, `app-nextcloud`, `app-kiwix`, `app-milkwise`).
 
 It returns a JSON report. Lead Bot reads the report and files GitHub issues for any violations:
 

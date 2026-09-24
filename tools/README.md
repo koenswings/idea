@@ -46,10 +46,11 @@ Installation: `apt-get install -y python3-markdown` (chromium already on Pi).
 
 ## Checkout paths
 
-Fleet and quality scripts assume the locked nested layout (Koen 2026-09-24):
+Fleet and quality scripts assume the locked nested layout (Koen 2026-09-24; apps under agent-app-dev):
 
-- Pi: `/home/pi/idea/agents/<repo>`
-- Local: `${IDEA_ROOT}/agents/<repo>` (`quality-scan.sh --repo-root` overrides the parent of `agents/`)
+- Pi agent repos: `/home/pi/idea/agents/<agent-*-dev>`
+- Pi App repos: `/home/pi/idea/agents/agent-app-dev/<app-*>`
+- Local: same nesting under `${IDEA_ROOT}/` (`quality-scan.sh --repo-root` overrides the parent of `agents/`)
 - Engine pm2 cwd: `/home/pi/idea/agents/agent-engine-dev`
 - Console `consolePath`: `/home/pi/idea/agents/agent-console-dev/dist`
 
