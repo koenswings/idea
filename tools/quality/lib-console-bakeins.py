@@ -13,7 +13,60 @@ def emit(rule, line, msg):
     seen.add(key)
     print(f"FIND\t{rule}\t{rel}:{line}\t{msg}")
 
-for m in re.finditer(r"<For\b([^>]*)>([\s\S]*?)</For>", text):
+def mask_js_comments(src):
+    """Replace // and /* */ comments with spaces; keep newlines for line numbers.
+
+    Skips string / template contents so comment markers inside them are left alone.
+    JSX `{/* ... */}` is covered by the block-comment path.
+    """
+    out = list(src)
+    i, n = 0, len(src)
+    while i < n:
+        c = src[i]
+        if c == "/" and i + 1 < n and src[i + 1] == "/":
+            j = i
+            while j < n and src[j] != "\n":
+                out[j] = " "
+                j += 1
+            i = j
+            continue
+        if c == "/" and i + 1 < n and src[i + 1] == "*":
+            j = i
+            while j + 1 < n:
+                if src[j] == "*" and src[j + 1] == "/":
+                    out[j] = " "
+                    out[j + 1] = " "
+                    j += 2
+                    break
+                if src[j] != "\n":
+                    out[j] = " "
+                j += 1
+            else:
+                while j < n:
+                    if src[j] != "\n":
+                        out[j] = " "
+                    j += 1
+            i = j
+            continue
+        if c in ("'", '"', "`"):
+            quote = c
+            i += 1
+            while i < n:
+                if src[i] == "\\":
+                    i += 2
+                    continue
+                if src[i] == quote:
+                    i += 1
+                    break
+                i += 1
+            continue
+        i += 1
+    return "".join(out)
+
+# Mask comments so literal `<For>` inside //, /* */, or JSX {/* */} cannot open a match.
+scan = mask_js_comments(text)
+
+for m in re.finditer(r"<For\b([^>]*)>([\s\S]*?)</For>", scan):
     attrs, body = m.group(1), m.group(2)
     start = text[: m.start()].count("\n") + 1
     if re.search(r"key=\{(index|i)\}", body) or re.search(r"key=\{(index|i)\}", attrs):
