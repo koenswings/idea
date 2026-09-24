@@ -6,9 +6,10 @@
     "domain": "any",
     "pr": null,
     "status": "idle",
-    "host": "192.168.0.180",
+    "host": "100.85.108.118",
     "tailscale": "100.85.108.118",
     "runner": "online",
-    "grok_build": "1.0.40"
+    "grok_build": "1.0.40",
+    "lan": "192.168.0.180"
   }
 }

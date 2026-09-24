@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # update-fleet-state.sh <pi> <field> <value>
+# Checkout layout: /home/pi/idea/agents/<repo> (see proposals/pi-checkout-layout.md)
 # Atomic read-modify-write of fleet-state.json
 # Must be run from the koenswings/idea repo root or with STATE_FILE set.
 set -euo pipefail

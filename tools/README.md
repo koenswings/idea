@@ -43,3 +43,15 @@ Quality scan and version monitoring scripts. Lead Bot and App Dev Bot call these
 | `md-to-pdf.py` | Markdown to PDF with clickable two-level ToC via Chromium headless |
 
 Installation: `apt-get install -y python3-markdown` (chromium already on Pi).
+
+## Checkout paths
+
+Fleet and quality scripts assume the locked nested layout (Koen 2026-09-24; apps under agent-app-dev):
+
+- Pi agent repos: `/home/pi/idea/agents/<agent-*-dev>`
+- Pi App repos: `/home/pi/idea/agents/agent-app-dev/<app-*>`
+- Local: same nesting under `${IDEA_ROOT}/` (`quality-scan.sh --repo-root` overrides the parent of `agents/`)
+- Engine pm2 cwd: `/home/pi/idea/agents/agent-engine-dev`
+- Console `consolePath`: `/home/pi/idea/agents/agent-console-dev/dist`
+
+See `proposals/pi-checkout-layout.md` and `docs/grok-bot-setup.md` §2.3.1.
