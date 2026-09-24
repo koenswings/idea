@@ -6,6 +6,10 @@ Update this file whenever a proposal is added, approved, declined, or superseded
 
 ---
 
+## pi-checkout-layout.md
+**Status:** Decided · **Author:** Steve
+Koen locked 2026-09-24: nest agent/app checkouts under `idea/agents/` for test/dev/prod. Retires `/home/pi/projects/engine`, `/home/pi/console-dist`, and sibling `/home/pi/agent-*` heuristics. Fixes quality-scan remote path assumption behind #62/#63.
+
 ## quality-scan-implementation.md
 **Status:** Draft · **Author:** Steve
 Implement `tools/quality/quality-scan.sh` from grok-bot-setup §5 (d05695a): one script for PR gate and scheduled scan; JSON report; audit line. Design Review complete; open questions resolved with Koen except as noted in the draft.

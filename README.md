@@ -64,6 +64,25 @@ Tasks tracked as GitHub Issues on this repo. Labels: `engine`, `console`, `app-d
 
 ---
 
+
+## Checkout layout (Pi + local)
+
+On fleet Pis and local quality-scan / box checkouts, clone `idea` then nest agent and app repos under `agents/`:
+
+```
+idea/
+  agents/
+    agent-engine-dev/     # Engine — pm2 cwd; ENGINE_CWD / ENGINE_BIN here
+    agent-console-dev/    # Console — build → dist/; Engine consolePath points here
+    agent-app-dev/
+    app-kolibri/
+    app-nextcloud/
+    app-kiwix/
+    app-milkwise/
+```
+
+Canonical paths, retired layouts, and idea02 migration: [`docs/grok-bot-setup.md`](docs/grok-bot-setup.md) §2.3.1 and [`proposals/pi-checkout-layout.md`](proposals/pi-checkout-layout.md).
+
 ## Setup
 
 Full documentation: [`docs/grok-bot-setup.md`](docs/grok-bot-setup.md)

@@ -11,7 +11,7 @@
 | # | Section |
 |:---:|---|
 | **1** | Overview |
-| **2** | Platform — Subscription · Grok Build · Pi Fleet · Fleet Scripts · GitHub |
+| **2** | Platform — Subscription · Grok Build · Pi Fleet · Filesystem layout · Fleet Scripts · GitHub |
 | **3** | Development Workflow — Bug fix path · Feature path · Paper trail |
 | **4** | Fleet Review Environments — Scripts · Manifest · Deploy · Golden instance · Health |
 | **5** | Quality Control — QC gate · Post-merge scan · Living docs · Doc policy · AGENTS.md contract |
@@ -78,9 +78,43 @@ Each Pi runs:
 - Tailscale (hostname: `idea<N>`, reachable at `idea<N>.tail2d60.ts.net`)
 - GitHub Actions self-hosted runner (label matches Tailscale hostname)
 - Grok Build
-- Engine running via pm2 at `/home/pi/projects/engine`
+- Engine running via pm2 with cwd `/home/pi/idea/agents/agent-engine-dev`
 
 **Roles are assigned dynamically at runtime** by the fleet scripts (see Section 2.4). By convention, the first available Pi for a given domain is used; one Pi is designated golden. These assignments are recorded in `fleet-state.json` and update as Pis come and go.
+
+### 2.3.1 Pi filesystem layout (canonical — test, dev, production)
+
+Koen locked this tree on 2026-09-24. The same nesting applies on fleet Pis, local quality-scan / box checkouts, and production. Agent and App repos live **under** `idea/agents/`, not as siblings of `idea`.
+
+```
+/home/pi/idea/                          # clone of koenswings/idea
+  agents/
+    agent-engine-dev/                   # Engine source + runtime (pm2 cwd)
+    agent-console-dev/                  # Console source; serve built dist from here
+    agent-app-dev/
+    app-kolibri/
+    app-nextcloud/
+    app-kiwix/
+    app-milkwise/
+```
+
+| Role | Canonical path |
+|------|----------------|
+| Engine pm2 cwd / `ENGINE_CWD` | `/home/pi/idea/agents/agent-engine-dev` |
+| `ENGINE_BIN` | `/home/pi/idea/agents/agent-engine-dev/dist/src/index.js` |
+| Console `consolePath` (Vite build output) | `/home/pi/idea/agents/agent-console-dev/dist` |
+| quality-scan remote test cwd | `/home/pi/idea/agents/<repo>` |
+| quality-scan local `repo_path` (non-idea) | `${IDEA_ROOT}/agents/<name>` |
+
+**Retired as primary** (migrate away; do not document as the path to use):
+
+- `/home/pi/projects/engine`
+- `/home/pi/console-dist`
+- `/home/pi/agent-engine-dev` / `/home/pi/agent-console-dev` as siblings of `idea` (or of `/home/pi`)
+
+Optional during migration: keep a symlink from an old path to the new tree, then remove it once fleet scripts and Engine `config.yaml` point at the nested paths.
+
+Proposal / migration notes: [`proposals/pi-checkout-layout.md`](../proposals/pi-checkout-layout.md).
 
 ### 2.4 Fleet Scripts
 
@@ -253,26 +287,31 @@ Ops Bot calls the script, reads the result, and acts. It does not reimplement th
 
 ### 4.3 Deployment
 
-`deploy.sh <pi> <component> <repo> <branch>` handles the full deploy sequence for each component type:
+`deploy.sh <pi> <component> <repo> <branch>` handles the full deploy sequence for each component type. All git/build work happens **inside** `/home/pi/idea/agents/<repo>` (see §2.3.1). There is no separate primary rsync target at `/home/pi/console-dist`.
 
 **Engine** (pm2, not Docker):
 ```
 ssh to pi
-  cd /home/pi/projects/engine
+  cd /home/pi/idea/agents/agent-engine-dev
   git fetch origin && git checkout <branch>
   pnpm install --frozen-lockfile && pnpm build
-  pm2 restart engine
+  pm2 restart engine                  (cwd = this tree; ENGINE_CWD / ENGINE_BIN under it)
   pm2 logs engine --lines 20          (verify clean start)
   curl http://localhost:80/api/store-url  (health check)
 ```
 
-**Console** (rsync, served by Engine):
+**Console** (built in-tree, served by Engine):
 ```
-build on runner: pnpm build → dist/
-rsync dist/ to pi:/home/pi/console-dist/
-ssh: pm2 restart engine
+ssh to pi
+  cd /home/pi/idea/agents/agent-console-dev
+  git fetch origin && git checkout <branch>
+  pnpm install --frozen-lockfile && pnpm build   # Vite → dist/
+  # Engine config.yaml: consolePath: /home/pi/idea/agents/agent-console-dev/dist
+  pm2 restart engine
 HTTP check on http://<pi>/            (expect 200)
 ```
+
+Migration note for existing Pis that still have `/home/pi/console-dist`: point `consolePath` at `agents/agent-console-dev/dist`, then remove or stop documenting the old directory. Optional one-time rsync into the new tree is fine during cutover; it is not the ongoing primary path.
 
 **App Disk** (simulates physical dock):
 ```
@@ -281,7 +320,7 @@ ssh: docker compose up -d
 ssh: docker compose ps                (verify running)
 ```
 
-`teardown.sh <pi>` reverses the deploy and restores the Pi to a clean main-branch state.
+`teardown.sh <pi>` reverses the deploy and restores the Pi to a clean main-branch state under `idea/agents/`.
 
 ### 4.4 Golden Instance
 
@@ -309,6 +348,8 @@ After each teardown, `check-fleet-health.sh` is called to verify the freed Pi is
 Quality is maintained through two mechanisms that enforce the same rules: a per-PR gate that runs before any code merges, and a scheduled scan that runs those same rules across everything already merged. The rules are not different between the two — the gate applies them to the current PR, the scan applies them to the full codebase.
 
 All checks are implemented in `tools/quality/quality-scan.sh`. Bots invoke the script and act on the JSON output. They do not reimplement the logic.
+
+`quality-scan.sh` resolves non-`idea` repos to `${IDEA_ROOT}/agents/<name>` locally, and runs remote domain tests under `/home/pi/idea/agents/<name>` on the selected Pi — the same nested layout as production (§2.3.1).
 
 ### 5.1 The Rules
 
@@ -590,7 +631,8 @@ You are the Console Dev for IDEA. Two duties: design review and execution.
 
 WHAT YOU BUILD:
 The IDEA Console — Solid.js web app served by the Engine on port 80.
-Built via Vite → dist/ → rsync to Pi → Engine serves it.
+Built via Vite → dist/ under /home/pi/idea/agents/agent-console-dev;
+Engine serves that dist via consolePath.
 
 Key constraints:
 - Solid.js fine-grained reactivity:
@@ -889,7 +931,7 @@ The fleet deploy scripts handle all deployment logic. Grok Build's job is to pro
 ```yaml
 settings:
   httpPort: 80          # Serves Console web app + /api/store-url
-  consolePath: /home/pi/console-dist
+  consolePath: /home/pi/idea/agents/agent-console-dev/dist
   port: 4321            # Automerge WebSocket port
   testMode: false       # true = skip sudo mount/umount (tests)
 ```
@@ -1068,8 +1110,8 @@ After any build: update `image:` in compose.yaml and `version:` in app.yaml cons
 **Test (required before any PR touching an App Disk)**
 
 ```bash
-ENGINE_BIN=/home/pi/projects/engine/dist/src/index.js \
-ENGINE_CWD=/home/pi/projects/engine \
+ENGINE_BIN=/home/pi/idea/agents/agent-engine-dev/dist/src/index.js \
+ENGINE_CWD=/home/pi/idea/agents/agent-engine-dev \
 node tests/<app>/smoke.mjs
 ```
 
