@@ -1,5 +1,7 @@
 # Agent workspaces are independent git repos — not part of this repo
 agents/
+!tools/quality/testdata/agents/
+!tools/quality/testdata/agents/**
 engine/
 
 # Transient logs

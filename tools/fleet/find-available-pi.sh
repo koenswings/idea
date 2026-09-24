@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # find-available-pi.sh <domain>
+# Checkout layout: /home/pi/idea/agents/<repo> (see proposals/pi-checkout-layout.md)
 # Returns the hostname of the first idle Pi matching the domain.
 # Domain affinity: engine→idea01, console→idea02, app-dev→idea03
 # Falls back to any idle non-golden Pi if domain Pi is busy.
