@@ -4,8 +4,8 @@
   "idea02": {
     "role": "review",
     "domain": "any",
-    "pr": "idea#102 (console#122)",
-    "status": "idle",
+    "pr": "idea#105 (engine#116)",
+    "status": "deployed",
     "host": "100.85.108.118",
     "tailscale": "100.85.108.118",
     "runner": "online",
