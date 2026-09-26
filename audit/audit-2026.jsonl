@@ -22,3 +22,4 @@
 {"ts":"2026-09-26T13:26:11Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"version","value":"engine main@58d1897, console main@af473f1","previous":null}
 {"ts":"2026-09-26T13:26:11Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"pr","value":null,"previous":"idea#80 (engine#117 @33c88cf, incl. #116)"}
 {"ts":"2026-09-26T13:26:11Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"status","value":"idle","previous":"deployed"}
+{"ts":"2026-09-26T13:36:18Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"version","value":"engine main@df060d3, console main@af473f1","previous":"engine main@58d1897, console main@af473f1"}
