@@ -132,7 +132,7 @@ All deterministic fleet operations are implemented as scripts in `koenswings/ide
 | `update-golden.sh <component> <version>` | Update the golden Pi to the given version of a component |
 | `set-golden-pi.sh` | Designate the most recently idle Pi as the new golden instance |
 | `check-fleet-health.sh` | HTTP health check all deployed Pis, return JSON status |
-| `update-fleet-state.sh <pi> <field> <value>` | Atomic read-modify-write of `fleet-state.json` (no race conditions) |
+| `update-fleet-state.sh [--create] [--json\|--null] <pi> <field> [<value>]` | Locked (flock), atomic read-modify-write of `fleet-state.json`. `--null` clears a field to JSON `null`; unknown Pis are refused unless `--create` |
 
 All scripts are idempotent. They write their results to stdout as structured JSON for Bot consumption.
 
@@ -775,7 +775,8 @@ FLEET SCRIPTS (call these; do not reimplement their logic):
 - update-golden.sh <component> <version> — update golden instance
 - set-golden-pi.sh — designate new golden Pi if current unavailable
 - check-fleet-health.sh — HTTP check all deployed Pis, return JSON
-- update-fleet-state.sh <pi> <field> <value> — atomic state update
+- update-fleet-state.sh [--create] [--json|--null] <pi> <field> [<value>] — locked, atomic state update
+  (clear a field with --null, e.g. update-fleet-state.sh --null idea02 pr)
 
 DEPLOY WORKFLOW (triggered when Dev Bot passes QC):
 1. Call find-available-pi.sh <domain>. Read result.
