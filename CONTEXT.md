@@ -54,6 +54,8 @@ Every component works without internet. This is the foundational constraint that
 
 Development conversations happen in Grok Bot chat. Code lives on GitHub. Builds and tests run on the Pi fleet. Koen reviews every PR on real hardware before merging.
 
+Until a second Pi exists, `idea02` is both the review Pi and the recorded golden state. When idle (`status: idle`, `pr: null`, `role: review`), its `version` records the mains it runs; after every merge to `main`, Ops (Atlas) moves it to `main` and updates that field. With multiple Pis, restore the dedicated golden rule: `role: golden`, `status: golden`, `version: main@<sha>`, and never use the golden Pi for review.
+
 **Full setup documentation:** `docs/grok-bot-setup.md`
 
 ---

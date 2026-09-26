@@ -19,6 +19,8 @@ Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment,
 
 Status: stub files. Full implementation in Phase 2.
 
+Until a second Pi exists, `idea02` is also the review Pi: “golden” is a recorded state, not a separate machine. When idle (`status: idle`, `pr: null`, `role: review`), its `version` records the mains it runs; Ops (Atlas) updates it after every merge to `main`. With multiple Pis, restore the dedicated golden Pi (`role: golden`, `status: golden`, `version: main@<sha>`), which is never used for review.
+
 ## quality/
 
 Quality scan and version monitoring scripts. Lead Bot and App Dev Bot call these.
