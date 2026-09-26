@@ -4,12 +4,13 @@
   "idea02": {
     "role": "review",
     "domain": "any",
-    "pr": "idea#80 (engine#117 @33c88cf, incl. #116)",
-    "status": "deployed",
+    "pr": null,
+    "status": "idle",
     "host": "100.85.108.118",
     "tailscale": "100.85.108.118",
     "runner": "online",
     "grok_build": "1.0.40",
-    "lan": "192.168.0.180"
+    "lan": "192.168.0.180",
+    "version": "engine main@58d1897, console main@af473f1"
   }
 }
