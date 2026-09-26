@@ -26,3 +26,7 @@ backups/
 # Python
 __pycache__/
 *.pyc
+
+# update-fleet-state.sh lock and temp files
+fleet-state.json.lock
+.fleet-state.*

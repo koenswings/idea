@@ -15,7 +15,7 @@ Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment,
 | `update-golden.sh <component> <version>` | Update golden Pi to new version of a component |
 | `set-golden-pi.sh` | Designate new golden Pi if current unavailable |
 | `check-fleet-health.sh` | HTTP check all deployed Pis, return JSON status |
-| `update-fleet-state.sh <pi> <field> <value>` | Atomic read-modify-write of fleet-state.json |
+| `update-fleet-state.sh [--create] [--json\|--null] <pi> <field> [<value>]` | Locked (flock), atomic read-modify-write of one field in fleet-state.json. `--null` clears a field to JSON `null`, `--json` stores a typed JSON value, unknown Pis are refused unless `--create`. Audit line goes to `audit/` next to `STATE_FILE`. **Implemented**; `selftest.sh` exercises it against a temp copy |
 
 Status: stub files. Full implementation in Phase 2.
 
