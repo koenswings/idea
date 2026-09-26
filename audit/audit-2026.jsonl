@@ -17,3 +17,4 @@
 {"ts":"2026-09-26T07:51:59Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"status","value":"idle"}
 {"ts":"2026-09-26T12:24:44Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"status","value":"deployed"}
 {"ts":"2026-09-26T12:24:44Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"pr","value":"idea#105 (engine#116)"}
+{"ts":"2026-09-26T12:29:43Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"pr","value":"idea#105 (engine#116 @13bf60e)"}
