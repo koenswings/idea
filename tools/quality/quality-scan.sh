@@ -675,7 +675,7 @@ run_tests_for_repo() {
       ;;
     app-dev)
       # run all smoke.mjs
-      cmd=(bash -c 'set -e; for f in tests/*/smoke.mjs tests/smoke.mjs; do [ -f "$f" ] && node "$f"; done')
+      cmd=(bash -c 'set -e; for f in tests/*/smoke.mjs tests/smoke.mjs; do [ -f "$f" ] || continue; node "$f"; done')
       ;;
   esac
 
