@@ -11,6 +11,6 @@
     "runner": "online",
     "grok_build": "1.0.40",
     "lan": "192.168.0.180",
-    "version": "engine main@df060d3, console main@af473f1"
+    "version": "engine main@e2cd53f, console main@af473f1"
   }
 }
