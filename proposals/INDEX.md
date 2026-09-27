@@ -6,6 +6,10 @@ Update this file whenever a proposal is added, approved, declined, or superseded
 
 ---
 
+## files-disk.md
+**Status:** Draft · **Author:** Steve (Lead Bot)
+Files Disk (idea#75): turn an empty ext4 disk into a shared file store, mounted into opted-in Apps (Nextcloud first) on the Engine it is docked to. No formatting, no SMB/NFS in v1. Depends on the META.yaml bug (B1).
+
 ## pi-checkout-layout.md
 **Status:** Decided · **Author:** Steve
 Koen locked 2026-09-24: nest agent checkouts under `idea/agents/`; App repos (`app-*`) nest under `agents/agent-app-dev/`. Retires `/home/pi/projects/engine`, `/home/pi/console-dist`, sibling `/home/pi/agent-*` heuristics, and `app-*` as agents siblings. Fixes quality-scan remote path assumption behind #62/#63.
