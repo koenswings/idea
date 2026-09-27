@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # deploy.sh <pi> <component> <repo> <branch>
 # Full deploy sequence for engine | console | app-disk.
+# Target is a review Pi chosen by find-available-pi.sh. Refuse a Pi with
+# role: golden (today idea02): golden only runs merged main (idea#118).
 #
 # Canonical paths on Pi (Koen locked 2026-09-24):
 #   Engine:  cwd /home/pi/idea/agents/agent-engine-dev

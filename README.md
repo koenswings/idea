@@ -46,7 +46,7 @@ Koen is the CEO — every PR requires his review and merge.
 
 ## The Pi Fleet
 
-A variable number of Raspberry Pis form the build, test, review, and golden-instance fleet. Any Pi enrolled in Tailscale as `idea<N>` is automatically discovered and available. Until a second Pi exists, `idea02` is both the review Pi and the recorded golden state; when idle (`status: idle`, `pr: null`, `role: review`), its `version` records the mains it runs. After every merge to `main`, Ops (Atlas) moves it to `main` and updates that version. With multiple Pis, the original dedicated golden Pi is restored: `role: golden`, `status: golden`, `version: main@<sha>`, and never used for review. Fleet state is tracked in `fleet-state.json` and managed by the scripts in `tools/fleet/`.
+A variable number of Raspberry Pis form the build, test, review, and golden-instance fleet. Any Pi enrolled in Tailscale as `idea<N>` is automatically discovered and available. `idea02` is the dedicated golden Pi (`role: golden`): it always runs the latest merged `main`, keeps MilkWise as a real workload, and is never used for PR review. Its `version` records the mains it runs (for example `engine main@<sha>, console main@<sha>`) and its `status` stays `idle`; `role: golden` is what excludes it from review allocation. Review Pis (currently `idea03`, `role: review`) are picked by `find-available-pi.sh`. After every merge to `main`, Ops (Atlas) moves the golden Pi to `main` and updates its `version` (`update-golden.sh` once implemented, idea#107). This dedicated-golden model (idea#118) replaces the temporary single-Pi rule from idea PR #112. Fleet state is tracked in `fleet-state.json` and managed by the scripts in `tools/fleet/`.
 
 ---
 

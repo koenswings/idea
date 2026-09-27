@@ -19,7 +19,7 @@ Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment,
 
 Status: stub files. Full implementation in Phase 2.
 
-Until a second Pi exists, `idea02` is also the review Pi: “golden” is a recorded state, not a separate machine. When idle (`status: idle`, `pr: null`, `role: review`), its `version` records the mains it runs; Ops (Atlas) updates it after every merge to `main`. With multiple Pis, restore the dedicated golden Pi (`role: golden`, `status: golden`, `version: main@<sha>`), which is never used for review.
+`idea02` is the dedicated golden Pi (`role: golden`): it always runs the latest merged `main`, keeps MilkWise as a real workload, and is never used for PR review. Its `version` records the mains it runs (for example `engine main@<sha>, console main@<sha>`) and its `status` stays `idle`; `role: golden` is what excludes it from review allocation. Review Pis (currently `idea03`, `role: review`) are picked by `find-available-pi.sh`. After every merge to `main`, Ops (Atlas) moves the golden Pi to `main` and updates its `version` (`update-golden.sh` once implemented, idea#107). This dedicated-golden model (idea#118) replaces the temporary single-Pi rule from idea PR #112.
 
 ## quality/
 

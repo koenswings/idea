@@ -78,6 +78,8 @@ Exit codes: `0` = clean; `1` = violations; `2` = script error.
 4. **Single-Pi exception (Koen):** if `fleet-state.json` contains **exactly one** Pi, that Pi may be used for tests even when its role is `golden`. This keeps a one-Pi fleet usable as a continuous dev/test platform.
 5. Never use golden when the fleet has more than one Pi.
 
+> **Update 2026-09-27 (idea#118):** the fleet now has a dedicated golden Pi (`idea02`) and a review Pi (`idea03`), so the single-Pi exception above no longer applies.
+
 There is no `--skip-tests` flag: both modes attempt tests under the Pi-selection rules.
 
 ### 4.4 Check implementations (deterministic)

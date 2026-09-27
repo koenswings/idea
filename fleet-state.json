@@ -1,6 +1,6 @@
 {
   "_comment": "Managed by tools/fleet/update-fleet-state.sh — do not edit manually",
-  "_note": "Single-Pi mode: idea02 handles all domains as overflow. idea01/03/04 added when online.",
+  "_note": "Dedicated golden (idea#118): idea02 is golden (role golden, never used for review; always runs merged main); idea03 is the review Pi. idea01/04 added when online.",
   "idea02": {
     "role": "golden",
     "domain": "any",

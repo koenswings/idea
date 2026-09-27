@@ -80,7 +80,7 @@ Each Pi runs:
 - Grok Build
 - Engine running via pm2 with cwd `/home/pi/idea/agents/agent-engine-dev`
 
-**Roles are assigned dynamically at runtime** by the fleet scripts (see Section 2.4). By convention, the first available Pi for a given domain is used. In the current single-Pi fleet, `idea02` is the review Pi and the golden state is recorded on that same machine; with multiple Pis, one Pi is designated golden. These assignments are recorded in `fleet-state.json` and update as Pis come and go.
+**Roles are assigned dynamically at runtime** by the fleet scripts (see Section 2.4). By convention, the first available Pi for a given domain is used. One Pi is the dedicated golden Pi (`role: golden`, currently `idea02`); the others are review Pis (currently `idea03`). These assignments are recorded in `fleet-state.json` and update as Pis come and go.
 
 ### 2.3.1 Pi filesystem layout (canonical — test, dev, production)
 
@@ -200,8 +200,7 @@ Koen evaluates on real Pi hardware via Tailscale
   │
   ▼
 Ops Bot calls teardown.sh <pi>
-  → single-Pi: moves idea02 to main and updates its version
-  → multi-Pi: calls update-golden.sh <component> <version>
+  → calls update-golden.sh <component> <version> (golden Pi moves to main; its version is updated)
   → calls check-fleet-health.sh (verifies the fleet is healthy)
   → calls find-available-pi.sh for any queued PRs
 ```
@@ -263,13 +262,17 @@ Every PR is evaluated on real Pi hardware before Koen merges it. All fleet logic
 ```json
 {
   "idea02": {
+    "role": "golden", "pr": null, "status": "idle",
+    "version": "engine main@b233ccb, console main@af473f1"
+  },
+  "idea03": {
     "role": "review", "pr": null, "status": "idle",
-    "version": "engine main@df060d3, console main@af473f1"
+    "version": "engine main@b233ccb, console main@af473f1"
   }
 }
 ```
 
-Until a second Pi exists, `idea02` is both the review Pi and the recorded golden state. When it is idle (`status: idle`, `pr: null`, `role: review`), its `version` records the mains it runs. After every merge to `main`, Ops (Atlas) moves `idea02` to `main` and updates that field. Once a second Pi exists, use the dedicated-golden arrangement described in §4.4. New Pis are added by running `idea-setup.sh`; they appear in `fleet-state.json` automatically.
+`idea02` is the dedicated golden Pi and `idea03` the review Pi (idea#118); see §4.4. Every Pi records the mains or PR it runs in `version` / `pr`. New Pis are added by running `idea-setup.sh`; they appear in `fleet-state.json` automatically.
 
 ### 4.2 Pi Allocation
 
@@ -280,7 +283,7 @@ Until a second Pi exists, `idea02` is both the review Pi and the recorded golden
 3. If none with matching domain, find any idle non-golden Pi (overflow)
 4. If none idle, return empty (PR is queued)
 
-In a multi-Pi fleet, the golden Pi is never used for PR review. Until a second Pi exists, `idea02` is the review Pi as well as the recorded golden state, so an idle `idea02` may be selected for review. Once another Pi is available, restore the dedicated-golden rule; its designation can shift if it goes down (`set-golden-pi.sh`).
+The golden Pi (`role: golden`) is never used for PR review, whatever its `status`. Its designation can shift if it goes down (`set-golden-pi.sh`).
 
 Ops Bot calls the script, reads the result, and acts. It does not reimplement the selection logic.
 
@@ -323,9 +326,9 @@ ssh: docker compose ps                (verify running)
 
 ### 4.4 Golden Instance
 
-Until a second Pi exists, “golden” is a recorded state, not a separate machine. The one Pi, `idea02`, is also the review Pi. When it is idle (`status: idle`, `pr: null`, `role: review`), its `version` field records the mains it runs: `engine main@df060d3, console main@af473f1`. After every merge to `main`, Ops (Atlas) moves `idea02` to `main` and updates that field.
+One Pi is the dedicated golden instance (idea#118, Koen 2026-09-27; this replaces the temporary single-Pi rule from idea PR #112). Today that is `idea02`: `role: golden`, `status: idle`, `pr: null`, and a `version` such as `engine main@b233ccb, console main@af473f1`. It always runs the latest merged `main` of all components, keeps MilkWise running as a real workload, and is never used for PR review. `role: golden` (not `status`) is what excludes it from `find-available-pi.sh`.
 
-Once a second Pi exists, restore the dedicated-golden rule: one Pi carries `role: golden`, `status: golden`, and a version such as `main@<sha>`, always runs the latest merged `main`, and is never used for PR review. After a merge, `update-golden.sh` updates it; if it becomes unavailable, `set-golden-pi.sh` designates the most recently idle Pi.
+PR review deploys go to review Pis (`role: review`; today `idea03`, review URL `http://idea03.tail2d60.ts.net:8080/`). After a merge, `update-golden.sh` moves the golden Pi to `main` and updates its `version` (until idea#107 implements it, Ops does this by hand with `update-fleet-state.sh`); if the golden Pi becomes unavailable, `set-golden-pi.sh` designates the most recently idle Pi.
 
 ### 4.5 Health Monitoring
 
@@ -407,7 +410,7 @@ Routines are scheduled or event-triggered workflows that run independently of di
 
 | Trigger | Owner | Routine | Outcome |
 |---------|-------|---------|---------|
-| After every merge | Lead Bot (automated) | `quality-scan.sh` across all repos + single-Pi golden-state update (or `update-golden.sh` in multi-Pi mode) | Quality issues filed; merged mains recorded; freed Pi health verified |
+| After every merge | Lead Bot (automated) | `quality-scan.sh` across all repos + golden update via `update-golden.sh` | Quality issues filed; merged mains recorded; freed Pi health verified |
 | Weekly — Monday | Lead Bot + App Dev Bot | `quality-scan.sh` + `check-app-versions.sh` | Quality report; app-update issues for new upstream versions |
 | Every 30 min (cron) | Ops Bot via `check-fleet-health.sh` | HTTP health check all deployed Pis | Alert Lead Bot if any Pi unreachable |
 | Monthly — first Monday | Lead Bot + Marco Bot | Authoritative docs review; new app scouting | docs-review issues; new-app-proposal issues |
@@ -775,8 +778,7 @@ DEPLOY WORKFLOW (triggered when Dev Bot passes QC):
 3. If no Pi available: record PR in queue in fleet-state.json.
    Notify Lead Bot: "no idle Pi — PR queued."
 4. After merge: call teardown.sh on review Pi.
-   In single-Pi mode, move idea02 to main and update its version.
-   In multi-Pi mode, call update-golden.sh for the merged component.
+   Call update-golden.sh for the merged component (golden Pi to main, version updated).
    Call check-fleet-health.sh. Verify clean.
    Call find-available-pi.sh for any queued PRs. Deploy if found.
 
@@ -785,16 +787,13 @@ Call check-fleet-health.sh every 30 minutes (cron via GitHub Actions).
 Read the JSON report. If any Pi is unreachable: alert Lead Bot immediately,
 stop all other changes.
 
-GOLDEN STATE:
-Until a second Pi exists, “golden” is a recorded state, not a separate
-machine. idea02 is also the review Pi. When idle (status idle, pr null,
-role review), its version records the mains it runs. After every merge to
-main, Ops (Atlas) moves idea02 to main and updates that version.
-
-MULTI-PI GOLDEN:
-Once a second Pi exists, one Pi carries role: golden, status: golden, and
-version: main@<sha>. It always runs latest merged main and is never used
-for PR review. If it goes down, call set-golden-pi.sh to designate a new one.
+GOLDEN INSTANCE:
+One Pi carries role: golden (today idea02; status stays idle). Its version
+records the mains it runs (engine main@<sha>, console main@<sha>). It always
+runs latest merged main, keeps MilkWise running, and is never used for PR
+review: find-available-pi.sh skips role golden. Review deploys go to review
+Pis (today idea03). If the golden Pi goes down, call set-golden-pi.sh to
+designate a new one.
 
 DESIGN REVIEW DUTY:
 Assess: deployment changes needed? pm2, systemd, Tailscale, or Docker

@@ -182,7 +182,8 @@ resolve_pi() {
     return
   fi
 
-  # Single-Pi golden exception
+  # Single-Pi golden exception (only when fleet-state.json lists exactly one Pi).
+  # Inactive in the dedicated-golden fleet (idea#118): golden is never used for tests.
   if [[ "$count" -eq 1 ]]; then
     local only
     only="$(jq -r '[keys[] | select(startswith("_")|not)][0]' "$FLEET_STATE")"
