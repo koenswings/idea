@@ -8,7 +8,7 @@ Update this file whenever a proposal is added, approved, declined, or superseded
 
 ## files-disk.md
 **Status:** Proposed (design reviewed) · **Author:** Steve (Lead Bot)
-Files Disk (idea#75): turn an empty ext4 disk into a shared file store, mounted into opted-in Apps (Nextcloud first) on the Engine it is docked to. No formatting, no SMB/NFS in v1; one narrow sudoers chown entry. Depends on idea#121 (META.yaml) plus an unmount safety fix.
+Files Disk (idea#75): turn an empty ext4 disk into a shared file store, mounted into opted-in Apps (Nextcloud first) on the Engine it is docked to. Empty ext4 disks work straight away; other non-IDEA disks can be formatted as ext4 through an explicit, typed-confirmation Console action (one root-owned format script, merged in from idea#125). No SMB/NFS in v1. Depends on idea#121 (META.yaml) plus an unmount safety fix.
 
 ## pi-checkout-layout.md
 **Status:** Decided · **Author:** Steve
