@@ -23,6 +23,8 @@
     "lan": "192.168.0.228",
     "runner": "none",
     "grok_build": null,
-    "version": "engine main@b233ccb, console main@af473f1"
+    "version": "engine main@b233ccb, console main@af473f1",
+    "mdns": false,
+    "note": "Isolated from golden idea02: Engine config mdns:false (2026-09-27, idea#118); own store automerge:3dF7bVXZadDRE8DvF6wi4QuKm3us; still holds replicas of idea02 docs synced before isolation. Password SSH still on pending Koen key confirmation."
   }
 }

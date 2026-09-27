@@ -36,3 +36,5 @@
 {"ts":"2026-09-27T08:00:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"grok_build","value":null,"previous":null}
 {"ts":"2026-09-27T08:00:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@b233ccb, console main@af473f1","previous":null}
 {"ts":"2026-09-27T08:00:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"role","value":"golden","previous":"review"}
+{"ts":"2026-09-27T09:57:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"mdns","value":false,"previous":null}
+{"ts":"2026-09-27T09:57:35Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"note","value":"Isolated from golden idea02: Engine config mdns:false (2026-09-27, idea#118); own store automerge:3dF7bVXZadDRE8DvF6wi4QuKm3us; still holds replicas of idea02 docs synced before isolation. Password SSH still on pending Koen key confirmation.","previous":null}
