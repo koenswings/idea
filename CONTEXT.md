@@ -54,7 +54,7 @@ Every component works without internet. This is the foundational constraint that
 
 Development conversations happen in Grok Bot chat. Code lives on GitHub. Builds and tests run on the Pi fleet. Koen reviews every PR on real hardware before merging.
 
-Until a second Pi exists, `idea02` is both the review Pi and the recorded golden state. When idle (`status: idle`, `pr: null`, `role: review`), its `version` records the mains it runs; after every merge to `main`, Ops (Atlas) moves it to `main` and updates that field. With multiple Pis, restore the dedicated golden rule: `role: golden`, `status: golden`, `version: main@<sha>`, and never use the golden Pi for review.
+`idea02` is the dedicated golden Pi (`role: golden`): it always runs the latest merged `main`, keeps MilkWise as a real workload, and is never used for PR review. Its `version` records the mains it runs (for example `engine main@<sha>, console main@<sha>`) and its `status` stays `idle`; `role: golden` is what excludes it from review allocation. Review Pis (currently `idea03`, `role: review`) are picked by `find-available-pi.sh`. After every merge to `main`, Ops (Atlas) moves the golden Pi to `main` and updates its `version` (`update-golden.sh` once implemented, idea#107). This dedicated-golden model (idea#118) replaces the temporary single-Pi rule from idea PR #112.
 
 **Full setup documentation:** `docs/grok-bot-setup.md`
 

@@ -4,6 +4,9 @@
 # Returns the hostname of the first idle Pi matching the domain.
 # Domain affinity: engine→idea01, console→idea02, app-dev→idea03
 # Falls back to any idle non-golden Pi if domain Pi is busy.
+# The golden Pi (role: golden, today idea02) is never returned, whatever its status:
+# it always runs merged main and is not used for review deploys (idea#118).
+# Keys starting with "_" (_comment, _note) are metadata, not Pis.
 # Exits 0 with hostname on stdout; exits 1 if none available.
 set -euo pipefail
 
@@ -22,7 +25,10 @@ AFFINITY["console"]="idea02"
 AFFINITY["app-dev"]="idea03"
 AFFINITY["ops"]="idea04"
 
-PREFERRED="${AFFINITY[$DOMAIN]:-}"
+PREFERRED=""
+if [ -n "$DOMAIN" ]; then
+    PREFERRED="${AFFINITY[$DOMAIN]:-}"
+fi
 
 # Check preferred Pi first
 if [ -n "$PREFERRED" ]; then
@@ -35,7 +41,7 @@ if [ -n "$PREFERRED" ]; then
 fi
 
 # Fall back: any idle non-golden Pi
-for PI in $(jq -r 'keys[]' "$STATE_FILE"); do
+for PI in $(jq -r 'keys[] | select(startswith("_") | not)' "$STATE_FILE"); do
     STATUS=$(jq -r --arg pi "$PI" '.[$pi].status // "unknown"' "$STATE_FILE")
     ROLE=$(jq -r --arg pi "$PI" '.[$pi].role // "review"' "$STATE_FILE")
     if [ "$STATUS" = "idle" ] && [ "$ROLE" != "golden" ] && [ "$PI" != "$PREFERRED" ]; then
