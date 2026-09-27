@@ -25,3 +25,14 @@
 {"ts":"2026-09-26T13:36:18Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"version","value":"engine main@df060d3, console main@af473f1","previous":"engine main@58d1897, console main@af473f1"}
 {"ts":"2026-09-26T20:00:59Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"version","value":"engine main@e2cd53f, console main@af473f1","previous":"engine main@df060d3, console main@af473f1"}
 {"ts":"2026-09-27T07:15:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"version","value":"engine main@b233ccb, console main@af473f1","previous":"engine main@e2cd53f, console main@af473f1"}
+{"ts":"2026-09-27T08:00:13Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"role","value":"review","previous":null,"created":true}
+{"ts":"2026-09-27T08:00:13Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"domain","value":"any","previous":null}
+{"ts":"2026-09-27T08:00:13Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"pr","value":null,"previous":null}
+{"ts":"2026-09-27T08:00:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":null}
+{"ts":"2026-09-27T08:00:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"host","value":"100.126.117.80","previous":null}
+{"ts":"2026-09-27T08:00:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"tailscale","value":"100.126.117.80","previous":null}
+{"ts":"2026-09-27T08:00:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"lan","value":"192.168.0.228","previous":null}
+{"ts":"2026-09-27T08:00:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"runner","value":"none","previous":null}
+{"ts":"2026-09-27T08:00:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"grok_build","value":null,"previous":null}
+{"ts":"2026-09-27T08:00:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@b233ccb, console main@af473f1","previous":null}
+{"ts":"2026-09-27T08:00:14Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"role","value":"golden","previous":"review"}
