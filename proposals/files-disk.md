@@ -44,9 +44,9 @@ Koen approved the design decisions in §5 (2026-09-27). The Design Review (§14)
    - "Available in: Nextcloud (nextcloud-01)"
    - "Nextcloud supports Files Disks but isn't running"
    - "No App on this Engine uses Files Disks yet"
-   If the disk can't be used (password-protected or a mount error), the view shows **Not mounted** with the reason. There is an **Eject** button.
+   If the disk can't be used (password-protected, or an earlier unmount got stuck), the view shows **Not mounted** with the reason. There is an **Eject** button.
 5. In Nextcloud, users see a folder named after the disk (for example **School Files**) and can open, upload and share files according to their Nextcloud accounts.
-6. **Eject** (or pulling the disk): Nextcloud restarts briefly and the folder disappears. Re-docking brings it back.
+6. **Eject** (or pulling the disk): Nextcloud restarts briefly and the folder disappears. Re-docking brings it back. If the Pi can't unmount the disk cleanly, that Engine's row shows a warning such as "School Files couldn't be unmounted cleanly. Restart this Pi." This works for every disk type, not only Files Disks.
 
 ## 5. Design decisions (approved by Koen, 2026-09-27)
 
@@ -105,7 +105,7 @@ password: null           # RESERVED for a future password option; v1 must be nul
 These protect App Disks today, so they ship before any Files Disk code:
 
 - **idea#121:** write `META.yaml` for new disks. For a non-system disk whose root isn't writable by `pi`, first run the new sudoers entry `chown pi:pi /disks/<dev>` (§10).
-- **Never delete a mounted path.** `undockDisk` (`usbDeviceMonitor.ts:305`) must never `rm -fr` a mount point that is still mounted. Unmount with a plain `umount` and a few retries. If it's still busy, record an error trace, update the store anyway (disk undocked; `filesConfig.error` set for Files Disks) and leave the mount point alone.
+- **Never delete a mounted path.** `undockDisk` (`usbDeviceMonitor.ts:305`) must never `rm -fr` a mount point that is still mounted. Unmount with a plain `umount` and a few retries. If it's still busy, record an error trace, update the store anyway (disk undocked), set **`Disk.unmountError`** (`{ engineId, message }`) and leave the mount point alone. This applies to **every disk type, App Disks included**. `unmountError` survives the undock (when `dockedTo` becomes `null`) and is cleared on the next successful mount of that disk.
 - **Check before mounting.** Before mounting a newly docked disk, the Engine checks with `findmnt` that nothing is still mounted at `/disks/<dev>`. If something is, it refuses with an error trace instead of mounting on top.
 
 ### 7.1 `createFilesDisk <diskId>` command
@@ -127,7 +127,7 @@ It then writes `META.yaml` if missing, writes `FILES.yaml`, creates `files/`, an
 - `isFilesDisk(disk)`: `FILES.yaml` exists in the disk root. This replaces the stub at `Disk.ts:435–439`.
 - `processDisk` branch (`Disk.ts:197–201`): add `'files'` and call `processFilesDisk`. Replace the TODO that links to #46 with #75.
 - `processFilesDisk`: read `FILES.yaml` and set `disk.filesConfig`. If `password` isn't null, set `passwordProtected: true`, set `filesConfig.error` ("password-protected Files Disks are not supported yet") and don't mount. Otherwise schedule a remount of opted-in instances (7.3).
-- **`filesConfig.error`** is set on a busy unmount and for a password-protected disk. It is cleared on the next successful mount.
+- **`filesConfig.error`** now covers **only the password-protected case** (a Files Disk problem while docked). Busy unmounts go into `Disk.unmountError` (7.0), for every disk type.
 - **Size (decided for v1):** every docked disk gets `sizeBytes` and `freeBytes` on `Disk` (not in `filesConfig`).
   - They are read with Node's `fs.statfs` on the mount point (no sudo), on dock and every 10 minutes.
   - To keep the Automerge document small, the values are rounded, and the Engine writes to the store only when free space changed by more than 1% or 100 MB.
@@ -169,13 +169,14 @@ The Engine stores this as `App.filesMount`.
 **Dock, boot and undock.**
 - **Boot:** the Engine processes Files Disks **before** starting any App Disk instances, so Nextcloud starts once with its mounts.
 - **Runtime docks** are grouped over a few seconds, so docking several disks causes one recreate.
-- **Eject or pulled disk:** clear `filesConfig`, mark the affected instances, recreate them without the bind, then unmount as in 7.0 (retries; if still busy: error trace, store updated anyway, `filesConfig.error` set, mount point left alone).
+- **Eject or pulled disk:** clear `filesConfig`, mark the affected instances, recreate them without the bind, then unmount as in 7.0 (retries; if still busy: error trace, store updated anyway, `Disk.unmountError` set, mount point left alone).
 
 ### 7.4 Store schema
 
 | Where | Field | Notes |
 |---|---|---|
-| `Disk` | `filesConfig: { shareName: string; readOnly: boolean; passwordProtected: boolean; error: string }` or `null` | `error` is a string or `null`. Set by `processFilesDisk`. Reset to `null` in `createOrUpdateDisk` and `undockDisk`, like `backupConfig`, except that `error` survives a failed unmount. `error` is set on a busy unmount or a password-protected disk, and cleared on the next successful mount. The password never goes into the store. |
+| `Disk` | `filesConfig: { shareName: string; readOnly: boolean; passwordProtected: boolean; error: string }` or `null` | `error` is a string or `null` and is **only** used for a password-protected disk. Set by `processFilesDisk`. Reset to `null` in `createOrUpdateDisk` and `undockDisk`, like `backupConfig`. The password never goes into the store. |
+| `Disk` | `unmountError: { engineId: EngineID; message: string }` or `null` | **All disk types.** Set when an unmount is still busy after the retries. Kept after undock (`dockedTo` becomes `null`), so `engineId` says which Pi has the stuck mount. Cleared on the next successful mount of that disk. Added in step 0. |
 | `Disk` | `sizeBytes: number` or `null`, `freeBytes: number` or `null` | All docked disks. `fs.statfs` on dock and every 10 minutes, rounded, written only on a change of more than 1% or 100 MB. Cleared on undock. |
 | `App` | `filesMount: { path: string; services: string[] }` or `null` | From `x-app.filesMount` |
 | `Instance` | `filesMounts: DiskID[]` | Written only after a successful `compose up` |
@@ -197,8 +198,9 @@ The Engine stores this as `App.filesMount`.
   - **mounted:** instances whose `filesMounts` contains the disk;
   - **opted in but not running:** Apps with `filesMount` whose instances on this Engine aren't running;
   - **none.**
-  It also has a **Not mounted** state when `passwordProtected` is true or `filesConfig.error` is set. All of this uses derived signals only, with no extra state. **Eject** reuses the existing `ejectDisk` command.
-- **Types:** add `filesConfig`, `sizeBytes`/`freeBytes`, `App.filesMount`, `Instance.filesMounts` and the missing `'system'` DiskType to `src/types/store.ts`. Update `docs/ARCHITECTURE.md`.
+  It also has a **Not mounted** state: for the password case (`passwordProtected` / `filesConfig.error`) and for a busy unmount (`unmountError`). All of this uses derived signals only, with no extra state. **Eject** reuses the existing `ejectDisk` command.
+- **Unmount warning (all disk types):** when a disk has `unmountError`, show a warning on **that Engine's row** in the network tree (found by `unmountError.engineId`, because an undocked disk has `dockedTo: null` and would otherwise appear nowhere). Example: "School Files couldn't be unmounted cleanly. Restart this Pi." While the disk is docked, show the same warning on the disk's own view.
+- **Types:** add `filesConfig`, `unmountError`, `sizeBytes`/`freeBytes`, `App.filesMount`, `Instance.filesMounts` and the missing `'system'` DiskType to `src/types/store.ts`. Update `docs/ARCHITECTURE.md`.
 - **Mock store fixtures and tests:** a Files Disk in each state, the panel routing, the helper (error, success, timeout).
 
 ## 9. App changes (app-nextcloud, agent-app-dev)
@@ -247,7 +249,7 @@ The Engine stores this as `App.filesMount`.
 ## 11. Tests
 
 **Engine (`test/automated/`):**
-- **Step 0:** a new disk gets `META.yaml` and keeps its ID on re-dock. The root-owned disk path calls chown. Undock never removes a still-mounted path; a busy unmount gives an error trace and the store is still updated. Mounting refuses when `findmnt` shows something already mounted.
+- **Step 0:** a new disk gets `META.yaml` and keeps its ID on re-dock. The root-owned disk path calls chown. Undock never removes a still-mounted path; a busy unmount gives an error trace, the store is still updated, and `unmountError` is set with the Engine ID. It survives undock and is cleared on the next successful mount (tested for an App Disk as well as a Files Disk). Mounting refuses when `findmnt` shows something already mounted.
 - **Command:** `createFilesDisk` success; errors for unknown ID, disk docked elsewhere, system disk, non-empty disk, disk with instances, non-ext4, unwritable after chown, and locked disk. Each error closes the trace as `error`, and the trace carries `args.diskId`.
 - **Detection:** `processDisk` sets `['files']`, `filesConfig`, size and free space. A non-null `password` → not mounted.
 - **Override:** long bind syntax, `create_host_path: false`, only the listed services, slug sanitising, always-suffixed paths, display-name JSON, rebuilt every time.
@@ -277,7 +279,7 @@ Six steps:
 
 | Step | Domain | Issue | Depends on |
 |---|---|---|---|
-| 0 | Engine + Ops | **idea#121** (write `META.yaml`) + **Q5 safety fix** (never `rm -fr` a mounted path; retry umount; `findmnt` check before mount) + **sudoers `chown` entry** (code-mapping comment, `visudo -cf`, shipped as a standalone file; PR names the first Engine commit that needs it; Atlas installs it with `visudo -cf` + atomic move on idea03, then idea02, before deploying) | — |
+| 0 | Engine + Ops | **idea#121** (write `META.yaml`) + **Q5 safety fix** (never `rm -fr` a mounted path; retry umount; `Disk.unmountError` for every disk type; `findmnt` check before mount) + **sudoers `chown` entry** (code-mapping comment, `visudo -cf`, shipped as a standalone file; PR names the first Engine commit that needs it; Atlas installs it with `visudo -cf` + atomic move on idea03, then idea02, before deploying) | — |
 | 1 | Engine | Files Disk type: `FILES.yaml` detection, `createFilesDisk <diskId>` with checks, `filesConfig`, `sizeBytes`/`freeBytes`, tests, `COMMANDS.md` | 0 |
 | 1b | Console | *(in parallel with 1, on the mock store)* Wording, result helper, Files Disk view, types, fixtures | — (merge after 1) |
 | 2 | Engine | Mounting: per-service `x-app.filesMount`, override helper (`COMPOSE_FILE`), status handling, locks, boot order, grouping of runtime docks, undock/eject path, `Instance.filesMounts`, tests | 1 |
@@ -306,14 +308,15 @@ The Design Review (Atlas, Kid, Axle, Pixel, 2026-09-27) answered the draft's nin
 | Q2 Ownership | Read-only root entrypoint wrapper on the App Disk; non-recursive chown to uid 33 only when wrong; no custom image | Kid, Axle |
 | Q3 Path naming | `<path>/<slug>-<id6>`, always suffixed; Engine sanitises; display names via read-only JSON | Axle, Kid |
 | Q4 Recreate via override | Yes: long bind syntax, `create_host_path: false`, per-instance file in Engine state folder, `COMPOSE_FILE` helper, status table, locks, `filesMounts` after success | Axle |
-| Q5 Pulled disk | Retry plain umount; on failure error trace + store updated + `filesConfig.error`; never `rm -fr` a mounted path; `findmnt` check before mount. Moved to step 0 | Axle, Atlas |
+| Q5 Pulled disk | Retry plain umount; on failure error trace + store updated + `Disk.unmountError`; never `rm -fr` a mounted path; `findmnt` check before mount. Moved to step 0 | Axle, Atlas |
 | Q6 Boot order | Files Disks before App Disk instances at boot; group runtime docks; `restart: no`; no recreate during Nextcloud first start or upgrade | Axle, Kid |
 | Q7 Sudoers | One entry: `chown pi:pi /disks/sd[a-z][12]`, root folder only; no `umount -l`; code-mapping comment and `visudo -cf`; roll out idea03 → idea02 | Atlas |
 | Q8 ID or name | Disk ID in the command and trace; name in messages | Pixel, Axle |
 | Q9 readOnly | Stays reserved and ignored | all |
 | Console result | Trace-ID matching with `args.diskId`, no timestamps; success = `ok` + `'files'` type; 15 s timeout; three "available in" states; Not mounted | Pixel |
-| Extra | Steve decided: `sizeBytes`/`freeBytes` and `filesConfig.error` are in v1. Hardware plan with post-checks | Steve, Atlas |
-| Follow-up: size | `fs.statfs`, on dock and every 10 min, rounded, write only on a change of more than 1% or 100 MB; on `Disk`, cleared on undock; `filesConfig.error` set on busy unmount or password, cleared on next successful mount | Axle |
+| Extra | Steve decided: `sizeBytes`/`freeBytes` and `filesConfig.error` (password case) are in v1. Hardware plan with post-checks | Steve, Atlas |
+| Follow-up: size | `fs.statfs`, on dock and every 10 min, rounded, write only on a change of more than 1% or 100 MB; on `Disk`, cleared on undock | Axle |
+| PR review: unmount error | New `Disk.unmountError: { engineId, message }` for **every** disk type: set on a busy unmount, kept after undock, cleared on the next successful mount; the Console warns on that Engine's row and on the disk's view. `filesConfig.error` now only covers the password case | Axle, Pixel |
 | Follow-up: deploy | Standalone sudoers file, PR names the first commit needing it, `visudo -cf` + atomic move on idea03 then idea02; clear error without it; state folder `~/.local/state/idea-engine/` created at startup and added to the pre-deploy backup | Atlas |
 | Follow-up: App rule | Files Disk binds are simply allowed, not an "exception"; reconciling the general App volume convention is a separate issue for Kid | Kid |
 
