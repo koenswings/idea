@@ -116,7 +116,7 @@ Add an entry in `src/data/Commands.ts`: scope `engine`, one argument named `disk
 2. **Not the system disk.**
 3. **Empty:** `diskTypes` is exactly `['empty']`, no instance is stored on it, and the root has nothing except `META.yaml` and `lost+found`.
 4. **ext4:** `findmnt -no FSTYPE /disks/<dev>` returns `ext4`.
-5. **Owner:** if `pi` can't write the disk root, run `sudo chown pi:pi /disks/<dev>` (root folder only, not recursive).
+5. **Owner:** if `pi` can't write the disk root, run `sudo chown pi:pi /disks/<dev>` (root folder only, not recursive). If the Pi doesn't have the new sudoers entry yet, this fails with a clear error ("this Engine is missing a permission update; ask Ops to install the new 10-engine sudoers file"), and **nothing has been written to the disk yet**, so it is never half-created.
 6. **Writable:** `pi` can now write the disk root.
 7. **Not busy:** no resource lock on the disk.
 
@@ -126,8 +126,12 @@ It then writes `META.yaml` if missing, writes `FILES.yaml`, creates `files/`, an
 
 - `isFilesDisk(disk)`: `FILES.yaml` exists in the disk root. This replaces the stub at `Disk.ts:435–439`.
 - `processDisk` branch (`Disk.ts:197–201`): add `'files'` and call `processFilesDisk`. Replace the TODO that links to #46 with #75.
-- `processFilesDisk`: read `FILES.yaml` and set `disk.filesConfig`. If `password` isn't null, set `passwordProtected: true` and don't mount. Otherwise schedule a remount of opted-in instances (7.3).
-- **Size:** every disk gets `sizeBytes` and `freeBytes`, published on dock and refreshed on a slow timer (from `df` on the mount point, no root needed). This is decided for v1.
+- `processFilesDisk`: read `FILES.yaml` and set `disk.filesConfig`. If `password` isn't null, set `passwordProtected: true`, set `filesConfig.error` ("password-protected Files Disks are not supported yet") and don't mount. Otherwise schedule a remount of opted-in instances (7.3).
+- **`filesConfig.error`** is set on a busy unmount and for a password-protected disk. It is cleared on the next successful mount.
+- **Size (decided for v1):** every docked disk gets `sizeBytes` and `freeBytes` on `Disk` (not in `filesConfig`).
+  - They are read with Node's `fs.statfs` on the mount point (no sudo), on dock and every 10 minutes.
+  - To keep the Automerge document small, the values are rounded, and the Engine writes to the store only when free space changed by more than 1% or 100 MB.
+  - Both are cleared on undock.
 
 ### 7.3 Mounting into opted-in Apps
 
@@ -146,7 +150,7 @@ The Engine stores this as `App.filesMount`.
 
 **Compose override.**
 - For every create, start or remount of an opted-in instance, the Engine writes a fresh override file with **long bind syntax** (`type: bind`, `bind.create_host_path: false`, so Docker never creates a missing folder on the SD card).
-- The file lives in an Engine-owned state folder on the system disk (outside the git checkout and outside `/tmp`, **not** on the App Disk), with one file per instance ID.
+- The file lives in the Engine-owned state folder **`~/.local/state/idea-engine/`** under pi's home, which needs no sudo. This is on the system disk, outside the git checkout and outside `/tmp`, **not** on the App Disk. There is one file per instance ID. The Engine creates the folder at startup if it's missing.
 - It is rebuilt from the store every time and never reused.
 - One helper sets `COMPOSE_FILE=compose.yaml:<override>` for **every** compose call on that instance (`Instance.ts:1009` create, `:1074` up, stop and down) and keeps the same project name, so stop and down see the same configuration.
 
@@ -171,8 +175,8 @@ The Engine stores this as `App.filesMount`.
 
 | Where | Field | Notes |
 |---|---|---|
-| `Disk` | `filesConfig: { shareName: string; readOnly: boolean; passwordProtected: boolean; error: string }` or `null` | `error` is a string or `null`. Set by `processFilesDisk`. Reset to `null` in `createOrUpdateDisk` and `undockDisk`, like `backupConfig`, except that `error` survives a failed unmount. The password never goes into the store. |
-| `Disk` | `sizeBytes: number` or `null`, `freeBytes: number` or `null` | All disks. Published on dock and on a slow timer. |
+| `Disk` | `filesConfig: { shareName: string; readOnly: boolean; passwordProtected: boolean; error: string }` or `null` | `error` is a string or `null`. Set by `processFilesDisk`. Reset to `null` in `createOrUpdateDisk` and `undockDisk`, like `backupConfig`, except that `error` survives a failed unmount. `error` is set on a busy unmount or a password-protected disk, and cleared on the next successful mount. The password never goes into the store. |
+| `Disk` | `sizeBytes: number` or `null`, `freeBytes: number` or `null` | All docked disks. `fs.statfs` on dock and every 10 minutes, rounded, written only on a change of more than 1% or 100 MB. Cleared on undock. |
 | `App` | `filesMount: { path: string; services: string[] }` or `null` | From `x-app.filesMount` |
 | `Instance` | `filesMounts: DiskID[]` | Written only after a successful `compose up` |
 | `DiskType` | `'files'` | Already exists in `CommonTypes.ts:39` |
@@ -215,7 +219,7 @@ The Engine stores this as `App.filesMount`.
 - **Convention doc** (`agent-app-dev`):
   - Document `x-app.filesMount`.
   - Apps using `filesMount` must keep `restart: no`, so Docker never restarts them on its own with a stale mount; the Engine decides when they start.
-  - Add one documented exception to the rule "named Docker volumes only, no host bind mounts": **Engine-generated Files Disk binds only.**
+  - State that **Engine-generated Files Disk binds are allowed**. (Kid: the current "named volumes only" wording already doesn't match reality, since today's Apps use binds relative to the App Disk such as `./data/...`. Reconciling the general App convention is a **separate issue for Kid**, not part of this work.)
 - **Testing:** Kid tests the hook offline against a fake `occ` first, then with the harness (a Files Disk fixture next to a Nextcloud instance).
 
 ## 10. Ops and permissions
@@ -231,7 +235,12 @@ The Engine stores this as `App.filesMount`.
 - No `umount -l`, no recursive chown.
 - The PR must add the code-mapping comment in the file header (like the existing `ENGINE_*` aliases) and pass `visudo -cf`.
 
-**Rollout to existing Pis:** they need the updated `/etc/sudoers.d/10-engine` (idea03 first, then idea02).
+**Rollout to existing Pis (Atlas):**
+- The Engine PR that adds the entry ships the updated `10-engine.sudoers` as a **file that can be installed on its own**. Its description names the **first Engine commit that needs it**.
+- Before deploying that commit, Atlas installs the file on each Pi: `visudo -cf` on the new file, then an **atomic move** into `/etc/sudoers.d/10-engine`. idea03 first, then idea02.
+- Without the entry, `createFilesDisk` fails with a clear error and never half-creates a disk (§7.1). Everything else keeps working.
+
+**Engine state folder:** `~/.local/state/idea-engine/` (compose overrides) is added to **Atlas's pre-deploy backup list**. It can always be rebuilt from the store, but backing it up makes a rollback easier to inspect.
 
 **No new packages.** No Samba or NFS.
 
@@ -268,11 +277,11 @@ Six steps:
 
 | Step | Domain | Issue | Depends on |
 |---|---|---|---|
-| 0 | Engine + Ops | **idea#121** (write `META.yaml`) + **Q5 safety fix** (never `rm -fr` a mounted path; retry umount; `findmnt` check before mount) + **sudoers `chown` entry** (code-mapping comment, `visudo -cf`; roll out to idea03, then idea02) | — |
+| 0 | Engine + Ops | **idea#121** (write `META.yaml`) + **Q5 safety fix** (never `rm -fr` a mounted path; retry umount; `findmnt` check before mount) + **sudoers `chown` entry** (code-mapping comment, `visudo -cf`, shipped as a standalone file; PR names the first Engine commit that needs it; Atlas installs it with `visudo -cf` + atomic move on idea03, then idea02, before deploying) | — |
 | 1 | Engine | Files Disk type: `FILES.yaml` detection, `createFilesDisk <diskId>` with checks, `filesConfig`, `sizeBytes`/`freeBytes`, tests, `COMMANDS.md` | 0 |
 | 1b | Console | *(in parallel with 1, on the mock store)* Wording, result helper, Files Disk view, types, fixtures | — (merge after 1) |
 | 2 | Engine | Mounting: per-service `x-app.filesMount`, override helper (`COMPOSE_FILE`), status handling, locks, boot order, grouping of runtime docks, undock/eject path, `Instance.filesMounts`, tests | 1 |
-| 3 | App | Nextcloud opt-in, `before-starting` hook, entrypoint wrapper, convention doc (`restart: no`, bind-mount exception), fake-occ tests, harness | 2 (hook can start earlier) |
+| 3 | App | Nextcloud opt-in, `before-starting` hook, entrypoint wrapper, convention doc (`restart: no`, Files Disk binds allowed), fake-occ tests, harness | 2 (hook can start earlier) |
 | 4 | Ops | Hardware test on idea03 (6 steps, post-checks), then idea02 with MilkWise running | 0–3 |
 
 ## 13. Out of scope (v1)
@@ -304,8 +313,12 @@ The Design Review (Atlas, Kid, Axle, Pixel, 2026-09-27) answered the draft's nin
 | Q9 readOnly | Stays reserved and ignored | all |
 | Console result | Trace-ID matching with `args.diskId`, no timestamps; success = `ok` + `'files'` type; 15 s timeout; three "available in" states; Not mounted | Pixel |
 | Extra | Steve decided: `sizeBytes`/`freeBytes` and `filesConfig.error` are in v1. Hardware plan with post-checks | Steve, Atlas |
+| Follow-up: size | `fs.statfs`, on dock and every 10 min, rounded, write only on a change of more than 1% or 100 MB; on `Disk`, cleared on undock; `filesConfig.error` set on busy unmount or password, cleared on next successful mount | Axle |
+| Follow-up: deploy | Standalone sudoers file, PR names the first commit needing it, `visudo -cf` + atomic move on idea03 then idea02; clear error without it; state folder `~/.local/state/idea-engine/` created at startup and added to the pre-deploy backup | Atlas |
+| Follow-up: App rule | Files Disk binds are simply allowed, not an "exception"; reconciling the general App volume convention is a separate issue for Kid | Kid |
 
 ### Remaining open questions (to settle during implementation, not blocking)
 
 1. **How the Engine recognises Nextcloud's first start or an upgrade** so it can hold back a recreate. For example, wait until the container is healthy and Nextcloud reports installed and not in maintenance mode. Axle and Kid agree the check in step 2.
-2. **Exact numbers:** the grouping window for runtime docks ("a few seconds"), the size refresh interval ("slow timer") and the unmount retry count. Engine Dev Bot picks them in step 0–2 and documents them in `docs/ARCHITECTURE.md`.
+2. **Exact numbers:** the grouping window for runtime docks ("a few seconds") and the unmount retry count. Engine Dev Bot picks them in steps 0–2 and documents them in `docs/ARCHITECTURE.md`.
+3. **The App volume convention** ("named volumes only" versus today's `./data` binds) is a separate issue for Kid. It doesn't block this work.
