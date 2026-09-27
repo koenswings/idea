@@ -15,6 +15,7 @@
 A **Files Disk** is an ordinary ext4 USB disk or SSD that an operator turns into a shared file store from the Console. A disk with any other filesystem (a new exFAT stick, for example) can be **formatted as ext4 by the Engine first**, through an explicit Console action with a typed confirmation. When it is docked, the Engine mounts its `files/` folder into every App on that Engine that says it can use one. Nextcloud comes first. Teachers and students then reach the files through Nextcloud in the browser, over the school's local Wi-Fi.
 
 There are two ways to create one:
+
 - **An empty ext4 disk:** `createFilesDisk` writes two small files (`META.yaml` and `FILES.yaml`) and an empty `files/` folder, the same way a Backup Disk is created today. Nothing is erased.
 - **Any other non-IDEA disk:** `formatDisk` erases it and creates one ext4 partition that already contains those files, so it comes up as a Files Disk straight away (§7.4).
 
@@ -143,9 +144,9 @@ It then writes `META.yaml` if missing, writes `FILES.yaml`, creates `files/`, an
 - `processFilesDisk`: read `FILES.yaml` and set `disk.filesConfig`. If `password` isn't null, set `passwordProtected: true`, set `filesConfig.error` ("password-protected Files Disks are not supported yet") and don't mount. Otherwise schedule a remount of opted-in instances (7.3).
 - **`filesConfig.error`** now covers **only the password-protected case** (a Files Disk problem while docked). Busy unmounts go into `Disk.unmountError` (7.0), for every disk type.
 - **Size (decided for v1):** every docked disk gets `sizeBytes` and `freeBytes` on `Disk` (not in `filesConfig`).
-  - They are read with Node's `fs.statfs` on the mount point (no sudo), on dock and every 10 minutes.
-  - To keep the Automerge document small, the values are rounded, and the Engine writes to the store only when free space changed by more than 1% or 100 MB.
-  - Both are cleared on undock.
+    - They are read with Node's `fs.statfs` on the mount point (no sudo), on dock and every 10 minutes.
+    - To keep the Automerge document small, the values are rounded, and the Engine writes to the store only when free space changed by more than 1% or 100 MB.
+    - Both are cleared on undock.
 
 ### 7.3 Mounting into opted-in Apps
 
@@ -163,6 +164,7 @@ The Engine stores this as `App.filesMount`.
 **Paths inside the container.** Each Files Disk appears at `<path>/<slug>-<id6>`, for example `/mnt/idea-files/school-files-3f9a2c`. The suffix is always added: `id6` is the first six characters of the disk ID. The Engine makes the slug from `shareName` and sanitises it (no `/`, no `..`, no leading dot). The display names travel to the App as a small **read-only JSON file** mounted by the same override (for example `/mnt/idea-files/.idea-files.json`: slug-id → share name). The App shows the plain name and only adds the suffix when two names clash.
 
 **Compose override.**
+
 - For every create, start or remount of an opted-in instance, the Engine writes a fresh override file with **long bind syntax** (`type: bind`, `bind.create_host_path: false`, so Docker never creates a missing folder on the SD card).
 - The file lives in the Engine-owned state folder **`~/.local/state/idea-engine/`** under pi's home, which needs no sudo. This is on the system disk, outside the git checkout and outside `/tmp`, **not** on the App Disk. There is one file per instance ID. The Engine creates the folder at startup if it's missing.
 - It is rebuilt from the store every time and never reused.
@@ -181,6 +183,7 @@ The Engine stores this as `App.filesMount`.
 - The Engine doesn't recreate Nextcloud while it is doing its first start or an upgrade (§14, open question 1).
 
 **Dock, boot and undock.**
+
 - **Boot:** the Engine processes Files Disks **before** starting any App Disk instances, so Nextcloud starts once with its mounts.
 - **Runtime docks** are grouped over a few seconds, so docking several disks causes one recreate.
 - **Eject or pulled disk:** clear `filesConfig`, mark the affected instances, recreate them without the bind, then unmount as in 7.0 (retries; if still busy: error trace, store updated anyway, `Disk.unmountError` set, mount point left alone).
@@ -201,6 +204,7 @@ This part came in on 2026-09-27 (idea#125, merged into this proposal). It needs 
 | (f) **Progress and failure** | Reported through the existing command trace and an Operation with steps. The Console waits longer than 15 seconds (see below). |
 
 **What counts as IDEA data.** Any of these makes the Engine refuse:
+
 - `diskTypes` includes `app`, `backup`, `files` or `system`;
 - an instance is stored on the disk;
 - the disk root has `apps/`, `instances/`, `BACKUP.yaml` or `FILES.yaml`.
@@ -225,21 +229,22 @@ This part came in on 2026-09-27 (idea#125, merged into this proposal). It needs 
 **The wrapper script `idea-format-disk <device> <label> <stagingDir>`** (runs as root; `set -eu`; no shell tricks with its arguments):
 
 - **Arguments:**
-  - `device` must match `^/dev/sd[a-z]$` (a whole disk, never a partition);
-  - `label` must match `^[A-Za-z0-9 _-]{1,16}$` (ext4 labels are at most 16 bytes);
-  - `stagingDir` must be exactly `/home/pi/.local/state/idea-engine/format/<id>` with a safe `<id>`, a real directory (not a symlink) owned by `pi`.
+    - `device` must match `^/dev/sd[a-z]$` (a whole disk, never a partition);
+    - `label` must match `^[A-Za-z0-9 _-]{1,16}$` (ext4 labels are at most 16 bytes);
+    - `stagingDir` must be exactly `/home/pi/.local/state/idea-engine/format/<id>` with a safe `<id>`, a real directory (not a symlink) owned by `pi`.
 - **Re-validates the device itself:**
-  - `lsblk` says it is a **disk** on the **USB** transport (`TYPE=disk`, `TRAN=usb`);
-  - it is **not** the device holding `/` or the boot partition (derived with `findmnt` and `lsblk -no PKNAME`, not guessed from names);
-  - **nothing** on it is mounted (no `MOUNTPOINTS` on the disk or any partition).
+    - `lsblk` says it is a **disk** on the **USB** transport (`TYPE=disk`, `TRAN=usb`);
+    - it is **not** the device holding `/` or the boot partition (derived with `findmnt` and `lsblk -no PKNAME`, not guessed from names);
+    - **nothing** on it is mounted (no `MOUNTPOINTS` on the disk or any partition).
 - **Then:**
-  1. `wipefs -a` on the device;
-  2. a **GPT** table with **one partition** covering the disk (`sfdisk`, part of util-linux, so no new package);
-  3. `udevadm settle`;
-  4. `mkfs.ext4 -F -L <label> -E root_owner=1000:1000 -d <stagingDir> /dev/sdX1`. `root_owner` makes the disk root belong to `pi`, so the `chown` step isn't needed. `-d` copies the prepared files in while the filesystem is created, so no extra mount is needed.
+    1. `wipefs -a` on the device;
+    2. a **GPT** table with **one partition** covering the disk (`sfdisk`, part of util-linux, so no new package);
+    3. `udevadm settle`;
+    4. `mkfs.ext4 -F -L <label> -E root_owner=1000:1000 -d <stagingDir> /dev/sdX1`. `root_owner` makes the disk root belong to `pi`, so the `chown` step isn't needed. `-d` copies the prepared files in while the filesystem is created, so no extra mount is needed.
 - **Exit codes and messages** are clear, for example "refused: /dev/sda holds the root filesystem". The Engine passes them into the trace unchanged.
 
 **Timeout: 5 minutes.**
+
 - The trace (status `running`) appears at once, so the normal 15-second "Engine didn't respond" check still applies to the start.
 - After that, the Console follows the Operation's steps and allows **5 minutes** before saying "This is taking longer than expected; the Engine is still working", without failing the operation.
 - Why 5 minutes: `mkfs.ext4` with its default lazy initialisation takes seconds even on large disks, but slow USB 2.0 sticks, large spinning disks, `udevadm settle` and the remount can add up to a minute or two. Five minutes leaves a wide margin without leaving a hung operation unnoticed for long.
@@ -250,6 +255,7 @@ This part came in on 2026-09-27 (idea#125, merged into this proposal). It needs 
 **Failure:** if the script fails before partitioning, the disk is re-mounted as it was. If it fails after, the disk is left for the operator to retry. It shows up as unrecognised or unmountable (see open question 6). The trace carries the script's message.
 
 **New `Disk` fields for the confirmation dialog** (all disks, published on dock, no sudo):
+
 - `fsType: string` or `null` (from `lsblk -no FSTYPE`);
 - `model: string` or `null` (`lsblk -no MODEL` of the parent device);
 - `hasFiles: boolean` or `null` (the root has anything besides `lost+found`, `META.yaml` and common system folders such as `System Volume Information`).
@@ -275,22 +281,22 @@ They are cleared on undock like `sizeBytes`/`freeBytes`.
 
 - **Empty Disk panel** (`EmptyDiskPanel.tsx:277–289`): replace "The Engine will format this disk…" with the wording in §4, rename the button to "Create Files Disk", and send `createFilesDisk <diskId>`.
 - **One reusable helper to wait for a command's result:**
-  1. Before sending, record the IDs of the traces that already exist.
-  2. The result is the first **new** `createFilesDisk` trace whose `args.diskId` matches. It doesn't use timestamps, because a school Pi may have no NTP.
-  3. **Error:** show the trace's `errorMessage` in the Empty Disk panel.
-  4. **Success:** the trace is `ok` **and** the disk's `diskTypes` includes `'files'`.
-  5. **Timeout (15 s):** "The Engine didn't respond. It may not support Files Disks yet."
-  Backup Disk and Install App can reuse it later.
+    1. Before sending, record the IDs of the traces that already exist.
+    2. The result is the first **new** `createFilesDisk` trace whose `args.diskId` matches. It doesn't use timestamps, because a school Pi may have no NTP.
+    3. **Error:** show the trace's `errorMessage` in the Empty Disk panel.
+    4. **Success:** the trace is `ok` **and** the disk's `diskTypes` includes `'files'`.
+    5. **Timeout (15 s):** "The Engine didn't respond. It may not support Files Disks yet."
+    Backup Disk and Install App can reuse it later.
 - **Files Disk view:** add a `'files'` case to `rightPanelFor` (`App.tsx:46–58`) and a panel showing name, size and free space, and the three "available in" states:
-  - **mounted:** instances whose `filesMounts` contains the disk;
-  - **opted in but not running:** Apps with `filesMount` whose instances on this Engine aren't running;
-  - **none.**
-  It also has a **Not mounted** state: for the password case (`passwordProtected` / `filesConfig.error`) and for a busy unmount (`unmountError`). All of this uses derived signals only, with no extra state. **Eject** reuses the existing `ejectDisk` command.
+    - **mounted:** instances whose `filesMounts` contains the disk;
+    - **opted in but not running:** Apps with `filesMount` whose instances on this Engine aren't running;
+    - **none.**
+    It also has a **Not mounted** state: for the password case (`passwordProtected` / `filesConfig.error`) and for a busy unmount (`unmountError`). All of this uses derived signals only, with no extra state. **Eject** reuses the existing `ejectDisk` command.
 - **Format as School Files (§7.4):**
-  - Offered in the Empty Disk panel for any disk without IDEA data, including non-ext4 disks and disks with files. It is the only Files Disk option when the disk isn't ext4, and an extra option next to "Create Files Disk" when it is.
-  - The dialog shows size, model, `fsType` and, when `hasFiles` is true, the warning "This disk contains files. They will be erased."
-  - The operator types the disk's name; the button is disabled until it matches.
-  - It sends `formatDisk <diskId> <typed name>` and uses the same result helper, with the 5-minute progress rule, showing the Operation's steps.
+    - Offered in the Empty Disk panel for any disk without IDEA data, including non-ext4 disks and disks with files. It is the only Files Disk option when the disk isn't ext4, and an extra option next to "Create Files Disk" when it is.
+    - The dialog shows size, model, `fsType` and, when `hasFiles` is true, the warning "This disk contains files. They will be erased."
+    - The operator types the disk's name; the button is disabled until it matches.
+    - It sends `formatDisk <diskId> <typed name>` and uses the same result helper, with the 5-minute progress rule, showing the Operation's steps.
 - **Unmount warning (all disk types):** when a disk has `unmountError`, show a warning on **that Engine's row** in the network tree (found by `unmountError.engineId`, because an undocked disk has `dockedTo: null` and would otherwise appear nowhere). Example: "School Files couldn't be unmounted cleanly. Restart this Pi." While the disk is docked, show the same warning on the disk's own view.
 - **Types and commands:** new commands `createFilesDisk <diskId>` and `formatDisk <diskId> <confirmName…>`. Add `filesConfig`, `unmountError` (`{ engineId; mountPoint; fsUuid; message }`), `sizeBytes`/`freeBytes`, `fsType`/`model`/`hasFiles`, `OperationKind` `'formatDisk'`, `App.filesMount`, `Instance.filesMounts` and the missing `'system'` DiskType to `src/types/store.ts`. Update `docs/ARCHITECTURE.md`.
 - **Mock store fixtures and tests:** a Files Disk in each state, an exFAT disk with files, the panel routing, the helper (error, success, timeout), and the format dialog (confirmation matching, warning, disabled for IDEA disks).
@@ -302,18 +308,18 @@ They are cleared on undock like `sizeBytes`/`freeBytes`.
 **How the files appear inside Nextcloud: Option A, external storage (decided).** Nextcloud's *External storage* app, **Local** backend. The other options (a bind into Nextcloud's data folder, Group Folders) were rejected: they tie the files to one user or store them in Nextcloud's own format.
 
 - **The hook.** A script in `/docker-entrypoint-hooks.d/before-starting/` (a standard hook folder of the official Nextcloud image) runs at every container start:
-  - It enables `files_external` once.
-  - It reconciles storages with the folders under `/mnt/idea-files/`: it creates any storage that's missing, using the display name from `.idea-files.json`, and deletes only storages **it created** whose folder is gone. Storages an admin made by hand are never touched.
-  - It sets "check for changes on direct access", so files added outside Nextcloud show up.
-  - Deleting a storage only removes Nextcloud's setting, **never files**.
+    - It enables `files_external` once.
+    - It reconciles storages with the folders under `/mnt/idea-files/`: it creates any storage that's missing, using the display name from `.idea-files.json`, and deletes only storages **it created** whose folder is gone. Storages an admin made by hand are never touched.
+    - It sets "check for changes on direct access", so files added outside Nextcloud show up.
+    - Deleting a storage only removes Nextcloud's setting, **never files**.
 - **Ownership: a small root entrypoint wrapper.**
-  - The wrapper is kept on the App Disk and mounted read-only. There is **no custom image**.
-  - It changes the owner of each top-level `/mnt/idea-files/<x>` folder to uid 33 **only when it is wrong**, and not recursively. It then `exec`s the image's normal `/entrypoint.sh`.
-  - Result: new files on the disk belong to uid 33 (see the note in §3).
+    - The wrapper is kept on the App Disk and mounted read-only. There is **no custom image**.
+    - It changes the owner of each top-level `/mnt/idea-files/<x>` folder to uid 33 **only when it is wrong**, and not recursively. It then `exec`s the image's normal `/entrypoint.sh`.
+    - Result: new files on the disk belong to uid 33 (see the note in §3).
 - **Convention doc** (`agent-app-dev`):
-  - Document `x-app.filesMount`.
-  - Apps using `filesMount` must keep `restart: no`, so Docker never restarts them on its own with a stale mount; the Engine decides when they start.
-  - State that **Engine-generated Files Disk binds are allowed**. (Kid: the current "named volumes only" wording already doesn't match reality, since today's Apps use binds relative to the App Disk such as `./data/...`. Reconciling the general App convention is a **separate issue for Kid**, not part of this work.)
+    - Document `x-app.filesMount`.
+    - Apps using `filesMount` must keep `restart: no`, so Docker never restarts them on its own with a stale mount; the Engine decides when they start.
+    - State that **Engine-generated Files Disk binds are allowed**. (Kid: the current "named volumes only" wording already doesn't match reality, since today's Apps use binds relative to the App Disk such as `./data/...`. Reconciling the general App convention is a **separate issue for Kid**, not part of this work.)
 - **Testing:** Kid tests the hook offline against a fake `occ` first, then with the harness (a Files Disk fixture next to a Nextcloud instance).
 
 ## 10. Ops and permissions
@@ -330,6 +336,7 @@ They are cleared on undock like `sizeBytes`/`freeBytes`.
 - The PR must add the code-mapping comment in the file header (like the existing `ENGINE_*` aliases) and pass `visudo -cf`.
 
 **Rollout to existing Pis (Atlas):**
+
 - The Engine PR that adds the entry ships the updated `10-engine.sudoers` as a **file that can be installed on its own**. Its description names the **first Engine commit that needs it**.
 - Before deploying that commit, Atlas installs the file on each Pi: `visudo -cf` on the new file, then an **atomic move** into `/etc/sudoers.d/10-engine`. idea03 first, then idea02.
 - Without the entry, `createFilesDisk` fails with a clear error and never half-creates a disk (§7.1). Everything else keeps working.
@@ -345,6 +352,7 @@ They are cleared on undock like `sizeBytes`/`freeBytes`.
 - The same code-mapping comment and `visudo -cf` rules apply.
 
 **Deploy notes for formatting (Atlas):**
+
 - The Engine PR ships the script and the updated `10-engine.sudoers` as files that can be installed on their own, and names the first Engine commit that needs them.
 - Atlas installs the script with `install -o root -g root -m 0755` and the sudoers file with `visudo -cf` + atomic move, idea03 first, then idea02, before deploying that commit.
 - Both must **survive a reboot and a reinstall**: they live on the Pi's root filesystem (not `/tmp`, not the git checkout), and `build-engine` installs them in the same step that installs the sudoers file today (`installEngineSudoers`), so a fresh install or reinstall puts them back.
@@ -357,6 +365,7 @@ They are cleared on undock like `sizeBytes`/`freeBytes`.
 ## 11. Tests
 
 **Engine (`test/automated/`):**
+
 - **Step 0:** a new disk gets `META.yaml` and keeps its ID on re-dock. The root-owned disk path calls chown. Undock never removes a still-mounted path; a busy unmount gives an error trace, the store is still updated, and `unmountError` is set with the Engine ID, the mount point and the `fsUuid` recorded at mount time. It survives undock and is cleared on the next successful mount (tested for an App Disk as well as a Files Disk). **Startup cleanup:** an `unmountError` with this Engine's `engineId` whose `mountPoint` is no longer mounted (mocked `findmnt`) is cleared at startup. **A different disk mounted at the same `mountPoint`** (`findmnt -no UUID` returns another UUID than `fsUuid`) → the error is cleared. The same filesystem still mounted there (same `fsUuid`) → the error is kept. The `fsUuid` recorded at mount time (mocked `lsblk -no UUID`) ends up in the error, and one with another Engine's `engineId` is never touched. Mounting refuses when `findmnt` shows something already mounted.
 - **Command:** `createFilesDisk` success; errors for unknown ID, disk docked elsewhere, system disk, non-empty disk, disk with instances, non-ext4, unwritable after chown, and locked disk. Each error closes the trace as `error`, and the trace carries `args.diskId`.
 - **Detection:** `processDisk` sets `['files']`, `filesConfig`, size and free space. A non-null `password` → not mounted.
@@ -371,6 +380,7 @@ They are cleared on undock like `sizeBytes`/`freeBytes`.
 **App:** the hook against a fake `occ` (create, keep admin storages, delete only its own, idempotent), the wrapper (chown only when wrong), then the harness.
 
 **Hardware (idea03, isolated with `mdns: false`, a person at the Pi, like idea#110).** Test setup:
+
 - a **partitioned** ext4 disk made with default `mkfs.ext4`, so the root-owned case is tested (unpartitioned disks aren't mounted);
 - a FAT stick;
 - an **exFAT stick with some files on it** (the format test);
@@ -378,6 +388,7 @@ They are cleared on undock like `sizeBytes`/`freeBytes`.
 - Nextcloud installed from an App Disk.
 
 Eight steps:
+
 1. Dock the FAT stick → clear rejection when trying to create a Files Disk.
 2. Dock the root-owned ext4 disk → create the Files Disk → **files** badge, root now `pi:pi`.
 3. Nextcloud shows the folder → upload a file.
