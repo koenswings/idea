@@ -3,7 +3,7 @@
 **Author:** Steve (Lead Bot)
 **Date:** 2026-09-27
 **Status:** Draft
-**Refs:** idea#75 (Files Disk). Depends on: new issue "New disks never get META.yaml written" (bug B1)
+**Refs:** idea#75 (Files Disk). Depends on: idea#121 (new disks never get META.yaml written, bug B1)
 **Affects:** `agent-engine-dev` (main work), `agent-console-dev`, `app-nextcloud` (+ `agent-app-dev` harness), Ops (fleet testing only)
 **Background research:** `files-disk-findings.md` (research notes, 2026-09-27)
 
@@ -130,7 +130,7 @@ It then writes `META.yaml` if missing, writes `FILES.yaml`, creates `files/`, an
 
 `diskDB`, `appDB` and `instanceDB` are maps, so `store-template.json` shouldn't need changes. The quality scan requires it to stay untouched.
 
-**7.5 Prerequisite: bug B1.** Today a new disk's `META.yaml` is never written (`usbDeviceMonitor.ts:174` logs "Creating one now" but doesn't). Disks without a recognised hardware serial get a new ID on every dock. `createFilesDisk` writes `META.yaml` itself, but B1 should be fixed first so that identity works the same way for every disk type.
+**7.5 Prerequisite: bug B1 (idea#121).** Today a new disk's `META.yaml` is never written (`usbDeviceMonitor.ts:174` logs "Creating one now" but doesn't). Disks without a recognised hardware serial get a new ID on every dock. `createFilesDisk` writes `META.yaml` itself, but B1 should be fixed first so that identity works the same way for every disk type.
 
 ## 8. Console changes (agent-console-dev)
 
@@ -184,7 +184,7 @@ It then writes `META.yaml` if missing, writes `FILES.yaml`, creates `files/`, an
 
 | Order | Domain | Issue | Depends on |
 |---|---|---|---|
-| 0 | Engine | **Fix B1:** write `META.yaml` for new disks (separate bug issue) | — |
+| 0 | Engine | **Fix B1 (idea#121):** write `META.yaml` for new disks | — |
 | 1 | Engine | `FILES.yaml` detection, `createFilesDisk` with checks, `filesConfig` in the store, tests, `COMMANDS.md` | 0 |
 | 2 | Console | New wording, wait for the result, Files Disk view, types | 1 (can start on the mock store in parallel) |
 | 3 | Engine | `x-app.filesMount` → `App.filesMount`; compose override; remount on dock; restart-then-unmount on eject/undock; `Instance.filesMounts`; tests | 1 |
