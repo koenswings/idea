@@ -69,7 +69,7 @@ Koen approved the design decisions in §5 (2026-09-27) and later that day revers
 |---|---|---|
 | 1 | **Purpose:** a shared teacher/student file store reached **through Apps over HTTP**, Nextcloud first. **No host-level SMB/NFS** in v1. | Clients are browsers on the school Wi-Fi, and Nextcloud is already IDEA's file-sharing App. SMB/NFS would add packages, root configuration and user accounts to an unattended Pi. |
 | 2 | **Changed 2026-09-27 (Koen, idea#125):** the Engine **can format a disk as ext4, only through an explicit Console action** (typed name confirmation; never automatically on dock). Without formatting, `createFilesDisk` still writes `META.yaml`, `FILES.yaml` and `files/` onto an existing ext4 filesystem without erasing anything. *(Was: "Don't format.")* | New drives come as exFAT/FAT, and schools can't prepare disks on a Linux machine. Safety comes from the explicit action, the typed confirmation, the Engine's refusals, and a root script that re-checks the device itself (§7.4). |
-| 3 | **Changed 2026-09-27 (Koen):** disks that are **already empty ext4** work straight away (`createFilesDisk`). **Any disk without an ext4 filesystem** (FAT, exFAT, NTFS, no partition table) is offered as a **format candidate** and can be **formatted first** (`formatDisk`). An ext4 disk that holds other files is not offered in v1 (§14, open question 4). Disks with IDEA data are always refused. **No combined disks.** *(Was: "Only empty ext4 disks; reject FAT, exFAT and NTFS.")* | Files Disks are still always ext4, because the ownership model and container binds rely on ext4 permissions. One role per disk keeps behaviour easy to predict. |
+| 3 | **Changed 2026-09-27 (Koen):** disks that are **already empty ext4** work straight away (`createFilesDisk`). **Any disk without an ext4 filesystem** (FAT, exFAT, NTFS, no partition table) is offered as a **format candidate** and can be **formatted first** (`formatDisk`). An ext4 disk that holds other files is not offered in v1 (decided by Steve, §14). Disks with IDEA data are always refused. **No combined disks.** *(Was: "Only empty ext4 disks; reject FAT, exFAT and NTFS.")* | Files Disks are still always ext4, because the ownership model and container binds rely on ext4 permissions. One role per disk keeps behaviour easy to predict. |
 | 4 | **Apps opt in** through compose metadata (`x-app.filesMount`). **Every** Files Disk on an Engine is mounted into **every** opted-in App on that Engine. Choosing Apps per disk comes later. | Creation stays one click and there are no per-disk links to manage. |
 | 5 | **No password in v1.** Nextcloud accounts give access control. A `password` field is reserved in `FILES.yaml`. | Reserving the field avoids a format change later. |
 | 6 | **Served only by the Engine it is docked to.** No mounts across Pis. | Network mounts between Pis create fragile dependencies. |
@@ -208,18 +208,18 @@ This part came in on 2026-09-27 (idea#125, merged into this proposal) and was de
 
 - The Engine mounts **only with `-t ext4`**. Anything else stays unmounted and never gets `META.yaml`.
 - Non-ext4 sticks that used to mount (and showed as "empty") will no longer do so. This fits the IDEA disk format: every IDEA disk is ext4.
-- The sudoers mount entry changes to match (§10).
+- A new sudoers entry matches the exact typed command, `mount -t ext4 <device> <mount point>` in that order (§10).
 
 **Format candidates: how new sticks reach the Console.** Today a new stick often never reaches the Console at all:
 
-- The udev rule `90-docking.rules` only links `sd?`, `sd?1` and `sd?2`.
-- `validDevice` skips whole disks (`usbDeviceMonitor.ts:95–100`).
+- The udev rule `90-docking.rules` already links the whole disk `sd?`, plus `sd?1` and `sd?2`.
+- But `validDevice` skips whole disks (`usbDeviceMonitor.ts:95–100`).
 - A stick without a partition table, or with an unsupported filesystem, doesn't show up.
 
 In step 3:
 
-- `90-docking.rules` is updated so the Engine sees every whole USB disk, not only through its first two partitions. The exact rule goes in the step 3 PR.
-- **Which disks are candidates:** a **whole, non-system disk** with **no ext4 filesystem** on it (by `lsblk` FSTYPE), no mounted partition and no swap. It is published as a **format candidate** on its Engine, read with `lsblk -J -b -o NAME,TYPE,FSTYPE,SIZE,MODEL,SERIAL` (no sudo). A disk with an ext4 filesystem is never a candidate, even when it is unmounted (for example an ejected App Disk).
+- **No udev change (Axle).** Step 3 changes neither `90-docking.rules` nor the `[12]` pattern in sudoers. The whole disk `sdX` is already linked. `validDevice` now accepts whole disks **only so the Engine can run `lsblk` on them** for candidate detection; whole disks are **never mounted**. Partitions 3 and higher stay out of scope, as today.
+- **Which disks are candidates:** a **whole, non-system disk** with **no ext4 filesystem on any partition** (by `lsblk` FSTYPE; ext4 on partition 3 or higher also counts), no mounted partition and, for `sd*` disks, no swap. It is published as a **format candidate** on its Engine, read with `lsblk -J -b -o NAME,TYPE,FSTYPE,SIZE,MODEL,SERIAL` (no sudo). A disk with an ext4 filesystem is never a candidate, even when it is unmounted (for example an ejected App Disk).
 - **`Engine.formatCandidates`**, an array of `{ candidateId, device, sizeBytes, model, fsType, label, hasFiles, formatProgress }`:
     - `candidateId` comes from the disk's serial (`readHardwareId` for the two known models, otherwise `lsblk` SERIAL). If there is no serial, the Engine generates an ID that stays the same for as long as the disk stays plugged in. The Engine writes this **same ID** into the new `META.yaml` (`isHardwareId: true` only when it came from `readHardwareId`), so the Files Disk keeps the candidate's ID.
     - `label` is what the operator types to confirm, for example **"Intenso 32 GB"** (model plus rounded size, or "USB disk" when there is no model). The Engine keeps labels unique on that Engine by adding " (2)", " (3)" and so on when two candidates would look the same.
@@ -231,7 +231,7 @@ In step 3:
 
 - It replaces the guess in `usbDeviceMonitor.ts:57–75` ("root's parent + 1", `sdX` only).
 - It never uses names, connection type or model. On the IDEA Pis the system disk is itself a USB SSD at `/dev/sda` (`/` on `sda2`, `/boot/firmware` on `sda1`, `TRAN=usb`), and on idea02 it is an Intenso, a model `readHardwareId` treats specially.
-- The helper also flags disks with a mounted partition or in use as swap. The script repeats all of this itself.
+- The helper also flags disks with a mounted partition or (for `sd*` disks) in use as swap. The script repeats all of this itself.
 
 **Command:** `formatDisk <candidateId> <confirmName…>` (scope `engine`). `confirmName` is the last argument and **variadic** (like `createBackupDisk`'s instance list), so a label with spaces arrives as several tokens that the Engine joins with single spaces. It must **exactly match** the candidate's `label`. The trace records `args.candidateId`. The handler throws on the first failure so the trace closes as `error`, and messages show the label.
 
@@ -259,8 +259,8 @@ In step 3:
 - **Re-verifies the device (authoritative):**
     - `lsblk` says `TYPE=disk`, and its **serial and size match** the arguments (not the name alone);
     - it is **not** a system disk (same `findmnt` + `lsblk -no PKNAME` lookup as the Engine helper);
-    - **no partition is mounted** and none is **in use as swap**.
-- **Role-marker check:** for any ext4 filesystem on the disk, mount it read-only (`-o ro,noexec,nosuid,nodev`) on a temporary folder and look for `apps/`, `instances/`, `BACKUP.yaml` or `FILES.yaml` (`META.yaml` alone doesn't count, because idea#121 writes it onto every disk). Unmount, then refuse if any is found.
+    - **no partition is mounted** and none is **in use as swap** (checked for `sd*` disks).
+- **Role-marker check:** for any ext4 filesystem on the disk, mount it read-only (`-o ro,noexec,nosuid,nodev`) on a temporary folder and look for `apps/`, `instances/`, `BACKUP.yaml` or `FILES.yaml`. **Only these four markers** decide the refusal. `META.yaml` never counts (idea#121 writes it onto every disk); it is only used to carry over the disk ID. Unmount, then refuse if any is found.
 - **Then:**
     1. `wipefs -a` on the device;
     2. a **GPT** table with **one partition** (`sfdisk`). A filesystem on the whole disk wouldn't match the udev rule and the device conventions;
@@ -358,12 +358,14 @@ In step 3:
 
 ```
 /usr/local/sbin/idea-format-disk
-/usr/bin/mount -t ext4 /dev/sd[a-z][12] /disks/sd[a-z][12]    (replaces the mount entry without -t)
+/usr/bin/mount -t ext4 /dev/sd[a-z][12] /disks/sd[a-z][12]    (added to ENGINE_MOUNT; the old untyped entry stays during the changeover)
 ```
 
 - **The script entry has no argument list** (not `""`, which would allow only a call with no arguments). The script validates all its arguments itself. There is no general `mkfs`, `sfdisk` or `wipefs` rule.
 - The entry points at the installed copy in `/usr/local/sbin`, **never into the git checkout**.
-- The mount entry changes because the Engine now mounts only with `-t ext4` (§7.4).
+- **The typed mount entry (Atlas).** The Engine now mounts only with `-t ext4` (§7.4). Sudoers matches arguments **exactly and in order**, so the entry spells out exactly what the Engine runs: `/usr/bin/mount -t ext4 /dev/sd[a-z][12] /disks/sd[a-z][12]`. The Engine code must use **exactly that argument order** (`-t ext4`, then the device, then the mount point).
+- **Changeover:** the old untyped entry (`/usr/bin/mount /dev/sd[a-z][12] /disks/sd[a-z][12]`) stays **alongside** the new one. Atlas installs the file on idea03 and then idea02 before the deploy. A **follow-up PR removes the old entry** once both Pis run the new commit.
+- **The `[12]` pattern stays (Axle).** Step 3 doesn't support partitions 3 and higher (out of scope, as today), so the `[12]` pattern in the mount and unmount entries is unchanged. Step 3 adds a **unit test that compares the Engine's mount command** against exactly `/usr/bin/mount -t ext4 /dev/sd[a-z][12] /disks/sd[a-z][12]`.
 - The code-mapping comment and `visudo -cf` rules apply as before.
 
 **The script is installed as a copy (Atlas):**
@@ -378,8 +380,10 @@ In step 3:
 
 1. Install the script (copy).
 2. Install the sudoers file (`visudo -cf` + atomic move).
-3. **Post-checks:** `sudo -l -U pi /usr/local/sbin/idea-format-disk` must match **through `10-engine`**, and `visudo -cf` passes.
+3. **Post-checks:** `sudo -l -U pi /usr/local/sbin/idea-format-disk` and `sudo -l -U pi /usr/bin/mount -t ext4 /dev/sdb1 /disks/sdb1` (the exact typed command) must both match **through `10-engine`**, and `visudo -cf` passes.
 4. Deploy the Engine commit.
+
+**udev rule.** Step 3 doesn't change `90-docking.rules` (Axle). If a later change does, Atlas installs it through `build-engine` and runs `udevadm control --reload`, one Pi at a time (idea03, then idea02).
 
 **Rollback** runs in reverse order. **Format tests run on idea03 only.**
 
@@ -401,7 +405,8 @@ In step 3:
 - **Status handling:** Running recreated, Stopped untouched, Paused `--no-start --force-recreate`. `filesMounts` only written after success. Boot order (Files Disks before instances) and grouping of runtime docks.
 - **Formatting (step 3 PR):**
     - Candidate detection from mocked `lsblk -J` output: whole non-system disks without ext4 become candidates; ext4 disks (also when unmounted), system disks (found via mocked `findmnt`/`PKNAME`, including a USB system disk and an Intenso model), disks with a mounted partition and swap disks don't. IDs come from the serial or a generated ID that stays stable while plugged in. Labels get " (2)" on a clash.
-    - ext4-only mounting: a FAT or exFAT partition is not mounted and gets no `META.yaml`.
+    - ext4-only mounting: a FAT or exFAT partition is not mounted and gets no `META.yaml`. Whole disks pass `validDevice` for `lsblk` only and are never mounted. A disk with ext4 on partition 3 or higher is not a candidate.
+    - **Mount command string (Axle):** the Engine's mount command matches exactly `/usr/bin/mount -t ext4 /dev/sd[a-z][12] /disks/sd[a-z][12]` (same arguments, same order as the sudoers entry).
     - `formatDisk` refusals: unknown candidate, label mismatch, system disk, a second concurrent format. The success path with a fake script: device locked for the whole format, `addDevice` skips the locked device, staging built as `pi` with `diskId = candidateId`, `formatProgress` steps, the Engine calls `addDevice` itself, and the result is a Files Disk with the same ID. A script failure gives an error trace with its message.
     - **An unmounted App Disk (Kid):** a mocked **unmounted** disk with `apps/` or `instances/` is not a candidate, and the script refuses it through its read-only role-marker check.
 - **Script tests** (shell, with fake `lsblk`, `findmnt`, `mount`, `wipefs`, `sfdisk`, `mkfs.ext4`, `udevadm`): refuses a partition path, a serial or size mismatch, a system disk, a mounted partition, swap, role markers on an ext4 filesystem (mounted `ro,noexec,nosuid,nodev` and unmounted again), a bad label, and a bad or symlinked staging path. It calls tools by full path and runs the steps in order with the right flags.
@@ -440,7 +445,7 @@ Eight steps:
 | 1 | Engine | Files Disk type: `FILES.yaml` detection, `createFilesDisk <diskId>` with checks, `filesConfig`, `sizeBytes`/`freeBytes`, tests, `COMMANDS.md` | 0 |
 | 1b | Console | *(in parallel with 1, on the mock store)* Wording, result helper, Files Disk view, types, fixtures | — (merge after 1) |
 | 2 | Engine | Mounting: per-service `x-app.filesMount`, override helper (`COMPOSE_FILE`), status handling, locks, boot order, grouping of runtime docks, undock/eject path, `Instance.filesMounts`, tests | 1 |
-| 3 | Engine + Ops | **Formatting:** udev rule sees whole disks; mount only with `-t ext4` (behaviour change, new sudoers mount entry); system-disk helper (`findmnt` + `lsblk -no PKNAME`) replacing the guess in `usbDeviceMonitor.ts:57–75`; `Engine.formatCandidates` from `lsblk -J`; device lock (`addDevice` skips locked devices); `idea-format-disk` script (copy installed by `build-engine`, full tool paths, serial and size re-check, read-only role-marker check); sudoers entry without an argument list; `formatDisk <candidateId> <confirmName…>`; tests (Engine + script, including an unmounted App Disk). Atlas: install script, sudoers, `sudo -l` post-check, then Engine commit, idea03 then idea02 | 1 (can run alongside 2) |
+| 3 | Engine + Ops | **Formatting:** no udev change (`validDevice` accepts whole disks for `lsblk` only, never mounts them); mount only with `-t ext4` (behaviour change, new sudoers mount entry); system-disk helper (`findmnt` + `lsblk -no PKNAME`) replacing the guess in `usbDeviceMonitor.ts:57–75`; `Engine.formatCandidates` from `lsblk -J`; device lock (`addDevice` skips locked devices); `idea-format-disk` script (copy installed by `build-engine`, full tool paths, serial and size re-check, read-only role-marker check); sudoers entry for the script without an argument list, plus the typed mount entry `/usr/bin/mount -t ext4 /dev/sd[a-z][12] /disks/sd[a-z][12]` (exact argument order in the code, checked by a unit test against that string; old untyped entry kept until a follow-up PR removes it once both Pis run the new commit; `[12]` unchanged, partitions 3+ out of scope); `formatDisk <candidateId> <confirmName…>`; tests (Engine + script, including an unmounted App Disk). Atlas: install script, sudoers, `sudo -l` post-checks (script and the exact typed mount command), then Engine commit, one Pi at a time, idea03 then idea02 | 1 (can run alongside 2) |
 | 3b | Console | Unformatted disks under the Engine's row; format dialog (exact label, contents unknown, erase warning); `formatProgress` steps; 15 s / 5 min on the Console clock; open the new Files Disk; candidate removed mid-dialog | 3 (can start on the mock store) |
 | 4 | App | Nextcloud opt-in, `before-starting` hook, entrypoint wrapper, convention doc (`restart: no`, Files Disk binds allowed), fake-occ tests, harness | 2 (hook can start earlier; alongside 3) |
 | 5 | Ops | Hardware test on idea03 (8 steps, including formatting an exFAT stick and the refusal on Kid's unmounted throwaway App Disk; post-checks), then idea02 with MilkWise running. Format and refusal tests **never** run on idea02 | 0–4 |
@@ -454,7 +459,7 @@ Eight steps:
 - Using a Files Disk from another Pi.
 - Files Disks on FAT, exFAT or NTFS (they must be formatted as ext4 first). Combined disks.
 - Automatic formatting, formatting without the typed confirmation, formatting disks with IDEA data, filesystems other than ext4, cancelling a running format, choosing a custom filesystem label (always "School Files" in v1).
-- Formatting ext4 disks that hold other files (§14, open question 4).
+- Formatting ext4 disks that hold other files (decided by Steve, §14).
 - Removing the blanket `pi NOPASSWD: ALL` rule (a separate decision).
 - Kolibri, Kiwix or other Apps as Files Disk users (possible later with the same opt-in).
 - Quotas and per-user folders beyond what Nextcloud offers.
@@ -486,9 +491,12 @@ The Design Review (Atlas, Kid, Axle, Pixel, 2026-09-27) answered the draft's nin
 | Koen change: formatting (2026-09-27) | Decisions 2 and 3 changed: the Engine can format as ext4 through an explicit Console action with typed confirmation; empty ext4 disks work straight away, other non-IDEA disks can be formatted first. Koen's choices on idea#125: **GPT with one partition**; **META.yaml written immediately**; existing files don't block formatting (typed confirmation + visible warning instead), **IDEA data always refused**; the hardware test covers formatting an exFAT stick and the refusal on an App Disk | Koen |
 | Formatting review: Ops | System disks found by lookup only (`findmnt` for `/` and `/boot/firmware` + `lsblk -no PKNAME`), because the Pis boot from a USB SSD at `/dev/sda` and idea02's is an Intenso. The script is installed as a copy (`install -o root -g root -m 0755`), never a symlink, from `script/build_image_assets/idea-format-disk`, with full tool paths. `-d` is fine (e2fsprogs 1.47.2); symlinked staging refused. The sudoers entry has no argument list; post-check `sudo -l -U pi` matches through `10-engine`, because the blanket rule still exists. Per-Pi order: script, sudoers, post-checks, Engine commit; rollback in reverse; format tests on idea03 only | Atlas |
 | Formatting review: App | The refusal test covers an **unmounted** App Disk (unit test + idea03). Refusal tests use a throwaway App Disk from the harness, never MilkWise or idea02. Formatted disks need no App changes | Kid |
-| Formatting review: Engine | Mount only with `-t ext4` (behaviour change); whole non-system disks without ext4 become format candidates via `lsblk -J` (no sudo); candidate ID from the serial or a generated ID kept while plugged in, written into `META.yaml`; udev rule sees whole disks. The device is locked for the whole format, `addDevice` skips it, and the Engine calls `addDevice` after `udevadm settle`. The script re-checks serial and size. Shared system-disk helper; refuse mounted partitions and swap; the script is authoritative. Staging built as `pi` in `format-staging/`; GPT with one partition kept. Read-only role-marker check in the script | Axle |
+| Formatting review: Engine | Mount only with `-t ext4` (behaviour change); whole non-system disks without ext4 become format candidates via `lsblk -J` (no sudo); candidate ID from the serial or a generated ID kept while plugged in, written into `META.yaml`; whole disks must reach the Engine (settled in the udev follow-up below). The device is locked for the whole format, `addDevice` skips it, and the Engine calls `addDevice` after `udevadm settle`. The script re-checks serial and size. Shared system-disk helper; refuse mounted partitions and swap; the script is authoritative. Staging built as `pi` in `format-staging/`; GPT with one partition kept. Read-only role-marker check in the script | Axle |
 | Formatting review: Console | `Engine.formatCandidates` shown under the Engine's row. **Pixel decided:** `confirmName` must exactly match the Engine-published `label`, kept unique per Engine with " (2)", so the command is `formatDisk <candidateId> <confirmName…>`. The dialog shows Engine, model, size, filesystem, erase warning, "contents unknown". `formatProgress` steps; result by the first new trace for the `candidateId`; 15 s / 5 min on the Console clock, no cancel; on success open the new Files Disk; a second concurrent format is refused | Pixel |
 | Formatting open questions resolved | Script location: `script/build_image_assets`, installed by `build-engine`. `-d`: accepted. System-disk detection: the lookup helper. Disks the Engine can't mount: format candidates | Atlas, Axle, Pixel |
+| Formatting follow-up: Ops (sudoers mount entry) | Sudoers matches arguments exactly and in order, so the new mount entry is `/usr/bin/mount -t ext4 /dev/sd[a-z][12] /disks/sd[a-z][12]` and the Engine uses exactly that order. The old untyped entry stays during the changeover (installed on idea03, then idea02, before the deploy), and a follow-up PR removes it once both Pis run the new commit. The post-check runs `sudo -l -U pi` against the exact typed command. Any future change to `90-docking.rules` is installed via `build-engine` + `udevadm control --reload`, one Pi at a time | Atlas |
+| Formatting follow-up: Engine (udev and markers) | Step 3 changes neither `90-docking.rules` nor the `[12]` pattern: the whole disk `sdX` is already linked, and `validDevice` accepts whole disks only so the Engine can run `lsblk` for candidate detection (never mounted). Partitions 3+ stay out of scope. A unit test compares the Engine's mount command against the exact sudoers string. The refusal uses only `apps/`, `instances/`, `BACKUP.yaml` and `FILES.yaml`; `META.yaml` only carries over the disk ID. The swap check applies to `sd*` disks. A disk with ext4 on any partition (even 3+) is not a candidate (resolved the former open question 5) | Axle |
+| Decision: ext4 disks with other files | v1 does **not** offer formatting for ext4 disks that already hold non-IDEA files. v1 only offers disks with **no ext4 filesystem** as format candidates. Such a disk mounts, `createFilesDisk` refuses it as not empty, and the operator empties it on another computer. It can be added later with the same script and dialog (resolved the former open question 4) | Steve (Lead) |
 | Follow-up: App rule | Files Disk binds are simply allowed, not an "exception"; reconciling the general App volume convention is a separate issue for Kid | Kid |
 
 ### Remaining open questions (to settle during implementation, not blocking)
@@ -496,5 +504,3 @@ The Design Review (Atlas, Kid, Axle, Pixel, 2026-09-27) answered the draft's nin
 1. **How the Engine recognises Nextcloud's first start or an upgrade** so it can hold back a recreate. For example, wait until the container is healthy and Nextcloud reports installed and not in maintenance mode. Axle and Kid agree the check in step 2.
 2. **Exact numbers:** the grouping window for runtime docks ("a few seconds") and the unmount retry count. Engine Dev Bot picks them in steps 0–2 and documents them in `docs/ARCHITECTURE.md`.
 3. **The App volume convention** ("named volumes only" versus today's `./data` binds) is a separate issue for Kid. It doesn't block this work.
-4. **Formatting ext4 disks that hold other files (for Koen).** Koen's decision allowed formatting "any other non-IDEA disk". Under the reviewed candidate model, an ext4 disk that holds non-IDEA files mounts and shows as "empty", `createFilesDisk` refuses it as not empty, and it is never a format candidate. Should v1 also offer "Format as School Files" for such disks (the Engine would unmount it and treat it as a candidate)? Recommendation: not in v1. It's rare, and the operator can empty the disk on another computer; adding it later reuses the same script and dialog.
-5. **The exact udev rule change** (step 3, Axle). The current rule already links whole disks (`sd?`). The gap is mostly that `validDevice` skips whole disks and only partitions 1–2 are linked. The step 3 PR settles the exact rule and how whole-disk events reach the candidate list.
