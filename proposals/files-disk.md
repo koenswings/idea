@@ -105,7 +105,8 @@ password: null           # RESERVED for a future password option; v1 must be nul
 These protect App Disks today, so they ship before any Files Disk code:
 
 - **idea#121:** write `META.yaml` for new disks. For a non-system disk whose root isn't writable by `pi`, first run the new sudoers entry `chown pi:pi /disks/<dev>` (§10).
-- **Never delete a mounted path.** `undockDisk` (`usbDeviceMonitor.ts:305`) must never `rm -fr` a mount point that is still mounted. Unmount with a plain `umount` and a few retries. If it's still busy, record an error trace, update the store anyway (disk undocked), set **`Disk.unmountError`** (`{ engineId, message }`) and leave the mount point alone. This applies to **every disk type, App Disks included**. `unmountError` survives the undock (when `dockedTo` becomes `null`) and is cleared on the next successful mount of that disk.
+- **Never delete a mounted path.** `undockDisk` (`usbDeviceMonitor.ts:305`) must never `rm -fr` a mount point that is still mounted. Unmount with a plain `umount` and a few retries. If it's still busy, record an error trace, update the store anyway (disk undocked), set **`Disk.unmountError`** (`{ engineId, message }`) and leave the mount point alone. This applies to **every disk type, App Disks included**. `unmountError` survives the undock (when `dockedTo` becomes `null`). It is cleared on the next successful mount of that disk, **or at Engine startup** (next bullet).
+- **Clear stale unmount errors at startup.** When the Engine cleans up its old mount points in `/disks` at startup (`usbDeviceMonitor.ts:269–291`), it also clears every `Disk.unmountError` whose `engineId` is its own and whose mount point is no longer mounted (checked with `findmnt`). Without this, the "Restart this Pi" warning would stay after the restart itself if the disk isn't docked again.
 - **Check before mounting.** Before mounting a newly docked disk, the Engine checks with `findmnt` that nothing is still mounted at `/disks/<dev>`. If something is, it refuses with an error trace instead of mounting on top.
 
 ### 7.1 `createFilesDisk <diskId>` command
@@ -176,7 +177,7 @@ The Engine stores this as `App.filesMount`.
 | Where | Field | Notes |
 |---|---|---|
 | `Disk` | `filesConfig: { shareName: string; readOnly: boolean; passwordProtected: boolean; error: string }` or `null` | `error` is a string or `null` and is **only** used for a password-protected disk. Set by `processFilesDisk`. Reset to `null` in `createOrUpdateDisk` and `undockDisk`, like `backupConfig`. The password never goes into the store. |
-| `Disk` | `unmountError: { engineId: EngineID; message: string }` or `null` | **All disk types.** Set when an unmount is still busy after the retries. Kept after undock (`dockedTo` becomes `null`), so `engineId` says which Pi has the stuck mount. Cleared on the next successful mount of that disk. Added in step 0. |
+| `Disk` | `unmountError: { engineId: EngineID; message: string }` or `null` | **All disk types.** Set when an unmount is still busy after the retries. Kept after undock (`dockedTo` becomes `null`), so `engineId` says which Pi has the stuck mount. Cleared on the next successful mount of that disk, or at Engine startup when its mount point is no longer mounted (7.0). Added in step 0. |
 | `Disk` | `sizeBytes: number` or `null`, `freeBytes: number` or `null` | All docked disks. `fs.statfs` on dock and every 10 minutes, rounded, written only on a change of more than 1% or 100 MB. Cleared on undock. |
 | `App` | `filesMount: { path: string; services: string[] }` or `null` | From `x-app.filesMount` |
 | `Instance` | `filesMounts: DiskID[]` | Written only after a successful `compose up` |
@@ -249,7 +250,7 @@ The Engine stores this as `App.filesMount`.
 ## 11. Tests
 
 **Engine (`test/automated/`):**
-- **Step 0:** a new disk gets `META.yaml` and keeps its ID on re-dock. The root-owned disk path calls chown. Undock never removes a still-mounted path; a busy unmount gives an error trace, the store is still updated, and `unmountError` is set with the Engine ID. It survives undock and is cleared on the next successful mount (tested for an App Disk as well as a Files Disk). Mounting refuses when `findmnt` shows something already mounted.
+- **Step 0:** a new disk gets `META.yaml` and keeps its ID on re-dock. The root-owned disk path calls chown. Undock never removes a still-mounted path; a busy unmount gives an error trace, the store is still updated, and `unmountError` is set with the Engine ID. It survives undock and is cleared on the next successful mount (tested for an App Disk as well as a Files Disk). **Startup cleanup:** an `unmountError` with this Engine's `engineId` whose mount point is no longer mounted (mocked `findmnt`) is cleared at startup. One whose mount point is still mounted is kept, and one with another Engine's `engineId` is never touched. Mounting refuses when `findmnt` shows something already mounted.
 - **Command:** `createFilesDisk` success; errors for unknown ID, disk docked elsewhere, system disk, non-empty disk, disk with instances, non-ext4, unwritable after chown, and locked disk. Each error closes the trace as `error`, and the trace carries `args.diskId`.
 - **Detection:** `processDisk` sets `['files']`, `filesConfig`, size and free space. A non-null `password` → not mounted.
 - **Override:** long bind syntax, `create_host_path: false`, only the listed services, slug sanitising, always-suffixed paths, display-name JSON, rebuilt every time.
@@ -279,7 +280,7 @@ Six steps:
 
 | Step | Domain | Issue | Depends on |
 |---|---|---|---|
-| 0 | Engine + Ops | **idea#121** (write `META.yaml`) + **Q5 safety fix** (never `rm -fr` a mounted path; retry umount; `Disk.unmountError` for every disk type; `findmnt` check before mount) + **sudoers `chown` entry** (code-mapping comment, `visudo -cf`, shipped as a standalone file; PR names the first Engine commit that needs it; Atlas installs it with `visudo -cf` + atomic move on idea03, then idea02, before deploying) | — |
+| 0 | Engine + Ops | **idea#121** (write `META.yaml`) + **Q5 safety fix** (never `rm -fr` a mounted path; retry umount; `Disk.unmountError` for every disk type, cleared at startup when its mount point is gone; `findmnt` check before mount) + **sudoers `chown` entry** (code-mapping comment, `visudo -cf`, shipped as a standalone file; PR names the first Engine commit that needs it; Atlas installs it with `visudo -cf` + atomic move on idea03, then idea02, before deploying) | — |
 | 1 | Engine | Files Disk type: `FILES.yaml` detection, `createFilesDisk <diskId>` with checks, `filesConfig`, `sizeBytes`/`freeBytes`, tests, `COMMANDS.md` | 0 |
 | 1b | Console | *(in parallel with 1, on the mock store)* Wording, result helper, Files Disk view, types, fixtures | — (merge after 1) |
 | 2 | Engine | Mounting: per-service `x-app.filesMount`, override helper (`COMPOSE_FILE`), status handling, locks, boot order, grouping of runtime docks, undock/eject path, `Instance.filesMounts`, tests | 1 |
@@ -317,6 +318,7 @@ The Design Review (Atlas, Kid, Axle, Pixel, 2026-09-27) answered the draft's nin
 | Extra | Steve decided: `sizeBytes`/`freeBytes` and `filesConfig.error` (password case) are in v1. Hardware plan with post-checks | Steve, Atlas |
 | Follow-up: size | `fs.statfs`, on dock and every 10 min, rounded, write only on a change of more than 1% or 100 MB; on `Disk`, cleared on undock | Axle |
 | PR review: unmount error | New `Disk.unmountError: { engineId, message }` for **every** disk type: set on a busy unmount, kept after undock, cleared on the next successful mount; the Console warns on that Engine's row and on the disk's view. `filesConfig.error` now only covers the password case | Axle, Pixel |
+| PR review: startup cleanup | At startup the Engine clears every `unmountError` with its own `engineId` whose mount point is no longer mounted (`findmnt`), so the "Restart this Pi" warning goes away after the restart | Axle |
 | Follow-up: deploy | Standalone sudoers file, PR names the first commit needing it, `visudo -cf` + atomic move on idea03 then idea02; clear error without it; state folder `~/.local/state/idea-engine/` created at startup and added to the pre-deploy backup | Atlas |
 | Follow-up: App rule | Files Disk binds are simply allowed, not an "exception"; reconciling the general App volume convention is a separate issue for Kid | Kid |
 
@@ -324,4 +326,5 @@ The Design Review (Atlas, Kid, Axle, Pixel, 2026-09-27) answered the draft's nin
 
 1. **How the Engine recognises Nextcloud's first start or an upgrade** so it can hold back a recreate. For example, wait until the container is healthy and Nextcloud reports installed and not in maintenance mode. Axle and Kid agree the check in step 2.
 2. **Exact numbers:** the grouping window for runtime docks ("a few seconds") and the unmount retry count. Engine Dev Bot picks them in steps 0–2 and documents them in `docs/ARCHITECTURE.md`.
-3. **The App volume convention** ("named volumes only" versus today's `./data` binds) is a separate issue for Kid. It doesn't block this work.
+3. **Knowing the old mount point at startup.** After undock the disk's `device` is `null`, so the startup cleanup needs the mount point from somewhere. Suggestion for Axle: keep it inside the error (`unmountError.mountPoint`, for example `/disks/sdb1`) rather than parsing the message.
+4. **The App volume convention** ("named volumes only" versus today's `./data` binds) is a separate issue for Kid. It doesn't block this work.
