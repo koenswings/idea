@@ -1,8 +1,9 @@
 # IDEA Platform: Grok Bot Setup
 
-**Author:** Atlas
-**Date:** 2026-09-20
+**Author:** Atlas (updated Lead / Steve for idea#147)
+**Date:** 2026-09-20; workflow update 2026-09-28
 **Status:** Authoritative — describes the current setup
+**Related:** idea#147 — Dev Bot + SSH official; Grok Build runner path parked
 
 ---
 
@@ -11,14 +12,14 @@
 | # | Section |
 |:---:|---|
 | **1** | Overview |
-| **2** | Platform — Subscription · Grok Build · Pi Fleet · Filesystem layout · Fleet Scripts · GitHub |
+| **2** | Platform — Subscription · Coding tools (Dev Bot live / Grok Build parked) · Pi Fleet · Filesystem layout · Fleet Scripts · GitHub |
 | **3** | Development Workflow — Bug fix path · Feature path · Paper trail |
-| **4** | Fleet Review Environments — Scripts · Manifest · Deploy · Golden instance · Health |
+| **4** | Fleet Review Environments — Scripts · Manifest · Deploy · Golden instance · Health · Test claim protocol |
 | **5** | Quality Control — QC gate · Post-merge scan · Living docs · Doc policy · AGENTS.md contract |
 | **6** | Routines — All scheduled and event-triggered workflows |
 | **7** | Team Structure — Roles · Group chats · Memory model |
 | **8** | Bot Descriptions — Lead · Engine Dev · Console Dev · App Dev · Ops · Marco |
-| **9** | AGENTS.md for Each Repo — Engine · Console · App Dev |
+| **9** | AGENTS.md for Each Repo — Engine · Console · App Dev (templates PARKED) |
 | **10** | Audit Trail — GitHub Actions logs · Structured event log · Recommended approach |
 | **11** | koenswings/idea Repository |
 
@@ -28,7 +29,9 @@
 
 This document describes the IDEA development setup on Grok Bot — the platform, tools, workflows, quality standards, team structure, and Bot configurations.
 
-Development conversations happen in Grok Bot chat. Code lives on GitHub. Builds and tests run on the Pi fleet via Grok Build. Koen evaluates every PR on real Pi hardware before merging. Quality is enforced at every step — in Bot descriptions, in Grok Build instructions (AGENTS.md), and by fleet management scripts.
+Development conversations happen in Grok Bot chat. Code lives on GitHub. **Dev Bots implement** with their own tools; they run tests over SSH on fleet Pis and open PRs. **Ops** deploys review environments via fleet scripts. Koen evaluates every PR on real Pi hardware before squash-merging. Quality is enforced at every step — in Bot descriptions, in each repo's AGENTS.md, and by fleet / quality scripts.
+
+The Grok Build + GitHub Actions self-hosted runner coding path is **parked** (see §2.2). Pis are test / review / golden hardware, not coding agents, until that path is deliberately revived.
 
 **Core design principle — LLM vs Script:**
 
@@ -48,26 +51,27 @@ Link your SuperGrok Heavy account to a free Cursor account once. That grants Gro
 | Component | Cost | Notes |
 |-----------|------|-------|
 | Grok Bot | Included in SuperGrok Heavy | Link Grok account to Cursor |
-| Grok Build (coding on Pis) | Pay-per-use (~$1/1M tokens) | XAI_API_KEY on each Pi |
+| Grok Build (coding on Pis) | **PARKED** — pay-per-use if revived | Optional install on idea02 for health check; not the live coding path |
 | Cursor Cloud Agents | Not used | IDEA builds ARM — x86 VMs cannot build or test it |
 
-### 2.2 Coding Tool: Grok Build
+### 2.2 Coding tools
 
-All coding work runs on the Pi fleet via **Grok Build** — xAI's open-source terminal coding agent. It runs natively on ARM64 and is the correct tool for IDEA because every component must compile and run on Raspberry Pi hardware.
+#### Live path — Dev Bots
 
-Key capabilities:
+**Dev Bots** (Engine Dev / Console Dev / App Dev) implement code with their own tools: clone the repo, edit, commit, and open PRs via GitHub. They run domain tests over **SSH on a fleet Pi** (typically `idea03`, or any idle non-golden). They read the repo's `AGENTS.md` for build / test / deploy conventions. Continuity of domain expertise across tasks is intentional — that is why Dev Bots remain the implementers rather than fresh one-shot coding agents.
 
-- Reads `AGENTS.md` natively — this file is the per-repo build, test, and deploy manual
-- Up to 8 parallel subagents per task, each in its own git worktree
-- Plan Mode: proposes a full diff before touching any file
-- Headless mode for Bot-driven automation: `grok -p "task"`
-- Routes to any model via OpenRouter — Claude, Grok, or others
+#### Parked path — Grok Build + Pi runners (idea#147)
 
-**Install on each Pi:**
-```bash
-curl -fsSL https://x.ai/cli/install.sh | bash
-grok auth login   # Koen authenticates via browser once
-```
+**PARKED (2026-09-28).** Do not use for new work unless Koen deliberately revives this path.
+
+Historically the design was: all coding on the Pi fleet via **Grok Build** (xAI's open-source terminal coding agent on ARM64), triggered headless on a GitHub Actions self-hosted runner. That path is not the live workflow. Grok Build and/or a self-hosted runner **may remain installed on `idea02`** for health-check purposes only. Pis are **not** coding agents while this path is parked.
+
+**State on idea02 (idea#147):** after this change merges, Atlas stops the self-hosted runner service on idea02 and sets `runner: parked` in `fleet-state.json`. The Grok Build binary (1.0.40, default model `grok-4.6`) stays installed. The only workflow in `koenswings/idea` is the manual `runner-test.yml` (`workflow_dispatch`); it will fail while the runner service is stopped, which is expected.
+
+Preserved reference (for revival only):
+
+- Reads `AGENTS.md` natively; Plan Mode; headless `grok -p "task"`; OpenRouter model routing
+- Install (parked): `curl -fsSL https://x.ai/cli/install.sh | bash` then `grok auth login`
 
 ### 2.3 Pi Fleet
 
@@ -76,9 +80,14 @@ The IDEA fleet is a variable number of Raspberry Pis — any Pi enrolled in Tail
 Each Pi runs:
 
 - Tailscale (hostname: `idea<N>`, reachable at `idea<N>.tail2d60.ts.net`)
-- GitHub Actions self-hosted runner (label matches Tailscale hostname)
-- Grok Build
 - Engine running via pm2 with cwd `/home/pi/idea/agents/agent-engine-dev`
+
+**Roles:** Pis are **test / review / golden** hardware. They are **not** coding agents while the Grok Build runner path is parked (§2.2).
+
+- **Shared test and review pool:** `idea01`, `idea03`, `idea04` (`role: spare` or `review`). Dev Bots claim a pool Pi for testing (§4.6); Ops deploys PRs for review to an idle pool Pi.
+- **Golden:** `idea02` (`role: golden`) — never used for testing or review.
+
+**Parked on idea02 only:** Grok Build stays installed; the self-hosted runner service is stopped after idea#147 merges (`runner: parked`). Neither is used for coding.
 
 **Roles are assigned dynamically at runtime** by the fleet scripts (see Section 2.4). By convention, the first available Pi for a given domain is used. One Pi is the dedicated golden Pi (`role: golden`, currently `idea02`); the others are review Pis (currently `idea03`). These assignments are recorded in `fleet-state.json` and update as Pis come and go.
 
@@ -125,7 +134,7 @@ All deterministic fleet operations are implemented as scripts in `koenswings/ide
 
 | Script | Purpose |
 |--------|---------|
-| `idea-setup.sh` | Platform install: discover all `idea*` Pis via Tailscale, install Grok Build, register GitHub Actions runner, verify dependencies, initialise `fleet-state.json` |
+| `idea-setup.sh` | Platform install: discover all `idea*` Pis via Tailscale, verify dependencies, initialise `fleet-state.json`. **Skips Grok Build install and GitHub Actions runner registration by default**; an opt-in flag installs them (parked path, §2.2). *Follow-up for Atlas: the script does not yet have this default / flag — change pending after idea#147.* |
 | `find-available-pi.sh <domain>` | Read `fleet-state.json`, apply domain affinity, return the first idle Pi. Returns empty if none available. |
 | `deploy.sh <pi> <component> <repo> <branch>` | Full deploy sequence for the given component type (engine/console/app-disk): checkout, build, start, health check |
 | `teardown.sh <pi>` | Reverse deploy: clean state, restore main, mark Pi idle in `fleet-state.json` |
@@ -172,16 +181,18 @@ Lead Bot discusses until approach agreed
   │
   ▼
 Dev Bot reads issue + agreed approach comment
-  → triggers Grok Build on Pi runner (headless mode)
-  → Grok Build reads AGENTS.md, plans, edits, builds, runs tests
+  → implements with own tools (clone / GitHub); reads AGENTS.md
+  → claims an idle pool Pi (idea01 / idea03 / idea04; never golden idea02)
+    and runs domain tests over SSH — claim protocol §4.6
+  → releases the Pi (main restored, pm2 restarted, status idle)
   │
   ▼
 Dev Bot runs QC gate (see Section 5)
-  ├── FAIL → Grok Build fixes and retries (one retry max)
+  ├── FAIL → Dev Bot fixes and retries (one retry max)
   ├── FAIL after retry → escalates to Lead Bot with diagnosis
   └── PASS → opens PR linked to issue
            → posts PR link as comment on issue
-           → notifies Ops Bot
+           → notifies Lead Bot (and Ops Bot for deploy)
   │
   ▼
 Ops Bot calls find-available-pi.sh <domain>
@@ -196,7 +207,7 @@ Lead Bot notifies Koen: "PR #X ready — live at http://idea<N>.tail…"
   ▼
 Koen evaluates on real Pi hardware via Tailscale
   ├── changes requested → Lead Bot discusses, updates issue comment, re-delegates
-  └── approved → Koen merges PR on GitHub → issue auto-closes
+  └── approved → Koen squash-merges PR on GitHub → issue auto-closes
   │
   ▼
 Ops Bot calls teardown.sh <pi>
@@ -254,6 +265,8 @@ Every decision that leads to code being written must be recorded on GitHub befor
 ## 4. Fleet Review Environments
 
 Every PR is evaluated on real Pi hardware before Koen merges it. All fleet logic runs through scripts — Ops Bot orchestrates them, it does not implement the allocation or deployment logic itself.
+
+Pis in this section are **review / golden / test** targets. Coding work does **not** run on Pi runners while the Grok Build path is parked (§2.2). Dev Bots claim an idle pool Pi to run tests before opening a PR (§4.6); Ops then deploys the PR branch to an idle pool Pi for Koen's live evaluation.
 
 ### 4.1 Fleet Manifest
 
@@ -336,6 +349,53 @@ PR review deploys go to review Pis (`role: review`; today `idea03`, review URL `
 
 After each teardown, `check-fleet-health.sh` is called to verify the freed Pi is clean before marking it idle.
 
+> **Known gap (idea#147):** the 30-minute health-check cron via GitHub Actions described above **does not exist as a workflow**. The only workflow in `koenswings/idea` is the manual `runner-test.yml`. Recorded as a follow-up (a scheduler that does not depend on the parked Pi runner), not fixed here.
+
+### 4.6 Using fleet Pis for testing (claim protocol)
+
+Applies to **all Dev Bots** (Engine, Console, App) whenever they use a fleet Pi for testing, a dev Console, or image builds. Decided in Design Review for idea#147 (Axle, Pixel, Kid, Atlas, 2026-09-28).
+
+**Pool:** `idea01`, `idea03`, `idea04` (`role: spare` or `review`) are the shared test and review pool. **`idea02` (golden) is never used.**
+
+**Claim:**
+```bash
+BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> status testing
+BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> claim "<bot>: <repo>#<issue/PR>"
+```
+Pick an `idle` pool Pi. The bot name goes in a note (`claim` field; `BOT_NAME` also records it in the audit line). Do not overwrite the Pi's existing `note` field, which holds its isolation details.
+
+**Release:** restore `main` in every tree you touched, restart the Engine with pm2 **as pi**, then:
+```bash
+BOT_NAME=<bot> tools/fleet/update-fleet-state.sh --null <pi> claim
+BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> status idle
+```
+
+`find-available-pi.sh` returns only `idle` Pis, so Ops review deploys skip claimed Pis automatically.
+
+**Rules (everyone):**
+- Never use golden `idea02`.
+- Leave each Pi's isolated store, `mdns: false` and local `config.yaml` untouched.
+- Never take more than one Pi down at a time.
+
+**Engine (Axle):**
+- On the claimed Pi, stop the pm2 Engine (as pi) before testing.
+- Run tests from a **separate checkout**, not the deployed tree (`/home/pi/idea/agents/agent-engine-dev`), kept off the fleet store.
+- Restore `main` and restart pm2 before release.
+- `IDEA_NETWORK_TESTS` stays off unless an issue asks for it.
+- `store-template.json` is never touched.
+
+**Sudoers:** a Dev Bot may install its PR's version of `11-engine-files` via `installEngineSudoers` on a Pi it has claimed, and must restore `main`'s version before release. Golden `idea02` sudoers stays with Atlas.
+
+**App (Kid):**
+- Builds can run on any claimed ARM64 pool Pi (not idea02); check each image with `docker manifest inspect`.
+- Before release: `docker compose down -v` for every harness project, remove test images, and leave no test disk mounted.
+- `dd` test-disk writes stay with Atlas on idea03 only (idea#139).
+
+**Console (Pixel):**
+- Unit tests and typecheck run off-Pi against the mock store (no claim needed).
+- A dev Console pointed at a Pi's Engine counts as using that Pi and needs a claim.
+- Command testing never targets idea02.
+
 ---
 
 ## 5. Quality Control
@@ -412,7 +472,7 @@ Routines are scheduled or event-triggered workflows that run independently of di
 |---------|-------|---------|---------|
 | After every merge | Lead Bot (automated) | `quality-scan.sh` across all repos + golden update via `update-golden.sh` | Quality issues filed; merged mains recorded; freed Pi health verified |
 | Weekly — Monday | Lead Bot + App Dev Bot | `quality-scan.sh` + `check-app-versions.sh` | Quality report; app-update issues for new upstream versions |
-| Every 30 min (cron) | Ops Bot via `check-fleet-health.sh` | HTTP health check all deployed Pis | Alert Lead Bot if any Pi unreachable |
+| Every 30 min (cron) — **not implemented** (§4.5 gap) | Ops Bot via `check-fleet-health.sh` | HTTP health check all deployed Pis | Alert Lead Bot if any Pi unreachable |
 | Monthly — first Monday | Lead Bot + Marco Bot | Authoritative docs review; new app scouting | docs-review issues; new-app-proposal issues |
 | After every proposal merge | Lead Bot | Check if CONTEXT.md needs updating | Follow-up issue if update needed |
 | Quarterly | Lead Bot prompts Koen | Bot description review | Koen approves diffs; no changes without approval |
@@ -454,6 +514,14 @@ Dev Bots may communicate directly with each other when a task crosses domains �
 ## 8. Bot Descriptions
 
 These are the exact texts to paste when creating each Bot in Grok Bot.
+
+> **Pending Bot description updates (idea#147 follow-up, Koen):** the `RUN` steps below already describe the live path. Lines each bot flagged for Koen to update in the live descriptions after the AGENTS.md PRs land:
+> - **Atlas (Ops):** "After teardown: run pnpm test:full on freed Pi's main branch via script"; "cron via GitHub Actions" health check (does not exist, §4.5).
+> - **Kid (App Dev):** "trigger Grok Build"; idea03-only builds ("Build on ARM Pi (idea03) only", "rebuild on idea03") — now any claimed ARM64 pool Pi (§4.6).
+> - **Axle (Engine Dev):** "trigger Grok Build".
+> - **Pixel (Console Dev):** "trigger Grok Build"; the non-existent `scripts/deploy-fleet.sh`.
+>
+> Where a line below conflicts with §4.6, §4.6 wins.
 
 ### Lead Bot
 
@@ -575,7 +643,7 @@ Key constraints:
 - pm2 always runs as pi user. Never root.
 
 YOUR REPO: github.com/koenswings/agent-engine-dev
-YOUR AGENTS.md: read at start of every Grok Build run.
+YOUR AGENTS.md: read at the start of every implementation task.
 
 Authoritative docs: docs/ARCHITECTURE.md, docs/COMMANDS.md,
 docs/SCRIPTS.md, docs/PI_FLEET.md
@@ -588,7 +656,10 @@ Be direct. Your review is an input to the decision, not a veto.
 
 EXECUTION DUTY:
 1. READ — GitHub issue + agreed approach comment. No comment = ask Lead Bot.
-2. RUN — trigger Grok Build on the domain Pi runner via GitHub Actions.
+2. RUN — implement with your own tools (clone / GitHub). Claim an idle
+   pool Pi (idea01/03/04, never idea02) and run tests over SSH; release
+   it when done (claim protocol, §4.6). Do not trigger Grok Build or Pi
+   runners — that path is parked (idea#147 / §2.2).
 3. QC GATE:
    TESTS: pnpm test:full must pass. Include testresults/ log in PR.
    STRUCTURAL: no source files in docs/; no .md in src/
@@ -639,7 +710,7 @@ Key constraints:
 - Chrome Extension (background.ts): legacy, keep building, never add logic
 
 YOUR REPO: github.com/koenswings/agent-console-dev
-YOUR AGENTS.md: read at start of every Grok Build run.
+YOUR AGENTS.md: read at the start of every implementation task.
 DEPLOY SCRIPT: scripts/deploy-fleet.sh
 
 DESIGN REVIEW DUTY:
@@ -648,7 +719,10 @@ rendering implications? Conflicts with offline-first or Solid.js patterns?
 
 EXECUTION DUTY:
 1. READ — GitHub issue + agreed approach comment. No comment = ask Lead Bot.
-2. RUN — trigger Grok Build on the domain Pi runner.
+2. RUN — implement with your own tools (clone / GitHub). Claim an idle
+   pool Pi (idea01/03/04, never idea02) and run tests over SSH; release
+   it when done (claim protocol, §4.6). Do not trigger Grok Build or Pi
+   runners — that path is parked (idea#147 / §2.2).
 3. QC GATE:
    TESTS: pnpm test + pnpm typecheck must pass.
    STRUCTURAL: no source files in docs/; no .md in src/
@@ -719,7 +793,7 @@ Key constraints:
 - No ports below 3000
 
 YOUR WORKSPACE REPO: github.com/koenswings/agent-app-dev
-YOUR AGENTS.md: read at start of every Grok Build run.
+YOUR AGENTS.md: read at the start of every implementation task.
 
 DESIGN REVIEW DUTY:
 Assess: affects App Disk format, compose.yaml conventions, app.yaml
@@ -727,8 +801,10 @@ schema, or Engine dock detection? ARM64 compatibility concerns?
 
 EXECUTION DUTY:
 1. READ — GitHub issue + agreed approach comment. No comment = ask Lead Bot.
-2. RUN — trigger Grok Build on the domain Pi runner. For Docker image work,
-   execute directly on idea03 via SSH.
+2. RUN — implement with your own tools (clone / GitHub). Claim an idle
+   ARM64 pool Pi (idea01/03/04, never idea02) and run harness tests / image
+   builds over SSH; release it when done (claim protocol, §4.6). Do not
+   trigger Grok Build or Pi runners — that path is parked (idea#147 / §2.2).
 3. QC GATE:
    TESTS: App Harness must pass for any modified App Disk.
    IMAGES: ARM64 confirmed via docker manifest inspect.
@@ -871,9 +947,11 @@ You do not send external communications without Koen's approval.
 
 ---
 
-## 9. AGENTS.md for Each Repo
+## 9. AGENTS.md for Each Repo (templates PARKED)
 
-AGENTS.md is Grok Build's operational manual. Read automatically at the start of every Grok Build run. Owned by the Dev Bot for that repo. Must be updated in the same PR as any change to build, test, or deploy procedures.
+AGENTS.md is the per-repo operational manual for whoever implements in that repo. **Live path:** Dev Bots read it at the start of every implementation task. **Parked path:** if Grok Build is revived, it also reads AGENTS.md natively at the start of a run. Owned by the Dev Bot for that repo. Must be updated in the same PR as any change to build, test, or deploy procedures.
+
+**PARKED (idea#147, Design Review decision):** the templates in §9.1–9.3 are kept as the parked Grok Build revival text — they say "You are Grok Build on an ARM64 Raspberry Pi runner" and are **not** the live instructions. Live implementers are Dev Bots using clone / GitHub + claimed-Pi SSH tests (§2.2, §3, §4.6). Each repo's real `AGENTS.md` is owned by its Dev Bot; follow-up PRs from Axle, Pixel and Kid rewrite that wording in their repos.
 
 ### 9.1 AGENTS.md — agent-engine-dev
 
@@ -923,7 +1001,7 @@ pnpm test:cross-engine  # requires 2+ Pis both running
 
 **Deploy (Ops Bot calls deploy.sh — do not deploy manually)**
 
-The fleet deploy scripts handle all deployment logic. Grok Build's job is to produce a passing test suite and open a PR — Ops Bot does the rest.
+The fleet deploy scripts handle all deployment logic. The implementer's job (Dev Bot live; Grok Build if revived) is to produce a passing test suite and open a PR — Ops Bot does the rest.
 
 **config.yaml key settings**
 
@@ -1116,7 +1194,7 @@ node tests/<app>/smoke.mjs
 
 **Deploy (Ops Bot handles this via deploy.sh)**
 
-Grok Build's job is to produce a passing harness result and open a PR.
+The implementer's job (Dev Bot live; Grok Build if revived) is to produce a passing harness result and open a PR.
 
 **Quality rules (every PR)**
 
@@ -1142,11 +1220,11 @@ Grok Build's job is to produce a passing harness result and open a PR.
 
 Two complementary audit trails cover all IDEA activity.
 
-### 10.1 GitHub Actions Logs (coding work)
+### 10.1 Coding-work audit (live vs parked)
 
-Every Grok Build invocation runs via a GitHub Actions workflow on a Pi runner. GitHub retains the full console output per run — every file Grok Build read, every command it ran, every test result, every error. Tied to the PR and commit, so traceable in both directions. Accessible from the GitHub Actions UI for any repo.
+**Live path:** Dev Bot implementation leaves the normal GitHub trail — commits, PR diffs, QC comments, and SSH test artefacts attached to the PR (for example `test/testresults/`). There is no Pi-runner coding workflow to log while Grok Build is parked.
 
-**No setup required.** Already available. Configure retention in the GitHub repository settings (default 90 days).
+**Parked path (Grok Build + Pi runners):** If revived, every Grok Build invocation would run via a GitHub Actions workflow on a Pi runner. GitHub retains the full console output per run — every file read, command, test result, and error — tied to the PR and commit. Configure retention in repository settings (default 90 days). Until revival, treat runner / Grok Build Action logs as historical or health-check only (idea02).
 
 ### 10.2 Structured Audit Log (non-coding events)
 
@@ -1173,10 +1251,10 @@ Fleet and quality scripts append one JSON line to `audit/audit-<YYYY>.jsonl` in 
 
 Use both:
 
-- **GitHub Actions logs** for the full technical detail of any coding run — what Grok Build did, line by line
+- **PR / commit / test artefacts** for the technical detail of live Dev Bot coding work; **GitHub Actions logs** only if the parked Grok Build runner path is revived
 - **Structured audit log** for the operational ledger — what Bot did what, when, and what the outcome was
 
-Together they cover the full picture: GitHub Actions for depth, the JSONL log for breadth.
+Together they cover the full picture: GitHub depth for code changes, the JSONL log for operational breadth.
 
 ---
 

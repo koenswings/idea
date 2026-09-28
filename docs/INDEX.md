@@ -9,8 +9,9 @@ Update this file whenever an authoritative doc is added or significantly revised
 
 ## grok-bot-setup.md
 **Status:** Authoritative  ·  **Maintained by:** Atlas / Steve
-IDEA development setup on Grok Bot: platform, fleet scripts, workflows, quality control
-(§5), routines, team structure, and Bot descriptions.
+IDEA development setup on Grok Bot: platform, fleet scripts, workflows (Dev Bot + SSH;
+Grok Build runner path parked, idea#147), fleet-Pi test claim protocol (§4.6), quality
+control (§5), routines, team structure, and Bot descriptions.
 → [docs/grok-bot-setup.md](grok-bot-setup.md)
 
 ## README.md

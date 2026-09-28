@@ -62,7 +62,11 @@ Every component works without internet. This is the foundational constraint that
 | **Ops Bot** | Infrastructure | Pi fleet, fleet scripts, review environments |
 | **Marco Bot** | Programme Management | App scouting, field coordination, teacher guides |
 
-Development conversations happen in Grok Bot chat. Code lives on GitHub. Builds and tests run on the Pi fleet. Koen reviews every PR on real hardware before merging.
+Development conversations happen in Grok Bot chat. Code lives on GitHub. **Dev Bots** (Engine / Console / App) implement changes with their own tools (clone / GitHub), run tests over SSH on a claimed pool Pi (`idea01` / `idea03` / `idea04`; never golden `idea02`), and open PRs. **Ops** deploys each PR to a review Pi via fleet scripts; Lead notifies Koen with the PR URL and live review URL. Koen squash-merges; Ops updates golden / fleet mains. Pis are test / review / golden hardware — not coding agents.
+
+The Grok Build + GitHub Actions self-hosted runner coding path is **parked** (may remain installed on `idea02` for health check) until deliberately revived. See `docs/grok-bot-setup.md` §2.2 and §3.
+
+**Test claim rule:** before using a pool Pi a Dev Bot sets its `status` to `testing` (`update-fleet-state.sh`, bot name in the `claim` note); on release it restores `main`, restarts pm2 as pi and sets `status idle`. Never idea02; leave each Pi's store, `mdns:false` and `config.yaml` alone; one Pi down at a time. Full protocol: `docs/grok-bot-setup.md` §4.6.
 
 `idea02` is the dedicated golden Pi (`role: golden`): it always runs the latest merged `main`, keeps MilkWise as a real workload, and is never used for PR review. Its `version` records the mains it runs (for example `engine main@<sha>, console main@<sha>`) and its `status` stays `idle`; `role: golden` is what excludes it from review allocation. Review Pis (currently `idea03`, `role: review`) are picked by `find-available-pi.sh`. After every merge to `main`, Ops (Atlas) moves the golden Pi to `main` and updates its `version` (`update-golden.sh` once implemented, idea#107). This dedicated-golden model (idea#118) replaces the temporary single-Pi rule from idea PR #112.
 
