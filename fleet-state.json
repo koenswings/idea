@@ -17,7 +17,7 @@
     "role": "review",
     "domain": "any",
     "pr": null,
-    "status": "idle",
+    "status": "testing",
     "host": "100.126.117.80",
     "tailscale": "100.126.117.80",
     "lan": "192.168.0.228",
@@ -28,7 +28,7 @@
     "note": "Isolated from golden idea02: Engine config mdns:false (2026-09-27, idea#118); own store automerge:3dF7bVXZadDRE8DvF6wi4QuKm3us; still holds replicas of idea02 docs synced before isolation. SSH is key-only (password auth off 2026-09-27).",
     "branch": null,
     "review_url": null,
-    "claim": null
+    "claim": "Axle: agent-engine-dev#134 / idea#152"
   },
   "idea01": {
     "role": "spare",
