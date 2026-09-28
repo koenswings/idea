@@ -70,3 +70,15 @@
 {"ts":"2026-09-28T13:22:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"note","value":"Spare fleet Pi (2026-09-28). Pi 5 / Debian 13 trixie / Intenso SSD. mdns:false; still on fleet store URL until role decided. Tailscale pending Koen login. SSH via idea03 jump until on Tailscale.","previous":null}
 {"ts":"2026-09-28T13:22:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"runner","value":"none","previous":null}
 {"ts":"2026-09-28T13:22:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"grok_build","value":null,"previous":null}
+{"ts":"2026-09-28T13:37:22Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"role","value":"spare","previous":null,"created":true}
+{"ts":"2026-09-28T13:37:22Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"domain","value":"any","previous":null}
+{"ts":"2026-09-28T13:37:22Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"pr","value":null,"previous":null}
+{"ts":"2026-09-28T13:37:22Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":null}
+{"ts":"2026-09-28T13:37:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"host","value":"192.168.0.113","previous":null}
+{"ts":"2026-09-28T13:37:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"tailscale","value":null,"previous":null}
+{"ts":"2026-09-28T13:37:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"lan","value":"192.168.0.113","previous":null}
+{"ts":"2026-09-28T13:37:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@1edad8a, console main@af473f1","previous":null}
+{"ts":"2026-09-28T13:37:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"mdns","value":false,"previous":null}
+{"ts":"2026-09-28T13:37:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"runner","value":"none","previous":null}
+{"ts":"2026-09-28T13:37:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"grok_build","value":null,"previous":null}
+{"ts":"2026-09-28T13:37:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"note","value":"Spare fleet Pi (2026-09-28). Pi 4 / Debian 13 trixie / 240 GB SSD. mdns:false; own command log, still on fleet store URL until role decided. Tailscale pending Koen login. SSH via idea03 jump until on Tailscale. pi password not set yet (Koen).","previous":null}
