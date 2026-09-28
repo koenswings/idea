@@ -8,7 +8,7 @@ Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment,
 
 | Script | Purpose |
 |--------|---------|
-| `idea-setup.sh` | Discover all `idea*` Pis via Tailscale, install Grok Build, register GitHub Actions runner, initialise fleet-state.json |
+| `idea-setup.sh` | Discover all `idea*` Pis via Tailscale, verify dependencies, initialise fleet-state.json. Skips Grok Build and the GitHub Actions runner by default; `--with-grok-build` opts in (parked path, idea#147). Still a stub. |
 | `find-available-pi.sh <domain>` | Return first idle Pi matching domain from fleet-state.json |
 | `deploy.sh <pi> <component> <repo> <branch>` | Full deploy sequence (engine/console/app-disk) |
 | `teardown.sh <pi>` | Reverse deploy, restore main, mark Pi idle |

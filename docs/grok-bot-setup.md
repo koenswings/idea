@@ -134,7 +134,7 @@ All deterministic fleet operations are implemented as scripts in `koenswings/ide
 
 | Script | Purpose |
 |--------|---------|
-| `idea-setup.sh` | Platform install: discover all `idea*` Pis via Tailscale, verify dependencies, initialise `fleet-state.json`. **Skips Grok Build install and GitHub Actions runner registration by default**; an opt-in flag installs them (parked path, §2.2). *Follow-up for Atlas: the script does not yet have this default / flag — change pending after idea#147.* |
+| `idea-setup.sh` | Platform install: discover all `idea*` Pis via Tailscale, verify dependencies, initialise `fleet-state.json`. **Skips Grok Build install and GitHub Actions runner registration by default**; an opt-in flag installs them (parked path, §2.2). The opt-in flag is `--with-grok-build` (the install steps themselves are still a stub). |
 | `find-available-pi.sh <domain>` | Read `fleet-state.json`, apply domain affinity, return the first idle Pi. Returns empty if none available. |
 | `deploy.sh <pi> <component> <repo> <branch>` | Full deploy sequence for the given component type (engine/console/app-disk): checkout, build, start, health check |
 | `teardown.sh <pi>` | Reverse deploy: clean state, restore main, mark Pi idle in `fleet-state.json` |
