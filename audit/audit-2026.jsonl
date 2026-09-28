@@ -120,3 +120,8 @@
 {"ts":"2026-09-28T16:56:14Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"pr","value":null,"previous":"idea#126 (engine#130 @bfdd5af)"}
 {"ts":"2026-09-28T16:56:14Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"branch","value":null,"previous":"review/pr130"}
 {"ts":"2026-09-28T16:56:14Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"review_url","value":null,"previous":"http://100.126.117.80:8080"}
+{"ts":"2026-09-28T16:58:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"deployed","previous":"idle"}
+{"ts":"2026-09-28T16:58:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"pr","value":"idea#152 (engine#134 @daa95eb + console#124 @ed2a823)","previous":null}
+{"ts":"2026-09-28T16:58:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"branch","value":"review/pr134 + review/pr124","previous":null}
+{"ts":"2026-09-28T16:58:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"review_url","value":"http://100.126.117.80:8080","previous":null}
+{"ts":"2026-09-28T16:58:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine PR#134@daa95eb, console PR#124@ed2a823","previous":"engine main@0b0e21a, console main@af473f1"}
