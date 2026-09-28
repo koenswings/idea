@@ -108,3 +108,5 @@
 {"ts":"2026-09-28T15:49:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"branch","value":"review/pr130","previous":null}
 {"ts":"2026-09-28T15:49:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"review_url","value":"http://100.126.117.80:8080","previous":null}
 {"ts":"2026-09-28T15:49:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine PR#130@bfdd5af, console main@af473f1","previous":"engine main@06d395e, console main@af473f1"}
+{"ts":"2026-09-28T16:47:49Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-09-28T16:47:49Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Axle: agent-engine-dev#134 / idea#152","previous":null}
