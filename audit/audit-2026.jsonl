@@ -165,3 +165,7 @@
 {"ts":"2026-09-28T20:28:32Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Axle: agent-engine-dev#136 hw-roundtrip stick guard","previous":null}
 {"ts":"2026-09-28T20:32:23Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Axle: agent-engine-dev#136 hw-roundtrip stick guard"}
 {"ts":"2026-09-28T20:32:23Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-09-28T20:46:46Z","bot":"Atlas","action":"fleet_state_update","pi":"idea02","field":"version","value":"engine main@df1a250, console main@b4eff52","previous":"engine main@b4cb2f4, console main@b4eff52"}
+{"ts":"2026-09-28T20:46:46Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@df1a250, console main@b4eff52","previous":"engine main@b4cb2f4, console main@b4eff52"}
+{"ts":"2026-09-28T20:46:46Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"version","value":"engine main@df1a250, console main@b4eff52","previous":"engine main@b4cb2f4, console main@b4eff52"}
+{"ts":"2026-09-28T20:46:46Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@df1a250, console main@b4eff52","previous":"engine main@b4cb2f4, console main@b4eff52"}
