@@ -112,3 +112,11 @@
 {"ts":"2026-09-28T16:47:49Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Axle: agent-engine-dev#134 / idea#152","previous":null}
 {"ts":"2026-09-28T16:49:37Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Axle: agent-engine-dev#134 / idea#152"}
 {"ts":"2026-09-28T16:49:37Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-09-28T16:56:14Z","bot":"Atlas","action":"fleet_state_update","pi":"idea02","field":"version","value":"engine main@0b0e21a, console main@af473f1","previous":"engine main@06d395e, console main@af473f1"}
+{"ts":"2026-09-28T16:56:14Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@0b0e21a, console main@af473f1","previous":"engine PR#130@bfdd5af, console main@af473f1"}
+{"ts":"2026-09-28T16:56:14Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"version","value":"engine main@0b0e21a, console main@af473f1","previous":"engine main@06d395e, console main@af473f1"}
+{"ts":"2026-09-28T16:56:14Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@0b0e21a, console main@af473f1","previous":"engine main@06d395e, console main@af473f1"}
+{"ts":"2026-09-28T16:56:14Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"deployed"}
+{"ts":"2026-09-28T16:56:14Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"pr","value":null,"previous":"idea#126 (engine#130 @bfdd5af)"}
+{"ts":"2026-09-28T16:56:14Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"branch","value":null,"previous":"review/pr130"}
+{"ts":"2026-09-28T16:56:14Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"review_url","value":null,"previous":"http://100.126.117.80:8080"}
