@@ -175,3 +175,7 @@
 {"ts":"2026-09-28T20:51:51Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-09-28T20:52:58Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: review deploy engine#137 + console#126 (idea#128/#129)","previous":null}
 {"ts":"2026-09-28T20:52:58Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"deploying","previous":"idle"}
+{"ts":"2026-09-28T20:53:48Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"deployed","previous":"deploying"}
+{"ts":"2026-09-28T20:53:48Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"pr","value":"idea#128/#129 (engine#137 + console#126)","previous":null}
+{"ts":"2026-09-28T20:53:48Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"branch","value":"engine idea-128-disk-id-args@8cd1923, console feat/idea-129-disk-id-args@bc72939","previous":null}
+{"ts":"2026-09-28T20:53:48Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"review_url","value":"http://idea03.tail2d60.ts.net:8080/","previous":null}
