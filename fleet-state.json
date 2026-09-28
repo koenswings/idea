@@ -8,7 +8,7 @@
     "status": "idle",
     "host": "100.85.108.118",
     "tailscale": "100.85.108.118",
-    "runner": "online",
+    "runner": "parked",
     "grok_build": "1.0.40",
     "lan": "192.168.0.180",
     "version": "engine main@06d395e, console main@af473f1"
