@@ -179,3 +179,9 @@
 {"ts":"2026-09-28T20:53:48Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"pr","value":"idea#128/#129 (engine#137 + console#126)","previous":null}
 {"ts":"2026-09-28T20:53:48Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"branch","value":"engine idea-128-disk-id-args@8cd1923, console feat/idea-129-disk-id-args@bc72939","previous":null}
 {"ts":"2026-09-28T20:53:48Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"review_url","value":"http://idea03.tail2d60.ts.net:8080/","previous":null}
+{"ts":"2026-09-28T21:03:43Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"deployed"}
+{"ts":"2026-09-28T21:03:43Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: idea#130 step 0b smoke test (main pair)","previous":"Atlas: review deploy engine#137 + console#126 (idea#128/#129)"}
+{"ts":"2026-09-28T21:03:43Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"pr","value":"idea#130 (step 0b smoke test)","previous":"idea#128/#129 (engine#137 + console#126)"}
+{"ts":"2026-09-28T21:03:43Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"branch","value":null,"previous":"engine idea-128-disk-id-args@8cd1923, console feat/idea-129-disk-id-args@bc72939"}
+{"ts":"2026-09-28T21:03:43Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"review_url","value":null,"previous":"http://idea03.tail2d60.ts.net:8080/"}
+{"ts":"2026-09-28T21:03:43Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@2ed7891, console main@d780c7e","previous":"engine main@df1a250, console main@b4eff52"}
