@@ -3,7 +3,7 @@
 **Author:** Steve (Lead Bot)
 **Date:** 2026-09-27
 **Revised:** 2026-09-27 (Design Review by Atlas, Kid, Axle and Pixel applied); 2026-09-27 (Koen: add ext4 formatting, merged in from idea#125); 2026-09-27 (formatting design review by Atlas, Kid, Axle and Pixel applied); 2026-09-28 (Koen: combined disks allowed, formatting only inside the Files Disk flow and for any non-system disk); 2026-09-28 (design re-review R1–R9 by Atlas, Axle, Kid and Pixel applied, accepted by Steve); 2026-09-28 11:08 (Koen: Erase becomes a general disk action that leaves an empty IDEA disk); 2026-09-28 (re-review E1–E10 by Axle, Atlas, Pixel and Kid applied, accepted by Steve; disk IDs in commands)
-**Status:** Proposed (design reviewed, final). The general Erase change of 2026-09-28 11:08 was re-reviewed (E1–E10, §14).
+**Status:** Approved (merged 2026-09-28 in #124; implementation issues are sub-issues of #75). The general Erase change of 2026-09-28 11:08 was re-reviewed (E1–E10, §14).
 **Refs:** idea#75 (Files Disk), idea#125 (formatting sketch, merged into this proposal). Depends on: idea#121 (new disks never get META.yaml written, bug B1)
 **Affects:** `agent-engine-dev` (main work), `agent-console-dev`, `app-nextcloud` (+ `agent-app-dev` conventions and harness), Ops (sudoers rollout, hardware test)
 **Background research:** `files-disk-findings.md` (research notes, 2026-09-27)

@@ -35,6 +35,16 @@ The Console is a Solid.js web app served by the Engine on port 80. Accessible fr
 
 An App Disk is a USB drive or SSD with ext4 filesystem containing a META.yaml and Docker Compose definitions. When docked into a school Pi, the Engine reads the metadata and starts the containers automatically. App Disks are the distribution mechanism — no download, no installer, no internet.
 
+### Disk roles: App, Backup and Files
+
+A docked disk can carry more than one role: **App**, **Backup** and **Files** can combine on one disk (`diskTypes`, for example `['app', 'files']`). A disk with only `META.yaml` and no role is an **empty IDEA disk** (`['empty']`).
+
+- **Files Disk:** an ext4 disk whose `files/` folder the Engine mounts into opted-in Apps on the Engine it is docked to (Nextcloud first, via `x-app.filesMount`). There is no SMB or NFS share.
+- **Erase** is a general action on any non-system disk (never the system disk or swap). After a content summary and a typed confirmation, it leaves an empty IDEA disk with the same disk ID; roles are then added separately.
+- **Disk commands target disk IDs**, never disk names (names like "IDEA Disk" repeat).
+
+Design: `proposals/files-disk.md` (idea#75; implementation issues are sub-issues of #75).
+
 ### Offline-First
 
 Every component works without internet. This is the foundational constraint that shapes every technical decision.
