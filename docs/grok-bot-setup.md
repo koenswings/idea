@@ -89,7 +89,7 @@ Each Pi runs:
 
 **Parked on idea02 only:** Grok Build stays installed; the self-hosted runner service is stopped after idea#147 merges (`runner: parked`). Neither is used for coding.
 
-**Roles are assigned dynamically at runtime** by the fleet scripts (see Section 2.4). By convention, the first available Pi for a given domain is used. One Pi is the dedicated golden Pi (`role: golden`, currently `idea02`); the others are review Pis (currently `idea03`). These assignments are recorded in `fleet-state.json` and update as Pis come and go.
+**Roles are assigned dynamically at runtime** by the fleet scripts (see Section 2.4). By convention, the first available Pi for a given domain is used. One Pi is the dedicated golden Pi (`role: golden`, currently `idea02`); `idea01`, `idea03`, and `idea04` form the shared non-golden test/review pool (`role: spare` or `review`). These assignments are recorded in `fleet-state.json` and update as Pis come and go.
 
 ### 2.3.1 Pi filesystem layout (canonical — test, dev, production)
 
@@ -341,7 +341,7 @@ ssh: docker compose ps                (verify running)
 
 One Pi is the dedicated golden instance (idea#118, Koen 2026-09-27; this replaces the temporary single-Pi rule from idea PR #112). Today that is `idea02`: `role: golden`, `status: idle`, `pr: null`, and a `version` such as `engine main@b233ccb, console main@af473f1`. It always runs the latest merged `main` of all components, keeps MilkWise running as a real workload, and is never used for PR review. `role: golden` (not `status`) is what excludes it from `find-available-pi.sh`.
 
-PR review deploys go to review Pis (`role: review`; today `idea03`, review URL `http://idea03.tail2d60.ts.net:8080/`). After a merge, `update-golden.sh` moves the golden Pi to `main` and updates its `version` (until idea#107 implements it, Ops does this by hand with `update-fleet-state.sh`); if the golden Pi becomes unavailable, `set-golden-pi.sh` designates the most recently idle Pi.
+PR review deploys go to an idle Pi from the shared pool (`idea01`, `idea03`, or `idea04`; `role: spare` or `review`), for example `http://idea03.tail2d60.ts.net:8080/`. After a merge, `update-golden.sh` moves the golden Pi to `main` and updates its `version` (until idea#107 implements it, Ops does this by hand with `update-fleet-state.sh`); if the golden Pi becomes unavailable, `set-golden-pi.sh` designates the most recently idle Pi.
 
 ### 4.5 Health Monitoring
 
@@ -362,7 +362,7 @@ Applies to **all Dev Bots** (Engine, Console, App) whenever they use a fleet Pi 
 BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> status testing
 BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> claim "<bot>: <repo>#<issue/PR>"
 ```
-Pick an `idle` pool Pi. The bot name goes in a note (`claim` field; `BOT_NAME` also records it in the audit line). Do not overwrite the Pi's existing `note` field, which holds its isolation details.
+Pick an `idle` pool Pi. The bot name goes in the `claim` field (`BOT_NAME` also records it in the audit line). Do not overwrite the Pi's existing `note` field, which holds its isolation details.
 
 **Release:** restore `main` in every tree you touched, restart the Engine with pm2 **as pi**, then:
 ```bash
@@ -388,6 +388,7 @@ BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> status idle
 
 **App (Kid):**
 - Builds can run on any claimed ARM64 pool Pi (not idea02); check each image with `docker manifest inspect`.
+- On a claimed pool Pi, stop the pm2 Engine while App Harness runs, restore it on release, and use the deployed `/home/pi/idea/agents/agent-engine-dev` tree read-only; do not modify that tree.
 - Before release: `docker compose down -v` for every harness project, remove test images, and leave no test disk mounted.
 - `dd` test-disk writes stay with Atlas on idea03 only (idea#139).
 
