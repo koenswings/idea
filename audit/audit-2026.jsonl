@@ -58,3 +58,15 @@
 {"ts":"2026-09-28T12:20:35Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"review_url","value":null,"previous":"http://100.126.117.80:8080"}
 {"ts":"2026-09-28T12:20:35Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@1edad8a, console main@af473f1","previous":"engine idea-121-meta-on-first-dock@cfa4366 (agent-engine-dev#129, +/etc/sudoers.d/11-engine-files), console main@af473f1"}
 {"ts":"2026-09-28T12:20:35Z","bot":"Atlas","action":"fleet_state_update","pi":"idea02","field":"version","value":"engine main@1edad8a, console main@af473f1","previous":"engine main@9e2b570, console main@af473f1"}
+{"ts":"2026-09-28T13:22:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"role","value":"spare","previous":null,"created":true}
+{"ts":"2026-09-28T13:22:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"domain","value":"any","previous":null}
+{"ts":"2026-09-28T13:22:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"pr","value":null,"previous":null}
+{"ts":"2026-09-28T13:22:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":null}
+{"ts":"2026-09-28T13:22:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"host","value":"192.168.0.138","previous":null}
+{"ts":"2026-09-28T13:22:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"tailscale","value":null,"previous":null}
+{"ts":"2026-09-28T13:22:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"lan","value":"192.168.0.138","previous":null}
+{"ts":"2026-09-28T13:22:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"version","value":"engine main@1edad8a, console main@af473f1","previous":null}
+{"ts":"2026-09-28T13:22:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"mdns","value":false,"previous":null}
+{"ts":"2026-09-28T13:22:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"note","value":"Spare fleet Pi (2026-09-28). Pi 5 / Debian 13 trixie / Intenso SSD. mdns:false; still on fleet store URL until role decided. Tailscale pending Koen login. SSH via idea03 jump until on Tailscale.","previous":null}
+{"ts":"2026-09-28T13:22:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"runner","value":"none","previous":null}
+{"ts":"2026-09-28T13:22:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"grok_build","value":null,"previous":null}

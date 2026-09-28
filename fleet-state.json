@@ -28,5 +28,19 @@
     "note": "Isolated from golden idea02: Engine config mdns:false (2026-09-27, idea#118); own store automerge:3dF7bVXZadDRE8DvF6wi4QuKm3us; still holds replicas of idea02 docs synced before isolation. SSH is key-only (password auth off 2026-09-27).",
     "branch": null,
     "review_url": null
+  },
+  "idea01": {
+    "role": "spare",
+    "domain": "any",
+    "pr": null,
+    "status": "idle",
+    "host": "192.168.0.138",
+    "tailscale": null,
+    "lan": "192.168.0.138",
+    "version": "engine main@1edad8a, console main@af473f1",
+    "mdns": false,
+    "note": "Spare fleet Pi (2026-09-28). Pi 5 / Debian 13 trixie / Intenso SSD. mdns:false; still on fleet store URL until role decided. Tailscale pending Koen login. SSH via idea03 jump until on Tailscale.",
+    "runner": "none",
+    "grok_build": null
   }
 }
