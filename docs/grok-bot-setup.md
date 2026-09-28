@@ -345,11 +345,13 @@ PR review deploys go to an idle Pi from the shared pool (`idea01`, `idea03`, or 
 
 ### 4.5 Health Monitoring
 
-`check-fleet-health.sh` runs on a cron schedule (every 30 minutes via GitHub Actions). It HTTP-checks all deployed Pis and returns a JSON status report. Ops Bot reads the report and alerts Lead Bot if any Pi is unreachable. It does not implement the check logic itself.
+`tools/fleet/check-fleet-health.sh` (idea#149) checks every Pi in `fleet-state.json` and prints a JSON report. Per Pi it checks that the Pi answers ssh over Tailscale, that the Console returns HTTP 200 on `:8080`, that the pm2 process `engine` is online, runs as `pi` and has not restarted since the previous run, that the deployed Engine and Console HEADs match the Pi's `version` in fleet-state, and that the root disk is below 90% full. It exits 0 when every unclaimed Pi is healthy, 1 when at least one is not, and 2 on a usage or state error. A Pi with a claim (or a status other than `idle`) is still checked and reported under `claimed_with_problems`, but never counts as a failure, and its versions are not compared because it runs a review branch.
 
-After each teardown, `check-fleet-health.sh` is called to verify the freed Pi is clean before marking it idle.
+It runs as an Atlas routine every 30 minutes on Atlas's box, over the tailnet the box is already on: no GitHub Actions workflow and no Tailscale secret. The routine calls it with `--origin --alert`: `--origin` reads fleet-state from `origin/main` so fresh claims are seen, and `--alert` keeps state in `~/.cache/idea-fleet-health/` and decides whether to alert. Atlas stays silent while the fleet is healthy. When an unclaimed Pi is unhealthy, Atlas messages Lead Bot (who tells Koen) and pauses fleet changes while `~/.cache/idea-fleet-health/PAUSED` exists. It alerts again only when the set of problems changes, when the same problem has lasted 2 hours since the last alert, or once when it clears. Tests: `tools/fleet/check-fleet-health.test.sh` fakes ssh and curl for each failure case.
 
-> **Known gap (idea#147):** the 30-minute health-check cron via GitHub Actions described above **does not exist as a workflow**. The only workflow in `koenswings/idea` is the manual `runner-test.yml`. Recorded as a follow-up (a scheduler that does not depend on the parked Pi runner), not fixed here.
+After a rollout that restarts the Engine, Ops runs the check once by hand so the new pm2 restart count becomes the baseline and the next routine run does not report it as a restart.
+
+After each teardown, `check-fleet-health.sh --pi <pi>` is run to verify the freed Pi is clean before marking it idle.
 
 ### 4.6 Using fleet Pis for testing (claim protocol)
 
@@ -494,7 +496,7 @@ Routines are scheduled or event-triggered workflows that run independently of di
 |---------|-------|---------|---------|
 | After every merge | Lead Bot (automated) | `quality-scan.sh` across all repos + golden update via `update-golden.sh` | Quality issues filed; merged mains recorded; freed Pi health verified |
 | Weekly — Monday | Lead Bot + App Dev Bot | `quality-scan.sh` + `check-app-versions.sh` | Quality report; app-update issues for new upstream versions |
-| Every 30 min (cron) — **not implemented** (§4.5 gap) | Ops Bot via `check-fleet-health.sh` | HTTP health check all deployed Pis | Alert Lead Bot if any Pi unreachable |
+| Every 30 min (Atlas routine on its box) | Ops Bot via `check-fleet-health.sh --origin --alert` | Reachability, Console, pm2 engine, versions and disk on every Pi (§4.5) | Alert Lead Bot if an unclaimed Pi is unhealthy; pause fleet changes until it clears |
 | Monthly — first Monday | Lead Bot + Marco Bot | Authoritative docs review; new app scouting | docs-review issues; new-app-proposal issues |
 | After every proposal merge | Lead Bot | Check if CONTEXT.md needs updating | Follow-up issue if update needed |
 | Quarterly | Lead Bot prompts Koen | Bot description review | Koen approves diffs; no changes without approval |
@@ -864,7 +866,7 @@ FLEET SCRIPTS (call these; do not reimplement their logic):
 - teardown.sh <pi> — reverse deploy, restore main, mark idle
 - update-golden.sh <component> <version> — update golden instance
 - set-golden-pi.sh — designate new golden Pi if current unavailable
-- check-fleet-health.sh — HTTP check all deployed Pis, return JSON
+- check-fleet-health.sh [--origin] [--pi <pi>] [--alert] — health-check Pis in fleet-state, return JSON (exit 1 if unhealthy)
 - update-fleet-state.sh [--create] [--json|--null] <pi> <field> [<value>] — locked, atomic state update
   (clear a field with --null, e.g. update-fleet-state.sh --null idea02 pr)
 
@@ -881,9 +883,10 @@ DEPLOY WORKFLOW (triggered when Dev Bot passes QC):
    Call find-available-pi.sh for any queued PRs. Deploy if found.
 
 HEALTH MONITORING:
-Call check-fleet-health.sh every 30 minutes (cron via GitHub Actions).
-Read the JSON report. If any Pi is unreachable: alert Lead Bot immediately,
-stop all other changes.
+Run check-fleet-health.sh --origin --alert every 30 minutes (your own routine on your box).
+Read the JSON report. Stay silent when healthy. If .alert.send is true, message
+Lead Bot with the unhealthy Pis and their problems. While ~/.cache/idea-fleet-health/PAUSED
+exists, make no fleet changes except fixing the reported problem.
 
 GOLDEN INSTANCE:
 One Pi carries role: golden (today idea02; status stays idle). Its version
