@@ -52,3 +52,9 @@
 {"ts":"2026-09-28T11:29:25Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine idea-121-meta-on-first-dock@01c25c0 (agent-engine-dev#129), console main@af473f1","previous":"engine main@9e2b570, console main@af473f1"}
 {"ts":"2026-09-28T11:29:25Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"review_url","value":"http://100.126.117.80:8080","previous":null}
 {"ts":"2026-09-28T11:53:03Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine idea-121-meta-on-first-dock@cfa4366 (agent-engine-dev#129, +/etc/sudoers.d/11-engine-files), console main@af473f1","previous":"engine idea-121-meta-on-first-dock@01c25c0 (agent-engine-dev#129), console main@af473f1"}
+{"ts":"2026-09-28T12:20:34Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"pr","value":null,"previous":129}
+{"ts":"2026-09-28T12:20:35Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"deployed"}
+{"ts":"2026-09-28T12:20:35Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"branch","value":null,"previous":"idea-121-meta-on-first-dock"}
+{"ts":"2026-09-28T12:20:35Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"review_url","value":null,"previous":"http://100.126.117.80:8080"}
+{"ts":"2026-09-28T12:20:35Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@1edad8a, console main@af473f1","previous":"engine idea-121-meta-on-first-dock@cfa4366 (agent-engine-dev#129, +/etc/sudoers.d/11-engine-files), console main@af473f1"}
+{"ts":"2026-09-28T12:20:35Z","bot":"Atlas","action":"fleet_state_update","pi":"idea02","field":"version","value":"engine main@1edad8a, console main@af473f1","previous":"engine main@9e2b570, console main@af473f1"}

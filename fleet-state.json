@@ -11,22 +11,22 @@
     "runner": "online",
     "grok_build": "1.0.40",
     "lan": "192.168.0.180",
-    "version": "engine main@9e2b570, console main@af473f1"
+    "version": "engine main@1edad8a, console main@af473f1"
   },
   "idea03": {
     "role": "review",
     "domain": "any",
-    "pr": 129,
-    "status": "deployed",
+    "pr": null,
+    "status": "idle",
     "host": "100.126.117.80",
     "tailscale": "100.126.117.80",
     "lan": "192.168.0.228",
     "runner": "none",
     "grok_build": null,
-    "version": "engine idea-121-meta-on-first-dock@cfa4366 (agent-engine-dev#129, +/etc/sudoers.d/11-engine-files), console main@af473f1",
+    "version": "engine main@1edad8a, console main@af473f1",
     "mdns": false,
     "note": "Isolated from golden idea02: Engine config mdns:false (2026-09-27, idea#118); own store automerge:3dF7bVXZadDRE8DvF6wi4QuKm3us; still holds replicas of idea02 docs synced before isolation. SSH is key-only (password auth off 2026-09-27).",
-    "branch": "idea-121-meta-on-first-dock",
-    "review_url": "http://100.126.117.80:8080"
+    "branch": null,
+    "review_url": null
   }
 }
