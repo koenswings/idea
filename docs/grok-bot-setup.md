@@ -397,6 +397,27 @@ BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> status idle
 - A dev Console pointed at a Pi's Engine counts as using that Pi and needs a claim.
 - Command testing never targets idea02.
 
+**Where tests run (idea#152, 2026-09-28):**
+- On-Pi hardware tests (`script/hw-roundtrip.ts`, `pnpm test:hw`) run on **idea03**, which keeps a hardware test disk docked permanently.
+- `pnpm test:full` runs on **idea01 or idea04**. Its preflight (idea#105) refuses to run on idea03 while the test disk is docked.
+
+**idea03 hardware test disk.** Identify it only by these IDs, never by a device name such as `sdb`:
+
+| Field | Value |
+|---|---|
+| Model | Intenso SSD, 111.8G |
+| USB bridge serial (`ID_USB_SERIAL_SHORT`) | `26A1EE83197F` |
+| Disk serial (`ID_SERIAL_SHORT`) | `3813430-532011020` |
+| Partition 1 | vfat, UUID `3E50-902A`, label `system-boot` |
+| Partition 2 | ext4, UUID `378383c9-0612-4c82-9c07-8c34d15253ba`, label `writable` |
+
+- Hardware tests touch only this disk.
+- `dd` writes (idea#139), erase, the App Harness and erase tests (idea#138) must refuse it, and each has an automated check that proves the refusal.
+- Never undock or wipe it. idea03's root SSD (serial `AA202000000000004820`) is never a test target.
+- The same IDs are recorded in idea03's `note` in `fleet-state.json`.
+
+**Handoffs to Koen (standing rule, 2026-09-28):** never ask Koen to run a specific test. Any test that is needed is coded as an automated test (unit, integration or on-Pi hardware) and passes before handoff. A handoff contains the PR URL, the review URL and the test evidence, never manual test steps. This applies to Ops review-deploy reports as well: Atlas reports the PR, the review URL and automated evidence (HTTP health, pm2 state, store and `mdns` checks, test results).
+
 ---
 
 ## 5. Quality Control
