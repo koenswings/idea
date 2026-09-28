@@ -103,3 +103,8 @@
 {"ts":"2026-09-28T15:44:02Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Axle: agent-engine-dev#130 / idea#126","previous":null}
 {"ts":"2026-09-28T15:48:11Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Axle: agent-engine-dev#130 / idea#126"}
 {"ts":"2026-09-28T15:48:11Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-09-28T15:49:50Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"deployed","previous":"idle"}
+{"ts":"2026-09-28T15:49:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"pr","value":"idea#126 (engine#130 @bfdd5af)","previous":null}
+{"ts":"2026-09-28T15:49:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"branch","value":"review/pr130","previous":null}
+{"ts":"2026-09-28T15:49:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"review_url","value":"http://100.126.117.80:8080","previous":null}
+{"ts":"2026-09-28T15:49:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine PR#130@bfdd5af, console main@af473f1","previous":"engine main@06d395e, console main@af473f1"}

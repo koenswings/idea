@@ -16,18 +16,18 @@
   "idea03": {
     "role": "review",
     "domain": "any",
-    "pr": null,
-    "status": "idle",
+    "pr": "idea#126 (engine#130 @bfdd5af)",
+    "status": "deployed",
     "host": "100.126.117.80",
     "tailscale": "100.126.117.80",
     "lan": "192.168.0.228",
     "runner": "none",
     "grok_build": null,
-    "version": "engine main@06d395e, console main@af473f1",
+    "version": "engine PR#130@bfdd5af, console main@af473f1",
     "mdns": false,
     "note": "Isolated from golden idea02: Engine config mdns:false (2026-09-27, idea#118); own store automerge:3dF7bVXZadDRE8DvF6wi4QuKm3us; still holds replicas of idea02 docs synced before isolation. SSH is key-only (password auth off 2026-09-27).",
-    "branch": null,
-    "review_url": null,
+    "branch": "review/pr130",
+    "review_url": "http://100.126.117.80:8080",
     "claim": null
   },
   "idea01": {
