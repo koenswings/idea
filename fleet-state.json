@@ -39,7 +39,7 @@
     "lan": "192.168.0.138",
     "version": "engine main@1edad8a, console main@af473f1",
     "mdns": false,
-    "note": "Spare fleet Pi (2026-09-28). Pi 5 / Debian 13 trixie / Intenso SSD. mdns:false; still on fleet store URL until role decided. Tailscale pending Koen login. SSH via idea03 jump until on Tailscale.",
+    "note": "Spare fleet Pi (2026-09-28). Pi 5 / Debian 13 trixie / Intenso SSD. Isolated from golden: mdns:false, own store automerge:3zoqdSVsEtj4ygNJPNcDyKWvdxo6 (Steve decision 2026-09-28). Tailscale pending Koen login. SSH via idea03 jump until on Tailscale.",
     "runner": "none",
     "grok_build": null
   },
@@ -55,6 +55,6 @@
     "mdns": false,
     "runner": "none",
     "grok_build": null,
-    "note": "Spare fleet Pi (2026-09-28). Pi 4 / Debian 13 trixie / 240 GB SSD. mdns:false; own command log, still on fleet store URL until role decided. Tailscale pending Koen login. SSH via idea03 jump until on Tailscale. pi password not set yet (Koen)."
+    "note": "Spare fleet Pi (2026-09-28). Pi 4 / Debian 13 trixie / 240 GB SSD. Isolated from golden: mdns:false, own store automerge:2FpVLW3G73sSdQD3wvRfkpqryiwQ (Steve decision 2026-09-28). Tailscale pending Koen login. SSH via idea03 jump until on Tailscale. pi password not set yet (Koen)."
   }
 }
