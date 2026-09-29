@@ -48,5 +48,8 @@ else
 fi
 
 # TODO(idea#147): implement the platform install steps in Phase 2
+# idea#153: after enrolling a Pi, run strip-cloud-init-sudoers.sh on it so a
+# freshly flashed image cannot keep cloud-init's pi NOPASSWD:ALL over Engine rules.
+#   tools/fleet/strip-cloud-init-sudoers.sh --host pi@<pi>
 echo "stub: idea-setup.sh not yet implemented" >&2
 exit 1
