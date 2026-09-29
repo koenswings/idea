@@ -240,3 +240,9 @@
 {"ts":"2026-09-29T11:41:02Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"busy","previous":"idle"}
 {"ts":"2026-09-29T13:25:33Z","bot":"Kid","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-09-29T13:25:33Z","bot":"Kid","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Kid: idea#159 Kolibri stream capacity","previous":null}
+{"ts":"2026-09-29T13:47:02Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-09-29T13:47:02Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid: idea#159 LAN client for Kolibri capacity","previous":null}
+{"ts":"2026-09-29T14:20:47Z","bot":"Kid","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Kid: idea#159 Kolibri stream capacity"}
+{"ts":"2026-09-29T14:20:47Z","bot":"Kid","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-09-29T14:20:47Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Kid: idea#159 LAN client for Kolibri capacity"}
+{"ts":"2026-09-29T14:20:47Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}

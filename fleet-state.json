@@ -34,7 +34,7 @@
     "role": "spare",
     "domain": "any",
     "pr": null,
-    "status": "testing",
+    "status": "idle",
     "host": "100.99.231.94",
     "tailscale": "100.99.231.94",
     "lan": "192.168.0.138",
@@ -43,7 +43,7 @@
     "note": "Spare fleet Pi (2026-09-28). Pi 5 / Debian 13 trixie / Intenso SSD. Isolated from golden: mdns:false, own store automerge:3zoqdSVsEtj4ygNJPNcDyKWvdxo6. On Tailscale as idea01 (100.99.231.94).",
     "runner": "none",
     "grok_build": null,
-    "claim": "Kid: idea#159 Kolibri stream capacity"
+    "claim": null
   },
   "idea04": {
     "role": "spare",
