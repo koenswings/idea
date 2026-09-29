@@ -207,3 +207,12 @@
 {"ts":"2026-09-29T02:33:25Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine review@a2f68d3 (#138), console review@d66d2b8 (#128)","previous":"engine main@2ed7891, console main@d780c7e"}
 {"ts":"2026-09-29T02:40:11Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle: agent-engine-dev idea#155 test:full own-store/shared-store check (branch idea-155-own-store-skip)"}
 {"ts":"2026-09-29T02:40:11Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-09-29T05:52:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas"}
+{"ts":"2026-09-29T05:52:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"pr","value":null,"previous":"idea#131/#132/#157 (engine#138 + console#128)"}
+{"ts":"2026-09-29T05:52:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"branch","value":null,"previous":"engine idea-131-files-disk@a2f68d3, console feat/idea-157-eject-confirm-unmount-warning@d66d2b8"}
+{"ts":"2026-09-29T05:52:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"review_url","value":null,"previous":"http://idea03.tail2d60.ts.net:8080/"}
+{"ts":"2026-09-29T05:52:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"deployed"}
+{"ts":"2026-09-29T05:52:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"version","value":"engine main@d70665f, console main@97176cc","previous":"engine main@2ed7891, console main@d780c7e"}
+{"ts":"2026-09-29T05:52:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea02","field":"version","value":"engine main@d70665f, console main@97176cc","previous":"engine main@2ed7891, console main@d780c7e"}
+{"ts":"2026-09-29T05:52:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@d70665f, console main@97176cc","previous":"engine review@a2f68d3 (#138), console review@d66d2b8 (#128)"}
+{"ts":"2026-09-29T05:52:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@d70665f, console main@97176cc","previous":"engine main@2ed7891, console main@d780c7e"}
