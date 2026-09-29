@@ -17,7 +17,7 @@
     "role": "review",
     "domain": "any",
     "pr": null,
-    "status": "idle",
+    "status": "busy",
     "host": "100.126.117.80",
     "tailscale": "100.126.117.80",
     "lan": "192.168.0.228",
@@ -28,7 +28,7 @@
     "note": "Isolated from golden idea02: Engine config mdns:false (2026-09-27, idea#118); own store automerge:3dF7bVXZadDRE8DvF6wi4QuKm3us; still holds replicas of idea02 docs synced before isolation. SSH is key-only (password auth off 2026-09-27). Hardware test disk (idea#152, 2026-09-28): Intenso SSD 111.8G, USB bridge serial 26A1EE83197F (ID_USB_SERIAL_SHORT), disk serial 3813430-532011020 (ID_SERIAL_SHORT), partition 1 vfat UUID 3E50-902A label system-boot, partition 2 ext4 UUID 378383c9-0612-4c82-9c07-8c34d15253ba label writable. It stays docked on idea03 for on-Pi hardware tests (script/hw-roundtrip.ts, pnpm test:hw). Match it by these IDs, never by device name (sdb). dd, erase, harness and erase tests must refuse it; do not undock or wipe it. pnpm test:full refuses while it is docked, so run test:full on idea01 or idea04. idea03 root SSD serial AA202000000000004820 (sda) is never a test target.",
     "branch": null,
     "review_url": null,
-    "claim": null
+    "claim": "Atlas idea#139 hardware test"
   },
   "idea01": {
     "role": "spare",
