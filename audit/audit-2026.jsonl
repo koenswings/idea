@@ -236,3 +236,5 @@
 {"ts":"2026-09-29T08:56:39Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"busy","previous":"idle"}
 {"ts":"2026-09-29T11:38:01Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas idea#139 hardware test"}
 {"ts":"2026-09-29T11:38:01Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"busy"}
+{"ts":"2026-09-29T11:41:02Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas idea#139 limited Intenso-only","previous":null}
+{"ts":"2026-09-29T11:41:02Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"busy","previous":"idle"}
