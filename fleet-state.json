@@ -49,7 +49,7 @@
     "role": "spare",
     "domain": "any",
     "pr": null,
-    "status": "idle",
+    "status": "testing",
     "host": "100.108.39.45",
     "tailscale": "100.108.39.45",
     "lan": "192.168.0.113",
@@ -58,6 +58,6 @@
     "runner": "none",
     "grok_build": null,
     "note": "Spare fleet Pi (2026-09-28). Pi 4 / Debian 13 trixie / 240 GB SSD. Isolated from golden: mdns:false, own store automerge:2FpVLW3G73sSdQD3wvRfkpqryiwQ. On Tailscale as idea04 (100.108.39.45). pi password not set yet (Koen).",
-    "claim": null
+    "claim": "Axle: agent-engine-dev idea#155 test:full own-store/shared-store check (branch idea-155-own-store-skip)"
   }
 }

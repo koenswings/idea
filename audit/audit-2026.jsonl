@@ -199,3 +199,5 @@
 {"ts":"2026-09-29T02:32:19Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas","previous":null}
 {"ts":"2026-09-29T02:32:19Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"deploying","previous":"idle"}
 {"ts":"2026-09-29T02:32:19Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"pr","value":"idea#131/#132/#157 (engine#138 + console#128)","previous":null}
+{"ts":"2026-09-29T02:33:22Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle: agent-engine-dev idea#155 test:full own-store/shared-store check (branch idea-155-own-store-skip)","previous":null}
+{"ts":"2026-09-29T02:33:22Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
