@@ -250,3 +250,7 @@
 {"ts":"2026-09-29T20:19:41Z","bot":"Kid","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Kid: idea#159 multi-quality Kolibri capacity","previous":null}
 {"ts":"2026-09-29T20:19:41Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-09-29T20:19:41Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid: idea#159 LAN client multi-quality","previous":null}
+{"ts":"2026-09-29T21:08:10Z","bot":"Kid","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Kid: idea#159 multi-quality Kolibri capacity"}
+{"ts":"2026-09-29T21:08:10Z","bot":"Kid","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-09-29T21:08:10Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Kid: idea#159 LAN client multi-quality"}
+{"ts":"2026-09-29T21:08:10Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
