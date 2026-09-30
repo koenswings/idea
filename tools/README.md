@@ -8,6 +8,7 @@ Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment,
 
 | Script | Purpose |
 |--------|---------|
+| `strip-cloud-init-sudoers.sh` | Remove cloud-init `pi ALL=(ALL) NOPASSWD:ALL` so Engine sudoers win (idea#153). **Implemented.** |
 | `idea-setup.sh` | Discover all `idea*` Pis via Tailscale, verify dependencies, initialise fleet-state.json. Skips Grok Build and the GitHub Actions runner by default; `--with-grok-build` opts in (parked path, idea#147). Still a stub. |
 | `find-available-pi.sh <domain>` | Return first idle Pi matching domain from fleet-state.json |
 | `deploy.sh <pi> <component> <repo> <branch>` | Full deploy sequence (engine/console/app-disk) |
@@ -17,7 +18,7 @@ Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment,
 | `check-fleet-health.sh` | Health-check every Pi in fleet-state (Tailscale ssh, Console :8080, pm2 engine, versions, disk); JSON out, exit 1 if unhealthy. Tests: `check-fleet-health.test.sh` |
 | `update-fleet-state.sh [--create] [--json\|--null] <pi> <field> [<value>]` | Locked (flock), atomic read-modify-write of one field in fleet-state.json. `--null` clears a field to JSON `null`, `--json` stores a typed JSON value, unknown Pis are refused unless `--create`. Audit line goes to `audit/` next to `STATE_FILE`. **Implemented**; `selftest.sh` exercises it against a temp copy |
 
-Status: stub files. Full implementation in Phase 2.
+Status: `find-available-pi`, `update-fleet-state`, `check-fleet-health`, and `strip-cloud-init-sudoers` are implemented; `deploy` / `teardown` / `update-golden` / `set-golden-pi` / `idea-setup` remain stubs (idea#107).
 
 `idea02` is the dedicated golden Pi (`role: golden`): it always runs the latest merged `main`, keeps MilkWise as a real workload, and is never used for PR review. Its `version` records the mains it runs (for example `engine main@<sha>, console main@<sha>`) and its `status` stays `idle`; `role: golden` is what excludes it from review allocation. Review Pis (currently `idea03`, `role: review`) are picked by `find-available-pi.sh`. After every merge to `main`, Ops (Atlas) moves the golden Pi to `main` and updates its `version` (`update-golden.sh` once implemented, idea#107). This dedicated-golden model (idea#118) replaces the temporary single-Pi rule from idea PR #112.
 
