@@ -29,7 +29,7 @@ Quality scan and version monitoring scripts. Lead Bot and App Dev Bot call these
 | Script | Purpose | Status |
 |--------|---------|--------|
 | `quality-scan.sh` | Full/PR quality gate: structure, hygiene, docs currency, domain bake-ins, staleness (full only), domain tests via Pi selection. JSON report on stdout; audit line in `audit/`. | **Implemented** |
-| `check-app-versions.sh` | Read app.yaml files, query upstream APIs, return JSON diff of new versions | Stub (Phase 2) |
+| `check-app-versions.sh` | Read app.yaml monitors, query DockerHub / http-scrape, return JSON updates (idea#88) | **Implemented** |
 | `selftest.sh` | Runs `quality-scan.sh` against `testdata/` fixtures (structural; no Pi required) | **Implemented** |
 
 ```bash
