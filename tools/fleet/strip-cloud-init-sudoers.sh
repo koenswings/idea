@@ -30,13 +30,20 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Presence check: /etc/sudoers.d is often 750 root:root, so bare test -e as pi
+# falsely reports clean (idea#153). Must use sudo test.
+file_present() {
+  local file="$1"
+  sudo -n test -e "$file" 2>/dev/null
+}
+
 run_local() {
   local file="/etc/sudoers.d/90-cloud-init-users"
   local backup_dir="${HOME}/backups"
   local stamp
   stamp="$(date -u +%Y%m%dT%H%M%SZ)"
 
-  if [[ ! -e "$file" ]]; then
+  if ! file_present "$file"; then
     echo "{\"status\":\"clean\",\"host\":\"$(hostname)\",\"message\":\"$file already absent\"}"
     return 0
   fi
@@ -48,23 +55,30 @@ run_local() {
 
   mkdir -p "$backup_dir"
   local backup="$backup_dir/90-cloud-init-users.$stamp"
-  sudo cp -a "$file" "$backup"
-  sudo rm -f "$file"
 
-  # Stop cloud-init recreating users/sudoers on reboot (image already provisioned).
-  if [[ -d /etc/cloud/cloud.cfg.d ]]; then
-    sudo tee /etc/cloud/cloud.cfg.d/99-disable-users.cfg >/dev/null <<'CFG'
+  # One sudo session: after rm, NOPASSWD:ALL is gone so later sudo tee/visudo would fail.
+  if ! sudo -n bash -c "
+set -euo pipefail
+file='$file'
+backup='$backup'
+cp -a \"\$file\" \"\$backup\"
+rm -f \"\$file\"
+if [[ -d /etc/cloud/cloud.cfg.d ]]; then
+  cat > /etc/cloud/cloud.cfg.d/99-disable-users.cfg <<'CFG'
 # idea#153 — do not recreate 90-cloud-init-users after we remove it
 users: []
 cloud_init_modules:
   - [users-groups, none]
 CFG
-  fi
-
-  if ! sudo visudo -c >/dev/null; then
-    echo "ERROR: visudo -c failed after remove; restoring backup" >&2
-    sudo cp -a "$backup" "$file"
-    sudo visudo -c >/dev/null || true
+fi
+if ! visudo -c >/dev/null; then
+  echo 'ERROR: visudo -c failed after remove; restoring backup' >&2
+  cp -a \"\$backup\" \"\$file\"
+  visudo -c >/dev/null || true
+  exit 1
+fi
+"; then
+    echo "ERROR: privileged strip failed (is 90-cloud-init-users NOPASSWD still present?)" >&2
     exit 1
   fi
 
@@ -82,7 +96,8 @@ set -euo pipefail
 file="/etc/sudoers.d/90-cloud-init-users"
 backup_dir="${HOME}/backups"
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
-if [[ ! -e "$file" ]]; then
+# /etc/sudoers.d is often 750 root:root — pi cannot see the file without sudo (idea#153 false-clean).
+if ! sudo -n test -e "$file" 2>/dev/null; then
   echo "{\"status\":\"clean\",\"host\":\"$(hostname)\",\"message\":\"$file already absent\"}"
   exit 0
 fi
@@ -92,19 +107,28 @@ if [[ "${DRY:-0}" == "1" ]]; then
 fi
 mkdir -p "$backup_dir"
 backup="$backup_dir/90-cloud-init-users.$stamp"
-sudo cp -a "$file" "$backup"
-sudo rm -f "$file"
+# One sudo session: after rm, NOPASSWD:ALL is gone so later sudo tee/visudo would fail.
+if ! sudo -n bash -c "
+set -euo pipefail
+file='$file'
+backup='$backup'
+cp -a \"\$file\" \"\$backup\"
+rm -f \"\$file\"
 if [[ -d /etc/cloud/cloud.cfg.d ]]; then
-  sudo tee /etc/cloud/cloud.cfg.d/99-disable-users.cfg >/dev/null <<'CFG'
+  cat > /etc/cloud/cloud.cfg.d/99-disable-users.cfg <<'CFG'
 # idea#153 — do not recreate 90-cloud-init-users after we remove it
 users: []
 cloud_init_modules:
   - [users-groups, none]
 CFG
 fi
-if ! sudo visudo -c >/dev/null; then
-  echo "ERROR: visudo -c failed; restoring" >&2
-  sudo cp -a "$backup" "$file"
+if ! visudo -c >/dev/null; then
+  echo 'ERROR: visudo -c failed; restoring' >&2
+  cp -a \"\$backup\" \"\$file\"
+  exit 1
+fi
+"; then
+  echo "ERROR: privileged strip failed (is 90-cloud-init-users NOPASSWD still present?)" >&2
   exit 1
 fi
 ll="$(sudo -ll -U pi 2>/dev/null || true)"
