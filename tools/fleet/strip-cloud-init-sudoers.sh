@@ -36,7 +36,8 @@ run_local() {
   local stamp
   stamp="$(date -u +%Y%m%dT%H%M%SZ)"
 
-  if [[ ! -e "$file" ]]; then
+  # /etc/sudoers.d is often 750 root:root — pi cannot see the file without sudo (idea#153 false-clean).
+  if ! sudo test -e "$file"; then
     echo "{\"status\":\"clean\",\"host\":\"$(hostname)\",\"message\":\"$file already absent\"}"
     return 0
   fi
@@ -82,7 +83,8 @@ set -euo pipefail
 file="/etc/sudoers.d/90-cloud-init-users"
 backup_dir="${HOME}/backups"
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
-if [[ ! -e "$file" ]]; then
+# /etc/sudoers.d is often 750 root:root — pi cannot see the file without sudo (idea#153 false-clean).
+if ! sudo test -e "$file"; then
   echo "{\"status\":\"clean\",\"host\":\"$(hostname)\",\"message\":\"$file already absent\"}"
   exit 0
 fi
