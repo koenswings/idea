@@ -332,3 +332,13 @@
 {"ts":"2026-10-01T08:58:01Z","bot":"Kid App Dev","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Kid App Dev: duration-walk kid-post-dock-running-20261001 idea#168","previous":null}
 {"ts":"2026-10-01T08:58:01Z","bot":"Kid App Dev","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-01T08:58:01Z","bot":"Kid App Dev","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid App Dev: duration-walk kid-post-dock-running-20261001 idea#168","previous":null}
+{"ts":"2026-10-01T07:07:12Z","bot":"Kid App","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Kid App: duration-walk kid-i168-fixture-sync-2026-10-01 idea#168"}
+{"ts":"2026-10-01T07:07:12Z","bot":"Kid App","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-10-01T07:15:09Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea01","field":"version","value":"engine main@3adc7c8, console PR#134@9502201","previous":"engine main@3adc7c8, console main@86c4eb4"}
+{"ts":"2026-10-01T07:15:09Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@3adc7c8, console PR#134@9502201","previous":"engine main@3adc7c8, console main@86c4eb4"}
+{"ts":"2026-10-01T07:15:09Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea01","field":"pr","value":"agent-console-dev#134 (idea#168 duration)","previous":null}
+{"ts":"2026-10-01T07:15:09Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"pr","value":"agent-console-dev#134 (idea#168 duration)","previous":null}
+{"ts":"2026-10-01T08:58:01Z","bot":"Kid App Dev","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-10-01T08:58:01Z","bot":"Kid App Dev","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Kid App Dev: duration-walk kid-post-dock-running-20261001 idea#168","previous":null}
+{"ts":"2026-10-01T08:58:01Z","bot":"Kid App Dev","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-10-01T08:58:01Z","bot":"Kid App Dev","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid App Dev: duration-walk kid-post-dock-running-20261001 idea#168","previous":null}
