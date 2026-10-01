@@ -34,19 +34,19 @@
   "idea01": {
     "role": "spare",
     "domain": "any",
-    "pr": null,
+    "pr": "134",
     "status": "testing",
     "host": "100.99.231.94",
     "tailscale": "100.99.231.94",
     "lan": "192.168.0.138",
-    "version": "engine main@3adc7c8, console main@86c4eb4",
+    "version": "engine main@3adc7c8, console PR#134@128f2d3",
     "mdns": false,
     "note": "Spare fleet Pi (2026-09-28). Pi 5 / Debian 13 trixie / Intenso SSD. Isolated from golden: mdns:false, own store automerge:3zoqdSVsEtj4ygNJPNcDyKWvdxo6. On Tailscale as idea01 (100.99.231.94).",
     "runner": "none",
     "grok_build": null,
     "claim": "Atlas Ops: duration-walk walk-2026-10-01-hardpass-ui idea#168",
-    "branch": null,
-    "review_url": null
+    "branch": "pr-134@128f2d3",
+    "review_url": "http://idea01:8080"
   },
   "idea04": {
     "role": "spare",
