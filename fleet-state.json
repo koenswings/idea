@@ -17,7 +17,7 @@
   "idea03": {
     "role": "review",
     "domain": "any",
-    "pr": "agent-console-dev#134 (idea#168 duration)",
+    "pr": null,
     "status": "idle",
     "host": "100.126.117.80",
     "tailscale": "100.126.117.80",
@@ -34,7 +34,7 @@
   "idea01": {
     "role": "spare",
     "domain": "any",
-    "pr": "agent-console-dev#134 (idea#168 duration)",
+    "pr": null,
     "status": "idle",
     "host": "100.99.231.94",
     "tailscale": "100.99.231.94",
