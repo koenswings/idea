@@ -302,3 +302,7 @@
 {"ts":"2026-10-01T07:14:17Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-10-01T07:14:17Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Atlas Ops: duration-walk walk-2026-10-01-ui idea#168"}
 {"ts":"2026-10-01T07:14:17Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-10-01T07:15:28Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea01","field":"version","value":"engine main@3adc7c8, console PR#134@9502201","previous":"engine main@3adc7c8, console main@86c4eb4"}
+{"ts":"2026-10-01T07:15:28Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@3adc7c8, console PR#134@9502201","previous":"engine main@3adc7c8, console main@86c4eb4"}
+{"ts":"2026-10-01T07:15:28Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea01","field":"pr","value":"agent-console-dev#134 (idea#168 duration)","previous":null}
+{"ts":"2026-10-01T07:15:28Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"pr","value":"agent-console-dev#134 (idea#168 duration)","previous":null}
