@@ -118,7 +118,15 @@ check "explicit claim idea04" test -n "$(claim_val idea04)"
 check "explicit release idea01 idle" test "$(status_val idea01)" = idle
 check "explicit release idea04 idle" test "$(status_val idea04)" = idle
 
-# 9. real fleet untouched
+# 9. App#10 fixture pack pointers in Ops checklist
+DOC="$SCRIPT_DIR/DURATION_TESTS.md"
+check "DURATION_TESTS pins App#10 da291d5a" grep -q 'da291d5a9aa3cd59dec6aa55940194dacc202dbf' "$DOC"
+check "DURATION_TESTS lists duration-kolibri-grade5a-001" grep -q 'duration-kolibri-grade5a-001' "$DOC"
+check "DURATION_TESTS lists duration-nextcloud-grade5a-001" grep -q 'duration-nextcloud-grade5a-001' "$DOC"
+check "DURATION_TESTS lists duration-empty-001" grep -q 'duration-empty-001' "$DOC"
+check "DURATION_TESTS lists duration-empty-002" grep -q 'duration-empty-002' "$DOC"
+
+# 10. real fleet untouched
 REAL_AFTER="$(real_fp)"
 check "real fleet-state + audit untouched" test "$REAL_AFTER" = "$REAL_BEFORE"
 

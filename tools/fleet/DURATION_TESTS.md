@@ -107,6 +107,33 @@ health-wrap calls `check-fleet-health.sh --origin`). Live Pi verify needs
 Tailscale SSH from the Atlas box. If Tailscale is missing, ship the scripts +
 checklist and skip live smoke; re-verify when the box rejoins the tailnet.
 
+
+## Fixture packs (App#10)
+
+Restored fixture disks for duration walks (Path A on idea01: Kolibri Grade 5A,
+Nextcloud Grade 5A, empties) must be seeded from **versioned packs** on
+[agent-app-dev](https://github.com/koenswings/agent-app-dev) `main` @
+`da291d5a9aa3cd59dec6aa55940194dacc202dbf` (App
+[#10](https://github.com/koenswings/agent-app-dev/pull/10)) — **never ad-hoc
+copies**.
+
+| Pack tree (`tests/duration-tests/fixtures/…`) | diskId |
+|-----------------------------------------------|--------|
+| `empty/` | `duration-empty-001` |
+| `empty-002/` | `duration-empty-002` |
+| `kolibri/` (instance `kolibri-grade5a-001`) | `duration-kolibri-grade5a-001` |
+| `nextcloud/` (instance `nextcloud-grade5a-001`) | `duration-nextcloud-grade5a-001` |
+
+- App docs: `tests/duration-tests/README.md` on that tip.
+- Live copies on idea01: `IDEA_DISKS_ROOT=/home/pi/idea/duration-disks` (derived
+  from the packs above).
+- After dock, Kid’s `tests/duration-tests/scripts/post-dock-restore-running.sh`
+  brings Kolibri `:18080` and Nextcloud `:18280` to running.
+- `kolibri-form3/` is for sidecars/manuals — do **not** dock Form3 on idea01
+  Path A (collides with empty-fixture / sidecar ports).
+
+Sync packs from **agent-app-dev `main`**, not stale branch SHAs.
+
 ## Related
 
 - Claim protocol: `docs/grok-bot-setup.md` §4.6
