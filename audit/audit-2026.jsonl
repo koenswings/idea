@@ -394,3 +394,13 @@
 {"ts":"2026-10-01T10:46:50Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea01","field":"version","value":"engine main@3adc7c8, console PR#134@cdcfdb1","previous":"engine main@3adc7c8, console PR#134@ba0cfa1"}
 {"ts":"2026-10-01T10:46:50Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@3adc7c8, console PR#134@cdcfdb1","previous":"engine main@3adc7c8, console PR#134@ba0cfa1"}
 {"ts":"2026-10-01T10:46:51Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@3adc7c8, console PR#134@cdcfdb1","previous":"engine main@3adc7c8, console PR#134@ba0cfa1"}
+{"ts":"2026-10-05T06:57:37Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea02","field":"version","value":"engine main@3adc7c8, console main@6432e7d","previous":"engine main@3adc7c8, console main@86c4eb4"}
+{"ts":"2026-10-05T06:57:37Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea01","field":"pr","value":null,"previous":"134"}
+{"ts":"2026-10-05T06:57:37Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea01","field":"branch","value":null,"previous":"pr-134@ba0cfa1"}
+{"ts":"2026-10-05T06:57:37Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea01","field":"review_url","value":null,"previous":"http://idea01:8080"}
+{"ts":"2026-10-05T06:57:37Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"pr","value":null,"previous":"134"}
+{"ts":"2026-10-05T06:57:37Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"branch","value":null,"previous":"pr-134@ba0cfa1"}
+{"ts":"2026-10-05T06:57:37Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"review_url","value":null,"previous":"http://idea03:8080"}
+{"ts":"2026-10-05T06:57:37Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"pr","value":null,"previous":"134"}
+{"ts":"2026-10-05T06:57:37Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"branch","value":null,"previous":"pr-134@ba0cfa1"}
+{"ts":"2026-10-05T06:57:37Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"review_url","value":null,"previous":"http://idea04:8080"}

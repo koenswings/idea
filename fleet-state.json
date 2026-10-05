@@ -1,5 +1,5 @@
 {
-  "_comment": "Managed by tools/fleet/update-fleet-state.sh \u2014 do not edit manually",
+  "_comment": "Managed by tools/fleet/update-fleet-state.sh — do not edit manually",
   "_note": "Dedicated golden (idea#118): idea02 is golden (role golden, never used for review; always runs merged main); idea03 is the review Pi. idea01/04 added when online.",
   "idea02": {
     "role": "golden",
@@ -11,13 +11,13 @@
     "runner": "parked",
     "grok_build": "1.0.40",
     "lan": "192.168.0.180",
-    "version": "engine main@3adc7c8, console main@86c4eb4",
+    "version": "engine main@3adc7c8, console main@6432e7d",
     "claim": null
   },
   "idea03": {
     "role": "review",
     "domain": "any",
-    "pr": "134",
+    "pr": null,
     "status": "testing",
     "host": "100.126.117.80",
     "tailscale": "100.126.117.80",
@@ -27,14 +27,14 @@
     "version": "engine main@8d9871871497e9fd20653e7eb24ae1056dfe709b, console PR#134@ac9d00f25cf16333b4340d495c252b809f9c6d4f",
     "mdns": false,
     "note": "Isolated from golden idea02: Engine config mdns:false (2026-09-27, idea#118); own store automerge:3dF7bVXZadDRE8DvF6wi4QuKm3us; still holds replicas of idea02 docs synced before isolation. SSH is key-only (password auth off 2026-09-27). Hardware test disk (idea#139 limited Files Disk run 2026-09-29): Intenso SSD 111.8G, USB bridge serial 26A1EE83197F (ID_USB_SERIAL_SHORT), disk serial 3813430-532011020 (ID_SERIAL_SHORT), single ext4 partition UUID a0bf8374-274e-4bef-b32e-cfbfd09d2884 label IDEA Disk (Disk B nextcloud image files-disk-b-nextcloud-20260929085050-4f38fe; partition grown to full disk). PRIOR dual-partition hw-roundtrip fixture SACRIFICED this run (was vfat 3E50-902A + ext4 378383c9-0612-4c82-9c07-8c34d15253ba). Match by serials/UUID, never by device name (currently sdc). idea03 root SSD serial AA202000000000004820 (sda) is never a test target. Claim: Atlas idea#139 limited Intenso-only completed 2026-09-29.",
-    "branch": "pr-134@ba0cfa1",
-    "review_url": "http://idea03:8080",
+    "branch": null,
+    "review_url": null,
     "claim": "Atlas Ops: duration-walk walk-2026-10-01-hardpass-ui idea#168"
   },
   "idea01": {
     "role": "spare",
     "domain": "any",
-    "pr": "134",
+    "pr": null,
     "status": "testing",
     "host": "100.99.231.94",
     "tailscale": "100.99.231.94",
@@ -45,13 +45,13 @@
     "runner": "none",
     "grok_build": null,
     "claim": "Atlas Ops: duration-walk walk-2026-10-01-hardpass-ui idea#168",
-    "branch": "pr-134@ba0cfa1",
-    "review_url": "http://idea01:8080"
+    "branch": null,
+    "review_url": null
   },
   "idea04": {
     "role": "spare",
     "domain": "any",
-    "pr": "134",
+    "pr": null,
     "status": "testing",
     "host": "100.108.39.45",
     "tailscale": "100.108.39.45",
@@ -62,7 +62,7 @@
     "grok_build": null,
     "note": "Spare fleet Pi (2026-09-28). Pi 4 / Debian 13 trixie / 240 GB SSD. Isolated from golden: mdns:false, own store automerge:2FpVLW3G73sSdQD3wvRfkpqryiwQ. On Tailscale as idea04 (100.108.39.45). pi password not set yet (Koen).",
     "claim": "Atlas Ops: duration-walk walk-2026-10-01-hardpass-ui idea#168",
-    "branch": "pr-134@ba0cfa1",
-    "review_url": "http://idea04:8080"
+    "branch": null,
+    "review_url": null
   }
 }
