@@ -2,17 +2,18 @@
   "_comment": "Managed by tools/fleet/update-fleet-state.sh — do not edit manually",
   "_note": "Dedicated golden (idea#118): idea02 is golden (role golden, never used for review; always runs merged main); idea03 is the review Pi. idea01/04 added when online.",
   "idea02": {
-    "role": "golden",
+    "role": "fleet-pending",
     "domain": "any",
     "pr": null,
-    "status": "idle",
+    "status": "hold",
     "host": "100.85.108.118",
     "tailscale": "100.85.108.118",
     "runner": "parked",
     "grok_build": "1.0.40",
     "lan": "192.168.0.180",
     "version": "engine main@745f2c3bcefa58c92ca7c6eafa340471e8674520, console main@cda87d20606a270eab896a4f9b0350ecebcbfb5b",
-    "claim": null
+    "claim": null,
+    "note": "No longer golden (Steve/Koen 2026-10-07). Still serves production Milkwise until the cutover to wizardly-hugle; status 'hold' so it is never allocated. After cutover + 7-day rollback window: convert to a pool Pi (store 3zoqd) per stage2-plan/PROD-MOVE.md §4."
   },
   "idea03": {
     "role": "review",
@@ -64,5 +65,20 @@
     "claim": null,
     "branch": null,
     "review_url": null
+  },
+  "wizardly-hugle": {
+    "role": "production",
+    "status": "production",
+    "pr": null,
+    "host": "192.168.0.231",
+    "tailscale": null,
+    "lan": "192.168.0.231",
+    "runner": "none",
+    "grok_build": null,
+    "version": "engine main@745f2c3bcefa58c92ca7c6eafa340471e8674520, console main@cda87d20606a270eab896a4f9b0350ecebcbfb5b",
+    "mdns": false,
+    "store": "automerge:6f8m5KxzARv9xwv4Lw18LgVUJzu",
+    "console_port": 8081,
+    "note": "PRODUCTION home server (Koen 2026-10-07): Pi 500, Debian 12, full Engine+Console from main, OWN store 6f8m (never 3zoqd/4GQm). status 'production' (not idle) so find-available-pi.sh never allocates it. mdns false until the pool and idea02 leave Koen's LAN, then true. Console on :8081 (:8080 = kolibri host-net). No Tailscale (logged out); ssh via ProxyJump idea01. Milkwise instance milkwise-wizardly-hugle-001 on :3333; idea02 copy stays live until Koen OKs the cutover."
   }
 }
