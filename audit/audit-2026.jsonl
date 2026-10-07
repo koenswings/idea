@@ -458,3 +458,7 @@
 {"ts":"2026-10-07T00:09:54Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-10-07T00:09:54Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas Ops: duration-walk walk-2026-10-01-hardpass-ui idea#168"}
 {"ts":"2026-10-07T00:09:54Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-10-07T00:21:17Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-10-07T00:21:17Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Axle hw-roundtrip 2109fbd (#152)","previous":null}
+{"ts":"2026-10-07T00:25:55Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Axle hw-roundtrip 2109fbd (#152)"}
+{"ts":"2026-10-07T00:25:55Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
