@@ -3,7 +3,8 @@
 #
 # Per Pi (host = .tailscale, else .host):
 #   reachable  ssh over Tailscale answers (BatchMode, short timeout)
-#   console    Console answers HTTP 200 on http://<host>:8080/
+#   console    Console answers HTTP 200 on http://<host>:<console_port>/
+#              (console_port from fleet-state; 8080 when the Pi has none)
 #   engine     pm2 process "engine" is online, runs as pi, and its restart count has
 #              not gone up since the previous run (baseline kept in $HEALTH_DIR)
 #   versions   deployed Engine/Console HEADs match .version in fleet-state
@@ -114,11 +115,18 @@ for PI in "${PIS[@]}"; do
     continue
   fi
 
-  # console (from here, over Tailscale)
-  http="$("$CURL_BIN" -s -o /dev/null --max-time 10 -w '%{http_code}' "http://$host:8080/" 2>/dev/null)"
-  http="${http:-000}"
-  console_ok=false; [ "$http" = 200 ] && console_ok=true
-  $console_ok || problems+=("console HTTP $http on :8080")
+  # console (from here, over Tailscale), on the Pi's console_port (default 8080)
+  console_port="$(jq -r '.console_port // 8080' <<<"$entry")"
+  console_ok=false
+  if [[ "$console_port" =~ ^[0-9]+$ ]] && [ "$console_port" -ge 1 ] && [ "$console_port" -le 65535 ]; then
+    http="$("$CURL_BIN" -s -o /dev/null --max-time 10 -w '%{http_code}' "http://$host:$console_port/" 2>/dev/null)"
+    http="${http:-000}"
+    [ "$http" = 200 ] && console_ok=true
+    $console_ok || problems+=("console HTTP $http on :$console_port")
+  else
+    http=""
+    problems+=("fleet-state console_port '$console_port' is not a port number")
+  fi
 
   # everything else over one ssh
   out="$("$SSH_BIN" -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=2 \
@@ -168,7 +176,7 @@ for PI in "${PIS[@]}"; do
   ok=true; [ ${#problems[@]} -gt 0 ] && ok=false
   results+=("$(jq -nc \
     --arg pi "$PI" --arg host "$host" --arg status "$status" --arg claim "$claim" --argjson claimed "$claimed" \
-    --argjson ok "$ok" --argjson reachable "$reachable" --arg http "$http" --argjson console_ok "$console_ok" \
+    --argjson ok "$ok" --argjson reachable "$reachable" --arg http "$http" --argjson console_ok "$console_ok" --arg console_port "$console_port" \
     --argjson engine_ok "$engine_ok" --arg e_status "$e_status" --arg e_user "$e_user" \
     --arg e_restarts "$e_restarts" --arg prev "$prev" \
     --argjson versions_ok "$versions_ok" --arg e_sha "${e_sha:0:7}" --arg c_sha "${c_sha:0:7}" \
@@ -179,7 +187,7 @@ for PI in "${PIS[@]}"; do
      {pi:$pi, host:$host, status:$status, claim:($claim|s), claimed:$claimed, ok:$ok,
       checks:{
         reachable:{ok:$reachable},
-        console:{ok:$console_ok, http:($http|n)},
+        console:{ok:$console_ok, http:($http|n), port:($console_port|n)},
         engine:{ok:$engine_ok, status:($e_status|s), user:($e_user|s), restarts:($e_restarts|n), previous_restarts:($prev|n)},
         versions:{ok:$versions_ok, engine:($e_sha|s), console:($c_sha|s), expected_engine:($exp_engine|s), expected_console:($exp_console|s)},
         disk:{ok:$disk_ok, used_pct:($disk|n), max_pct:$max}},
