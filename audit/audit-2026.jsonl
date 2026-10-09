@@ -504,3 +504,7 @@
 {"ts":"2026-10-08T14:38:42Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas Ops: duration-walk r50-stop-persist-363cb7b r50 Engine 363cb7b (#157+#155 v2)","previous":"Atlas Ops: duration-walk r49-scoped-peers-f231944 r49 Engine f231944 (#157+#155)"}
 {"ts":"2026-10-08T14:38:42Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas Ops: duration-walk r50-stop-persist-363cb7b r50 Engine 363cb7b (#157+#155 v2)","previous":"Atlas Ops: duration-walk r49-scoped-peers-f231944 r49 Engine f231944 (#157+#155)"}
 {"ts":"2026-10-08T14:38:42Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas Ops: duration-walk r50-stop-persist-363cb7b r50 Engine 363cb7b (#157+#155 v2)","previous":"Atlas Ops: duration-walk r49-scoped-peers-f231944 r49 Engine f231944 (#157+#155)"}
+{"ts":"2026-10-09T09:20:21Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"lan","value":"10.99.0.166","previous":"192.168.0.138"}
+{"ts":"2026-10-09T09:20:21Z","bot":"Atlas","action":"fleet_state_update","pi":"idea02","field":"lan","value":"10.99.0.167","previous":"192.168.0.180"}
+{"ts":"2026-10-09T09:20:21Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"lan","value":"10.99.0.88","previous":"192.168.0.228"}
+{"ts":"2026-10-09T09:20:21Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"lan","value":"10.99.0.210","previous":"192.168.0.113"}
