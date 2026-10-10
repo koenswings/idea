@@ -20,6 +20,10 @@
 #              (alert when a problem is new, changes, lasts beyond ALERT_REPEAT_SECS
 #              (default 7200) since the last alert, or clears). Adds an "alert" object,
 #              and creates/removes $HEALTH_DIR/PAUSED while the fleet is unhealthy.
+#              Manual walk hold: while $HEALTH_DIR/HOLD exists, PAUSED is kept (created if
+#              missing) and never removed, even on a healthy run; the report then shows
+#              alert.hold=true, alert.fleet_changes_paused=true and alert.hold_file.
+#              Remove HOLD to hand PAUSED back to the health check.
 # Exit: 0 all unclaimed Pis healthy, 1 at least one unhealthy, 2 usage/state error.
 #
 # Env overrides (used by the tests): STATE_REPO (repo for --origin), STATE_FILE, HEALTH_DIR, SSH_BIN, CURL_BIN,
@@ -49,7 +53,7 @@ while [ $# -gt 0 ]; do
     --pi) [ $# -ge 2 ] || { echo "usage: --pi NAME" >&2; exit 2; }; ONLY+=("$2"); shift 2 ;;
     --alert) ALERT=1; shift ;;
     --origin) ORIGIN=1; shift ;;
-    -h|--help) sed -n '2,33p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,37p' "$0"; exit 0 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -214,14 +218,20 @@ if [ $ALERT -eq 1 ]; then
   if jq -e '.send' <<<"$decision" >/dev/null; then
     jq -c --argjson now "$NOW" '{signature, since, alerted_at: (if (.signature|length)>0 then $now else null end)}' <<<"$decision" > "$ALERT_FILE"
   fi
-  if jq -e '.signature|length>0' <<<"$decision" >/dev/null; then
+  HOLD_FILE="$HEALTH_DIR/HOLD"
+  hold=false; [ -e "$HOLD_FILE" ] && hold=true
+  if $hold; then
+    # Manual walk hold: keep (or create) PAUSED and never remove it here.
+    [ -f "$HEALTH_DIR/PAUSED" ] || echo "fleet changes paused (manual hold $HOLD_FILE) since $(date -u -d "@$NOW" +%FT%TZ)" > "$HEALTH_DIR/PAUSED"
+  elif jq -e '.signature|length>0' <<<"$decision" >/dev/null; then
     [ -f "$HEALTH_DIR/PAUSED" ] || echo "fleet changes paused by check-fleet-health.sh since $(date -u -d "@$NOW" +%FT%TZ)" > "$HEALTH_DIR/PAUSED"
   else
     rm -f "$HEALTH_DIR/PAUSED"
   fi
-  report="$(jq -c --argjson d "$decision" --arg paused "$HEALTH_DIR/PAUSED" \
+  report="$(jq -c --argjson d "$decision" --arg paused "$HEALTH_DIR/PAUSED" --arg holdf "$HOLD_FILE" --argjson hold "$hold" \
     '.alert = {send:$d.send, reason:$d.reason, unhealthy_since:(if $d.since then ($d.since|todate) else null end),
-               fleet_changes_paused: ($d.signature|length>0), pause_file:$paused}' <<<"$report")"
+               fleet_changes_paused: ($hold or ($d.signature|length>0)), pause_file:$paused,
+               hold:$hold, hold_file:(if $hold then $holdf else null end)}' <<<"$report")"
 fi
 
 jq . <<<"$report"

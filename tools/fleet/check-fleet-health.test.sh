@@ -180,6 +180,24 @@ jq '.p2.claim="x" | .p2.status="deployed"' "$STATE_FILE" > "$WORK/s" && mv "$WOR
 echo 502 > "$FAKE/10.0.0.2.http"; NOW=24000 run --alert
 check "alert: claimed Pi problems never alert or pause" test "$(j .alert.send):$(test -e "$HEALTH_DIR/PAUSED" && echo p || echo n)" = "false:n"
 
+# 11b. --alert with a manual walk hold ($HEALTH_DIR/HOLD)
+reset; mkdir -p "$HEALTH_DIR"; echo "walk hold" > "$HEALTH_DIR/PAUSED"; touch "$HEALTH_DIR/HOLD"; NOW=1000 run --alert
+check "hold: healthy run keeps PAUSED" test -e "$HEALTH_DIR/PAUSED"
+check "hold: PAUSED content untouched" test "$(cat "$HEALTH_DIR/PAUSED")" = "walk hold"
+check "hold: report hold=true, paused=true, hold_file" test "$RC:$(j .alert.hold):$(j .alert.fleet_changes_paused):$(j .alert.hold_file)" = "0:true:true:$HEALTH_DIR/HOLD"
+rm "$HEALTH_DIR/PAUSED"; NOW=1100 run --alert
+check "hold: missing PAUSED is created" test -e "$HEALTH_DIR/PAUSED"
+echo 502 > "$FAKE/10.0.0.1.http"; NOW=1200 run --alert
+rm "$FAKE/10.0.0.1.http"; NOW=1300 run --alert
+check "hold: resolved run still keeps PAUSED" test "$(j .alert.reason):$(test -e "$HEALTH_DIR/PAUSED" && echo p)" = "resolved:p"
+rm "$HEALTH_DIR/HOLD"; NOW=1400 run --alert
+check "no hold: healthy run removes PAUSED as before" test ! -e "$HEALTH_DIR/PAUSED"
+check "no hold: report hold=false, paused=false, hold_file null" test "$(j .alert.hold):$(j .alert.fleet_changes_paused):$(j .alert.hold_file)" = "false:false:null"
+reset; mkdir -p "$HEALTH_DIR"; echo x > "$HEALTH_DIR/PAUSED"; NOW=1000 run --alert
+check "no hold: stale PAUSED removed on healthy run" test ! -e "$HEALTH_DIR/PAUSED"
+reset; mkdir -p "$HEALTH_DIR"; touch "$HEALTH_DIR/HOLD"; echo x > "$HEALTH_DIR/PAUSED"; NOW=1000 run
+check "hold: without --alert PAUSED untouched and no alert object" test "$(j .alert):$(cat "$HEALTH_DIR/PAUSED")" = "null:x"
+
 # 12. --origin reads fleet-state from origin/main, not the (stale) working tree
 reset
 git init -q --bare "$WORK/origin.git"
