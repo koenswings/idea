@@ -18,3 +18,18 @@ control (§5), routines, team structure, and Bot descriptions.
 **Status:** Authoritative  ·  **Maintained by:** Koen / Steve
 Short orientation for the `docs/` folder.
 → [docs/README.md](README.md)
+
+## ops/BOOT-RECOVERY.md
+**Status:** Authoritative  ·  **Maintained by:** Atlas
+What comes back after a reboot, fstab loop mounts for fixture disks (rules, rollback), the 05:00 reboot hold, after-reboot checklist.
+→ [docs/ops/BOOT-RECOVERY.md](ops/BOOT-RECOVERY.md)
+
+## ops/AVAHI-HOSTNAME-CLASH.md
+**Status:** Authoritative (root cause; fix not merged)  ·  **Maintained by:** Atlas
+Engine mDNS (ciao) vs avahi both claiming `<host>.local` -> "<host> (2)" rename at every start; impact and proposed fix.
+→ [docs/ops/AVAHI-HOSTNAME-CLASH.md](ops/AVAHI-HOSTNAME-CLASH.md)
+
+## ops/TAILSCALE-DECISION.md
+**Status:** Decided (Koen)  ·  **Maintained by:** Atlas
+Tailscale always on at schools; one fleet tag `tag:idea` and one fleet auth key; ACL admins->tag:idea only, no Pi-to-Pi over Tailscale (LAN websocket only).
+→ [docs/ops/TAILSCALE-DECISION.md](ops/TAILSCALE-DECISION.md)

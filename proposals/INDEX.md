@@ -40,7 +40,7 @@ Original virtual company design: agent roles, cross-agent task convention, outpu
 
 ## ssh-key-management.md
 **Status:** Implemented · **Author:** Atlas
-SSH key types, command= convention, authorized_keys restrictions, IDEA SSH access map.
+SSH key types, command= convention, authorized_keys restrictions, IDEA SSH access map. Tailscale tag/key parts superseded by docs/ops/TAILSCALE-DECISION.md.
 
 ## openclaw-native-migration.md
 **Status:** Implemented · **Author:** Atlas
@@ -48,7 +48,7 @@ Trade-off analysis for OpenClaw Docker vs native install. Option B (native) sele
 
 ## tailscale-remote-management.md
 **Status:** Implemented · **Author:** Atlas
-Latent Tailscale debug mode for school Pis: ephemeral auth keys, ACL tag model, USB activation.
+Latent Tailscale debug mode for school Pis: ephemeral auth keys, ACL tag model, USB activation. **Per-school/`tag:school-pi` parts superseded by docs/ops/TAILSCALE-DECISION.md (always on, one `tag:idea`, one fleet key).**
 
 ## agent-identity-memory-architecture.md
 **Status:** Implemented · **Author:** Atlas
