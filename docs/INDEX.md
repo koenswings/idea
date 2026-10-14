@@ -34,17 +34,7 @@ Evidence summary of the 2026-10-13 compaction: 3zoqd -> 2VroE, 175,189 changes -
 Why the shared store grows (heartbeats/metrics in history) and the plan: ephemeral heartbeat/metrics, archive ops, compaction.
 → [docs/store/STORE-GROWTH-PROPOSAL.md](store/STORE-GROWTH-PROPOSAL.md)
 
-## ops/BOOT-RECOVERY.md
+## ops/boot-recovery.md
 **Status:** Authoritative  ·  **Maintained by:** Atlas
 What comes back after a reboot, fstab loop mounts for fixture disks (rules, rollback), the 05:00 reboot hold, after-reboot checklist.
-→ [docs/ops/BOOT-RECOVERY.md](ops/BOOT-RECOVERY.md)
-
-## ops/AVAHI-HOSTNAME-CLASH.md
-**Status:** Authoritative (root cause; fix not merged)  ·  **Maintained by:** Atlas
-Engine mDNS (ciao) vs avahi both claiming `<host>.local` -> "<host> (2)" rename at every start; impact and proposed fix.
-→ [docs/ops/AVAHI-HOSTNAME-CLASH.md](ops/AVAHI-HOSTNAME-CLASH.md)
-
-## ops/TAILSCALE-DECISION.md
-**Status:** Decided (Koen)  ·  **Maintained by:** Atlas
-Tailscale always on at schools; one fleet tag `tag:idea` and one fleet auth key; ACL admins->tag:idea only, no Pi-to-Pi over Tailscale (LAN websocket only).
-→ [docs/ops/TAILSCALE-DECISION.md](ops/TAILSCALE-DECISION.md)
+→ [docs/ops/boot-recovery.md](ops/boot-recovery.md)
