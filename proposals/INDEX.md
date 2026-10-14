@@ -81,3 +81,7 @@ One Engine key per school for cross-Pi copy/move; kept for the record.
 ## design-root-helper.md
 **Status:** Proposal (borg/root helpers since merged in engine #184) · **Author:** Engine Dev (Axle), filed by Atlas
 Root helper `idea-app-data`: fixed verbs (copy, delete, borg on one repo), checked tokens, single sudoers line.
+
+## 2026-10-13-store-growth.md
+**Status:** Approved · **Author:** Axle (Engine Dev)
+Why the shared store grows (heartbeats/metrics kept in history) and the plan: ephemeral heartbeat/metrics, hourly lastSeen, archive ops, compaction. Executed compaction: docs/ops/store-compaction-devpool.md.
