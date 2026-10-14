@@ -8,7 +8,7 @@
 
 A teacher plugs a normal USB stick (FAT32 or exFAT, filled at home or in town) into an IDEA Pi. Within a few seconds it shows up in Nextcloud as a folder **"USB: &lt;stick name&gt;"**, and as a source in the Kolibri channel builder. It is **read-only**: teachers browse it and copy what they need into their own folders or into a Kolibri channel. Nothing is ever written to the stick, so it can't be corrupted and needs no preparation, and it still works on any Windows laptop afterwards.
 
-The Files Disk ([files-disk.md](files-disk.md), ext4) stays the place for permanent, writable, backed-up storage. A writable "marker" mode for sticks is **deferred** (§8).
+The Files Disk ([files-disk.md](files-disk.md), ext4) stays the place for permanent, writable, backed-up storage. A writable "marker" mode for sticks is **deferred** (§9). A running channel builder **auto-builds** channels from sticks that carry a top-level `kolibri` folder (§8).
 
 **Out of scope:** backing up Files Disk content. That is a later, separate proposal.
 
@@ -151,7 +151,35 @@ Option B keeps working anyway for teachers who use Nextcloud, without extra code
 6. She adds it to a lesson or lets learners browse it. Learners see it next to the other channels.
 7. Next term she adds files to the same folder on the stick and builds again; Kolibri offers the update.
 
-## 8. The writable "marker" bridge: deferred
+## 8. Automatic build when a stick goes in
+
+Koen (2026-10-14): explore starting the channel builder automatically on stick insert; this is worth more to teachers than the Files Disk.
+
+### 8.1 What the code allows today
+
+- **Builder** (app-kolibri-channel-builder #1, `builder/channel_builder/server.py`): a small Python `ThreadingHTTPServer`. Builds run synchronously inside `POST /build` under one global `BUILD_LOCK`; the source id is `files:<relative path>` or `nc:<user>:<folder>`, and the channel id is derived from it, so the same source always updates the same channel. The export dir is served over the Kolibri peer API (`/api/public/v1/channels`), so a built channel is visible to Kolibri's "Import → Local network" immediately. The builder has **no** connection to the Engine store (no Automerge); it only sees mounted folders.
+- **Engine** (agent-engine-dev): `usbDeviceMonitor` handles plug/unplug; `Engine.unformattedDisks` is the pattern for this proposal's `Engine.usbSticks`; `FilesMount.ts` already reaches into app containers with `docker exec` (Nextcloud `occ`). The Engine starts/stops apps only on operator commands; it never starts an app as a side effect of a disk.
+
+### 8.2 Options
+
+| Question | Options | Recommendation |
+|---|---|---|
+| How does the builder learn a stick arrived? | (a) builder watches the Engine store; (b) Engine calls a builder HTTP endpoint after mount; (c) builder watches the read-only `/mnt/idea-usb` bind and the Engine's sticks JSON (`.idea-usb.json`, §4) | **(c)**. No store client in Python, no Engine→app HTTP coupling or auth, works even if the Engine restarts. Poll every 5 s (or inotify on the JSON); a stick counts once its entry is in the JSON. |
+| Must the builder already run? | Engine starts it on insert / it must be Running | **Must be Running.** The Engine keeps its rule of starting apps only on operator command. The Console row (§5) says "Auto-build is off: channel builder is not running on this Pi" when a stick has a `kolibri` folder and no builder is running. |
+| Which sticks trigger a build? | every stick / marker folder / `channel.json` | **A top-level folder named `kolibri`** (case-insensitive). Only what is inside it is built; each subfolder of `kolibri/` becomes one channel ("kolibri/Grade 5 Science" → channel "Grade 5 Science"). Optional `kolibri/<channel>/channel.json` gives `name`, `author`, `description`, `license`; otherwise folder name, the stick label as author, and the builder's default licence. Sticks without the folder are never auto-built (a stick of holiday photos stays just a stick). Unlike the writable marker (§9), this marker grants nothing: read-only stays, the worst a spoofed folder does is produce a channel nobody imports. |
+| Build and publish, or only prepare? | fully automatic / "ready to build" prompt | **Fully automatic build**, because building is not publishing: the channel only reaches learners when a teacher or admin clicks Import in Kolibri. That Import is the human gate. A "ready to build" prompt would add a step without adding safety. |
+| How is the teacher told? | Console notification / builder page / Kolibri | **Builder start page** shows a "From USB sticks" box (Waiting → Building 40/120 files → Built v3, "you can pull the stick out" / Failed + reason), plus `GET /api/usb-status` JSON. The Console row links to it. Kolibri itself shows the new channel or "update available" in Import. No push notifications in v1. |
+| Reinsert | rebuild always / only if changed | **Rebuild only if changed**: source id `usb:<fs-uuid>:kolibri/<folder>` gives the same channel id; the builder keeps a fingerprint (paths + sizes + mtimes) per source and skips the build if nothing changed, so plugging the same stick in daily does no work. A changed stick → new channel version → Kolibri offers the update. |
+| Concurrency | | Reuse `BUILD_LOCK`: auto-builds go in one FIFO queue in a worker thread; a teacher's manual build waits its turn (the page shows "queued"). Several sticks/folders are queued in order. |
+| Stick pulled mid-build | | Build fails with "stick removed before the build finished; plug it in again", the previous channel version stays intact (build writes to a temp dir and swaps at the end, as in §7). On reinsert the fingerprint differs from the last *successful* build, so it rebuilds. |
+| Which Pi | | The Pi the stick is in, only if its builder runs. Several Pis: each builds only its own sticks; Kolibri on any Pi can import from any builder on the LAN. |
+| Safety | | Unchanged from §3: read-only `ro,nosuid,nodev,noexec` mount, builder bind read-only, nothing written to the stick (fingerprints and status live in the builder's own volume). Size cap per auto-build (default 8 GB, setting) so a stick can't fill the Pi unasked; over the cap → "too large for auto-build, use the manual build". |
+
+### 8.3 Recommended design in one paragraph
+
+When a running channel builder sees a new stick with a top-level `kolibri` folder, it builds one channel per subfolder by itself, in the background, one at a time. The teacher sees progress and "Built, you can pull the stick out" on the builder page (linked from the Console). Nothing is published to learners until someone clicks Import in Kolibri. Plugging the same stick in again rebuilds only if files changed, and then Kolibri offers an update. Sticks without a `kolibri` folder are never auto-built, and the stick stays read-only throughout.
+
+## 9. The writable "marker" bridge: deferred
 
 Idea from 2026-10-11: a stick with an `idea-files` folder or `idea.json` gets mounted **writable** as the teacher's own disk.
 
@@ -167,67 +195,73 @@ What it would bring (writing back to the stick to take files home) is real but s
 
 **Recommendation: no writable mode in v1.** Read-only sticks + Files Disk cover the need. Revisit after field feedback; if it comes back, it should be exFAT only, `sync` mount, a Console-confirmed opt-in per stick (not a file anyone can create), and still never an IDEA role.
 
-## 9. Pros and cons
+## 10. Pros and cons
 
 - **Pros:** what teachers already do; nothing to prepare or erase; stick stays readable on Windows; no corruption possible; no Nextcloud restart; works as a source for the channel builder.
 - **Cons:** read-only, so a teacher can't save onto the stick from IDEA; sticks come and go, so folders appear and disappear (handled in §3.4, §4); FAT32 files over 4 GB can't exist on the stick anyway; a malicious stick could hold harmful files (mitigated: `noexec`, read-only, only teachers see it; Nextcloud doesn't run uploaded files); a second mount path in the Engine to maintain; changes a decided rule in files-disk.md.
 
-## 10. Alternatives considered
+## 11. Alternatives considered
 
 1. **Keep ext4-only; teachers copy over the network.** Zero code, but slow for videos, needs a laptop, and doesn't match how teachers work.
 2. **Automatically copy every stick into a "USB imports" folder.** Fills disks unasked, duplicates data, unclear ownership. Rejected.
 3. **Show sticks through the Files Disk `filesMount` (recreate Nextcloud per plug).** Reuses code, but restarts Nextcloud for every stick. Rejected in favour of one propagated bind.
-4. **Writable sticks with a marker.** Deferred (§8).
+4. **Writable sticks with a marker.** Deferred (§9).
 5. **udisks2 / automount.** Another daemon with its own policy and paths under `/media`; less control than one typed sudoers line. Rejected.
 
-## 11. Changes to the teacher tutorial (Marco)
+## 12. Changes to the teacher tutorial (Marco)
 
 The tutorial (`docs/manuals/teachers/teacher-tutorial/`) describes only what is live (DOCUMENTATION-RULES). So these chapters land in the **same release PRs** as the features, after the hardware tests, not before. Screenshots come from the demo Pi, and never show errors.
 
-**Channel builder** (new, not in the tutorial yet; still untested on a Pi):
+**Order (Koen, 2026-10-14):** the channel builder and USB-stick chapter comes **before** the Files Disk chapter, because turning a teacher's own stick into a Kolibri channel is worth more to teachers than a Files Disk. Chapters are renumbered accordingly (current numbers in brackets; Marco fixes cross-links and the index in the same PR).
 
-- **New chapter "Make your own Kolibri channel"** after 4 (Kolibri for learners), or as 3.x if Marco prefers. Scenarios:
-  - *Build a channel from School Files:* put folders in School Files → open the builder → pick folder, name, author → Build → "finished". Screenshots: builder start page, folder picker, finished page.
-  - *Import it into Kolibri:* Device → Channels → Import → Local network → builder → channel → Import. One screenshot per screen (this is the step that needs the most help).
-  - *Update the channel:* add files, build again, import the update.
-- **Chapter 8.3 "Can I put my own files into Kolibri?"** changes from "not yet / ask" to a pointer to the new chapter.
+1. **Chapter 5 (new) "Make your own Kolibri channel"**, directly after 4 (Kolibri for learners). Scenarios, in this order:
+   - *5.1 From your USB stick to a channel (automatic):* on a laptop in town make a folder `kolibri`, inside it one folder per channel ("Grade 5 Science"), inside that one folder per topic → plug the stick into the Pi → open the channel builder from the Console, watch "Building… / Built, you can pull the stick out" → import in Kolibri. Optional `channel.json` in an aside. Screenshots: stick folder layout in Windows Explorer, builder "From USB sticks" box (building, built).
+   - *5.2 Import it into Kolibri:* Device → Channels → Import → Local network → builder → channel → Import. One screenshot per screen (the step that needs the most help).
+   - *5.3 Update the channel:* add files on the stick, plug in again → rebuilt automatically → import the update.
+   - *5.4 Build by hand* (stick without a `kolibri` folder, School Files, or Nextcloud): pick folder, name, author → Build. Screenshots: folder picker with a "USB:" source, finished page.
+   - *5.5 Use your stick in Nextcloud:* plug in → "USB: name" folder (lock icon) → open or copy into your course folder → pull out. Read-only, nothing changes on your stick. Screenshots: Files with the USB folder; the Copy dialog.
+2. **Files Disk chapter ("Your own files", now 9, was 8)** comes after it, unchanged except: 9.3 "Can I put my own files into Kolibri?" becomes a pointer to chapter 5; a one-line pointer to 5.5 for sticks.
+3. **Operator: disks (now 12, was 11):** FAT/exFAT sticks show as "USB stick (read-only)" and need no erasing; erase only turns a stick into an IDEA disk; auto-build needs the channel builder Running.
+4. **FAQ:** "My stick doesn't show up" (NTFS, or another Pi); "Nothing was built" (no `kolibri` folder, builder not running, or over the size cap); "I saved a file but it's not on my stick" (read-only, use Download).
 
-**USB sticks:**
+Chapters land in the release PRs with the features, after the hardware tests (DOCUMENTATION-RULES).
 
-- **Chapter 8 (Your own files)** gets a new section **"8.x Use your own USB stick"**: plug in → "USB: name" folder in Nextcloud → open or copy files into your course folder → pull out when done. Note: read-only, nothing is changed on your stick; copy what you want to keep. Screenshots: Nextcloud Files with the USB folder and lock icon; the Copy dialog.
-- **New channel-builder scenario "From a stick to a channel":** the full flow from §7. Screenshot: folder picker showing a "USB:" source.
-- **Chapter 11 (Operator: disks)**: a short note that FAT/exFAT sticks show as "USB stick (read-only)" and don't need erasing; erase is only for turning a stick into an IDEA disk.
-- **FAQ lines:** "My stick doesn't show up" (NTFS or not on this Pi), "I saved a file but it's not on my stick" (read-only, use Download).
-
-## 12. Implementation plan
+## 13. Implementation plan
 
 | Step | Repo / bot | Work | Depends on |
 |---|---|---|---|
 | 0 | idea / Steve | Approve this proposal; one-line amendment note in files-disk.md's index entry pointing here | Koen |
-| 1 | agent-engine-dev / Axle | fstype branch in `usbDeviceMonitor`; `/run/idea-usb` mount/umount with exact typed commands; `Engine.usbSticks`; unplug + startup cleanup; `x-app.usbMount` (static rslave read-only bind); reconcile `docker exec` call; display-name JSON; sticks stay in `unformattedDisks` for erase; unit tests incl. sudoers string pin | 0 |
+| 1 | agent-engine-dev / Axle | `hasKolibriFolder` in `UsbStickPublic` and the sticks JSON; fstype branch in `usbDeviceMonitor`; `/run/idea-usb` mount/umount with exact typed commands; `Engine.usbSticks`; unplug + startup cleanup; `x-app.usbMount` (static rslave read-only bind); reconcile `docker exec` call; display-name JSON; sticks stay in `unformattedDisks` for erase; unit tests incl. sudoers string pin | 0 |
 | 2 | idea ops / Atlas | sudoers lines in `11-engine-files` + `build-engine` install, `visudo -cf` and `sudo -ll` proof; confirm `exfat` module on Pi OS image; two test sticks (FAT32, exFAT) on a test Pi | 1 |
 | 3 | app-nextcloud / Kid | `usbMount` opt-in; `usb-sync.sh` (create/delete `idea_usb=1` storages, read-only, teachers group); tests with a fake root | 1 |
 | 4 | app-kolibri-channel-builder / Kid | USB_ROOT sources, `usb:<uuid>:<path>` channel id, pull-out handling; merge after builder #1 | 1, builder #1 |
-| 5 | agent-console-dev / Pixel | "USB stick (read-only)" row; text change for the unformatted entry; mock-store fixtures | 1 (store type) |
-| 6 | idea / Marco | Tutorial chapters (§11), in the release PR, after step 7 passes | 3, 4, 5, 7 |
-| 7 | Atlas + Axle | hardware tests (§13), then normal batch to the pool | 1–5 |
+| 4b | app-kolibri-channel-builder / Kid | Auto-build (§8): watcher on `.idea-usb.json`, `kolibri/` folder detection, `channel.json`, fingerprint skip, FIFO worker under `BUILD_LOCK`, temp-dir build + swap, size cap, "From USB sticks" box, `GET /api/usb-status` | 4 |
+| 5 | agent-console-dev / Pixel | "USB stick (read-only)" row; text change for the unformatted entry; link to the builder; "auto-build off: builder not running" hint when a stick has a `kolibri` folder (Engine adds `hasKolibriFolder` to `UsbStickPublic`); mock-store fixtures | 1 (store type) |
+| 6 | idea / Marco | Tutorial chapters (§12, builder chapter before Files Disk), in the release PR, after step 7 passes | 3, 4, 4b, 5, 7 |
+| 7 | Atlas + Axle | hardware tests (§14), then normal batch to the pool | 1–5 |
 
-## 13. Test plan (automated; no manual tests for Koen)
+## 14. Test plan (automated; no manual tests for Koen)
 
 - **Unit (Engine):** fstype routing (ext4 / vfat / exfat / ntfs / none); exact mount and umount strings match the sudoers lines; system disk never routed; label clash naming; unplug and startup cleanup; nothing ever written under `/run/idea-usb` (mock fs asserts no writes); stick never appears in `disks`.
 - **Unit (Nextcloud script):** create/delete reconcile with a fake `occ`; admin-created storages never deleted; read-only option set; group set.
 - **Unit (builder):** both roots listed; path escape refused; stable channel id from UUID; stick removed mid-build → build fails cleanly, old version kept.
+- **Unit (builder auto-build):** stick with `kolibri/A`, `kolibri/B` → two channels queued in order; stick without `kolibri` → nothing built; reinsert unchanged → skipped; one file changed → version +1, same channel id; pulled mid-build → failed, old version served; manual build during auto-build waits; over size cap → refused with message; `channel.json` fields used, bad JSON → warning + defaults.
 - **Console:** fixtures with sticks; snapshot of the row; no erase change.
-- **Hardware (scripted, on a claimed test Pi, never golden):** a FAT32 and an exFAT stick, each with a known file set (including a > 4 GB file on exFAT, a dirty-bit FAT image, non-ASCII names). Script: plug (or `udevadm trigger`), wait for `usbSticks`, check `findmnt` options (`ro,nosuid,nodev,noexec`), checksum files via Nextcloud WebDAV as a teacher, check a learner can't see it, write attempt via WebDAV fails, build a channel from the stick, unplug, check storage gone and mount gone, compare stick image checksum before/after (**bit-identical**), erase still offered.
+- **Hardware (scripted, on a claimed test Pi, never golden):** a FAT32 and an exFAT stick, each with a known file set (including a > 4 GB file on exFAT, a dirty-bit FAT image, non-ASCII names). Script: plug (or `udevadm trigger`), wait for `usbSticks`, check `findmnt` options (`ro,nosuid,nodev,noexec`), checksum files via Nextcloud WebDAV as a teacher, check a learner can't see it, write attempt via WebDAV fails, build a channel from the stick by hand, then a second stick with a `kolibri` folder → channel appears on the peer API without any click and Kolibri on another Pi can import it; reinsert → no rebuild; unplug, check storage gone and mount gone, compare stick image checksum before/after (**bit-identical**), erase still offered.
 - **Walks:** the cover-all walk gains a USB step, run only from idea02 on Steve's GO.
 
-## 14. Open questions for Koen (with recommendations)
+## 15. Open questions for Koen (with recommendations)
 
 1. **Who sees the stick folder in Nextcloud?** Recommend: **teachers group + admin only**, not learners. A stick can hold anything; teachers decide what to copy into shared folders.
 2. **What happens on unplug?** Recommend: folder disappears within seconds, no warning needed; read-only means nothing open can be lost. Files already copied stay.
 3. **Several sticks at once?** Recommend: yes, each its own "USB: name" folder, " (2)" on duplicate names.
 4. **Which Pi shows it?** Recommend: only the Pi it is plugged into (its Nextcloud and builder). No cross-Pi sharing in v1.
 5. **Should the Console show it?** Recommend: yes, a read-only info row per stick, no new actions (erase stays available).
-6. **Writable marker mode?** Recommend: **not in v1** (§8).
+6. **Writable marker mode?** Recommend: **not in v1** (§9).
 7. **NTFS sticks?** Recommend: not in v1; they stay erase-only. Add if field schools report many NTFS sticks.
 8. **Should a stick be backed up?** Recommend: no (part of the later backup proposal); copied files are backed up with Nextcloud.
+9. **Auto-build trigger?** Recommend: **only sticks with a top-level `kolibri` folder**, one channel per subfolder; optional `channel.json`. Never every stick.
+10. **Build automatically or ask first?** Recommend: **build automatically**; Kolibri Import stays the human gate before learners see anything.
+11. **Should the Engine start the builder when such a stick appears?** Recommend: **no**; auto-build only when the builder is already Running, with a Console hint otherwise.
+12. **Size cap for auto-build?** Recommend: **8 GB per stick**, adjustable; larger sticks use the manual build.
+13. **Author when there is no `channel.json`?** Recommend: the stick label (e.g. "MARY-STICK"); teachers who care add `channel.json`.
