@@ -20,8 +20,8 @@ Short orientation for the `docs/` folder.
 → [docs/README.md](README.md)
 
 ## DOCUMENTATION-RULES.md
-**Status:** Proposed  ·  **Maintained by:** Steve / Atlas
-Extends proposals/README.md and docs/README.md: adds docs/manuals/<audience>/<name>/ and docs/house-style/; naming, build and secrets rules; inventory with proposed locations.
+**Status:** Approved (#189)  ·  **Maintained by:** Steve / Atlas
+Extends proposals/README.md and docs/README.md: adds docs/manuals/<audience>/<name>/ and docs/house-style/; naming, build and secrets rules; inventory with current locations.
 → [docs/DOCUMENTATION-RULES.md](DOCUMENTATION-RULES.md)
 
 ## Manuals and house style (docs/manuals/, docs/house-style/)
