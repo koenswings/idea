@@ -1,7 +1,11 @@
-# Store doc 3zoqd: heartbeats and metrics out of history (design only, no code)
+# Store growth: heartbeats and metrics out of the store history
 
-> Imported from the ops box (/workspace/store-design) on 2026-10-13 for the audit. References to /workspace paths are box-only evidence.
-Axle, 2026-10-13. Evidence: /workspace/r86q-diag/NOTES.md, breakdown.json; code read at Engine main 31b82f4, Console main, harness feat/stage2-harness-rehome, idea repo main (clones under /workspace/store-design).
+**Author:** Axle (Engine Dev)
+**Date:** 2026-10-13
+**Status:** Approved
+
+Executed dev-pool compaction: [docs/ops/store-compaction-devpool.md](../docs/ops/store-compaction-devpool.md). References to /workspace paths are ops-box evidence.
+ Evidence: /workspace/r86q-diag/NOTES.md, breakdown.json; code read at Engine main 31b82f4, Console main, harness feat/stage2-harness-rehome, idea repo main (clones under /workspace/store-design).
 
 ## Summary for Koen
 - The shared store slows down because every 30 s each Pi writes "I'm alive" into it and every 15 s it writes container stats. Every write is kept forever: about 18k of the ~23k changes per day.

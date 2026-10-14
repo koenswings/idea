@@ -1,8 +1,15 @@
-# Dev-pool store compaction plan (3zoqd → new doc), dress rehearsal
+# Runbook: dev-pool store compaction (3zoqd → new doc)
 
-> Imported from the ops box (/workspace/store-design) on 2026-10-13 for the audit. References to /workspace paths are box-only evidence.
-Axle, 2026-10-13. PLAN ONLY: nothing below has been executed. Executor: Atlas, once Steve clears it. Then r86s.
-Background: PROPOSAL.md (Q2), /workspace/r86q-diag/NOTES.md (173,991 changes, 2.90 MB saved, load(full) ~10 s on the box; compacted 322 KB, 0.39 s).
+**Status:** Authoritative (executed 2026-10-13) · **Maintained by:** Atlas (executor); plan by Axle
+Design and reasoning: [proposals/2026-10-13-store-growth.md](../../proposals/2026-10-13-store-growth.md). References to /workspace paths are ops-box evidence.
+
+## Result record (2026-10-13)
+- Dev-pool store **3zoqd compacted to 2VroE** (`automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH`) on idea01/03/04, 2026-10-13 **14:54-15:14 CEST** (freeze to Engine start). 175,189 changes → 1; 26 MB → 322 KB. Gates G1-G4 GO, verify steps 13-18 PASS, no rollback. idea02 and wizardly-hugle unchanged.
+- Evidence (ops box): `duration-evidence/path-a-stage2/compaction-devpool/RESULT.md`.
+- Afterwards: cover-all **r86t PASSED 128/128** on 2VroE.
+
+## Plan (as written by Axle before execution; executed as below)
+Background: store-growth proposal (Q2), /workspace/r86q-diag/NOTES.md (173,991 changes, 2.90 MB saved, load(full) ~10 s on the box; compacted 322 KB, 0.39 s).
 
 ## 0. Facts confirmed read-only (14:40 CEST)
 - Pool Pis idea01 10.99.0.11, idea03 .13, idea04 .14. Engine dir `/home/pi/idea/agents/agent-engine-dev` (D below), pm2 app `engine`.
