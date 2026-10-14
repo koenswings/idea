@@ -1,6 +1,6 @@
 # IDEA Documentation Rules
 
-**Status:** Proposed (for Koen's approval) · **Maintained by:** Atlas (with Steve) · 14 October 2026
+**Status:** Approved (Koen merged #189, 14 October 2026) · **Maintained by:** Atlas (with Steve)
 
 These rules **extend** the rules that already apply in this repo. They do not replace them:
 
@@ -9,8 +9,8 @@ These rules **extend** the rules that already apply in this repo. They do not re
 - [`CONTEXT.md`](../CONTEXT.md): product knowledge (Engine, Console, App Disks).
 
 Where this file and those files seem to disagree, those files win and this file gets fixed.
-Nothing has been moved yet: the table in §3 is the proposed migration, executed only after
-Koen approves it.
+The migration in §3/§4 has been carried out (#187, #188, #190, #191); §3 lists the
+current locations.
 
 ## 1. The existing rules (unchanged)
 
@@ -51,38 +51,39 @@ Koen approves it.
 11. **The box is never the final location.** Evidence and raw test output (logs, JSON,
     test screenshots, diag dirs) stay out of `docs/`; summarise them in the GitHub issue.
 
-## 3. Inventory and proposed locations
+## 3. Inventory (current locations)
 
 Recent documents (≈ last 3 weeks). "box" = only on Koen's Grok Bot box.
 
-| Document | Current location | Proposed location |
+| Document | Location | Done in |
 |---|---|---|
-| IDEA Field Support Channel – Design | idea PR #188 | `proposals/2026-10-14-field-support-channel.md` (+ folder for PDF/diagram/build) — done in #188 |
-| Teacher tutorial | agent-app-dev `docs/tutorial-justice/` (main) + PR #14 | `docs/manuals/teachers/teacher-tutorial/` |
-| Lesson manuals (Form 3 variables, Grade 5A fractions) | agent-app-dev PR #15 `docs/lesson-manuals/` | `docs/manuals/teachers/lesson-manuals/` |
-| Install manual 1 – school server | agent-app-dev PR #15 `docs/install-guides/` | `docs/manuals/install/install-manual-school-server/` |
-| Install manual 2 – client Pi 400 | agent-app-dev PR #15 `docs/install-guides/` | `docs/manuals/install/install-manual-client-pi400/` |
-| Router setup scripts | agent-app-dev PR #15 `docs/install-guides/scripts/` | `docs/manuals/install/scripts/` |
-| Remote access guide (Justice) | agent-app-dev PR #15 `docs/justice-access/` | `docs/manuals/field/remote-access-guide/` |
-| House style module | agent-app-dev PR #14/#15 `docs/house-style/`; box copies | `docs/house-style/` (single copy) |
-| Demo accounts (internal) | agent-app-dev `docs/tutorial-justice/demo-accounts-internal.md` | out of `docs/` (contains passwords) |
-| wizardly-hugle tutorial notes (DONE.md) | agent-app-dev PR #15 | evidence: issue comment, not `docs/` |
-| **Store growth proposal** | idea `docs/store/STORE-GROWTH-PROPOSAL.md` (main, via #186) | **misplaced:** a design → `proposals/2026-10-13-store-growth.md` |
-| Store compaction plan | idea `docs/store/COMPACTION-PLAN-devpool.md` (main, via #186) | executed procedure → `docs/ops/` runbook is fine; the reasoning part belongs in the store-growth proposal |
-| Store compaction result 2026-10-13 | idea `docs/store/COMPACTION-RESULT-devpool-20261013.md` (main, via #186) | evidence → summarise in the issue, or keep as a short ops record in `docs/ops/` (Koen to choose) |
-| Engine key / root helper designs | idea `proposals/design-*.md` (main, #186) | correct folder; rename to dated `proposals/2026-10-13-<topic>.md` optional |
-| Boot recovery runbook | idea PR #187 `docs/ops/BOOT-RECOVERY.md` | `docs/ops/` (correct; kebab-case name) |
-| Avahi hostname clash | idea PR #187 `docs/ops/AVAHI-HOSTNAME-CLASH.md` | a proposed fix → `proposals/`; any as-run workaround stays in `docs/ops/` |
-| Tailscale `tag:idea` decision | idea PR #187 `docs/ops/TAILSCALE-DECISION.md` | `proposals/2026-10-13-tailscale-single-fleet-tag.md` |
-| Fleet store ID record | idea PR #185 (fleet state) | same (data, not a document) |
-| Engine/Console/app technical docs and proposals | their own repos | stay |
-| Audit 2026-10-13, r86q diagnostics | box | box / issue (evidence) |
-| Box working copies (store design, support channel design) | box | delete after the idea PRs merge |
+| IDEA Field Support Channel – Design | `proposals/2026-10-14-field-support-channel.md` (+ `proposals/2026-10-14-field-support-channel/` for PDF, diagram, build) | #188 |
+| Teacher tutorial | `docs/manuals/teachers/teacher-tutorial/` | #191 |
+| Lesson manuals (Form 3 variables, Grade 5A fractions) | `docs/manuals/teachers/lesson-manuals/` | #191 |
+| Install manual 1 – school server | `docs/manuals/install/install-manual-school-server/` | #191 |
+| Install manual 2 – client Pi 400 | `docs/manuals/install/install-manual-client-pi400/` | #191 |
+| Router setup scripts | `docs/manuals/install/scripts/` | #191 |
+| Remote access guide (field engineer) | `docs/manuals/field/remote-access-guide/` | #191 |
+| House style module | `docs/house-style/` (single copy) | #191 |
+| Demo accounts (internal) | out of `docs/` (contains passwords) | — |
+| wizardly-hugle tutorial notes (DONE.md) | evidence: issue comment, not `docs/` | — |
+| Store growth proposal | `proposals/2026-10-13-store-growth.md` | #190 |
+| Store compaction plan + result record (3zoqd → 2VroE, 2026-10-13) | `docs/ops/store-compaction-devpool.md` (runbook); raw evidence stays on the box | #190 |
+| Engine key / root helper designs | `proposals/design-per-pi-engine-key.md`, `proposals/design-school-engine-key.md`, `proposals/design-root-helper.md` (dated rename optional) | #186 |
+| Boot recovery runbook | `docs/ops/boot-recovery.md` | #187 |
+| Avahi hostname clash (proposed fix) | `proposals/2026-10-13-avahi-hostname-clash.md` | #187 |
+| Tailscale `tag:idea` decision | `proposals/2026-10-13-tailscale-single-fleet-tag.md` | #187 |
+| Fleet store ID record | `fleet-state.json` (data, not a document) | #185 |
+| Engine/Console/app technical docs and proposals | their own repos | — |
+| Audit 2026-10-13, r86q diagnostics | box / issue (evidence) | — |
+| Box working copies (store design, support channel design) | box; delete now that the idea PRs have merged | — |
+
+There is no `docs/store/` any more.
 
 **Earlier tutorials for Marco:** not found in the `idea` repo (main, branches, PRs or
 history). The only teacher tutorial in Git is agent-app-dev `docs/tutorial-justice/`.
 
-## 4. Migration plan (after approval)
+## 4. Migration plan (done)
 
 1. Do not merge agent-app-dev #14/#15; one idea PR moves their contents and the house style
    into `docs/manuals/…` and `docs/house-style/`, fixes each `build.py` path, rebuilds every
