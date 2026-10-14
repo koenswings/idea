@@ -18,6 +18,9 @@ Design intent and decision history belong in `proposals/`. Product knowledge (En
 `CONTEXT.md`. This directory is for the org itself: who is deployed, how we work, what is
 running.
 
+User-facing manuals live in `docs/manuals/<audience>/<name>/`, the house style in
+`docs/house-style/`. Full placement rules: [`DOCUMENTATION-RULES.md`](DOCUMENTATION-RULES.md).
+
 ## When to update
 
 An authoritative doc must be updated in the **same PR** as the change that makes it true.

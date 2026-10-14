@@ -34,6 +34,11 @@ Evidence summary of the 2026-10-13 compaction: 3zoqd -> 2VroE, 175,189 changes -
 Why the shared store grows (heartbeats/metrics in history) and the plan: ephemeral heartbeat/metrics, archive ops, compaction.
 → [docs/store/STORE-GROWTH-PROPOSAL.md](store/STORE-GROWTH-PROPOSAL.md)
 
+## DOCUMENTATION-RULES.md
+**Status:** Proposed  ·  **Maintained by:** Steve / Atlas
+Extends proposals/README.md and docs/README.md: adds docs/manuals/<audience>/<name>/ and docs/house-style/; naming, build and secrets rules; inventory with proposed locations.
+→ [docs/DOCUMENTATION-RULES.md](DOCUMENTATION-RULES.md)
+
 ## ops/boot-recovery.md
 **Status:** Authoritative  ·  **Maintained by:** Atlas
 What comes back after a reboot, fstab loop mounts for fixture disks (rules, rollback), the 05:00 reboot hold, after-reboot checklist.
