@@ -69,3 +69,15 @@ Options for tracing all agent activity. Decision: GitHub Actions logs for coding
 ## milkwise-grok-bot.md
 **Status:** Pending · **Author:** Atlas
 MilkWise standalone product Grok Bot setup — Lead and Dev Bots, extraction steps.
+
+## design-per-pi-engine-key.md
+**Status:** Decided (Koen, 2026-10-06; not built yet) · **Author:** Engine Dev (Axle), filed by Atlas
+Each Engine has its own SSH key, exchanged through the shared store, so Pis move between schools with no ops step.
+
+## design-school-engine-key.md
+**Status:** Superseded by design-per-pi-engine-key.md (2026-10-06) · **Author:** Engine Dev (Axle), filed by Atlas
+One Engine key per school for cross-Pi copy/move; kept for the record.
+
+## design-root-helper.md
+**Status:** Proposal (borg/root helpers since merged in engine #184) · **Author:** Engine Dev (Axle), filed by Atlas
+Root helper `idea-app-data`: fixed verbs (copy, delete, borg on one repo), checked tokens, single sudoers line.
