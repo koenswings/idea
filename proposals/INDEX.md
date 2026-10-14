@@ -40,7 +40,7 @@ Original virtual company design: agent roles, cross-agent task convention, outpu
 
 ## ssh-key-management.md
 **Status:** Implemented · **Author:** Atlas
-SSH key types, command= convention, authorized_keys restrictions, IDEA SSH access map.
+SSH key types, command= convention, authorized_keys restrictions, IDEA SSH access map. Tailscale tag/key parts superseded by [2026-10-13-tailscale-single-fleet-tag.md](2026-10-13-tailscale-single-fleet-tag.md).
 
 ## openclaw-native-migration.md
 **Status:** Implemented · **Author:** Atlas
@@ -48,7 +48,7 @@ Trade-off analysis for OpenClaw Docker vs native install. Option B (native) sele
 
 ## tailscale-remote-management.md
 **Status:** Implemented · **Author:** Atlas
-Latent Tailscale debug mode for school Pis: ephemeral auth keys, ACL tag model, USB activation.
+Latent Tailscale debug mode for school Pis: ephemeral auth keys, ACL tag model, USB activation. **Per-school/`tag:school-pi` parts superseded by [2026-10-13-tailscale-single-fleet-tag.md](2026-10-13-tailscale-single-fleet-tag.md) (always on, one `tag:idea`, one fleet key).**
 
 ## agent-identity-memory-architecture.md
 **Status:** Implemented · **Author:** Atlas
@@ -81,3 +81,11 @@ One Engine key per school for cross-Pi copy/move; kept for the record.
 ## design-root-helper.md
 **Status:** Proposal (borg/root helpers since merged in engine #184) · **Author:** Engine Dev (Axle), filed by Atlas
 Root helper `idea-app-data`: fixed verbs (copy, delete, borg on one repo), checked tokens, single sudoers line.
+
+## 2026-10-13-tailscale-single-fleet-tag.md
+**Status:** Approved · **Author:** Atlas (decision by Koen)
+Tailscale always on at schools; one fleet tag `tag:idea` and one fleet auth key, no per-school tags or keys; ACL admins->tag:idea only, no Pi-to-Pi over Tailscale (LAN websocket only). Supersedes the tag/key parts of tailscale-remote-management.md and ssh-key-management.md.
+
+## 2026-10-13-avahi-hostname-clash.md
+**Status:** Draft · **Author:** Atlas
+Engine mDNS (ciao) and avahi both claim `<host>.local`, so every Engine renames to "<host> (2)" at start; proposes publishing as `<host>-engine` and reading TXT from answers.
