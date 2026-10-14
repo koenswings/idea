@@ -15,7 +15,7 @@ Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment,
 | `teardown.sh <pi>` | Reverse deploy, restore main, mark Pi idle |
 | `update-golden.sh <component> <version>` | Update golden Pi to new version of a component |
 | `set-golden-pi.sh` | Designate new golden Pi if current unavailable |
-| `check-fleet-health.sh` | Health-check every Pi in fleet-state (Tailscale ssh, Console :8080, pm2 engine, versions, disk); JSON out, exit 1 if unhealthy. Tests: `check-fleet-health.test.sh` |
+| `check-fleet-health.sh` | Health-check every Pi in fleet-state (Tailscale ssh, Console on `console_port` (default :8080), pm2 engine, versions, disk); JSON out, exit 1 if unhealthy. Tests: `check-fleet-health.test.sh` |
 | `update-fleet-state.sh [--create] [--json\|--null] <pi> <field> [<value>]` | Locked (flock), atomic read-modify-write of one field in fleet-state.json. `--null` clears a field to JSON `null`, `--json` stores a typed JSON value, unknown Pis are refused unless `--create`. Audit line goes to `audit/` next to `STATE_FILE`. **Implemented**; `selftest.sh` exercises it against a temp copy |
 | `duration-test-claim.sh` | Claim N pool Pis (idea01/03/04 only; refuse golden idea02) for a duration-walk id via `update-fleet-state.sh` (idea#166). **Implemented**; offline tests in `duration-test-ops.test.sh` |
 | `duration-test-release.sh` | Clear duration-walk claims → idle; print unique-store + mDNS-off restore checklist (wraps stub `teardown.sh`) |
