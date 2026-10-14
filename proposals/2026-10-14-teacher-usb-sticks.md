@@ -278,17 +278,17 @@ Chapters land in the release PRs with the features, after the hardware tests (DO
 
 ## 15. Open questions for Koen (with recommendations)
 
-1. **Who sees the stick folder in Nextcloud?** Recommend: **teachers group + admin only**, not learners. A stick can hold anything; teachers decide what to copy into shared folders.
-2. **What happens on unplug?** Recommend: folder disappears within seconds, no warning needed; read-only means nothing open can be lost. Files already copied stay.
-3. **Several sticks at once?** Recommend: yes, each its own "USB: name" folder, " (2)" on duplicate names.
-4. **Which Pi shows it?** Recommend: only the Pi it is plugged into (its Nextcloud and builder). No cross-Pi sharing in v1.
-5. **Should the Console show it?** Recommend: yes, a read-only info row per stick, no new actions (erase stays available).
-6. **Writable marker mode?** Recommend: **not in v1** (§9).
-7. **NTFS sticks?** Recommend: not in v1; they stay erase-only. Add if field schools report many NTFS sticks.
-8. **Should a stick be backed up?** Recommend: no (part of the later backup proposal); copied files are backed up with Nextcloud.
-9. **Auto-build trigger?** Recommend: **only sticks with a top-level `kolibri` folder**, one channel per subfolder; optional `channel.json`. Never every stick.
-10. **Build automatically or ask first?** Recommend: **build automatically**; Kolibri Import stays the human gate before learners see anything.
+1. **Who sees the stick folder in Nextcloud?** **Decided by Koen 2026-10-14** (recommendation accepted): **teachers group + admin only**, not learners. A stick can hold anything; teachers decide what to copy into shared folders.
+2. **What happens on unplug?** **Decided by Koen 2026-10-14** (recommendation accepted): folder disappears within seconds, no warning needed; read-only means nothing open can be lost. Files already copied stay.
+3. **Several sticks at once?** **Decided by Koen 2026-10-14** (recommendation accepted): yes, each its own "USB: name" folder, " (2)" on duplicate names.
+4. **Which Pi shows it?** **Decided by Koen 2026-10-14** (recommendation accepted): only the Pi it is plugged into (its Nextcloud and builder). No cross-Pi sharing in v1.
+5. **Should the Console show it?** **Decided by Koen 2026-10-14** (recommendation accepted): yes, a read-only info row per stick, no new actions (erase stays available).
+6. **Writable marker mode?** **Decided by Koen 2026-10-14** (recommendation accepted): **not in v1** (§9).
+7. **NTFS sticks?** **Decided by Koen 2026-10-14** (recommendation accepted): not in v1; they stay erase-only. Add if field schools report many NTFS sticks.
+8. **Should a stick be backed up?** **Decided by Koen 2026-10-14** (recommendation accepted): no (part of the later backup proposal); copied files are backed up with Nextcloud.
+9. **Auto-build trigger?** **Decided by Koen 2026-10-14** (recommendation accepted): **only sticks with a top-level `kolibri` folder**, one channel per subfolder; optional `channel.json`. Never every stick.
+10. **Build automatically or ask first?** **Decided by Koen 2026-10-14** (recommendation accepted): **build automatically**; Kolibri Import stays the human gate before learners see anything.
 11. **Should the Engine start the builder when such a stick appears?** **Decided by Koen 2026-10-14: yes**, if the builder app is docked on that Pi and not stopped by an operator (§8.2a). Without a builder on that Pi: no start, Console hint.
-12. **Size cap for auto-build?** Recommend: **8 GB per stick**, adjustable; larger sticks use the manual build.
-13. **Author when there is no `channel.json`?** Recommend: the stick label (e.g. "MARY-STICK"); teachers who care add `channel.json`.
+12. **Size cap for auto-build?** **Decided by Koen 2026-10-14** (recommendation accepted): **8 GB per stick**, adjustable; larger sticks use the manual build.
+13. **Author when there is no `channel.json`?** **Decided by Koen 2026-10-14** (recommendation accepted): the stick label (e.g. "MARY-STICK"); teachers who care add `channel.json`.
 14. **Builder in Console demo mode?** **Decided by Koen 2026-10-14: yes** (§8.4).
