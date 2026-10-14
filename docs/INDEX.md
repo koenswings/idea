@@ -19,21 +19,6 @@ control (§5), routines, team structure, and Bot descriptions.
 Short orientation for the `docs/` folder.
 → [docs/README.md](README.md)
 
-## store/COMPACTION-PLAN-devpool.md
-**Status:** Authoritative (executed 2026-10-13)  ·  **Maintained by:** Axle (plan) / Atlas (executor)
-Procedure for compacting the dev-pool Automerge store into a fresh document (freeze, merge heads, swap, verify steps 13-18, rollback).
-→ [docs/store/COMPACTION-PLAN-devpool.md](store/COMPACTION-PLAN-devpool.md)
-
-## store/COMPACTION-RESULT-devpool-20261013.md
-**Status:** Authoritative  ·  **Maintained by:** Atlas
-Evidence summary of the 2026-10-13 compaction: 3zoqd -> 2VroE, 175,189 changes -> 1, 26 MB -> 322 KB, downtime 14:54-15:14 CEST, verify PASS.
-→ [docs/store/COMPACTION-RESULT-devpool-20261013.md](store/COMPACTION-RESULT-devpool-20261013.md)
-
-## store/STORE-GROWTH-PROPOSAL.md
-**Status:** Design, in pool proof (engine #192/#194, console #148; target < 2k changes/day)  ·  **Maintained by:** Axle
-Why the shared store grows (heartbeats/metrics in history) and the plan: ephemeral heartbeat/metrics, archive ops, compaction.
-→ [docs/store/STORE-GROWTH-PROPOSAL.md](store/STORE-GROWTH-PROPOSAL.md)
-
 ## DOCUMENTATION-RULES.md
 **Status:** Proposed  ·  **Maintained by:** Steve / Atlas
 Extends proposals/README.md and docs/README.md: adds docs/manuals/<audience>/<name>/ and docs/house-style/; naming, build and secrets rules; inventory with proposed locations.
@@ -46,7 +31,7 @@ Extends proposals/README.md and docs/README.md: adds docs/manuals/<audience>/<na
 The single IDEA house style for project PDFs (housestyle.py, house.css). Build scripts find it by walking up to docs/house-style or via IDEA_HOUSE_STYLE.
 → [docs/house-style/](house-style/)
 
-Files: `house-style/README.md`, `house-style/__pycache__/housestyle.cpython-313.pyc`, `house-style/house.css`, `house-style/housestyle.py`
+Files: `house-style/README.md`, `house-style/house.css`, `house-style/housestyle.py`
 
 ### Teacher tutorial (teacher-tutorial.pdf)
 **Status:** Authoritative  ·  **Maintained by:** Marco / Atlas
@@ -75,3 +60,12 @@ How Koen shares wizardly-hugle and how the field engineer reaches it over Tailsc
 → [docs/manuals/field/remote-access-guide/](manuals/field/remote-access-guide/)
 
 Files: `manuals/field/remote-access-guide/README.md`, `manuals/field/remote-access-guide/build.py`, `manuals/field/remote-access-guide/diagrams/checks.svg`, `manuals/field/remote-access-guide/diagrams/flow.svg`, `manuals/field/remote-access-guide/diagrams/make_diagrams.py`, `manuals/field/remote-access-guide/diagrams/overview.svg`, `manuals/field/remote-access-guide/diagrams/privacy.svg`, `manuals/field/remote-access-guide/remote-access-guide.md`, `manuals/field/remote-access-guide/remote-access-guide.pdf`
+## ops/boot-recovery.md
+**Status:** Authoritative  ·  **Maintained by:** Atlas
+What comes back after a reboot, fstab loop mounts for fixture disks (rules, rollback), the 05:00 reboot hold, after-reboot checklist.
+→ [docs/ops/boot-recovery.md](ops/boot-recovery.md)
+
+## ops/store-compaction-devpool.md
+**Status:** Authoritative (executed 2026-10-13)  ·  **Maintained by:** Atlas
+Runbook for compacting the dev-pool Automerge store into a fresh document (freeze, merge heads, swap, verify 13-18, rollback), with the result record: 3zoqd -> 2VroE on 2026-10-13 14:54-15:14 CEST, cover-all r86t 128/128 afterwards.
+→ [docs/ops/store-compaction-devpool.md](ops/store-compaction-devpool.md)
