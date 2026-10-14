@@ -15,21 +15,23 @@
 | **System Disk** | The IDEA box's own disk. The apps live on it. |
 | **IDEA Disk** | A USB disk or stick that the Console has prepared. It can become a **Files Disk** or a **Backup Disk**. |
 | **Spare disk** | An IDEA Disk that is still empty. |
-| **Files Disk** | An IDEA Disk for your own files. It appears as the folder **School Files** in Nextcloud (chapter 8). |
-| **Backup Disk** | An IDEA Disk that keeps copies of the apps' data (chapter 9). |
+| **Files Disk** | An IDEA Disk for your own files. It appears as the folder **School Files** in Nextcloud (chapter 9). |
+| **Backup Disk** | An IDEA Disk that keeps copies of the apps' data (chapter 10). |
+| **USB stick** | Your own USB stick (FAT32 or exFAT), filled on any computer. IDEA only reads it and never changes it (chapter 5). |
+| **Channel builder** | The IDEA app that turns a folder of your videos and PDFs into a Kolibri channel (chapter 5). |
 | **Operator** | The person at the school who looks after the IDEA box, with the IDEA contact on the phone (Part B). |
 
 ## 1.2 The apps
 
 | App | What you use it for | Chapters |
 |---|---|---|
-| **Kolibri** | Ready-made lessons, videos and exercises (for example Khan Academy). You make classes, lessons and quizzes and see each learner's progress. | 3, 4 |
-| **Nextcloud** | Your own files: share worksheets with a class, write documents together in **Nextcloud Office**, collect homework. | 5, 6, 8 |
-| **Kiwix** | Wikipedia and other reference books, offline. | 7 |
+| **Kolibri** | Ready-made lessons, videos and exercises (for example Khan Academy). You make classes, lessons and quizzes and see each learner's progress. With the **channel builder** you turn your own files into a Kolibri channel. | 3, 4, 5 |
+| **Nextcloud** | Your own files: share worksheets with a class, write documents together in **Nextcloud Office**, collect homework. | 6, 7, 9 |
+| **Kiwix** | Wikipedia and other reference books, offline. | 8 |
 
 ## 1.3 How to use this guide
 
-- **Part A (chapters 1 to 9)** is for teachers.
-- **Part B (chapters 10 and 11)** is for the school operator.
+- **Part A (chapters 1 to 10)** is for teachers.
+- **Part B (chapters 11 and 12)** is for the school operator.
 - Each chapter has numbered steps with screenshots. The screenshots come from the IDEA demo box and use demo accounts whose names start with `demo` (see the appendix). Your school's names will be different.
 

@@ -16,7 +16,10 @@ def find_house_style(here):
 STATUS = re.compile(r"^\*\*Status:\*\*.*\n+", re.M)   # status line on top of each source; not printed
 sys.path.insert(0, find_house_style(HERE)); import housestyle
 meta, _ = housestyle.split_front_matter(open(os.path.join(HERE, "teacher-tutorial.md"), encoding="utf-8").read())
-PARTS = {1: ("Part A", "For teachers"), 10: ("Part B", "For the school operator")}
+PARTS = {1: ("Part A", "For teachers"), 11: ("Part B", "For the school operator")}
+# [[pending-shot: ID | caption]] = a screenshot still to be taken; rendered as a box, listed at the end of the build
+PENDING = re.compile(r"^\[\[pending-shot: *([A-Z0-9-]+) *\| *(.+?) *\]\]$", re.M)
+pending = []
 parts, bad = [], []
 for f in sorted(glob.glob(os.path.join(HERE, "chapters", "*.md"))):
     t = STATUS.sub("", open(f, encoding="utf-8").read(), count=1)
@@ -28,6 +31,8 @@ for f in sorted(glob.glob(os.path.join(HERE, "chapters", "*.md"))):
     if num and int(num.group(1)) in PARTS:
         a, b = PARTS[int(num.group(1))]
         parts.append(f'<div class="part"><h1 class="parttitle" id="part-{a[-1].lower()}">{a}: {b}</h1></div>')
+    for m in PENDING.finditer(t): pending.append(f"{m.group(1)} ({os.path.basename(f)}): {m.group(2)}")
+    t = PENDING.sub(lambda m: f'<div class="confirm"><b>Screenshot pending retake ({m.group(1)}):</b> {m.group(2)}.</div>', t)
     parts.append(t.replace("](../screenshots/", "](screenshots/").strip())
 if bad:
     sys.exit("BUILD FAILED: 'to confirm' markers left:\n" + "\n".join(bad))
@@ -41,3 +46,4 @@ h1.parttitle { page-break-before: avoid; border: none; font-size: 24pt; }"""
 housestyle.build("\n\n".join(parts), meta, os.path.join(HERE, "teacher-tutorial.pdf"), base_url=HERE, extra_css=extra, keep_html=False,
     note="IDEA - offline school computing.<br>No real passwords are included. Demo passwords come from your IDEA contact.")
 print("built teacher-tutorial.pdf")
+if pending: print(f"{len(pending)} screenshots pending retake:\n  " + "\n  ".join(pending))

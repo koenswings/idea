@@ -1,10 +1,10 @@
 **Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 October 2026
 
-# 7. Wikipedia offline (Kiwix)
+# 8. Wikipedia offline (Kiwix)
 
 The demo has **Wikipedia in simple English** (text, no pictures). It works without internet.
 
-## 7.1 Look something up and use it in class
+## 8.1 Look something up and use it in class
 
 1. Open Kiwix from the Console (chapter 2). The **Kiwix** library shows the books available.
    ![The Kiwix library](../screenshots/W1-01.png)

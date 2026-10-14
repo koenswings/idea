@@ -3,8 +3,8 @@
 # Teacher tutorial
 
 `teacher-tutorial.pdf` ("IDEA for Teachers: Tutorial", 55 pages): Kolibri, Nextcloud, Wikipedia offline, Files Disk and
-Backup Disk on the demo server wizardly-hugle. Part A for teachers (chapters 01-09), Part B for the school operator (10-11),
-appendix with the demo usernames (12).
+Backup Disk on the demo server wizardly-hugle. Part A for teachers (chapters 01-10, including chapter 05 on the channel builder and USB sticks), Part B for the school
+operator (11-12), appendix with the demo usernames (13).
 
 Build: `python3 build.py` (uses `docs/house-style`; fails if a "to confirm" marker is left).
 Sources: `teacher-tutorial.md` (front matter: title on the cover), `chapters/*.md`, `screenshots/` (only the shots used in
