@@ -89,3 +89,7 @@ Tailscale always on at schools; one fleet tag `tag:idea` and one fleet auth key,
 ## 2026-10-13-avahi-hostname-clash.md
 **Status:** Draft · **Author:** Atlas
 Engine mDNS (ciao) and avahi both claim `<host>.local`, so every Engine renames to "<host> (2)" at start; proposes publishing as `<host>-engine` and reading TXT from answers.
+
+## 2026-10-14-field-support-channel.md
+**Status:** Approved (Koen agreed in chat 2026-10-14; merge confirms) · **Author:** Steve (Lead Bot)
+IDEA Field Support Channel – Design: one contact point for field people (Justice first). Router sends technical questions to a new Support Engineer agent and teaching/manual questions to Marco; agents only filter and report, never change anything; Steve escalates to Koen. Phase 0 email to one Grok Bot address, phase 1 WhatsApp Business (Meta Cloud API), phase 2 more schools. PDF, diagram and build script in `proposals/2026-10-14-field-support-channel/`.
