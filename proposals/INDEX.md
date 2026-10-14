@@ -97,3 +97,8 @@ Tailscale always on at schools; one fleet tag `tag:idea` and one fleet auth key,
 ## 2026-10-14-field-support-channel.md
 **Status:** Approved (Koen agreed in chat 2026-10-14; merge confirms) · **Author:** Steve (Lead Bot)
 IDEA Field Support Channel – Design: one contact point for field people (Justice first). Router sends technical questions to a new Support Engineer agent and teaching/manual questions to Marco; agents only filter and report, never change anything; Steve escalates to Koen. Phase 0 email to one Grok Bot address, phase 1 WhatsApp Business (Meta Cloud API), phase 2 more schools. PDF, diagram and build script in `proposals/2026-10-14-field-support-channel/`.
+
+## 2026-10-14-teacher-usb-sticks.md
+**Status:** Draft · **Author:** Steve (Lead Bot)
+Teacher USB sticks: any FAT/exFAT stick is mounted read-only (`ro,nosuid,nodev,noexec`) under `/run/idea-usb`, published as `Engine.usbSticks` (not an IDEA disk), and shown in Nextcloud as a read-only "USB: <name>" folder for teachers (static rslave bind, no recreate) and as a source in the Kolibri channel builder. Amends files-disk.md's "never mounts FAT/exFAT" rule (erase still possible). Writable marker mode deferred; Files Disk backup is a later proposal. Includes the teacher-tutorial changes.
+
