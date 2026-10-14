@@ -1,63 +1,55 @@
 # IDEA Documentation Rules
 
-**Status:** Proposed (for Koen's approval) · **Maintained by:** Steve / Atlas · 14 October 2026
+**Status:** Proposed (for Koen's approval) · **Maintained by:** Atlas (with Steve) · 14 October 2026
 
-Where each document lives, how it is named and built. Nothing has been moved yet: the
-table in §3 is the proposed migration, executed only after Koen approves it.
+These rules **extend** the rules that already apply in this repo. They do not replace them:
 
-## 1. Rules
+- [`proposals/README.md`](../proposals/README.md): designs and decisions, format and lifecycle.
+- [`docs/README.md`](README.md): authoritative, as-implemented documentation.
+- [`CONTEXT.md`](../CONTEXT.md): product knowledge (Engine, Console, App Disks).
 
-1. **Product and user-facing documentation lives in the `idea` repo**, under `docs/`:
+Where this file and those files seem to disagree, those files win and this file gets fixed.
+Nothing has been moved yet: the table in §3 is the proposed migration, executed only after
+Koen approves it.
 
-   | Folder | What goes there |
-   |---|---|
-   | `docs/teachers/` | Teacher tutorials and lesson manuals (per-lesson subfolders) |
-   | `docs/install/` | Install manuals (school server, client Pi) and their helper scripts |
-   | `docs/field/` | Guides for field/support people (e.g. remote access guide) |
-   | `docs/design/` | Approved and proposed cross-component designs |
-   | `docs/ops/` | Fleet operations runbooks (boot recovery, avahi clash, store compaction) |
-   | `docs/decisions/` | Decision records (one file per decision, dated) |
-   | `docs/house-style/` | The one house style module (`housestyle.py`, `house.css`, README) |
+## 1. The existing rules (unchanged)
 
-   The existing `proposals/` folder stays for proposals not yet approved; once approved a
-   design moves (or is copied as final) to `docs/design/`.
-2. **Component-internal technical docs stay in their own repo**: Engine, Console and each
-   app repo keep their README, `docs/` (architecture, commands, scripts) and `proposals/`
-   that concern only that component.
-3. **The box is never the final location.** A document that exists only on the box is a
-   draft. Evidence and raw test output (logs, JSON, screenshots of test runs, diag dirs)
-   stay on the box or are attached/summarised in GitHub issues; they are not committed to
-   `docs/`.
-4. **One house style module, in one place** (`idea/docs/house-style/`). No copies in other
-   repos or document folders. Build scripts locate it relative to the repo, or via the
-   `IDEA_HOUSE_STYLE` environment variable.
-5. **Source, build script and PDF are committed together** in one folder:
+1. **`proposals/` holds designs and decisions.** File: `proposals/<YYYY-MM-DD>-<topic>.md`,
+   with the header `**Author:**` / `**Date:**` / `**Status:** Draft | Approved | Declined |
+   Superseded by <link>`. Koen merging the PR = approved. After implementation the proposal
+   stays unchanged as the record of *why*. A decision record (e.g. "Tailscale: one
+   `tag:idea` key") is a proposal file too. There is **no** `docs/design/` and **no**
+   `docs/decisions/`. Every proposal gets an entry in `proposals/INDEX.md`.
+2. **`docs/` is authoritative**: it describes only what is implemented, it is updated in the
+   same PR as the change that makes it true, and Atlas maintains it. When a design is
+   implemented, its result (not the reasoning) is written here. Ops runbooks for things
+   that run today (boot recovery, fleet procedures) belong here, e.g. `docs/ops/`.
+   Every file under `docs/` is listed in `docs/INDEX.md` (checked by the quality scan).
+3. **`CONTEXT.md`** holds product knowledge for the agents.
+4. **Component-internal technical docs stay in their own repo** (Engine, Console, each app:
+   README, `docs/`, `proposals/` that concern only that component).
+
+## 2. New: user-facing manuals and the house style
+
+5. **New category: `docs/manuals/<audience>/<name>/`** for manuals written for people
+   outside the dev team: teacher tutorial, lesson manuals, install manuals, field and
+   remote-access guides. Audiences: `teachers`, `install`, `field`. Manuals are authoritative
+   docs: they describe the system as it is and are updated when it changes.
+6. **Source, build script and PDF are committed together** in the manual's folder:
    `<name>.md` (+ chapters/diagrams), `build.py`, `<name>.pdf`. The PDF is rebuilt in the
-   same commit as any source change. No `__pycache__`, no intermediate HTML.
-6. **Naming:** kebab-case, descriptive full names, for folders and files
-   (`field-support-channel-design.md`, `install-manual-school-server.md`). No `DESIGN.md`,
-   no person names in folder names (use the role: `field/remote-access-guide`). The PDF
-   title metadata carries the full human title (e.g. "IDEA Field Support Channel – Design").
-7. **Status line on top:** Draft / Proposed / Approved YYYY-MM-DD, plus owner.
-8. **Secrets never included:** no keys, auth keys, passwords, tokens. Demo-account
-   passwords go in an internal note outside `docs/`. A deliberate exception (e.g. a
-   Tailscale IP a field engineer needs) is listed in the document's README.
-9. **Indexes:** every new or moved document gets an entry in `docs/INDEX.md`.
-
-## 2. House style move: what breaks
-
-Moving `docs/house-style/` from `agent-app-dev` (PRs #14/#15) to `idea/docs/house-style/`:
-
-- Every `build.py` today does `sys.path.insert(0, HERE/../house-style)` or uses a local
-  copy (`/workspace/support-channel-design/house-style`, `/workspace/teacher-manuals/house-style`).
-  After the move those imports still work **if the documents move with it** to
-  `idea/docs/<folder>/<doc>/` (two levels deep: path becomes `../../house-style`). Each
-  `build.py` needs that one-line path change; `field-support-channel/build.py` already
-  searches `IDEA_HOUSE_STYLE`, `./house-style` and `../../house-style`.
-- Anything left in `agent-app-dev` that builds PDFs would need a checkout of `idea` and
-  `IDEA_HOUSE_STYLE` set. Proposal: nothing user-facing stays there, so nothing breaks.
-- `house.css` references to fonts/images must be relative to the module folder (check
-  during the move). Box copies of the module are deleted after the move.
+   same commit as any source change. No `__pycache__`, no intermediate HTML. A proposal
+   that has a PDF keeps its assets in `proposals/<YYYY-MM-DD>-<topic>/` next to the `.md`.
+7. **One house style module, in `docs/house-style/`** (`housestyle.py`, `house.css`, README).
+   No copies elsewhere. Build scripts find it relative to the repo or via `IDEA_HOUSE_STYLE`.
+8. **Naming:** kebab-case, descriptive full names (`install-manual-school-server`); no
+   `DESIGN.md`, no person names in folder names (use the role: `remote-access-guide`).
+   The PDF title carries the full human title.
+9. **Status line on top** of every document (proposals use the proposal header).
+10. **No secrets:** no keys, auth keys, passwords, tokens. Demo-account passwords stay in an
+    internal note outside `docs/`. A deliberate exception (e.g. a Tailscale IP a field
+    engineer needs) is stated in that manual's README.
+11. **The box is never the final location.** Evidence and raw test output (logs, JSON,
+    test screenshots, diag dirs) stay out of `docs/`; summarise them in the GitHub issue.
 
 ## 3. Inventory and proposed locations
 
@@ -65,39 +57,37 @@ Recent documents (≈ last 3 weeks). "box" = only on Koen's Grok Bot box.
 
 | Document | Current location | Proposed location |
 |---|---|---|
-| IDEA Field Support Channel – Design | idea PR #188 `docs/design/field-support-channel/` | same (already compliant) |
-| Teacher tutorial (Justice) | agent-app-dev `docs/tutorial-justice/` (main) + PR #14 build/fixes | `idea/docs/teachers/teacher-tutorial/` |
-| Demo accounts (internal) | agent-app-dev `docs/tutorial-justice/demo-accounts-internal.md` | out of `docs/`; internal note (contains passwords) |
-| House style module | agent-app-dev PR #14/#15 `docs/house-style/`; box copies | `idea/docs/house-style/` (single copy) |
-| Install manual 1 – school server | agent-app-dev PR #15 `docs/install-guides/manual-1-school-server.*` | `idea/docs/install/install-manual-school-server/` |
-| Install manual 2 – client Pi 400 | agent-app-dev PR #15 `docs/install-guides/manual-2-client-pi400.*` | `idea/docs/install/install-manual-client-pi400/` |
-| Router setup scripts | agent-app-dev PR #15 `docs/install-guides/scripts/` | `idea/docs/install/scripts/` |
-| Justice remote access guide | agent-app-dev PR #15 `docs/justice-access/` | `idea/docs/field/remote-access-guide/` |
-| Lesson manuals (Form 3 variables, Grade 5A fractions) | agent-app-dev PR #15 `docs/lesson-manuals/`; sources box `/workspace/teacher-manuals/` | `idea/docs/teachers/lesson-manuals/` |
-| wizardly-hugle tutorial notes (DONE.md) | agent-app-dev PR #15 `docs/duration-evidence/…` | evidence: issue comment / box, not `docs/` |
-| Store growth proposal, compaction plan + result | idea `docs/store/` (main, #186) | `idea/docs/ops/store/` (plan/result) + `docs/design/` (proposal) |
-| Engine key / root helper designs | idea `proposals/design-*.md` (main, #186) | `idea/docs/design/` once approved |
-| Boot recovery, avahi clash runbooks | idea PR #187 `docs/ops/` | same; rename kebab-case |
-| Tailscale tag:idea decision | idea PR #187 `docs/ops/TAILSCALE-DECISION.md` | `idea/docs/decisions/2026-10-tailscale-tag-idea.md` |
+| IDEA Field Support Channel – Design | idea PR #188 | `proposals/2026-10-14-field-support-channel.md` (+ folder for PDF/diagram/build) — done in #188 |
+| Teacher tutorial | agent-app-dev `docs/tutorial-justice/` (main) + PR #14 | `docs/manuals/teachers/teacher-tutorial/` |
+| Lesson manuals (Form 3 variables, Grade 5A fractions) | agent-app-dev PR #15 `docs/lesson-manuals/` | `docs/manuals/teachers/lesson-manuals/` |
+| Install manual 1 – school server | agent-app-dev PR #15 `docs/install-guides/` | `docs/manuals/install/install-manual-school-server/` |
+| Install manual 2 – client Pi 400 | agent-app-dev PR #15 `docs/install-guides/` | `docs/manuals/install/install-manual-client-pi400/` |
+| Router setup scripts | agent-app-dev PR #15 `docs/install-guides/scripts/` | `docs/manuals/install/scripts/` |
+| Remote access guide (Justice) | agent-app-dev PR #15 `docs/justice-access/` | `docs/manuals/field/remote-access-guide/` |
+| House style module | agent-app-dev PR #14/#15 `docs/house-style/`; box copies | `docs/house-style/` (single copy) |
+| Demo accounts (internal) | agent-app-dev `docs/tutorial-justice/demo-accounts-internal.md` | out of `docs/` (contains passwords) |
+| wizardly-hugle tutorial notes (DONE.md) | agent-app-dev PR #15 | evidence: issue comment, not `docs/` |
+| **Store growth proposal** | idea `docs/store/STORE-GROWTH-PROPOSAL.md` (main, via #186) | **misplaced:** a design → `proposals/2026-10-13-store-growth.md` |
+| Store compaction plan | idea `docs/store/COMPACTION-PLAN-devpool.md` (main, via #186) | executed procedure → `docs/ops/` runbook is fine; the reasoning part belongs in the store-growth proposal |
+| Store compaction result 2026-10-13 | idea `docs/store/COMPACTION-RESULT-devpool-20261013.md` (main, via #186) | evidence → summarise in the issue, or keep as a short ops record in `docs/ops/` (Koen to choose) |
+| Engine key / root helper designs | idea `proposals/design-*.md` (main, #186) | correct folder; rename to dated `proposals/2026-10-13-<topic>.md` optional |
+| Boot recovery runbook | idea PR #187 `docs/ops/BOOT-RECOVERY.md` | `docs/ops/` (correct; kebab-case name) |
+| Avahi hostname clash | idea PR #187 `docs/ops/AVAHI-HOSTNAME-CLASH.md` | a proposed fix → `proposals/`; any as-run workaround stays in `docs/ops/` |
+| Tailscale `tag:idea` decision | idea PR #187 `docs/ops/TAILSCALE-DECISION.md` | `proposals/2026-10-13-tailscale-single-fleet-tag.md` |
 | Fleet store ID record | idea PR #185 (fleet state) | same (data, not a document) |
-| Store history r86q | agent-engine-dev `docs/STORE_HISTORY_R86Q.md` | stays (Engine-internal) |
-| Engine PI_FLEET / ARCHITECTURE / COMMANDS / SCRIPTS | agent-engine-dev `docs/` | stays |
-| Duration-test proposals + PDFs | agent-engine-dev `proposals/` | stays (component) |
-| Console architecture, proposals | agent-console-dev `docs/`, `proposals/` | stays |
-| App READMEs, Nextcloud files-disk | app repos `README.md`, `docs/` | stays |
-| Audit 2026-10-13 (AUDIT.md, branch archive list, proof plan) | box `/workspace/audit-20261013/` | box / issue (evidence) |
-| r86q diagnostics (NOTES.md + logs) | box `/workspace/r86q-diag/` | box / issue (evidence) |
-| Store design working copy (PROPOSAL.md) | box `/workspace/store-design/` | delete box copy (in idea `docs/store/`) |
-| Support channel design working copy | box `/workspace/support-channel-design/` | delete box copy after #188 merges |
+| Engine/Console/app technical docs and proposals | their own repos | stay |
+| Audit 2026-10-13, r86q diagnostics | box | box / issue (evidence) |
+| Box working copies (store design, support channel design) | box | delete after the idea PRs merge |
 
 **Earlier tutorials for Marco:** not found in the `idea` repo (main, branches, PRs or
-history). The only teacher tutorial in Git is agent-app-dev `docs/tutorial-justice/`
-(on main), with build fixes in PR #14.
+history). The only teacher tutorial in Git is agent-app-dev `docs/tutorial-justice/`.
 
 ## 4. Migration plan (after approval)
 
-1. Merge or close agent-app-dev #14/#15 as Koen prefers; then one idea PR moves the
-   documents and the house style per §3 and fixes each `build.py` path.
-2. Rebuild every PDF from the moved sources in that PR; verify no secrets.
-3. Leave a pointer README in `agent-app-dev/docs/` to the new locations.
-4. Update `docs/INDEX.md`.
+1. Do not merge agent-app-dev #14/#15; one idea PR moves their contents and the house style
+   into `docs/manuals/…` and `docs/house-style/`, fixes each `build.py` path, rebuilds every
+   PDF and checks for secrets; then #14/#15 are closed with a pointer.
+2. One idea PR moves `docs/store/STORE-GROWTH-PROPOSAL.md` to `proposals/` and settles the
+   compaction plan/result per §3.
+3. #187 is adjusted per §3 (Tailscale decision and avahi proposal to `proposals/`).
+4. `docs/INDEX.md` and `proposals/INDEX.md` are updated in each of those PRs.

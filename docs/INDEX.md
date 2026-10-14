@@ -36,5 +36,5 @@ Why the shared store grows (heartbeats/metrics in history) and the plan: ephemer
 
 ## DOCUMENTATION-RULES.md
 **Status:** Proposed  ·  **Maintained by:** Steve / Atlas
-Where documents live, naming, build and secrets rules; inventory with proposed locations.
+Extends proposals/README.md and docs/README.md: adds docs/manuals/<audience>/<name>/ and docs/house-style/; naming, build and secrets rules; inventory with proposed locations.
 → [docs/DOCUMENTATION-RULES.md](DOCUMENTATION-RULES.md)
