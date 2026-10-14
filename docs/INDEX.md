@@ -19,6 +19,11 @@ control (§5), routines, team structure, and Bot descriptions.
 Short orientation for the `docs/` folder.
 → [docs/README.md](README.md)
 
+## DOCUMENTATION-RULES.md
+**Status:** Proposed  ·  **Maintained by:** Steve / Atlas
+Extends proposals/README.md and docs/README.md: adds docs/manuals/<audience>/<name>/ and docs/house-style/; naming, build and secrets rules; inventory with proposed locations.
+→ [docs/DOCUMENTATION-RULES.md](DOCUMENTATION-RULES.md)
+
 ## ops/store-compaction-devpool.md
 **Status:** Authoritative (executed 2026-10-13)  ·  **Maintained by:** Atlas
 Runbook for compacting the dev-pool Automerge store into a fresh document (freeze, merge heads, swap, verify 13-18, rollback), with the result record: 3zoqd -> 2VroE on 2026-10-13 14:54-15:14 CEST, cover-all r86t 128/128 afterwards.
