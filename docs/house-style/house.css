@@ -1,0 +1,44 @@
+@page { size: A4; margin: 18mm 16mm 20mm 16mm;
+  @bottom-center { content: string(doctitle) "  -  page " counter(page) " of " counter(pages); font-size: 8pt; color: #777; }
+}
+@page :first { @bottom-center { content: none; } }
+html { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 10pt; line-height: 1.45; color: #1a1a1a; }
+.cover { page-break-after: always; padding-top: 60mm; text-align: left; }
+.cover h1.title { font-size: 26pt; color: #c51a4a; border: none; margin: 0 0 6mm 0; string-set: doctitle content(); }
+.cover .subtitle { font-size: 15pt; color: #333; margin-bottom: 14mm; }
+.cover .audience { font-size: 11pt; color: #555; }
+.cover .bar { height: 6mm; background: linear-gradient(90deg,#c51a4a,#1f77b4,#2ca02c); margin: 10mm 0; border-radius: 3mm; }
+.toc { page-break-after: always; }
+.toc ul { list-style: none; padding-left: 4mm; } .toc > ul { padding-left: 0; }
+.toc a { color: #1a1a1a; text-decoration: none; }
+.toc a::after { content: leader('.') target-counter(attr(href), page); }
+h1 { font-size: 17pt; color: #c51a4a; border-bottom: 2px solid #c51a4a; padding-bottom: 2mm; margin-top: 8mm; page-break-before: always; }
+h1.nobreak { page-break-before: avoid; }
+h2 { font-size: 13pt; color: #1f4e79; margin-top: 6mm; page-break-after: avoid; }
+h3 { font-size: 11pt; page-break-after: avoid; }
+p { margin: 2mm 0; }
+code { font-family: "DejaVu Sans Mono", monospace; font-size: 8.6pt; background: #f2f2f2; padding: 0 1px; border-radius: 2px; }
+pre { background: #f6f8fa; border: 1px solid #ddd; border-left: 4px solid #1f77b4; padding: 2.5mm; font-size: 8pt; white-space: pre-wrap; word-wrap: break-word; page-break-inside: auto; }
+pre code { background: none; font-size: 8pt; }
+table { border-collapse: collapse; width: 100%; margin: 3mm 0; font-size: 9pt; page-break-inside: auto; }
+th { background: #1f4e79; color: #fff; text-align: left; padding: 1.5mm 2mm; }
+td { border: 1px solid #ccc; padding: 1.5mm 2mm; vertical-align: top; }
+tr:nth-child(even) td { background: #fafafa; }
+tr { page-break-inside: avoid; }
+img { width: 100%; margin: 3mm 0; page-break-inside: avoid; }
+.note, .warn, .confirm { border-radius: 3px; padding: 2.5mm 3.5mm; margin: 3mm 0; page-break-inside: avoid; }
+.note { background: #eef5ff; border-left: 5px solid #1f77b4; }
+.warn { background: #fff4e5; border-left: 5px solid #ff7f0e; }
+.confirm { background: #fff0f3; border-left: 5px solid #c51a4a; }
+.note ul, .note ol, .warn ol, .warn ul, .confirm ol, .confirm ul { margin: 1mm 0 0 0; padding-left: 5mm; }
+.tc { background: #c51a4a; color: #fff; font-weight: bold; padding: 0 1.5mm; border-radius: 2px; font-size: 8.5pt; white-space: nowrap; }
+strong { color: #000; }
+li { margin: 0.8mm 0; }
+/* shared additions: figure captions and markdown blockquote callouts */
+body { counter-reset: fig; }
+figure { margin: 3mm 0; page-break-inside: avoid; }
+figure img { margin: 0; border: 1px solid #ccc; }
+figcaption { font-size: 8.5pt; color: #555; font-style: italic; margin-top: 1mm; }
+figcaption::before { counter-increment: fig; content: "Figure " counter(fig) ". "; font-weight: bold; font-style: normal; color: #1f4e79; }
+blockquote { background: #eef5ff; border-left: 5px solid #1f77b4; border-radius: 3px; padding: 2.5mm 3.5mm; margin: 3mm 0; page-break-inside: avoid; }
+blockquote p { margin: 1mm 0; }
