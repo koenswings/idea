@@ -289,6 +289,6 @@ Chapters land in the release PRs with the features, after the hardware tests (DO
 9. **Auto-build trigger?** Recommend: **only sticks with a top-level `kolibri` folder**, one channel per subfolder; optional `channel.json`. Never every stick.
 10. **Build automatically or ask first?** Recommend: **build automatically**; Kolibri Import stays the human gate before learners see anything.
 11. **Should the Engine start the builder when such a stick appears?** **Decided by Koen 2026-10-14: yes**, if the builder app is docked on that Pi and not stopped by an operator (§8.2a). Without a builder on that Pi: no start, Console hint.
-14. **Builder in Console demo mode?** **Decided by Koen 2026-10-14: yes** (§8.4).
 12. **Size cap for auto-build?** Recommend: **8 GB per stick**, adjustable; larger sticks use the manual build.
 13. **Author when there is no `channel.json`?** Recommend: the stick label (e.g. "MARY-STICK"); teachers who care add `channel.json`.
+14. **Builder in Console demo mode?** **Decided by Koen 2026-10-14: yes** (§8.4).
