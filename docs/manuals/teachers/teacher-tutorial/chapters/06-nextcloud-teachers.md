@@ -1,13 +1,13 @@
 **Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 October 2026
 
-# 5. Nextcloud for teachers
+# 6. Nextcloud for teachers
 
 Demo: `demo-teacher1`, groups `demo-Grade5A` (class) and `demo-teachers`. Office documents open in **Nextcloud Office**.
 
 Open Nextcloud from the Console (chapter 2) and sign in. Click **Files** at the top.
 ![Files](../screenshots/N0-01.png)
 
-## 5.1 Share worksheets with the class (view only)
+## 6.1 Share worksheets with the class (view only)
 
 1. Next to the folder `demo-Worksheets`, click the share icon (**Show sharing options**). The right panel opens on **Sharing**.
    ![Sharing panel](../screenshots/N1-01.png)
@@ -16,7 +16,7 @@ Open Nextcloud from the Console (chapter 2) and sign in. Click **Files** at the 
    ![Shared with group](../screenshots/N1-03.png)
 Learners now see the folder but cannot change or delete files.
 
-## 5.2 Write a document together
+## 6.2 Write a document together
 
 1. Click **+ New > New document**.
    ![New menu](../screenshots/N2-01.png)
@@ -29,7 +29,7 @@ Learners now see the folder but cannot change or delete files.
 5. The document opens in Nextcloud Office. When others open it at the same time, you see their names and cursors.
    ![Nextcloud Office](../screenshots/N2-04.png)
 
-## 5.3 Collect homework (File drop)
+## 6.3 Collect homework (File drop)
 
 Learners upload work, but cannot see each other's work.
 

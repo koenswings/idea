@@ -1,16 +1,18 @@
 **Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 October 2026
 
-# 11. Disks: Files Disk and Backup Disk
+# 12. Disks: Files Disk and Backup Disk
 
 This chapter is for the school operator, with the IDEA contact on the phone.
 
-## 11.1 A new disk (not yet an IDEA Disk)
+## 12.1 A new disk (not yet an IDEA Disk)
 
 1. A new disk appears under the IDEA box with its model and size and an **UNFORMATTED** badge.
    ![Unformatted disk](../screenshots/B2-00.png)
 2. Its view shows the model, the size and two buttons: **Make this a Files Disk** and **Erase this disk…**.
 
-## 11.2 Erase a disk
+**USB sticks.** A teacher's FAT32 or exFAT stick shows as **USB stick: (name) (read-only)**. It needs no erasing: the IDEA box only reads it, and teachers use it in Nextcloud and the channel builder (chapter 5). **Erase this disk…** is still offered, but erasing turns the stick into an IDEA Disk and deletes the teacher's files, so only do it when asked. A stick with a `kolibri` folder is built into channels automatically only if the channel builder is on this box and not stopped: if you stopped it, the stick row says so. Start it again to build.
+
+## 12.2 Erase a disk
 
 1. Click **Erase this disk…**. The confirmation shows the disk name, model, size and contents, and the red warning "This erases everything on the disk…".
 2. Check the **size and contents**: several disks can have the same name (for example **IDEA Disk**). Make sure it is not the Backup Disk.
@@ -20,22 +22,22 @@ This chapter is for the school operator, with the IDEA contact on the phone.
 
 > **A Files Disk that Nextcloud is using cannot be erased.** Ask your IDEA contact to stop Nextcloud first.
 
-## 11.3 Make a Files Disk
+## 12.3 Make a Files Disk
 
 1. Select the **IDEA Disk** marked **empty**. The view asks "What would you like to do with this disk?": **Make this a Files Disk**, **Make this a Backup Disk** or **Install App**.
    ![Empty IDEA Disk](../screenshots/F1-11.png)
 2. Click **Make this a Files Disk**. The panel says "Nothing on the disk is erased", with **SHARE NAME** filled in as **School Files**. Click **Make this a Files Disk**.
    ![Make this a Files Disk](../screenshots/F1-12.png)
-3. After a short wait the disk shows the **files** badge, "Share name: School Files", the free space, an **Eject** button and **Erase this disk…**. Once your IDEA contact has linked it, the view also says **Available in: Nextcloud**. Teachers then find it in Nextcloud (chapter 8).
+3. After a short wait the disk shows the **files** badge, "Share name: School Files", the free space, an **Eject** button and **Erase this disk…**. Once your IDEA contact has linked it, the view also says **Available in: Nextcloud**. Teachers then find it in Nextcloud (chapter 9).
    ![Files Disk available in Nextcloud](../screenshots/F2-01.png)
 
-## 11.4 Eject a disk
+## 12.4 Eject a disk
 
 An IDEA Disk has a small eject icon next to its name in the Network list and an **Eject** button in its disk view. The System Disk has none. Never eject or unplug a disk during a backup.
 
 ![Eject button on a Files Disk](../screenshots/F1-14.png)
 
-## 11.5 Make a Backup Disk
+## 12.5 Make a Backup Disk
 
 1. Select an **IDEA Disk** marked **empty** and click **Make this a Backup Disk**.
    ![Empty disk options](../screenshots/B2-10.png)
@@ -46,7 +48,7 @@ An IDEA Disk has a small eject icon next to its name in the Network list and an 
 4. Click **Configure Backup Disk**. The disk gets the **backup** badge and a **Backups** list with each linked app.
    ![Backup Disk configured](../screenshots/B2-13.png)
 
-## 11.6 Run a backup
+## 12.6 Run a backup
 
 1. In **ALL APPS**, each linked app row has a **Back up** button next to Start, Stop and Open. Click it for Kolibri. The row shows **Backing up…** with a progress bar, and the **OPERATIONS** box at the top shows the same job.
    ![Back up clicked](../screenshots/B3-10a.png)
@@ -54,7 +56,7 @@ An IDEA Disk has a small eject icon next to its name in the Network list and an 
 3. When it is done, the Backup Disk's **Backups** list shows **Last backup** with the date and time for each app. Repeat for Nextcloud.
    ![Last backup for both apps](../screenshots/B4-20.png)
 
-## 11.7 Restore after a breakdown
+## 12.7 Restore after a breakdown
 
 You need a **spare disk** (an empty IDEA Disk) to restore onto.
 

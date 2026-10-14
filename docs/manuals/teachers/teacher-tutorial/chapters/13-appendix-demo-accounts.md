@@ -7,13 +7,13 @@ These are the accounts used for the screenshots. Your IDEA contact gives you the
 | Username | App | Role | Used in |
 |---|---|---|---|
 | demo_admin | Kolibri | Kolibri admin | 3.3 (shown in the enroll list) |
-| demo_teacher1 | Kolibri | Admin and coach of class demo-Grade5A | 3, 11.7 |
+| demo_teacher1 | Kolibri | Admin and coach of class demo-Grade5A | 3, 5.2, 12.7 |
 | demo_learner1 | Kolibri | Learner in demo-Grade5A | 4 |
 | demo_learner2 | Kolibri | Learner in demo-Grade5A | 4 |
 | demo_learner3 | Kolibri | Learner, enrolled in 3.3 | 3.3 |
-| demo-teacher1 | Nextcloud | Teacher (groups demo-Grade5A, demo-teachers) | 5, 8 |
-| demo-teacher2 | Nextcloud | Teacher (group demo-teachers) | 5.2 |
-| demo-learner1 | Nextcloud | Learner (group demo-Grade5A) | 6, 8.2 |
-| demo-learner2 | Nextcloud | Learner (group demo-Grade5A) | 6.1 |
+| demo-teacher1 | Nextcloud | Teacher (groups demo-Grade5A, demo-teachers) | 5.5, 6, 9 |
+| demo-teacher2 | Nextcloud | Teacher (group demo-teachers) | 6.2 |
+| demo-learner1 | Nextcloud | Learner (group demo-Grade5A) | 7, 9.2 |
+| demo-learner2 | Nextcloud | Learner (group demo-Grade5A) | 7.1 |
 
 Demo content: Kolibri class **demo-Grade5A**, lesson **demo-Fractions lesson**, quiz **demo-Fractions quiz**; Nextcloud folders **demo-Worksheets** and **demo-Drop Zone**, document **demo-Lesson plan**.
