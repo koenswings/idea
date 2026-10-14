@@ -1,8 +1,12 @@
 ---
 title: "IDEA Field Support Channel – Design"
 subtitle: "One contact point, two customer-facing agents, no autonomy to change anything"
-audience: "Status: Approved by Koen Swings, 14 October 2026 (version 1.0)"
+audience: "Proposal · Status: Approved (Koen Swings, 14 October 2026)"
 ---
+
+**Author:** Steve (Lead Bot)
+**Date:** 2026-10-14
+**Status:** Approved (Koen agreed in chat 2026-10-14; merging this PR confirms it)
 
 # Concept in one page
 
@@ -15,7 +19,7 @@ A small **router** step decides by topic who answers. The field person never has
 
 The agents can **only filter**. They answer obvious questions, say politely when a question is not about IDEA, and point to the documented way of doing something when no change is needed. They **never change anything**: no deploys, no writes over SSH, no merges, no configuration. Everything else becomes a report to **Steve**, who passes it to **Koen**. Steve and Koen decide; the dev bots (Axle, Pixel, Kid, Atlas) do the work.
 
-![The support channel at a glance](concept.svg)
+![The support channel at a glance](2026-10-14-field-support-channel/concept.svg)
 
 **Recommendation in short**
 

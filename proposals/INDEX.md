@@ -69,3 +69,7 @@ Options for tracing all agent activity. Decision: GitHub Actions logs for coding
 ## milkwise-grok-bot.md
 **Status:** Pending · **Author:** Atlas
 MilkWise standalone product Grok Bot setup — Lead and Dev Bots, extraction steps.
+
+## 2026-10-14-field-support-channel.md
+**Status:** Approved (Koen agreed in chat 2026-10-14; merge confirms) · **Author:** Steve (Lead Bot)
+IDEA Field Support Channel – Design: one contact point for field people (Justice first). Router sends technical questions to a new Support Engineer agent and teaching/manual questions to Marco; agents only filter and report, never change anything; Steve escalates to Koen. Phase 0 email to one Grok Bot address, phase 1 WhatsApp Business (Meta Cloud API), phase 2 more schools. PDF, diagram and build script in `proposals/2026-10-14-field-support-channel/`.
