@@ -31,6 +31,7 @@ SH
 cat > "$WORK/curl" <<'SH'
 #!/usr/bin/env bash
 url="${!#}"; host="${url#http://}"; host="${host%%:*}"
+echo "$url" >> "$FAKE/curl.log"
 code=$(cat "$FAKE/$host.http" 2>/dev/null || echo 200)
 printf '%s' "$code"; [ "$code" = 000 ] && exit 28; exit 0
 SH
@@ -75,6 +76,22 @@ reset; echo 502 > "$FAKE/10.0.0.1.http"; run
 check "console 502 exits 1" test "$RC" = 1
 check "console 502: problem named" has_problem p1 "console HTTP 502"
 check "console 502: http recorded" test "$(j '.pis[0].checks.console.http')" = 502
+
+# 3b. console_port from fleet-state (default 8080)
+reset; run
+check "console_port unset: probed on :8080" grep -qx 'http://10.0.0.1:8080/' "$FAKE/curl.log"
+check "console_port unset: port 8080 reported" test "$(j '.pis[0].checks.console.port')" = 8080
+reset; jq '.p2.console_port=8081' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"; run
+check "console_port 8081: probed on :8081" grep -qx 'http://10.0.0.2:8081/' "$FAKE/curl.log"
+check "console_port 8081: never probed on :8080" test "$(grep -c '10.0.0.2:8080' "$FAKE/curl.log")" = 0
+check "console_port 8081: other Pi still on :8080" grep -qx 'http://10.0.0.1:8080/' "$FAKE/curl.log"
+check "console_port 8081: healthy, port reported" test "$RC:$(j '.pis[1].checks.console.port')" = "0:8081"
+echo 000 > "$FAKE/10.0.0.2.http"; run
+check "console_port 8081 down: problem names the port" has_problem p2 "console HTTP 000 on :8081"
+reset; jq '.p2.console_port="http"' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"; run
+check "console_port not a number: flagged, exit 1" test "$RC:$(j '.pis[1].checks.console.ok')" = "1:false"
+check "console_port not a number: problem named" has_problem p2 "console_port 'http' is not a port number"
+check "console_port not a number: no probe sent" test "$(grep -c '10.0.0.2' "$FAKE/curl.log")" = 0
 
 # 4. engine stopped / missing / wrong user / pm2 unreadable
 reset; healthy | sed 's/=online/=stopped/' > "$FAKE/10.0.0.1.ssh"; run
