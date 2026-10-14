@@ -33,3 +33,8 @@ Evidence summary of the 2026-10-13 compaction: 3zoqd -> 2VroE, 175,189 changes -
 **Status:** Design, in pool proof (engine #192/#194, console #148; target < 2k changes/day)  ·  **Maintained by:** Axle
 Why the shared store grows (heartbeats/metrics in history) and the plan: ephemeral heartbeat/metrics, archive ops, compaction.
 → [docs/store/STORE-GROWTH-PROPOSAL.md](store/STORE-GROWTH-PROPOSAL.md)
+
+## DOCUMENTATION-RULES.md
+**Status:** Proposed  ·  **Maintained by:** Steve / Atlas
+Extends proposals/README.md and docs/README.md: adds docs/manuals/<audience>/<name>/ and docs/house-style/; naming, build and secrets rules; inventory with proposed locations.
+→ [docs/DOCUMENTATION-RULES.md](DOCUMENTATION-RULES.md)

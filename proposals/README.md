@@ -80,3 +80,5 @@ A proposal that supersedes an earlier one notes this at the top (`**Status:** Su
 ## Relationship to `docs/`
 
 `docs/` describes what the system *is now*. `proposals/` captures the reasoning behind *how it got there* and *where it might go next*. They serve different questions: docs answer "what does this do?", proposals answer "why was this decided?".
+
+Where every kind of document lives (proposals, authoritative docs, user-facing manuals, house style): see [`docs/DOCUMENTATION-RULES.md`](../docs/DOCUMENTATION-RULES.md).
