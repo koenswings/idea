@@ -1,7 +1,7 @@
 ---
-title: "IDEA Field Support Channel: Design"
+title: "IDEA Field Support Channel – Design"
 subtitle: "One contact point, two customer-facing agents, no autonomy to change anything"
-audience: "For Koen's review. Draft 0.1, 14 October 2026"
+audience: "Status: Approved by Koen Swings, 14 October 2026 (version 1.0)"
 ---
 
 # Concept in one page
