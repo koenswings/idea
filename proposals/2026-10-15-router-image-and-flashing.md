@@ -1,12 +1,12 @@
 ---
 title: "IDEA School Router – Image and Automated Flashing"
 subtitle: "One OpenWrt image for every Cudy WR3000S, flashed and checked by a script"
-audience: "Proposal · Status: Draft for Koen · 15 October 2026"
+audience: "Proposal · Status: Approved by Koen 2026-10-15"
 ---
 
 **Author:** Steve (Lead Bot)
 **Date:** 2026-10-15
-**Status:** Draft. Open decisions in section 10.
+**Status:** Approved by Koen 2026-10-15. Decisions D1–D9 closed in section 10.
 
 # 1. Problem
 
@@ -120,7 +120,7 @@ make image PROFILE=cudy_wr3000s-v1 \
 | Area | Setting |
 |---|---|
 | System | Hostname = the router's **sticker name** (section 5.4), time zone `Africa/Harare` (CAT-2), LuCI in English |
-| Login | `root` / `admin911!` (open decision D2); SSH (dropbear) on LAN and Tailscale only, not on WAN or Wi-Fi |
+| Login | `root` / `admin911!` (D2 decided); SSH (dropbear) on LAN and Tailscale only, not on WAN or Wi-Fi |
 | LAN | `10.42.0.1/24`; DHCP pool `.100–.199`; `.2–.99` reserved for fixed devices |
 | Wi-Fi | `IDEA` (psk2, `idea911!`, isolation on) → `students` `10.42.1.0/24`; `IDEA-Teachers` (psk2, `idea-teachers911!`) → `teachers` `10.42.2.0/24`; both bands; country `ZW` |
 | Firewall | as the manual: students/teachers → only DHCP, DNS and the Engines; `Teachers-Internet` rule present, **off** |
@@ -172,7 +172,7 @@ can change them). They may be in the repo.
 | 15 | Logging | **Now** | Logs in RAM (OpenWrt default, protects the NAND), 512 KB ring; Atlas pulls `logread` over Tailscale when needed. No remote syslog yet. |
 | 16 | Bandwidth limits | **Later** | SQM (`cake`) on WAN only matters once teachers have internet. Package in the image, **off** by default. |
 | 17 | Content filtering on teacher Wi-Fi | **Later (D6)** | Cheap option: dnsmasq forwards teacher DNS to a filtering resolver (e.g. a family DNS service) and blocks DoH/DoT. Real filtering needs policy decisions first. |
-| 18 | Starlink WAN + 4G fallback | **Later (D7)** | WR3000S has **no USB**, so 4G needs an external 4G router/hotspot on a LAN port as a second WAN, with `mwan3`. Hardware decision first. |
+| 18 | Starlink WAN + 4G fallback | **Later, optional school add-on (D7)** | WR3000S has **no USB**, so 4G needs an external 4G router/hotspot on a LAN port as a second WAN, with `mwan3`. A school may buy and fund this itself; the IDEA project never funds 4G connections. |
 | 19 | Expose a Tailscale subnet route | **No** | Contradicts "tag:idea reaches nothing / no subnet routes", and every school has the same `10.42.0.0/24`, so routes would collide. Admins reach each device directly. |
 | 20 | Per-school passwords | **No** | Koen chose the `<name>911!` defaults. |
 
@@ -299,19 +299,21 @@ and overlay space logged.
 * Sysupgrade to a newer IDEA build → same sticker name and tailnet identity.
 * 24 h soak with 30 Wi-Fi clients: free RAM stays above 60 MB with Tailscale running.
 
-# 10. Open decisions for Koen
+# 10. Decisions (closed, 15 October 2026)
 
-| # | Question | My recommendation |
+Koen approved all recommendations D1–D9 as recommended (chat, 15 October 2026). D7 clarified: 4G is only an optional add-on a school may buy and fund itself; the IDEA project never funds 4G connections.
+
+| # | Question | Decision |
 |---|---|---|
-| D1 | OpenWrt base: 25.12.5 (current, matches manual) or 24.10.8 (older branch)? | **25.12.5** |
-| D2 | Router login: `root` / `admin911!` (LuCI and SSH on LAN), SSH over Tailscale key-only? | **Yes**, same rule as the Pis: password on the LAN, keys remotely |
-| D3 | Teacher Wi-Fi password: `idea-teachers911!` (fits the `<name>911!` convention)? | **Yes** |
-| D4 | Auth key: injected by the flash station after first boot (never in an image), or a private image with the key baked in? | **Inject** |
-| D5 | After a factory reset: re-enrol by hand (a), or automatically from an Engine (b)? | **(a) now, (b) with the Console flash station** |
-| D6 | Teacher content filtering: none, filtering DNS resolver, or later? | **Later**, once teacher internet is in use |
-| D7 | 4G fallback: buy an external 4G router per school? | **Later**, decide per school |
-| D8 | Engines by DHCP vendor class (no MAC reservations), firewall to `.2–.9`? | **Yes** (needs a one-line Engine installer change) |
-| D9 | Captive "sign in" page that opens `idea.local` on student phones? | **Yes** |
+| D1 | OpenWrt base: 25.12.5 (current, matches manual) or 24.10.8 (older branch)? | **25.12.5** (as recommended) |
+| D2 | Router login: `root` / `admin911!` (LuCI and SSH on LAN), SSH over Tailscale key-only? | **Yes** (as recommended): password on the LAN, keys remotely |
+| D3 | Teacher Wi-Fi password: `idea-teachers911!` (fits the `<name>911!` convention)? | **Yes** (as recommended) |
+| D4 | Auth key: injected by the flash station after first boot (never in an image), or a private image with the key baked in? | **Inject** (as recommended) |
+| D5 | After a factory reset: re-enrol by hand (a), or automatically from an Engine (b)? | **(a) now, (b) with the Console flash station** (as recommended) |
+| D6 | Teacher content filtering: none, filtering DNS resolver, or later? | **Later**, once teacher internet is in use (as recommended) |
+| D7 | 4G fallback: external 4G router/hotspot as second WAN? | **Optional school add-on only.** A school may buy and fund 4G itself; the IDEA project **never** funds 4G connections. Image support (`mwan3`) later when a school asks. |
+| D8 | Engines by DHCP vendor class (no MAC reservations), firewall to `.2–.9`? | **Yes** (as recommended; one-line Engine installer change) |
+| D9 | Captive "sign in" page that opens `idea.local` on student phones? | **Yes** (as recommended) |
 
 # 11. Work and owners
 

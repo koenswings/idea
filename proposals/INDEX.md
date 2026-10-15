@@ -7,8 +7,8 @@ Update this file whenever a proposal is added, approved, declined, or superseded
 ---
 
 ## 2026-10-15-router-image-and-flashing.md
-**Status:** Draft · **Author:** Steve (Lead Bot)
-IDEA school router image for the Cudy WR3000S v1: OpenWrt 25.12.5 Image Builder + uci-defaults first boot that bakes in `school-router-setup.sh` (10.42.x, `IDEA`/`idea911!` students-only, `IDEA-Teachers` with the toggleable `Teachers-Internet` rule, mDNS reflector, `idea.local` DNS fallback), Tailscale in the image with the fleet key injected over SSH after flashing (never in git or the image). Scripted flash: stock → Cudy intermediate (20251119, MD5 checked) → `sysupgrade -n` → sticker name + enrol + self-test; later a Console/Engine flash station. Engines by DHCP vendor class instead of MAC reservations; factory reset returns IDEA defaults. Open decisions D1–D9. PDF: `proposals/2026-10-15-router-image-and-flashing/`.
+**Status:** Approved by Koen 2026-10-15 · **Author:** Steve (Lead Bot)
+IDEA school router image for the Cudy WR3000S v1: OpenWrt 25.12.5 Image Builder + uci-defaults first boot that bakes in `school-router-setup.sh` (10.42.x, `IDEA`/`idea911!` students-only, `IDEA-Teachers` with the toggleable `Teachers-Internet` rule, mDNS reflector, `idea.local` DNS fallback), Tailscale in the image with the fleet key injected over SSH after flashing (never in git or the image). Scripted flash: stock → Cudy intermediate (20251119, MD5 checked) → `sysupgrade -n` → sticker name + enrol + self-test; later a Console/Engine flash station. Engines by DHCP vendor class instead of MAC reservations; factory reset returns IDEA defaults. D1–D9 approved as recommended; D7: 4G is an optional school-funded add-on only (IDEA never funds 4G). PDF: `proposals/2026-10-15-router-image-and-flashing/`.
 
 ## 2026-10-15-client-browser-and-server-discovery.md
 **Status:** Draft · **Author:** Steve (Lead Bot)
