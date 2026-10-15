@@ -3,6 +3,7 @@
 # Usage: sudo tools/client-image/build.sh [--base /path/to/base.img.xz] [--secrets FILE] [--out DIR] [--no-xz]
 # Host: amd64 or arm64 Linux with losetup, qemu-user-static (binfmt for aarch64 on amd64), xz, parted, e2fsprogs.
 set -euo pipefail
+export PATH="$PATH:/usr/sbin:/sbin"
 HERE="$(cd "$(dirname "$0")" && pwd)"; REPO="$(git -C "$HERE" rev-parse --show-toplevel)"
 . "$HERE/client-image.conf"
 BASE=""; SECRETS="${SUDO_USER:+$(getent passwd "$SUDO_USER" | cut -d: -f6)}/.config/idea-client-image/secrets.env"
@@ -33,12 +34,16 @@ if live=$(curl -fsL "$BASE_URL/SHA256SUMS" 2>/dev/null | awk -v f="*$BASE_IMAGE"
 
 IMG="$WORK/$NAME.img"; echo "decompressing base -> $IMG"; xz -dc -T0 "$BASE" > "$IMG"
 truncate -s +"${EXTRA_MB}M" "$IMG"
-LOOP=$(losetup -fP --show "$IMG"); MNT="$WORK/root"
-cleanup() { set +e; for m in dev/pts dev proc sys run boot/firmware ""; do mountpoint -q "$MNT/$m" && umount -l "$MNT/$m"; done; losetup -d "$LOOP" 2>/dev/null; }
+# partition loops by offset (works in containers without /dev/loopNpM nodes)
+parted -s "$IMG" resizepart 2 100%
+poff(){ parted -sm "$IMG" unit B print | awk -F: -v n=$1 '$1==n{sub("B","",$2);sub("B","",$4);print $2" "$4}'; }
+read O1 S1 < <(poff 1); read O2 S2 < <(poff 2)
+L1=$(losetup -f --show -o "$O1" --sizelimit "$S1" "$IMG"); L2=$(losetup -f --show -o "$O2" --sizelimit "$S2" "$IMG")
+MNT="$WORK/root"
+cleanup() { set +e; for m in dev/pts dev proc sys run boot/firmware ""; do mountpoint -q "$MNT/$m" && umount -l "$MNT/$m"; done; losetup -d "$L1" "$L2" 2>/dev/null; }
 trap cleanup EXIT
-parted -s "$LOOP" resizepart 2 100%; partprobe "$LOOP" 2>/dev/null || true; sleep 1
-e2fsck -fy "${LOOP}p2" >/dev/null || true; resize2fs "${LOOP}p2" >/dev/null
-mkdir -p "$MNT"; mount "${LOOP}p2" "$MNT"; mount "${LOOP}p1" "$MNT/boot/firmware"
+e2fsck -fy "$L2" >/dev/null || true; resize2fs "$L2" >/dev/null
+mkdir -p "$MNT"; mount "$L2" "$MNT"; mount "$L1" "$MNT/boot/firmware"
 for m in dev dev/pts proc sys run; do mount --bind "/$m" "$MNT/$m"; done
 if [ "$(uname -m)" != aarch64 ]; then cp /usr/bin/qemu-aarch64-static "$MNT/usr/bin/"; fi
 mv "$MNT/etc/resolv.conf" "$MNT/etc/resolv.conf.idea-orig" 2>/dev/null || true; cp -L /etc/resolv.conf "$MNT/etc/resolv.conf"
