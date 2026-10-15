@@ -74,7 +74,12 @@ cp $B/files/idea-home-engine.service /etc/systemd/system/; systemctl enable idea
 : > /etc/idea/home-engine; echo 'window.IDEA_HOME_ENGINE = "";' > /etc/idea/home-engine.js
 
 # the ONE shortcut: app menu + learner desktop; no per-app icons, no /go, no Nextcloud links
-install -d /usr/share/icons/hicolor/scalable/apps; cp $B/files/idea.svg /usr/share/icons/hicolor/scalable/apps/idea.svg
+# IDEA logo C (Koen's pick, idea#202 #9) as the shortcut/dock icon "idea-console"
+H=/usr/share/icons/hicolor; install -d $H/scalable/apps $H/256x256/apps $H/48x48/apps
+install -m 644 $B/files/idea-logo/idea-console.svg $H/scalable/apps/idea-console.svg
+install -m 644 $B/files/idea-logo/idea-console-256.png $H/256x256/apps/idea-console.png
+install -m 644 $B/files/idea-logo/idea-console-48.png $H/48x48/apps/idea-console.png
+cp $B/files/idea.svg $H/scalable/apps/idea.svg   # legacy name kept
 gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
 sed "s/@BROWSER@/$BIN --password-store=basic/" $B/files/idea-console.desktop > /usr/share/applications/idea-console.desktop
 rm -f /usr/share/applications/idea-{nextcloud,kolibri,kiwix}.desktop /usr/local/bin/idea-open /home/learner/Desktop/idea-{nextcloud,kolibri,kiwix}.desktop

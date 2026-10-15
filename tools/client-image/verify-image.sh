@@ -89,6 +89,17 @@ for p in oem-config ubuntu-desktop-provision gnome-tour; do dpkg -s $p >/dev/nul
 grep -q "^welcome-dialog-last-shown-version='999'" /etc/dconf/db/local.d/00-idea && [ -s /etc/dconf/db/local ] && ok "GNOME welcome tour off (dconf db compiled)" || bad "welcome-dialog dconf"
 grep -q '^InitialSetupEnable=false' /etc/gdm3/custom.conf && ok "GDM InitialSetupEnable=false" || bad "GDM initial setup"
 grep -qx 'isFirstRun=false' /home/learner/.config/gcompris-qt/gcompris-qt.conf 2>/dev/null && ok "GCompris first-run off" || bad "GCompris conf"
+# 9 IDEA logo C icon (shortcut + dock)
+python3 - /usr/share/icons/hicolor <<'P' && ok "IDEA logo C icon: Icon=idea-console (menu+desktop), svg + 256 + 48 png, icon cache" || bad "idea-console icon"
+import struct,sys,os
+h=sys.argv[1]
+for d in ("/usr/share/applications/idea-console.desktop","/home/learner/Desktop/idea-console.desktop"):
+    assert "Icon=idea-console" in open(d).read().splitlines()
+assert "<svg" in open(h+"/scalable/apps/idea-console.svg").read()
+for n in (256,48):
+    b=open("%s/%dx%d/apps/idea-console.png"%(h,n,n),"rb").read(24); assert b[:8]==b"\x89PNG\r\n\x1a\n" and struct.unpack(">II",b[16:24])==(n,n)
+assert os.path.getsize(h+"/icon-theme.cache")>0
+P
 # 8 admin local password = <account>911!, ssh still key-only, learner none
 h=$(getent shadow admin | cut -d: -f2)
 [ "$(perl -e 'print crypt($ARGV[0],$ARGV[1])' "${ADMIN_USER:-admin}911!" "$h")" = "$h" ] && case "$h" in '$6$'*) true;; *) false;; esac && ok "admin local password follows <account>911! (sha-512)" || bad "admin password hash"
