@@ -1,12 +1,12 @@
 ---
-title: "IDEA Student Client – Browser, App Icons and Finding the Servers"
+title: "IDEA Student Client – Browser, Console Shortcut and Finding the Servers"
 subtitle: "Follow-up to the student client image: Koen's feedback of 2026-10-15"
 audience: "Proposal · Status: Draft"
 ---
 
 **Author:** Steve (Lead Bot)
 **Date:** 2026-10-15
-**Status:** Draft
+**Status:** Draft (revised 2026-10-15 after Koen's review: one Console shortcut, no app icons)
 **Follows:** `2026-10-15-student-client-image.md` (idea#201, approved and merged; frozen)
 
 # Problem or opportunity
@@ -14,7 +14,9 @@ audience: "Proposal · Status: Draft"
 Koen reviewed the merged student client image and asked for three changes:
 
 1. **Chrome rather than Firefox** as the browser.
-2. **Icons** for Nextcloud, Kolibri, Kiwix and the other apps, so students do not need bookmarks.
+2. **An easy way to reach the apps** without typing an address. After review, Koen chose **one desktop
+   shortcut that opens the Console**. No per-app icons: the Console already lists the apps and opens them, and
+   per-app icons would replace that.
 3. **No fixed server address.** The merged proposal points every bookmark at `10.42.0.2`. A school can have
    more than one server Pi, an app can live on any Engine, and an Engine can be switched off or moved.
    How does a client find the right server?
@@ -42,7 +44,7 @@ shipped official **arm64 Linux** builds of Chrome on 30 July 2026 (`.deb` for De
 * Delete `/etc/apt/sources.list.d/google-chrome.list` and the cron job that re-adds it, then
   `apt-mark hold google-chrome-stable`. This keeps the decision "updates off; a new tested image is the update".
 * Chrome policy file in `/etc/opt/chrome/policies/managed/idea.json`: no first-run screen, no sign-in, no
-  update checks, no default-browser prompt, home page = the IDEA start page (section 3).
+  update checks, no default-browser prompt, home page = `http://idea.local` (the Console, section 3).
 * Chrome becomes the default browser; Firefox is not installed.
 * **Snaps:** none in the student path (unchanged); any snap left in the base stays held.
 
@@ -50,18 +52,19 @@ shipped official **arm64 Linux** builds of Chrome on 30 July 2026 (`.deb` for De
 Pi 500** with the Ubuntu raspi kernel. If it fails, use the xtradeb Chromium `.deb` with the same hold and policy
 (`/etc/chromium/policies/managed/`), and tell Koen.
 
-# 2. Desktop and app-menu icons
+# 2. One desktop shortcut: "IDEA" opens the Console
 
-Each app gets a `.desktop` file in `/usr/share/applications/` (app menu) and a copy on the learner desktop
-(GNOME "Desktop Icons" extension, already in Ubuntu Desktop). Each opens Chrome in **app mode**: its own
-window, no address bar, its own icon:
+The image has **one** shortcut, `idea-console.desktop`, in `/usr/share/applications/` (app menu) and on the
+learner desktop (GNOME "Desktop Icons" extension, already in Ubuntu Desktop):
 
 ```
-Exec=google-chrome-stable --app=http://idea.local/go/nextcloud
+Name=IDEA
+Exec=google-chrome-stable http://idea.local
 ```
 
-Icons: Nextcloud, Kolibri, Kiwix, Scratch, GeoGebra, plus **"School apps"** (the start page). New apps
-added to an Engine later appear on the start page without a new image.
+It opens Chrome at `http://idea.local`, which shows the **Console**. The student picks an app there, as today.
+There are **no per-app icons** and no separate start page: the Console stays the one place that lists and
+opens apps, so new apps on an Engine appear without a new image. Chrome's home page is the same address.
 
 **Nextcloud desktop sync client: not recommended.** The computers are shared and students have no personal
 accounts. A sync client would keep one student's files on the disk for the next student, and would be logged
@@ -88,7 +91,7 @@ So two servers per school is already the normal design, and the router reservati
 |---|---|---|---|
 | A. Fixed IP `10.42.0.2` in icons | **No.** Breaks if Pi #1 is off or the app is on Pi #2 | Yes | Merged design |
 | B. Sticker names `<name>.local` | **No.** The name differs per school, so needs per-school config | No | Fine for humans, not for an image |
-| C. One shared mDNS name `idea.local` answered by **every** Engine, serving a start page | **Yes.** Any live Engine answers; the page lists all Engines and apps | **Yes** | **Recommended** |
+| C. One shared mDNS name `idea.local` answered by **every** Engine, serving the Console | **Yes.** Any live Engine answers; its Console shows all Engines and apps | **Yes** | **Recommended** |
 | D. Static page in the image that queries Engines itself | Yes, but must hard-code IPs or do mDNS in a browser (not possible) | Partly | Logic in the image goes stale; needs a reflash to change |
 
 **mDNS on clients.** Ubuntu Desktop ships avahi and `libnss-mdns`, so `.local` names resolve for every
@@ -97,36 +100,31 @@ mDNS between `10.42.0.0/24` and the Wi-Fi subnets (`avahi` reflector or the Open
 package). The Console sticker address `http://<STICKER>.local` already needs this, so it is the same work,
 done once in `school-router-setup.sh`, the same at every school.
 
-## Recommendation: option C, the IDEA start page at `http://idea.local`
+## Recommendation: option C, `http://idea.local` opens the Console
 
-* **Every Engine** publishes the extra mDNS name `idea.local` and serves a small **start page** on port 80.
-  Several Engines answering the same name is fine for a client: it uses the first answer, and any live Engine
-  has the full picture.
-* The page is built from the **Automerge store** the Console already uses: all Engines that are online, and the
-  apps running on them, with big icons for students. A click opens the app on the Engine where it runs.
-* **Short links** `http://idea.local/go/<app>` redirect to wherever that app is running now (if it runs on two
-  Engines, the first online one). The desktop icons use these links, so icons never contain an IP or a school
-  name.
-* If the app is not running anywhere, the page says so in plain words ("Kolibri is not running. Ask your
-  teacher.") instead of a browser error.
-* **Fallback when mDNS fails** (e.g. the router reflector is missing): the router's DNS (dnsmasq) also answers
-  `idea.local` → `10.42.0.2` and `10.42.0.3`. Set the same way at every school.
-* Must coexist with the avahi hostname fix (`2026-10-13-avahi-hostname-clash.md`): publish `idea.local`
-  through the Pi's own avahi, not a second mDNS responder. Several Engines publishing the same name must not
-  trigger avahi's rename-on-conflict; Axle confirms the exact mechanism during implementation.
+* **Every Engine** publishes the extra mDNS name `idea.local`. A request to `http://idea.local` (port 80)
+  serves or redirects to **that Engine's Console**. Nothing new is built for students: the Console already
+  shows every Engine and app from the shared Automerge store, and opens an app on the Engine where it runs.
+* No `/go/<app>` links and no extra start page; they would duplicate the Console.
+* **Open point: can several Engines publish the same `idea.local`?** mDNS normally treats two hosts claiming
+  one name as a conflict, and avahi then renames one (`idea-2.local`). It must also coexist with the avahi
+  hostname fix (`2026-10-13-avahi-hostname-clash.md`): publish through the Pi's own avahi, not a second mDNS
+  responder. **Axle confirms** on two Engines whether a shared name works without rename-on-conflict.
+* **Fallback if it does not work:** (a) only one Engine publishes `idea.local` at a time (the others watch and
+  take over when it disappears), and/or (b) the router's DNS (dnsmasq) answers `idea.local` with `10.42.0.2`
+  and `10.42.0.3`, set the same way at every school. Either way the shortcut in the image stays the same.
 
 **Work:**
 
 | Who | What |
 |---|---|
-| Axle (Engine) | publish `idea.local`; serve start page and `/go/<app>` on port 80 from the store |
-| Pixel (Console) | start page UI (student-friendly, reuses Console components) |
+| Axle (Engine) | publish `idea.local` (or the fallback); port 80 serves/redirects to the Console; confirm the shared-name behaviour |
 | Atlas (Ops) | mDNS reflector + dnsmasq fallback in `school-router-setup.sh`; test with 2 Engines, one switched off |
-| Client image worker | Chrome, policies, `.desktop` icons pointing at `idea.local/go/...` |
-| Marco (docs) | client and server install manuals, tutorial |
+| Client image worker | Chrome, policies, the one `idea-console.desktop` shortcut |
+| Marco (docs) | the client install manual, the school server install manual, the tutorial |
 
-**Test:** two Engines on one network, app on Engine 2 only: the icon opens it. Switch Engine 1 off: the start
-page still loads. Move the app's disk to Engine 1: the same icon follows it. From the student Wi-Fi subnet.
+**Test:** two Engines on one network, from the student Wi-Fi subnet: the shortcut opens the Console. Switch
+Engine 1 off: the shortcut still opens the Console (on Engine 2). No `idea-2.local` rename appears on either Engine.
 
 # 4. Correction: "Manual 2"
 
@@ -137,8 +135,8 @@ implementation branch (`feat/client-image-build`) does not use "Manual 2"; new d
 # Decision needed
 
 1. Google Chrome `.deb` (held, no Google repo) as the browser, xtradeb Chromium as fallback?
-2. Start page at `http://idea.local` on every Engine, icons via `/go/<app>`, router mDNS reflector + DNS
-   fallback (option C)?
+2. One desktop shortcut opening Chrome at `http://idea.local`, which shows the Console; no per-app icons
+   (option C, with router mDNS reflector + DNS fallback)?
 
 # References
 
