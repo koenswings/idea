@@ -6,8 +6,8 @@ audience: "Proposal · Status: Approved by Koen 2026-10-15"
 
 **Author:** Steve (Lead Bot)
 **Date:** 2026-10-15
-**Status:** Approved by Koen 2026-10-15. Decisions D1–D9 closed in section 10. Updated 2026-10-15: Engine count
-not fixed (1 to 4 today), Starlink chapter (section 12) with open decisions D10–D11.
+**Status:** Approved by Koen 2026-10-15. Decisions D1–D11 closed in section 10. Updated 2026-10-15: Engine count
+not fixed (a school starts with 1 and adds more), Starlink chapter (section 12); D10–D11 closed same day.
 
 # 1. Problem
 
@@ -36,9 +36,8 @@ This proposal changes **how** the router gets its settings, not **what** they ar
 * Every school uses the **same addresses**: router `10.42.0.1`, Engines on `10.42.0.0/24`, students on Wi-Fi
   `10.42.1.0/24`, teachers on `10.42.2.0/24`. There are no school numbers.
 * **One or more PoE Pi 5 Engines** behind the Cudy. The number is **not fixed**: a school starts with **1** and can
-  add or remove Engines at any time, up to **4** today (the 4-port PoE switch we deploy); a bigger switch allows more
-  later. Nothing in the router depends on how many Engines there are. **Starlink** in bypass mode on the Cudy WAN
-  port (section 12).
+  add or remove Engines at any time. Nothing in the router depends on how many Engines there are. **Starlink** in
+  bypass mode on the Cudy WAN port (section 12).
 * Wi-Fi **`IDEA`** (students) reaches the Pis only, **never** the WAN. Client isolation is on.
 * Wi-Fi **`IDEA-Teachers`** gets internet through **one** firewall rule, `Teachers-Internet`, which is off by default
   and can be switched on and off (later from the Console).
@@ -131,6 +130,7 @@ make image PROFILE=cudy_wr3000s-v1 \
 | DNS | dnsmasq answers `idea.local` with the live Engine addresses (section 5.2); everything else is forwarded upstream only for LAN and teachers |
 | mDNS | `umdns` reflects mDNS between LAN and the Wi-Fi zones, as the client-browser proposal requires |
 | Tailscale | `tailscale up --auth-key=file:… --advertise-tags=tag:idea --hostname=<sticker>`, `tailscale0` in its own zone with **no forwarding** (unchanged from manual 3.7) |
+| Starlink CGNAT (D10) | Narrow exception: WAN UDP 67→68 accepted before Tailscale's `100.64.0.0/10` drop in `ts-input`, re-applied by a hotplug script when `wan` / `tailscale0` come up (section 5 item 21, Appendix D of the install manual) |
 | Updates | none automatic; a new IDEA image is the only update (same rule as the client image) |
 
 ## 4.3 The fleet auth key: never in git, never in the image file
@@ -177,6 +177,7 @@ can change them). They may be in the repo.
 | 16 | Bandwidth limits | **Later** | SQM (`cake`) on WAN only matters once teachers have internet. Package in the image, **off** by default. |
 | 17 | Content filtering on teacher Wi-Fi | **Later (D6)** | Cheap option: dnsmasq forwards teacher DNS to a filtering resolver (e.g. a family DNS service) and blocks DoH/DoT. Real filtering needs policy decisions first. |
 | 18 | Starlink WAN (section 12) + 4G fallback | **Later, optional school add-on (D7)** | WR3000S has **no USB**, so 4G needs an external 4G router/hotspot on a LAN port as a second WAN, with `mwan3`. A school may buy and fund this itself; the IDEA project never funds 4G connections. |
+| 21 | Starlink CGNAT DHCP exception (D10) | **Now** | Image installs a hotplug that inserts `nft insert rule ip filter ts-input iifname "wan" udp sport 67 udp dport 68 counter accept` before Tailscale's CGNAT drop, so Starlink DHCP renewals are not dropped [19], [20]. Same script as the install manual Appendix D. |
 | 19 | Expose a Tailscale subnet route | **No** | Contradicts "tag:idea reaches nothing / no subnet routes", and every school has the same `10.42.0.0/24`, so routes would collide. Admins reach each device directly. |
 | 20 | Per-school passwords | **No** | Koen chose the `<name>911!` defaults. |
 
@@ -190,20 +191,19 @@ dhcp-vendorclass=set:engine,idea-engine
 dhcp-range=tag:engine,10.42.0.2,10.42.0.9,12h
 ```
 
-So **every** Engine at a school, whether there is 1 or 4, gets an address in `.2–.9`, with no per-Pi
-configuration. Adding a fifth Engine later needs no router change either. The pool holds **8 Engines**; the
-practical limit today is the PoE switch (4 ports), not the router. If a school ever needs more than 8, widening the
-range (and the matching firewall range) is a one-line image change. The firewall allows students and teachers to the
-whole `10.42.0.2–10.42.0.9` range, never to individual Engine addresses, so the rules do not change when Engines
-come and go. This replaces the `PI1_MAC` / `PI2_MAC` fields in the manual. (The reserved switch address `.4` moves to
-`.10`.) Which Engine gets which address is not fixed and does not matter: clients use `idea.local` or a sticker
-name, not an IP.
+So **every** Engine at a school, whether there is 1 or several, gets an address in `.2–.9`, with no per-Pi
+configuration. Adding another Engine later needs no router change either. The pool holds **8 Engines**; if a school
+ever needs more than 8, widening the range (and the matching firewall range) is a one-line image change. The firewall
+allows students and teachers to the whole `10.42.0.2–10.42.0.9` range, never to individual Engine addresses, so the
+rules do not change when Engines come and go. This replaces the `PI1_MAC` / `PI2_MAC` fields in the manual. (The
+reserved switch address `.4` moves to `.10`.) Which Engine gets which address is not fixed and does not matter:
+clients use `idea.local` or a sticker name, not an IP.
 
 ## 5.2 `idea.local` in the router DNS
 
 A dnsmasq `dhcp-script` writes the current Engine leases into `/tmp/hosts/idea` (`10.42.0.x idea.local`) and reloads
 dnsmasq on every lease change. It lists **all** live Engine leases (1 to 8 lines), so `idea.local` works the same
-with one Engine or four. When an Engine is switched off, its lease ages out and only the Engines still on are
+with one Engine or many. When an Engine is switched off, its lease ages out and only the Engines still on are
 answered; with a single Engine, `idea.local` simply points at that one. This matches the takeover design (Axle, #203): mDNS from the holder is primary, the router is the backup.
 
 ## 5.3 First boot flow
@@ -303,11 +303,11 @@ and overlay space logged.
   between).
 * Phone on `IDEA`: gets `10.42.1.x`, opens `http://idea.local`, **cannot** reach the internet or the router's LuCI.
 * Laptop on `IDEA-Teachers`: no internet; switch `Teachers-Internet` on → internet; off → none.
-* Engine count: start with **1** Engine (gets an address in `.2–.9`, `idea.local` answers it), add a 2nd, 3rd and
-  4th one by one without any router change; each gets `.2–.9` without MAC config and appears in `idea.local`.
+* Engine count: start with **1** Engine (gets an address in `.2–.9`, `idea.local` answers it), add further Engines
+  one by one without any router change; each gets `.2–.9` without MAC config and appears in `idea.local`.
   Switch them off one by one → `idea.local` answers only the live ones.
-* Starlink: WAN gets a `100.64.x.x` lease, Tailscale online, the lease **renews** over 24 h (section 12.3, D10);
-  unplug Starlink → students/teachers keep the Console, `idea.local` and all Apps.
+* Starlink: WAN gets a `100.64.x.x` lease, Tailscale online, the lease **renews** over 24 h (section 12.3, D10
+  exception in place); unplug Starlink → students/teachers keep the Console, `idea.local` and all Apps.
 * Move an Engine to a "second school" (a second flashed router): works with no change.
 * Factory reset button → IDEA defaults back; Tailscale re-enrol works.
 * Sysupgrade to a newer IDEA build → same sticker name and tailnet identity.
@@ -315,7 +315,7 @@ and overlay space logged.
 
 # 10. Decisions (closed, 15 October 2026)
 
-Koen approved all recommendations D1–D9 as recommended (chat, 15 October 2026). D7 clarified: 4G is only an optional add-on a school may buy and fund itself; the IDEA project never funds 4G connections.
+Koen approved all recommendations D1–D9 as recommended (chat, 15 October 2026). D7 clarified: 4G is only an optional add-on a school may buy and fund itself; the IDEA project never funds 4G connections. Later the same day Koen closed D10 and D11 (chat): D10 option (a), D11 the IDEA project owns and pays for Starlink.
 
 | # | Question | Decision |
 |---|---|---|
@@ -328,6 +328,8 @@ Koen approved all recommendations D1–D9 as recommended (chat, 15 October 2026)
 | D7 | 4G fallback: external 4G router/hotspot as second WAN? | **Optional school add-on only.** A school may buy and fund 4G itself; the IDEA project **never** funds 4G connections. Image support (`mwan3`) later when a school asks. |
 | D8 | Engines by DHCP vendor class (no MAC reservations), firewall to `.2–.9`? | **Yes** (as recommended; one-line Engine installer change) |
 | D9 | Captive "sign in" page that opens `idea.local` on student phones? | **Yes** (as recommended) |
+| D10 | Tailscale CGNAT drop rule vs. Starlink DHCP: image exception (a) or tailnet attribute (b)? | **(a)** (as recommended): narrow WAN UDP 67→68 accept before the drop, re-applied by hotplug; verified on the first router (9.2) |
+| D11 | Starlink account and subscription: school, project, or mix? | **IDEA project** owns the account and pays the subscription |
 
 # 11. Work and owners
 
@@ -380,7 +382,7 @@ Bypass mode turns off the Starlink router's own routing and Wi-Fi so a third-par
 * Nothing else from the school plugs into the Starlink router; the Engines and the PoE switch go on the Cudy LAN.
 
 ```
-dish ── Starlink router (bypass) ──Ethernet── Cudy WAN │ Cudy LAN ── PoE switch ── Engines (1–4)
+dish ── Starlink router (bypass) ──Ethernet── Cudy WAN │ Cudy LAN ── PoE switch ── Engines
 ```
 
 ## 12.3 What the Cudy WAN gets
@@ -394,13 +396,11 @@ dish ── Starlink router (bypass) ──Ethernet── Cudy WAN │ Cudy LAN 
 * **Pitfall: Tailscale's own CGNAT drop rule.** Tailscale addresses also live in `100.64.0.0/10`, and on Linux
   (OpenWrt included) `tailscaled` drops any packet from that range that does not arrive on `tailscale0` [18]. On
   Starlink the WAN DHCP server is in that range too, so DHCP **renewals** can be dropped and the WAN briefly
-  drops every lease period. This is reported for OpenWrt and other routers behind CGNAT ISPs [19], [20]. Fix
-  options (decision **D10**):
-  (a) the image adds a narrow exception, WAN UDP 67→68 accepted before the Tailscale drop rule, re-applied by a
-  hotplug script because `tailscaled` repositions its rules [19], [21]; or
-  (b) set the Tailscale node attribute `disable-linux-cgnat-drop-rule` for the routers in the tailnet policy,
-  which turns the drop into a return [18]. I recommend **(a)**: it is contained in the image and keeps the
-  anti-spoofing protection; the test plan (9.2) checks that the lease renews.
+  drops every lease period. This is reported for OpenWrt and other routers behind CGNAT ISPs [19], [20].
+  **Decision D10 (closed):** the image adds a narrow exception — WAN UDP 67→68 accepted before the Tailscale drop
+  rule, re-applied by a hotplug script because `tailscaled` repositions its rules [19], [21] (section 4.2 and
+  customisation item 21). Option (b), the Tailscale node attribute `disable-linux-cgnat-drop-rule` [18], was not
+  chosen. The test plan (9.2) checks that the lease renews.
 
 ## 12.4 When Starlink is down
 
@@ -430,19 +430,11 @@ dish ── Starlink router (bypass) ──Ethernet── Cudy WAN │ Cudy LAN 
   forwarding or UPnP on the Cudy.
 * Do not change the dish's mounting or move it without checking obstructions in the app afterwards.
 
-## 12.7 Account and subscription (open, D11)
+## 12.7 Account and subscription (D11, closed)
 
-Who owns the Starlink account, pays the subscription, and holds the app login is **not decided** (decision **D11**,
-for Koen): (a) the **school**, (b) the **project**, or (c) a mix (project buys the kit, school pays the
-subscription). The router design works the same in every case. Whoever holds the account must keep the app login
-reachable, because bypass, outages and obstruction checks are done in the app.
-
-## 12.8 Open decisions
-
-| # | Question | Recommendation |
-|---|---|---|
-| D10 | Tailscale CGNAT drop rule vs. Starlink DHCP: image exception (a) or tailnet attribute (b)? | **(a)**, verified on the first router (9.2) |
-| D11 | Starlink account and subscription: school, project, or mix? | Open, Koen decides |
+**Decision D11 (closed):** the **IDEA project** owns the Starlink account and pays the subscription. The project
+holds the app login (needed for bypass, outages and obstruction checks). The school does not pay for Starlink.
+(4G remains a separate optional school add-on under D7.)
 
 # Sources (checked on 15 October 2026)
 
