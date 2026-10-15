@@ -2,6 +2,7 @@
 title: "IDEA School Server: Installation Manual"
 subtitle: "Raspberry Pi 5 Engines + Cudy router + PoE switch + Starlink"
 audience: "For Justice. Version 1.2, 15 October 2026"
+cover_logo: "yes"
 ---
 **Status:** Authoritative (follows the school network design and the *IDEA School Router – Image and Automated Flashing* proposal; see the README for what is not yet installed on hardware) · **Maintained by:** Marco (with Atlas) · 15 October 2026 (pre-flashed router, Engine count not fixed, Starlink, `<name>911!` defaults)
 

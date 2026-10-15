@@ -2,6 +2,7 @@
 title: "IDEA Classroom Computer: Installation Manual"
 subtitle: "Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor + the IDEA client image"
 audience: "For Justice. Version 2.0, 15 October 2026"
+cover_logo: "yes"
 ---
 **Status:** Authoritative (follows the student client image proposal and the student client browser proposal; the client image is not yet boot-tested on hardware, see the README) · **Maintained by:** Marco (with Atlas) · 15 October 2026 (IDEA client image, Pi 400 and Pi 500, Chrome, IDEA shortcut)
 

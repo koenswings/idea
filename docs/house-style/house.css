@@ -42,3 +42,6 @@ figcaption { font-size: 8.5pt; color: #555; font-style: italic; margin-top: 1mm;
 figcaption::before { counter-increment: fig; content: "Figure " counter(fig) ". "; font-weight: bold; font-style: normal; color: #1f4e79; }
 blockquote { background: #eef5ff; border-left: 5px solid #1f77b4; border-radius: 3px; padding: 2.5mm 3.5mm; margin: 3mm 0; page-break-inside: avoid; }
 blockquote p { margin: 1mm 0; }
+
+.cover .cover-logo { display: block; width: 95mm; height: auto; margin: -25mm 0 18mm 0; }
+.cover h1.title { page-break-before: avoid; }
