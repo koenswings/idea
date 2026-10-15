@@ -14,7 +14,6 @@ Good to know:
 
 - A card that is greyed out and says **Not available** is not running. Do not try to fix it: tell your school operator.
 - Do not type numbers (ports) into the address bar. Always use **Open** in the Console.
-- A student computer that no longer works properly is not repaired: the operator resets its card (chapter 13). Students lose only what they saved on the computer itself, so let them save their work in Nextcloud (chapter 7).
 - The person icon at the top right (**Operator Login**) is for the operator (Part B). Teachers do not need it.
 
 > **Tip.** You can bookmark the page that opens. If the bookmark stops working, go back to the Console and use **Open** again.
