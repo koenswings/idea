@@ -32,7 +32,9 @@ passwd -d learner >/dev/null
 for g in sudo adm lpadmin; do gpasswd -d learner $g >/dev/null 2>&1 || true; done
 usermod -aG audio,video,plugdev,netdev learner 2>/dev/null || true
 id admin >/dev/null 2>&1 || useradd -m -s /bin/bash -c "IDEA support" -G sudo admin
-usermod -p "$ADMIN_PASSWORD_HASH" admin
+# local console password follows Koen's convention <account>911! (documented, not a secret); SSH stays key-only
+ADMIN_PW="${ADMIN_USER:-admin}911!"; SALT=$(head -c 12 /dev/urandom | base64 | tr -dc 'A-Za-z0-9./' | head -c 16)
+usermod -p "$(perl -e 'print crypt($ARGV[0], "\$6\$".$ARGV[1]."\$")' "$ADMIN_PW" "$SALT")" admin; unset ADMIN_PW
 install -d -m 700 -o admin -g admin /home/admin/.ssh
 install -m 600 -o admin -g admin $B/admin_authorized_keys /home/admin/.ssh/authorized_keys
 # hide admin from the login screen
@@ -90,6 +92,21 @@ sed -i 's/^enabled=1/enabled=0/' /etc/default/apport 2>/dev/null || true
 # --- browser, policies, start page, home-Engine boot step, the one IDEA shortcut (idea#203) ---
 . $B/browser.sh
 sed -i "s/@BROWSER_DESKTOP@/$BROWSER_DESKTOP/" /etc/dconf/db/local.d/00-idea; dconf update
+
+# --- boot config: KMS overlay per model, one image for Pi 400 ([pi4]) and Pi 500 ([pi5]) ---
+python3 - /boot/firmware/config.txt <<'P'
+import sys,re
+p=sys.argv[1]; s=open(p).read()
+s=re.sub(r'(?m)^dtoverlay=vc4-kms-v3d[ \t]*\n','',s)            # exact line only; cma-128 variants stay
+if '# IDEA: per-model KMS' not in s:
+    i=s.rfind('\n[all]'); blk='\n# IDEA: per-model KMS overlay (Pi 400 = pi4, Pi 500 = pi5)\n[pi4]\ndtoverlay=vc4-kms-v3d\n\n[pi5]\ndtoverlay=vc4-kms-v3d-pi5\n'
+    s=s[:i]+blk+s[i:] if i>=0 else s+blk+'\n[all]\n'
+open(p,'w').write(s)
+P
+
+# --- first-run wizards off ---
+install -d /etc/libreoffice/registry; cp $B/files/idea-libreoffice.xcd /etc/libreoffice/registry/idea.xcd
+install -d /home/learner/.config/gcompris-qt; cp $B/files/gcompris-qt.conf /home/learner/.config/gcompris-qt/gcompris-qt.conf
 
 # --- Wi-Fi profile (root-only) ---
 f=/etc/NetworkManager/system-connections/IDEA.nmconnection

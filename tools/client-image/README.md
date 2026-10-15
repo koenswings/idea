@@ -28,10 +28,13 @@ sudo tools/client-image/build.sh [--base ubuntu-26.04.1-...+raspi.img.xz] [--sec
 ## Secrets (never in git, never printed)
 
 Copy `secrets.env.example` to `~/.config/idea-client-image/secrets.env` (chmod 600) or pass `--secrets`.
-It holds the support **authorized_keys** path (public keys only), the **admin password hash** (`mkpasswd -m sha-512`)
-and the per-school **Wi-Fi PSK**. `build.sh` refuses a secrets file inside the repo and a private key in the keys file;
-`scan-secrets.sh` fails the build if a secret value appears anywhere except `/etc/shadow` (hash) and the root-only
-NetworkManager profile (PSK).
+It holds the support **authorized_keys** path (public keys only) and the per-school **Wi-Fi PSK**. `build.sh` refuses a secrets file inside the repo and a private key in the keys file;
+`scan-secrets.sh` fails the build if a secret value appears anywhere except the root-only NetworkManager profile (PSK).
+
+**Local admin password rule:** the hidden `admin` account's local (console / `su - admin`) password follows Koen's
+convention **`<accountname>911!`**, i.e. `admin911!` (`ADMIN_USER` in `client-image.conf`). It is a documented
+convention, not a secret: `customise.sh` hashes it (SHA-512, random salt) at build time. SSH stays **key-only**
+(`PasswordAuthentication no`, `AllowUsers admin`), so the password only works at the keyboard. `learner` has no password.
 
 ## What the image does (proposal section)
 
@@ -44,6 +47,7 @@ NetworkManager profile (PSK).
 | Console shortcut + discovery (idea#203 §2) | **One** "IDEA" shortcut (`idea-console.desktop`, app menu + learner desktop) opens `start.html`: home Engine (`idea-home.txt` on the FAT boot partition → `/etc/idea/home-engine` by `idea-home-engine.service` at boot) → last Engine that opened → `http://idea.local`, 1.5 s per probe; sticker-name field (strict hostname validation) always shown, prominent on failure; friendly not-found text, never a browser error. No per-app icons, no `/go`, no Nextcloud links, no Engine name or IP in the image |
 | §8 first boot | `idea-firstboot`: hostname `idea-pc-<last4 serial>`, new SSH host keys and machine-id (nothing model-specific) |
 | §5 reset B | `overlayroot` installed, off unless `OVERLAY=on`; `idea-client-mode overlay|normal|status` |
+| idea#202 (2026-10-15) | `config.txt`: KMS overlay per model (`[pi4]` `vc4-kms-v3d` = Pi 400, `[pi5]` `vc4-kms-v3d-pi5` = Pi 500), none in `[all]`, `disable_fw_kms_setup=1` kept, stock cmdline - one image boots both. `curl`. Firefox snap removed from the seed (+ launchers); Chrome only. Chrome launchers + `google-chrome.desktop` override (`/usr/local/share/applications`) use `--password-store=basic`; policy `PasswordManagerEnabled=false`, Google as fixed default search (no choice screen), `PromotionsEnabled=false`, `initial_preferences` + `First Run` sentinel skip first-run. Desktop icon learner-owned 755, trusted by a one-shot learner autostart (`gio set … metadata::trusted true`, then `Hidden=true`). First-run off: LibreOffice `/etc/libreoffice/registry/idea.xcd`, GCompris `isFirstRun=false`, gnome-initial-setup purged + done-file, GNOME welcome tour off (dconf). GeoGebra is not in the image (offline web app on the Engine) |
 | §12 CI | `verify-image.sh` (in chroot) + `scan-secrets.sh` run on every build; non-zero exit fails the build |
 
 

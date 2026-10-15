@@ -24,7 +24,7 @@ missing=""; for t in $need; do command -v "$t" >/dev/null 2>&1 || [ -x "/usr/bin
 [ -f "$SECRETS" ] || { echo "secrets file missing: $SECRETS (see secrets.env.example)" >&2; exit 1; }
 case "$(realpath "$SECRETS")" in "$REPO"/*) echo "refusing: secrets file is inside the repo" >&2; exit 1;; esac
 set +x; . "$SECRETS"
-for v in ADMIN_AUTHORIZED_KEYS_FILE ADMIN_PASSWORD_HASH WIFI_PSK; do [ -n "${!v:-}" ] || { echo "secret $v not set" >&2; exit 1; }; done
+for v in ADMIN_AUTHORIZED_KEYS_FILE WIFI_PSK; do [ -n "${!v:-}" ] || { echo "secret $v not set" >&2; exit 1; }; done
 grep -q 'PRIVATE KEY' "$ADMIN_AUTHORIZED_KEYS_FILE" && { echo "authorized keys file contains a private key" >&2; exit 1; }
 
 GITSHA="$(git -C "$REPO" rev-parse --short HEAD)"; [ -z "$(git -C "$REPO" status --porcelain -- tools/client-image)" ] || GITSHA="${GITSHA}-dirty"
@@ -71,7 +71,7 @@ cp "$HERE/client-image.conf" "$HERE/customise.sh" "$HERE/browser.sh" "$HERE/veri
 printf 'BROWSER=%q\nCHROME_DEB=%q\n' "$BROWSER" "$CHROME_DEB" > "$S/browser.env"
 [ "$BROWSER" = chrome ] && cp "$CHROME_FILE" "$S/$CHROME_DEB"
 install -m 600 "$ADMIN_AUTHORIZED_KEYS_FILE" "$S/admin_authorized_keys"
-( umask 077; printf 'ADMIN_PASSWORD_HASH=%q\nWIFI_PSK=%q\n' "$ADMIN_PASSWORD_HASH" "$WIFI_PSK" > "$S/secrets.env" )
+( umask 077; printf 'WIFI_PSK=%q\n' "$WIFI_PSK" > "$S/secrets.env" )
 echo "IDEA_CLIENT_VERSION=$VER" > "$S/version.env"
 
 chroot "$MNT" /bin/bash /root/.idea-build/customise.sh
