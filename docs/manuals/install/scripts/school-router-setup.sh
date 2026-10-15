@@ -3,8 +3,11 @@
 #
 # What it does: LAN 10.42.0.1/24, two Wi-Fi networks in their own firewall zones
 # ('IDEA' = students 10.42.1.0/24, 'IDEA-Teachers' = teachers 10.42.2.0/24),
-# DHCP reservations for the two Pis (+ optional switch), and the firewall rules.
-# It does NOT install Tailscale (see manual section 3.7).
+# Engine addresses .2-.9 by DHCP vendor class 'idea-engine' (no MAC reservations),
+# the switch at .10 (optional MAC), and the firewall rules.
+# The pre-flashed IDEA router image (router image and flashing proposal, idea#209)
+# already has all of this; use this script only to set up a router by hand.
+# It does NOT install Tailscale (see manual Appendix D.2.7).
 #
 # 1. Edit the values below on your laptop. NEVER commit real passwords to git.
 # 2. Copy it:   scp -O school-router-setup.sh root@192.168.1.1:/tmp/
@@ -13,16 +16,11 @@
 set -e
 
 NET_PREFIX='10.42'                        # the same at every school (no school numbers)
-PI1_MAC=''                                # Pi #1 eth0 MAC, e.g. 2c:cf:67:00:00:01 (empty = add later)
-PI2_MAC=''                                # Pi #2 eth0 MAC
 SWITCH_MAC=''                             # TL-SG105PE MAC from its label (optional)
-STUDENT_WIFI_KEY='<IDEA-WIFI-PASSWORD>'           # min. 8 characters
-TEACHER_WIFI_KEY='<IDEA-TEACHERS-WIFI-PASSWORD>'  # min. 8 characters, different from the student one
+STUDENT_WIFI_KEY='idea911!'               # IDEA default (<name>911!); the school changes it later
+TEACHER_WIFI_KEY='idea-teachers911!'      # IDEA default; the school changes it later
 COUNTRY='ZW'                              # Wi-Fi regulatory country (Zimbabwe)
 
-case "$STUDENT_WIFI_KEY$TEACHER_WIFI_KEY" in
-  *'<'*) echo "ERROR: replace the <...> Wi-Fi password placeholders first"; exit 1 ;;
-esac
 
 # ---- system --------------------------------------------------------------
 uci set system.@system[0].hostname="idea-router"
@@ -56,17 +54,22 @@ for Z in students teachers; do
   uci set dhcp.$Z.leasetime='2h'
 done
 
-# ---- DHCP reservations (fixed addresses) --------------------------------------
-add_host() {  # <section> <label> <mac> <ip>   (no name: the Pis name themselves, manual 5.6)
-  [ -n "$3" ] || { echo "note: no MAC for $2 yet - add the reservation later (manual 5.5)"; return 0; }
-  uci -q delete dhcp.$1 || true
-  uci set dhcp.$1=host
-  uci set dhcp.$1.mac="$3"
-  uci set dhcp.$1.ip="$4"
-}
-add_host pi1    "Pi #1"    "$PI1_MAC"    "$NET_PREFIX.0.2"
-add_host pi2    "Pi #2"    "$PI2_MAC"    "$NET_PREFIX.0.3"
-add_host switch "switch"    "$SWITCH_MAC" "$NET_PREFIX.0.4"
+# ---- Engines: fixed range by DHCP vendor class, no MAC reservations -------------
+# Each Engine sends vendor class 'idea-engine' and gets an address in .2-.9 (proposal 5.1).
+sed -i '/# IDEA engines/,+2d' /etc/dnsmasq.conf 2>/dev/null || true
+cat >> /etc/dnsmasq.conf <<DNSMASQ
+# IDEA engines
+dhcp-vendorclass=set:engine,idea-engine
+dhcp-range=tag:engine,$NET_PREFIX.0.2,$NET_PREFIX.0.9,255.255.255.0,12h
+DNSMASQ
+uci -q delete dhcp.pi1 || true
+uci -q delete dhcp.pi2 || true
+if [ -n "$SWITCH_MAC" ]; then
+  uci -q delete dhcp.switch || true
+  uci set dhcp.switch=host
+  uci set dhcp.switch.mac="$SWITCH_MAC"
+  uci set dhcp.switch.ip="$NET_PREFIX.0.10"
+fi
 
 # ---- Wi-Fi: same two SSIDs on 2.4 GHz (radio0) and 5 GHz (radio1) -------------
 for R in 0 1; do
@@ -120,17 +123,18 @@ for Z in students teachers; do
   uci set firewall.${Z}_dns.dest_port='53'
   uci set firewall.${Z}_dns.target='ACCEPT'
 
-  for P in 1 2; do
-    S="${Z}_pi$P"
-    uci -q delete firewall.$S || true
-    uci set firewall.$S=rule
-    uci set firewall.$S.name="Allow-$Z-to-Pi$P"
-    uci set firewall.$S.src="$Z"
-    uci set firewall.$S.dest='lan'
-    uci set firewall.$S.dest_ip="$NET_PREFIX.0.$((P + 1))"
-    uci set firewall.$S.proto='all'
-    uci set firewall.$S.target='ACCEPT'
-  done
+  S="${Z}_engines"
+  uci -q delete firewall.${Z}_pi1 || true
+  uci -q delete firewall.${Z}_pi2 || true
+  uci -q delete firewall.$S || true
+  uci set firewall.$S=rule
+  uci set firewall.$S.name="Allow-$Z-to-Engines"
+  uci set firewall.$S.src="$Z"
+  uci set firewall.$S.dest='lan'
+  uci add_list firewall.$S.dest_ip="$NET_PREFIX.0.0/29"   # .2-.7 (.0/.1 are not Engines)
+  uci add_list firewall.$S.dest_ip="$NET_PREFIX.0.8/31"   # .8-.9; the switch at .10 stays closed
+  uci set firewall.$S.proto='all'
+  uci set firewall.$S.target='ACCEPT'
 done
 
 # ---- the ONE switchable rule: teachers -> internet (starts OFF) -------------------

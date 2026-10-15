@@ -87,7 +87,7 @@ def wiring():
     # Switch
     sx, sy = 740, 300
     s.rect(sx, sy, 330, 120, fill="#f0fff0")
-    s.text(sx + 165, sy + 86, "TP-Link TL-SG105PE  -  10.42.0.4", 14, "bold")
+    s.text(sx + 165, sy + 86, "TP-Link TL-SG105PE  -  10.42.0.10", 14, "bold")
     s.text(sx + 165, sy + 104, "ports 1-4 = PoE+ (power out), port 5 = normal", 10, italic=True, fill="#555")
     spx = {}
     for i in range(1, 6):
@@ -100,7 +100,7 @@ def wiring():
     s.line([(xs["LAN1"], cy + 89), (xs["LAN1"], cy + 140), (1115, cy + 140), (1115, 270), (spx[5], 270), (spx[5], sy + 12)], C_UP, 5)
     s.badge(1115, 450, 2, C_UP)
     # Pis
-    for k, (px, ip, port, col) in enumerate([(740, "10.42.0.2", 1, C_POE1), (920, "10.42.0.3", 2, C_POE2)]):
+    for k, (px, ip, port, col) in enumerate([(740, "10.42.0.2-.9 (DHCP)", 1, C_POE1), (920, "10.42.0.2-.9 (DHCP)", 2, C_POE2)]):
         py = 80
         s.rect(px, py, 150, 120, fill="#fff5f5")
         s.text(px + 75, py + 22, f"Pi 5 #{k+1}", 14, "bold")
@@ -146,14 +146,14 @@ def zones():
         s.text(x + w/2, y + 26, title, 15, "bold")
         s.text(x + w/2, y + 48, sub, 11, fill="#333")
     zone(420, 60, 260, 110, "WAN  (Starlink -> internet)", "zone: wan", "#fff7e0")
-    zone(780, 230, 290, 170, "LAN  10.42.0.0/24  (wired)", "zone: lan\nPi #1 10.42.0.2 - Pi #2 10.42.0.3\nswitch 10.42.0.4\n(Console: http://10.42.0.2)", "#f0fff0")
+    zone(780, 230, 290, 170, "LAN  10.42.0.0/24  (wired)", "zone: lan\nEngines 10.42.0.2-.9 (by DHCP)\nswitch 10.42.0.10\n(Console: http://10.42.0.2)", "#f0fff0")
     zone(30, 130, 300, 140, "Wi-Fi 'IDEA'  10.42.1.0/24", "zone: students\nlaptops / Pi 400s of students\nclient isolation ON", "#fff0f0")
     zone(30, 380, 300, 140, "Wi-Fi 'IDEA-Teachers'  10.42.2.0/24", "zone: teachers\nteacher laptops / phones", "#f5f0ff")
     zone(420, 470, 260, 110, "tailscale0", "zone: tailscale\nadmin access to the router only", "#eefaff")
     G, R, O = "#2ca02c", "#d62728", "#ff7f0e"
     # students -> Pis allowed
     s.line([(330, 190), (760, 190), (760, 280), (780, 280)], G, 4, arrow=True)
-    s.text(545, 183, "ALLOW: to 10.42.0.2 and 10.42.0.3 only", 11, "bold", fill=G)
+    s.text(545, 183, "ALLOW: to the Engines (10.42.0.2-.9) only", 11, "bold", fill=G)
     # students -> WAN blocked
     s.line([(250, 130), (250, 100), (420, 100)], R, 4, dash="8,6", arrow=True)
     s.text(30, 70, "BLOCKED (no forwarding):\ninternet, outside DNS, VPNs", 11, "bold", fill=R, anchor="start")

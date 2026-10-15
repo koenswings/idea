@@ -1,9 +1,9 @@
 ---
 title: "IDEA Classroom Computer: Installation Manual"
 subtitle: "Raspberry Pi 400 + Raspberry Pi Monitor + Ubuntu Desktop"
-audience: "For Justice. Version 1.1, 14 October 2026"
+audience: "For Justice. Version 1.2, 15 October 2026"
 ---
-**Status:** Authoritative (follows idea#184; see the README for what is not yet installed on hardware) · **Maintained by:** Marco (with Atlas) · 14 October 2026
+**Status:** Authoritative (follows idea#184; see the README for what is not yet installed on hardware) · **Maintained by:** Marco (with Atlas) · 15 October 2026 (router Wi-Fi defaults)
 
 
 # How to use this manual
@@ -16,8 +16,7 @@ This manual sets up one classroom computer: a Raspberry Pi 400 keyboard computer
 <div class="note">
 <b>Placeholders, no real secrets.</b>
 <ul>
-<li>Every school uses the same addresses (Manual 1). The Console is always at <code>http://10.42.0.2</code>.</li>
-<li><code>&lt;IDEA-WIFI-PASSWORD&gt;</code> / <code>&lt;IDEA-TEACHERS-WIFI-PASSWORD&gt;</code>: the Wi-Fi passwords set on the school router (Manual 1).</li>
+<li>Every school uses the same addresses (*IDEA School Server: Installation Manual*). The Console is always at <code>http://10.42.0.2</code>.</li>
 <li><code>&lt;STUDENT-USER-PASSWORD&gt;</code>: the password for the Ubuntu user on the Pi 400.</li>
 <li><code>&lt;SCHOOL&gt;</code>: the school name, for labels only.</li>
 </ul>
@@ -227,20 +226,24 @@ Without PiShrink, the target card must be at least as large as the golden card. 
 
 ## 6.3 Wi-Fi: IDEA or IDEA-Teachers
 
+The pre-flashed IDEA school router creates two Wi-Fi networks (*IDEA School Server: Installation Manual*, "The school router's Wi-Fi networks and default passwords"). The passwords are the IDEA defaults until the school changes them:
+
 | Who uses this PC | Network |
 |---|---|
-| Students (default) | `IDEA` with `<IDEA-WIFI-PASSWORD>`: Console and apps only, no internet |
-| Teacher's PC | `IDEA-Teachers` with `<IDEA-TEACHERS-WIFI-PASSWORD>`: Console and apps, plus internet when the teacher rule is on |
+| Students (default) | `IDEA`, password `idea911!`: Console and apps only, no internet |
+| Teacher's PC | `IDEA-Teachers`, password `idea-teachers911!`: Console and apps, plus internet when the teacher rule is on (off by default) |
 
-Use `IDEA` on every PC unless the head teacher names a PC for a teacher. Only that PC gets `IDEA-Teachers`.
+Use `IDEA` on every PC unless the head teacher names a PC for a teacher. Only that PC gets `IDEA-Teachers`. Never type the `IDEA-Teachers` password on a student PC.
+
+If the school has changed the passwords (*IDEA School Server: Installation Manual*, section 10), ask the head teacher for the new ones.
 
 **At school:** choose the network in the wizard, or later from the top-right menu → Wi-Fi.
 
-**Preparing in Belgium:** the IDEA network isn't there yet. Join your **home Wi-Fi** for updates (6.5), then add IDEA in advance from a terminal. The password is typed only into your terminal: don't save it in a script.
+**Preparing in Belgium:** the IDEA network isn't there yet. Join your **home Wi-Fi** for updates (6.5), then add IDEA in advance from a terminal.
 
 ```bash
 nmcli connection add type wifi con-name IDEA ssid IDEA \
-  wifi-sec.key-mgmt wpa-psk wifi-sec.psk '<IDEA-WIFI-PASSWORD>' connection.autoconnect yes
+  wifi-sec.key-mgmt wpa-psk wifi-sec.psk 'idea911!' connection.autoconnect yes
 # when done with updates, forget your home network:
 nmcli connection delete '<HOME-WIFI-NAME>'
 ```
@@ -327,7 +330,7 @@ sudo reboot
 | Monitor flashes on and off | Turn brightness and volume down [3]. Unplug extra USB devices. Last resort: a separate USB-C supply for the monitor. |
 | Rainbow screen / no boot with Ubuntu | EEPROM too old: section 6.1. Rewrite the card and check the SHA-256. |
 | Very slow first boot | That is normal: the first boot resizes the card. Give it 5 minutes. |
-| Wi-Fi 'IDEA' not shown | Is the router on? (Manual 1.) The 5 GHz network may need the Wi-Fi country (6.3). |
+| Wi-Fi 'IDEA' not shown | Is the router on? (*IDEA School Server: Installation Manual*, section 2.) The 5 GHz network may need the Wi-Fi country (6.3). |
 | Console doesn't open | Check the address: `http://10.42.0.2` (http, not https). Is the PC on IDEA/IDEA-Teachers? Run `ping 10.42.0.2`. |
 
 # Appendix B. Sources (read on 12 October 2026)
