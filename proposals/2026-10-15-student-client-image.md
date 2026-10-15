@@ -6,180 +6,251 @@ audience: "Proposal · Status: Draft (for Koen Swings)"
 
 **Author:** Steve (Lead Bot)
 **Date:** 2026-10-15
-**Status:** Draft
+**Status:** Draft, revision 2 (Koen's feedback of 15 Oct 2026 09:25 applied; all open questions decided)
 
 # 1. Problem
 
-Classroom computers (Raspberry Pi 400 / Pi 4 / Pi 5 with a 32 GB microSD card) are **shared**: a different
-student sits at each one every lesson. Today each card is set up by hand from Manual 2
+Classroom computers (**Raspberry Pi 400 and Pi 500**, also Pi 4 / Pi 5, each with a 32 GB microSD card) are
+**shared**: a different student sits at each one every lesson. Today each card is set up by hand from Manual 2
 (`docs/manuals/install/install-manual-client-pi400/`), including the Ubuntu first-boot wizard. That is slow,
 every card ends up slightly different, and when a card breaks (power cut, full disk, a student changed
 settings) a local helper has no simple way back to a known-good state.
 
 Koen's requirements (15 October 2026):
 
-* One **repeatable** Ubuntu image, the same on every student computer.
-* **No personal accounts.** One `learner` account with a default password, or no password if that is safe enough.
-* A **standard set of applications**: office (documents and spreadsheets compatible with Word/Excel), education software, and games.
-* **Reset = reflash.** If a computer becomes unstable, someone puts its card in a USB reader on a school server Pi
-  and Koen, or a local support engineer, writes a fresh default image **remotely over Tailscale**.
+* One **repeatable** Ubuntu image, the same on every student computer, **Pi 400 and Pi 500 alike**.
+* **No personal accounts.** One `learner` account with no password.
+* A **standard set of applications**: office (Word/Excel compatible), education software, and games.
+* **Reset = reflash.** A card goes into a card reader on a school server Pi and Koen, or a local support
+  engineer, writes a fresh default image **remotely over Tailscale**, from the **Console**.
+* **No automatic updates** on the clients.
+* **Every Engine can flash**: the standard image is stored on the Engine; no fixed list of approved readers.
 
 # 2. Summary of the proposal
 
-1. **Ubuntu Desktop 26.04 LTS for Raspberry Pi** (the same release Manual 2 already uses), customised by a
-   **build script** into `idea-student-<version>.img.xz` with a SHA-256 checksum. The script runs in CI
-   on every change; nobody builds images by hand.
-2. **One `learner` account with automatic login and no password**, no sudo, screen lock off. A separate
-   **`ideaadmin`** account for support, reachable only by **SSH key** (no password login).
-3. **Two reset levels**: a fast "clean on every reboot" mode (read-only root with an overlay, optional, see §5)
-   and the always-available **reflash**.
-4. **`idea-flash`**: a small, careful flashing tool on the school server Pi. It only writes to a reader on an
-   **allowlist** (by USB serial), refuses system disks and IDEA disks, verifies the image checksum and reads back
-   what it wrote. The **Engine is taught to ignore** allowlisted readers. A Console button can come later.
-5. Images are **stored on the school server Pi** (Files Disk or a folder on the system disk), so a school can
-   reflash while offline.
+1. **Ubuntu Desktop 26.04 LTS for Raspberry Pi**, customised by a **build script** into
+   `idea-client-<version>.img.xz` with a SHA-256 checksum. One image boots on Pi 4, 400, 5 and 500 (§3).
+2. **One `learner` account, automatic login, no password**, no sudo. A separate **`admin`** account for support:
+   SSH by key only, plus a local password known only to support (§4).
+3. **Updates off** on the clients. A new tested image version, reflashed, is the only way software changes (§7).
+4. **Flash from the Console.** The image is a **versioned, checksummed artifact stored on the Engine**, spread to
+   every Engine like an app. The Console lists cards in any card reader and offers **Flash** with a clear
+   confirmation; the Engine writes and verifies (§10).
+5. **No reader allowlist.** Instead the Engine **stops claiming unknown disks automatically**: a disk without IDEA
+   `META.yaml` is never mounted read-write or written to until someone initialises it in the Console. Flash targets
+   are picked explicitly, with hard refusals for IDEA disks, the system disk and anything in use (§10.3).
+6. Reset level B ("clean on every reboot", read-only root) is built in but **off in v1**; it can be switched on
+   later remotely, per computer, without a reflash (§5).
 
-# 3. Ubuntu flavour and version
+# 3. Ubuntu flavour, version and hardware
 
 | Option | For | Against | Verdict |
 |---|---|---|---|
-| **Ubuntu Desktop 26.04 LTS (GNOME), preinstalled raspi image** | Official image for Pi 4/400/5, 5 years of support, same as Manual 2, best hardware support | GNOME uses ~1.2-1.5 GB RAM idle; heavier on a 4 GB Pi 400 | **Recommended** |
-| Ubuntu MATE / Xubuntu 26.04 for Pi | Lighter (~600-800 MB idle), simpler desktop for children | Community images; Pi images released later or not at all for some flavours; less tested | Fallback if GNOME is too slow on Pi 400 |
-| Ubuntu 24.04 LTS | Older, well known | Shorter remaining support; Manual 2 already moved to 26.04 | No |
-| Raspberry Pi OS | Lightest, best Pi support | Koen chose Ubuntu for the clients | No |
+| **Ubuntu Desktop 26.04 LTS (GNOME), preinstalled raspi image** | Official image, 5 years of support, same as Manual 2 | GNOME uses ~1.2-1.5 GB RAM idle; heavier on a 4 GB Pi 400 | **Decided** |
+| Ubuntu MATE / Xubuntu 26.04 for Pi | Lighter | Community images, less tested | Fallback if the boot test shows GNOME is too slow |
+| Ubuntu 24.04 LTS / Raspberry Pi OS | - | Older, or not Ubuntu | No |
 
-Reasoning: the clients mostly run a browser (Kolibri, Nextcloud, Kiwix) and LibreOffice. GNOME on a Pi 400 is
-acceptable for that, and staying on the official image keeps security updates and hardware support simple. The
-build script is written so the base image is one variable: if the boot test (§9) shows GNOME is too slow on
-4 GB, switching to a lighter desktop is a one-line change plus a package list.
+**One card for Pi 400 and Pi 500 (Koen's question 8): yes.** Canonical publishes a single
+`ubuntu-26.04-preinstalled-desktop-arm64+raspi.img.xz` "for modern Raspberry Pi boards (Pi 3, 4, 5, ...)", and the
+Ubuntu hardware support matrix lists 26.04 LTS as supported (server and desktop) on the **Pi 400 and the Pi 500**
+(Pi 4B and Pi 5 also certified). The image carries the boot firmware and kernel for both families and picks the right
+device tree at boot, so the same card moves freely between a Pi 400 and a Pi 500. Two conditions:
 
-Small tweaks that help a 4 GB Pi: zram swap (already in Ubuntu), disable GNOME's search indexer (Tracker),
-animations off, no snaps refreshing in the background (see §7).
+* **Bootloader EEPROM** must be recent enough: at least 2022-11-25 for Pi 4/400 and 2025-02-11 for Pi 5/500
+  (Ubuntu's documented minimum). New Pi 500s ship newer; older Pi 400s may need a one-time EEPROM update with the
+  Raspberry Pi bootloader-update card. Manual 2 gets a "check the EEPROM date" step.
+* **Keyboard layout** differs per kit (UK/US ANSI etc.), not per model; it stays a per-school build parameter.
+
+Our own customisation adds no model-specific parts. The boot test (§12) runs the same card on a Pi 400 and a Pi 500.
+
+Small tweaks that help a 4 GB Pi: zram swap, GNOME search indexer (Tracker) off, animations off.
 
 # 4. Accounts and security
 
 | Account | Purpose | Login | Rights |
 |---|---|---|---|
-| `learner` | Every student | **Automatic login, no password** | No sudo, cannot install software, cannot change network or system settings |
-| `ideaadmin` | Koen / local support engineer | **SSH key only** (Tailscale or school LAN); a console password stored in the support vault for emergencies | sudo |
+| `learner` | Every student | **Automatic login, no password** | No sudo, cannot install software or change network/system settings |
+| `admin` | Koen / local support engineer | **SSH by key only** (via the school server Pi); at the keyboard: local password known to support, kept in the support vault, never in docs or git | sudo |
 
-**Is passwordless safe enough?** Yes, for a shared lab machine where students have no private data on it.
-The risk of a password is not protection but lockout: students forget it, and a shared password written on the
-wall protects nothing. What matters is that `learner` **cannot break the system**:
+Passwordless `learner` is safe enough for a shared lab machine with no private data: what matters is that `learner`
+**cannot break the system** (not in `sudo`/`adm`/`lpadmin`; polkit denies network, software, user and power
+changes; screen lock off; Wi-Fi password stored root-only). SSH: `PasswordAuthentication no`, `AllowUsers admin`.
+Students save to **Nextcloud** on the school Pi; a local *Documents* folder is wiped by a reflash.
 
-* Not in the `sudo`, `adm` or `lpadmin` groups; polkit rules deny network, software, user and power-policy changes for `learner`.
-* Screen lock and "switch user" off; idle blanking after 15 minutes without a lock.
-* Student work is not meant to live on the computer: they save to **Nextcloud** on the school Pi (bookmark on the desktop). A local *Documents* folder still works, but it is wiped by a reset (state this in the teacher guide).
-* `learner` cannot see the IDEA Wi-Fi password in clear text (connection stored system-wide, `psk-flags=0`, file root-only).
-* SSH: `PasswordAuthentication no`, `AllowUsers ideaadmin`, keys installed by the image build (support public keys only, no secrets in the repo).
-* **Tailscale on the clients: not by default.** 20-30 clients per school would be a lot of tailnet nodes and keys to manage. Support reaches a client via the school server Pi (already on Tailscale) as an SSH jump host: `ssh -J pi@<school-pi> ideaadmin@<client>`. Optional Tailscale per client stays possible later.
+**Can a support engineer open a terminal as `learner` and install software? (Koen's question 6)**
+They can open a terminal (Ctrl+Alt+T), but **not install**: `learner` has no sudo, on purpose, otherwise any student
+could do the same. Decision:
 
-If a school insists on a password, the build takes `LEARNER_PASSWORD` as a build parameter (never stored in the
-repo) and sets it as the default; autologin is then off.
+* **At the computer:** in the learner's terminal type `su - admin`, enter the support password, then use `sudo`.
+  No logout needed, and the student account stays locked down. The login screen does not show `admin` (hidden user),
+  so students do not see it.
+* **Remotely:** `ssh -J <school-pi> admin@<client>` over Tailscale.
+* **But:** an install on one computer is **lost at the next reflash** and makes that card different from the rest.
+  Use it for diagnosis or an urgent fix only. Software that should stay goes into `client-image.conf` and a new image
+  version. Schools are offline, so `apt install` also needs a package copied in by hand; support docs say so.
 
-# 5. Reset: reflash versus "clean on every reboot"
+# 5. Reset: reflash (A) versus "clean on every reboot" (B)
 
 | | **A. Reflash the card** | **B. Read-only root + overlay (`overlayroot`)** |
 |---|---|---|
-| How | Card out, into the reader on the server Pi, `idea-flash`, card back | Root filesystem mounted read-only; all changes go to a RAM overlay and vanish at reboot |
-| When it helps | Everything, including a corrupted card | Settings changed, junk files, broken desktop: a reboot fixes it |
+| How | Card into a reader on the server Pi, **Flash** in the Console, card back | Root mounted read-only; changes go to RAM and vanish at reboot |
+| Fixes | Everything, including a corrupted card | Changed settings, junk, broken desktop: a reboot fixes it |
 | Effort per incident | Someone handles the card (5-10 min) | Just reboot |
-| Power-loss robustness | Normal ext4 | Much better: the card is almost never written |
-| Card wear | Normal | Very low |
-| Downsides | Needs hands at the computer | Local *Documents* also vanish on reboot; updates need an "unlock" step (`overlayroot-chroot`); RAM use grows during a session (fine for a lesson; 4 GB Pi) |
+| Power-loss robustness / card wear | Normal | Much better: the card is almost never written |
+| Downsides | Needs hands at the computer | Local *Documents* also vanish; RAM use grows during a session |
 
-**Recommendation:** build the image with **both**. Reflash (A) is always available and is the answer to a
-corrupt or failing card. Overlay mode (B) is **an image option, off in the first version**, and switched on
-per school after a two-week trial on a test Pi. If Koen prefers, B can be the default from the start, because
-for shared student computers "every reboot is a fresh computer" is exactly the wanted behaviour; then
-Nextcloud is the only place to save work.
+**Decided:** both are in the image. A is always available. B is **off in v1**, tried for two weeks on a test
+Pi, then decided per school.
+
+**Starting with A and switching to B in the field, remotely (Koen's question 7).** B is already installed in every
+image, only switched off by one line in `/etc/overlayroot.conf`. So switching needs **no card handling**:
+
+1. **Remote, per computer (no reflash):** Koen connects over Tailscale to the school server Pi, then
+   `ssh -J <school-pi> admin@<client>` and runs `sudo idea-client-mode overlay` (sets `overlayroot="tmpfs"`) and reboots.
+   Back to A: `sudo overlayroot-chroot idea-client-mode normal` and reboot. A script on the server Pi can do this
+   for all clients in one go while they are switched on.
+2. **For new and reflashed cards:** the image build has `OVERLAY=on|off`; once B is the school default, the next image
+   version ships with B on, and every card flashed from the Console gets it.
+3. **Later, from the Console:** a "Client mode" toggle could run step 1 for the school; not in v1.
 
 # 6. Applications
 
-All packages below are in Ubuntu main/universe and are built for **arm64** (spot-checked on packages.ubuntu.com for noble arm64: gcompris-qt, kturtle, kalzium; the rest are standard universe packages;
-the CI build verifies each one on 26.04 and fails if one is missing). They are installed as **.deb packages**,
-not snaps, so nothing needs the internet after the build.
+All packages are in Ubuntu main/universe for **arm64** and installed as **.deb**, not snaps (CI fails if one is missing).
 
-| Group | Apps | Notes for Pi 4 GB |
+| Group | Apps | Notes |
 |---|---|---|
-| Office | LibreOffice Writer, Calc, Impress (`libreoffice-writer/-calc/-impress`, `-gtk3`), fonts `fonts-crosextra-carlito/-caladea` (Word/Excel-compatible metrics) | Fine; default save format stays .docx/.xlsx/.pptx so files open at home |
-| Browser | **Firefox** (from the Mozilla .deb repo or Ubuntu's .deb; not the snap) | Bookmarks and homepage pre-set: IDEA Console, Kolibri, Nextcloud, Kiwix on the school Pi |
-| Education | GCompris (`gcompris-qt`), Tux Paint, TuxMath, TuxType, KTurtle, Kalzium, Marble, Stellarium | Stellarium and Marble are the heaviest; usable on Pi 4/5, slow-ish on Pi 400 |
-| Maths / coding | **GeoGebra** and **Scratch 3**: no arm64 Ubuntu packages | Serve both as **offline web apps** from the school Pi (static Scratch GUI build, GeoGebra offline HTML5 bundle) and bookmark them; check GeoGebra's licence for offline redistribution (open question) |
-| Games | SuperTuxKart, GNOME Chess (+ `stockfish`), GNOME Mines, GNOME Sudoku, Aisleriot, Quadrapassel | SuperTuxKart runs on Pi 4/5 at low settings; may be choppy on Pi 400 |
-| Accessibility / language | English UI, `language-pack-en`, spell checkers `hunspell-en-gb`; optional Shona and Ndebele where available | Keyboard default: US (Pi 400 ANSI kits); per school build parameter |
+| Office | LibreOffice Writer, Calc, Impress, fonts Carlito/Caladea | Default save format .docx/.xlsx/.pptx |
+| Browser | **Firefox** (.deb, not snap) | Bookmarks: IDEA Console, Kolibri, Nextcloud, Kiwix on the school Pi |
+| Education | GCompris, Tux Paint, TuxMath, TuxType, KTurtle, Kalzium, Marble, Stellarium | Stellarium/Marble slow-ish on Pi 400, fine on Pi 500 |
+| Maths / coding | **GeoGebra** and **Scratch 3** (no arm64 packages) | Served as **offline web apps** from the school Pi and bookmarked. GeoGebra licence: **confirmed OK** by Koen |
+| Games | SuperTuxKart, GNOME Chess (+ stockfish), Mines, Sudoku, Aisleriot, Quadrapassel | SuperTuxKart at low settings |
+| Language | English UI, `hunspell-en-gb`; Shona/Ndebele where available | Keyboard per school build parameter |
 
-Removed from the stock image: Ubuntu Pro prompts, Thunderbird, Software Center, snap auto-refresh,
-first-boot wizard (`gnome-initial-setup`), crash reporter popups.
+Removed: Ubuntu Pro prompts, Thunderbird, Software Center, update notifier, first-boot wizard, crash reporter popups.
 
-# 7. Offline operation and updates
+# 7. Updates: off on the clients
 
-* Schools are offline. The image works with **no internet at all**: no snaps, no update notifier, time from the school Pi's NTP (or fake-hwclock if none).
-* **Updates come with a new image**, not with apt on each client. The build pulls current Ubuntu updates; a school gets the new version the next time cards are reflashed. Clients never run unattended upgrades (they would fill the card and break at a power cut).
-* If a teacher Wi-Fi with internet exists, clients still do not update themselves; that keeps every card identical.
+Koen's requirement (question 3): updates are off, after a past update made a system unusable.
+**Our opinion: we agree.** For shared, offline classroom computers a silent update is a bigger risk than an old
+package. An update can half-finish at a power cut, fill a 32 GB card, or change the desktop overnight, and it makes
+cards differ from each other. The image therefore:
+
+* removes `unattended-upgrades` and `update-notifier`, disables `apt-daily.timer` and `apt-daily-upgrade.timer`,
+  and sets `APT::Periodic::*` to `0`;
+* has no snaps in the student path; any snap left in the base is held with `snap refresh --hold` (forever) and
+  `snapd` refresh timers off;
+* has no Software Center and no firmware updater (`fwupd` off).
+
+**How software changes instead:** we build a **new image version**, test it on the pool (boot test, §12), publish it
+to the Engines (§10.1), and schools reflash when convenient. Every computer is then on a known, tested version, and
+rolling back means flashing the previous version (Engines keep the last two).
+
+**Security trade-off:** the clients miss security patches between image versions. We accept that: they are offline,
+on the school's IDEA network only, hold no private data, students have no admin rights, and a reflash fixes any
+compromise. We plan a new image at least twice a year (and sooner for a serious browser issue).
 
 # 8. Network, names and first boot
 
-* Clients join the **IDEA Wi-Fi** (school router, 10.42.0.x); the connection profile is in the image, the Wi-Fi password is a **build parameter** per school (not in git).
-* The school Pi is found at the fixed address **10.42.0.2** (Manual 1) and by its `.local` name via mDNS; bookmarks use the fixed address so they work even when mDNS fails.
-* **Names:** every card is identical; on first boot a one-shot service names the computer `idea-pc-<last 4 of the Pi serial>` (unique, no manual step). A **sticker** on the computer shows that name, like the Pi stickers. Optionally a support engineer renames it (`hostnamectl`) to `idea-pc07`; a reflash then resets it to the serial name, which the sticker still shows.
-* First boot also grows the root partition (already done by the Ubuntu raspi image) and regenerates SSH host keys and the machine-id, so clones are not duplicates on the network.
-* Locale: en_GB / Africa/Harare time zone for Zimbabwe; both build parameters.
-* **Power loss**: ext4 with the default 5 s commit interval (no `commit=60` tuning), `fsck` on boot (`fsck.mode=auto`, `fsck.repair=yes`); overlay mode (§5) removes most risk.
+* Clients join the **IDEA Wi-Fi**; the profile is in the image, the Wi-Fi password is a per-school build parameter (not in git).
+* The school Pi is at the fixed address **10.42.0.2**; bookmarks use that address.
+* **Names:** every card is identical; first boot names the computer `idea-pc-<last 4 of the Pi serial>` (shown on a sticker).
+* First boot regenerates SSH host keys and machine-id; the root partition grows to fill the card.
+* Locale en_GB, time zone Africa/Harare (build parameters). Power loss: ext4 + `fsck` on boot; mode B removes most risk.
+* **Tailscale on clients: no** (decided); support goes through the school server Pi as a jump host.
 
 # 9. Build pipeline
 
-1. `tools/student-image/build.sh` in a new repo-internal tool folder (or in `agent-app-dev`, see open questions) downloads the official `preinstalled-desktop-arm64+raspi.img.xz`, checks Ubuntu's SHA256SUMS, loop-mounts it and **chroots with `qemu-user-static`** to install packages and apply configuration (accounts, polkit, autologin in GDM, bookmarks, Wi-Fi profile template, first-boot service).
-2. All settings live in one versioned file `student-image.conf` (package list, locale, keyboard, overlay on/off). The Wi-Fi password and support public keys are injected at build time from the ops box, never committed.
-3. Output: `idea-student-26.04-<YYYYMMDD>-<git sha>.img.xz` + `.sha256` + a `MANIFEST.txt` listing every installed package version. Same inputs give the same package set (pinned snapshot date from `snapshot.ubuntu.com`).
-4. Images are copied to the **school server Pi** under `/var/lib/idea/client-images/` (or the Files Disk), keeping the last two versions so a school can roll back.
+1. `tools/client-image/build.sh` in the `idea` repo downloads the official raspi desktop image, checks Ubuntu's
+   SHA256SUMS, loop-mounts it and chroots with `qemu-user-static` to install packages and apply the configuration.
+2. All settings in one versioned file `client-image.conf`. Wi-Fi password and support keys/password hash are injected at
+   build time from the ops box, never committed.
+3. Output: `idea-client-26.04-<YYYYMMDD>-<git sha>.img.xz` + `.sha256` + `MANIFEST.txt` (all package versions).
+4. CI builds on every change; a version is **published** only after the boot test passes (§12).
 
-# 10. The flash tool (`idea-flash`)
+# 10. Flashing from the Console
 
-Runs on a school server Pi. Used over SSH via Tailscale by Koen or a support engineer; later from a Console button.
+## 10.1 The image as a versioned artifact on every Engine
 
-```
-idea-flash list                     # shows allowlisted readers and the card in each
-idea-flash write <reader> <image>   # checks, writes, verifies
-```
+* The client image is distributed **like an app**: a catalogue entry `client-image` with version, size and SHA-256,
+  stored on the Engine under `/var/lib/idea/client-images/<version>/` (or on the Files Disk when the system disk is small).
+* It reaches schools the way apps do: copied from a disk (e.g. the update stick or a Files Disk) or from another Engine on
+  the network. The Engine **verifies the SHA-256 on arrival** and refuses a mismatched file.
+* Every Engine keeps the **current and previous** version, so any school server Pi can flash, offline, and roll back.
 
-Safety rules, all enforced in code:
+## 10.2 The Flash operation
 
-1. **Allowlist by USB serial.** Only readers registered in `/etc/idea/flash-readers.conf` (USB vendor:product + serial, e.g. the reader now on wizardly-hugle, `14cd:1212` serial `121220160204`) can be targets. The device is resolved fresh from `/dev/disk/by-id/` at write time, never from a `/dev/sdX` name typed by a person.
-2. **Refuses** the system disk, any disk with an IDEA `META.yaml`, any disk with a mounted partition the tool did not mount, and any target larger than 256 GB (cards are 32-128 GB).
-3. Checks the image's SHA-256 before writing; writes with `dd`/`bmaptool` with direct I/O; **reads back and compares** the checksum of the written range.
-4. Unmounts and powers off the card at the end, prints "DONE - safe to remove", and logs who/when/which image to `/var/log/idea-flash.log`.
-5. Needs root through one fixed helper (`/usr/local/sbin/idea-flash` in sudoers for the `pi` user), same pattern as the Engine's root helpers.
+* The Console shows a **Client cards** section per Engine: every card in a card reader, with reader name, card size,
+  and what is on it now (e.g. "Ubuntu client image 2026-10-01", "Raspberry Pi OS", "empty").
+* **Flash** button: choose the image version (default: current) and confirm in a dialog that repeats the card size,
+  reader and current contents, and says the card will be wiped.
+* The Engine does the write through a fixed **root helper** (`flash-card`, same pattern as the existing helpers):
+  re-checks the target, checks the image SHA-256, writes, **reads back and verifies**, flushes, powers the card off, and
+  reports progress and "Done - safe to remove" to the Console. Each flash is logged (who, when, which image, which card).
+* Remote use (Koen or support): open the Console over Tailscale, ask someone at school to put the card in, press Flash.
 
-**Engine must ignore the reader.** On wizardly-hugle today the Engine *did* take the card in (finding below), so this is a prerequisite, not a nice-to-have. Proposed Engine change: a list of ignored USB serials (same allowlist file), checked before mount and before `unformattedDisks`; ignored devices never appear in the Console and can never be offered for Erase.
+## 10.3 Safety without a reader allowlist (Koen's question 9)
 
-> **Finding on wizardly-hugle, 15 Oct 2026 08:35.** The reader Koen plugged in (Super Top SY-T18, `14cd:1212`, serial `121220160204`) shows up as `/dev/sdc`, 31.7 GB, removable, with an old Raspberry Pi OS card (`bootfs` vfat + `rootfs` ext4). The Engine listed `sdc` under unformatted disks, **mounted `sdc2` read-write at `/disks/sdc2` and wrote a `META.yaml` onto it**. Harmless for this old card, but it means an Engine could also offer Erase for it, and would be writing to a card while it is being flashed.
+Koen rejected a fixed list of approved readers as inflexible. Instead the safety comes from **two rules in the
+Engine**, which work with any reader in any Engine:
+
+1. **The Engine no longer claims unknown disks by itself.** Today it mounts any new USB disk read-write and writes a
+   `META.yaml` on it (seen on wizardly-hugle on 15 Oct: the card in the new reader was mounted at `/disks/sdc2` and got
+   a `META.yaml`). New rule: a disk **without** IDEA `META.yaml` is only *looked at* (partitions and labels read,
+   mounted read-only at most, as already done for FAT sticks) and shown in the Console as a new disk. It gets `META.yaml`
+   only when someone chooses **Initialise** (or an app install) in the Console. This also protects any other foreign disk.
+2. **Flash targets are chosen explicitly and checked hard.** A device is offered as a **client card** when it is
+   removable media in a USB card reader (kernel `removable=1`, card-reader/SD transport) and at most 256 GB. Whatever the
+   Console shows, the helper **refuses** to write to: the system disk, any disk with an IDEA `META.yaml`, any disk with
+   a mounted partition or a running app, a disk larger than 256 GB, and the device the Engine itself runs from. The
+   target is resolved again from `/dev/disk/by-id/` at write time, and the write is aborted if the card was swapped.
+
+Result: any reader works, plugged into any Engine, with no setup. A card is never written by accident, because the only
+write paths are an explicit Console Initialise or an explicit, confirmed Flash, and IDEA disks are never flash targets.
+
+**Engine change needed (Axle):** rule 1 (no automatic `META.yaml` / read-write mount for unknown disks; Initialise in the
+Console), the client-card classification, the `flash-card` helper call and progress API, and the image artifact
+(store, verify, sync). Console (Pixel): Client cards section, Flash dialog, Initialise for new disks.
 
 # 11. Implementation plan
 
 | Who | Work |
 |---|---|
-| **Atlas** (ops) | `idea-flash` tool + reader allowlist, sudoers helper, image storage on server Pis, install on wizardly-hugle **after** the Engine ignore change is deployed; rollback notes |
-| **Kid** (apps / content) | Image build script and `student-image.conf`: package list, bookmarks, desktop layout, offline Scratch and GeoGebra bundles served from the school Pi |
-| **Axle** (Engine) | Ignore allowlisted reader serials (before mount, before `unformattedDisks`, no Erase); unit tests + hardware test on a pool Pi |
-| **Pixel** (Console, later) | "Client computers" panel: list readers, start a flash, show progress and verify result |
-| **Marco** (field docs) | Update Manual 2: "flash a card" replaces the manual Ubuntu install; one-page "reset a student computer" sheet for teachers |
-| **Steve** | Coordination, Design Review, issues after approval |
+| **Axle** (Engine) | Rule 1 (no auto-claim of unknown disks), client-card detection, flash API + progress, client-image artifact store/verify/sync; unit tests + hardware test on a pool Pi |
+| **Atlas** (ops) | `flash-card` root helper, image storage paths, deployment to pool and wizardly-hugle; until the Console flow exists, flashes by hand with the same helper |
+| **Kid** (apps / content) | Build script and `client-image.conf`, updates-off settings, offline Scratch/GeoGebra bundles |
+| **Pixel** (Console) | Client cards section, Flash dialog with confirmation and progress, Initialise for new disks |
+| **Marco** (field docs) | Manual 2 update (see follow-up below) and a one-page "reset a student computer" sheet |
+| **Steve** | Coordination, Design Review, issues |
+
+**Follow-up: Manual 2 name.** The client install manual lives in `docs/manuals/install/install-manual-client-pi400/`
+(`install-manual-client-pi400.md`, its `build.py`, PDF, diagrams and the generator script), and is referenced from
+`docs/INDEX.md`, `docs/DOCUMENTATION-RULES.md` and `docs/manuals/install/README.md`. It must not be Pi 400-specific.
+Proposal: rename to **`install-manual-client`** ("Manual 2 - Student client computers (Pi 400 / Pi 500)"), update all
+references, and add the Pi 500 and EEPROM steps. Not done in this PR (seven files plus PDFs and diagrams); it goes
+with Marco's manual update once the image exists.
 
 # 12. Automated tests (nothing manual for Koen)
 
-* **Build CI** on the box: build the image on every change; fail if any package is missing for arm64, if the `learner` account has sudo, if SSH allows passwords, or if any secret pattern is found in the image or repo.
-* **Boot test on a test Pi** with a reader (pool Pi idea01/03/04, claimed per protocol): `idea-flash` writes the new image to a card in a reader on the pool Pi; the test then needs a Pi that boots from it. Two options: a dedicated test client Pi with **USB boot** from that reader (no card swapping), or network boot. The test checks: autologin reaches the desktop (screenshot via `grim`/GDM log), Firefox opens the Console at 10.42.0.2, LibreOffice opens and saves a .docx, `learner` cannot `sudo`, a reboot in overlay mode discards a test file.
-* **Flash tool tests:** unit tests with loop devices; refuses a fake IDEA disk, the system disk, an unlisted reader; verifies a corrupted image is rejected.
-* **Engine test:** plug the allowlisted reader into a pool Pi; the Engine neither mounts it nor lists it.
+* **Build CI:** fail if a package is missing for arm64, `learner` has sudo, SSH allows passwords, any update timer or
+  `unattended-upgrades` is active, a snap is not held, or a secret pattern is found.
+* **Boot test** on a pool Pi with a reader: flash through the Engine helper, boot on a **Pi 400 and a Pi 500** (USB
+  boot from the reader); check autologin, Firefox opens the Console, LibreOffice saves a .docx, `learner` cannot
+  `sudo`, `su - admin` works, no apt activity after 24 h, mode B discards a test file after reboot.
+* **Engine tests:** an unknown disk is not written to and gets no `META.yaml`; flash refuses an IDEA disk, the system
+  disk, a mounted disk, a >256 GB disk and a corrupted image; a swapped card aborts the write.
 
-# 13. Open questions (with recommendations)
+# 13. Decisions (open questions closed, 15 Oct 2026)
 
-1. **Passwordless autologin for `learner`?** Recommend **yes**.
-2. **Overlay ("clean on every reboot") on by default?** Recommend **off in v1, trial for two weeks, then decide**.
-3. **GNOME vs a lighter desktop** on Pi 400: recommend GNOME, decided by the boot test's memory numbers.
-4. **Tailscale on every client?** Recommend **no**; reach clients via the school Pi as a jump host.
-5. **Where do the build script and images live?** Recommend the build in the `idea` repo under `tools/student-image/`, images on each school server Pi (not in git).
-6. **GeoGebra offline licence** for schools: needs checking before we bundle it; Scratch is open source (BSD), fine.
-7. **Which server Pi gets the reader in schools?** The school's main Pi; on wizardly-hugle only after the Engine ignore change, because it runs Milkwise in production.
-8. **The card now in the reader on wizardly-hugle** is an old Raspberry Pi OS card; OK to overwrite it as the first test card? Recommend yes, once `idea-flash` exists.
+Koen agreed with all recommendations. Recorded as decided:
+
+1. **Passwordless autologin for `learner`:** yes.
+2. **Overlay mode (B) by default:** off in v1, two-week trial, then decide; switchable remotely (§5).
+3. **Desktop:** GNOME; the boot test's memory numbers can still move us to a lighter desktop.
+4. **Tailscale on every client:** no; the school server Pi is the jump host.
+5. **Where things live:** build in the `idea` repo under `tools/client-image/`; images on the Engines (§10.1), not in git.
+6. **GeoGebra offline licence:** OK (Koen). Scratch is open source.
+7. **Which server Pi flashes:** any Engine (no dedicated Pi); on wizardly-hugle only after the Engine rule-1 change, since it runs Milkwise.
+8. **The old Raspberry Pi OS card on wizardly-hugle:** may be overwritten as the first test card.
+
+Further decisions from Koen's feedback: Pi 500 is a client; one image for Pi 400 and Pi 500; updates off; flash from the
+Console with the image stored on every Engine; account `admin`; no reader allowlist.

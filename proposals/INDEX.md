@@ -8,7 +8,7 @@ Update this file whenever a proposal is added, approved, declined, or superseded
 
 ## 2026-10-15-student-client-image.md
 **Status:** Draft · **Author:** Steve (Lead Bot)
-Repeatable Ubuntu Desktop 26.04 LTS image for shared student client Pis: one `learner` account (autologin, no password, no sudo), `ideaadmin` key-only SSH, office/education/games app set (offline, .deb only), reset by reflash with `idea-flash` on a school server Pi over Tailscale (reader allowlist by USB serial, refuses system/IDEA disks, checksum + read-back), Engine ignores allowlisted readers, optional read-only overlay root. PDF: `proposals/2026-10-15-student-client-image/`.
+Repeatable Ubuntu Desktop 26.04 LTS image for shared student client Pis (one card for Pi 400 and Pi 500): one `learner` account (autologin, no password, no sudo), `admin` key-only SSH + support password for `su`, office/education/games app set (offline, .deb only), updates off (new tested image = update), image stored as a versioned SHA-verified artifact on every Engine and flashed from a Console Flash button; no reader allowlist: Engine stops auto-claiming unknown disks and refuses IDEA/system/in-use disks; optional read-only overlay switchable remotely. All open questions decided. PDF: `proposals/2026-10-15-student-client-image/`.
 
 ## dev-bot-workflow.md
 **Status:** Approved (Design Review complete — Axle, Pixel, Kid, Atlas, 2026-09-28) · **Author:** Steve (Lead Bot)
