@@ -32,11 +32,14 @@ cat > "$WORK/curl" <<'SH'
 #!/usr/bin/env bash
 url="${!#}"; host="${url#http://}"; host="${host%%:*}"
 echo "$url" >> "$FAKE/curl.log"
+p=none; while [ $# -gt 0 ]; do [ "$1" = --proxy ] && p="$2"; shift; done; echo "$p" >> "$FAKE/proxy.log"
 code=$(cat "$FAKE/$host.http" 2>/dev/null || echo 200)
 printf '%s' "$code"; [ "$code" = 000 ] && exit 28; exit 0
 SH
 chmod +x "$WORK/ssh" "$WORK/curl"
 export SSH_BIN="$WORK/ssh" CURL_BIN="$WORK/curl"
+# Keep the real environment out: no proxy env, and probe a port nothing listens on.
+unset ALL_PROXY IDEA_SOCKS_PROXY; export SOCKS_PROBE_ADDR=127.0.0.1:1
 
 E=df1a250aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; C=b4eff52bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 healthy() { printf 'ENGINE_STATUS=online\nENGINE_USER=pi\nENGINE_RESTARTS=%s\nENGINE_SHA=%s\nCONSOLE_SHA=%s\nDISK_PCT=%s\n' \
@@ -234,6 +237,22 @@ OUT="$(STATE_REPO="$WORK/clone" STATE_FILE="$WORK/clone/fleet-state.json" "$CFH"
 check "--origin sees the new claim: exit 0" test "$RC:$(j '.pis[1].claimed')" = "0:true"
 check "--origin leaves the working tree alone" test "$(jq -r .p2.status "$WORK/clone/fleet-state.json")" = idle
 STATE_REPO="$WORK/nope" "$CFH" --origin >/dev/null 2>&1; check "--origin without a repo exits 2" test $? = 2
+
+# 13. SOCKS proxy: env wins, else a listening probe port, else direct
+reset; run
+check "socks: nothing listening -> direct curl" test "$(sort -u "$FAKE/proxy.log")" = none
+reset; ALL_PROXY=socks5h://127.0.0.1:9 run
+check "socks: ALL_PROXY passed to curl" test "$(sort -u "$FAKE/proxy.log")" = socks5h://127.0.0.1:9
+reset; ALL_PROXY=socks5h://a:1 IDEA_SOCKS_PROXY=socks5h://b:2 run
+check "socks: IDEA_SOCKS_PROXY beats ALL_PROXY" test "$(sort -u "$FAKE/proxy.log")" = socks5h://b:2
+reset
+python3 -c 'import socket,time;s=socket.socket();s.bind(("127.0.0.1",0));s.listen();print(s.getsockname()[1],flush=True);time.sleep(30)' > "$WORK/port" &
+LPID=$!; for _ in $(seq 50); do [ -s "$WORK/port" ] && break; sleep 0.1; done; LPORT=$(cat "$WORK/port")
+SOCKS_PROBE_ADDR=127.0.0.1:$LPORT run
+check "socks: listening probe port -> socks5h proxy" test "$(sort -u "$FAKE/proxy.log")" = "socks5h://127.0.0.1:$LPORT"
+reset; IDEA_SOCKS_PROXY=none SOCKS_PROBE_ADDR=127.0.0.1:$LPORT run
+check "socks: IDEA_SOCKS_PROXY=none forces direct" test "$(sort -u "$FAKE/proxy.log")" = none
+kill $LPID 2>/dev/null; wait $LPID 2>/dev/null
 
 check "real fleet-state.json untouched" test "$(real_fp)" = "$REAL_BEFORE"
 echo "---"

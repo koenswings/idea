@@ -30,6 +30,9 @@
 # Env overrides (used by the tests): STATE_REPO (repo for --origin), STATE_FILE, HEALTH_DIR, SSH_BIN, CURL_BIN,
 #   DISK_MAX_PCT, ALERT_REPEAT_SECS, NOW (epoch secs), SSH_USER,
 #   ENGINE_DIR, CONSOLE_DIR (paths on the Pi, default ~/idea/agents/agent-*-dev).
+# SOCKS proxy for the Console curl probes: $IDEA_SOCKS_PROXY, else $ALL_PROXY, else
+#   socks5h://$SOCKS_PROBE_ADDR (default 127.0.0.1:1055, tailscaled userspace networking)
+#   when something listens there, else direct. Set IDEA_SOCKS_PROXY=none to force direct.
 # Needs jq on the machine running it. Pis need only ssh, node, pm2, git, df.
 set -uo pipefail
 
@@ -45,6 +48,13 @@ ALERT_REPEAT_SECS="${ALERT_REPEAT_SECS:-7200}"
 NOW="${NOW:-$(date +%s)}"
 ENGINE_DIR="${ENGINE_DIR:-~/idea/agents/agent-engine-dev}"
 CONSOLE_DIR="${CONSOLE_DIR:-~/idea/agents/agent-console-dev}"
+SOCKS_PROBE_ADDR="${SOCKS_PROBE_ADDR:-127.0.0.1:1055}"
+CURL_PROXY="${IDEA_SOCKS_PROXY:-${ALL_PROXY:-}}"
+if [ -z "$CURL_PROXY" ] && timeout 2 bash -c ": > /dev/tcp/${SOCKS_PROBE_ADDR%:*}/${SOCKS_PROBE_ADDR##*:}" 2>/dev/null; then
+  CURL_PROXY="socks5h://$SOCKS_PROBE_ADDR"
+fi
+[ "$CURL_PROXY" = none ] && CURL_PROXY=""
+CURL_PROXY_ARGS=(); [ -n "$CURL_PROXY" ] && CURL_PROXY_ARGS=(--proxy "$CURL_PROXY")
 
 ONLY=()
 ALERT=0
@@ -54,7 +64,7 @@ while [ $# -gt 0 ]; do
     --pi) [ $# -ge 2 ] || { echo "usage: --pi NAME" >&2; exit 2; }; ONLY+=("$2"); shift 2 ;;
     --alert) ALERT=1; shift ;;
     --origin) ORIGIN=1; shift ;;
-    -h|--help) sed -n '2,37p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,40p' "$0"; exit 0 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -123,7 +133,7 @@ for PI in "${PIS[@]}"; do
   console_port="$(jq -r '.console_port // 8080' <<<"$entry")"
   console_ok=false
   if [[ "$console_port" =~ ^[0-9]+$ ]] && [ "$console_port" -ge 1 ] && [ "$console_port" -le 65535 ]; then
-    http="$("$CURL_BIN" -s -o /dev/null --max-time 10 -w '%{http_code}' "http://$host:$console_port/" 2>/dev/null)"
+    http="$("$CURL_BIN" ${CURL_PROXY_ARGS[@]+"${CURL_PROXY_ARGS[@]}"} -s -o /dev/null --max-time 10 -w '%{http_code}' "http://$host:$console_port/" 2>/dev/null)"
     http="${http:-000}"
     [ "$http" = 200 ] && console_ok=true
     $console_ok || problems+=("console HTTP $http on :$console_port")
