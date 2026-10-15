@@ -3,7 +3,7 @@ title: "IDEA School Server: Installation Manual"
 subtitle: "Raspberry Pi 5 Engines + Cudy router + PoE switch + Starlink"
 audience: "For Justice. Version 1.2, 15 October 2026"
 ---
-**Status:** Authoritative (follows idea#184; see the README for what is not yet installed on hardware) · **Maintained by:** Marco (with Atlas) · 15 October 2026 (pre-flashed router, Engine count not fixed, Starlink D10–D11, idea#209)
+**Status:** Authoritative (follows the school network design and the *IDEA School Router – Image and Automated Flashing* proposal; see the README for what is not yet installed on hardware) · **Maintained by:** Marco (with Atlas) · 15 October 2026 (pre-flashed router, Engine count not fixed, Starlink, `<name>911!` defaults)
 
 
 # How to use this manual
@@ -18,7 +18,7 @@ This manual takes one school from boxes to a working IDEA server. Each step has 
 <code>&lt;SOMETHING&gt;</code>, use your own value. Keep the real values in your password manager, not in this PDF.
 The IDEA default passwords below are not secret: they follow the public IDEA convention <code>&lt;name&gt;911!</code>.
 <ul>
-<li><code>&lt;SWITCH-ADMIN-PASSWORD&gt;</code>, <code>&lt;PI-USER-PASSWORD&gt;</code></li>
+<li>IDEA defaults: router <code>root</code> / <code>admin911!</code>, switch <code>admin</code> / <code>admin911!</code>, Pi user <code>pi</code> / <code>pi911!</code> (keyboard only; SSH is key-only), classroom computer <code>admin</code> / <code>admin911!</code>, Wi-Fi <code>IDEA</code> / <code>idea911!</code> and <code>IDEA-Teachers</code> / <code>idea-teachers911!</code>.</li>
 <li><code>&lt;TAILSCALE-AUTH-KEY&gt;</code>: the one IDEA fleet key. Koen gives it to you as a file. Never type it on a command line.</li>
 <li><code>&lt;STICKER&gt;</code>: the name the installer gives a Pi, for example <code>brave-otter</code> (section 5.6). Write it on the sticker on the case.</li>
 </ul>
@@ -27,7 +27,7 @@ The IDEA default passwords below are not secret: they follow the public IDEA con
 <div class="note">
 <b>How many Engines?</b> Not fixed. A school starts with <b>one</b> Engine and can add or remove Engines at any time.
 The router needs no change when Engines come or go: it gives every Engine an address from <code>10.42.0.2</code> to
-<code>.9</code> (room for 8) and answers <code>idea.local</code> with the Engines that are on. Where this manual says
+<code>.9</code> and answers <code>idea.local</code> with the Engines that are on. Where this manual says
 "each Pi", do the step once per Engine.
 </div>
 
@@ -38,7 +38,7 @@ A Pi can move to another school without any change in Tailscale or in this manua
 
 ## The school router's Wi-Fi networks and default passwords
 
-The IDEA school router arrives **pre-flashed** (see the *IDEA school router image and automated flashing* proposal, idea#209). It already has these settings:
+The IDEA school router arrives **pre-flashed** (see the *IDEA School Router – Image and Automated Flashing* proposal). It already has these settings:
 
 | What | Name | Default password | Who uses it |
 |---|---|---|---|
@@ -139,7 +139,7 @@ Do this once for each school kit. Tick each item.
 
 # 2. Router: check the pre-flashed IDEA router
 
-The IDEA team flashes and sets up every router before it ships, with the flash script from the *IDEA school router image and automated flashing* proposal (idea#209). You do **not** flash it yourself.
+The IDEA team flashes and sets up every router before it ships, with the flash script from the *IDEA School Router – Image and Automated Flashing* proposal. You do **not** flash it yourself.
 If you ever get a plain Cudy router that is not pre-flashed, follow Appendix D instead.
 
 ## 2.1 Read the labels
@@ -188,7 +188,7 @@ Facts from TP-Link [7][8]:
 
 1. Connect switch port 5 to Cudy LAN1. Power the switch. Wait 1 minute.
 2. Find the switch in LuCI **Status → Overview → Active DHCP Leases**. Click **Set Static** and give it `10.42.0.10`. Then power-cycle the switch.
-3. Browse to `http://10.42.0.10`. Log in with the factory default. **System → User Account**: set `<SWITCH-ADMIN-PASSWORD>`.
+3. Browse to `http://10.42.0.10`. Log in with the factory default. **System → User Account**: set the IDEA default `admin911!`.
 4. Optional watchdog, under **PoE → PoE Auto Recovery**:
    * Enable it globally.
    * For each port with an Engine: Ping IP = that Engine's address from the fill-in sheet. (The router normally keeps giving an Engine the same address; if you move Engines between ports, update this.)
@@ -230,7 +230,7 @@ The IDEA Engine runs on **Raspberry Pi OS Lite (64-bit)**. The test fleet runs D
 3. Customisation:
    * **Hostname:** leave the Imager default (`raspberrypi`). The IDEA installer gives the Pi its sticker name in 5.6.
    * **Localisation:** time zone `Africa/Harare`, keyboard `us`
-   * **User:** username **`pi`**, password `<PI-USER-PASSWORD>`. If Imager asks, **allow passwordless sudo**: the IDEA provisioning script needs it (step 1/5 of the script checks this).
+   * **User:** username **`pi`**, password `pi911!` (the IDEA `<name>911!` default; SSH stays key-only, so it only works at the keyboard). If Imager asks, **allow passwordless sudo**: the IDEA provisioning script needs it (step 1/5 of the script checks this).
    * **Wi-Fi:** leave it empty. The Pis use the cable only.
    * **SSH:** enabled, **public-key authentication only**. Paste your `~/.ssh/id_ed25519.pub`.
    * **Raspberry Pi Connect:** off
@@ -269,7 +269,7 @@ sudo reboot
 
 You do **not** reserve addresses by MAC. Each Engine tells the router it is an IDEA Engine (DHCP vendor class `idea-engine`), and the router gives it an address from `10.42.0.2` to `10.42.0.9`. So a Pi can move to another school without any change on the router.
 
-1. On the Pi, set the vendor class once (the Engine installer will do this itself; router proposal decision D8):
+1. On the Pi, set the vendor class once (the Engine installer will do this itself, as decided in the router proposal):
 
 ```bash
 sudo nmcli connection modify "$(nmcli -g NAME,DEVICE c show --active | grep ':eth0$' | cut -d: -f1)" \
@@ -402,11 +402,11 @@ Only the people in `group:admins` get access. School staff are not on the list.
 
 # 7. On site: connect Starlink and final cabling
 
-The router proposal (idea#209, section 12) has the background. In short: Starlink is only the internet on the Cudy
+The *IDEA School Router – Image and Automated Flashing* proposal (Starlink chapter) has the background. In short: Starlink is only the internet on the Cudy
 **WAN** port. The school network works fully without it.
 
 1. **Install and activate Starlink** with the Starlink app (dish outside with a clear view of the sky). The **IDEA
-   project** owns the Starlink account and pays the subscription (idea#209 D11); use the project app login Koen gives
+   project** owns the Starlink account and pays the subscription; use the project app login Koen gives
    you. Check that it works with a phone on the Starlink Wi-Fi, and check the app for obstructions. Write the router
    generation on the fill-in sheet.
 2. **Bypass mode:** with the phone still on the Starlink Wi-Fi, open the **Starlink app → Settings → Bypass mode** and
@@ -476,12 +476,15 @@ Switch it on only when the head teacher asks, and off again when the lesson is o
 * **Students** join Wi-Fi **`IDEA`** with **`idea911!`**. It opens the IDEA Console, Kolibri, Nextcloud and Kiwix, and nothing else: no internet.
 * **Teachers** join Wi-Fi **`IDEA-Teachers`** with **`idea-teachers911!`**. It reaches the same apps. Internet is off until it is switched on (section 9).
 * Teachers keep the `IDEA-Teachers` password to themselves.
+* **Opening the Console:** on a classroom computer, click the **IDEA** icon on the desktop or in the dock (*IDEA Classroom Computer: Installation Manual*). On any other device, type **`http://idea.local`** or **`http://<STICKER>.local`** (the name on any Engine's sticker), and set it as the browser's home page or bookmark it.
+* **Default accounts** follow the `<name>911!` convention, for example `admin` / `admin911!`. The student account on the classroom computers, `learner`, has no password.
 
 **Change the passwords once the school is running.** The defaults are easy on purpose but anyone who knows the pattern can guess them.
 The head teacher picks new passwords (at least 8 characters, different for students and teachers). The IDEA team, or you over a wired laptop:
 
 1. LuCI → **Network → Wireless** → **Edit** on `IDEA` (both radios) → **Wireless Security → Key** → **Save & Apply**. The same for `IDEA-Teachers`.
 2. LuCI → **System → Administration → Router Password** for `root`.
+3. On each classroom computer, the `admin` password (`passwd` as admin), and the switch password (section 4).
 
 **✔ Check:** a phone joins with the new password and not with the old one. Every device on that Wi-Fi must join again with the new password.
 
@@ -535,7 +538,7 @@ The head teacher picks new passwords (at least 8 characters, different for stude
 
 # Appendix D. Flashing and setting up a router by hand
 
-Only for a Cudy WR3000S v1 that did **not** arrive pre-flashed. The flash script of the router proposal (idea#209) does the same steps automatically.
+Only for a Cudy WR3000S v1 that did **not** arrive pre-flashed. The flash script of the *IDEA School Router – Image and Automated Flashing* proposal does the same steps automatically.
 
 ## D.1 Router: check model, version and flash chip
 
@@ -690,7 +693,7 @@ ssh root@10.42.0.1 'tailscale up --auth-key=file:/tmp/tskey --hostname=router-<C
 
 4. Give `tailscale0` its own firewall zone so that admins can reach the router over Tailscale. Use `scripts/router-tailscale-zone.sh` (Appendix A.2): copy it with `scp -O` and run it with `sh`. It follows the wiki's "unmanaged interface + zone" recipe [5], except that it has **no forwarding** and no masquerading, because we don't route.
 
-5. **Starlink CGNAT DHCP exception (idea#209 D10).** Tailscale drops packets from `100.64.0.0/10` that do not arrive on `tailscale0`. Starlink's DHCP server is in that range, so without an exception DHCP renewals fail and the WAN briefly drops each lease period. Install the narrow exception (WAN UDP 67→68 accept before the drop, re-applied by hotplug):
+5. **Starlink CGNAT DHCP exception.** Tailscale drops packets from `100.64.0.0/10` that do not arrive on `tailscale0`. Starlink's DHCP server is in that range, so without an exception DHCP renewals fail and the WAN briefly drops each lease period. Install the narrow exception (WAN UDP 67→68 accept before the drop, re-applied by hotplug):
 
 ```bash
 scp -O router-starlink-cgnat-exception.sh root@10.42.0.1:/tmp/
@@ -702,7 +705,7 @@ ssh root@10.42.0.1 'sh /tmp/router-starlink-cgnat-exception.sh'
 <div class="warn">
 Never add <code>--advertise-routes</code> or <code>--advertise-exit-node</code>. IDEA uses neither subnet routers nor exit nodes.
 Never put the key itself after <code>--auth-key=</code>. Always use <code>file:</code>, so the key does not end up in the shell history or the process list
-(the same rule as in the IDEA Engine, idea#115).
+(the same rule as in the IDEA Engine).
 </div>
 
 **✔ Check:** `ssh root@10.42.0.1 tailscale status` shows the router online. In the Tailscale admin console, the machine `router-<CUDY-SERIAL>` has tag `tag:idea`. From your laptop on the tailnet, `ssh root@<router-tailscale-ip>` works.
