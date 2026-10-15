@@ -1,0 +1,9 @@
+[Unit]
+Description=IDEA: hold all snaps forever (no auto-refresh)
+After=snapd.seeded.service
+Wants=snapd.seeded.service
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'command -v snap >/dev/null && snap refresh --hold || true'
+[Install]
+WantedBy=multi-user.target

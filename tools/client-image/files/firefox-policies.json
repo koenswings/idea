@@ -1,0 +1,13 @@
+{ "policies": {
+  "DisableAppUpdate": true, "DisableTelemetry": true, "DontCheckDefaultBrowser": true,
+  "OverrideFirstRunPage": "", "OverridePostUpdatePage": "",
+  "Homepage": { "URL": "http://@SCHOOL_PI@/", "Locked": false, "StartPage": "homepage" },
+  "DisplayBookmarksToolbar": "always",
+  "Bookmarks": [
+    { "Title": "IDEA Console", "URL": "http://@SCHOOL_PI@/", "Placement": "toolbar" },
+    { "Title": "Kolibri",      "URL": "http://@SCHOOL_PI@:8080/", "Placement": "toolbar" },
+    { "Title": "Nextcloud",    "URL": "http://@SCHOOL_PI@:8081/", "Placement": "toolbar" },
+    { "Title": "Kiwix",        "URL": "http://@SCHOOL_PI@:8082/", "Placement": "toolbar" },
+    { "Title": "Scratch",      "URL": "http://@SCHOOL_PI@/scratch/", "Placement": "toolbar" },
+    { "Title": "GeoGebra",     "URL": "http://@SCHOOL_PI@/geogebra/", "Placement": "toolbar" }
+  ] } }

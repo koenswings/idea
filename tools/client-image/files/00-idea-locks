@@ -1,0 +1,4 @@
+/org/gnome/desktop/screensaver/lock-enabled
+/org/gnome/desktop/lockdown/disable-lock-screen
+/org/gnome/software/download-updates
+/org/gnome/software/allow-updates

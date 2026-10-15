@@ -1,0 +1,18 @@
+[org/gnome/desktop/screensaver]
+lock-enabled=false
+[org/gnome/desktop/lockdown]
+disable-lock-screen=true
+disable-user-switching=true
+[org/gnome/desktop/interface]
+enable-animations=false
+[org/gnome/desktop/search-providers]
+disable-external=true
+[org/freedesktop/tracker/miner/files]
+index-recursive-directories=@as []
+index-single-directories=@as []
+[org/gnome/shell]
+favorite-apps=['firefox.desktop', 'libreoffice-writer.desktop', 'libreoffice-calc.desktop', 'org.kde.gcompris.desktop', 'tuxpaint.desktop', 'org.gnome.Nautilus.desktop']
+welcome-dialog-last-shown-version='999'
+[org/gnome/software]
+download-updates=false
+allow-updates=false

@@ -1,0 +1,10 @@
+#!/bin/sh
+# idea-client-mode overlay|normal|status  - switch reset level B (overlayroot) on/off; reboot to apply.
+# From overlay mode use: sudo overlayroot-chroot idea-client-mode normal
+set -e; C=/etc/overlayroot.conf
+case "$1" in
+  overlay) sed -i 's/^overlayroot=.*/overlayroot="tmpfs"/' $C; echo "overlay ON after reboot";;
+  normal)  sed -i 's/^overlayroot=.*/overlayroot=""/' $C; echo "overlay OFF after reboot";;
+  status)  grep '^overlayroot=' $C; grep -q ' / overlay ' /proc/mounts && echo "running: overlay" || echo "running: normal";;
+  *) echo "usage: $0 overlay|normal|status" >&2; exit 2;;
+esac
