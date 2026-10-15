@@ -31,8 +31,8 @@ snap remove --purge firefox 2>/dev/null || true; rm -f /var/lib/snapd/seed/snaps
 if [ -f /var/lib/snapd/seed/seed.yaml ]; then python3 - /var/lib/snapd/seed/seed.yaml <<'P'
 import sys,re
 p=sys.argv[1]; s=open(p).read()
-# drop every "  - name: firefox" list item (up to the next item or end)
-s=re.sub(r'(?ms)^  - name: firefox\n(?:    .*\n)*','',s); open(p,'w').write(s)
+# drop the "- name: firefox" list item (any indent) with its indented keys; seed.yaml must not list a missing .snap
+s=re.sub(r'(?m)^([ \t]*)- name: firefox\n(?:\1[ \t]+\S.*\n)*','',s); open(p,'w').write(s)
 P
 fi
 grep -lsx "snap-name: firefox" /var/lib/snapd/seed/assertions/* 2>/dev/null | xargs -r rm -f || true

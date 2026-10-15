@@ -46,6 +46,8 @@ command -v curl >/dev/null && dpkg -s curl >/dev/null 2>&1 && ok "curl installed
 # 3 no Firefox anywhere
 ls /var/lib/snapd/seed/snaps/firefox_* /var/lib/snapd/snaps/firefox_* >/dev/null 2>&1 && bad "firefox snap file present" || ok "no firefox snap file"
 grep -qsi firefox /var/lib/snapd/seed/seed.yaml && bad "firefox in snap seed.yaml" || ok "firefox not in seed.yaml"
+m=$(awk '$1=="file:"{print $2}' /var/lib/snapd/seed/seed.yaml 2>/dev/null | while read -r x; do [ -f /var/lib/snapd/seed/snaps/$x ] || echo "$x"; done)
+[ -z "$m" ] && ok "snap seed intact (every seed.yaml file present)" || bad "seed.yaml lists missing snaps:" $m
 grep -lsx 'snap-name: firefox' /var/lib/snapd/seed/assertions/* >/dev/null 2>&1 && bad "firefox seed assertion" || ok "no firefox seed assertion"
 ls /usr/share/applications/firefox*.desktop /usr/local/share/applications/firefox*.desktop /var/lib/snapd/desktop/applications/firefox* /home/learner/Desktop/firefox* >/dev/null 2>&1 && bad "firefox launcher present" || ok "no firefox launchers"
 grep -rqsi firefox /etc/dconf/db/local.d/ && bad "firefox in dock/dconf" || ok "no firefox in dock (dconf)"
