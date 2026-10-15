@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # Build idea-client-<ver>.img.xz from the official Ubuntu raspi desktop image (proposal idea#201 §9).
-# Usage: sudo tools/client-image/build.sh [--base /path/to/base.img.xz] [--secrets FILE] [--out DIR] [--no-xz]
+# Usage: sudo tools/client-image/build.sh [--browser chrome|chromium] [--chrome-deb FILE] [--base /path/to/base.img.xz] [--secrets FILE] [--out DIR] [--no-xz]
 # Host: amd64 or arm64 Linux with losetup, qemu-user-static (binfmt for aarch64 on amd64), xz, parted, e2fsprogs.
 set -euo pipefail
 export PATH="$PATH:/usr/sbin:/sbin"
 HERE="$(cd "$(dirname "$0")" && pwd)"; REPO="$(git -C "$HERE" rev-parse --show-toplevel)"
 . "$HERE/client-image.conf"
-BASE=""; SECRETS="${SUDO_USER:+$(getent passwd "$SUDO_USER" | cut -d: -f6)}/.config/idea-client-image/secrets.env"
+BASE=""; CHROME_FILE=""; SECRETS="${SUDO_USER:+$(getent passwd "$SUDO_USER" | cut -d: -f6)}/.config/idea-client-image/secrets.env"
 OUT="$HERE/out"; WORK="$HERE/work"; XZ=1; EXTRA_MB=6144
 while [ $# -gt 0 ]; do case "$1" in
-  --base) BASE="$2"; shift 2;; --secrets) SECRETS="$2"; shift 2;;
+  --base) BASE="$2"; shift 2;; --browser) BROWSER="$2"; shift 2;; --chrome-deb) CHROME_FILE="$2"; shift 2;; --secrets) SECRETS="$2"; shift 2;;
   --out) OUT="$2"; shift 2;; --work) WORK="$2"; shift 2;; --no-xz) XZ=0; shift;;
   *) echo "unknown arg $1" >&2; exit 2;; esac; done
 [ "$(id -u)" = 0 ] || { echo "run as root" >&2; exit 1; }
@@ -32,6 +32,14 @@ echo "$BASE_SHA256  $BASE" | sha256sum -c --quiet || { echo "base image sha256 m
 if live=$(curl -fsL "$BASE_URL/SHA256SUMS" 2>/dev/null | awk -v f="*$BASE_IMAGE" '$2==f{print $1}') && [ -n "$live" ]; then
   [ "$live" = "$BASE_SHA256" ] || { echo "pinned sha differs from live SHA256SUMS" >&2; exit 1; }; fi
 
+case "$BROWSER" in chrome|chromium) ;; *) echo "--browser must be chrome or chromium" >&2; exit 2;; esac
+# --- Chrome .deb: pinned version, fetched once (offline afterwards), sha256 must match client-image.conf ---
+if [ "$BROWSER" = chrome ]; then
+  [ -n "$CHROME_FILE" ] || CHROME_FILE="$WORK/$CHROME_DEB"
+  [ -f "$CHROME_FILE" ] || curl -fL --retry 3 -o "$CHROME_FILE" "$CHROME_DEB_URL"
+  echo "$CHROME_DEB_SHA256  $CHROME_FILE" | sha256sum -c --quiet || { echo "chrome .deb sha256 mismatch" >&2; exit 1; }
+fi
+
 IMG="$WORK/$NAME.img"; echo "decompressing base -> $IMG"; xz -dc -T0 "$BASE" > "$IMG"
 truncate -s +"${EXTRA_MB}M" "$IMG"
 # partition loops by offset (works in containers without /dev/loopNpM nodes)
@@ -53,7 +61,9 @@ mv "$MNT/etc/resolv.conf" "$MNT/etc/resolv.conf.idea-orig" 2>/dev/null || true; 
 
 # --- stage inputs (secrets in a root-only dir, removed before packing) ---
 S="$MNT/root/.idea-build"; install -d -m 700 "$S"
-cp "$HERE/client-image.conf" "$HERE/customise.sh" "$HERE/verify-image.sh" "$S/"; cp -r "$HERE/files" "$S/files"
+cp "$HERE/client-image.conf" "$HERE/customise.sh" "$HERE/browser.sh" "$HERE/verify-image.sh" "$HERE/verify-browser.sh" "$S/"; cp -r "$HERE/files" "$S/files"
+printf 'BROWSER=%q\nCHROME_DEB=%q\n' "$BROWSER" "$CHROME_DEB" > "$S/browser.env"
+[ "$BROWSER" = chrome ] && cp "$CHROME_FILE" "$S/$CHROME_DEB"
 install -m 600 "$ADMIN_AUTHORIZED_KEYS_FILE" "$S/admin_authorized_keys"
 ( umask 077; printf 'ADMIN_PASSWORD_HASH=%q\nWIFI_PSK=%q\n' "$ADMIN_PASSWORD_HASH" "$WIFI_PSK" > "$S/secrets.env" )
 echo "IDEA_CLIENT_VERSION=$VER" > "$S/version.env"

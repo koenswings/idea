@@ -34,12 +34,14 @@ NetworkManager profile (PSK).
 | | |
 |---|---|
 | §4 accounts | `learner`: GDM autologin, no password, no sudo/adm/lpadmin, polkit denies network/software/users/time. `admin`: hidden, sudo, SSH key only (`AllowUsers admin`, no passwords), local password for `su - admin` |
-| §6 apps | from `.deb` only (`client-image.conf`); **Chromium** `.deb` from `ppa:xtradeb/apps` (Ubuntu only ships Chromium as a snap; no Chrome for arm64), pinned so only `chromium*` comes from that PPA; build fails if any package has no arm64 candidate |
+| §6 apps | from `.deb` only (`client-image.conf`); build fails if any package has no arm64 candidate |
 | §7 updates off | `unattended-upgrades`, `update-notifier`, Software, Pro client, fwupd removed; apt/fwupd/motd timers masked; `APT::Periodic::*=0`; snaps held forever at first boot; `snapd.refresh.timer` masked |
-| §6 browser + icons | Chromium managed policy: homepage + bookmarks (Console, Kolibri, Nextcloud, Kiwix, Scratch, GeoGebra). **Desktop and app-menu icons** for Nextcloud, Kolibri, Kiwix (`idea-open` opens the URL in Chromium app mode) |
-| server addressing | **One place:** the `SERVER_HOST`/`URL_*` block in `client-image.conf` → `/etc/idea-client/servers.conf`; bookmarks, icons and menu entries are generated from it. Server discovery for several servers on one network is a separate follow-up proposal |
+| browser (idea#203 §1) | **Google Chrome stable**, official arm64 `.deb` pinned in `client-image.conf` (`CHROME_DEB`, `CHROME_DEB_SHA256`), fetched once into `work/` and sha-checked, installed offline; Google apt source + cron job removed, `apt-mark hold`. Fallback: `build.sh --browser chromium` (xtradeb PPA `.deb`, same hold + policies). Managed policy (`browser.sh`): home/startup = `file:///usr/share/idea/start.html`, `LocalNetworkAccessAllowedForUrls` = `file://*`, `http://*.local`, sign-in/sync/promos/default-browser prompt/component updates off |
+| Console shortcut + discovery (idea#203 §2) | **One** "IDEA" shortcut (`idea-console.desktop`, app menu + learner desktop) opens `start.html`: home Engine (`idea-home.txt` on the FAT boot partition → `/etc/idea/home-engine` by `idea-home-engine.service` at boot) → last Engine that opened → `http://idea.local`, 1.5 s per probe; sticker-name field (strict hostname validation) always shown, prominent on failure; friendly not-found text, never a browser error. No per-app icons, no `/go`, no Nextcloud links, no Engine name or IP in the image |
 | §8 first boot | `idea-firstboot`: hostname `idea-pc-<last4 serial>`, new SSH host keys and machine-id (nothing model-specific) |
 | §5 reset B | `overlayroot` installed, off unless `OVERLAY=on`; `idea-client-mode overlay|normal|status` |
 | §12 CI | `verify-image.sh` (in chroot) + `scan-secrets.sh` run on every build; non-zero exit fails the build |
 
+
+Tests (no image build): `cd tests && npm i && npm test` (start.html in headless Chrome with mocked Engines); `tests/home-engine.test.sh`; `sudo tests/chroot-check.sh` (browser.sh + verify-browser.sh in a minimal arm64 Ubuntu rootfs; needs root network access for apt).
 The boot test and the Pi 400 ↔ Pi 500 swap test (§12) need hardware and are tracked separately.

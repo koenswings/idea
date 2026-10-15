@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=IDEA
+Comment=Open the IDEA Console on the school server
+Exec=@BROWSER@ --new-window file:///usr/share/idea/start.html
+Icon=idea
+Categories=Education;Network;
+StartupNotify=true

@@ -11,7 +11,7 @@ disable-external=true
 index-recursive-directories=@as []
 index-single-directories=@as []
 [org/gnome/shell]
-favorite-apps=['chromium.desktop', 'idea-kolibri.desktop', 'idea-nextcloud.desktop', 'idea-kiwix.desktop', 'libreoffice-writer.desktop', 'libreoffice-calc.desktop', 'org.kde.gcompris.desktop', 'tuxpaint.desktop', 'org.gnome.Nautilus.desktop']
+favorite-apps=['idea-console.desktop', '@BROWSER_DESKTOP@', 'libreoffice-writer.desktop', 'libreoffice-calc.desktop', 'org.kde.gcompris.desktop', 'tuxpaint.desktop', 'org.gnome.Nautilus.desktop']
 welcome-dialog-last-shown-version='999'
 [org/gnome/software]
 download-updates=false
