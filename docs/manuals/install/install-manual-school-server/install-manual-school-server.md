@@ -325,9 +325,12 @@ The Pi also keeps it in the file `/home/pi/STICKER.txt` (`ssh pi@<ENGINE-IP> cat
 * For each Engine: `ssh pi@<ENGINE-IP> hostname` prints its sticker name, and it matches the sticker on that case.
 * For each Engine: `ssh pi@<ENGINE-IP> 'pm2 status'` shows `engine` **online**.
 * For each Engine: `curl -s -o /dev/null -w '%{http_code}\n' http://<ENGINE-IP>/` prints `200`.
-* A laptop on the **wired** LAN opens `http://<STICKER>.local` (the name on any sticker) and sees the IDEA Console, with **every** Engine of this school listed. The Console reads the list of Engines from the IDEA database, so it does not matter which Pi you open.
+* A laptop on the wired LAN or on the Wi-Fi `IDEA` opens `http://<STICKER>.local` (the name on any sticker) and sees the IDEA Console, with **every** Engine of this school listed.
+* The same laptop opens `http://idea.local` and sees the same Console. The Console reads the list of Engines from the IDEA database, so it does not matter which Pi you open.
 
-The Console port is **80**: `config.yaml` → `settings.httpPort: 80` ("serves Console UI"). From the Wi-Fi networks, `.local` names do not work (they do not cross subnets): there you use `http://idea.local` (the router answers it with the Engines that are on) or an Engine's address (section 8).
+The Console port is **80**: `config.yaml` → `settings.httpPort: 80` ("serves Console UI").
+
+**How `.local` names reach the Wi-Fi.** Every Engine offers the extra name `idea.local` on the wired LAN. One Engine holds it at a time; when that Engine stops or is switched off, another one takes it over within seconds (after a power cut, within about two minutes). The router passes `.local` names between the wired LAN and the Wi-Fi networks `IDEA` and `IDEA-Teachers`, so `http://idea.local` and `http://<STICKER>.local` work from the Wi-Fi too. As a backup, the router's own DNS also answers `idea.local` with the Engines' addresses.
 
 <div class="note">
 <b>Use <code>provision-fleet.sh</code>.</b> The older <code>script/install.sh</code> is out of date (it clones <code>koenswings/engine</code> and sets Node 20). Do not use it.
@@ -440,7 +443,7 @@ Do it once in Belgium (dry run) and again on site. Use a laptop with no other ne
 | ☐ | Test | How | Expected |
 |---|---|---|---|
 | ☐ | Laptop on **IDEA** opens Console | Join Wi-Fi `IDEA` with `idea911!`, browse to `http://idea.local` | IDEA Console loads, every Engine listed. The laptop has an address `10.42.1.x`. |
-| ☐ | Console by sticker name | Wired laptop: browse to `http://<STICKER>.local` (each sticker) | Console loads, every Engine listed |
+| ☐ | Console by sticker name | Laptop on Wi-Fi `IDEA`: browse to `http://<STICKER>.local` (each sticker) | Console loads, every Engine listed |
 | ☐ | Every Engine reachable | Browse to `http://<ENGINE-IP>` for each Engine | Console loads on each |
 | ☐ | **No internet on IDEA** | Browse to `https://example.com`. In a terminal: `ping -c2 1.1.1.1`, `nslookup example.com 1.1.1.1` | All fail (time-out / refused) |
 | ☐ | Router admin closed on IDEA | Browse to `http://10.42.1.1` and `http://10.42.0.1` | Fails |
@@ -518,7 +521,7 @@ The head teacher picks new passwords (at least 8 characters, different for stude
 | The router seems "bricked" | Reset (hold 10 s after boot) [1]. Otherwise use Cudy TFTP recovery with a **recent** stock image (2.4.6 / 2.5.30 for new-flash units) [1][2]. |
 | A Pi does not start | Check the PoE LED on that switch port and swap the cable. Try another PoE+ port. |
 | `throttled` is not `0x0` | Power problem: check the cable and HAT and switch budget. See the 5.1 USB power box. |
-| Console doesn't load from Wi-Fi but does from LAN | Check the rules `Allow-students-to-Engines`. Is the Pi in `10.42.0.2`-`.9` (5.5)? |
+| Console doesn't load from Wi-Fi but does from LAN | Check the rules `Allow-students-to-Engines`. Is the Pi in `10.42.0.2`-`.9` (5.5)? Try `http://<STICKER>.local` as well as `http://idea.local`: if only one of them fails, tell the IDEA team which one. |
 | Tailscale offline after a move | `ssh` in and run `tailscale status`. Check the WAN on the router. Starlink must be in bypass mode. |
 
 # Appendix C. Sources (read on 12 October 2026)
