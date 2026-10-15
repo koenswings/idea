@@ -12,6 +12,7 @@ Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment,
 | `idea-setup.sh` | Discover all `idea*` Pis via Tailscale, verify dependencies, initialise fleet-state.json. Skips Grok Build and the GitHub Actions runner by default; `--with-grok-build` opts in (parked path, idea#147). Still a stub. |
 | `find-available-pi.sh <domain>` | Return first idle Pi matching domain from fleet-state.json |
 | `deploy.sh <pi> <component> <repo> <branch>` | Full deploy sequence (engine/console/app-disk) |
+| `deploy-engine-pi.sh <tip> [--fetch <branch>] [--yes]` | Option-2 Engine deploy on ONE pool Pi (run via `ssh <pi> bash -s`): keeps config.yaml, pm2.config.cjs and store-identity/ across the checkout, aborts before pm2 restart if store-url.txt is not 2VroE. **Implemented**; tests: `deploy-engine-pi.test.sh`. Runbook: `docs/ops/engine-deploy-pool-pi.md` |
 | `teardown.sh <pi>` | Reverse deploy, restore main, mark Pi idle |
 | `update-golden.sh <component> <version>` | Update golden Pi to new version of a component |
 | `set-golden-pi.sh` | Designate new golden Pi if current unavailable |
