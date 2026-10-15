@@ -15,7 +15,7 @@ apt-get purge -y -q $PACKAGES_REMOVE 2>/dev/null || for p in $PACKAGES_REMOVE; d
 ALL="$PACKAGES_OFFICE $PACKAGES_EDU $PACKAGES_GAMES $PACKAGES_SYSTEM"
 # fail hard if any package has no arm64 candidate (CI rule §12)
 miss=$(apt-cache policy $ALL | awk '/^[^ ].*:$/{p=substr($1,1,length($1)-1)} /Candidate: \(none\)/{printf " %s",p}')
-for p in $ALL; do apt-cache policy "$p" 2>/dev/null | grep -q Candidate || miss="$miss $p"; done
+for p in $ALL; do pol=$(apt-cache policy "$p" 2>/dev/null || true); grep -q Candidate <<<"$pol" || miss="$miss $p"; done
 [ -z "$miss" ] || { echo "MISSING arm64 packages:$miss" >&2; exit 1; }
 apt-get install -y -q --no-install-recommends $ALL
 apt-get autoremove -y -q; apt-get clean
