@@ -31,7 +31,7 @@ Extends proposals/README.md and docs/README.md: adds docs/manuals/<audience>/<na
 The single IDEA house style for project PDFs (housestyle.py, house.css). Build scripts find it by walking up to docs/house-style or via IDEA_HOUSE_STYLE.
 → [docs/house-style/](house-style/)
 
-Files: `house-style/README.md`, `house-style/house.css`, `house-style/housestyle.py`
+Files: `house-style/README.md`, `house-style/house.css`, `house-style/housestyle.py`, `house-style/idea-logo.svg`
 
 ### Teacher tutorial (teacher-tutorial.pdf)
 **Status:** Authoritative  ·  **Maintained by:** Marco / Atlas

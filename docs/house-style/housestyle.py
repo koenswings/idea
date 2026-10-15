@@ -31,13 +31,20 @@ def to_html(body, toc_depth="1-2"):
     h = h.replace("<h1", '<h1 class="nobreak"', 1)
     return h, md.toc
 
+LOGO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "idea-logo.svg")
+
+def cover_logo(meta):
+    """Optional IDEA logo on the cover: front matter cover_logo: "yes"."""
+    if meta.get("cover_logo", "").lower() != "yes": return ""
+    return f'<img class="cover-logo" src="file://{LOGO}" alt="">'
+
 def build(body, meta, out_pdf, base_url, extra_css="", note=None, toc_depth="1-2", keep_html=True):
     note = note if note is not None else ("IDEA - offline school computing. Prepared for Koen Swings's team.<br>"
         "No real passwords, keys or tokens are included; values in &lt;ANGLE BRACKETS&gt; are placeholders.")
     h, toc = to_html(body, toc_depth)
     html = f"""<!doctype html><html><head><meta charset="utf-8"><title>{meta['title']}</title>
 <link rel="stylesheet" href="file://{CSS}"><style>{extra_css}</style></head><body>
-<div class="cover"><h1 class="title">{meta['title']}</h1><div class="subtitle">{meta.get('subtitle','')}</div>
+<div class="cover">{cover_logo(meta)}<h1 class="title">{meta['title']}</h1><div class="subtitle">{meta.get('subtitle','')}</div>
 <div class="bar"></div><div class="audience">{meta.get('audience','')}</div>
 <div class="audience" style="margin-top:6mm">{note}</div></div>
 <div class="toc"><h1 class="nobreak" style="page-break-before:avoid">Contents</h1>{toc}</div>
