@@ -35,7 +35,7 @@ p=sys.argv[1]; s=open(p).read()
 s=re.sub(r'(?ms)^  - name: firefox\n(?:    .*\n)*','',s); open(p,'w').write(s)
 P
 fi
-grep -lsx 'snap-name: firefox' /var/lib/snapd/seed/assertions/* 2>/dev/null | xargs -r rm -f
+grep -lsx "snap-name: firefox" /var/lib/snapd/seed/assertions/* 2>/dev/null | xargs -r rm -f || true
 rm -f /var/lib/snapd/desktop/applications/firefox_*.desktop /usr/share/applications/firefox*.desktop /home/learner/Desktop/firefox*.desktop
 apt-get purge -y -q firefox 2>/dev/null || true
 
