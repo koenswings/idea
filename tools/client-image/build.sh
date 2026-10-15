@@ -46,7 +46,7 @@ e2fsck -fy "$L2" >/dev/null || true; resize2fs "$L2" >/dev/null
 mkdir -p "$MNT"; mount "$L2" "$MNT"; # FAT boot partition via mtools (no vfat kernel module needed): unpack, bind in, write back changed files after
 FW="$WORK/firmware"; rm -rf "$FW"; mkdir -p "$FW"; export MTOOLS_SKIP_CHECK=1
 mcopy -s -n -i "$IMG@@$O1" '::/*' "$FW/"; ( cd "$FW" && find . -type f -exec sha256sum {} + | sort > "$WORK/fw.before" )
-mount --bind "$FW" "$MNT/boot/firmware"
+mkdir -p "$MNT/boot/firmware"; mount --bind "$FW" "$MNT/boot/firmware"
 for m in dev dev/pts proc sys run; do mount --bind "/$m" "$MNT/$m"; done
 if [ "$(uname -m)" != aarch64 ]; then cp /usr/bin/qemu-aarch64-static "$MNT/usr/bin/"; fi
 mv "$MNT/etc/resolv.conf" "$MNT/etc/resolv.conf.idea-orig" 2>/dev/null || true; cp -L /etc/resolv.conf "$MNT/etc/resolv.conf"
