@@ -5,7 +5,12 @@ B=/root/.idea-build; . $B/client-image.conf; . $B/version.env; . $B/browser.env;
 export DEBIAN_FRONTEND=noninteractive LC_ALL=C
 policy=/usr/sbin/policy-rc.d; printf '#!/bin/sh\nexit 101\n' > $policy; chmod +x $policy   # no daemons in chroot
 
+# arm64 lives on ports.ubuntu.com/ubuntu-ports, not archive/security.ubuntu.com (those have no arm64 lists)
+for f in /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list; do [ -f "$f" ] || continue
+  sed -i -E 's#https?://(([a-z]{2}\.)?archive|security)\.ubuntu\.com/ubuntu/?#http://ports.ubuntu.com/ubuntu-ports/#g' "$f"; done
 apt-get update -q
+ls /var/lib/apt/lists/*binary-arm64_Packages* >/dev/null 2>&1 && apt-cache policy | grep -q 'arch=arm64' \
+  || { echo "FATAL: no arm64 package lists after apt-get update; check /etc/apt/sources (need ports.ubuntu.com/ubuntu-ports) and network" >&2; exit 1; }
 apt-get purge -y -q $PACKAGES_REMOVE 2>/dev/null || for p in $PACKAGES_REMOVE; do apt-get purge -y -q "$p" 2>/dev/null || true; done
 ALL="$PACKAGES_OFFICE $PACKAGES_EDU $PACKAGES_GAMES $PACKAGES_SYSTEM"
 # fail hard if any package has no arm64 candidate (CI rule §12)

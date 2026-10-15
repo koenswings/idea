@@ -13,6 +13,12 @@ while [ $# -gt 0 ]; do case "$1" in
   --out) OUT="$2"; shift 2;; --work) WORK="$2"; shift 2;; --no-xz) XZ=0; shift;;
   *) echo "unknown arg $1" >&2; exit 2;; esac; done
 [ "$(id -u)" = 0 ] || { echo "run as root" >&2; exit 1; }
+# required host tools (Debian/Ubuntu packages: util-linux parted e2fsprogs mtools xz-utils curl git coreutils;
+# qemu-user-static + binfmt only on non-arm64 hosts)
+need="losetup parted e2fsck resize2fs mcopy mmd xz curl git sha256sum truncate mountpoint chroot fstrim python3"
+[ "$(uname -m)" = aarch64 ] || need="$need qemu-aarch64-static"
+missing=""; for t in $need; do command -v "$t" >/dev/null 2>&1 || [ -x "/usr/bin/$t" ] || missing="$missing $t"; done
+[ -z "$missing" ] || { echo "missing host tools:$missing (apt install util-linux parted e2fsprogs mtools xz-utils curl git qemu-user-static)" >&2; exit 1; }
 
 # --- secrets: outside git, never echoed ---
 [ -f "$SECRETS" ] || { echo "secrets file missing: $SECRETS (see secrets.env.example)" >&2; exit 1; }

@@ -16,8 +16,12 @@ out/idea-client-26.04-<YYYYMMDD>-<gitsha>.MANIFEST.txt   # every package + versi
 sudo tools/client-image/build.sh [--base ubuntu-26.04.1-...+raspi.img.xz] [--secrets FILE] [--out DIR] [--work DIR] [--no-xz]
 ```
 
-* Host: Linux amd64 with `qemu-user-static` (binfmt `aarch64` with the `F` flag) or a native arm64 Pi; `parted`,
-  `e2fsprogs`, `mtools`, `xz-utils`. No vfat kernel module or `/dev/loopNpM` nodes needed (works in containers):
+* Host: Linux amd64 with `qemu-user-static` (binfmt `aarch64` with the `F` flag) or a native arm64 Pi.
+  Required tools (checked at start by `build.sh`): `losetup`, `mountpoint`, `fstrim` (util-linux), `parted`,
+  `e2fsck`/`resize2fs` (e2fsprogs), `mcopy`/`mmd` (mtools), `xz` (xz-utils), `curl`, `git`, `sha256sum`, `truncate`,
+  `chroot` (coreutils), `python3`; on amd64 also `qemu-aarch64-static`:
+  `sudo apt install util-linux parted e2fsprogs mtools xz-utils curl git python3 qemu-user-static`.
+* The chroot's apt sources are rewritten to `ports.ubuntu.com/ubuntu-ports` (arm64); the build stops if no arm64 lists come back. No vfat kernel module or `/dev/loopNpM` nodes needed (works in containers):
   the root partition is loop-mounted by offset, the FAT boot partition is edited with `mtools`.
 * ~25 GB free disk; 30-60 min under qemu on an 8-core box.
 
