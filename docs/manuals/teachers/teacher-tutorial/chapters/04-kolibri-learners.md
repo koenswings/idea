@@ -14,11 +14,11 @@ Sign in as a learner in a second browser window (private window) to see exactly 
    ![Learner home](../screenshots/S1-01.png)
 2. Click **Fractions lesson**. Its items are listed in order.
    ![Lesson](../screenshots/S1-03.png)
-3. Watch the first video.
+3. Open the first item (**Cake in quarters**, a picture activity). Videos open the same way.
    ![Video](../screenshots/S1-04.png)
-4. Open an exercise, type an answer, click **CHECK**. Keep going until the exercise is complete ("5 correct" goal shown at the top).
+4. Exercises work like this (here the Khan Academy exercise **Add fractions with unlike denominators**): type an answer, click **CHECK**. Keep going until the goal at the top ("Get 5 correct") is reached.
    ![Exercise](../screenshots/S1-05.png)
-5. Sign out. Sign in as `learner2` and open only one video, so the report shows a difference.
+5. Sign out. Sign in as `learner2` and open only one item, so the report shows a difference.
 
 ## 4.2 Take a quiz
 

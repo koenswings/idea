@@ -2,7 +2,7 @@
 
 # 3. Kolibri for teachers
 
-Demo: school (facility) **IDEA Demo School**, teacher `teacher1` (password `teacher1911!`), class **Grade 5**. The demo school has the **Maths**, **Grade 5 Science** and **Early Reading** channels from the IDEA-DEMO disk; the demo lesson uses **Maths > Fractions**.
+Demo: school (facility) **IDEA Demo School**, teacher `teacher1` (password `teacher1911!`), class **Grade 5**. The demo school has the **Maths**, **Grade 5 Science** and **Early Reading** channels from the IDEA-DEMO disk; the demo lesson uses **Maths > Fractions** and the quiz in 3.5 uses the exercises in **Khan Academy (English - US curriculum) > Math by grade > 5th grade > Add and subtract fractions**.
 
 ## 3.1 Signing in
 
@@ -51,7 +51,7 @@ Quizzes are built from exercises only.
 
 1. Click **PLAN > QUIZZES > NEW QUIZ**.
    ![Quizzes tab](../screenshots/K4-01.png)
-2. Type a title (`Fractions quiz`) and the **Number of questions** (6). Browse to Add and subtract fractions and tick a folder (or single exercises). Click **CONTINUE**.
+2. Type a title (`Fractions quiz`) and the **Number of questions** (6). Browse to **Khan Academy (English - US curriculum) > Math by grade > 5th grade > Add and subtract fractions** and tick a folder (here **Adding and subtracting fractions with unlike denominators**, 3 exercises) or single exercises. Click **CONTINUE**.
    ![Create new quiz](../screenshots/K4-02.png)
 3. **Preview quiz**: check the questions, choose **Randomized** or **Fixed** order, click **FINISH**.
    ![Preview quiz](../screenshots/K4-03a.png)
