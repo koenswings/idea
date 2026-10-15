@@ -50,7 +50,7 @@ Good to know:
 
 ## 5.2 Import the channel into Kolibri
 
-Your channel is built, but learners cannot see it yet. Someone who may manage channels on the device in Kolibri (on the demo school: `demo_admin`) imports it once.
+Your channel is built, but learners cannot see it yet. Someone who may manage channels on the device in Kolibri (on the demo school: `admin`) imports it once.
 
 1. Open Kolibri from the Console and sign in.
 2. Open **Device**. The **CHANNELS** tab lists the channels on the IDEA box. Click **IMPORT**.
@@ -104,7 +104,7 @@ Your stick also appears in Nextcloud, so you can open its files or copy them int
 
 1. Plug the stick in. Open Nextcloud and sign in as a teacher. In **All files** you see a folder **USB: (your stick's name)**. Nextcloud shows its size as *Pending*: that is normal.
 
-   ![Folders from outside Nextcloud have a folder icon with a small screen, here School Files and Grade 5A Files. Your USB: folder shows the same way](../screenshots/C5-14.png)
+   ![Folders from outside Nextcloud have a folder icon with a small screen, here School Files and a class folder (to be retaken: the old shot shows a test folder). Your USB: folder shows the same way](../screenshots/C5-14.png)
 
 2. Open the folder to view or play a file. You can't add or change anything in it (Nextcloud says *You do not have permission to upload or create files here*).
 
