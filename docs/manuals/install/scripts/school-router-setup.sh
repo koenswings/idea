@@ -13,13 +13,140 @@
 # 2. Copy it:   scp -O school-router-setup.sh root@192.168.1.1:/tmp/
 # 3. Run it:    ssh root@192.168.1.1 'sh /tmp/school-router-setup.sh'
 #    The router reboots at the end and comes back on 10.42.0.1.
+# 4. Check it:  ssh root@10.42.0.1 'sh /tmp/school-router-setup.sh --check'
+#    Read-only: prints PASS/FAIL per item, exit code 0 only if all pass.
+#
+# Options: --check (verify only, changes nothing)   --no-reboot (apply, commit, restart
+# the services, but do not reboot). Running the script twice gives the same result.
 set -e
+
+MODE=apply; REBOOT=1
+for A in "$@"; do
+  case "$A" in
+    --check) MODE=check ;;
+    --no-reboot) REBOOT=0 ;;
+    -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
+    *) echo "unknown option: $A"; exit 2 ;;
+  esac
+done
+R="${IDEA_ROOT:-}"                        # file root; only the unit test sets it
 
 NET_PREFIX='10.42'                        # the same at every school (no school numbers)
 SWITCH_MAC=''                             # TL-SG105PE MAC from its label (optional)
 STUDENT_WIFI_KEY='idea911!'               # IDEA default (<name>911!); the school changes it later
 TEACHER_WIFI_KEY='idea-teachers911!'      # IDEA default; the school changes it later
 COUNTRY='ZW'                              # Wi-Fi regulatory country (Zimbabwe)
+
+# ---- idea#203 router half: mDNS reflector + idea.local in DNS ---------------------
+# Wired Engines announce idea.local (one holder) and <STICKER>.local by mDNS on the LAN.
+# Multicast does not cross the router between br-lan, br-students and br-teachers, so
+# avahi-daemon reflects mDNS between exactly those three bridges (never WAN/tailscale).
+# umdns (named in the image proposal) answers for the router itself but cannot reflect,
+# hence avahi. Fallback: dnsmasq answers idea.local with every live Engine lease
+# (.2-.9), kept up to date by a DHCP hotplug script (image proposal 5.2).
+MDNS_PKG='avahi-nodbus-daemon'
+AVAHI_CONF="$R/etc/avahi/avahi-daemon.conf"
+IDEA_HOSTS="$R/tmp/hosts/idea"
+HOTPLUG="$R/etc/hotplug.d/dhcp/90-idea-local"
+
+write_avahi_conf() {
+  mkdir -p "$(dirname "$AVAHI_CONF")"
+  cat > "$AVAHI_CONF" <<AVAHI
+# IDEA (school-router-setup.sh): reflect mDNS between the wired LAN and the two Wi-Fi networks
+[server]
+use-ipv4=yes
+use-ipv6=no
+allow-interfaces=br-lan,br-students,br-teachers
+deny-interfaces=wan,wan6,tailscale0
+check-response-ttl=no
+use-iff-running=no
+ratelimit-interval-usec=1000000
+ratelimit-burst=1000
+
+[publish]
+publish-addresses=yes
+publish-hinfo=no
+publish-workstation=no
+publish-domain=yes
+
+[reflector]
+enable-reflector=yes
+reflect-ipv=no
+
+[rlimits]
+rlimit-core=0
+rlimit-data=4194304
+rlimit-fsize=0
+rlimit-nofile=768
+rlimit-stack=4194304
+rlimit-nproc=3
+AVAHI
+}
+
+write_hotplug() {
+  mkdir -p "$(dirname "$HOTPLUG")"
+  cat > "$HOTPLUG" <<'HP'
+#!/bin/sh
+# IDEA: keep idea.local in the router DNS = every live Engine lease (.2-.9). idea#203/#209 5.2
+LEASES="${IDEA_LEASES:-/tmp/dhcp.leases}"
+OUT="${IDEA_HOSTS:-/tmp/hosts/idea}"
+PREFIX="${IDEA_NET_PREFIX:-10.42}"
+mkdir -p "$(dirname "$OUT")"
+TMP="$OUT.new"
+: > "$TMP"
+[ -f "$LEASES" ] && while read -r _exp _mac ip _rest; do
+  case "$ip" in "$PREFIX".0.[2-9]) ;; *) continue ;; esac
+  [ "$ACTION" = remove ] && [ "$ip" = "$IPADDR" ] && continue
+  echo "$ip idea.local" >> "$TMP"
+done < "$LEASES"
+# an 'add' can run before dnsmasq has written the lease file
+if [ "$ACTION" = add ] || [ "$ACTION" = update ]; then
+  case "$IPADDR" in "$PREFIX".0.[2-9])
+    grep -q "^$IPADDR " "$TMP" || echo "$IPADDR idea.local" >> "$TMP" ;;
+  esac
+fi
+sort -u "$TMP" -o "$TMP"
+if ! cmp -s "$TMP" "$OUT"; then
+  mv "$TMP" "$OUT"
+  [ -n "$IDEA_NO_HUP" ] || killall -HUP dnsmasq 2>/dev/null || true
+else
+  rm -f "$TMP"
+fi
+HP
+  chmod 755 "$HOTPLUG"
+}
+
+if [ "$MODE" = check ]; then
+  FAILS=0
+  ok()  { echo "PASS  $1"; }
+  bad() { echo "FAIL  $1"; FAILS=$((FAILS + 1)); }
+  t() { D="$1"; shift; if "$@" >/dev/null 2>&1; then ok "$D"; else bad "$D"; fi; }
+  t "lan is $NET_PREFIX.0.1"            [ "$(uci -q get network.lan.ipaddr)" = "$NET_PREFIX.0.1" ]
+  t "students net $NET_PREFIX.1.1"      [ "$(uci -q get network.students.ipaddr)" = "$NET_PREFIX.1.1" ]
+  t "teachers net $NET_PREFIX.2.1"      [ "$(uci -q get network.teachers.ipaddr)" = "$NET_PREFIX.2.1" ]
+  t "SSID IDEA"                         [ "$(uci -q get wireless.idea_s0.ssid)" = IDEA ]
+  t "SSID IDEA-Teachers"                [ "$(uci -q get wireless.idea_t0.ssid)" = IDEA-Teachers ]
+  t "Engine vendor-class range"         grep -q '^dhcp-vendorclass=set:engine,idea-engine' "$R/etc/dnsmasq.conf"
+  t "Teachers-Internet rule exists"     [ -n "$(uci -q get firewall.teachers_internet)" ]
+  t "$MDNS_PKG installed"               sh -c "command -v avahi-daemon || [ -x '$R/usr/sbin/avahi-daemon' ]"
+  t "reflector enabled"                 grep -qx 'enable-reflector=yes' "$AVAHI_CONF"
+  t "reflector only on lan+wifi"        grep -qx 'allow-interfaces=br-lan,br-students,br-teachers' "$AVAHI_CONF"
+  t "avahi enabled at boot"             sh -c "ls '$R'/etc/rc.d/S*avahi-daemon"
+  t "avahi running"                     sh -c "pgrep -x avahi-daemon || pidof avahi-daemon"
+  for Z in students teachers; do
+    t "firewall: mDNS 5353 from $Z"     [ "$(uci -q get firewall.${Z}_mdns.dest_port)" = 5353 ]
+  done
+  t "idea.local hotplug script"         [ -x "$HOTPLUG" ]
+  t "idea.local hosts file present"     [ -f "$IDEA_HOSTS" ]
+  if [ -s "$IDEA_HOSTS" ]; then
+    ok "idea.local -> $(awk '{printf "%s ", $1}' "$IDEA_HOSTS")"
+    t "dnsmasq answers idea.local"      sh -c "nslookup idea.local 127.0.0.1 | grep -q 'Address.*$NET_PREFIX.0.[2-9]'"
+  else
+    echo "INFO  idea.local: no live Engine lease yet (expected with no Engine plugged in)"
+  fi
+  echo "check: $FAILS failure(s)"
+  [ "$FAILS" -eq 0 ]; exit $?
+fi
 
 
 # ---- system --------------------------------------------------------------
@@ -56,8 +183,8 @@ done
 
 # ---- Engines: fixed range by DHCP vendor class, no MAC reservations -------------
 # Each Engine sends vendor class 'idea-engine' and gets an address in .2-.9 (proposal 5.1).
-sed -i '/# IDEA engines/,+2d' /etc/dnsmasq.conf 2>/dev/null || true
-cat >> /etc/dnsmasq.conf <<DNSMASQ
+sed -i '/# IDEA engines/,+2d' "$R/etc/dnsmasq.conf" 2>/dev/null || true
+mkdir -p "$R/etc"; cat >> "$R/etc/dnsmasq.conf" <<DNSMASQ
 # IDEA engines
 dhcp-vendorclass=set:engine,idea-engine
 dhcp-range=tag:engine,$NET_PREFIX.0.2,$NET_PREFIX.0.9,255.255.255.0,12h
@@ -147,6 +274,40 @@ uci set firewall.teachers_internet.proto='all'
 uci set firewall.teachers_internet.target='ACCEPT'
 uci set firewall.teachers_internet.enabled='0'
 
+# ---- mDNS reflector (idea#203): avahi on br-lan + both Wi-Fi bridges -----------
+if ! command -v avahi-daemon >/dev/null 2>&1 && [ -z "$R" ]; then
+  echo "installing $MDNS_PKG (the router needs internet once; the IDEA image has it built in)"
+  if command -v apk >/dev/null 2>&1; then apk update && apk add "$MDNS_PKG"
+  else opkg update && opkg install "$MDNS_PKG"; fi
+fi
+write_avahi_conf
+for Z in students teachers; do
+  uci -q delete firewall.${Z}_mdns || true
+  uci set firewall.${Z}_mdns=rule
+  uci set firewall.${Z}_mdns.name="Allow-mDNS-$Z"
+  uci set firewall.${Z}_mdns.src="$Z"
+  uci set firewall.${Z}_mdns.proto='udp'
+  uci set firewall.${Z}_mdns.dest_port='5353'
+  uci set firewall.${Z}_mdns.family='ipv4'
+  uci set firewall.${Z}_mdns.target='ACCEPT'
+done
+
+# ---- idea.local in the router DNS (fallback; image proposal 5.2) -------------------
+write_hotplug
+uci -q del_list dhcp.@dnsmasq[0].addnhosts='/tmp/hosts/idea' || true
+uci add_list dhcp.@dnsmasq[0].addnhosts='/tmp/hosts/idea'
+# .local is not 'local=' in dnsmasq, so it would be forwarded upstream; keep it on the router
+uci -q del_list dhcp.@dnsmasq[0].local='/local/' || true
+uci add_list dhcp.@dnsmasq[0].local='/local/'
+ACTION=update IPADDR='' IDEA_HOSTS="$IDEA_HOSTS" IDEA_NET_PREFIX="$NET_PREFIX" IDEA_NO_HUP=1 sh "$HOTPLUG"
+
 uci commit
+if [ "$REBOOT" = 0 ]; then
+  [ -n "$R" ] || { /etc/init.d/avahi-daemon enable; /etc/init.d/avahi-daemon restart
+    /etc/init.d/network reload; /etc/init.d/firewall reload; /etc/init.d/dnsmasq restart; }
+  echo "Saved (no reboot). Check: sh $0 --check"
+  exit 0
+fi
+[ -n "$R" ] || /etc/init.d/avahi-daemon enable
 echo "Saved. Rebooting now. Reconnect your laptop cable to LAN2-LAN4 and open http://$NET_PREFIX.0.1"
 reboot
