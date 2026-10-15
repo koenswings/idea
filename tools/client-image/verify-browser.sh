@@ -21,7 +21,7 @@ P
 [ -x /usr/local/sbin/idea-home-engine ] && systemctl is-enabled idea-home-engine.service >/dev/null 2>&1 && ok "home-engine boot unit enabled" || bad "home-engine boot unit"
 [ ! -s /etc/idea/home-engine ] && ok "no Engine name baked in" || bad "/etc/idea/home-engine not empty in image"
 d=/usr/share/applications/idea-console.desktop
-grep -qx "Exec=$BIN --new-window file:///usr/share/idea/start.html" $d 2>/dev/null && [ -f /home/learner/Desktop/idea-console.desktop ] && ok "one IDEA shortcut (menu+desktop)" || bad "IDEA shortcut"
+grep -qx "Exec=$BIN --password-store=basic --new-window file:///usr/share/idea/start.html" $d 2>/dev/null && [ -f /home/learner/Desktop/idea-console.desktop ] && ok "one IDEA shortcut (menu+desktop)" || bad "IDEA shortcut"
 n=$(ls /usr/share/applications/idea-*.desktop /home/learner/Desktop/*.desktop 2>/dev/null | grep -vc idea-console.desktop)
 [ "$n" = 0 ] && ok "no per-app icons" || bad "$n extra idea/desktop launchers"
 [ -e /usr/local/bin/idea-open ] || [ -e /etc/idea-client/servers.conf ] && bad "old idea-open/servers.conf present" || ok "no idea-open, no servers.conf"
