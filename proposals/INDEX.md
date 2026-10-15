@@ -6,6 +6,10 @@ Update this file whenever a proposal is added, approved, declined, or superseded
 
 ---
 
+## 2026-10-15-student-client-image.md
+**Status:** Draft · **Author:** Steve (Lead Bot)
+Repeatable Ubuntu Desktop 26.04 LTS image for shared student client Pis: one `learner` account (autologin, no password, no sudo), `ideaadmin` key-only SSH, office/education/games app set (offline, .deb only), reset by reflash with `idea-flash` on a school server Pi over Tailscale (reader allowlist by USB serial, refuses system/IDEA disks, checksum + read-back), Engine ignores allowlisted readers, optional read-only overlay root. PDF: `proposals/2026-10-15-student-client-image/`.
+
 ## dev-bot-workflow.md
 **Status:** Approved (Design Review complete — Axle, Pixel, Kid, Atlas, 2026-09-28) · **Author:** Steve (Lead Bot)
 Officialise the real workflow (idea#147): Dev Bots implement with their own tools, test over SSH on a claimed pool Pi (idea01/03/04, never golden idea02), open PRs; Ops deploys review Pis via fleet scripts; Koen squash-merges; Ops updates golden. Grok Build + GitHub Actions self-hosted runner coding path **parked** (runner stopped on idea02, Grok Build 1.0.40 stays installed). Adds the fleet-Pi test claim protocol (`docs/grok-bot-setup.md` §4.6). Follow-ups: AGENTS.md rewrites per repo, Bot descriptions, `idea-setup.sh` opt-in flag, health-check scheduler.
