@@ -72,9 +72,20 @@ Exec=google-chrome-stable file:///usr/share/idea/start.html
 
 1. Try the **home Engine's Console** (`http://<home-engine>.local`) with a quick probe, timeout ~1-2 s.
    If it answers, open it.
+   * *Proposal (optional):* then try the **last Engine name that worked** from the sticker field below,
+     remembered in the browser's `localStorage`.
 2. Otherwise try **`http://idea.local`** (any Engine, section 3) the same way.
 3. Otherwise show a friendly message: "No IDEA server found. Check that the computer is connected to the
    school network, or ask your teacher." No browser error screen.
+
+**Sticker-name field.** Under the automatic attempt, `start.html` always shows a small field: "Or type the
+name on the server's sticker". The sticker name is the Engine's mDNS hostname (e.g. `brave-otter`). On submit
+the page tries `http://<name>.local` the same way and opens that Engine's Console, or shows a friendly
+message: "No server called brave-otter was found. Check the name on the sticker and the network." When
+automatic discovery fails (step 3), the field is shown **prominently** with that message.
+Input is validated before use: lower-case letters, digits and hyphens only (a trailing `.local` is
+stripped), 1-63 characters, no leading or trailing hyphen; anything else gets a friendly "letters, numbers
+and - only" hint and is never put into a URL.
 
 The student then picks an app in the Console, as today. There are **no per-app icons** and no list of apps
 outside the Console: the Console stays the one place that lists and opens apps, so new apps on an Engine
@@ -143,7 +154,7 @@ done once in `school-router-setup.sh`, the same at every school.
 | Axle (Engine) | Flash writes the home-Engine name (`idea-home.txt`) onto the card (Engine §10); `idea.local` publisher with retry/takeover; port 80 serves/redirects to the Console; automated power-cut test on a pool Pi |
 | Pixel (Console) | Flash dialog shows which Engine becomes the home Engine |
 | Atlas (Ops) | mDNS reflector + dnsmasq fallback in `school-router-setup.sh`; test with 2 Engines, one switched off |
-| Client image worker | Chrome, policies, `start.html` (home Engine → `idea.local` → friendly message), boot step reading `idea-home.txt`, the one `idea-console.desktop` shortcut |
+| Client image worker | Chrome, policies, `start.html` (home Engine → optional last-used name → `idea.local` → friendly message; sticker-name field with validation), boot step reading `idea-home.txt`, the one `idea-console.desktop` shortcut |
 | Marco (docs) | the client install manual, the school server install manual, the tutorial |
 
 **Tests** (from the student Wi-Fi subnet, two Engines on one network):
@@ -151,7 +162,11 @@ done once in `school-router-setup.sh`, the same at every school.
 * Client flashed from Engine 1: the shortcut opens Engine 1's Console.
 * The same card works in a Pi 400 and a Pi 500, and the image file itself contains no Engine name.
 * Home Engine off: the shortcut falls back to `idea.local` and opens the other Engine's Console.
-* Both Engines off: the friendly "no server found, check the network" message appears, no browser error.
+* Type Engine 2's sticker name in the field: Engine 2's Console opens. Type an unknown name: friendly "not
+  found" message. Type `Brave Otter!`, `../x` or a URL: rejected with the hint, no request is made.
+* *(If the optional memory is accepted)* After using the field for Engine 2 and switching the home Engine
+  off: Engine 2 is tried before `idea.local`.
+* Both Engines off: the sticker field is shown prominently with the friendly "no server found, check the network" message appears, no browser error.
 * Cut power to the `idea.local` holder: another Engine takes over and clients reach the Console within the
   120 s TTL (automated, pool Pi).
 
@@ -166,7 +181,11 @@ implementation branch (`feat/client-image-build`) does not use "Manual 2"; new d
 1. Google Chrome `.deb` (held, no Google repo) as the browser, xtradeb Chromium as fallback?
 2. One desktop shortcut opening the local `start.html`: home Engine (written by the flash), then
    `http://idea.local`, then a friendly message; no per-app icons?
-3. `idea.local` with one holder and automatic takeover, router mDNS reflector, router DNS as backup?
+3. A sticker-name field on `start.html` (always small, prominent when discovery fails), hostname-safe input
+   only?
+4. *Optional:* remember the last name that worked (`localStorage`), tried after the home Engine and before
+   `idea.local`?
+5. `idea.local` with one holder and automatic takeover, router mDNS reflector, router DNS as backup?
 
 # References
 
