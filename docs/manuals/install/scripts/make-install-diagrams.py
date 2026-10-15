@@ -103,8 +103,8 @@ def wiring():
     for k, (px, ip, port, col) in enumerate([(740, "10.42.0.2-.9 (DHCP)", 1, C_POE1), (920, "10.42.0.2-.9 (DHCP)", 2, C_POE2)]):
         py = 80
         s.rect(px, py, 150, 120, fill="#fff5f5")
-        s.text(px + 75, py + 22, f"Pi 5 #{k+1}", 14, "bold")
-        s.text(px + 75, py + 40, ip, 12, fill="#333")
+        s.text(px + 75, py + 22, "Engine 1 (Pi 5)" if k == 0 else "Engines 2-4", 14, "bold")
+        s.text(px + 75, py + 40, ip if k == 0 else "optional, ports 2-4", 12, fill="#333")
         s.text(px + 75, py + 56, "PoE+ HAT + NVMe", 10, fill="#555")
         s.port(px + 52, py + 72, "ETH", fill="#c9f0c9")
         s.text(px + 75, py + 140, "no USB-C power cable", 10, italic=True, fill="#a00")
@@ -124,7 +124,7 @@ def wiring():
     lx, ly = 40, 670
     s.text(lx, ly - 12, "Cables (all Cat5e/Cat6 Ethernet):", 12, "bold", anchor="start")
     items = [(1, C_WAN, "Starlink ETH -> Cudy WAN"), (2, C_UP, "Cudy LAN1 -> switch port 5"),
-             (3, C_POE1, "switch port 1 -> Pi #1"), (4, C_POE2, "switch port 2 -> Pi #2")]
+             (3, C_POE1, "switch port 1 -> Engine 1 (always)"), (4, C_POE2, "ports 2-4 -> one cable per extra Engine")]
     for i, (n, c, t) in enumerate(items):
         x = lx + i * 265
         s.badge(x + 12, ly + 12, n, c)
@@ -146,7 +146,7 @@ def zones():
         s.text(x + w/2, y + 26, title, 15, "bold")
         s.text(x + w/2, y + 48, sub, 11, fill="#333")
     zone(420, 60, 260, 110, "WAN  (Starlink -> internet)", "zone: wan", "#fff7e0")
-    zone(780, 230, 290, 170, "LAN  10.42.0.0/24  (wired)", "zone: lan\nEngines 10.42.0.2-.9 (by DHCP)\nswitch 10.42.0.10\n(Console: http://10.42.0.2)", "#f0fff0")
+    zone(780, 230, 290, 170, "LAN  10.42.0.0/24  (wired)", "zone: lan\nEngines 10.42.0.2-.9 (by DHCP)\nswitch 10.42.0.10\n(Console: http://idea.local)", "#f0fff0")
     zone(30, 130, 300, 140, "Wi-Fi 'IDEA'  10.42.1.0/24", "zone: students\nlaptops / Pi 400s of students\nclient isolation ON", "#fff0f0")
     zone(30, 380, 300, 140, "Wi-Fi 'IDEA-Teachers'  10.42.2.0/24", "zone: teachers\nteacher laptops / phones", "#f5f0ff")
     zone(420, 470, 260, 110, "tailscale0", "zone: tailscale\nadmin access to the router only", "#eefaff")
@@ -159,7 +159,7 @@ def zones():
     s.text(30, 70, "BLOCKED (no forwarding):\ninternet, outside DNS, VPNs", 11, "bold", fill=R, anchor="start")
     # teachers -> Pis
     s.line([(330, 430), (740, 430), (740, 360), (780, 360)], G, 4, arrow=True)
-    s.text(545, 446, "ALLOW: to the two Pis", 11, "bold", fill=G)
+    s.text(545, 446, "ALLOW: to the Engines (10.42.0.2-.9)", 11, "bold", fill=G)
     # teachers -> WAN toggle
     s.line([(200, 380), (200, 330), (370, 330), (370, 140), (420, 140)], O, 4, dash="3,5", arrow=True)
     s.text(377, 230, "ON/OFF switch:\nrule 'Teachers-Internet'", 11, "bold", fill=O, anchor="start")
@@ -200,7 +200,7 @@ def tailnet():
     for i, (n, x) in enumerate([("School A", 60), ("School B", 420), ("School C", 780)]):
         s.rect(x, 220, 260, 110, fill="#f0fff0")
         s.text(x + 130, 248, f"{n}  (tag:idea)", 14, "bold")
-        s.text(x + 130, 272, ["router\nbrave-otter - calm-heron", "router\nquick-lynx - tidy-crane", "router\nbold-gecko - warm-finch"][i], 11)
+        s.text(x + 130, 272, ["router\nbrave-otter  (1 Engine)", "router\nquick-lynx - tidy-crane  (2)", "router\nbold-gecko - warm-finch\nsoft-wren - keen-ibis  (4)"][i], 11)
         s.line([(550, 150), (x + 130, 215)], "#2ca02c", 3, arrow=True)
     s.line([(320, 300), (420, 300)], "#d62728", 3, dash="6,5", arrow=True, arrow_start=True)
     s.line([(680, 300), (780, 300)], "#d62728", 3, dash="6,5", arrow=True, arrow_start=True)
@@ -306,7 +306,7 @@ def timeline():
     s.text(550, 28, "Where to do each step", 18, "bold")
     s.rect(20, 50, 640, 180, fill="#eef5ff")
     s.text(340, 78, "In Belgium (home internet as 'WAN')", 15, "bold")
-    s.text(40, 108, "- flash + configure the Cudy (all OpenWrt settings)\n- join router + Pis to Tailscale\n- set the switch password\n- install Raspberry Pi OS + IDEA Engine on both Pis\n- download App/content (Kolibri, Kiwix ZIMs...)\n- full test with the final checklist, then label and pack", 12, anchor="start")
+    s.text(40, 108, "- flash + configure the Cudy (all OpenWrt settings)\n- join router + Pis to Tailscale\n- set the switch password\n- install Raspberry Pi OS + IDEA Engine on each Pi\n- download App/content (Kolibri, Kiwix ZIMs...)\n- full test with the final checklist, then label and pack", 12, anchor="start")
     s.rect(690, 50, 390, 180, fill="#f0fff0")
     s.text(885, 78, "On site (with Starlink)", 15, "bold")
     s.text(710, 108, "- install dish, activate Starlink\n- Starlink app: Bypass mode ON\n- cable everything (wiring diagram)\n- power on, wait 5 minutes\n- check Tailscale is back online\n- final checklist with a laptop", 12, anchor="start")

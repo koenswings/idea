@@ -1,9 +1,9 @@
 ---
 title: "IDEA School Server: Installation Manual"
-subtitle: "Two Raspberry Pi 5 Engines + Cudy router + PoE switch + Starlink"
+subtitle: "Raspberry Pi 5 Engines (1 to 4) + Cudy router + PoE switch + Starlink"
 audience: "For Justice. Version 1.2, 15 October 2026"
 ---
-**Status:** Authoritative (follows idea#184; see the README for what is not yet installed on hardware) · **Maintained by:** Marco (with Atlas) · 15 October 2026 (pre-flashed router, idea#209)
+**Status:** Authoritative (follows idea#184; see the README for what is not yet installed on hardware) · **Maintained by:** Marco (with Atlas) · 15 October 2026 (pre-flashed router, Engine count not fixed, Starlink, idea#209)
 
 
 # How to use this manual
@@ -22,6 +22,13 @@ The IDEA default passwords below are not secret: they follow the public IDEA con
 <li><code>&lt;TAILSCALE-AUTH-KEY&gt;</code>: the one IDEA fleet key. Koen gives it to you as a file. Never type it on a command line.</li>
 <li><code>&lt;STICKER&gt;</code>: the name the installer gives a Pi, for example <code>brave-otter</code> (section 5.6). Write it on the sticker on the case.</li>
 </ul>
+</div>
+
+<div class="note">
+<b>How many Engines?</b> Not fixed. A school starts with <b>one</b> Engine and can add or remove Engines at any time, up to
+<b>four</b> with today's 4-port PoE switch (a bigger switch allows more later). The router needs no change when Engines
+come or go: it gives every Engine an address from <code>10.42.0.2</code> to <code>.9</code> (room for 8) and answers
+<code>idea.local</code> with the Engines that are on. Where this manual says "each Pi", do the step once per Engine.
 </div>
 
 <div class="note">
@@ -53,8 +60,11 @@ and the IDEA team changes them on the router (section 10). Write the new ones do
 |---|---|
 | School name | ______________________ |
 | Router | `10.42.0.1`, hostname `idea-router` |
-| Pi #1 (Engine 1) | address 10.42.0.\_\_\_\_ (the router gives Engines `.2` to `.9`), sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
-| Pi #2 (Engine 2) | address 10.42.0.\_\_\_\_, sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
+| Engine 1 (switch port 1) | address 10.42.0.\_\_\_\_ (the router gives Engines `.2` to `.9`), sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
+| Engine 2 (port 2, if fitted) | address 10.42.0.\_\_\_\_, sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
+| Engine 3 (port 3, if fitted) | address 10.42.0.\_\_\_\_, sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
+| Engine 4 (port 4, if fitted) | address 10.42.0.\_\_\_\_, sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
+| Starlink kit | router generation (Gen 3 / Gen 2 / Mini) \_\_\_\_\_\_, bypass on ☐, account holder \_\_\_\_\_\_\_\_\_\_\_\_ |
 | Switch | `10.42.0.10`, MAC (on its label) ____:____:____:____:____:____ |
 | Wi-Fi students | SSID `IDEA`, password `idea911!` (until changed), subnet `10.42.1.0/24` |
 | Wi-Fi teachers | SSID `IDEA-Teachers`, password `idea-teachers911!` (until changed), subnet `10.42.2.0/24` |
@@ -78,19 +88,19 @@ Two separate firewall zones need two separate networks, so the Wi-Fi networks ge
 |---|---|---|---|
 | 1 | Starlink router, Ethernet port | Cudy **WAN** port (yellow) | Gen 3 router: built-in LAN port. Gen 2: Starlink Ethernet Adapter needed. |
 | 2 | Cudy **LAN1** | Switch **port 5** | Port 5 is the only port without PoE. Use it for the uplink. |
-| 3 | Switch **port 1** (PoE+) | Pi #1 Ethernet | This cable powers Pi #1. |
-| 4 | Switch **port 2** (PoE+) | Pi #2 Ethernet | This cable powers Pi #2. |
+| 3 | Switch **port 1** (PoE+) | Engine 1 Ethernet | This cable powers Engine 1. Every school has at least this one. |
+| 4… | Switch **ports 2, 3, 4** (PoE+) | Engines 2, 3, 4 (if the school has them) | One cable per extra Engine. Leave unused ports empty. |
 
-The Pis get **no** USB-C power supply. The PoE+ HAT takes power from the Ethernet cable. Ports 3 and 4 of the switch are free (PoE+) for later, for example an extra access point.
+The Pis get **no** USB-C power supply. The PoE+ HAT takes power from the Ethernet cable. The switch has four PoE+ ports, so four Engines is today's maximum; a free port can also take an extra access point instead of an Engine.
 
 ## Network zones
 
 ![Network zones and allowed traffic](diagrams/m1-zones.svg)
 
-* **IDEA (students):** devices reach only the two Pis (Console, Kolibri, Nextcloud, Kiwix). There is no forwarding to the internet, so outside DNS servers, VPNs and websites are all blocked. Students on the IDEA Wi-Fi cannot reach each other either (client isolation).
+* **IDEA (students):** devices reach only the Engines, however many there are (Console, Kolibri, Nextcloud, Kiwix). There is no forwarding to the internet, so outside DNS servers, VPNs and websites are all blocked. Students on the IDEA Wi-Fi cannot reach each other either (client isolation).
 * **IDEA-Teachers:** devices reach the Pis. Internet goes through **one** firewall rule, `Teachers-Internet`, which you can switch on or off (section 9). It starts **off**.
 * **LAN (wired):** the Pis may reach the internet for updates and Tailscale. They do not route traffic for anyone else.
-* **Tailscale:** the router and both Pis join the IDEA tailnet with the one fleet tag `tag:idea`. Admins reach every device. Devices with `tag:idea` reach nothing, not even each other. There are no exit nodes and no subnet routes.
+* **Tailscale:** the router and every Engine join the IDEA tailnet with the one fleet tag `tag:idea`. Admins reach every device. Devices with `tag:idea` reach nothing, not even each other. There are no exit nodes and no subnet routes.
 
 ## Where to do each step
 
@@ -106,7 +116,7 @@ Do everything you can **in Belgium**, with your home internet plugged into the C
 | 4 Switch password and watchdog | ✔ | |
 | 5 Pi OS and IDEA Engine, Tailscale on Pis | ✔ (needs internet) | |
 | 6 Tailscale policy (Koen) | ✔ | |
-| 7 Starlink and final cabling | | ✔ |
+| 7 Connect Starlink and final cabling | | ✔ |
 | 8 Final checklist | ✔ (dry run) | ✔ (for real) |
 
 # 1. Unboxing
@@ -117,10 +127,10 @@ Do this once for each school kit. Tick each item.
 |---|---|---|
 | ☐ | Cudy WR3000S router + 12 V adapter + Ethernet cable | Label underneath says **WR3000S** and **V1.0**; IDEA sticker with the router name (see 2.1) |
 | ☐ | TP-Link TL-SG105PE switch + 53.5 V adapter | Ports 1-4 marked PoE+ |
-| ☐ | 2× Raspberry Pi 5 | |
-| ☐ | 2× blank stickers (or labels) and a permanent marker | For the sticker names (5.6) |
-| ☐ | 2× PoE+ HAT with NVMe slot (or PoE+ HAT + M.2 HAT) + 2× NVMe SSD | Write the HAT model and its rated output (for example 5 V 4.5 A) on the fill-in sheet. See 5.1. |
-| ☐ | 3× Ethernet patch cables (Cat5e/Cat6), 0.5-2 m | One for each Pi plus one for the router-switch link |
+| ☐ | N× Raspberry Pi 5 (N = number of Engines for this school, 1 to 4; usually 1 to start) | Write N on the fill-in sheet |
+| ☐ | N× blank stickers (or labels) and a permanent marker | For the sticker names (5.6) |
+| ☐ | N× PoE+ HAT with NVMe slot (or PoE+ HAT + M.2 HAT) + N× NVMe SSD | Write the HAT model and its rated output (for example 5 V 4.5 A) on the fill-in sheet. See 5.1. |
+| ☐ | N+1 Ethernet patch cables (Cat5e/Cat6), 0.5-2 m | One for each Engine plus one for the router-switch link |
 | ☐ | Plug adapters for Zimbabwe (Type G / Type D sockets) | Belgian plugs (Type E/F) don't fit Zimbabwe sockets |
 | ☐ | Power strip, ideally with surge protection | A small UPS is a good idea where the power often cuts out (optional) |
 | ☐ | Starlink kit (dish, router, cable, PSU) | Note the router generation. Gen 3 has an Ethernet port. Gen 2 needs the Starlink Ethernet Adapter: if the kit has no adapter, stop and tell Koen. |
@@ -176,25 +186,27 @@ Facts from TP-Link [7][8]:
 * The factory login is user `admin`, password `admin`. This is a public factory default, printed in TP-Link's guide, and you will replace it.
 * **PoE Auto Recovery** pings a device and power-cycles its port when the device stops answering. It is off by default.
 
-**Power budget:** 2 × Pi 5 with NVMe is at most about 2 × 25 W on the HAT side. That fits within 65 W. If the PoE MAX LED is lit or flashing, the switch is near or over its budget [8]: unplug extra PoE devices.
+**Power budget:** the switch gives at most 65 W in total over PoE [8]. A Pi 5 with NVMe usually draws well under 15 W, but a HAT may take up to about 25 W at peak. One or two Engines always fit. With three or four Engines the worst case (4 × 25 W) is above 65 W, so in Belgium check **PoE Status** with all Engines busy (copying to an App Disk) and note the total watts on the fill-in sheet. If the PoE MAX LED is lit or flashing, the switch is near or over its budget [8]: unplug extra PoE devices.
 
 1. Connect switch port 5 to Cudy LAN1. Power the switch. Wait 1 minute.
 2. Find the switch in LuCI **Status → Overview → Active DHCP Leases**. Click **Set Static** and give it `10.42.0.10`. Then power-cycle the switch.
 3. Browse to `http://10.42.0.10`. Log in with the factory default. **System → User Account**: set `<SWITCH-ADMIN-PASSWORD>`.
 4. Optional watchdog, under **PoE → PoE Auto Recovery**:
    * Enable it globally.
-   * Port 1: Ping IP of Pi #1. Port 2: Ping IP of Pi #2 (the addresses on the fill-in sheet).
+   * For each port with an Engine: Ping IP = that Engine's address from the fill-in sheet. (The router normally keeps giving an Engine the same address; if you move Engines between ports, update this.)
    * **Startup Delay 300 s** (a Pi takes a few minutes to boot and start the Engine)
    * Interval 60 s, Failure Threshold 5, Break Time 15 s
 
-**✔ Check:** you can log in with the new password and the old one fails. PoE Status shows ports 1 and 2 "on" with a few watts each once the Pis are connected.
+**✔ Check:** you can log in with the new password and the old one fails. PoE Status shows every port with an Engine "on" with a few watts each once the Pis are connected.
 
 <div class="note">
 The switch is not on Tailscale, so nobody can reach it from outside the school. The watchdog is the only automatic power reset.
 An admin can still reach its web page through a Pi with an SSH tunnel: <code>ssh -L 8080:10.42.0.10:80 pi@&lt;pi-tailscale-ip&gt;</code>, then open <code>http://localhost:8080</code>.
 </div>
 
-# 5. The two Raspberry Pi 5 Engines
+# 5. The Raspberry Pi 5 Engines (one or more)
+
+Do this section once per Engine. A school with one Engine does it once; you can add Engines later the same way.
 
 ## 5.1 Assemble
 
@@ -232,7 +244,7 @@ The IDEA Engine runs on **Raspberry Pi OS Lite (64-bit)**. The test fleet runs D
 
 ## 5.3 First boot
 
-1. Plug Pi #1 into switch **port 1** (Pi #2 into **port 2**). The PoE+ HAT powers it. No SD card should be in the slot.
+1. Plug the first Engine into switch **port 1** (further Engines into ports 2, 3, 4). The PoE+ HAT powers it. No SD card should be in the slot.
 2. Wait 2-3 minutes. In LuCI → **Status → Overview → DHCP leases** you will see a new `raspberrypi` with a temporary address (`10.42.0.1xx`). Do one Pi at a time, so you know which lease is which. The MAC address tells them apart.
 
 **✔ Check:** `ssh pi@10.42.0.1xx` logs in without a password (key only), and then:
@@ -267,9 +279,9 @@ sudo nmcli connection modify "$(nmcli -g NAME,DEVICE c show --active | grep ':et
 sudo reboot
 ```
 
-2. In LuCI **Status → Overview → DHCP leases**, note the new address (`10.42.0.2`-`.9`) and write it on the fill-in sheet. Pi #1 normally gets `.2` and Pi #2 `.3`; this manual uses those two addresses below. If yours differ, use your own.
+2. In LuCI **Status → Overview → DHCP leases**, note the new address (`10.42.0.2`-`.9`) and write it on the fill-in sheet. Which Engine gets which address is not fixed and does not matter. Below, `<ENGINE-IP>` means the address of the Engine you are working on (for a one-Engine school this is often `10.42.0.2`).
 
-**✔ Check:** `ping 10.42.0.2` and `ping 10.42.0.3` answer.
+**✔ Check:** `ping <ENGINE-IP>` answers, for every Engine.
 
 ## 5.6 Install the IDEA Engine (and Console)
 
@@ -288,7 +300,7 @@ The current, documented way to install a Pi is `script/provision-fleet.sh`. You 
 
 With `auto` instead of a name, the installer makes up a two-word **sticker name** (for example `brave-otter`). It checks that no other Pi on the network, and no Engine in the IDEA database, already has that name. Then it sets it as the Pi's hostname and Engine name.
 
-It takes **15-20 minutes per Pi** and needs internet on the Pi, so do it in Belgium. Install **one Pi per run**: first Pi #1, and when it is done, Pi #2. Then the second Pi can check its name against the first.
+It takes **15-20 minutes per Pi** and needs internet on the Pi, so do it in Belgium. Install **one Pi per run**, one after the other. Then each new Pi can check its name against the ones already installed.
 
 ```bash
 # on your Ubuntu machine
@@ -297,14 +309,12 @@ git clone https://github.com/koenswings/agent-engine-dev.git
 cd agent-engine-dev
 chmod 600 ~/idea-fleet-authkey.txt   # the one fleet key, <TAILSCALE-AUTH-KEY>
 ./script/provision-fleet.sh --authkey-file ~/idea-fleet-authkey.txt \
-    --timezone Africa/Harare --keyboard us  auto=10.42.0.2,model=pi5
-# when Pi #1 is done:
-./script/provision-fleet.sh --authkey-file ~/idea-fleet-authkey.txt \
-    --timezone Africa/Harare --keyboard us  auto=10.42.0.3,model=pi5
+    --timezone Africa/Harare --keyboard us  auto=<ENGINE-IP>,model=pi5
+# repeat for each further Engine, with its own <ENGINE-IP>, once the previous one is done
 ```
 
 **Put the sticker on the case.** Near the end of each run the script prints a line `Sticker name: <STICKER>`.
-The Pi also keeps it in the file `/home/pi/STICKER.txt` (`ssh pi@10.42.0.2 cat STICKER.txt`).
+The Pi also keeps it in the file `/home/pi/STICKER.txt` (`ssh pi@<ENGINE-IP> cat STICKER.txt`).
 
 1. Write the sticker name on a sticker in large, clear letters. Add the Console address below it: `http://<STICKER>.local`.
 2. Stick it on the top of the Pi's case, where you can read it without moving cables.
@@ -313,12 +323,12 @@ The Pi also keeps it in the file `/home/pi/STICKER.txt` (`ssh pi@10.42.0.2 cat S
 **✔ Check:**
 
 * The script's summary line for each Pi is a success (not `FAILED (...)`).
-* `ssh pi@10.42.0.2 hostname` prints the sticker name of Pi #1 (the same for .3 and Pi #2). It matches the sticker on that case.
-* `ssh pi@10.42.0.2 'pm2 status'` shows `engine` **online** (the same for .3).
-* `curl -s -o /dev/null -w '%{http_code}\n' http://10.42.0.2/` prints `200`.
-* A laptop on the **wired** LAN opens `http://<STICKER>.local` (the name on either sticker) and sees the IDEA Console, with **both** Engines listed. The Console reads the list of Engines from the IDEA database, so it does not matter which Pi you open.
+* For each Engine: `ssh pi@<ENGINE-IP> hostname` prints its sticker name, and it matches the sticker on that case.
+* For each Engine: `ssh pi@<ENGINE-IP> 'pm2 status'` shows `engine` **online**.
+* For each Engine: `curl -s -o /dev/null -w '%{http_code}\n' http://<ENGINE-IP>/` prints `200`.
+* A laptop on the **wired** LAN opens `http://<STICKER>.local` (the name on any sticker) and sees the IDEA Console, with **every** Engine of this school listed. The Console reads the list of Engines from the IDEA database, so it does not matter which Pi you open.
 
-The Console port is **80**: `config.yaml` → `settings.httpPort: 80` ("serves Console UI"). From the Wi-Fi networks, `.local` names do not work (they do not cross subnets): there you use `http://10.42.0.2` (section 8).
+The Console port is **80**: `config.yaml` → `settings.httpPort: 80` ("serves Console UI"). From the Wi-Fi networks, `.local` names do not work (they do not cross subnets): there you use `http://idea.local` (the router answers it with the Engines that are on) or an Engine's address (section 8).
 
 <div class="note">
 <b>Use <code>provision-fleet.sh</code>.</b> The older <code>script/install.sh</code> is out of date (it clones <code>koenswings/engine</code> and sets Node 20). Do not use it.
@@ -331,8 +341,8 @@ Send Koen one short message for each school:
 
 | School | Pi | Sticker name |
 |---|---|---|
-| (school name) | Pi #1 | (sticker name) |
-| (school name) | Pi #2 | (sticker name) |
+| (school name) | Engine 1 | (sticker name) |
+| (school name) | Engine 2, 3, 4 (if any) | (sticker name) |
 
 Send it again whenever a Pi moves to another school. The school is not part of the Pi's name: this report is the only place where the link between Pi and school is kept.
 
@@ -340,18 +350,18 @@ Send it again whenever a Pi moves to another school. The school is not part of t
 
 ## 5.7 Tailscale on the Pis (always on, tag:idea)
 
-Join both Pis to the tailnet with the same fleet key and tag, using the sticker name as the Tailscale name:
+Join every Engine to the tailnet with the same fleet key and tag, using the sticker name as the Tailscale name:
 
 ```bash
-scp ~/idea-fleet-authkey.txt pi@10.42.0.2:/tmp/tskey
-ssh pi@10.42.0.2 'sudo systemctl enable --now tailscaled && \
+scp ~/idea-fleet-authkey.txt pi@<ENGINE-IP>:/tmp/tskey
+ssh pi@<ENGINE-IP> 'sudo systemctl enable --now tailscaled && \
   sudo tailscale up --auth-key=file:/tmp/tskey --hostname=<STICKER> \
   --advertise-tags=tag:idea --accept-dns=false && shred -u /tmp/tskey'
 ```
 
-Do the same for `10.42.0.3`, with the sticker name of Pi #2.
+Repeat for each further Engine, with its own address and sticker name.
 
-**✔ Check:** `ssh pi@10.42.0.2 tailscale status` shows it online. The Tailscale admin console shows both sticker names with `tag:idea`.
+**✔ Check:** `ssh pi@<ENGINE-IP> tailscale status` shows it online. The Tailscale admin console shows every sticker name with `tag:idea`.
 
 ## 5.8 Apps and content (Kolibri, Nextcloud, Kiwix)
 
@@ -392,21 +402,36 @@ Only the people in `group:admins` get access. School staff are not on the list.
 * From an admin laptop, `tailscale ping <STICKER>` works.
 * From a Pi, `tailscale ping` to any other IDEA device **fails** (no access).
 
-# 7. On site: Starlink and final cabling
+# 7. On site: connect Starlink and final cabling
 
-1. Install and activate Starlink with the Starlink app (dish outside with a clear view of the sky). Check that it works with a phone on the Starlink Wi-Fi.
-2. In the Starlink app, go to **Settings → Router → Bypass mode** and switch it on. This turns the Starlink Wi-Fi off and passes the internet straight to the Cudy.
+The router proposal (idea#209, section 12) has the background. In short: Starlink is only the internet on the Cudy
+**WAN** port. The school network works fully without it.
 
-   <div class="warn">The Starlink app warns that you can only undo bypass mode with a factory reset of the Starlink router. Do it last, after Starlink itself works.</div>
+1. **Install and activate Starlink** with the Starlink app (dish outside with a clear view of the sky). Check that it
+   works with a phone on the Starlink Wi-Fi, and check the app for obstructions. Write the router generation and the
+   account holder on the fill-in sheet.
+2. **Bypass mode:** with the phone still on the Starlink Wi-Fi, open the **Starlink app → Settings → Bypass mode** and
+   switch it on. On a Gen 3 router the light turns violet.
 
-3. Cable everything exactly as in the wiring diagram: cables 1, 2, 3, 4. Plug in the power adapters: Starlink, Cudy, switch. The Pis start by themselves through PoE.
-4. Wait 5 minutes.
+   <div class="warn">Bypass mode switches the Starlink Wi-Fi off for good: from now on all Wi-Fi comes from the Cudy.
+   It can only be undone with a factory reset of the Starlink router. Do it last, after Starlink itself works.</div>
+
+3. **Cable 1:** Gen 3 router: remove the rubber cover at the back and connect one of its Ethernet ports to the Cudy
+   **WAN** port. Gen 2 router: Starlink Ethernet Adapter between the router and the dish cable, adapter port to the
+   Cudy WAN. Starlink Mini: its Ethernet cable to the Cudy WAN. Nothing else plugs into the Starlink router.
+4. Cable the rest exactly as in the wiring diagram: cable 2 (Cudy LAN1 → switch port 5), then one cable per Engine.
+   Plug in the power adapters: Starlink, Cudy, switch. The Pis start by themselves through PoE.
+5. **Power:** if there is a UPS, put the **Cudy, the switch** (and so the Engines) on it. Starlink uses far more power
+   (about 75–100 W); keep it on mains unless the UPS is large.
+6. Wait 5 minutes. **Do not change** anything on the Cudy WAN (leave it on DHCP), and do not turn bypass off.
 
 **✔ Check:**
 
-* LuCI → **Status → Overview** shows a WAN address from Starlink.
-* `tailscale status` (on your laptop, on the tailnet) shows the router and both sticker names online.
-* The switch's PoE LEDs for ports 1 and 2 are on.
+* LuCI → **Status → Overview** shows a WAN address from Starlink (normally `100.x.x.x`: that is Starlink's shared
+  address, which is normal and fine for Tailscale).
+* `tailscale status` (on your laptop, on the tailnet) shows the router and every Engine's sticker name online.
+* The switch's PoE LEDs are on for every port with an Engine.
+* Unplug cable 1 for a minute: a laptop on `IDEA` still opens the Console. Plug it back in: Tailscale comes back by itself.
 
 # 8. Final checklist
 
@@ -414,18 +439,18 @@ Do it once in Belgium (dry run) and again on site. Use a laptop with no other ne
 
 | ☐ | Test | How | Expected |
 |---|---|---|---|
-| ☐ | Laptop on **IDEA** opens Console | Join Wi-Fi `IDEA` with `idea911!`, browse to `http://10.42.0.2` | IDEA Console loads, both Engines listed. The laptop has an address `10.42.1.x`. |
-| ☐ | Console by sticker name | Wired laptop: browse to `http://<STICKER>.local` (each sticker) | Console loads, both Engines listed |
-| ☐ | Second Pi reachable | Browse to `http://10.42.0.3` | Console loads |
+| ☐ | Laptop on **IDEA** opens Console | Join Wi-Fi `IDEA` with `idea911!`, browse to `http://idea.local` | IDEA Console loads, every Engine listed. The laptop has an address `10.42.1.x`. |
+| ☐ | Console by sticker name | Wired laptop: browse to `http://<STICKER>.local` (each sticker) | Console loads, every Engine listed |
+| ☐ | Every Engine reachable | Browse to `http://<ENGINE-IP>` for each Engine | Console loads on each |
 | ☐ | **No internet on IDEA** | Browse to `https://example.com`. In a terminal: `ping -c2 1.1.1.1`, `nslookup example.com 1.1.1.1` | All fail (time-out / refused) |
 | ☐ | Router admin closed on IDEA | Browse to `http://10.42.1.1` and `http://10.42.0.1` | Fails |
 | ☐ | Students isolated | From phone A on IDEA, ping laptop B on IDEA | Fails |
-| ☐ | **Teachers: Pis yes, internet off** | Join `IDEA-Teachers` with `idea-teachers911!`. Open `http://10.42.0.2`, then `https://example.com` | Console yes, internet no |
+| ☐ | **Teachers: Pis yes, internet off** | Join `IDEA-Teachers` with `idea-teachers911!`. Open `http://idea.local`, then `https://example.com` | Console yes, internet no |
 | ☐ | **Teachers: internet when toggled on** | Turn on `Teachers-Internet` (section 9), then reload `https://example.com` | Internet works. Turn it off again: internet stops. |
-| ☐ | Pis have internet (updates) | `ssh pi@10.42.0.2 'curl -sI https://deb.debian.org | head -1'` | `HTTP/... 200` |
-| ☐ | **Both Pis visible in Tailscale** | `tailscale status` on an admin laptop, or the admin console | Both sticker names (and the router) online, tagged `tag:idea` |
-| ☐ | Stickers and report | Look at both cases | Each sticker matches `hostname` on that Pi. Koen has the report (5.6b). |
-| ☐ | Power fine | `ssh pi@10.42.0.2 vcgencmd get_throttled` (the same for .3) | `throttled=0x0` |
+| ☐ | Pis have internet (updates) | `ssh pi@<ENGINE-IP> 'curl -sI https://deb.debian.org | head -1'` | `HTTP/... 200` |
+| ☐ | **Every Engine visible in Tailscale** | `tailscale status` on an admin laptop, or the admin console | Every sticker name (and the router) online, tagged `tag:idea` |
+| ☐ | Stickers and report | Look at every case | Each sticker matches `hostname` on that Pi. Koen has the report (5.6b). |
+| ☐ | Power fine | `ssh pi@<ENGINE-IP> vcgencmd get_throttled` (for each Engine) | `throttled=0x0` |
 | ☐ | Reboot test | Pull the switch's power for 10 s, then plug it back in | After about 5 minutes, all of the above pass again |
 
 # 9. Switching teacher internet on and off

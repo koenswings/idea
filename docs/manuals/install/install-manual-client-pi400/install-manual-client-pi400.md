@@ -16,7 +16,7 @@ This manual sets up one classroom computer: a Raspberry Pi 400 keyboard computer
 <div class="note">
 <b>Placeholders, no real secrets.</b>
 <ul>
-<li>Every school uses the same addresses (*IDEA School Server: Installation Manual*). The Console is always at <code>http://10.42.0.2</code>.</li>
+<li>Every school uses the same addresses (*IDEA School Server: Installation Manual*). The Console is at <code>http://idea.local</code>, whichever and however many Engines the school has.</li>
 <li><code>&lt;STUDENT-USER-PASSWORD&gt;</code>: the password for the Ubuntu user on the Pi 400.</li>
 <li><code>&lt;SCHOOL&gt;</code>: the school name, for labels only.</li>
 </ul>
@@ -259,10 +259,11 @@ cat /boot/firmware/cmdline.txt     # still ONE line, ending in ...regdom=ZW
 
 ## 6.4 Homepage = the school Console
 
-The homepage is the Console on Engine 1, **by IP address: `http://10.42.0.2`**. The port is 80 (the IDEA Engine's `config.yaml` `httpPort: 80`), so no `:port` is needed.
-Do not use the sticker name here: the PCs are on the Wi-Fi network, and `.local` names do not cross from the wired network to Wi-Fi.
+The homepage is the school Console at **`http://idea.local`**. The port is 80 (the IDEA Engine's `config.yaml` `httpPort: 80`), so no `:port` is needed.
+A school has one or more Engines (1 to 4 today), and which address each one gets is not fixed. The IDEA router answers `idea.local` with the Engines that are switched on, so the homepage works with one Engine or four, and keeps working when one is off.
+Do not use a sticker name here: the PCs are on the Wi-Fi network, and sticker `.local` names do not cross from the wired network to Wi-Fi.
 
-The Console reads the list of all Engines from the IDEA database, so both Engines appear on this one page. If Pi #1 is ever off, type `http://10.42.0.3` by hand: it shows the same Console. Keep the homepage on `10.42.0.2`.
+The Console reads the list of all Engines from the IDEA database, so every Engine appears on this one page. If `idea.local` ever fails, type an Engine's address by hand (`http://10.42.0.2` to `.9`; the school's fill-in sheet lists them).
 
 **Firefox (Ubuntu's default browser) for all users, set once by the admin.** The Firefox snap reads enterprise policies from `/etc/firefox/policies/policies.json`:
 
@@ -271,7 +272,7 @@ sudo mkdir -p /etc/firefox/policies
 sudo tee /etc/firefox/policies/policies.json > /dev/null <<'JSON'
 {
   "policies": {
-    "Homepage": { "URL": "http://10.42.0.2/", "StartPage": "homepage", "Locked": false },
+    "Homepage": { "URL": "http://idea.local/", "StartPage": "homepage", "Locked": false },
     "OverrideFirstRunPage": "",
     "OverridePostUpdatePage": "",
     "DisableTelemetry": true
@@ -282,9 +283,9 @@ JSON
 
 (The address is the same at every school. Restart Firefox.)
 
-**Or by hand, in Firefox:** ☰ → **Settings → Home** → *Homepage and new windows* → **Custom URLs** → `http://10.42.0.2/`.
+**Or by hand, in Firefox:** ☰ → **Settings → Home** → *Homepage and new windows* → **Custom URLs** → `http://idea.local/`.
 
-**Chromium** (only if you install it: `sudo snap install chromium`): ⋮ → **Settings → On start-up → Open a specific page** → `http://10.42.0.2/`.
+**Chromium** (only if you install it: `sudo snap install chromium`): ⋮ → **Settings → On start-up → Open a specific page** → `http://idea.local/`.
 
 **Handy:** put Firefox in the dock (right-click → *Pin to Dash*). Open the Console, then ★ to bookmark it.
 
@@ -316,7 +317,7 @@ sudo reboot
 | ☐ | Ubuntu desktop reached, device name set | Settings → About: Raspberry Pi 400, Ubuntu 26.04.1 LTS |
 | ☐ | Wi-Fi | Connected to `IDEA` (or `IDEA-Teachers`), address `10.42.1.x` / `10.42.2.x` |
 | ☐ | Wi-Fi country | `iw reg get` → `country ZW` |
-| ☐ | Firefox opens the Console | `http://10.42.0.2` loads and lists **both** Engines of the school |
+| ☐ | Firefox opens the Console | `http://idea.local` loads and lists **every** Engine of the school |
 | ☐ | Apps open from the Console | Kolibri / Kiwix / Nextcloud open |
 | ☐ | No internet on IDEA | `https://example.com` fails (expected) |
 | ☐ | Power stable | No lightning-bolt or under-voltage warning during 10 minutes of use |
@@ -331,7 +332,7 @@ sudo reboot
 | Rainbow screen / no boot with Ubuntu | EEPROM too old: section 6.1. Rewrite the card and check the SHA-256. |
 | Very slow first boot | That is normal: the first boot resizes the card. Give it 5 minutes. |
 | Wi-Fi 'IDEA' not shown | Is the router on? (*IDEA School Server: Installation Manual*, section 2.) The 5 GHz network may need the Wi-Fi country (6.3). |
-| Console doesn't open | Check the address: `http://10.42.0.2` (http, not https). Is the PC on IDEA/IDEA-Teachers? Run `ping 10.42.0.2`. |
+| Console doesn't open | Check the address: `http://idea.local` (http, not https). Is the PC on IDEA/IDEA-Teachers? Run `ping idea.local`; if that fails, try an Engine address from the fill-in sheet. |
 
 # Appendix B. Sources (read on 12 October 2026)
 
