@@ -1,12 +1,12 @@
 ---
 title: "IDEA Student Client Image – Design"
 subtitle: "One repeatable Ubuntu card for shared classroom Pis, reflashed remotely when it goes wrong"
-audience: "Proposal · Status: Draft (for Koen Swings)"
+audience: "Proposal · Status: Approved by Koen 2026-10-15"
 ---
 
 **Author:** Steve (Lead Bot)
 **Date:** 2026-10-15
-**Status:** Draft, revision 2 (Koen's feedback of 15 Oct 2026 09:25 applied; all open questions decided)
+**Status:** Approved by Koen 2026-10-15 (revision 2 feedback applied; cross-model swap test added)
 
 # 1. Problem
 
@@ -61,7 +61,7 @@ device tree at boot, so the same card moves freely between a Pi 400 and a Pi 500
   Raspberry Pi bootloader-update card. Manual 2 gets a "check the EEPROM date" step.
 * **Keyboard layout** differs per kit (UK/US ANSI etc.), not per model; it stays a per-school build parameter.
 
-Our own customisation adds no model-specific parts. The boot test (§12) runs the same card on a Pi 400 and a Pi 500.
+Our own customisation adds no model-specific parts. The boot test (§12) includes an explicit **cross-model swap**: the same card is first-booted on a Pi 400 then moved to a Pi 500, and the reverse, to prove first boot does not make the card model-specific.
 
 Small tweaks that help a 4 GB Pi: zram swap, GNOME search indexer (Tracker) off, animations off.
 
@@ -236,6 +236,15 @@ with Marco's manual update once the image exists.
 * **Boot test** on a pool Pi with a reader: flash through the Engine helper, boot on a **Pi 400 and a Pi 500** (USB
   boot from the reader); check autologin, Firefox opens the Console, LibreOffice saves a .docx, `learner` cannot
   `sudo`, `su - admin` works, no apt activity after 24 h, mode B discards a test file after reboot.
+* **Cross-model swap (Koen, 15 Oct):** prove the card does **not** become model-specific after first boot
+  (first-boot resize, cloud-init, firmware/`config.txt`, initramfs, or device-tree choices). Two directions, both required:
+  1. Flash a fresh card → **first boot on a Pi 400** → use it (learner autologin, open apps, reboot once) → move the
+     same card to a **Pi 500** → full boot and function.
+  2. Flash another fresh card → **first boot on a Pi 500** → same use and reboot → move to a **Pi 400** → full boot
+     and function.
+  **Pass:** in both directions the second model reaches the learner desktop, network (IDEA Wi-Fi / school Pi bookmarks)
+  works, and the standard apps start. **Fail:** any stuck boot, missing desktop, broken network, or apps that only work
+  on the first-boot model.
 * **Engine tests:** an unknown disk is not written to and gets no `META.yaml`; flash refuses an IDEA disk, the system
   disk, a mounted disk, a >256 GB disk and a corrupted image; a swapped card aborts the write.
 
@@ -253,4 +262,5 @@ Koen agreed with all recommendations. Recorded as decided:
 8. **The old Raspberry Pi OS card on wizardly-hugle:** may be overwritten as the first test card.
 
 Further decisions from Koen's feedback: Pi 500 is a client; one image for Pi 400 and Pi 500; updates off; flash from the
-Console with the image stored on every Engine; account `admin`; no reader allowlist.
+Console with the image stored on every Engine; account `admin`; no reader allowlist; cross-model swap test required
+(Pi 400→500 and 500→400 after first boot).
