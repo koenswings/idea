@@ -44,7 +44,7 @@ shipped official **arm64 Linux** builds of Chrome on 30 July 2026 (`.deb` for De
 * Delete `/etc/apt/sources.list.d/google-chrome.list` and the cron job that re-adds it, then
   `apt-mark hold google-chrome-stable`. This keeps the decision "updates off; a new tested image is the update".
 * Chrome policy file in `/etc/opt/chrome/policies/managed/idea.json`: no first-run screen, no sign-in, no
-  update checks, no default-browser prompt, home page = `http://idea.local` (the Console, section 3).
+  update checks, no default-browser prompt, home page = the local start page `file:///usr/share/idea/start.html` (section 2).
 * Chrome becomes the default browser; Firefox is not installed.
 * **Snaps:** none in the student path (unchanged); any snap left in the base stays held.
 
@@ -52,19 +52,33 @@ shipped official **arm64 Linux** builds of Chrome on 30 July 2026 (`.deb` for De
 Pi 500** with the Ubuntu raspi kernel. If it fails, use the xtradeb Chromium `.deb` with the same hold and policy
 (`/etc/chromium/policies/managed/`), and tell Koen.
 
-# 2. One desktop shortcut: "IDEA" opens the Console
+# 2. One desktop shortcut: "IDEA" opens the Console of the home Engine
+
+**Home Engine.** A client is always flashed **from** a specific Engine (Engine §10, Console Flash dialog).
+The flash operation writes that Engine's unique mDNS name (e.g. `<engine-hostname>.local`) onto the card
+as the client's **home Engine**: a one-line file `idea-home.txt` on the card's FAT boot partition, which
+the client reads into `/etc/idea/home-engine` at boot. The name is **not** baked into the generic image, so
+there is still one image for every school and every Engine.
 
 The image has **one** shortcut, `idea-console.desktop`, in `/usr/share/applications/` (app menu) and on the
 learner desktop (GNOME "Desktop Icons" extension, already in Ubuntu Desktop):
 
 ```
 Name=IDEA
-Exec=google-chrome-stable http://idea.local
+Exec=google-chrome-stable file:///usr/share/idea/start.html
 ```
 
-It opens Chrome at `http://idea.local`, which shows the **Console**. The student picks an app there, as today.
-There are **no per-app icons** and no separate start page: the Console stays the one place that lists and
-opens apps, so new apps on an Engine appear without a new image. Chrome's home page is the same address.
+`start.html` is a small local page in the image (also Chrome's home page). It goes through three steps:
+
+1. Try the **home Engine's Console** (`http://<home-engine>.local`) with a quick probe, timeout ~1-2 s.
+   If it answers, open it.
+2. Otherwise try **`http://idea.local`** (any Engine, section 3) the same way.
+3. Otherwise show a friendly message: "No IDEA server found. Check that the computer is connected to the
+   school network, or ask your teacher." No browser error screen.
+
+The student then picks an app in the Console, as today. There are **no per-app icons** and no list of apps
+outside the Console: the Console stays the one place that lists and opens apps, so new apps on an Engine
+appear without a new image.
 
 **Nextcloud desktop sync client: not recommended.** The computers are shared and students have no personal
 accounts. A sync client would keep one student's files on the disk for the next student, and would be logged
@@ -100,8 +114,10 @@ mDNS between `10.42.0.0/24` and the Wi-Fi subnets (`avahi` reflector or the Open
 package). The Console sticker address `http://<STICKER>.local` already needs this, so it is the same work,
 done once in `school-router-setup.sh`, the same at every school.
 
-## Recommendation: option C, `http://idea.local` opens the Console
+## Recommendation: home Engine first, option C `http://idea.local` as fallback
 
+* The client's first choice is its **home Engine** (section 2). `idea.local` is the fallback when the home
+  Engine is off or moved.
 * **Every Engine** publishes the extra mDNS name `idea.local`. A request to `http://idea.local` (port 80)
   serves or redirects to **that Engine's Console**. Nothing new is built for students: the Console already
   shows every Engine and app from the shared Automerge store, and opens an app on the Engine where it runs.
@@ -124,13 +140,20 @@ done once in `school-router-setup.sh`, the same at every school.
 
 | Who | What |
 |---|---|
-| Axle (Engine) | `idea.local` publisher with retry/takeover; port 80 serves/redirects to the Console; automated power-cut test on a pool Pi |
+| Axle (Engine) | Flash writes the home-Engine name (`idea-home.txt`) onto the card (Engine §10); `idea.local` publisher with retry/takeover; port 80 serves/redirects to the Console; automated power-cut test on a pool Pi |
+| Pixel (Console) | Flash dialog shows which Engine becomes the home Engine |
 | Atlas (Ops) | mDNS reflector + dnsmasq fallback in `school-router-setup.sh`; test with 2 Engines, one switched off |
-| Client image worker | Chrome, policies, the one `idea-console.desktop` shortcut |
+| Client image worker | Chrome, policies, `start.html` (home Engine → `idea.local` → friendly message), boot step reading `idea-home.txt`, the one `idea-console.desktop` shortcut |
 | Marco (docs) | the client install manual, the school server install manual, the tutorial |
 
-**Test:** two Engines on one network, from the student Wi-Fi subnet: the shortcut opens the Console. Switch
-Engine 1 off: the shortcut still opens the Console (on Engine 2). Cut power to the holder: another Engine takes over and clients reach the Console within the 120 s TTL.
+**Tests** (from the student Wi-Fi subnet, two Engines on one network):
+
+* Client flashed from Engine 1: the shortcut opens Engine 1's Console.
+* The same card works in a Pi 400 and a Pi 500, and the image file itself contains no Engine name.
+* Home Engine off: the shortcut falls back to `idea.local` and opens the other Engine's Console.
+* Both Engines off: the friendly "no server found, check the network" message appears, no browser error.
+* Cut power to the `idea.local` holder: another Engine takes over and clients reach the Console within the
+  120 s TTL (automated, pool Pi).
 
 # 4. Correction: "Manual 2"
 
@@ -141,8 +164,9 @@ implementation branch (`feat/client-image-build`) does not use "Manual 2"; new d
 # Decision needed
 
 1. Google Chrome `.deb` (held, no Google repo) as the browser, xtradeb Chromium as fallback?
-2. One desktop shortcut opening Chrome at `http://idea.local`, which shows the Console; no per-app icons
-   (option C, with router mDNS reflector + DNS fallback)?
+2. One desktop shortcut opening the local `start.html`: home Engine (written by the flash), then
+   `http://idea.local`, then a friendly message; no per-app icons?
+3. `idea.local` with one holder and automatic takeover, router mDNS reflector, router DNS as backup?
 
 # References
 
