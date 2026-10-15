@@ -260,7 +260,7 @@ cat /boot/firmware/cmdline.txt     # still ONE line, ending in ...regdom=ZW
 ## 6.4 Homepage = the school Console
 
 The homepage is the school Console at **`http://idea.local`**. The port is 80 (the IDEA Engine's `config.yaml` `httpPort: 80`), so no `:port` is needed.
-A school has one or more Engines (1 to 4 today), and which address each one gets is not fixed. The IDEA router answers `idea.local` with the Engines that are switched on, so the homepage works with one Engine or four, and keeps working when one is off.
+A school has one or more Engines, and which address each one gets is not fixed. The IDEA router answers `idea.local` with the Engines that are switched on, so the homepage works with one Engine or many, and keeps working when one is off.
 Do not use a sticker name here: the PCs are on the Wi-Fi network, and sticker `.local` names do not cross from the wired network to Wi-Fi.
 
 The Console reads the list of all Engines from the IDEA database, so every Engine appears on this one page. If `idea.local` ever fails, type an Engine's address by hand (`http://10.42.0.2` to `.9`; the school's fill-in sheet lists them).

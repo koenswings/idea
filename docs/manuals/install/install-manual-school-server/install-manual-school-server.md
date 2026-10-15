@@ -1,9 +1,9 @@
 ---
 title: "IDEA School Server: Installation Manual"
-subtitle: "Raspberry Pi 5 Engines (1 to 4) + Cudy router + PoE switch + Starlink"
+subtitle: "Raspberry Pi 5 Engines + Cudy router + PoE switch + Starlink"
 audience: "For Justice. Version 1.2, 15 October 2026"
 ---
-**Status:** Authoritative (follows idea#184; see the README for what is not yet installed on hardware) · **Maintained by:** Marco (with Atlas) · 15 October 2026 (pre-flashed router, Engine count not fixed, Starlink, idea#209)
+**Status:** Authoritative (follows idea#184; see the README for what is not yet installed on hardware) · **Maintained by:** Marco (with Atlas) · 15 October 2026 (pre-flashed router, Engine count not fixed, Starlink D10–D11, idea#209)
 
 
 # How to use this manual
@@ -25,10 +25,10 @@ The IDEA default passwords below are not secret: they follow the public IDEA con
 </div>
 
 <div class="note">
-<b>How many Engines?</b> Not fixed. A school starts with <b>one</b> Engine and can add or remove Engines at any time, up to
-<b>four</b> with today's 4-port PoE switch (a bigger switch allows more later). The router needs no change when Engines
-come or go: it gives every Engine an address from <code>10.42.0.2</code> to <code>.9</code> (room for 8) and answers
-<code>idea.local</code> with the Engines that are on. Where this manual says "each Pi", do the step once per Engine.
+<b>How many Engines?</b> Not fixed. A school starts with <b>one</b> Engine and can add or remove Engines at any time.
+The router needs no change when Engines come or go: it gives every Engine an address from <code>10.42.0.2</code> to
+<code>.9</code> (room for 8) and answers <code>idea.local</code> with the Engines that are on. Where this manual says
+"each Pi", do the step once per Engine.
 </div>
 
 <div class="note">
@@ -64,7 +64,7 @@ and the IDEA team changes them on the router (section 10). Write the new ones do
 | Engine 2 (port 2, if fitted) | address 10.42.0.\_\_\_\_, sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
 | Engine 3 (port 3, if fitted) | address 10.42.0.\_\_\_\_, sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
 | Engine 4 (port 4, if fitted) | address 10.42.0.\_\_\_\_, sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
-| Starlink kit | router generation (Gen 3 / Gen 2 / Mini) \_\_\_\_\_\_, bypass on ☐, account holder \_\_\_\_\_\_\_\_\_\_\_\_ |
+| Starlink kit | router generation (Gen 3 / Gen 2 / Mini) ______, bypass on ☐; account: **IDEA project** (pays the subscription) |
 | Switch | `10.42.0.10`, MAC (on its label) ____:____:____:____:____:____ |
 | Wi-Fi students | SSID `IDEA`, password `idea911!` (until changed), subnet `10.42.1.0/24` |
 | Wi-Fi teachers | SSID `IDEA-Teachers`, password `idea-teachers911!` (until changed), subnet `10.42.2.0/24` |
@@ -91,7 +91,7 @@ Two separate firewall zones need two separate networks, so the Wi-Fi networks ge
 | 3 | Switch **port 1** (PoE+) | Engine 1 Ethernet | This cable powers Engine 1. Every school has at least this one. |
 | 4… | Switch **ports 2, 3, 4** (PoE+) | Engines 2, 3, 4 (if the school has them) | One cable per extra Engine. Leave unused ports empty. |
 
-The Pis get **no** USB-C power supply. The PoE+ HAT takes power from the Ethernet cable. The switch has four PoE+ ports, so four Engines is today's maximum; a free port can also take an extra access point instead of an Engine.
+The Pis get **no** USB-C power supply. The PoE+ HAT takes power from the Ethernet cable. A free switch port can also take an extra access point instead of an Engine.
 
 ## Network zones
 
@@ -127,7 +127,7 @@ Do this once for each school kit. Tick each item.
 |---|---|---|
 | ☐ | Cudy WR3000S router + 12 V adapter + Ethernet cable | Label underneath says **WR3000S** and **V1.0**; IDEA sticker with the router name (see 2.1) |
 | ☐ | TP-Link TL-SG105PE switch + 53.5 V adapter | Ports 1-4 marked PoE+ |
-| ☐ | N× Raspberry Pi 5 (N = number of Engines for this school, 1 to 4; usually 1 to start) | Write N on the fill-in sheet |
+| ☐ | N× Raspberry Pi 5 (N = number of Engines for this school; usually 1 to start) | Write N on the fill-in sheet |
 | ☐ | N× blank stickers (or labels) and a permanent marker | For the sticker names (5.6) |
 | ☐ | N× PoE+ HAT with NVMe slot (or PoE+ HAT + M.2 HAT) + N× NVMe SSD | Write the HAT model and its rated output (for example 5 V 4.5 A) on the fill-in sheet. See 5.1. |
 | ☐ | N+1 Ethernet patch cables (Cat5e/Cat6), 0.5-2 m | One for each Engine plus one for the router-switch link |
@@ -185,8 +185,6 @@ Facts from TP-Link [7][8]:
 * It gets its IP address by DHCP. If there is no DHCP server, it falls back to `192.168.0.1`.
 * The factory login is user `admin`, password `admin`. This is a public factory default, printed in TP-Link's guide, and you will replace it.
 * **PoE Auto Recovery** pings a device and power-cycles its port when the device stops answering. It is off by default.
-
-**Power budget:** the switch gives at most 65 W in total over PoE [8]. A Pi 5 with NVMe usually draws well under 15 W, but a HAT may take up to about 25 W at peak. One or two Engines always fit. With three or four Engines the worst case (4 × 25 W) is above 65 W, so in Belgium check **PoE Status** with all Engines busy (copying to an App Disk) and note the total watts on the fill-in sheet. If the PoE MAX LED is lit or flashing, the switch is near or over its budget [8]: unplug extra PoE devices.
 
 1. Connect switch port 5 to Cudy LAN1. Power the switch. Wait 1 minute.
 2. Find the switch in LuCI **Status → Overview → Active DHCP Leases**. Click **Set Static** and give it `10.42.0.10`. Then power-cycle the switch.
@@ -407,9 +405,10 @@ Only the people in `group:admins` get access. School staff are not on the list.
 The router proposal (idea#209, section 12) has the background. In short: Starlink is only the internet on the Cudy
 **WAN** port. The school network works fully without it.
 
-1. **Install and activate Starlink** with the Starlink app (dish outside with a clear view of the sky). Check that it
-   works with a phone on the Starlink Wi-Fi, and check the app for obstructions. Write the router generation and the
-   account holder on the fill-in sheet.
+1. **Install and activate Starlink** with the Starlink app (dish outside with a clear view of the sky). The **IDEA
+   project** owns the Starlink account and pays the subscription (idea#209 D11); use the project app login Koen gives
+   you. Check that it works with a phone on the Starlink Wi-Fi, and check the app for obstructions. Write the router
+   generation on the fill-in sheet.
 2. **Bypass mode:** with the phone still on the Starlink Wi-Fi, open the **Starlink app → Settings → Bypass mode** and
    switch it on. On a Gen 3 router the light turns violet.
 
@@ -500,6 +499,12 @@ The head teacher picks new passwords (at least 8 characters, different for stude
 @@INCLUDE ../scripts/router-tailscale-zone.sh@@
 ```
 
+## A.3 `docs/manuals/install/scripts/router-starlink-cgnat-exception.sh`
+
+```sh
+@@INCLUDE ../scripts/router-starlink-cgnat-exception.sh@@
+```
+
 # Appendix B. Troubleshooting
 
 | Problem | Try |
@@ -507,7 +512,7 @@ The head teacher picks new passwords (at least 8 characters, different for stude
 | No LuCI after the first upload | That is normal: there is no Wi-Fi. Use a cable to a LAN port, set your laptop to DHCP and open `http://192.168.1.1`. |
 | Cudy won't accept the intermediate image | Check the MD5. Upload the unzipped `.bin`, then try again [1]. |
 | The router seems "bricked" | Reset (hold 10 s after boot) [1]. Otherwise use Cudy TFTP recovery with a **recent** stock image (2.4.6 / 2.5.30 for new-flash units) [1][2]. |
-| A Pi does not start | Check the PoE LED on that switch port and swap the cable. Look at the PoE MAX LED (budget). Try another port (1-4 only). |
+| A Pi does not start | Check the PoE LED on that switch port and swap the cable. Try another PoE+ port. |
 | `throttled` is not `0x0` | Power problem: check the cable and HAT and switch budget. See the 5.1 USB power box. |
 | Console doesn't load from Wi-Fi but does from LAN | Check the rules `Allow-students-to-Engines`. Is the Pi in `10.42.0.2`-`.9` (5.5)? |
 | Tailscale offline after a move | `ssh` in and run `tailscale status`. Check the WAN on the router. Starlink must be in bypass mode. |
@@ -685,6 +690,15 @@ ssh root@10.42.0.1 'tailscale up --auth-key=file:/tmp/tskey --hostname=router-<C
 
 4. Give `tailscale0` its own firewall zone so that admins can reach the router over Tailscale. Use `scripts/router-tailscale-zone.sh` (Appendix A.2): copy it with `scp -O` and run it with `sh`. It follows the wiki's "unmanaged interface + zone" recipe [5], except that it has **no forwarding** and no masquerading, because we don't route.
 
+5. **Starlink CGNAT DHCP exception (idea#209 D10).** Tailscale drops packets from `100.64.0.0/10` that do not arrive on `tailscale0`. Starlink's DHCP server is in that range, so without an exception DHCP renewals fail and the WAN briefly drops each lease period. Install the narrow exception (WAN UDP 67→68 accept before the drop, re-applied by hotplug):
+
+```bash
+scp -O router-starlink-cgnat-exception.sh root@10.42.0.1:/tmp/
+ssh root@10.42.0.1 'sh /tmp/router-starlink-cgnat-exception.sh'
+```
+
+   **✔ Check:** `ssh root@10.42.0.1 "nft list chain ip filter ts-input"` shows a rule `iifname "wan" udp sport 67 udp dport 68 … accept` **above** the `100.64.0.0/10` drop. On Starlink, leave the router for one lease period (or force a renew) and confirm the WAN address stays up.
+
 <div class="warn">
 Never add <code>--advertise-routes</code> or <code>--advertise-exit-node</code>. IDEA uses neither subnet routers nor exit nodes.
 Never put the key itself after <code>--auth-key=</code>. Always use <code>file:</code>, so the key does not end up in the shell history or the process list
@@ -696,4 +710,5 @@ Never put the key itself after <code>--auth-key=</code>. Always use <code>file:<
 <div class="note">
 The <code>file:</code> form of <code>--auth-key</code> is the one the IDEA Engine's <code>tailscale-debug-activate.sh</code> uses.
 Tagged devices have key expiry switched off by default in Tailscale, so the router stays on the tailnet after the auth key itself expires.
+The IDEA router image bakes in the same CGNAT exception; this hand step is only for Appendix D.
 </div>
