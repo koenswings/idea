@@ -1,4 +1,4 @@
-**Status:** Draft (feature not live yet; lands with idea#201, Console Client cards and Flash) · **Maintained by:** Marco (with Atlas) · 15 October 2026
+**Status:** Draft (feature not live yet; lands with idea#201 and idea#203: Console Client cards, Flash and the IDEA shortcut) · **Maintained by:** Marco (with Atlas) · 15 October 2026
 
 # 13. Student computers: reset a card from the Console
 
@@ -36,23 +36,26 @@ Good to know:
 
 [[pending-shot: SC-02 | Flash dialog: image version, card name, reader, size and current contents, the wipe warning]]
 
-3. Read the confirmation: it repeats the card's **name, reader, size and current contents**, and says the card will be wiped. If anything looks wrong, click **Cancel**.
-4. Confirm. The Console shows the progress: writing, then checking.
+3. The card belongs to the IDEA box you flash it from: its **IDEA** shortcut tries that box first. Flash it from the IDEA box of the classroom it will be used in.
+4. Read the confirmation: it repeats the card's **name, reader, size and current contents**, and says the card will be wiped. If anything looks wrong, click **Cancel**.
+5. Confirm. The Console shows the progress: writing, then checking.
 
 [[pending-shot: SC-03 | Console: flash in progress]]
 
-5. Wait for **Done - safe to remove**. Do not pull the card reader out before that.
+6. Wait for **Done - safe to remove**. Do not pull the card reader out before that.
 
 [[pending-shot: SC-04 | Console: Done - safe to remove]]
 
-6. Take the card out of the reader and put it back into the student computer. Switch the computer on.
+7. Take the card out of the reader and put it back into the student computer. Switch the computer on.
 
 ## 13.4 After the reset
 
 1. The first start takes a few minutes longer: the card sets itself up and names the computer after its Pi (the name on the sticker).
-2. The computer opens the student desktop by itself, with no password. Check that Firefox opens and that the bookmarks to the Console, Kolibri and Nextcloud work.
+2. The computer opens the student desktop by itself, with no password. The desktop has one shortcut, **IDEA**.
 
-[[pending-shot: SC-05 | The student desktop after the first start, Firefox with the IDEA bookmarks]]
+[[pending-shot: SC-05 | The student desktop after the first start, with the IDEA shortcut]]
+
+3. Double-click **IDEA**. Chrome opens the start page, finds the IDEA box and opens the Console (chapter 2). Check that **Open** on the Kolibri card works.
 
 ## 13.5 Questions
 
@@ -63,4 +66,5 @@ Good to know:
 | **The flash stopped with an error.** | Flash again. If it fails again, the card is probably worn out: use a new card. |
 | **The computer does not start after the reset.** | Try the card in another student computer. If it starts there, the computer may need a bootloader update: call your IDEA contact. |
 | **Can I install an extra program on one computer?** | No. It would be lost at the next reset. Ask your IDEA contact to add it to the next image version. |
+| **The IDEA shortcut says No IDEA server found.** | Check the network connection. Type the name on the IDEA box's sticker in the field on the start page (chapter 2). If it keeps happening, the card may belong to an IDEA box that has been switched off or moved: flash it again from the right box. |
 | **Can my IDEA contact do this remotely?** | Yes. Put the card in the reader and tell them. They press Flash from the Console, and you put the card back when the Console says it is done. |
