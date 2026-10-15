@@ -134,6 +134,20 @@ copies**.
 
 Sync packs from **agent-app-dev `main`**, not stale branch SHAs.
 
+### Physical disk change: DUR-EMPTY002 retired (2026-10-15)
+
+- On Koen's go (07:09, via Steve), the physical `duration-empty-002` disk
+  (idea04 `/dev/sda1`, ext4 label `DUR-EMPTY002`, UUID `f4d387ac-7293-4bfc-b477-6bc21d829ace`,
+  on the Intenso SSD serial `1642504001002428`) was ejected through the Engine and
+  reformatted as FAT32 `IDEA-DEMO` (UUID `0425-A7AB`), Justice's demo stick and the
+  idea#193 USB-stick hardware-test disk. Same GPT bounds; type now Microsoft basic data.
+- Pre-format copy (rsync -aHAX, sha256 manifest verified, plus `sfdisk -d` and `blkid`):
+  idea04 `/home/pi/quarantine/dur-empty002-pre-idea-demo-20261015-070921/`.
+- `sda2` (`DUR-EMPTY003`) was not touched.
+- **TODO:** the cover-all / duration fixtures that expect a physical `duration-empty-002`
+  must be rebuilt on another disk (from the `empty-002/` pack) before the next walk.
+  The pack itself is unchanged.
+
 ## Related
 
 - Claim protocol: `docs/grok-bot-setup.md` §4.6
