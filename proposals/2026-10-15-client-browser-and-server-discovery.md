@@ -166,7 +166,7 @@ done once in `school-router-setup.sh`, the same at every school.
   found" message. Type `Brave Otter!`, `../x` or a URL: rejected with the hint, no request is made.
 * *(If the optional memory is accepted)* After using the field for Engine 2 and switching the home Engine
   off: Engine 2 is tried before `idea.local`.
-* Both Engines off: the sticker field is shown prominently with the friendly "no server found, check the network" message appears, no browser error.
+* Both Engines off: the friendly "no server found, check the network" message appears with the sticker field shown prominently; no browser error.
 * Cut power to the `idea.local` holder: another Engine takes over and clients reach the Console within the
   120 s TTL (automated, pool Pi).
 
