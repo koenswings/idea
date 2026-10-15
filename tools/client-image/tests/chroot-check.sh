@@ -11,7 +11,7 @@ echo "$CHROME_DEB_SHA256  $DEB" | sha256sum -c --quiet
 R=$(mktemp -d /var/tmp/idea-chroot.XXXX); trap 'for m in proc dev; do umount -l "$R/$m" 2>/dev/null; done; rm -rf "$R"' EXIT
 docker pull -q --platform linux/arm64 ubuntu:$UB >/dev/null
 cid=$(docker create --platform linux/arm64 ubuntu:$UB); docker export "$cid" | tar -x -C "$R"; docker rm "$cid" >/dev/null
-cp /usr/bin/qemu-aarch64-static "$R/usr/bin/"; cp -L /etc/resolv.conf "$R/etc/resolv.conf"
+[ "$(uname -m)" = aarch64 ] || cp /usr/bin/qemu-aarch64-static "$R/usr/bin/"; cp -L /etc/resolv.conf "$R/etc/resolv.conf"
 mount --bind /proc "$R/proc"; mount --bind /dev "$R/dev"
 B="$R/root/.idea-build"; mkdir -p "$B"; cp -r "$H/files" "$B/"; cp "$H/browser.sh" "$H/verify-browser.sh" "$B/"; cp "$DEB" "$B/$CHROME_DEB"
 [ -z "$PROXY" ] || echo "Acquire::http::Proxy \"$PROXY\";" > "$R/etc/apt/apt.conf.d/00proxy"

@@ -4,7 +4,7 @@
 type bad >/dev/null 2>&1 || { fail=0; bad(){ echo "FAIL: $*"; fail=1; }; ok(){ echo "ok:   $*"; }; }
 if [ "$BROWSER" = chrome ]; then PKG=google-chrome-stable; POL=/etc/opt/chrome/policies/managed/idea.json; BIN=google-chrome-stable
 else PKG=chromium; POL=/etc/chromium/policies/managed/idea.json; BIN=chromium; fi
-dpkg -s $PKG 2>/dev/null | grep -q '^Status: install ok installed' && ok "$PKG installed (.deb)" || bad "$PKG not installed"
+dpkg -s $PKG 2>/dev/null | grep -Eq '^Status: (install|hold) ok installed' && ok "$PKG installed (.deb)" || bad "$PKG not installed"
 apt-mark showhold | grep -qx $PKG && ok "$PKG held" || bad "$PKG not held"
 ls /etc/apt/sources.list.d/ 2>/dev/null | grep -qiE 'google|xtradeb' && bad "browser apt source still present" || ok "no Google/xtradeb apt source"
 [ -e /etc/cron.daily/google-chrome ] && bad "google-chrome cron job present" || ok "no repo-re-adding cron job"
