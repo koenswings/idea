@@ -5,19 +5,22 @@ B=/root/.idea-build; . $B/client-image.conf; . $B/version.env; set +x; . $B/secr
 export DEBIAN_FRONTEND=noninteractive LC_ALL=C
 policy=/usr/sbin/policy-rc.d; printf '#!/bin/sh\nexit 101\n' > $policy; chmod +x $policy   # no daemons in chroot
 
-# --- Firefox as .deb from Mozilla, pinned over the Ubuntu snap transitional ---
+# --- Chromium as .deb from ppa:xtradeb/apps, pinned over Ubuntu's snap shim ---
 install -d -m 755 /etc/apt/keyrings
-cp $B/files/packages.mozilla.org.asc /etc/apt/keyrings/
-echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" > /etc/apt/sources.list.d/mozilla.list
-printf 'Package: *\nPin: origin packages.mozilla.org\nPin-Priority: 1000\n\nPackage: firefox*\nPin: release o=Ubuntu\nPin-Priority: -1\n' > /etc/apt/preferences.d/mozilla-firefox
-snap remove --purge firefox 2>/dev/null || true
-rm -f /var/lib/snapd/seed/snaps/firefox_*.snap 2>/dev/null || true
+cp $B/files/xtradeb-apps.asc /etc/apt/keyrings/
+. /etc/os-release
+echo "deb [signed-by=/etc/apt/keyrings/xtradeb-apps.asc] https://ppa.launchpadcontent.net/xtradeb/apps/ubuntu $VERSION_CODENAME main" > /etc/apt/sources.list.d/xtradeb-apps.list
+# only chromium* comes from the PPA; everything else stays Ubuntu
+printf 'Package: *\nPin: release o=LP-PPA-xtradeb-apps\nPin-Priority: 1\n\nPackage: chromium*\nPin: release o=LP-PPA-xtradeb-apps\nPin-Priority: 1001\n' > /etc/apt/preferences.d/idea-chromium
+snap remove --purge firefox 2>/dev/null || true; rm -f /var/lib/snapd/seed/snaps/firefox_*.snap
+apt-get purge -y -q firefox 2>/dev/null || true
 
 apt-get update -q
 apt-get purge -y -q $PACKAGES_REMOVE 2>/dev/null || for p in $PACKAGES_REMOVE; do apt-get purge -y -q "$p" 2>/dev/null || true; done
 ALL="$PACKAGES_OFFICE $PACKAGES_BROWSER $PACKAGES_EDU $PACKAGES_GAMES $PACKAGES_SYSTEM"
 # fail hard if any package has no arm64 candidate (CI rule §12)
-miss=""; for p in $ALL; do apt-cache policy "$p" | grep -q 'Candidate: [0-9]' || miss="$miss $p"; done
+miss=$(apt-cache policy $ALL | awk '/^[^ ].*:$/{p=substr($1,1,length($1)-1)} /Candidate: \(none\)/{printf " %s",p}')
+for p in $ALL; do apt-cache policy "$p" 2>/dev/null | grep -q Candidate || miss="$miss $p"; done
 [ -z "$miss" ] || { echo "MISSING arm64 packages:$miss" >&2; exit 1; }
 apt-get install -y -q --no-install-recommends $ALL
 apt-get autoremove -y -q; apt-get clean
@@ -89,9 +92,41 @@ systemctl mask snapd.refresh.timer snapd.snap-repair.timer 2>/dev/null || true
 # Software Center / Pro prompts gone; disable apport
 sed -i 's/^enabled=1/enabled=0/' /etc/default/apport 2>/dev/null || true
 
-# --- Firefox bookmarks and homepage (policies.json) ---
-mkdir -p /etc/firefox/policies
-sed "s/@SCHOOL_PI@/$SCHOOL_PI/g" $B/files/firefox-policies.json > /etc/firefox/policies/policies.json
+# --- server addresses (one place), browser policy, desktop + menu launchers ---
+install -d /etc/idea-client
+{ echo "# Generated from client-image.conf at build time. Server discovery: see follow-up proposal."
+  for v in SERVER_HOST URL_CONSOLE URL_KOLIBRI URL_NEXTCLOUD URL_KIWIX URL_SCRATCH URL_GEOGEBRA; do printf '%s=%q\n' $v "${!v}"; done
+} > /etc/idea-client/servers.conf
+install -d /etc/chromium/policies/managed
+python3 - <<P > /etc/chromium/policies/managed/idea.json
+import json
+bm=[("IDEA Console","$URL_CONSOLE"),("Kolibri","$URL_KOLIBRI"),("Nextcloud","$URL_NEXTCLOUD"),("Kiwix","$URL_KIWIX"),("Scratch","$URL_SCRATCH"),("GeoGebra","$URL_GEOGEBRA")]
+print(json.dumps({"HomepageLocation":"$URL_CONSOLE","RestoreOnStartup":4,"RestoreOnStartupURLs":["$URL_CONSOLE"],
+ "BookmarkBarEnabled":True,"ManagedBookmarks":[{"toplevel_name":"IDEA"}]+[{"name":n,"url":u} for n,u in bm],
+ "DefaultBrowserSettingEnabled":False,"MetricsReportingEnabled":False,"BrowserSignin":0,"SyncDisabled":True,
+ "PasswordManagerEnabled":False,"ComponentUpdatesEnabled":False,"PromotionalTabsEnabled":False},indent=1))
+P
+install -d /usr/share/icons/hicolor/scalable/apps
+for app in nextcloud kolibri kiwix; do
+  cp $B/files/icons/idea-$app.svg /usr/share/icons/hicolor/scalable/apps/; done
+mk(){ # id name url
+  cat > /usr/share/applications/idea-$1.desktop <<D
+[Desktop Entry]
+Type=Application
+Name=$2
+Comment=$2 on the school server
+Exec=/usr/local/bin/idea-open $1
+Icon=idea-$1
+Categories=Education;Network;
+D
+}
+mk nextcloud Nextcloud; mk kolibri Kolibri; mk kiwix Kiwix
+install -m 755 $B/files/idea-open /usr/local/bin/idea-open
+gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
+install -d -o learner -g learner /home/learner/Desktop
+for a in nextcloud kolibri kiwix; do install -m 755 -o learner -g learner /usr/share/applications/idea-$a.desktop /home/learner/Desktop/; done
+install -m 755 $B/files/idea-trust-desktop /usr/local/bin/
+install -d /etc/xdg/autostart; cp $B/files/idea-trust-desktop.desktop /etc/xdg/autostart/
 
 # --- Wi-Fi profile (root-only) ---
 f=/etc/NetworkManager/system-connections/IDEA.nmconnection

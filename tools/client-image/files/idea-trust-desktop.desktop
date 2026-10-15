@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=IDEA desktop icons
+Exec=/usr/local/bin/idea-trust-desktop
+NoDisplay=true
+X-GNOME-Autostart-Phase=Initialization

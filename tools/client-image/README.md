@@ -34,9 +34,10 @@ NetworkManager profile (PSK).
 | | |
 |---|---|
 | §4 accounts | `learner`: GDM autologin, no password, no sudo/adm/lpadmin, polkit denies network/software/users/time. `admin`: hidden, sudo, SSH key only (`AllowUsers admin`, no passwords), local password for `su - admin` |
-| §6 apps | from `.deb` only (`client-image.conf`); Firefox from Mozilla's apt repo, pinned over the Ubuntu snap shim; build fails if any package has no arm64 candidate |
+| §6 apps | from `.deb` only (`client-image.conf`); **Chromium** `.deb` from `ppa:xtradeb/apps` (Ubuntu only ships Chromium as a snap; no Chrome for arm64), pinned so only `chromium*` comes from that PPA; build fails if any package has no arm64 candidate |
 | §7 updates off | `unattended-upgrades`, `update-notifier`, Software, Pro client, fwupd removed; apt/fwupd/motd timers masked; `APT::Periodic::*=0`; snaps held forever at first boot; `snapd.refresh.timer` masked |
-| §6 browser | `/etc/firefox/policies/policies.json`: homepage + toolbar bookmarks Console, Kolibri, Nextcloud, Kiwix, Scratch, GeoGebra on `SCHOOL_PI` |
+| §6 browser + icons | Chromium managed policy: homepage + bookmarks (Console, Kolibri, Nextcloud, Kiwix, Scratch, GeoGebra). **Desktop and app-menu icons** for Nextcloud, Kolibri, Kiwix (`idea-open` opens the URL in Chromium app mode) |
+| server addressing | **One place:** the `SERVER_HOST`/`URL_*` block in `client-image.conf` → `/etc/idea-client/servers.conf`; bookmarks, icons and menu entries are generated from it. Server discovery for several servers on one network is a separate follow-up proposal |
 | §8 first boot | `idea-firstboot`: hostname `idea-pc-<last4 serial>`, new SSH host keys and machine-id (nothing model-specific) |
 | §5 reset B | `overlayroot` installed, off unless `OVERLAY=on`; `idea-client-mode overlay|normal|status` |
 | §12 CI | `verify-image.sh` (in chroot) + `scan-secrets.sh` run on every build; non-zero exit fails the build |

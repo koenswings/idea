@@ -4,7 +4,10 @@ set -u; fail=0; B=/root/.idea-build; . $B/client-image.conf
 bad(){ echo "FAIL: $*"; fail=1; }; ok(){ echo "ok:   $*"; }
 for p in $PACKAGES_OFFICE $PACKAGES_BROWSER $PACKAGES_EDU $PACKAGES_GAMES $PACKAGES_SYSTEM; do
   dpkg -s "$p" >/dev/null 2>&1 || bad "package $p not installed"; done
-dpkg -s firefox 2>/dev/null | grep -q '^Version: 1:1snap' && bad "firefox is the snap transitional" || ok "firefox is a real .deb"
+dpkg -s chromium 2>/dev/null | grep -q '^Version:' && ! dpkg -s chromium | grep -q snap && ok "chromium is a real .deb" || bad "chromium .deb missing"
+[ -f /etc/chromium/policies/managed/idea.json ] && ok "chromium bookmarks policy" || bad "chromium policy"
+for a in nextcloud kolibri kiwix; do [ -f /usr/share/applications/idea-$a.desktop ] && [ -f /home/learner/Desktop/idea-$a.desktop ] && ok "$a menu+desktop icon" || bad "$a launcher"; done
+. /etc/idea-client/servers.conf && [ -n "$URL_KOLIBRI" ] && ok "servers.conf" || bad "servers.conf"
 id -nG learner | tr ' ' '\n' | grep -qxE 'sudo|adm|lpadmin|admin' && bad "learner in a privileged group" || ok "learner has no admin groups"
 [ -z "$(getent shadow learner | cut -d: -f2)" ] && ok "learner passwordless" || bad "learner has a password"
 grep -rqs 'learner' /etc/sudoers /etc/sudoers.d && bad "learner in sudoers" || ok "learner not in sudoers"

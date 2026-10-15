@@ -1,0 +1,4 @@
+#!/bin/sh
+# Mark the IDEA desktop launchers as trusted so GNOME shows them as clickable icons.
+for f in "$HOME"/Desktop/idea-*.desktop; do [ -f "$f" ] && gio set "$f" metadata::trusted true 2>/dev/null; done
+exit 0
