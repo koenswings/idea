@@ -104,7 +104,7 @@ Your stick also appears in Nextcloud, so you can open its files or copy them int
 
 1. Plug the stick in. Open Nextcloud and sign in as a teacher. In **All files** you see a folder **USB: (your stick's name)**. Nextcloud shows its size as *Pending*: that is normal.
 
-[[pending-shot: C5-14 | Nextcloud All files: the USB: folder in the list]]
+   ![Folders from outside Nextcloud have a folder icon with a small screen, here School Files and Grade 5A Files. Your USB: folder shows the same way](../screenshots/C5-14.png)
 
 2. Open the folder to view or play a file. You can't add or change anything in it (Nextcloud says *You do not have permission to upload or create files here*).
 
