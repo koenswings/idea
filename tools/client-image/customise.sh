@@ -9,7 +9,7 @@ policy=/usr/sbin/policy-rc.d; printf '#!/bin/sh\nexit 101\n' > $policy; chmod +x
 for f in /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list; do [ -f "$f" ] || continue
   sed -i -E 's#https?://(([a-z]{2}\.)?archive|security)\.ubuntu\.com/ubuntu/?#http://ports.ubuntu.com/ubuntu-ports/#g' "$f"; done
 apt-get update -q
-ls /var/lib/apt/lists/*binary-arm64_Packages* >/dev/null 2>&1 && apt-cache policy | grep -q 'arch=arm64' \
+p=$(apt-cache policy); ls /var/lib/apt/lists/*binary-arm64_Packages* >/dev/null 2>&1 && grep -q 'b=arm64' <<<"$p" \
   || { echo "FATAL: no arm64 package lists after apt-get update; check /etc/apt/sources (need ports.ubuntu.com/ubuntu-ports) and network" >&2; exit 1; }
 apt-get purge -y -q $PACKAGES_REMOVE 2>/dev/null || for p in $PACKAGES_REMOVE; do apt-get purge -y -q "$p" 2>/dev/null || true; done
 ALL="$PACKAGES_OFFICE $PACKAGES_EDU $PACKAGES_GAMES $PACKAGES_SYSTEM"
