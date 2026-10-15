@@ -46,6 +46,7 @@ hp remove 10.42.0.3; a "remove drops Engine"     '[ "$(cat "$O")" = "10.42.0.2 i
 printf '1 aa 10.42.0.2 e1 *\n' > "$L"; hp add 10.42.0.4; a "add before lease file" 'grep -qx "10.42.0.4 idea.local" "$O"'
 hp add 10.42.0.150; a "non-Engine ignored"      '! grep -q 150 "$O"'
 : > "$L"; hp remove 10.42.0.2; a "no Engines -> empty" '[ ! -s "$O" ]'
+# shellcheck disable=SC2034  # RC is read inside eval
 sh "$D/school-router-setup.sh" --check > "$W/check.log" 2>&1; RC=$?
 a "--check fails only on runtime items (avahi not running in test)" '[ $RC -ne 0 ] && [ "$(grep -c ^FAIL "$W/check.log")" = 1 ] && grep -q "FAIL  avahi running" "$W/check.log"'
 sed -i 's/enable-reflector=yes/enable-reflector=no/' "$W/root/etc/avahi/avahi-daemon.conf"
