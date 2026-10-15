@@ -38,12 +38,15 @@ truncate -s +"${EXTRA_MB}M" "$IMG"
 parted -s "$IMG" resizepart 2 100%
 poff(){ parted -sm "$IMG" unit B print | awk -F: -v n=$1 '$1==n{sub("B","",$2);sub("B","",$4);print $2" "$4}'; }
 read O1 S1 < <(poff 1); read O2 S2 < <(poff 2)
-L1=$(losetup -f --show -o "$O1" --sizelimit "$S1" "$IMG"); L2=$(losetup -f --show -o "$O2" --sizelimit "$S2" "$IMG")
+L2=$(losetup -f --show -o "$O2" --sizelimit "$S2" "$IMG")
 MNT="$WORK/root"
-cleanup() { set +e; for m in dev/pts dev proc sys run boot/firmware ""; do mountpoint -q "$MNT/$m" && umount -l "$MNT/$m"; done; losetup -d "$L1" "$L2" 2>/dev/null; }
+cleanup() { set +e; for m in dev/pts dev proc sys run boot/firmware ""; do mountpoint -q "$MNT/$m" && umount -l "$MNT/$m"; done; losetup -d "$L2" 2>/dev/null; }
 trap cleanup EXIT
 e2fsck -fy "$L2" >/dev/null || true; resize2fs "$L2" >/dev/null
-mkdir -p "$MNT"; mount "$L2" "$MNT"; mount "$L1" "$MNT/boot/firmware"
+mkdir -p "$MNT"; mount "$L2" "$MNT"; # FAT boot partition via mtools (no vfat kernel module needed): unpack, bind in, write back changed files after
+FW="$WORK/firmware"; rm -rf "$FW"; mkdir -p "$FW"; export MTOOLS_SKIP_CHECK=1
+mcopy -s -n -i "$IMG@@$O1" '::/*' "$FW/"; ( cd "$FW" && find . -type f -exec sha256sum {} + | sort > "$WORK/fw.before" )
+mount --bind "$FW" "$MNT/boot/firmware"
 for m in dev dev/pts proc sys run; do mount --bind "/$m" "$MNT/$m"; done
 if [ "$(uname -m)" != aarch64 ]; then cp /usr/bin/qemu-aarch64-static "$MNT/usr/bin/"; fi
 mv "$MNT/etc/resolv.conf" "$MNT/etc/resolv.conf.idea-orig" 2>/dev/null || true; cp -L /etc/resolv.conf "$MNT/etc/resolv.conf"
@@ -62,6 +65,11 @@ chroot "$MNT" /bin/bash /root/.idea-build/verify-image.sh
 rm -rf "$S"; rm -f "$MNT/usr/bin/qemu-aarch64-static"
 rm -f "$MNT/etc/resolv.conf"; mv "$MNT/etc/resolv.conf.idea-orig" "$MNT/etc/resolv.conf" 2>/dev/null || true
 "$HERE/scan-secrets.sh" "$MNT" "$SECRETS"
+umount "$MNT/boot/firmware"
+( cd "$FW" && find . -type f -exec sha256sum {} + | sort > "$WORK/fw.after" )
+comm -13 "$WORK/fw.before" "$WORK/fw.after" | awk '{print $2}' | while read -r f; do
+  d=$(dirname "${f#./}"); [ "$d" = . ] || mmd -D s -i "$IMG@@$O1" "::/$d" 2>/dev/null || true
+  mcopy -o -i "$IMG@@$O1" "$FW/${f#./}" "::/${f#./}"; echo "firmware updated: ${f#./}"; done
 fstrim "$MNT" 2>/dev/null || true
 cleanup; trap - EXIT
 
