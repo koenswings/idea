@@ -2,18 +2,18 @@
 
 # Appendix: demo accounts
 
-These are the accounts used for the screenshots. Your IDEA contact gives you the demo passwords. Kolibri usernames use an underscore (`demo_teacher1`); Nextcloud usernames use a hyphen (`demo-teacher1`).
+These are the accounts of the demo school **IDEA Demo School**, used for the screenshots. Every demo password follows the IDEA default: the account name followed by `911!` (for example `teacher1911!`). It is easy to remember and the same in every school, so change it before real use (3.1, 11.1). The same usernames are used in Kolibri and Nextcloud.
 
-| Username | App | Role | Used in |
-|---|---|---|---|
-| demo_admin | Kolibri | Kolibri admin | 3.3 (shown in the enroll list) |
-| demo_teacher1 | Kolibri | Admin and coach of class demo-Grade5A | 3, 5.2, 12.7 |
-| demo_learner1 | Kolibri | Learner in demo-Grade5A | 4 |
-| demo_learner2 | Kolibri | Learner in demo-Grade5A | 4 |
-| demo_learner3 | Kolibri | Learner, enrolled in 3.3 | 3.3 |
-| demo-teacher1 | Nextcloud | Teacher (groups demo-Grade5A, demo-teachers) | 5.5, 6, 9 |
-| demo-teacher2 | Nextcloud | Teacher (group demo-teachers) | 6.2 |
-| demo-learner1 | Nextcloud | Learner (group demo-Grade5A) | 7, 9.2 |
-| demo-learner2 | Nextcloud | Learner (group demo-Grade5A) | 7.1 |
+| Username | Password | App | Role | Used in |
+|---|---|---|---|---|
+| admin | admin911! | Kolibri | Kolibri admin of IDEA Demo School | 3.2, 3.3, 5.2 |
+| teacher1 | teacher1911! | Kolibri | Coach of class Grade 5 | 3, 12.7 |
+| learner1 | learner1911! | Kolibri | Learner in Grade 5 | 4 |
+| learner2 | learner2911! | Kolibri | Learner in Grade 5 | 4 |
+| learner3 | learner3911! | Kolibri | Learner in Grade 5 | 3.3 |
+| teacher1 | teacher1911! | Nextcloud | Teacher (groups Grade 5, teachers) | 5.5, 6, 9 |
+| teacher2 | teacher2911! | Nextcloud | Teacher (group teachers) | 6.2 |
+| learner1 | learner1911! | Nextcloud | Learner (group Grade 5) | 7, 9.2 |
+| learner2 | learner2911! | Nextcloud | Learner (group Grade 5) | 7.1 |
 
-Demo content: Kolibri class **demo-Grade5A**, lesson **demo-Fractions lesson**, quiz **demo-Fractions quiz**; Nextcloud folders **demo-Worksheets** and **demo-Drop Zone**, document **demo-Lesson plan**.
+Demo content: Kolibri school **IDEA Demo School**, class **Grade 5**, one lesson per channel of the IDEA-DEMO disk (**Science: plants, animals, earth and sky**, **Reading: African Storybook stories**, **Maths: fractions and multiplication**), plus the **Fractions lesson** and **Fractions quiz** you make in chapter 3; Nextcloud folders **Worksheets** and **Drop Zone**, document **Lesson plan**. The pictures on the IDEA-DEMO disk are from Zimbabwe for now; see `CREDITS.txt` on the disk for every file's source and licence.
