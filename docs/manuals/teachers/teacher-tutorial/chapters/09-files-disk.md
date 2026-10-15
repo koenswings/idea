@@ -23,7 +23,7 @@ Good to know:
 
 1. On the file's row click **⋯ (Actions) > Show sharing options**, or click the share icon.
 2. In **Internal shares**, type the class group name (here `Grade 5`) and choose it from the list. Keep **View only**. The group then appears under **Internal shares**.
-   ![File in School Files shared with Grade 5](../screenshots/F2-06.png)
+   ![A file shared with Grade 5 (here a worksheet)](../screenshots/F2-06.png)
 3. A learner in that group signs in and finds the file in **All files** and under **Recently shared**.
    ![A learner sees the shared file](../screenshots/F2-07.png)
 

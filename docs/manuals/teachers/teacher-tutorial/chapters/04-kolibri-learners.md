@@ -12,7 +12,7 @@ Sign in as a learner in a second browser window (private window) to see exactly 
 
 1. Sign in as `learner1`. **HOME** shows **Your classes**, **Recent lessons** and **Recent quizzes**.
    ![Learner home](../screenshots/S1-01.png)
-2. Click **Fractions lesson**. The 6 items are listed in order.
+2. Click **Fractions lesson**. Its items are listed in order.
    ![Lesson](../screenshots/S1-03.png)
 3. Watch the first video.
    ![Video](../screenshots/S1-04.png)

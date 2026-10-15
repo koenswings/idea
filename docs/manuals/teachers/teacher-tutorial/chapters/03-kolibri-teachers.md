@@ -2,7 +2,7 @@
 
 # 3. Kolibri for teachers
 
-Demo: school (facility) **IDEA Demo School**, teacher `teacher1` (password `teacher1911!`), class **Grade 5**. The demo lessons use the **Maths**, **Grade 5 Science** and **Early Reading** channels from the IDEA-DEMO disk; the quiz in 3.5 uses the exercises in **Khan Academy (English - US curriculum) > Math by grade > 5th grade > Add and subtract fractions**.
+Demo: school (facility) **IDEA Demo School**, teacher `teacher1` (password `teacher1911!`), class **Grade 5**. The demo school has the **Maths**, **Grade 5 Science** and **Early Reading** channels from the IDEA-DEMO disk; the demo lesson uses **Maths > Fractions**.
 
 ## 3.1 Signing in
 
@@ -28,7 +28,7 @@ Creating classes needs a Kolibri admin account (in the demo school, `admin`, pas
 
 ## 3.4 Make a lesson and show it to the class
 
-A good lesson has 3 videos (explain) and 3 exercises (practise).
+A good lesson mixes resources that explain (videos, activities) with resources that let learners practise (exercises).
 
 1. Open **Coach**, choose the class, click **PLAN > LESSONS > NEW LESSON**.
    ![Plan your class](../screenshots/K3-01a.png)
@@ -38,12 +38,12 @@ A good lesson has 3 videos (explain) and 3 exercises (practise).
    ![Empty lesson](../screenshots/K3-02.png)
 4. Choose the channel.
    ![Channels](../screenshots/K3-03a.png)
-5. Click through **Math by grade > 5th grade > Add and subtract fractions**.
+5. Click the channel (**Maths**). You see its topics.
    ![Topic](../screenshots/K3-03.png)
-6. Open "Adding and subtracting fractions with unlike denominators". Tick 3 videos and 3 exercises (the exercise titles start with "Practice"). Each tick is saved straight away; a message "resources added" appears. Click **CLOSE** when done.
+6. Open the topic **Fractions** and tick the resources you want (here all 3: Cake in quarters, Fraction circles, Paper fraction pies). Each tick is saved straight away; the count at the top right goes up. Click **SAVE CHANGES** (or **CLOSE**) when done.
    ![Resources ticked](../screenshots/K3-04.png)
-7. Back on the lesson page, check the 6 resources and switch on **Visible to learners**.
-   ![Lesson with 6 resources, visible](../screenshots/K3-05.png)
+7. Back on the lesson page, check the resources and switch on **Visible to learners**.
+   ![Lesson with its resources, visible](../screenshots/K3-05.png)
 
 ## 3.5 Make a quiz
 
