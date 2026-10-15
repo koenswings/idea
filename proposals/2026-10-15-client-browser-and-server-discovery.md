@@ -45,6 +45,8 @@ shipped official **arm64 Linux** builds of Chrome on 30 July 2026 (`.deb` for De
   `apt-mark hold google-chrome-stable`. This keeps the decision "updates off; a new tested image is the update".
 * Chrome policy file in `/etc/opt/chrome/policies/managed/idea.json`: no first-run screen, no sign-in, no
   update checks, no default-browser prompt, home page = the local start page `file:///usr/share/idea/start.html` (section 2).
+  It also sets `LocalNetworkAccessAllowedForUrls` to `file://*` and `http://*.local`, so Chrome's
+  local-network access rules do not block the probes that `start.html` makes to the Engines.
 * Chrome becomes the default browser; Firefox is not installed.
 * **Snaps:** none in the student path (unchanged); any snap left in the base stays held.
 
@@ -90,6 +92,12 @@ and - only" hint and is never put into a URL.
 The student then picks an app in the Console, as today. There are **no per-app icons** and no list of apps
 outside the Console: the Console stays the one place that lists and opens apps, so new apps on an Engine
 appear without a new image.
+
+**Considered: the Console as a Chrome extension; rejected.** It gives no gain for finding servers (an
+extension cannot do mDNS either). The client image never updates, so an extension baked into it would drift
+away from the Consoles on the Engines. It would also cost about 8-12 days of work. **Fallback:** if the
+`LocalNetworkAccessAllowedForUrls` policy proves insufficient for the probes, add a tiny discovery-only
+extension that does just the probing, not the Console.
 
 **Nextcloud desktop sync client: not recommended.** The computers are shared and students have no personal
 accounts. A sync client would keep one student's files on the disk for the next student, and would be logged
