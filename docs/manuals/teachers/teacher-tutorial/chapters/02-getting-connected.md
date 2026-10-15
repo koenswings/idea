@@ -33,6 +33,20 @@ The classroom computers (the student computers) are already connected to the sch
 2. Open the browser and go to `http://idea.local`. The Console opens.
 3. If it doesn't open, type the name on the box's sticker: go to the address on the sticker's second line, for example `http://brave-otter.local`.
 
+### Open the Console by hand
+
+Use this on a device without the IDEA shortcut, for example your own laptop, when the steps above don't work.
+
+1. Click in the browser's address bar and type `http://` followed by the name on the box's sticker and `.local`: `http://<sticker-name>.local`, for example `http://brave-otter.local`. Press Enter.
+2. The Console opens.
+
+   ![The Console opened by hand](../screenshots/CON-04.png)
+
+3. **Make it your home page** (Chrome): open **⋮ > Settings > On startup**, choose **Open a specific page or set of pages**, click **Add a new page** and paste the Console address.
+4. **Bookmark it** (Chrome): press **Ctrl+D** (on a Mac **⌘+D**), or click the star at the right of the address bar, then **Done**.
+
+Steps 1, 3 and 4 take place in the browser's own window, so this tutorial has no screenshots of them. Other browsers have the same settings under similar names.
+
 ## 2.3 Open an app in the Console
 
 1. The Console opens on the **Apps** page: one card per app, each with a short description and a blue **Open** button. The green dot at the top shows the Console is connected to the IDEA box.
