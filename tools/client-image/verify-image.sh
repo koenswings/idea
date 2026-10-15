@@ -100,6 +100,13 @@ for n in (256,48):
     b=open("%s/%dx%d/apps/idea-console.png"%(h,n,n),"rb").read(24); assert b[:8]==b"\x89PNG\r\n\x1a\n" and struct.unpack(">II",b[16:24])==(n,n)
 assert os.path.getsize(h+"/icon-theme.cache")>0
 P
+# 10 SuperTuxKart first-run (internet question, create-player/first-time) off
+for h in /home/learner /etc/skel; do d=$h/.config/supertuxkart/config-0.10
+  grep -q '<stkconfig version="8"' $d/config.xml 2>/dev/null && grep -q '<enable_internet value="2" />' $d/config.xml && grep -q '<current player="Learner"/>' $d/players.xml && grep -q 'first-time="false"' $d/players.xml \
+    && ok "SuperTuxKart seeded in $h (internet not allowed, player Learner, first-time done)" || bad "SuperTuxKart seed in $h"; done
+[ "$(stat -c %U /home/learner/.config/supertuxkart/config-0.10/config.xml 2>/dev/null)" = learner ] && ok "STK config owned by learner" || bad "STK config owner"
+dpkg-query -W -f='${Version}' supertuxkart 2>/dev/null | grep -q '^1\.5' && ok "SuperTuxKart 1.5 (config-0.10 layout)" || bad "SuperTuxKart version changed: re-check STK keys"
+command -v gnome-screenshot >/dev/null && ok "gnome-screenshot present (acceptance)" || bad "gnome-screenshot missing"
 # 8 admin local password = <account>911!, ssh still key-only, learner none
 h=$(getent shadow admin | cut -d: -f2)
 [ "$(perl -e 'print crypt($ARGV[0],$ARGV[1])' "${ADMIN_USER:-admin}911!" "$h")" = "$h" ] && case "$h" in '$6$'*) true;; *) false;; esac && ok "admin local password follows <account>911! (sha-512)" || bad "admin password hash"

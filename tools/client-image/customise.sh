@@ -106,6 +106,10 @@ P
 
 # --- first-run wizards off ---
 install -d /etc/libreoffice/registry; cp $B/files/idea-libreoffice.xcd /etc/libreoffice/registry/idea.xcd
+# SuperTuxKart 1.5 (config-0.10): enable_internet=2 (not allowed, offline schools, no question) and a ready player
+# "Learner" with story-mode first-time=false (no create-player / first-time screens). For learner and /etc/skel.
+for h in /home/learner /etc/skel; do d=$h/.config/supertuxkart/config-0.10; install -d $d
+  cp $B/files/stk-config.xml $d/config.xml; cp $B/files/stk-players.xml $d/players.xml; done
 install -d /home/learner/.config/gcompris-qt; cp $B/files/gcompris-qt.conf /home/learner/.config/gcompris-qt/gcompris-qt.conf
 
 # --- Wi-Fi profile (root-only) ---
