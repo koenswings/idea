@@ -12,11 +12,16 @@ The classroom computers (the student computers) are already connected to the sch
 
 [[pending-shot: IDEA-01 | Student computer desktop with the one IDEA shortcut]]
 
-2. A start page appears for a moment while it looks for the IDEA box. First it tries the IDEA box this computer belongs to, then any other IDEA box at the school. When it finds one, the Console opens by itself.
+2. A start page appears for a moment while it looks for the IDEA box. First it tries the IDEA box this computer belongs to, then the last IDEA box it opened, then any other IDEA box at the school. When it finds one, the Console opens by itself.
 
-[[pending-shot: IDEA-02 | The IDEA start page while it looks for the IDEA box]]
+[[pending-shot: IDEA-02 | The IDEA start page while it looks for the IDEA box (wording to follow the idea#202 start.html)]]
 
-3. If the start page says **No IDEA server found**, check that the computer is connected to the school network. Then type the **name on the IDEA box's sticker** (for example `brave-otter`) in the field **Or type the name on the server's sticker**, and press Enter. Type only letters, numbers and `-`.
+3. If the start page says **No IDEA server found**, check that the computer is connected to the school network. Then type the name on the box's sticker in the field on the start page, and press Enter. The sticker is hand-written and has two lines:
+
+   - line 1: the name, for example `brave-otter`
+   - line 2: the address, for example `http://brave-otter.local`
+
+   Type the first line, for example `brave-otter`: small letters, with `-` between the words. The start page then remembers that IDEA box.
 
 [[pending-shot: IDEA-03 | Start page: No IDEA server found, with the sticker-name field]]
 
@@ -25,7 +30,8 @@ The classroom computers (the student computers) are already connected to the sch
 ## 2.2 On your own laptop, tablet or phone
 
 1. Connect your device to the school's IDEA Wi-Fi. Ask your IDEA contact for the Wi-Fi name and password.
-2. Open the browser and go to the Console address your IDEA contact gives you. It is also on the IDEA box's sticker.
+2. Open the browser and go to `http://idea.local`. The Console opens.
+3. If it doesn't open, type the name on the box's sticker: go to the address on the sticker's second line, for example `http://brave-otter.local`.
 
 ## 2.3 Open an app in the Console
 
