@@ -6,7 +6,7 @@ audience: "Proposal · Status: Approved by Koen 2026-10-15"
 
 **Author:** Steve (Lead Bot)
 **Date:** 2026-10-15
-**Status:** Approved by Koen 2026-10-15 (revision 2 feedback applied; cross-model swap test added)
+**Status:** Approved by Koen 2026-10-15 (revision 3: no flash size limit; large SSDs allowed)
 
 # 1. Problem
 
@@ -198,11 +198,13 @@ Engine**, which work with any reader in any Engine:
    a `META.yaml`). New rule: a disk **without** IDEA `META.yaml` is only *looked at* (partitions and labels read,
    mounted read-only at most, as already done for FAT sticks) and shown in the Console as a new disk. It gets `META.yaml`
    only when someone chooses **Initialise** (or an app install) in the Console. This also protects any other foreign disk.
-2. **Flash targets are chosen explicitly and checked hard.** A device is offered as a **client card** when it is
-   removable media in a USB card reader (kernel `removable=1`, card-reader/SD transport) and at most 256 GB. Whatever the
-   Console shows, the helper **refuses** to write to: the system disk, any disk with an IDEA `META.yaml`, any disk with
-   a mounted partition or a running app, a disk larger than 256 GB, and the device the Engine itself runs from. The
-   target is resolved again from `/dev/disk/by-id/` at write time, and the write is aborted if the card was swapped.
+2. **Flash targets are chosen explicitly and checked hard.** A device is offered as a flash target when it is
+   removable media (kernel `removable=1`, typically a USB card reader or an external USB SSD). There is **no size
+   limit**: a large SSD is allowed when Koen or support chooses it on purpose. Whatever the Console shows, the helper
+   **refuses** to write to: the system disk, any disk with an IDEA `META.yaml`, any disk with a mounted partition or a
+   running app, and the device the Engine itself runs from. The confirmation dialog always shows the target **name and
+   size**. The target is resolved again from `/dev/disk/by-id/` at write time, and the write is aborted if the medium
+   was swapped.
 
 Result: any reader works, plugged into any Engine, with no setup. A card is never written by accident, because the only
 write paths are an explicit Console Initialise or an explicit, confirmed Flash, and IDEA disks are never flash targets.
@@ -246,7 +248,8 @@ with Marco's manual update once the image exists.
   works, and the standard apps start. **Fail:** any stuck boot, missing desktop, broken network, or apps that only work
   on the first-boot model.
 * **Engine tests:** an unknown disk is not written to and gets no `META.yaml`; flash refuses an IDEA disk, the system
-  disk, a mounted disk, a >256 GB disk and a corrupted image; a swapped card aborts the write.
+  disk, a mounted disk and a corrupted image; a swapped medium aborts the write. A large SSD is accepted when chosen
+  explicitly (no size limit).
 
 # 13. Decisions (open questions closed, 15 Oct 2026)
 
@@ -264,3 +267,7 @@ Koen agreed with all recommendations. Recorded as decided:
 Further decisions from Koen's feedback: Pi 500 is a client; one image for Pi 400 and Pi 500; updates off; flash from the
 Console with the image stored on every Engine; account `admin`; no reader allowlist; cross-model swap test required
 (Pi 400→500 and 500→400 after first boot).
+
+9. **No flash size limit (Koen, 2026-10-15 09:41):** do **not** refuse targets above 256 GB. Koen sometimes wants to
+   flash a large SSD. Remaining guards only: never a disk with IDEA `META.yaml`, never the system disk, never a disk
+   in use or mounted, and an explicit Console confirmation that shows the target name and size.
