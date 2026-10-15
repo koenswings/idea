@@ -106,25 +106,31 @@ done once in `school-router-setup.sh`, the same at every school.
   serves or redirects to **that Engine's Console**. Nothing new is built for students: the Console already
   shows every Engine and app from the shared Automerge store, and opens an app on the Engine where it runs.
 * No `/go/<app>` links and no extra start page; they would duplicate the Console.
-* **Open point: can several Engines publish the same `idea.local`?** mDNS normally treats two hosts claiming
-  one name as a conflict, and avahi then renames one (`idea-2.local`). It must also coexist with the avahi
-  hostname fix (`2026-10-13-avahi-hostname-clash.md`): publish through the Pi's own avahi, not a second mDNS
-  responder. **Axle confirms** on two Engines whether a shared name works without rename-on-conflict.
-* **Fallback if it does not work:** (a) only one Engine publishes `idea.local` at a time (the others watch and
-  take over when it disappears), and/or (b) the router's DNS (dnsmasq) answers `idea.local` with `10.42.0.2`
-  and `10.42.0.3`, set the same way at every school. Either way the shortcut in the image stays the same.
+* **Tested on the pool (Axle, 2026-10-15): several Engines cannot all hold `idea.local`.** avahi treats a
+  second claim as a conflict: the first Engine wins and the others fail silently (no `idea-2.local` appears).
+  With one holder it works well: 50/50 lookups answered in about 20 ms, Console HTTP 200 in 10/10 tries.
+  A planned handover (holder stops cleanly) completes in about 6 s.
+* **Chosen design: one holder, automatic takeover.** Every Engine runs a small `idea.local` publisher that
+  registers the name through the Pi's own avahi over D-Bus (an address record, `-R`, no second mDNS responder,
+  compatible with `2026-10-13-avahi-hostname-clash.md`). If the name is taken it retries every 2-5 s. The holder
+  serves the Console; when it leaves, another Engine takes the name within seconds. No election via the store.
+* **Remaining risk:** a real power-off sends no avahi goodbye, so clients may keep the dead address for up to
+  the 120 s record TTL. This must be proven during implementation by an **automated power-cut test on a pool
+  Pi** (not wizardly-hugle).
+* **Backup:** the router's DNS (dnsmasq) also answers `idea.local` with `10.42.0.2` and `10.42.0.3`, set the
+  same way at every school. Either way the shortcut in the image stays the same.
 
 **Work:**
 
 | Who | What |
 |---|---|
-| Axle (Engine) | publish `idea.local` (or the fallback); port 80 serves/redirects to the Console; confirm the shared-name behaviour |
+| Axle (Engine) | `idea.local` publisher with retry/takeover; port 80 serves/redirects to the Console; automated power-cut test on a pool Pi |
 | Atlas (Ops) | mDNS reflector + dnsmasq fallback in `school-router-setup.sh`; test with 2 Engines, one switched off |
 | Client image worker | Chrome, policies, the one `idea-console.desktop` shortcut |
 | Marco (docs) | the client install manual, the school server install manual, the tutorial |
 
 **Test:** two Engines on one network, from the student Wi-Fi subnet: the shortcut opens the Console. Switch
-Engine 1 off: the shortcut still opens the Console (on Engine 2). No `idea-2.local` rename appears on either Engine.
+Engine 1 off: the shortcut still opens the Console (on Engine 2). Cut power to the holder: another Engine takes over and clients reach the Console within the 120 s TTL.
 
 # 4. Correction: "Manual 2"
 
