@@ -32,6 +32,6 @@
 ## 1.3 How to use this guide
 
 - **Part A (chapters 1 to 10)** is for teachers.
-- **Part B (chapters 11 and 12)** is for the school operator.
+- **Part B (chapters 11 to 13)** is for the school operator.
 - Each chapter has numbered steps with screenshots. The screenshots come from the IDEA demo box and use demo accounts whose names start with `demo` (see the appendix). Your school's names will be different.
 
