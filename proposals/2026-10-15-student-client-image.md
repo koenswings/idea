@@ -96,7 +96,7 @@ Nextcloud is the only place to save work.
 
 # 6. Applications
 
-All packages below are in the Ubuntu archive for **arm64** (checked against the noble/24.04 arm64 archive;
+All packages below are in Ubuntu main/universe and are built for **arm64** (spot-checked on packages.ubuntu.com for noble arm64: gcompris-qt, kturtle, kalzium; the rest are standard universe packages;
 the CI build verifies each one on 26.04 and fails if one is missing). They are installed as **.deb packages**,
 not snaps, so nothing needs the internet after the build.
 
