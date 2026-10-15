@@ -6,7 +6,7 @@ Demo: school (facility) `demo-School`, teacher `demo_teacher1`, class `demo-Grad
 
 ## 3.1 Signing in
 
-Open Kolibri from the Console (chapter 2, Figure 2). Type your username and click **NEXT**, then type your password.
+Open Kolibri from the Console (2.3). Type your username and click **NEXT**, then type your password.
 
 ## 3.2 Create a class
 

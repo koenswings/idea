@@ -12,6 +12,7 @@
 |---|---|
 | **IDEA box** | The small Raspberry Pi computer in the school that runs the apps. (On the demo it is named `wizardly-hugle`; your school's box has its own name.) |
 | **Console** | The web page that lists the apps and opens them. |
+| **IDEA shortcut** | The one shortcut on a classroom computer's desktop. It finds the IDEA box and opens the Console (chapter 2). |
 | **System Disk** | The IDEA box's own disk. The apps live on it. |
 | **IDEA Disk** | A USB disk or stick that the Console has prepared. It can become a **Files Disk** or a **Backup Disk**. |
 | **Spare disk** | An IDEA Disk that is still empty. |

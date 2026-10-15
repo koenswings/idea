@@ -2,6 +2,8 @@
 
 # 7. Nextcloud for learners (try it yourself)
 
+Learners open Nextcloud from the Console, like Kolibri: **IDEA** on the desktop, then **Open** on the Nextcloud card (2.1). They have no personal Nextcloud app on the classroom computer, so they always work in the browser.
+
 ## 7.1 Open class files and co-edit
 
 1. Sign in to Nextcloud as `demo-learner1` (private window). Shared folders and files appear in **Files** with the teacher's name.
