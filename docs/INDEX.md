@@ -65,6 +65,11 @@ Files: `manuals/field/remote-access-guide/README.md`, `manuals/field/remote-acce
 What comes back after a reboot, fstab loop mounts for fixture disks (rules, rollback), the 05:00 reboot hold, after-reboot checklist.
 → [docs/ops/boot-recovery.md](ops/boot-recovery.md)
 
+## ops/engine-deploy-pool-pi.md
+**Status:** Authoritative  ·  **Maintained by:** Atlas
+Option-2 Engine deploy on a pool Pi: save, discard, check out and restore config.yaml, pm2.config.cjs and every store-identity file; abort before pm2 restart unless store-url.txt is still 2VroE. Script `tools/fleet/deploy-engine-pi.sh`.
+→ [docs/ops/engine-deploy-pool-pi.md](ops/engine-deploy-pool-pi.md)
+
 ## ops/store-compaction-devpool.md
 **Status:** Authoritative (executed 2026-10-13)  ·  **Maintained by:** Atlas
 Runbook for compacting the dev-pool Automerge store into a fresh document (freeze, merge heads, swap, verify 13-18, rollback), with the result record: 3zoqd -> 2VroE on 2026-10-13 14:54-15:14 CEST, cover-all r86t 128/128 afterwards.

@@ -70,6 +70,7 @@ Recent documents (≈ last 3 weeks). "box" = only on Koen's Grok Bot box.
 | Store growth proposal | `proposals/2026-10-13-store-growth.md` | #190 |
 | Store compaction plan + result record (3zoqd → 2VroE, 2026-10-13) | `docs/ops/store-compaction-devpool.md` (runbook); raw evidence stays on the box | #190 |
 | Engine key / root helper designs | `proposals/design-per-pi-engine-key.md`, `proposals/design-school-engine-key.md`, `proposals/design-root-helper.md` (dated rename optional) | #186 |
+| Engine deploy on a pool Pi (option 2, store-identity kept) | `docs/ops/engine-deploy-pool-pi.md` + `tools/fleet/deploy-engine-pi.sh` | this PR |
 | Boot recovery runbook | `docs/ops/boot-recovery.md` | #187 |
 | Avahi hostname clash (proposed fix) | `proposals/2026-10-13-avahi-hostname-clash.md` | #187 |
 | Tailscale `tag:idea` decision | `proposals/2026-10-13-tailscale-single-fleet-tag.md` | #187 |
