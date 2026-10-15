@@ -1,8 +1,20 @@
-**Status:** Authoritative (2.1 is a draft until the IDEA shortcut is on the student computers, idea#203) · **Maintained by:** Marco (with Atlas) · 15 October 2026
+**Status:** Authoritative (2.1 is a draft until the IDEA shortcut is on the student computers, idea#203) · **Maintained by:** Marco (with Atlas) · 15 October 2026 (school Wi-Fi networks, idea#209)
 
 # 2. Getting connected and opening an app
 
 All apps open from one web page: the **Console**. How you get to the Console depends on the computer you use.
+
+## The school Wi-Fi networks
+
+The IDEA router at your school makes two Wi-Fi networks. Their names and first passwords are the same at every IDEA school:
+
+| Network | Password (until your school changes it) | Who joins it | What it reaches |
+|---|---|---|---|
+| **IDEA** | `idea911!` | Students, and the classroom computers | Only the IDEA box: the Console and its apps. No internet. |
+| **IDEA-Teachers** | `idea-teachers911!` | Teachers only | The IDEA box. Internet is **off** at first; your IDEA contact can switch it on when the head teacher asks. |
+
+- Give students only the **IDEA** password. Keep the **IDEA-Teachers** password among the teachers.
+- **Change the passwords later.** These first passwords are easy on purpose, but anyone who knows them can join. Once IDEA is running at your school, the head teacher chooses new passwords and asks the IDEA contact to set them on the router. After that, every phone and laptop must join again with the new password.
 
 ## 2.1 On a classroom computer: the IDEA shortcut
 
@@ -29,7 +41,7 @@ The classroom computers (the student computers) are already connected to the sch
 
 ## 2.2 On your own laptop, tablet or phone
 
-1. Connect your device to the school's IDEA Wi-Fi. Ask your IDEA contact for the Wi-Fi name and password.
+1. Connect your device to the Wi-Fi: teachers join **IDEA-Teachers**, students join **IDEA** (see *The school Wi-Fi networks* above).
 2. Open the browser and go to `http://idea.local`. The Console opens.
 3. If it doesn't open, type the name on the box's sticker: go to the address on the sticker's second line, for example `http://brave-otter.local`.
 
