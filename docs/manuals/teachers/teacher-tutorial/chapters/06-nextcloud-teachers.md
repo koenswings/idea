@@ -2,7 +2,9 @@
 
 # 6. Nextcloud for teachers
 
-Demo: `teacher1`, groups `Grade 5` (class) and `teachers`. Office documents open in **Nextcloud Office**.
+**About the examples in this chapter.** The screens in this chapter come from the demo IDEA box, where the demo setup is switched on (activated). In Nextcloud you see the demo teacher `teacher1`, with the groups `Grade 5` (the class) and `teachers`. The steps work the same at your school, but your names will be different. How to turn on the demo setup is described in *Appendix: activating the demo setup*. The demo accounts are listed in *Appendix: demo accounts*.
+
+Office documents open in **Nextcloud Office**.
 
 Open Nextcloud from the Console (chapter 2) and sign in. Click **Files** at the top.
 ![Files](../screenshots/N0-01.png)

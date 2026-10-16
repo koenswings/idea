@@ -2,11 +2,11 @@
 
 # 4. Kolibri for learners (try it yourself)
 
-Your learners open Kolibri the same way you do: on a classroom computer they double-click **IDEA** on the desktop and click **Open** on the Kolibri card in the Console (2.1). Show them this once.
+Your learners open Kolibri the same way you do: on a classroom computer they double-click **IDEA** on the desktop and click **Open** on the Kolibri card in the Console (2.2.1). Show them this once.
 
-Sign in as a learner in a second browser window (private window) to see exactly what your class sees. In the demo school, learners sign in with a username and password: `learner1` with `learner1911!`, and so on (the IDEA default is the account name followed by `911!`; check your school's setting).
+Sign in as a learner in a second browser window (private window) to see exactly what your class sees. Learners have no password in Kolibri. They sign in with only their username, for example `learner1`.
 
-> **Note on passwords.** The demo learners have a password. A school can turn learner passwords off or on: sign in as a Kolibri admin, open **Facility > SETTINGS**, tick or untick **Require password for learners**, then click **SAVE CHANGES**. Learners who have no password yet then need one set by the admin; the IDEA default is the account name followed by `911!`.
+> **At an existing school.** A teacher with admin rights (or the Kolibri admin) turns this on in Kolibri: open **Facility > SETTINGS**, untick **Require password for learners**, then click **SAVE CHANGES**.
 
 ## 4.1 Do a lesson
 

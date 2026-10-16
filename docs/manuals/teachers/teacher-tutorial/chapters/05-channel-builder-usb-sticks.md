@@ -20,8 +20,6 @@ Good to know:
 2. Inside `kolibri`, make **one folder per channel**, for example `Grade 5 Science`. The folder name becomes the channel name.
 3. Inside the channel folder, make **one folder per topic**, for example `Plants` and `Animals`, and copy your files into them. Each file becomes one resource. The builder takes PDF, EPUB, MP4/WebM video, MP3 and pictures.
 
-[[pending-shot: C5-01 | The stick in Windows File Explorer: kolibri > Grade 5 Science > Plants, Animals]]
-
 > **Optional: `channel.json`.** To set the channel's name, author, description or licence yourself, put a small text file named `channel.json` into the channel folder, for example:
 > `{"name":"Plants and Water","author":"Mary Okello","description":"Term 2","license":"CC BY","license_description":""}`
 > Without it (or if the file has a mistake), the channel gets the folder name, the stick's name as author, and the licence All Rights Reserved.
@@ -38,7 +36,7 @@ Good to know:
 
 7. On the builder's page, the box **From USB sticks** shows each channel. A channel waiting for its turn says **Queued (number N in line)**, a channel being built says **Building N/M files**, and a finished channel says **Built version V: R resources.**
 
-[[pending-shot: C5-03 | Channel builder, From USB sticks box while a channel is Building N/M files]]
+   ![Channel builder, From USB sticks box while a channel is Building N/M files](../screenshots/C5-03.png)
 
 8. When the stick's line says **Built: you can pull the stick out.**, you can take your stick out. The channels stay on the IDEA box.
 
@@ -65,14 +63,14 @@ Your channel is built, but learners cannot see it yet. Someone who may manage ch
 
    ![Select network address. If an address is greyed out, it no longer answers: pick the other one](../screenshots/C5-07.png)
 
-5. Pick your channel (for example **Grade 5 Science**) and click **Import**.
+5. Kolibri lists the builder's channels. Next to your channel (for example **Grade 5 Science**) click **SELECT RESOURCES**.
 
-[[pending-shot: C5-08 | Kolibri import: the builder's channels listed, Import button]]
+   ![Import from 'Channel builder (brave-otter)': the builder's channels, here IDEA-DEMO version 1, each with SELECT RESOURCES](../screenshots/C5-08.png)
 
-6. Choose the topics (or everything) and click **IMPORT**. When the task is finished, the channel is in the **Channels** list with the label **New** (see the figure at step 2).
+6. Choose the topics (or everything) and click **IMPORT**. When the task is finished, the channel is in the **Channels** list (Kolibri shows the label **New** until you click **Clear completed** in the task bar).
 7. Now use it like any other channel: add its resources to a lesson (3.4) or a quiz (3.5).
 
-[[pending-shot: C5-10 | Learner view: the new channel next to the other channels]]
+   ![Device > Channels: the new channel (here IDEA-DEMO, version 1) above the other channels](../screenshots/C5-10.png)
 
 ## 5.3 Update the channel
 
@@ -80,7 +78,7 @@ Your channel is built, but learners cannot see it yet. Someone who may manage ch
 2. Plug the stick in again. The builder sees what changed and builds a new version of the **same channel**. If nothing changed, it does nothing.
 3. In Kolibri, open **Device > Channels** and import the channel again from the builder, as in 5.2, to get the new version.
 
-[[pending-shot: C5-11 | Kolibri Device > Channels: importing the new version of the channel]]
+   ![Importing again from the builder: Kolibri shows New version available for the channel already on the device](../screenshots/C5-11.png)
 
 ## 5.4 Build a channel by hand
 
@@ -111,8 +109,6 @@ Your stick also appears in Nextcloud, so you can open its files or copy them int
    ![Inside the folder USB: IDEA-DEMO: the folders kolibri, Teacher Notes and Worksheets, and the file CREDITS.txt](../screenshots/C5-15.png)
 
 3. To keep a file, click **⋯** on its row, choose **Copy**, and copy it into one of your own folders (for example a course folder, or **School Files**).
-
-[[pending-shot: C5-16 | Nextcloud: the Copy dialog, copying from the USB folder into a course folder]]
 
 4. Pull the stick out when you are done. The **USB:** folder disappears; the files you copied stay in Nextcloud.
 
