@@ -13,12 +13,12 @@ while [ $# -gt 0 ]; do case "$1" in
   --out) OUT="$2"; shift 2;; --work) WORK="$2"; shift 2;; --no-xz) XZ=0; shift;;
   *) echo "unknown arg $1" >&2; exit 2;; esac; done
 [ "$(id -u)" = 0 ] || { echo "run as root" >&2; exit 1; }
-# required host tools (Debian/Ubuntu packages: util-linux parted e2fsprogs mtools xz-utils curl git coreutils;
+# required host tools (Debian/Ubuntu packages: util-linux fdisk parted e2fsprogs mtools xz-utils curl git coreutils;
 # qemu-user-static + binfmt only on non-arm64 hosts)
-need="losetup parted e2fsck resize2fs mcopy mmd xz curl git sha256sum truncate mountpoint chroot fstrim python3"
+need="losetup parted sfdisk dumpe2fs e2fsck resize2fs mcopy mmd xz curl git sha256sum truncate mountpoint chroot fstrim python3"
 [ "$(uname -m)" = aarch64 ] || need="$need qemu-aarch64-static"
 missing=""; for t in $need; do command -v "$t" >/dev/null 2>&1 || [ -x "/usr/bin/$t" ] || missing="$missing $t"; done
-[ -z "$missing" ] || { echo "missing host tools:$missing (apt install util-linux parted e2fsprogs mtools xz-utils curl git qemu-user-static)" >&2; exit 1; }
+[ -z "$missing" ] || { echo "missing host tools:$missing (apt install util-linux fdisk parted e2fsprogs mtools xz-utils curl git qemu-user-static)" >&2; exit 1; }
 
 # --- secrets: outside git, never echoed ---
 [ -f "$SECRETS" ] || { echo "secrets file missing: $SECRETS (see secrets.env.example)" >&2; exit 1; }
@@ -88,6 +88,20 @@ comm -13 "$WORK/fw.before" "$WORK/fw.after" | awk '{print $2}' | while read -r f
   mcopy -o -i "$IMG@@$O1" "$FW/${f#./}" "::/${f#./}"; echo "firmware updated: ${f#./}"; done
 fstrim "$MNT" 2>/dev/null || true
 cleanup; trap - EXIT
+
+# Shrink (idea#202): fit the smallest "16 GB" cards (some hold only 15,931,539,456 bytes). Root fs -> used + ROOT_FREE_MB
+# headroom, partition 2 and the file cut to match. Labels/UUIDs/PARTUUID unchanged; cloud-init growpart+resizefs
+# (enabled in the base image, no /var/lib/cloud state) grows root to the full card on first boot.
+L2=$(losetup -f --show -o "$O2" --sizelimit "$S2" "$IMG"); e2fsck -fy "$L2" >/dev/null || true
+BS=$(dumpe2fs -h "$L2" 2>/dev/null | awk -F: '/^Block size/{gsub(/ /,"",$2);print $2}')
+MINB=$(resize2fs -P "$L2" 2>/dev/null | awk -F': ' '/minimum/{print $2}')
+WANT=$(( MINB + ROOT_FREE_MB*1024*1024/BS )); CAPB=$(( (MAX_IMAGE_BYTES - O2) / BS ))
+[ "$WANT" -le "$CAPB" ] || { losetup -d "$L2"; echo "rootfs needs $WANT blocks (+${ROOT_FREE_MB}M free) > cap $CAPB for MAX_IMAGE_BYTES=$MAX_IMAGE_BYTES" >&2; exit 1; }
+resize2fs "$L2" "$WANT" >/dev/null; e2fsck -fn "$L2" >/dev/null; losetup -d "$L2"
+echo ", $(( WANT*BS/512 ))" | sfdisk --no-reread -N 2 "$IMG" >/dev/null
+truncate -s $(( O2 + WANT*BS )) "$IMG"
+SZ=$(stat -c %s "$IMG"); [ "$SZ" -le "$MAX_IMAGE_BYTES" ] || { echo "image $SZ > MAX_IMAGE_BYTES $MAX_IMAGE_BYTES" >&2; exit 1; }
+echo "image shrunk to $SZ bytes (root free ~${ROOT_FREE_MB}M, max $MAX_IMAGE_BYTES)"
 
 if [ $XZ = 1 ]; then xz -T0 -6 -f "$IMG"; F="$IMG.xz"; else F="$IMG"; fi
 mv "$F" "$OUT/"; ( cd "$OUT" && sha256sum "$(basename "$F")" > "$(basename "$F").sha256" )

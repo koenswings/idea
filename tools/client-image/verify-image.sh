@@ -110,5 +110,15 @@ command -v gnome-screenshot >/dev/null && ok "gnome-screenshot present (acceptan
 # 8 admin local password = <account>911!, ssh still key-only, learner none
 h=$(getent shadow admin | cut -d: -f2)
 [ "$(perl -e 'print crypt($ARGV[0],$ARGV[1])' "${ADMIN_USER:-admin}911!" "$h")" = "$h" ] && case "$h" in '$6$'*) true;; *) false;; esac && ok "admin local password follows <account>911! (sha-512)" || bad "admin password hash"
+# 11 reset-on-reboot (idea#202, 2026-10-16): overlay ON by default, armed once after first boot
+FWI=/boot/firmware/current/initrd.img; LS=$(lsinitrd "$FWI" 2>/dev/null)
+printf '%s\n' "$LS" | grep -q 'hooks/cmdline/50-parse-overlayroot.sh' && printf '%s\n' "$LS" | grep -q 'hooks/pre-pivot/10-mount-overlayfs.sh' && printf '%s\n' "$LS" | grep -q 'fs/overlayfs/overlay.ko' \
+  && ok "boot initrd has overlayroot/overlayfs hooks + overlay.ko" || bad "boot initrd lacks overlay support ($FWI)"
+printf '%s\n' "$LS" | grep -q 'rp1-fw.ko' && ok "boot initrd keeps stock drivers (rp1-fw)" || bad "boot initrd lost stock drivers"
+grep -qw 'overlayroot=tmpfs' /boot/firmware/current/cmdline.txt && bad "overlay already on in cmdline (first boot must run on the real disk)" || ok "first boot runs without overlay (cmdline)"
+[ ! -e /var/lib/idea-overlay-armed ] && ok "overlay not yet armed" || bad "idea-overlay-armed marker baked in"
+if [ "${OVERLAY:-on}" = on ]; then systemctl is-enabled idea-overlay-arm.service >/dev/null 2>&1 && ok "idea-overlay-arm enabled (reset-on-reboot ON by default)" || bad "idea-overlay-arm not enabled"
+else systemctl is-enabled idea-overlay-arm.service >/dev/null 2>&1 && bad "idea-overlay-arm enabled with OVERLAY=off" || ok "overlay off (OVERLAY=off)"; fi
+[ -x /usr/local/sbin/idea-client-mode ] && /usr/local/sbin/idea-client-mode status 2>/dev/null | grep -q 'next boot: normal' && ok "idea-client-mode status works" || bad "idea-client-mode"
 echo "verify: $npass passed, $nfail failed, $((npass+nfail)) total"
 exit $fail

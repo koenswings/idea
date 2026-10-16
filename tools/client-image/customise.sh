@@ -143,10 +143,27 @@ sed -i "s/@PREFIX@/$HOSTNAME_PREFIX/" /usr/local/sbin/idea-firstboot
 cp $B/files/idea-firstboot.service /etc/systemd/system/; systemctl enable idea-firstboot.service
 rm -f /etc/ssh/ssh_host_*; : > /etc/machine-id; rm -f /var/lib/dbus/machine-id
 
-# --- reset level B: overlayroot installed, off unless OVERLAY=on; switch tool ---
+# --- reset level B (reset-on-reboot): tmpfs overlay over root, switched by kernel arg overlayroot=tmpfs ---
+# Ubuntu 26.04 boots a dracut initramfs from /boot/firmware/current/initrd.img; overlayroot's dracut hook reads only
+# the kernel command line (not /etc/overlayroot.conf), and the stock firmware initrd has no overlay hooks. So:
+# rebuild the initrd with the overlayfs+overlayroot modules plus every driver/firmware of the stock one, put it where
+# the firmware loads it, and switch via current/cmdline.txt (idea-client-mode). OVERLAY=on (default since
+# 2026-10-16): the image ships with the overlay OFF and idea-overlay-arm.service turns it ON once, right after
+# first-boot setup (growpart/resizefs, idea-firstboot, snap seeding), then reboots - so those run once on the real disk.
 install -m 755 $B/files/idea-client-mode /usr/local/sbin/idea-client-mode
-if [ "$OVERLAY" = on ]; then sed -i 's/^overlayroot=.*/overlayroot="tmpfs"/' /etc/overlayroot.conf
-else sed -i 's/^overlayroot=.*/overlayroot=""/' /etc/overlayroot.conf; fi
+install -m 755 $B/files/idea-overlay-arm /usr/local/sbin/idea-overlay-arm
+cp $B/files/idea-overlay-arm.service /etc/systemd/system/
+KV=$(ls /lib/modules | sort -V | tail -1); FWI=/boot/firmware/current/initrd.img
+STOCK=$(lsinitrd "$FWI" 2>/dev/null | awk '{print $NF}')
+MODS=$(printf '%s\n' "$STOCK" | grep '\.ko' | sed 's#.*/##; s/\.ko.*//' | sort -u | tr '\n' ' ')
+FWS=$(printf '%s\n' "$STOCK" | grep '^usr/lib/firmware/.*\.[a-z0-9]*$' | sed 's#^#/#' | while read -r f; do if [ -f "$f" ]; then echo "$f"; fi; done | tr '\n' ' ')
+[ -n "$MODS" ] || { echo "customise: cannot list stock initrd $FWI" >&2; exit 1; }
+set -- --force --add "overlayfs overlayroot" --add-drivers "$MODS"; [ -z "$FWS" ] || set -- "$@" --install "$FWS"
+dracut "$@" "/boot/initrd.img-$KV" "$KV"
+cp "/boot/initrd.img-$KV" "$FWI"
+sed -i 's/^overlayroot=.*/overlayroot=""/' /etc/overlayroot.conf; sed -i '1s/ *overlayroot=[^ ]*//' /boot/firmware/current/cmdline.txt
+rm -f /var/lib/idea-overlay-armed
+if [ "$OVERLAY" = on ]; then systemctl enable idea-overlay-arm.service; else systemctl disable idea-overlay-arm.service 2>/dev/null || true; fi
 
 echo "$IDEA_CLIENT_VERSION" > /etc/idea-client-version
 chown -R learner:learner /home/learner

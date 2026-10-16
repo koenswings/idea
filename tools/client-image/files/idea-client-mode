@@ -1,10 +1,26 @@
 #!/bin/sh
-# idea-client-mode overlay|normal|status  - switch reset level B (overlayroot) on/off; reboot to apply.
-# From overlay mode use: sudo overlayroot-chroot idea-client-mode normal
-set -e; C=/etc/overlayroot.conf
+# idea-client-mode overlay|normal|status  - reset-on-reboot (overlay) on/off; takes effect after a reboot.
+# Overlay ON: the root fs is mounted read-only under a tmpfs overlay by the initramfs (dracut overlayroot/overlayfs
+# modules, kernel arg overlayroot=tmpfs), so every write is lost at the next reboot. The switch lives in the kernel
+# command line on the boot partition (/boot/firmware/current/cmdline.txt), which is NOT under the overlay, so
+# "sudo idea-client-mode normal" works directly from overlay mode and survives the reboot.
+# Image default (idea#202, 2026-10-16): ON, armed once by idea-overlay-arm.service after first-boot setup.
+set -e
+CL=/boot/firmware/current/cmdline.txt; [ -f "$CL" ] || CL=/boot/firmware/cmdline.txt
+C=/etc/overlayroot.conf
+running() { grep -q '^[^ ]* / overlay ' /proc/mounts && echo overlay || echo normal; }
 case "$1" in
-  overlay) sed -i 's/^overlayroot=.*/overlayroot="tmpfs"/' $C; echo "overlay ON after reboot";;
-  normal)  sed -i 's/^overlayroot=.*/overlayroot=""/' $C; echo "overlay OFF after reboot";;
-  status)  grep '^overlayroot=' $C; grep -q ' / overlay ' /proc/mounts && echo "running: overlay" || echo "running: normal";;
+  overlay)
+    grep -qw 'overlayroot=tmpfs' "$CL" || { sed -i '1s/ *overlayroot=[^ ]*//; 1s/$/ overlayroot=tmpfs/' "$CL"; }
+    [ "$(running)" = overlay ] || sed -i 's/^overlayroot=.*/overlayroot="tmpfs"/' $C 2>/dev/null || true
+    sync; echo "overlay ON after reboot";;
+  normal)
+    sed -i '1s/ *overlayroot=[^ ]*//' "$CL"
+    L=""; [ "$(running)" = overlay ] && L=/run/rootfsbase   # lower (real) root while the overlay runs
+    sed -i 's/^overlayroot=.*/overlayroot=""/' "$L$C" 2>/dev/null || true
+    sync; echo "overlay OFF after reboot";;
+  status)
+    grep -qw 'overlayroot=tmpfs' "$CL" && echo "next boot: overlay" || echo "next boot: normal"
+    echo "running: $(running)";;
   *) echo "usage: $0 overlay|normal|status" >&2; exit 2;;
 esac

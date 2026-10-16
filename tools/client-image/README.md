@@ -18,11 +18,14 @@ sudo tools/client-image/build.sh [--base ubuntu-26.04.1-...+raspi.img.xz] [--sec
 
 * Host: Linux amd64 with `qemu-user-static` (binfmt `aarch64` with the `F` flag) or a native arm64 Pi.
   Required tools (checked at start by `build.sh`): `losetup`, `mountpoint`, `fstrim` (util-linux), `parted`,
-  `e2fsck`/`resize2fs` (e2fsprogs), `mcopy`/`mmd` (mtools), `xz` (xz-utils), `curl`, `git`, `sha256sum`, `truncate`,
+  `sfdisk` (fdisk), `e2fsck`/`resize2fs`/`dumpe2fs` (e2fsprogs), `mcopy`/`mmd` (mtools), `xz` (xz-utils), `curl`, `git`, `sha256sum`, `truncate`,
   `chroot` (coreutils), `python3`; on amd64 also `qemu-aarch64-static`:
-  `sudo apt install util-linux parted e2fsprogs mtools xz-utils curl git python3 qemu-user-static`.
+  `sudo apt install util-linux fdisk parted e2fsprogs mtools xz-utils curl git python3 qemu-user-static`.
 * The chroot's apt sources are rewritten to `ports.ubuntu.com/ubuntu-ports` (arm64); the build stops if no arm64 lists come back. No vfat kernel module or `/dev/loopNpM` nodes needed (works in containers):
   the root partition is loop-mounted by offset, the FAT boot partition is edited with `mtools`.
+* Image size: the last step shrinks the root fs to its used size + `ROOT_FREE_MB` and cuts the file, failing if the raw
+  image exceeds `MAX_IMAGE_BYTES` (14,000,000,000; the smallest "16 GB" card seen holds 15,931,539,456). Labels, UUIDs
+  and PARTUUID are unchanged; cloud-init `growpart` + `resizefs` expand root to the full card on first boot.
 * ~25 GB free disk; 30-60 min under qemu on an 8-core box.
 
 ## Secrets (never in git, never printed)
@@ -46,7 +49,7 @@ convention, not a secret: `customise.sh` hashes it (SHA-512, random salt) at bui
 | browser (idea#203 §1) | **Google Chrome stable**, official arm64 `.deb` pinned in `client-image.conf` (`CHROME_DEB`, `CHROME_DEB_SHA256`), fetched once into `work/` and sha-checked, installed offline; Google apt source + cron job removed, `apt-mark hold`. Fallback: `build.sh --browser chromium` (xtradeb PPA `.deb`, same hold + policies). Managed policy (`browser.sh`): home/startup = `file:///usr/share/idea/start.html`, `LocalNetworkAccessAllowedForUrls` = `file://*`, `http://*.local`, sign-in/sync/promos/default-browser prompt/component updates off |
 | Console shortcut + discovery (idea#203 §2) | **One** "IDEA" shortcut (`idea-console.desktop`, app menu + learner desktop) opens `start.html`: home Engine (`idea-home.txt` on the FAT boot partition → `/etc/idea/home-engine` by `idea-home-engine.service` at boot) → last Engine that opened → `http://idea.local`, 1.5 s per probe; sticker-name field (strict hostname validation) always shown, prominent on failure; friendly not-found text, never a browser error. No per-app icons, no `/go`, no Nextcloud links, no Engine name or IP in the image |
 | §8 first boot | `idea-firstboot`: hostname `idea-pc-<last4 serial>`, new SSH host keys and machine-id (nothing model-specific) |
-| §5 reset B | `overlayroot` installed, off unless `OVERLAY=on`; `idea-client-mode overlay|normal|status` |
+| §5 reset B | Reset-on-reboot **ON by default** (`OVERLAY=on`, 2026-10-16): tmpfs overlay over root, every write erased at reboot. Armed once by `idea-overlay-arm.service` after first-boot setup, then one automatic reboot. Switch: `sudo idea-client-mode normal|overlay|status` (see *Reset on reboot*) |
 | idea#202 (2026-10-15) | `config.txt`: KMS overlay per model (`[pi4]` `vc4-kms-v3d` = Pi 400, `[pi5]` `vc4-kms-v3d-pi5` = Pi 500), none in `[all]`, `disable_fw_kms_setup=1` kept, stock cmdline - one image boots both. `curl`. Firefox snap removed from the seed (+ launchers); Chrome only. Chrome launchers + `google-chrome.desktop` override (`/usr/local/share/applications`) use `--password-store=basic`; policy `PasswordManagerEnabled=false`, Google as fixed default search (no choice screen), `PromotionsEnabled=false`, `initial_preferences` + `First Run` sentinel skip first-run. Desktop icon learner-owned 755, trusted by a one-shot learner autostart (`gio set … metadata::trusted true`, then `Hidden=true`). First-run off: LibreOffice `/etc/libreoffice/registry/idea.xcd`, GCompris `isFirstRun=false`, SuperTuxKart (`config-0.10`: `enable_internet=2`, seeded player Learner, `first-time=false`), gnome-initial-setup purged + done-file, GNOME welcome tour off (dconf). GeoGebra is not in the image (offline web app on the Engine). Icon: IDEA logo C (`files/idea-logo/`) as `idea-console` (hicolor scalable/256/48) for the shortcut and dock |
 | first-login acceptance | `acceptance/first-login-check.sh CLIENT_IP [--jump idea03]` (from the box, TEST admin key, sudo via the `admin911!` convention over SSH stdin): learner Wayland autologin, gnome-screenshot of desktop + Chrome, gio trusted flag, trust autostart self-disabled, no gnome-initial-setup, Chrome profile (no choice screen pending, password store basic), LibreOffice profile vs xcd, SuperTuxKart seed. PASS/FAIL per item |
 | §12 CI | `verify-image.sh` (in chroot) + `scan-secrets.sh` run on every build; non-zero exit fails the build |
@@ -54,3 +57,26 @@ convention, not a secret: `customise.sh` hashes it (SHA-512, random salt) at bui
 
 Tests (no image build): `cd tests && npm i && npm test` (start.html in headless Chrome with mocked Engines); `tests/home-engine.test.sh`; `sudo tests/chroot-check.sh` (browser.sh + verify-browser.sh in a minimal arm64 Ubuntu rootfs; needs root network access for apt).
 The boot test and the Pi 400 ↔ Pi 500 swap test (§12) need hardware and are tracked separately.
+
+## Reset on reboot (overlay) - on by default
+
+Since 2026-10-16 (idea#202) every client card resets on each reboot: the root file system is mounted read-only under a
+tmpfs overlay, so anything a learner (or admin) changes is gone after the next reboot.
+
+* **How it is switched:** kernel argument `overlayroot=tmpfs` in `/boot/firmware/current/cmdline.txt`. Ubuntu 26.04 boots
+  a dracut initramfs, and overlayroot's dracut hook reads only the kernel command line - `/etc/overlayroot.conf` is
+  kept in sync but is not what switches it. The stock firmware initrd has no overlay hooks, so `customise.sh` rebuilds
+  it with the `overlayfs` + `overlayroot` dracut modules plus every driver/firmware of the stock initrd and copies it to
+  `/boot/firmware/current/initrd.img`.
+* **First boot runs once, on the real disk:** the card ships with the overlay *off*. On first boot cloud-init
+  `growpart`/`resizefs` grow root to the card, `idea-firstboot` sets hostname/SSH host keys/machine-id, snaps seed; then
+  `idea-overlay-arm.service` (before GDM) adds `overlayroot=tmpfs`, writes `/var/lib/idea-overlay-armed` and reboots
+  once. All done-markers are on the real disk, so none of this repeats. Expect one extra reboot ~1-2 min after the
+  very first power-on. The learner's desktop-icon trust (`idea-trust-desktop` autostart) re-runs at each login after a
+  reboot, because the learner's home is reset too.
+* **Turn it off in the field** (e.g. a teacher needs files to survive): log in as admin, then
+  `sudo idea-client-mode normal` and reboot. The boot partition is not under the overlay, so this works from overlay mode
+  and survives the reboot; the arm service never re-arms (marker present). Turn it back on: `sudo idea-client-mode overlay`
+  and reboot. `idea-client-mode status` shows the next-boot and running mode.
+* **Making a lasting change while the overlay is on:** switch it off, reboot, change, switch it on, reboot.
+* Build with `OVERLAY=off` in `client-image.conf` to ship cards that never arm the overlay.

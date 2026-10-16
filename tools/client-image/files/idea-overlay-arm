@@ -1,0 +1,13 @@
+#!/bin/sh
+# One-shot after first-boot setup (idea#202): switch reset-on-reboot ON and reboot once.
+# First boot runs WITHOUT the overlay so cloud-init growpart/resizefs grow the real root partition and
+# idea-firstboot (hostname, SSH host keys, machine-id), snap seeding and their done-markers land on the real disk;
+# from the 2nd boot on every write goes to a tmpfs overlay. The marker below is on the real disk too, so this
+# never re-arms after an admin switched the overlay off with "sudo idea-client-mode normal".
+set -e
+M=/var/lib/idea-overlay-armed
+[ -e $M ] && exit 0
+grep -q '^[^ ]* / overlay ' /proc/mounts && { touch $M 2>/dev/null || true; exit 0; }
+/usr/local/sbin/idea-client-mode overlay
+echo "armed $(date -Is)" > $M; sync
+systemctl reboot --no-block
