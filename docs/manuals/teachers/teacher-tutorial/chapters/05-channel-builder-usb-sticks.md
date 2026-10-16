@@ -38,7 +38,7 @@ Good to know:
 
 7. On the builder's page, the box **From USB sticks** shows each channel. A channel waiting for its turn says **Queued (number N in line)**, a channel being built says **Building N/M files**, and a finished channel says **Built version V: R resources.**
 
-[[pending-shot: C5-03 | Channel builder, From USB sticks box while a channel is Building N/M files]]
+   ![The builder while a channel is being built: here IDEA-DEMO (all grades), Building 129/151 files. The same Building N/M files line appears in the From USB sticks box for a channel from a stick](../screenshots/C5-03.png)
 
 8. When the stick's line says **Built: you can pull the stick out.**, you can take your stick out. The channels stay on the IDEA box.
 
@@ -65,9 +65,9 @@ Your channel is built, but learners cannot see it yet. Someone who may manage ch
 
    ![Select network address. If an address is greyed out, it no longer answers: pick the other one](../screenshots/C5-07.png)
 
-5. Pick your channel (for example **Grade 5 Science**) and click **Import**.
+5. Kolibri lists the builder's channels. Next to your channel (for example **Grade 5 Science**) click **SELECT RESOURCES**.
 
-[[pending-shot: C5-08 | Kolibri import: the builder's channels listed, Import button]]
+   ![Import from 'Channel builder (idea03)': the builder's channels, here IDEA-DEMO version 1, each with SELECT RESOURCES](../screenshots/C5-08.png)
 
 6. Choose the topics (or everything) and click **IMPORT**. When the task is finished, the channel is in the **Channels** list with the label **New** (see the figure at step 2).
 7. Now use it like any other channel: add its resources to a lesson (3.4) or a quiz (3.5).
