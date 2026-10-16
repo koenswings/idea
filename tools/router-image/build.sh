@@ -15,6 +15,7 @@ echo "$IB_SHA256  $IB_FILE" | sha256sum -c -
 IB=${IB_FILE%.tar.zst}; [ -d "$IB" ] || tar --zstd -xf "$IB_FILE"
 # overlay: static files + generated first-boot copies of the manual scripts
 F="$WORK/files"; rm -rf "$F"; cp -a "$HERE/files" "$F"
+mkdir -p "$F/usr/share/idea" "$F/etc/idea"   # empty dirs are not tracked by git
 # Router scripts: from SETUP_REF (default: idea#211 head 7eedd03 with the avahi reflector +
 # idea.local hotplug, until #211 is merged; then set SETUP_REF=HEAD).
 SETUP_REF=${SETUP_REF:-7eedd03}; S="$WORK/scripts"; rm -rf "$S"; mkdir -p "$S"

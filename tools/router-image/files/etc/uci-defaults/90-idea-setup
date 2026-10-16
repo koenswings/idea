@@ -7,9 +7,18 @@ sh $S/router-starlink-cgnat-exception.sh || true   # helper no-ops until ts-inpu
 STICKER=$(cat /etc/idea/sticker 2>/dev/null || echo idea-router)
 uci set system.@system[0].hostname="$STICKER"
 uci set luci.main.lang='en' 2>/dev/null || true
-# Teacher Wi-Fi internet ON by default (idea#209, Koen 2026-10-16). The rule stays, so it can
-# be switched off remotely. Set here too so the image is ON whatever SETUP_REF ships.
-uci -q get firewall.teachers_internet >/dev/null && uci set firewall.teachers_internet.enabled='1'
+# Teacher Wi-Fi internet OFF by default (idea#209 section 2: the Teachers-Internet rule is
+# present but off; switched on later from the Console). Set here too so the image is OFF
+# whatever SETUP_REF ships.
+uci -q get firewall.teachers_internet >/dev/null && uci set firewall.teachers_internet.enabled='0'
+# dnsmasq 'local' is a LIST. OpenWrt ships it as a plain option ('/lan/'); 'uci add_list' on top
+# of that produced the single value '/lan/ /local/', which renders 'local=/lan/ /local/' and
+# makes dnsmasq refuse to start (no DHCP, no DNS). Rewrite it as two clean list entries.
+# '/local/' keeps *.local answered from the router (idea.local via /tmp/hosts/idea) and never
+# forwarded upstream.
+uci -q delete dhcp.@dnsmasq[0].local || true
+uci add_list dhcp.@dnsmasq[0].local='/lan/'
+uci add_list dhcp.@dnsmasq[0].local='/local/'
 # SSH only from LAN + tailscale (dropbear on lan; tailscale zone input ACCEPT)
 uci set dropbear.@dropbear[0].Interface='lan'
 uci commit
