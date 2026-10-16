@@ -1,0 +1,5 @@
+secrets.env
+out/
+work/
+*.img
+*.img.xz

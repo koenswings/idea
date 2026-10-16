@@ -1,0 +1,18 @@
+#!/bin/sh
+# Boot step (proposal idea#203 §2): copy the home-Engine name written by the Engine's Flash step
+# (idea-home.txt on the FAT boot partition) to /etc/idea/home-engine and "$D/home-engine.js".
+# Only a valid hostname label is accepted; anything else leaves the client without a home Engine.
+set -u
+SRC=${IDEA_HOME_SRC:-/boot/firmware/idea-home.txt}; D=${IDEA_ETC:-/etc/idea}
+install -d -m 755 "$D"
+N=$(head -c 256 "$SRC" 2>/dev/null | head -n 1 | tr -d '\r\t ' | tr 'A-Z' 'a-z')
+N=${N%.local}
+if printf '%s' "$N" | grep -Eqx '[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?'; then
+  printf '%s\n' "$N" > "$D/home-engine"
+  printf 'window.IDEA_HOME_ENGINE = "%s";\n' "$N" > "$D/home-engine.js"
+else
+  [ -e "$SRC" ] && echo "idea-home-engine: ignoring invalid name in $SRC" >&2
+  : > "$D/home-engine"
+  echo 'window.IDEA_HOME_ENGINE = "";' > "$D/home-engine.js"
+fi
+chmod 644 "$D/home-engine" "$D/home-engine.js"

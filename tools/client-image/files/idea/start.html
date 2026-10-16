@@ -1,0 +1,84 @@
+<!doctype html>
+<!-- IDEA client start page (proposal idea#203 §2). Chrome home page and target of the one "IDEA" shortcut.
+     Order: home Engine (/etc/idea/home-engine, via home-engine.js) -> last name that worked -> idea.local.
+     Never shows a browser error page: every probe is a short no-cors fetch; only a host that answered is opened. -->
+<html lang="en"><head><meta charset="utf-8"><title>IDEA</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+ body{font-family:system-ui,sans-serif;margin:0;display:flex;min-height:100vh;align-items:center;justify-content:center;background:#f4f6f8;color:#1d2a35}
+ main{max-width:34rem;padding:2rem;text-align:center}
+ h1{font-size:2.4rem;margin:.2rem 0 1rem}
+ #status{font-size:1.25rem;min-height:3.5rem}
+ #notfound{display:none;background:#fff4e5;border:1px solid #f0c27a;border-radius:.6rem;padding:1rem;margin:1rem 0;font-size:1.1rem}
+ form{margin-top:1.5rem;font-size:.95rem;color:#55636f}
+ form input{font-size:1rem;padding:.3rem .5rem;width:12rem}
+ form button{font-size:1rem;padding:.3rem .8rem}
+ body.failed form{font-size:1.3rem;color:#1d2a35;background:#fff;border:2px solid #2b7bb9;border-radius:.6rem;padding:1.2rem}
+ body.failed form input{font-size:1.3rem;width:15rem;padding:.5rem}
+ body.failed form button{font-size:1.3rem;padding:.5rem 1.2rem}
+ #fielderr{color:#b3261e;min-height:1.3rem;margin-top:.4rem}
+</style>
+<script src="file:///etc/idea/home-engine.js"></script>
+</head><body>
+<main>
+ <h1>IDEA</h1>
+ <div id="status" role="status">Looking for the school server&hellip;</div>
+ <div id="notfound" role="alert"></div>
+ <form id="sticker" autocomplete="off" novalidate>
+  <label for="name">Or type the name on the server's sticker:</label><br>
+  <input id="name" name="name" placeholder="e.g. brave-otter" spellcheck="false" autocapitalize="off" maxlength="80">
+  <button type="submit">Open</button>
+  <div id="fielderr" aria-live="polite"></div>
+ </form>
+</main>
+<script>
+"use strict";
+const IDEA = window.IDEA_START = (function () {
+  const cfg = Object.assign({ timeoutMs: 1500, rememberLast: true, sharedName: "idea", lastKey: "idea.lastEngine" },
+                            window.IDEA_START_CONFIG || {});
+  // strict hostname label: [a-z0-9-], 1-63, no hyphen at either end; ".local" stripped; case-folded
+  function normalise(raw) {
+    if (typeof raw !== "string") return null;
+    let s = raw.trim().toLowerCase();
+    if (s.endsWith(".local")) s = s.slice(0, -6);
+    return /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(s) ? s : null;
+  }
+  const url = n => "http://" + n + ".local/";
+  async function probe(name) {
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), cfg.timeoutMs);
+    try { await fetch(url(name), { mode: "no-cors", cache: "no-store", signal: ctl.signal }); return true; }
+    catch (e) { return false; } finally { clearTimeout(t); }
+  }
+  function getLast() { try { return normalise(localStorage.getItem(cfg.lastKey) || ""); } catch (e) { return null; } }
+  // remember the Engine actually opened (the host we land on), only if it validates; the shared
+  // name (idea.local) is not a specific Engine, so it never replaces a remembered one.
+  function setLast(n) { n = normalise(n); if (!cfg.rememberLast || !n || n === cfg.sharedName) return;
+    try { localStorage.setItem(cfg.lastKey, n); } catch (e) {} }
+  function open(name) { setLast(name); IDEA.navigate(url(name)); }
+  const $ = id => document.getElementById(id);
+  function fail(msg) { document.body.classList.add("failed"); $("status").textContent = ""; const n = $("notfound"); n.textContent = msg; n.style.display = "block"; $("name").focus(); }
+  function candidates() {
+    const out = []; const add = n => { n = normalise(n || ""); if (n && !out.includes(n)) out.push(n); };
+    add(window.IDEA_HOME_ENGINE); if (cfg.rememberLast) add(getLast()); add(cfg.sharedName); return out;
+  }
+  async function auto() {
+    for (const n of candidates()) {
+      $("status").textContent = "Looking for the school server\u2026";
+      if (await probe(n)) return open(n);
+    }
+    fail("No school server was found. Check that this computer is on the school network, " +
+         "or type the name on the server's sticker below.");
+  }
+  async function submit(ev) {
+    ev.preventDefault(); const raw = $("name").value; const n = normalise(raw);
+    if (!n) { $("fielderr").textContent = "That is not a server name. Use only letters, numbers and hyphens, like brave-otter."; return; }
+    $("fielderr").textContent = ""; $("status").textContent = "Looking for " + n + "\u2026";
+    if (await probe(n)) return open(n);
+    fail("No server called " + n + " was found. Check the name on the sticker and the network.");
+  }
+  return { cfg, normalise, probe, candidates, auto, submit, navigate: cfg.navigate || (u => location.assign(u)) };
+})();
+document.getElementById("sticker").addEventListener("submit", IDEA.submit);
+if (!window.IDEA_START_NO_AUTO) IDEA.auto();
+</script>
+</body></html>

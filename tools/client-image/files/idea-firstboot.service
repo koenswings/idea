@@ -1,0 +1,10 @@
+[Unit]
+Description=IDEA client first boot (hostname, ssh host keys, machine-id)
+ConditionPathExists=!/var/lib/idea-firstboot.done
+Before=ssh.service gdm.service
+After=local-fs.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/idea-firstboot
+[Install]
+WantedBy=multi-user.target

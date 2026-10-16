@@ -1,0 +1,15 @@
+#!/bin/sh
+# One-shot (learner's first login): mark the IDEA desktop shortcut trusted so GNOME/DING launches it
+# (DING's "Allow Launching" is the same metadata::trusted flag + the exec bit). On success it disables
+# its own autostart entry (Hidden=true); if the session isn't ready yet it retries for ~60 s and runs again next login.
+f="$HOME/Desktop/idea-console.desktop"; a="$HOME/.config/autostart/idea-trust-desktop.desktop"
+i=0; while [ $i -lt 30 ]; do
+  if [ -f "$f" ] && gio set "$f" metadata::trusted true 2>/dev/null \
+     && gio info -a metadata::trusted "$f" 2>/dev/null | grep -q 'trusted: true'; then
+    chmod 755 "$f" 2>/dev/null
+    printf '[Desktop Entry]\nType=Application\nName=IDEA desktop icons\nExec=/usr/local/bin/idea-trust-desktop\nNoDisplay=true\nHidden=true\n' > "$a"
+    exit 0
+  fi
+  i=$((i+1)); sleep 2
+done
+exit 0

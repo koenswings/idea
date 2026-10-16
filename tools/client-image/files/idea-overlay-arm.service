@@ -1,0 +1,10 @@
+[Unit]
+Description=IDEA client: switch reset-on-reboot ON after first-boot setup (once), then reboot
+ConditionPathExists=!/var/lib/idea-overlay-armed
+After=idea-firstboot.service cloud-config.service snapd.seeded.service local-fs.target
+Before=gdm.service display-manager.service
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/idea-overlay-arm
+[Install]
+WantedBy=multi-user.target

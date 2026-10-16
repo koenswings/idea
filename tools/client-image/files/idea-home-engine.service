@@ -1,0 +1,12 @@
+[Unit]
+Description=IDEA: read home-Engine name from the boot partition
+After=local-fs.target boot-firmware.mount
+RequiresMountsFor=/boot/firmware
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/idea-home-engine
+
+[Install]
+WantedBy=multi-user.target

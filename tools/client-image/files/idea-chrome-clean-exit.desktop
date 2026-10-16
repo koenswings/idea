@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=IDEA browser clean-exit fix-up
+Exec=/usr/local/bin/idea-chrome-clean-exit
+NoDisplay=true
+X-GNOME-Autostart-Phase=Initialization

@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<stkconfig version="8" >
+    <!-- IDEA client: offline school; never ask for internet access (2 = not allowed) -->
+    <enable_internet value="2" />
+</stkconfig>

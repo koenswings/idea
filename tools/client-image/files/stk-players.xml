@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<players version="1" >
+    <current player="Learner"/>
+    <player name="Learner" guest="false" use-frequency="1" is-default="true" remember-password="false" icon-filename="" >
+        <story-mode first-time="false" >
+        </story-mode>
+    </player>
+</players>
