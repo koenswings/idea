@@ -23,7 +23,16 @@ by sha256 in `config.env`) for profile `cudy_wr3000s-v1`. No compiling, ~1-4 min
 * No Tailscale auth key (flash station pushes it after boot; proposal 4.3).
 * No per-school or per-router values. Sticker name is written later to `/etc/idea/sticker`.
 * Not yet: LED/button scripts, captive DNS redirect, NTP server, health CGI, the
-  `idea-router-flash` flash-station script, `test/`.
+  `idea-router-flash` flash-station script (it will call `idea-router-enrol`), on-router self-test.
+
+## Tailscale enrol (flash station)
+`idea-router-enrol <sticker> [10.42.0.1]` runs after the IDEA image has booted (proposal 4.3, 5.4):
+writes `/etc/idea/sticker`, sets the hostname, copies the fleet key
+(`~/.config/idea-router/fleet-authkey`, must be mode 600) to `/tmp/tskey` on the router, runs
+`tailscale up --reset --auth-key=file:/tmp/tskey --advertise-tags=tag:idea --hostname=<sticker> --accept-dns=false --accept-routes=false`,
+removes the key (also on failure), checks `tailscale status` shows it online with `tag:idea`, and logs to
+`~/.local/state/idea-router/enrol.log` without the key. Re-running on an enrolled router pushes no key.
+Offline test: `test/idea-router-enrol.test.sh` (mock ssh/scp).
 
 ## Label values
 `config.env` holds every value from the router label as `LABEL_TODO_*`. A build with any left
