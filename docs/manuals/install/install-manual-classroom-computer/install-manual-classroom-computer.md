@@ -17,7 +17,7 @@ This manual sets up one classroom computer: a Raspberry Pi 400 or Raspberry Pi 5
 <div class="note">
 <b>No secrets in this manual.</b>
 <ul>
-<li>Every school uses the same addresses (<i>IDEA School Server: Installation Manual</i>). The Console is at <code>http://idea.local</code>, whichever and however many Engines the school has.</li>
+<li>Every school uses the same addresses (<i>IDEA School Server: Installation Manual</i>). On the wired network, the Console is at <code>http://idea.local</code>, whichever and however many Engines the school has.</li>
 <li>IDEA default passwords follow the public convention <code>&lt;name&gt;911!</code>: the account or network name followed by <code>911!</code>. The student account <code>learner</code> has <b>no</b> password.</li>
 <li><code>&lt;SCHOOL&gt;</code>: the school name, for labels only. <code>&lt;STICKER&gt;</code>: the two-word sticker name of an Engine, for example <code>brave-otter</code>.</li>
 </ul>
