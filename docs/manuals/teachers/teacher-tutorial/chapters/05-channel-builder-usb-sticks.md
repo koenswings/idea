@@ -80,7 +80,7 @@ Your channel is built, but learners cannot see it yet. Someone who may manage ch
 2. Plug the stick in again. The builder sees what changed and builds a new version of the **same channel**. If nothing changed, it does nothing.
 3. In Kolibri, open **Device > Channels** and import the channel again from the builder, as in 5.2, to get the new version.
 
-   ![Importing again from the builder: Kolibri shows New version available next to the channel already on the device. Click More information to update the channel](../screenshots/C5-11.png)
+   ![Importing again from the builder: Kolibri shows New version available for the channel already on the device](../screenshots/C5-11.png)
 
 ## 5.4 Build a channel by hand
 
