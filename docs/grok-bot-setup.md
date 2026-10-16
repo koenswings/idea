@@ -407,15 +407,17 @@ BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> status idle
 
 | Field | Value |
 |---|---|
-| Model | Intenso SSD, 111.8G |
-| USB bridge serial (`ID_USB_SERIAL_SHORT`) | `26A1EE83197F` |
-| Disk serial (`ID_SERIAL_SHORT`) | `3813430-532011020` |
-| Partition 1 | vfat, UUID `3E50-902A`, label `system-boot` |
-| Partition 2 | ext4, UUID `378383c9-0612-4c82-9c07-8c34d15253ba`, label `writable` |
+| Model | Intenso SSD, 119.2G (re-verified on idea03 2026-10-16) |
+| USB bridge serial (`ID_USB_SERIAL_SHORT`) | `26A1EE830C13` (by-id `usb-Intenso_SSD_Sata_III_26A1EE830C13-0:0`) |
+| Disk serial (`ID_SERIAL_SHORT`, lsblk `SERIAL`) | `AA000000000000005638` |
+| Partition 1 | ext4, UUID `91a9d40d-631c-4a20-88f5-e65f528f3a67`, label `DUR-NEXTCLOUD` |
+| Partition 2 | ext4, UUID `15bd4687-5df4-4206-b7ae-4e5ac30a1872`, label `DUR-EMPTY001` |
+
+The idea#152 IDs (`26A1EE83197F`, `3813430-532011020`, `3E50-902A`, `378383c9-…`) and the later `a0bf8374`/`sdc` report are stale and no longer present on idea03.
 
 - Hardware tests touch only this disk.
 - `dd` writes (idea#139), erase, the App Harness and erase tests (idea#138) must refuse it, and each has an automated check that proves the refusal.
-- Never undock or wipe it. idea03's root SSD (serial `AA202000000000004820`) is never a test target.
+- Never undock or wipe it. idea03's root SSD (serial `AA202000000000004820`; vfat `EACA-13DA`, ext4 `21724cc6-e5a3-48a1-8643-7917dba3a9fb`) is never a test target.
 - The same IDs are recorded in idea03's `note` in `fleet-state.json`.
 
 **Handoffs to Koen (standing rule, 2026-09-28):** never ask Koen to run a specific test. Any test that is needed is coded as an automated test (unit, integration or on-Pi hardware) and passes before handoff. A handoff contains the PR URL, the review URL and the test evidence, never manual test steps. This applies to Ops review-deploy reports as well: Atlas reports the PR, the review URL and automated evidence (HTTP health, pm2 state, store and `mdns` checks, test results).
