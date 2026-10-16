@@ -67,6 +67,15 @@ check "mode message" grep -q "has mode 644, must be 600" "$WORK/out"
 reset; run Bad_Name; rc=$?
 check "bad sticker -> rc 2" [ "$rc" = 2 ]
 
+reset; run sunny-robin-router; rc=$?
+check "-router suffix accepted" [ "$rc" = 0 ]
+check "-router hostname set" [ "$(cat "$WORK/r/hostname")" = sunny-robin-router ]
+check "-router: key never leaked" noleak
+for bad in sunny-robin-switch sunny-robin-router-x sunny router-robin-sunny-x; do
+  reset; run "$bad"; rc=$?
+  check "bad name $bad -> rc 2" [ "$rc" = 2 ]
+done
+
 reset; FAKE_DOWN=1 run sunny-robin; rc=$?
 check "router down -> rc 4" [ "$rc" = 4 ]
 

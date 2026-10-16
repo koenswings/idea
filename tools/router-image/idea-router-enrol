@@ -2,7 +2,7 @@
 # idea-router-enrol — flash-station step after the IDEA image has booted (proposal 2026-10-15 §4.3, §5.4, §6.1):
 # write the sticker name, set the hostname, join the IDEA tailnet with the fleet key, verify, remove the key.
 #
-# Usage: idea-router-enrol <sticker-name> [router-ip]      (router-ip default 10.42.0.1)
+# Usage: idea-router-enrol <sticker-name>[-router] [router-ip]     (router-ip default 10.42.0.1)
 # Env:   IDEA_FLEET_KEY   key file (default ~/.config/idea-router/fleet-authkey, must be mode 600)
 #        IDEA_ROUTER_LOG  log file (default ~/.local/state/idea-router/enrol.log)
 #        SSH / SCP        override the ssh/scp commands (tests)
@@ -26,7 +26,7 @@ die()  { local rc="$1"; shift; echo "FAIL: $*" >&2; logline "FAIL rc=$rc $*"; ex
 logline() { mkdir -p "$(dirname "$LOG")" 2>/dev/null || true; printf '%s router=%s sticker=%s %s\n' "$(date -Is)" "$ROUTER" "${STICKER:-?}" "$*" >> "$LOG" 2>/dev/null || true; }
 rsh()  { "${SSH_CMD[@]}" "${SSH_OPTS[@]}" "root@$ROUTER" "$@"; }
 
-[[ "$STICKER" =~ ^[a-z]+-[a-z]+$ ]] || { echo "usage: $0 <sticker-name like sunny-robin> [router-ip]" >&2; exit 2; }
+[[ "$STICKER" =~ ^[a-z]+-[a-z]+(-router)?$ ]] || { echo "usage: $0 <sticker-name like sunny-robin or sunny-robin-router> [router-ip]" >&2; exit 2; }
 
 # --- key file checks (before touching the router) ---
 [ -f "$KEY" ] || die 3 "fleet key file missing: $KEY"
