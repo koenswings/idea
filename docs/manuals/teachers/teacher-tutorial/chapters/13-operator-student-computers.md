@@ -21,32 +21,31 @@ Good to know:
 
 ## 13.2 Find the card
 
-1. Under the IDEA box, open **Client cards**. Every card in a card reader is listed with the reader's name, the card's size and what is on it now, for example *Ubuntu client image 2026-10-01* or *empty*.
+1. Click the IDEA box in the list on the left. Scroll down to **CLIENT CARDS**. It shows the client image the box will write, and every card in a card reader: the reader's name, the card's size and what is on it now.
 
-[[pending-shot: SC-01 | Console: Client cards under the IDEA box, one card in a reader]]
+   ![Client cards: one card in a reader, with Flash…](../screenshots/SC-01.png)
 
-2. Check that the **size** matches your card (a student card is 32 GB). If the card is not listed, see 13.5.
+2. Check that the **size** matches your card. If the card is not listed, see 13.5.
 
 > **Never pick an IDEA Disk.** The Files Disk, the Backup Disk and app disks are never offered here, but always check the name and size before you continue.
 
 ## 13.3 Reset (flash) the card
 
-1. Click **Flash** on the card's row.
-2. Choose the image version. Leave the default (the current version) unless your IDEA contact tells you otherwise.
+1. The card belongs to the IDEA box you flash it from: its **IDEA** shortcut tries that box first. Flash it from the IDEA box of the classroom it will be used in.
+2. Click **Flash…** on the card's row.
+3. Read the panel **FLASH CLIENT CARD**. It repeats the card, its size, what is on it now and the image. It says in red that everything on the card will be wiped. If anything looks wrong, click **Back**.
 
-[[pending-shot: SC-02 | Flash dialog: image version, card name, reader, size and current contents, the wipe warning]]
+   ![Flash client card: check the card, then Wipe and flash](../screenshots/SC-02.png)
 
-3. The card belongs to the IDEA box you flash it from: its **IDEA** shortcut tries that box first. Flash it from the IDEA box of the classroom it will be used in.
-4. Read the confirmation: it repeats the card's **name, reader, size and current contents**, and says the card will be wiped. If anything looks wrong, click **Cancel**.
-5. Confirm. The Console shows the progress: writing, then checking.
+4. Click **Wipe and flash**. The Console shows the progress in steps, for example **Step 3 of 6: Writing**.
 
-[[pending-shot: SC-03 | Console: flash in progress]]
+   ![Flash in progress](../screenshots/SC-03.png)
 
-6. Wait for **Done - safe to remove**. Do not pull the card reader out before that.
+5. Wait for **Done – safe to remove**. Do not pull the card reader out before that. Then click **Close**.
 
-[[pending-shot: SC-04 | Console: Done - safe to remove]]
+   ![Done – safe to remove](../screenshots/SC-04.png)
 
-7. Take the card out of the reader and put it back into the student computer. Switch the computer on.
+6. Take the card out of the reader and put it back into the student computer. Switch the computer on.
 
 ## 13.4 After the reset
 
