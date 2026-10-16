@@ -12,7 +12,7 @@ cover_logo: "yes"
 This manual takes one school from boxes to a working IDEA server. Each step has the same shape:
 
 1. **Do:** what to do.
-2. **✔ Check:** how to see that it worked. Do not go on until the check passes.
+2. **✔ Check:** how to see that it worked. Go on once the check passes.
 
 <div class="note">
 <b>Placeholders.</b> This manual has no secret keys or tokens in it. Wherever you see
@@ -20,7 +20,7 @@ This manual takes one school from boxes to a working IDEA server. Each step has 
 The IDEA default passwords below are not secret: they follow the public IDEA convention <code>&lt;name&gt;911!</code>.
 <ul>
 <li>IDEA defaults: router <code>root</code> / <code>admin911!</code>, switch <code>admin</code> / <code>admin911!</code>, Pi user <code>pi</code> / <code>pi911!</code> (keyboard only; SSH is key-only), classroom computer <code>admin</code> / <code>admin911!</code>, Wi-Fi <code>IDEA</code> / <code>idea911!</code> and <code>IDEA-Teachers</code> / <code>idea-teachers911!</code>.</li>
-<li><code>&lt;TAILSCALE-AUTH-KEY&gt;</code>: the one IDEA fleet key. Koen gives it to you as a file. Never type it on a command line.</li>
+<li><code>&lt;TAILSCALE-AUTH-KEY&gt;</code>: the one IDEA fleet key. Koen gives it to you as a file. Keep it in the file: it stays out of the command history.</li>
 <li><code>&lt;STICKER&gt;</code>: the name the installer gives a Pi, for example <code>brave-otter</code> (section 5.6). Write it on the sticker on the case.</li>
 </ul>
 </div>
@@ -39,6 +39,8 @@ A Pi can move to another school without any change in Tailscale or in this manua
 
 ## The school router's Wi-Fi networks and default passwords
 
+*The Wi-Fi networks the router makes, and their first passwords.*
+
 The IDEA school router arrives **pre-flashed** (see the *IDEA School Router – Image and Automated Flashing* proposal). It already has these settings:
 
 | What | Name | Default password | Who uses it |
@@ -56,6 +58,8 @@ and the IDEA team changes them on the router (section 10). Write the new ones do
 </div>
 
 ## Fill-in sheet for this school
+
+*Write down the details of this school as you go.*
 
 | Item | Value |
 |---|---|
@@ -81,7 +85,11 @@ Two separate firewall zones need two separate networks, so the Wi-Fi networks ge
 
 # The big picture
 
+*How the parts fit together.*
+
 ## Wiring
+
+*Which cable goes where.*
 
 ![Wiring diagram: which cable goes into which port](diagrams/m1-wiring.svg)
 
@@ -96,6 +104,8 @@ The Pis get **no** USB-C power supply. The PoE+ HAT takes power from the Etherne
 
 ## Network zones
 
+*Who can reach what on the school network.*
+
 ![Network zones and allowed traffic](diagrams/m1-zones.svg)
 
 * **IDEA (students):** devices reach only the Engines, however many there are (Console, Kolibri, Nextcloud, Kiwix). There is no forwarding to the internet, so outside DNS servers, VPNs and websites are all blocked. Students on the IDEA Wi-Fi cannot reach each other either (client isolation).
@@ -104,6 +114,8 @@ The Pis get **no** USB-C power supply. The PoE+ HAT takes power from the Etherne
 * **Tailscale:** the router and every Engine join the IDEA tailnet with the one fleet tag `tag:idea`. Admins reach every device. Devices with `tag:idea` reach nothing, not even each other. There are no exit nodes and no subnet routes.
 
 ## Where to do each step
+
+*Which steps you do in Belgium and which on site.*
 
 ![Belgium vs on site](diagrams/m1-where.svg)
 
@@ -121,6 +133,8 @@ Do everything you can **in Belgium**, with your home internet plugged into the C
 | 8 Final checklist | ✔ (dry run) | ✔ (for real) |
 
 # 1. Unboxing
+
+*Check that the school kit is complete.*
 
 Do this once for each school kit. Tick each item.
 
@@ -140,10 +154,14 @@ Do this once for each school kit. Tick each item.
 
 # 2. Router: check the pre-flashed IDEA router
 
+*Check that the router arrived with the IDEA settings.*
+
 The IDEA team flashes and sets up every router before it ships, with the flash script from the *IDEA School Router – Image and Automated Flashing* proposal. You do **not** flash it yourself.
 If you ever get a plain Cudy router that is not pre-flashed, follow Appendix D instead.
 
 ## 2.1 Read the labels
+
+*Note the router's model and serial number.*
 
 1. Turn the Cudy over. The Cudy label shows the model (**WR3000S**), the hardware version (**V1.0**) and the serial number. Write the serial number on the fill-in sheet.
 2. The IDEA sticker shows the router's own name, the Wi-Fi name `IDEA`, the password `idea911!` and `http://10.42.0.1`.
@@ -151,6 +169,8 @@ If you ever get a plain Cudy router that is not pre-flashed, follow Appendix D i
 **✔ Check:** the Cudy label says WR3000S V1.x and there is an IDEA sticker. If there is no IDEA sticker, the router is not pre-flashed: tell Koen, or use Appendix D.
 
 ## 2.2 Check the IDEA settings
+
+*See that the router's IDEA settings are in place.*
 
 1. Connect the 12 V adapter. Connect your laptop with a cable to **LAN2**. Leave WAN empty.
 2. Browse to `http://10.42.0.1` and log in as `root` with `admin911!`.
@@ -169,6 +189,8 @@ not plain OpenWrt. So a reset never leaves a school with an open network, but it
 
 # 3. Router: internet and Tailscale check
 
+*Check that the router reaches the internet and the IDEA team.*
+
 1. Plug your home router (Belgium) or the Starlink router (on site) into the Cudy **WAN** port.
 2. LuCI **Status → Overview** should show an IPv4 WAN address.
 
@@ -179,6 +201,8 @@ not plain OpenWrt. So a reset never leaves a school with an open network, but it
 * In the Tailscale admin console the router shows with its sticker name and tag `tag:idea`.
 
 # 4. Switch: TP-Link TL-SG105PE (optional, recommended)
+
+*Set up the switch that powers the Engines.*
 
 Facts from TP-Link [7][8]:
 
@@ -205,9 +229,13 @@ An admin can still reach its web page through a Pi with an SSH tunnel: <code>ssh
 
 # 5. The Raspberry Pi 5 Engines (one or more)
 
+*Build and install each Engine.*
+
 Do this section once per Engine. A school with one Engine does it once; you can add Engines later the same way.
 
 ## 5.1 Assemble
+
+*Put the Engine's parts together.*
 
 1. Fit the NVMe SSD and the PoE+ HAT, following the HAT maker's instructions. Fit any cooling the HAT comes with.
 2. Do **not** connect a USB-C power supply at the same time as PoE.
@@ -221,6 +249,8 @@ copy a large file to the disk and check that <code>vcgencmd get_throttled</code>
 </div>
 
 ## 5.2 Install Raspberry Pi OS Lite (64-bit) on the NVMe
+
+*Put the operating system on the Engine's SSD.*
 
 The IDEA Engine runs on **Raspberry Pi OS Lite (64-bit)**. The test fleet runs Debian 13 "trixie" (from `agent-engine-dev/docs/PI_FLEET.md`). Its user must be **`pi`**: the Engine lives in `/home/pi/...` and runs as `pi`.
 
@@ -243,6 +273,8 @@ The IDEA Engine runs on **Raspberry Pi OS Lite (64-bit)**. The test fleet runs D
 
 ## 5.3 First boot
 
+*Start the Engine and connect to it.*
+
 1. Plug the first Engine into switch **port 1** (further Engines into ports 2, 3, 4). The PoE+ HAT powers it. No SD card should be in the slot.
 2. Wait 2-3 minutes. In LuCI → **Status → Overview → DHCP leases** you will see a new `raspberrypi` with a temporary address (`10.42.0.1xx`). Do one Pi at a time, so you know which lease is which. The MAC address tells them apart.
 
@@ -258,6 +290,8 @@ If it booted from somewhere else, run `sudo raspi-config` → **Advanced Options
 
 ## 5.4 Update the bootloader and the OS
 
+*Bring the Engine up to date.*
+
 ```bash
 sudo apt update && sudo apt full-upgrade -y
 sudo rpi-eeprom-update -a
@@ -267,6 +301,8 @@ sudo reboot
 **✔ Check:** after the reboot, `sudo rpi-eeprom-update` says "BOOTLOADER: up to date".
 
 ## 5.5 Engine addresses (no MAC reservations)
+
+*How the Engines get their addresses.*
 
 You do **not** reserve addresses by MAC. Each Engine tells the router it is an IDEA Engine (DHCP vendor class `idea-engine`), and the router gives it an address from `10.42.0.2` to `10.42.0.9`. So a Pi can move to another school without any change on the router.
 
@@ -283,6 +319,8 @@ sudo reboot
 **✔ Check:** `ping <ENGINE-IP>` answers, for every Engine.
 
 ## 5.6 Install the IDEA Engine (and Console)
+
+*Install the IDEA software, so the Console opens at `http://idea.local`.*
 
 **Where this comes from:** `koenswings/agent-engine-dev`, read on 12 Oct 2026:
 
@@ -339,6 +377,8 @@ The exact wording of the script's output may still change a little. What counts 
 
 ## 5.6b Report the sticker names to the IDEA team
 
+*Tell the IDEA team which Engines this school has.*
+
 Send Koen one short message for each school:
 
 | School | Pi | Sticker name |
@@ -351,6 +391,8 @@ Send it again whenever a Pi moves to another school. The school is not part of t
 **✔ Check:** Koen confirms that he has the names.
 
 ## 5.7 Tailscale on the Pis (always on, tag:idea)
+
+*Let the IDEA team reach the Engines for support.*
 
 Join every Engine to the tailnet with the same fleet key and tag, using the sticker name as the Tailscale name:
 
@@ -367,14 +409,18 @@ Repeat for each further Engine, with its own address and sticker name.
 
 ## 5.8 Apps and content (Kolibri, Nextcloud, Kiwix)
 
+*Add the apps and the learning content.*
+
 The Engine starts apps from **App Disks**: drives with Docker Compose apps on them, which the Engine detects when you plug them in (`README.md`, `docs/ARCHITECTURE.md`).
 
 Koen gives you the App Disks for each school, ready to use. Plug them into the Pis in Belgium and check them there.
-Do not download content on site: Starlink data and time on site are limited.
+Download content before you travel: Starlink data and time on site are limited.
 
 **✔ Check:** in the Console, each app shows as *Running* and opens from a laptop on the LAN.
 
 # 6. Tailscale policy (Koen, once for all schools)
+
+*The one-time remote-access setup for all schools.*
 
 Koen manages the tailnet. There is **one** tag and **one** key for the whole fleet, not one per school:
 
@@ -406,6 +452,8 @@ Only the people in `group:admins` get access. School staff are not on the list.
 
 # 7. On site: connect Starlink and final cabling
 
+*Connect everything at the school.*
+
 The *IDEA School Router – Image and Automated Flashing* proposal (Starlink chapter) has the background. In short: Starlink is only the internet on the Cudy
 **WAN** port. The school network works fully without it.
 
@@ -426,7 +474,7 @@ The *IDEA School Router – Image and Automated Flashing* proposal (Starlink cha
    Plug in the power adapters: Starlink, Cudy, switch. The Pis start by themselves through PoE.
 5. **Power:** if there is a UPS, put the **Cudy, the switch** (and so the Engines) on it. Starlink uses far more power
    (about 75–100 W); keep it on mains unless the UPS is large.
-6. Wait 5 minutes. **Do not change** anything on the Cudy WAN (leave it on DHCP), and do not turn bypass off.
+6. Wait 5 minutes. Leave the Cudy WAN on DHCP and keep bypass on.
 
 **✔ Check:**
 
@@ -437,6 +485,8 @@ The *IDEA School Router – Image and Automated Flashing* proposal (Starlink cha
 * Unplug cable 1 for a minute: a laptop on `IDEA` still opens the Console. Plug it back in: Tailscale comes back by itself.
 
 # 8. Final checklist
+
+*Check that everything works before you leave.*
 
 Do it once in Belgium (dry run) and again on site. Use a laptop with no other network connection (unplug the cable).
 
@@ -458,6 +508,8 @@ Do it once in Belgium (dry run) and again on site. Use a laptop with no other ne
 
 # 9. Switching teacher internet off and on
 
+*Turn internet on the teacher Wi-Fi off or on.*
+
 Internet on the teacher Wi-Fi `IDEA-Teachers` is **on** by default. Staff can switch it off, also from far away, and switch it on again later.
 
 **LuCI** (from a wired laptop at the school, or over Tailscale): **Network → Firewall → Traffic Rules** → `Teachers-Internet` → untick **Enable** to switch it off, or tick it to switch it back on → **Save & Apply**.
@@ -476,6 +528,8 @@ ssh root@10.42.0.1 "uci set firewall.teachers_internet.enabled='1' && uci commit
 Switch it on only when the head teacher asks, and off again when the lesson is over. It does not go off by itself.
 
 # 10. Tell the school, and change the default passwords
+
+*Hand over to the school and set new passwords.*
 
 **Tell the head teacher and the teachers:**
 
@@ -496,7 +550,11 @@ The head teacher picks new passwords (at least 8 characters, different for stude
 
 # Appendix A. Router scripts
 
+*The scripts that set up the router.*
+
 ## A.1 `docs/manuals/install/scripts/school-router-setup.sh`
+
+*Sets up the IDEA networks on the router.*
 
 ```sh
 @@INCLUDE ../scripts/school-router-setup.sh@@
@@ -504,17 +562,23 @@ The head teacher picks new passwords (at least 8 characters, different for stude
 
 ## A.2 `docs/manuals/install/scripts/router-tailscale-zone.sh`
 
+*Lets Tailscale reach the school network.*
+
 ```sh
 @@INCLUDE ../scripts/router-tailscale-zone.sh@@
 ```
 
 ## A.3 `docs/manuals/install/scripts/router-starlink-cgnat-exception.sh`
 
+*Lets the Starlink router's own address through.*
+
 ```sh
 @@INCLUDE ../scripts/router-starlink-cgnat-exception.sh@@
 ```
 
 # Appendix B. Troubleshooting
+
+*Quick fixes for common problems.*
 
 | Problem | Try |
 |---|---|
@@ -527,6 +591,8 @@ The head teacher picks new passwords (at least 8 characters, different for stude
 | Tailscale offline after a move | `ssh` in and run `tailscale status`. Check the WAN on the router. Starlink must be in bypass mode. |
 
 # Appendix C. Sources (read on 12 October 2026)
+
+*Where the facts in this manual come from.*
 
 1. OpenWrt wiki, *Cudy WR3000S v1*: `https://openwrt.org/toh/cudy/wr3000s_v1` (installation, flash chip notice, MD5, backup, layout).
 2. Cudy, *OpenWrt Software Download* (Transition Firmware notice): `https://www.cudy.com/blogs/faq/openwrt-software-download`.
@@ -544,11 +610,17 @@ The head teacher picks new passwords (at least 8 characters, different for stude
 
 # Appendix D. Flashing and setting up a router by hand
 
+*Prepare a router yourself if it did not arrive pre-flashed.*
+
 Only for a Cudy WR3000S v1 that did **not** arrive pre-flashed. The flash script of the *IDEA School Router – Image and Automated Flashing* proposal does the same steps automatically.
 
 ## D.1 Router: check model, version and flash chip
 
+*Make sure the router can take OpenWrt.*
+
 ### D.1.1 Read the label
+
+*Find the model and hardware version.*
 
 1. Turn the Cudy over. The label shows the model (**WR3000S**), the hardware version (**V1.0**) and the serial number.
 2. If it says anything other than WR3000S V1.x, **stop**. The images below are only for WR3000S v1. (WR3000, WR3000H, WR3000E and WR3000P are different devices with different images.)
@@ -557,13 +629,15 @@ Only for a Cudy WR3000S v1 that did **not** arrive pre-flashed. The flash script
 <div class="warn">
 <b>New flash chip (date code 2543 or later, so from November 2025).</b> These units have a different flash chip
 (ESMT F50L1G41LC). Per the OpenWrt wiki [1] and Cudy's notice [2] you must use the <b>new</b> Cudy-signed intermediate image
-(the 20251119 build), and OpenWrt 24.10.5 or later. 25.12.5 is fine. Never install Cudy stock firmware 2.3.x or older on these units.
+(the 20251119 build), and OpenWrt 24.10.5 or later. 25.12.5 is fine. Keep these units away from Cudy stock firmware 2.3.x or older.
 <b>If you are not sure, treat the unit as a new-flash unit.</b>
 </div>
 
 **✔ Check:** you know the model (WR3000S), version (V1) and date code (old or new flash).
 
 ### D.1.2 Download the two files (on your laptop)
+
+*Get the two firmware files.*
 
 | File | Where | How to check it |
 |---|---|---|
@@ -578,17 +652,21 @@ Do <b>not</b> pick the <code>...-ubootmod-...</code> files. That is an advanced 
 
 ## D.2 Router: flash OpenWrt and configure it
 
+*Install OpenWrt and the IDEA settings.*
+
 ![Flashing in two uploads](diagrams/m1-flash.svg)
 
 Do all of this with a **network cable** between your laptop and a Cudy **LAN** port. After the first upload the router has no Wi-Fi at all, which can look as if it is broken [1].
 
 ### D.2.1 First upload: Cudy-signed intermediate image (source: OpenWrt wiki [1])
 
+*Load the intermediate image that makes OpenWrt possible.*
+
 1. Connect the 12 V adapter. Connect your laptop to **LAN2**. Leave WAN empty.
 2. Browse to `http://192.168.10.1` (or `http://cudy.net`). Recent stock firmware (2.4.6) asks you to **create an admin password** first [1]. Pick any password: this firmware will be replaced in a moment.
 3. If a setup wizard turns on automatic upgrades, switch that off [1].
 4. Go to **Advanced Settings → Firmware** (on 2.4.6 the upload is called **Local Update**). Upload the unzipped `.bin` intermediate image.
-5. If the confirmation screen shows an MD5, compare it with `403e276f...1a137`. Confirm and wait 3-5 minutes. Do not unplug.
+5. If the confirmation screen shows an MD5, compare it with `403e276f...1a137`. Confirm and wait 3-5 minutes, with the power connected.
 
 **✔ Check:** your laptop gets an address `192.168.1.x`. `http://192.168.1.1` opens an OpenWrt LuCI page that says "OpenWrt 23.05-SNAPSHOT-CUDY" [1]. There is no Wi-Fi network: that is normal.
 
@@ -597,6 +675,8 @@ Do all of this with a **network cable** between your laptop and a Cudy **LAN** p
 </div>
 
 ### D.2.2 Back up the per-unit calibration data (recommended, 2 minutes)
+
+*Keep a copy of the router's own radio data.*
 
 The OpenWrt wiki [1] recommends saving the `Factory` and `bdinfo` partitions now. They hold this unit's own Wi-Fi calibration and MAC address, and no download can replace them. The intermediate image runs SSH as `root` with no password. From your Ubuntu machine:
 
@@ -611,6 +691,8 @@ sha256sum Factory.bin bdinfo.bin
 **✔ Check:** the two hash pairs match.
 
 ### D.2.3 Second upload: official OpenWrt 25.12.5
+
+*Install the official OpenWrt.*
 
 **Option A (web):** in LuCI at `http://192.168.1.1` go to **System → Backup / Flash Firmware → Flash image**. Pick `openwrt-25.12.5-mediatek-filogic-cudy_wr3000s-v1-squashfs-sysupgrade.bin`. **Untick "Keep settings"** [1]. Continue and wait 3-5 minutes.
 
@@ -627,12 +709,16 @@ ssh root@192.168.1.1 'sysupgrade -n /tmp/openwrt-25.12.5-mediatek-filogic-cudy_w
 
 ### D.2.4 Set the router root password
 
+*Protect the router with a password.*
+
 1. LuCI: **System → Administration → Router Password**. Enter the IDEA default `admin911!` twice and save. (Or run `passwd` over SSH.)
 2. Optional but good: in **System → Administration → SSH-Keys**, add your SSH public key.
 
 **✔ Check:** log out of LuCI and log in again with the new password. `ssh root@192.168.1.1` asks for the password (or uses your key).
 
 ### D.2.5 Apply the IDEA school settings (script)
+
+*Run the IDEA settings script.*
 
 The script `scripts/school-router-setup.sh` (full text in Appendix A) sets everything up in one go:
 
@@ -668,12 +754,16 @@ To change one value later, for example a Wi-Fi password, use LuCI (<b>Network �
 
 ### D.2.6 Connect WAN and test internet on the router
 
+*Check that the router reaches the internet.*
+
 1. Plug your home router (Belgium) or the Starlink router (on site) into the Cudy **WAN** port.
 2. LuCI **Status → Overview** should show an IPv4 WAN address.
 
 **✔ Check:** `ssh root@10.42.0.1 'ping -c3 openwrt.org'` gets replies.
 
 ### D.2.7 Install Tailscale on the router
+
+*Let the IDEA team reach the router for support.*
 
 Source: OpenWrt wiki "Tailscale" [5]. OpenWrt 25.12 uses the `apk` package manager (not `opkg`). Release 25.12.5 ships `tailscale 1.102.3` [6].
 
@@ -709,8 +799,8 @@ ssh root@10.42.0.1 'sh /tmp/router-starlink-cgnat-exception.sh'
    **✔ Check:** `ssh root@10.42.0.1 "nft list chain ip filter ts-input"` shows a rule `iifname "wan" udp sport 67 udp dport 68 … accept` **above** the `100.64.0.0/10` drop. On Starlink, leave the router for one lease period (or force a renew) and confirm the WAN address stays up.
 
 <div class="warn">
-Never add <code>--advertise-routes</code> or <code>--advertise-exit-node</code>. IDEA uses neither subnet routers nor exit nodes.
-Never put the key itself after <code>--auth-key=</code>. Always use <code>file:</code>, so the key does not end up in the shell history or the process list
+Leave out <code>--advertise-routes</code> and <code>--advertise-exit-node</code>: IDEA uses neither subnet routers nor exit nodes.
+Use <code>file:</code> after <code>--auth-key=</code>, not the key itself, so the key does not end up in the shell history or the process list
 (the same rule as in the IDEA Engine).
 </div>
 

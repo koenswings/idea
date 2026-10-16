@@ -25,7 +25,11 @@ This manual sets up one classroom computer: a Raspberry Pi 400 or Raspberry Pi 5
 
 # 1. What is in the boxes
 
+*Check that you have every part before you start.*
+
 ## 1.1 Raspberry Pi 400 kit (or Pi 500 kit) (bol.com, "Raspberry Pi 400 kit, muis, 16GB microSD, English guide, QWERTY")
+
+*The keyboard computer kit and what comes in it.*
 
 <div class="note">
 The bol.com page could not be opened from our tools (bol.com blocks automated access). The list below is the
@@ -47,6 +51,8 @@ Check the **plug** of the power supply. Kits sold in Belgium usually have the Eu
 
 ## 1.2 Raspberry Pi Monitor 15.6" red/white (Kiwi Electronics, SC0940)
 
+*The monitor and what comes with it.*
+
 From the Kiwi product page [2] and the Raspberry Pi docs [3]:
 
 | ☐ | Item |
@@ -58,12 +64,16 @@ Monitor connectors: **HDMI** in (standard size, HDMI 1.4), **USB-C** (power in o
 
 ## 1.3 From Koen
 
+*The extra items the IDEA team sends you.*
+
 | ☐ | Item |
 |---|---|
 | ☐ | One **32 GB microSD card** for each computer (fast, A1/A2 class is best). |
 | ☐ | Stickers or a marker for labels: school name, computer number |
 
 # 2. Power: one power supply for the computer and the monitor
+
+*Run the computer and the monitor from one power supply.*
 
 Koen wants **one** power supply per workstation. That works. Here is what the Raspberry Pi documentation says:
 
@@ -78,14 +88,16 @@ Koen wants **one** power supply per workstation. That works. Here is what the Ra
 <div class="warn">
 <b>Rules for the one-power-supply setup</b>
 <ol>
-<li>Use the <b>official</b> Raspberry Pi USB-C supply from the kit: 15 W (5.1 V / 3 A) for a Pi 400 [5], 27 W (5.1 V / 5 A) for a Pi 500. Never use a phone charger.</li>
+<li>Use the <b>official</b> Raspberry Pi USB-C supply from the kit: 15 W (5.1 V / 3 A) for a Pi 400 [5], 27 W (5.1 V / 5 A) for a Pi 500. A phone charger is usually too weak.</li>
 <li>Plug <b>nothing else power-hungry</b> into the Pi 400's USB ports: only the mouse (and at most a USB stick). The monitor and mouse together are already close to the 1.2 A limit.</li>
-<li><b>Never force Full Power mode</b> on a monitor powered by a Pi 400. That is done by holding brightness-up for 3 seconds [3]. It would ask for more current than the Pi can give.</li>
+<li><b>Leave Full Power mode off</b> on a monitor powered by a Pi 400. That is done by holding brightness-up for 3 seconds [3]. It would ask for more current than the Pi can give.</li>
 <li>If the monitor <b>flashes on and off</b>, or the Pi shows a lightning-bolt/under-voltage warning, the supply can't keep up. Turn brightness and volume down. If that doesn't help, give the monitor its own USB-C power supply (a second official 15 W supply works) [3].</li>
 </ol>
 </div>
 
 ## 2.1 Wiring
+
+*Connect the cables in the right order.*
 
 The diagram shows a Pi 400. A Pi 500 has the same ports in the same order on its back edge.
 
@@ -114,6 +126,8 @@ The back edge of the Pi 400, seen from **behind**, left to right: GPIO, microSD,
 
 # 3. The IDEA client image
 
+*What the IDEA client image is and what it already contains.*
+
 Every classroom computer runs the same **IDEA client image**. It is the official Ubuntu Desktop **26.04.1 LTS** for Raspberry Pi with the IDEA settings built in. There is **no Ubuntu setup wizard** and nothing to configure by hand.
 
 | What | In the IDEA client image |
@@ -136,6 +150,8 @@ The IDEA client image needs a Pi 400 bootloader (EEPROM) dated <b>2022-11-25 or 
 
 # 4. Install Raspberry Pi Imager (on Ubuntu, Mac or Windows)
 
+*Install the tool that writes the image to a card.*
+
 | Your computer | How |
 |---|---|
 | Ubuntu | `sudo snap install rpi-imager` [6], or `sudo apt install rpi-imager` |
@@ -147,9 +163,13 @@ The current Imager is **2.0.12** (8 Oct 2026).
 
 # 5. Write the microSD cards
 
+*Put the IDEA client image on the cards.*
+
 ![Card preparation](diagrams/m2-cards.svg)
 
 ## 5.1 Get the IDEA client image
+
+*Get the image file and check that it arrived complete.*
 
 The IDEA team (Koen or Atlas) gives you the image file with its checksum file:
 
@@ -162,6 +182,8 @@ Copy both to your computer once, on a good connection in Belgium. Use the **same
 
 ## 5.2 Write one card with Imager
 
+*Write the image to one card.*
+
 1. Put a 32 GB card in your card reader.
 2. Imager → **Device:** *Raspberry Pi 4* for a Pi 400, *Raspberry Pi 5* for a Pi 500. (The card works in both; this only affects Imager's own menu.)
 3. **OS:** *Use custom* → pick the `idea-client-…img.xz` file.
@@ -173,6 +195,8 @@ Copy both to your computer once, on a good connection in Belgium. Use the **same
 
 ## 5.3 (Optional) Give the computer a home Engine
 
+*Choose which Engine the computer tries first.*
+
 A computer can have a **home Engine**: the Engine its IDEA icon tries first. Without one, the start page simply uses `idea.local`, which works at every school. Later the Console's Flash step will write the home Engine for you; until then you can do it by hand:
 
 1. Take the card out and put it back in, so your computer shows the small boot partition (called `system-boot`).
@@ -183,6 +207,8 @@ A computer can have a **home Engine**: the Engine its IDEA icon tries first. Wit
 
 ## 5.4 Batch tips for many cards
 
+*Save time when you prepare many cards.*
+
 * Imager writes one card at a time. With 2-3 USB card readers you can run a second Imager window on a second reader. Watch the **Storage** choice every time.
 * On Linux you can also write from the command line with `rpi-imager --cli <image.img.xz> /dev/sdX`. Check `/dev/sdX` with `lsblk` first: a wrong letter erases the wrong disk. **Test first** on one card.
 * No "golden card" is needed any more: every card written from the IDEA image is already complete, and each computer gives itself its own name and identity at first boot.
@@ -190,7 +216,11 @@ A computer can have a **home Engine**: the Engine its IDEA icon tries first. Wit
 
 # 6. First boot
 
+*Start the computer for the first time and check that it works.*
+
 ## 6.1 (Only if a Pi 400 won't boot) Update the EEPROM with the kit card
+
+*Fix a Pi 400 that does not start.*
 
 1. Put the kit's **16 GB Raspberry Pi OS** card in the Pi 400 and boot it. Its own setup wizard will appear: complete it with any user.
 2. Open a terminal and run `sudo rpi-eeprom-update`. It shows the current bootloader date.
@@ -200,6 +230,8 @@ A computer can have a **home Engine**: the Engine its IDEA icon tries first. Wit
 
 ## 6.2 Start the computer
 
+*Switch the computer on with the IDEA card.*
+
 1. Put the IDEA card in (contacts facing down). Wire it as in 2.1 and connect power last.
 2. The first boot takes a few minutes: the card's partition is grown, and the computer gives itself its name and new keys. It may restart once.
 3. The desktop of the `learner` account opens by itself. There is no wizard and no password.
@@ -207,6 +239,8 @@ A computer can have a **home Engine**: the Engine its IDEA icon tries first. Wit
 **✔ Check:** you see the desktop with the **IDEA** icon, and the IDEA icon in the dock on the left. No pop-up asks for anything.
 
 ## 6.3 The IDEA icon and the start page
+
+*Open the Console with one click.*
 
 Click the **IDEA** icon (desktop or dock). Chrome opens the **IDEA start page**, which looks for the Console in this order, and opens the first one that answers:
 
@@ -222,6 +256,8 @@ The Console lists **every** Engine of the school, whichever one you opened.
 
 ## 6.4 The manual way: open the Console by its sticker name
 
+*Open the Console by typing its address.*
+
 This always works, also on a laptop, a phone or a computer without the IDEA image:
 
 1. In any browser, type **`http://<STICKER>.local`**, the sticker name of any Engine, for example `http://brave-otter.local` (http, not https).
@@ -231,6 +267,8 @@ This always works, also on a laptop, a phone or a computer without the IDEA imag
 
 ## 6.5 Wi-Fi: IDEA or IDEA-Teachers
 
+*Connect the computer to the right Wi-Fi network.*
+
 The pre-flashed IDEA school router creates two Wi-Fi networks (*IDEA School Server: Installation Manual*, "The school router's Wi-Fi networks and default passwords"). The passwords are the IDEA defaults until the school changes them:
 
 | Who uses this computer | Network |
@@ -238,7 +276,7 @@ The pre-flashed IDEA school router creates two Wi-Fi networks (*IDEA School Serv
 | Students (default) | `IDEA`, password `idea911!`: Console and apps only, no internet |
 | Teacher's computer | `IDEA-Teachers`, password `idea-teachers911!`: Console and apps, plus internet (on by default; staff can switch it off) |
 
-The IDEA image already joins `IDEA`. Only a computer that the head teacher names for a teacher gets `IDEA-Teachers`. The learner account cannot change Wi-Fi, so an admin adds it: top-right menu → Wi-Fi → `IDEA-Teachers`, and give the `admin` password when Ubuntu asks. Never type the `IDEA-Teachers` password on a student computer.
+The IDEA image already joins `IDEA`. Only a computer that the head teacher names for a teacher gets `IDEA-Teachers`. The learner account cannot change Wi-Fi, so an admin adds it: top-right menu → Wi-Fi → `IDEA-Teachers`, and give the `admin` password when Ubuntu asks. Keep the `IDEA-Teachers` password for teacher computers.
 
 If the school has changed the `IDEA` password (*IDEA School Server: Installation Manual*, "Tell the school, and change the default passwords"), an admin enters the new one on each computer: top-right menu → Wi-Fi → `IDEA` → forget, then join again.
 
@@ -248,17 +286,23 @@ If the school has changed the `IDEA` password (*IDEA School Server: Installation
 
 ## 6.6 The admin account
 
+*The account for repairs and settings.*
+
 You need `admin` only for repairs. On the login screen choose **Not listed?**, type `admin` and the password `admin911!`. Or, in a terminal of the learner account: `su - admin`.
 
 Change it later like every IDEA default: the head teacher can pick a new admin password (`passwd` as admin).
 
 ## 6.7 Final touches
 
+*Small things to finish the computer.*
+
 * Power off with **Fn + F10** (both models), or the system menu → Power Off. Wait until the screen is black before you pull the plug.
 * The monitor's speakers work over HDMI. If there is no sound, choose *HDMI* under **Settings → Sound → Output**.
 * Label the card and the computer: `<SCHOOL> - idea-pc-____` (the name from **Settings → System → About**).
 
 # 7. Checklist for each computer
+
+*Check each computer before you hand it over.*
 
 | ☐ | Test | Expected |
 |---|---|---|
@@ -277,6 +321,8 @@ Change it later like every IDEA default: the head teacher can pick a new admin p
 
 # Appendix A. Troubleshooting
 
+*Quick fixes for common problems.*
+
 | Problem | Try |
 |---|---|
 | No picture | Move cable 2 to the other micro-HDMI port. Check that the monitor isn't in standby (press ⏻). |
@@ -289,6 +335,8 @@ Change it later like every IDEA default: the head teacher can pick a new admin p
 | Something is broken beyond repair | Write the card again from the IDEA image (section 5). Nothing on the computer needs saving: students keep their work on the Engine (Nextcloud). |
 
 # Appendix B. Sources (read on 12-15 October 2026)
+
+*Where the facts in this manual come from.*
 
 1. Raspberry Pi documentation, *Keyboard computers* (Pi 400 kit contents, setup, monitor powered from the keyboard, Fn + F10): `raspberrypi.com/documentation/computers/keyboard-computers.html`.
 2. Kiwi Electronics, *Raspberry Pi Monitor 15.6" Rood/Wit* (KW-3393, SC0940; package: monitor + USB-A to USB-C cable): `https://www.kiwi-electronics.com/nl/raspberry-pi-monitor-15-6quot-rood-wit-20221`.
