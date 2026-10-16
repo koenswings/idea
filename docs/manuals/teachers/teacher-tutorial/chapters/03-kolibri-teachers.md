@@ -2,7 +2,9 @@
 
 # 3. Kolibri for teachers
 
-Demo: school (facility) **IDEA Demo School**, teacher `teacher1` (password `teacher1911!`), class **Grade 5**. The demo school has the **Maths**, **Grade 5 Science** and **Early Reading** channels from the IDEA-DEMO disk; the demo lesson uses **Maths > Fractions** and the quiz in 3.5 uses the exercises in **Khan Academy (English - US curriculum) > Math by grade > 5th grade > Add and subtract fractions**.
+**About the examples in this chapter.** The screens in this chapter come from the IDEA demo setup. That setup is switched on (activated) on the demo IDEA box. It creates a Kolibri school named **IDEA Demo School**, with the class **Grade 5** and the demo accounts. The steps work the same at your school, but your school, class and account names will be different. The demo IDEA box is described in *IDEA Demo Server: Remote Access for Justice*. The demo accounts are listed in *Appendix: demo accounts* at the end of this tutorial.
+
+In the demo, you sign in as `teacher1`. The demo school has three channels from the IDEA-DEMO disk: **Maths**, **Grade 5 Science** and **Early Reading**. The demo lesson uses **Maths > Fractions**. The quiz in 3.5 uses **Khan Academy (English - US curriculum) > Math by grade > 5th grade > Add and subtract fractions**.
 
 ## 3.1 Signing in
 
