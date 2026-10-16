@@ -30,6 +30,9 @@ sudo tools/client-image/build.sh [--base ubuntu-26.04.1-...+raspi.img.xz] [--sec
 
 ## Secrets (never in git, never printed)
 
+* Release guard: `build.sh` refuses to build unless `WIFI_PSK` is the field key `idea911!`. A build with any other key
+  (e.g. `secrets-test.env`) needs `--test-secrets` and is named `...-TEST.img.xz`; never flash a -TEST image for a school.
+
 Copy `secrets.env.example` to `~/.config/idea-client-image/secrets.env` (chmod 600) or pass `--secrets`.
 It holds the support **authorized_keys** path (public keys only) and the per-school **Wi-Fi PSK**. `build.sh` refuses a secrets file inside the repo and a private key in the keys file;
 `scan-secrets.sh` fails the build if a secret value appears anywhere except the root-only NetworkManager profile (PSK).

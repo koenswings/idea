@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # Build idea-client-<ver>.img.xz from the official Ubuntu raspi desktop image (proposal idea#201 §9).
-# Usage: sudo tools/client-image/build.sh [--browser chrome|chromium] [--chrome-deb FILE] [--base /path/to/base.img.xz] [--secrets FILE] [--out DIR] [--no-xz]
+# Usage: sudo tools/client-image/build.sh [--browser chrome|chromium] [--chrome-deb FILE] [--base /path/to/base.img.xz] [--secrets FILE] [--out DIR] [--no-xz] [--test-secrets]
 # Host: amd64 or arm64 Linux with losetup, qemu-user-static (binfmt for aarch64 on amd64), xz, parted, e2fsprogs.
 set -euo pipefail
 export PATH="$PATH:/usr/sbin:/sbin"
 HERE="$(cd "$(dirname "$0")" && pwd)"; REPO="$(git -C "$HERE" rev-parse --show-toplevel)"
 . "$HERE/client-image.conf"
-BASE=""; CHROME_FILE=""; SECRETS="${SUDO_USER:+$(getent passwd "$SUDO_USER" | cut -d: -f6)}/.config/idea-client-image/secrets.env"
+BASE=""; TEST_SECRETS=0; CHROME_FILE=""; SECRETS="${SUDO_USER:+$(getent passwd "$SUDO_USER" | cut -d: -f6)}/.config/idea-client-image/secrets.env"
 OUT="$HERE/out"; WORK="$HERE/work"; XZ=1; EXTRA_MB=6144
 while [ $# -gt 0 ]; do case "$1" in
   --base) BASE="$2"; shift 2;; --browser) BROWSER="$2"; shift 2;; --chrome-deb) CHROME_FILE="$2"; shift 2;; --secrets) SECRETS="$2"; shift 2;;
+  --test-secrets) TEST_SECRETS=1; shift;;
   --out) OUT="$2"; shift 2;; --work) WORK="$2"; shift 2;; --no-xz) XZ=0; shift;;
   *) echo "unknown arg $1" >&2; exit 2;; esac; done
 [ "$(id -u)" = 0 ] || { echo "run as root" >&2; exit 1; }
@@ -24,11 +25,15 @@ missing=""; for t in $need; do command -v "$t" >/dev/null 2>&1 || [ -x "/usr/bin
 [ -f "$SECRETS" ] || { echo "secrets file missing: $SECRETS (see secrets.env.example)" >&2; exit 1; }
 case "$(realpath "$SECRETS")" in "$REPO"/*) echo "refusing: secrets file is inside the repo" >&2; exit 1;; esac
 set +x; . "$SECRETS"
+# Release guard (idea#202): the field WiFi key is the fleet convention "idea911!". Any other WIFI_PSK (e.g. the
+# 32-char test key in secrets-test.env) is refused unless --test-secrets, which also marks the output -TEST.
+if [ "${WIFI_PSK:-}" != 'idea911!' ] && [ "${TEST_SECRETS:-0}" != 1 ]; then
+  echo "refusing release build: WIFI_PSK in $SECRETS is not the field key (len ${#WIFI_PSK}); use --test-secrets for a -TEST image" >&2; exit 1; fi
 for v in ADMIN_AUTHORIZED_KEYS_FILE WIFI_PSK; do [ -n "${!v:-}" ] || { echo "secret $v not set" >&2; exit 1; }; done
 grep -q 'PRIVATE KEY' "$ADMIN_AUTHORIZED_KEYS_FILE" && { echo "authorized keys file contains a private key" >&2; exit 1; }
 
 GITSHA="$(git -C "$REPO" rev-parse --short HEAD)"; [ -z "$(git -C "$REPO" status --porcelain -- tools/client-image)" ] || GITSHA="${GITSHA}-dirty"
-VER="26.04-$(date -u +%Y%m%d)-$GITSHA"; NAME="idea-client-$VER"
+VER="26.04-$(date -u +%Y%m%d)-$GITSHA"; NAME="idea-client-$VER"; [ "${TEST_SECRETS:-0}" = 1 ] && NAME="$NAME-TEST"
 mkdir -p "$OUT" "$WORK"
 
 # --- base image: fetch if needed, verify sha (pinned + live SHA256SUMS when reachable) ---
