@@ -11,14 +11,14 @@ uci set luci.main.lang='en' 2>/dev/null || true
 # present but off; switched on later from the Console). Set here too so the image is OFF
 # whatever SETUP_REF ships.
 uci -q get firewall.teachers_internet >/dev/null && uci set firewall.teachers_internet.enabled='0'
-# dnsmasq 'local' is a LIST. OpenWrt ships it as a plain option ('/lan/'); 'uci add_list' on top
-# of that produced the single value '/lan/ /local/', which renders 'local=/lan/ /local/' and
-# makes dnsmasq refuse to start (no DHCP, no DNS). Rewrite it as two clean list entries.
-# '/local/' keeps *.local answered from the router (idea.local via /tmp/hosts/idea) and never
-# forwarded upstream.
+# dnsmasq: OpenWrt's init script reads 'local' as ONE option (append_parm --local), so any
+# second value ('/lan/ /local/', whether set or add_list) renders 'local=/lan/ /local/' and
+# dnsmasq refuses to start (no DHCP, no DNS). Keep local='/lan/' and make *.local local-only
+# with a 'server=/local/' list entry (no upstream = answer from /tmp/hosts/idea, never forward).
 uci -q delete dhcp.@dnsmasq[0].local || true
-uci add_list dhcp.@dnsmasq[0].local='/lan/'
-uci add_list dhcp.@dnsmasq[0].local='/local/'
+uci set dhcp.@dnsmasq[0].local='/lan/'
+uci -q del_list dhcp.@dnsmasq[0].server='/local/' || true
+uci add_list dhcp.@dnsmasq[0].server='/local/'
 # SSH only from LAN + tailscale (dropbear on lan; tailscale zone input ACCEPT)
 uci set dropbear.@dropbear[0].Interface='lan'
 uci commit
