@@ -34,15 +34,15 @@ The classroom computers have **one** shortcut on the desktop, named **IDEA**. Th
 
 1. Double-click **IDEA** on the desktop. You can also find it in the app menu. It opens in Chrome.
 
-[[pending-shot: IDEA-01 | Student computer desktop with the one IDEA shortcut]]
+[[pending-shot: IDEA-01 | Student computer desktop with the one IDEA shortcut (text only for now: the screenshot tool captures browser pages, not a computer desktop)]]
 
-2. A start page appears for a moment while it looks for the IDEA box.
+2. A start page titled **IDEA** appears for a moment and says **Looking for the school server…**.
 
-[[pending-shot: IDEA-02 | The IDEA start page while it looks for the IDEA box (wording to follow the idea#202 start.html)]]
+   ![The IDEA start page: Looking for the school server…](../screenshots/IDEA-02.png)
 
 3. The Console opens by itself.
 
-If the Console does not open, check that the computer is connected to the school network. Then type the name on the box's sticker in the field on the start page, for example `brave-otter`, and press Enter. Use small letters, with `-` between the words. The start page remembers that IDEA box.
+If the start page says **No school server was found**, check that the computer is connected to the school network. Then type the first line of the box's sticker, for example `brave-otter`, in the field **Or type the name on the server's sticker**. Use small letters, with `-` between the words. Press **Open**. The start page remembers that IDEA box.
 
 ### 2.2.2 On your own laptop, tablet or phone
 
