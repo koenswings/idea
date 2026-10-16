@@ -91,6 +91,16 @@ if pm is True: ok=False
 sys.exit(0 if ok else 1)
 PY
 su_ python3 $R/chrome.py $P && pass "Chrome profile: First Run sentinel kept, no choice screen pending, password manager off" || fail "Chrome profile checks (see above)"
+# 5c power cut: kill Chrome hard, mark the profile Crashed, run the login fix-up as the session would, relaunch:
+#     the fix-up must restore exit_type=Normal and the relaunch must show no "Restore pages?" bubble (screenshot chrome-after-crash.png)
+Pf=$P/Default/Preferences
+su_ pkill -KILL -u learner -f chrome 2>/dev/null; sleep 3
+su_ -u learner python3 -c "import json,sys;p=sys.argv[1];d=json.load(open(p));d.setdefault('profile',{}).update(exit_type='Crashed',exited_cleanly=False);json.dump(d,open(p,'w'))" $Pf
+asl /usr/local/bin/idea-chrome-clean-exit
+ex=$(su_ python3 -c "import json,sys;p=json.load(open(sys.argv[1]))['profile'];print(p.get('exit_type'),p.get('exited_cleanly'))" $Pf 2>&1)
+asl systemd-run --user --scope --quiet --collect gtk-launch idea-console >/dev/null 2>&1; sleep 20
+shot chrome-after-crash
+[ "$ex" = "Normal True" ] && pgrep -u learner -f chrome >/dev/null && [ -s $R/chrome-after-crash.png ] && pass "power-cut sim: fix-up set exit_type=Normal, Chrome relaunched (check chrome-after-crash.png: no Restore bubble)" || fail "power-cut sim: profile '$ex' after fix-up / Chrome or screenshot missing"
 su_ pkill -TERM -u learner -f chrome 2>/dev/null; sleep 3; true
 # 6 LibreOffice: first start as learner creates the user profile; the xcd values must win
 asl timeout 90 soffice --headless --terminate_after_init >/dev/null 2>&1

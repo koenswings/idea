@@ -67,6 +67,10 @@ install -d /home/learner/.config/$PROF; : > "/home/learner/.config/$PROF/First R
 install -d /usr/local/share/applications
 sed -E "s#^(Exec=[^ ]+)#\\1 --ozone-platform-hint=auto --password-store=basic#" /usr/share/applications/$DESKTOP > /usr/local/share/applications/$DESKTOP
 
+# no "Restore pages?" bubble after a power cut: mark the profile cleanly exited at every login (idea#202)
+install -m 755 $B/files/idea-chrome-clean-exit /usr/local/bin/
+install -d /etc/xdg/autostart; install -m 644 $B/files/idea-chrome-clean-exit.desktop /etc/xdg/autostart/
+
 # start page + home-Engine boot step (name comes from the card, never from the image)
 install -d /usr/share/idea /etc/idea
 install -m 644 $B/files/idea/start.html /usr/share/idea/start.html

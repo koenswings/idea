@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+# IDEA (idea#202): mark the Chrome/Chromium profile as cleanly exited at login, so a power cut
+# (normal at schools) never shows Chrome's "Restore pages? Chrome didn't shut down correctly" bubble.
+# Runs from /etc/xdg/autostart at every login, before the learner can open Chrome. Skips if Chrome is running.
+import json, os, subprocess
+if subprocess.run(["pgrep", "-u", str(os.getuid()), "-x", "chrome"], capture_output=True).returncode == 0:
+    raise SystemExit(0)
+for prof in ("google-chrome", "chromium"):
+    p = os.path.expanduser(f"~/.config/{prof}/Default/Preferences")
+    try:
+        d = json.load(open(p))
+    except Exception:
+        continue
+    pr = d.setdefault("profile", {})
+    if pr.get("exit_type") == "Normal" and pr.get("exited_cleanly") is True:
+        continue
+    pr["exit_type"] = "Normal"; pr["exited_cleanly"] = True
+    t = p + ".idea-tmp"
+    json.dump(d, open(t, "w"), separators=(",", ":")); os.replace(t, p)

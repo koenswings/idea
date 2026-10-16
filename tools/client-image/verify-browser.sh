@@ -17,6 +17,12 @@ assert set(p["LocalNetworkAccessAllowedForUrls"])=={"file://*","http://*.local"}
 assert p["BrowserSignin"]==0 and p["SyncDisabled"] is True and p["ComponentUpdatesEnabled"] is False
 assert p["PromotionalTabsEnabled"] is False and p["DefaultBrowserSettingEnabled"] is False
 P
+# no "Restore pages?" bubble: login fix-up installed, autostarted, and it really rewrites a crashed profile
+a=/etc/xdg/autostart/idea-chrome-clean-exit.desktop; T=$(mktemp -d); mkdir -p $T/.config/google-chrome/Default
+echo '{"profile":{"exit_type":"Crashed","exited_cleanly":false},"x":1}' > $T/.config/google-chrome/Default/Preferences
+[ -x /usr/local/bin/idea-chrome-clean-exit ] && grep -qx 'Exec=/usr/local/bin/idea-chrome-clean-exit' $a 2>/dev/null && ! grep -q '^Hidden=true' $a \
+ && HOME=$T python3 /usr/local/bin/idea-chrome-clean-exit && python3 -c "import json,sys;d=json.load(open(sys.argv[1]));p=d['profile'];sys.exit(0 if p['exit_type']=='Normal' and p['exited_cleanly'] is True and d['x']==1 else 1)" $T/.config/google-chrome/Default/Preferences \
+ && ok "clean-exit fix-up at login (no 'Restore pages?' bubble after power cut)" || bad "clean-exit fix-up missing or not working"; rm -rf $T
 [ -s /usr/share/idea/start.html ] && ok "start.html" || bad "start.html missing"
 [ -x /usr/local/sbin/idea-home-engine ] && systemctl is-enabled idea-home-engine.service >/dev/null 2>&1 && ok "home-engine boot unit enabled" || bad "home-engine boot unit"
 [ ! -s /etc/idea/home-engine ] && ok "no Engine name baked in" || bad "/etc/idea/home-engine not empty in image"
