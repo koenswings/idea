@@ -26,7 +26,7 @@ echo 'uci commit' >> "$F/usr/share/idea/school-router-setup.firstboot.sh"
 sed '/init.d/d' "$S/router-tailscale-zone.sh" > "$F/usr/share/idea/router-tailscale-zone.firstboot.sh"
 cp "$S/router-starlink-cgnat-exception.sh" "$F/usr/share/idea/"
 cp "$S/school-router-setup.sh" "$F/usr/share/idea/"   # for '--check' on the router
-sed -i "s/@ROOT_PASSWORD@/$ROOT_PASSWORD/" "$F/etc/uci-defaults/90-idea-setup"
+sed -i "s/@ROOT_PASSWORD@/$ROOT_PASSWORD/g" "$F/etc/uci-defaults/90-idea-setup"
 GIT=$(git -C "$REPO" rev-parse --short HEAD 2>/dev/null || echo nogit); SETUP_SHA=$(git -C "$REPO" rev-parse --short "$SETUP_REF")
 printf 'IDEA_ROUTER_VERSION=%s\nGIT=%s\nSETUP_REF=%s\nOPENWRT=%s\nPROFILE=%s\n' "$IDEA_ROUTER_VERSION" "$GIT" "$SETUP_SHA" "$OPENWRT_VERSION" "$PROFILE" > "$F/etc/idea/version"
 chmod 755 "$F/etc/uci-defaults/90-idea-setup" "$F"/usr/share/idea/*.sh
