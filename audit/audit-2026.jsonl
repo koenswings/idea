@@ -554,3 +554,5 @@
 {"ts":"2026-10-16T17:11:36Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-10-16T17:19:14Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-16T17:19:14Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Axle: #166 on-Pi lanAddress re-run, mDNS on (Steve)","previous":null}
+{"ts":"2026-10-16T17:25:06Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Axle: #166 on-Pi lanAddress re-run, mDNS on (Steve)"}
+{"ts":"2026-10-16T17:25:06Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
