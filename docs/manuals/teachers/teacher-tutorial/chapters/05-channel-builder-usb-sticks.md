@@ -44,7 +44,7 @@ Good to know:
 
 ## 5.2 Import the channel into Kolibri
 
-Your channel is built, but learners cannot see it yet. A Kolibri admin imports it once. On the demo school, `demo_teacher1` is a Kolibri admin.
+Your channel is built, but learners cannot see it yet. A Kolibri admin imports it once. On the demo school, `teacher1` is a Kolibri admin.
 
 1. Open Kolibri from the Console and sign in as a Kolibri admin.
 2. Open **Device**, then **Channels**, and click **IMPORT**.

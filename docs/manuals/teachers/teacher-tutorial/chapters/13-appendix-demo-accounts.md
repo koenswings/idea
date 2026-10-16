@@ -1,19 +1,16 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 15 October 2026
 
 # Appendix: demo accounts
 
-These are the accounts used for the screenshots. Your IDEA contact gives you the demo passwords. Kolibri usernames use an underscore (`demo_teacher1`); Nextcloud usernames use a hyphen (`demo-teacher1`).
+The screenshots were taken on the demo school **IDEA Demo School**, class **Grade 5**. The same usernames exist in Kolibri and in Nextcloud. Your IDEA contact gives you the demo passwords.
 
-| Username | App | Role | Used in |
-|---|---|---|---|
-| demo_admin | Kolibri | Kolibri admin | 3.3 (shown in the enroll list) |
-| demo_teacher1 | Kolibri | Admin and coach of class demo-Grade5A | 3, 5.2, 12.7 |
-| demo_learner1 | Kolibri | Learner in demo-Grade5A | 4 |
-| demo_learner2 | Kolibri | Learner in demo-Grade5A | 4 |
-| demo_learner3 | Kolibri | Learner, enrolled in 3.3 | 3.3 |
-| demo-teacher1 | Nextcloud | Teacher (groups demo-Grade5A, demo-teachers) | 5.5, 6, 9 |
-| demo-teacher2 | Nextcloud | Teacher (group demo-teachers) | 6.2 |
-| demo-learner1 | Nextcloud | Learner (group demo-Grade5A) | 7, 9.2 |
-| demo-learner2 | Nextcloud | Learner (group demo-Grade5A) | 7.1 |
+| Username | Role | Used in |
+|---|---|---|
+| admin | Kolibri and Nextcloud admin | 3.3 (shown in the enroll list) |
+| teacher1 | Kolibri admin and coach of class Grade 5; Nextcloud teacher (groups Grade 5 and teachers) | 3, 5.2, 6, 9, 12.7 |
+| teacher2 | Teacher (Nextcloud group teachers) | 6.2 |
+| learner1 | Learner in Grade 5 | 4, 7, 9.2 |
+| learner2 | Learner in Grade 5 | 4, 7.1 |
+| learner3 | Learner, enrolled in 3.3 | 3.3 |
 
-Demo content: Kolibri class **demo-Grade5A**, lesson **demo-Fractions lesson**, quiz **demo-Fractions quiz**; Nextcloud folders **demo-Worksheets** and **demo-Drop Zone**, document **demo-Lesson plan**.
+Demo content: Kolibri lesson **Fractions lesson** and quiz **Fractions quiz**; Nextcloud folders **Worksheets** and **Drop Zone**, document **Lesson plan**.
