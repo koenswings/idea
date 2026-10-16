@@ -11,7 +11,8 @@ by sha256 in `config.env`) for profile `cudy_wr3000s-v1`. No compiling, ~1-4 min
   from idea#211 head `7eedd03` (`SETUP_REF`) without its reboot: LAN 10.42.0.1/24, Wi-Fi
   `IDEA` / `idea911!` (students 10.42.1.0/24, isolated) and `IDEA-Teachers` /
   `idea-teachers911!` (10.42.2.0/24), country ZW, Engines .2-.9 by vendor class
-  `idea-engine`, firewall zones, `Teachers-Internet` rule off, avahi reflector on
+  `idea-engine`, firewall zones, `Teachers-Internet` rule **on** (idea#209: teacher internet on by default; untick the rule, or
+  `uci set firewall.teachers_internet.enabled='0'`, to switch it off remotely), avahi reflector on
   br-lan/br-students/br-teachers, `idea.local` dnsmasq hotplug. Then the tailscale zone
   (no forwarding), the Starlink CGNAT DHCP exception (D10), root password `admin911!`,
   SSH on LAN (plus tailscale zone).
