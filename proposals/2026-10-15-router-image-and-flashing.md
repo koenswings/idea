@@ -8,6 +8,8 @@ audience: "Proposal · Status: Approved by Koen 2026-10-15"
 **Date:** 2026-10-15
 **Status:** Approved by Koen 2026-10-15. Decisions D1–D11 closed in section 10. Updated 2026-10-15: Engine count
 not fixed (a school starts with 1 and adds more), Starlink chapter (section 12); D10–D11 closed same day.
+Updated 2026-10-16 (Koen): `Teachers-Internet` is **on** by default; staff can switch it off remotely
+(`school-router-setup.sh` sets `teachers_internet.enabled='1'`).
 
 # 1. Problem
 
@@ -39,8 +41,8 @@ This proposal changes **how** the router gets its settings, not **what** they ar
   add or remove Engines at any time. Nothing in the router depends on how many Engines there are. **Starlink** in
   bypass mode on the Cudy WAN port (section 12).
 * Wi-Fi **`IDEA`** (students) reaches the Pis only, **never** the WAN. Client isolation is on.
-* Wi-Fi **`IDEA-Teachers`** gets internet through **one** firewall rule, `Teachers-Internet`, which is off by default
-  and can be switched on and off (later from the Console).
+* Wi-Fi **`IDEA-Teachers`** gets internet through **one** firewall rule, `Teachers-Internet`, which is **on** by default
+  and can be switched off and on again remotely (later from the Console). (Koen, 2026-10-16)
 * **Tailscale is always on** on the router and the Pis, with the one fleet tag `tag:idea` and one fleet auth key.
   There are no per-school keys or tags. ACL: admins → `tag:idea`; `tag:idea` reaches nothing.
 * The router's DNS is the **fallback for `idea.local`** (mDNS on the Engines is the main path).
@@ -126,7 +128,7 @@ make image PROFILE=cudy_wr3000s-v1 \
 | Login | `root` / `admin911!` (D2 decided); SSH (dropbear) on LAN and Tailscale only, not on WAN or Wi-Fi |
 | LAN | `10.42.0.1/24`; DHCP pool `.100–.199`; `.2–.99` reserved for fixed devices |
 | Wi-Fi | `IDEA` (psk2, `idea911!`, isolation on) → `students` `10.42.1.0/24`; `IDEA-Teachers` (psk2, `idea-teachers911!`) → `teachers` `10.42.2.0/24`; both bands; country `ZW` |
-| Firewall | as the manual: students/teachers → only DHCP, DNS and the Engines; `Teachers-Internet` rule present, **off** |
+| Firewall | as the manual: students/teachers → only DHCP, DNS and the Engines; `Teachers-Internet` rule present, **on** (staff can switch it off remotely) |
 | DNS | dnsmasq answers `idea.local` with the live Engine addresses (section 5.2); everything else is forwarded upstream only for LAN and teachers |
 | mDNS | `umdns` reflects mDNS between LAN and the Wi-Fi zones, as the client-browser proposal requires |
 | Tailscale | `tailscale up --auth-key=file:… --advertise-tags=tag:idea --hostname=<sticker>`, `tailscale0` in its own zone with **no forwarding** (unchanged from manual 3.7) |
@@ -302,7 +304,7 @@ and overlay space logged.
 * Label/revision and flash chip recorded; full flash from stock with the script, twice (once with a factory reset
   between).
 * Phone on `IDEA`: gets `10.42.1.x`, opens `http://idea.local`, **cannot** reach the internet or the router's LuCI.
-* Laptop on `IDEA-Teachers`: no internet; switch `Teachers-Internet` on → internet; off → none.
+* Laptop on `IDEA-Teachers`: internet (rule on by default); switch `Teachers-Internet` off → none; on again → internet.
 * Engine count: start with **1** Engine (gets an address in `.2–.9`, `idea.local` answers it), add further Engines
   one by one without any router change; each gets `.2–.9` without MAC config and appears in `idea.local`.
   Switch them off one by one → `idea.local` answers only the live ones.
