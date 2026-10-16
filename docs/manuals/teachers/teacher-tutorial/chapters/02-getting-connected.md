@@ -22,20 +22,20 @@ The classroom computers (the student computers) are already connected to the sch
 
 1. Double-click **IDEA** on the desktop. You can also find it in the app menu. It opens in Chrome.
 
-[[pending-shot: IDEA-01 | Student computer desktop with the one IDEA shortcut]]
+[[pending-shot: IDEA-01 | Student computer desktop with the one IDEA shortcut (text only for now: the screenshot tool captures browser pages, not a computer desktop)]]
 
-2. A start page appears for a moment while it looks for the IDEA box. First it tries the IDEA box this computer belongs to, then the last IDEA box it opened, then any other IDEA box at the school. When it finds one, the Console opens by itself.
+2. A start page titled **IDEA** appears for a moment and says **Looking for the school server…**. First it tries the IDEA box this computer belongs to, then the last IDEA box it opened, then any other IDEA box at the school. When it finds one, the Console opens by itself.
 
-[[pending-shot: IDEA-02 | The IDEA start page while it looks for the IDEA box (wording to follow the idea#202 start.html)]]
+![The IDEA start page: Looking for the school server…](../screenshots/IDEA-02.png)
 
-3. If the start page says **No IDEA server found**, check that the computer is connected to the school network. Then type the name on the box's sticker in the field on the start page, and press Enter. The sticker is hand-written and has two lines:
+3. If the start page says **No school server was found**, check that the computer is connected to the school network. Then type the name on the box's sticker in the field **Or type the name on the server's sticker**, and press **Open** (or Enter). The sticker is hand-written and has two lines:
 
    - line 1: the name, for example `brave-otter`
    - line 2: the address, for example `http://brave-otter.local`
 
    Type the first line, for example `brave-otter`: small letters, with `-` between the words. The start page then remembers that IDEA box.
 
-[[pending-shot: IDEA-03 | Start page: No IDEA server found, with the sticker-name field]]
+![The start page when no IDEA box answers: No school server was found, with the field for the sticker name](../screenshots/IDEA-03.png)
 
 > **Two IDEA boxes at your school?** The Console shows the apps of all of them. You can also open a specific box by typing its sticker name in the field on the start page.
 
