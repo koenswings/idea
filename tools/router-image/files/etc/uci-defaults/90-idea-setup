@@ -1,0 +1,16 @@
+#!/bin/sh
+# IDEA first boot (idea#209 4.2). Runs once; OpenWrt deletes it on exit 0.
+S=/usr/share/idea
+sh $S/school-router-setup.firstboot.sh || exit 1
+sh $S/router-tailscale-zone.firstboot.sh || exit 1
+sh $S/router-starlink-cgnat-exception.sh || true   # helper no-ops until ts-input exists
+STICKER=$(cat /etc/idea/sticker 2>/dev/null || echo idea-router)
+uci set system.@system[0].hostname="$STICKER"
+uci set luci.main.lang='en' 2>/dev/null || true
+# SSH only from LAN + tailscale (dropbear on lan; tailscale zone input ACCEPT)
+uci set dropbear.@dropbear[0].Interface='lan'
+uci commit
+printf '%s\n%s\n' "@ROOT_PASSWORD@" "@ROOT_PASSWORD@" | passwd root >/dev/null 2>&1
+/etc/init.d/avahi-daemon enable
+/etc/init.d/tailscale enable 2>/dev/null || true
+exit 0

@@ -1,0 +1,12 @@
+# one package per line; '-name' removes. Proposal 4.1 + idea#211 avahi reflector.
+luci
+luci-ssl
+# luci-i18n-base-en: not a package; English is LuCI built-in
+-wpad-basic-mbedtls
+wpad-mbedtls
+tailscale
+umdns
+avahi-nodbus-daemon
+luci-app-sqm
+sqm-scripts
+prometheus-node-exporter-lua
