@@ -55,10 +55,26 @@ su_ grep -qx 'Hidden=true' /home/learner/.config/autostart/idea-trust-desktop.de
 shot(){ asl gdbus call --session --dest org.gnome.ScreenSaver --object-path /org/gnome/ScreenSaver --method org.gnome.ScreenSaver.SetActive false >/dev/null 2>&1; sleep 2; asl timeout 45 python3 $R/shot.py /tmp/idea-shot-$1.png >$R/shot.err 2>&1; [ -s /tmp/idea-shot-$1.png ] && su_ cp /tmp/idea-shot-$1.png $R/$1.png; }
 shot desktop && pass "screenshot desktop.png" || fail "screenshot: $(tail -c 200 $R/shot.err)"
 # 5 Chrome: launch the IDEA shortcut, then inspect profile
-# launch the IDEA shortcut inside learner's real session environment (systemd --user), as a click would
-asl systemd-run --user --quiet --collect gtk-launch idea-console >/dev/null 2>&1; t=0; while [ $t -lt 90 ] && ! su_ test -f /home/learner/.config/google-chrome/Default/Preferences; do sleep 5; t=$((t+5)); done; sleep 10
+# launch the IDEA shortcut inside learner's real session environment (systemd --user scope, so Chrome outlives gtk-launch), as a click would
+asl systemd-run --user --scope --quiet --collect gtk-launch idea-console >/dev/null 2>&1; t=0; while [ $t -lt 90 ] && ! su_ test -f /home/learner/.config/google-chrome/Default/Preferences; do sleep 5; t=$((t+5)); done; sleep 10
 pgrep -u learner -af 'chrome' | grep -q -- '--password-store=basic' && pass "Chrome running with --password-store=basic" || fail "Chrome not running with --password-store=basic"
 shot chrome && pass "screenshot chrome.png" || fail "chrome screenshot"
+# 5b Chrome window really visible: chrome.png must differ clearly from desktop.png
+cat > $R/winchk.py <<'PY3'
+import sys,zlib,struct
+def px(p):
+    d=open(p,'rb').read(); i=8; idat=b''; w=h=0
+    while i<len(d):
+        n=struct.unpack('>I',d[i:i+4])[0]; t=d[i+4:i+8]; c=d[i+8:i+8+n]; i+=12+n
+        if t==b'IHDR': w,h=struct.unpack('>II',c[:8])
+        if t==b'IDAT': idat+=c
+    return w,h,zlib.decompress(idat)
+a=px(sys.argv[1]); b=px(sys.argv[2])
+if a[:2]!=b[:2]: sys.exit(1)
+x,y=a[2],b[2]; step=max(1,len(x)//200000); diff=sum(1 for k in range(0,min(len(x),len(y)),step) if abs(x[k]-y[k])>24)
+frac=diff/(min(len(x),len(y))/step); print("   chrome window: %.1f%% of sampled bytes changed"%(100*frac)); sys.exit(0 if frac>0.10 else 1)
+PY3
+python3 $R/winchk.py $R/desktop.png $R/chrome.png && pass "Chrome window visible (chrome.png differs from desktop.png)" || fail "no visible Chrome window in chrome.png"
 P=/home/learner/.config/google-chrome
 cat > $R/chrome.py <<'PY'
 import json,sys,os

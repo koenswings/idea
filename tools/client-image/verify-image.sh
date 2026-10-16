@@ -53,8 +53,8 @@ ls /usr/share/applications/firefox*.desktop /usr/local/share/applications/firefo
 grep -rqsi firefox /etc/dconf/db/local.d/ && bad "firefox in dock/dconf" || ok "no firefox in dock (dconf)"
 # 4 Chrome launchers + password manager
 for d in /usr/share/applications/idea-console.desktop /home/learner/Desktop/idea-console.desktop /usr/local/share/applications/$BROWSER_DESKTOP_V; do
-  n=$(grep -c '^Exec=' $d 2>/dev/null); m=$(grep '^Exec=' $d 2>/dev/null | grep -c -- '--password-store=basic')
-  [ "${n:-0}" -gt 0 ] && [ "$n" = "$m" ] && ok "--password-store=basic on all $n Exec in $d" || bad "--password-store=basic missing in $d"; done
+  n=$(grep -c '^Exec=' $d 2>/dev/null); m=$(grep '^Exec=' $d 2>/dev/null | grep -- '--password-store=basic' | grep -c -- '--ozone-platform-hint=auto')
+  [ "${n:-0}" -gt 0 ] && [ "$n" = "$m" ] && ok "--password-store=basic + --ozone-platform-hint=auto on all $n Exec in $d" || bad "--password-store=basic/--ozone-platform-hint=auto missing in $d"; done
 # 5 search engine, choice screen, first run
 python3 - "$POL_V" "$INITPREF_V" <<'P' && ok "policy: PasswordManager off, Google fixed default search (no choice screen), promotions off; initial_preferences skip_first_run_ui" || bad "search/first-run policy"
 import json,sys

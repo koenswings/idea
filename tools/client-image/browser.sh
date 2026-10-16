@@ -63,8 +63,9 @@ printf '{"distribution":{"skip_first_run_ui":true,"suppress_first_run_bubble":tr
 PROF=$( [ "$BROWSER" = chrome ] && echo google-chrome || echo chromium )
 install -d /home/learner/.config/$PROF; : > "/home/learner/.config/$PROF/First Run"
 # default .desktop override (first in XDG_DATA_DIRS): every Exec gets --password-store=basic (no keyring prompt on autologin)
+# and --ozone-platform-hint=auto (native Wayland on GNOME, X11 where only X11 runs; Pi 400 + Pi 500)
 install -d /usr/local/share/applications
-sed -E "s#^(Exec=[^ ]+)#\\1 --password-store=basic#" /usr/share/applications/$DESKTOP > /usr/local/share/applications/$DESKTOP
+sed -E "s#^(Exec=[^ ]+)#\\1 --ozone-platform-hint=auto --password-store=basic#" /usr/share/applications/$DESKTOP > /usr/local/share/applications/$DESKTOP
 
 # start page + home-Engine boot step (name comes from the card, never from the image)
 install -d /usr/share/idea /etc/idea
@@ -81,7 +82,7 @@ install -m 644 $B/files/idea-logo/idea-console-256.png $H/256x256/apps/idea-cons
 install -m 644 $B/files/idea-logo/idea-console-48.png $H/48x48/apps/idea-console.png
 cp $B/files/idea.svg $H/scalable/apps/idea.svg   # legacy name kept
 gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
-sed "s/@BROWSER@/$BIN --password-store=basic/" $B/files/idea-console.desktop > /usr/share/applications/idea-console.desktop
+sed "s/@BROWSER@/$BIN --ozone-platform-hint=auto --password-store=basic/" $B/files/idea-console.desktop > /usr/share/applications/idea-console.desktop
 rm -f /usr/share/applications/idea-{nextcloud,kolibri,kiwix}.desktop /usr/local/bin/idea-open /home/learner/Desktop/idea-{nextcloud,kolibri,kiwix}.desktop
 install -d /home/learner/Desktop
 install -m 755 /usr/share/applications/idea-console.desktop /home/learner/Desktop/
