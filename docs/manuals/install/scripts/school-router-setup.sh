@@ -133,7 +133,7 @@ for Z in students teachers; do
   done
 done
 
-# ---- the ONE switchable rule: teachers -> internet (starts OFF) -------------------
+# ---- the ONE switchable rule: teachers -> internet (starts ON; staff can disable remotely) -------------------
 uci -q delete firewall.teachers_internet || true
 uci set firewall.teachers_internet=rule
 uci set firewall.teachers_internet.name='Teachers-Internet'
@@ -141,7 +141,7 @@ uci set firewall.teachers_internet.src='teachers'
 uci set firewall.teachers_internet.dest='wan'
 uci set firewall.teachers_internet.proto='all'
 uci set firewall.teachers_internet.target='ACCEPT'
-uci set firewall.teachers_internet.enabled='0'
+uci set firewall.teachers_internet.enabled='1'
 
 uci commit
 echo "Saved. Rebooting now. Reconnect your laptop cable to LAN2-LAN4 and open http://$NET_PREFIX.0.1"
