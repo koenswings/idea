@@ -33,6 +33,6 @@
 ## 1.3 How to use this guide
 
 - **Part A (chapters 1 to 10)** is for teachers.
-- **Part B (chapters 11 and 12)** is for the school operator.
+- **Part B (chapters 11 to 13)** is for the school operator.
 - Each chapter has numbered steps with screenshots. The screenshots come from the IDEA demo box and use the demo school **IDEA Demo School** with class **Grade 5** and the demo accounts in the appendix (`admin`, `teacher1`, `learner1` to `learner3`; each password is the account name followed by `911!`). Your school's names will be different.
 

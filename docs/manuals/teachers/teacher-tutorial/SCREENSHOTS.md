@@ -64,3 +64,14 @@ Hosts: Console :8081, Kolibri :54189, Nextcloud :50065 (Collabora :9980), Kiwix 
 | CON-01 | 10-console-basics.md | none | yes |
 
 Not captured (skipped by rule): F1 files disk, B2–B4 backup/restore, C3–C4 operator disk view (needs Operator Login). Files Disk F2 shots not taken (no Files Disk on wh).
+
+## To retake for IDEA Demo School (2026-10-15)
+
+The text now uses the demo school **IDEA Demo School**, class **Grade 5** and the accounts `admin`, `teacher1`, `teacher2`, `learner1`–`learner3` (passwords `<name>911!`, see the appendix). Shots that show the old `demo-…` / `demo_…` names, `demo-Grade5A` or `demo-School` must be retaken once wizardly-hugle has the demo school. No error messages or password fields with typed text in any shot.
+
+- Kolibri teacher (ch. 3): K1-01–K1-03, K2-01–K2-03, K3-01a, K3-01–K3-05, K3-03a, K4-01–K4-03, K4-03a, K5-01–K5-04 (sign in as `teacher1`; K1-03/K2 class creation and enrolment as `admin`).
+- Kolibri learner (ch. 4): S1-01, S1-03–S1-05, S2-01–S2-03, S2-03a (sign in as `learner1`; the sign-in step now asks for a password).
+- Nextcloud teacher (ch. 6): N0-01, N1-01, N1-03, N2-01–N2-04, N2-03a, N3-00–N3-03 (`teacher1`; folders Worksheets, Drop Zone, document Lesson plan, groups Grade 5 and teachers).
+- Nextcloud learner (ch. 7): S3-01–S3-03 (`learner1`), S4-01, S4-02 (Drop Zone name visible).
+- Files Disk (ch. 9): F2-06 (shared with group Grade 5).
+- Channel builder (ch. 5, PR idea#205): C5-12–C5-15 if they show the Kolibri import as `demo_teacher1` (now `admin`).
