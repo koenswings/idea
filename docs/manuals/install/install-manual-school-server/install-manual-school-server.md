@@ -28,7 +28,7 @@ The IDEA default passwords below are not secret: they follow the public IDEA con
 <div class="note">
 <b>How many Engines?</b> Not fixed. A school starts with <b>one</b> Engine and can add or remove Engines at any time.
 The router needs no change when Engines come or go: it gives every Engine an address from <code>10.42.0.2</code> to
-<code>.9</code> and answers <code>idea.local</code> with the Engines that are on. Where this manual says
+<code>.9</code>. Where this manual says
 "each Pi", do the step once per Engine.
 </div>
 
@@ -325,12 +325,12 @@ The Pi also keeps it in the file `/home/pi/STICKER.txt` (`ssh pi@<ENGINE-IP> cat
 * For each Engine: `ssh pi@<ENGINE-IP> hostname` prints its sticker name, and it matches the sticker on that case.
 * For each Engine: `ssh pi@<ENGINE-IP> 'pm2 status'` shows `engine` **online**.
 * For each Engine: `curl -s -o /dev/null -w '%{http_code}\n' http://<ENGINE-IP>/` prints `200`.
-* A laptop on the wired LAN or on the Wi-Fi `IDEA` opens `http://<STICKER>.local` (the name on any sticker) and sees the IDEA Console, with **every** Engine of this school listed.
-* The same laptop opens `http://idea.local` and sees the same Console. The Console reads the list of Engines from the IDEA database, so it does not matter which Pi you open.
+* A laptop on the **wired** LAN opens `http://<STICKER>.local` (the name on any sticker) and sees the IDEA Console, with **every** Engine of this school listed.
+* The same wired laptop opens `http://idea.local` and sees the same Console. The Console reads the list of Engines from the IDEA database, so it does not matter which Pi you open.
 
 The Console port is **80**: `config.yaml` → `settings.httpPort: 80` ("serves Console UI").
 
-**How `.local` names reach the Wi-Fi.** Every Engine offers the extra name `idea.local` on the wired LAN. One Engine holds it at a time; when that Engine stops or is switched off, another one takes it over within seconds (after a power cut, within about two minutes). The router passes `.local` names between the wired LAN and the Wi-Fi networks `IDEA` and `IDEA-Teachers`, so `http://idea.local` and `http://<STICKER>.local` work from the Wi-Fi too. As a backup, the router's own DNS also answers `idea.local` with the Engines' addresses.
+**Where `.local` names work.** Every Engine offers its sticker name and the extra name `idea.local` on the **wired** LAN. One Engine holds `idea.local` at a time; when that Engine stops or is switched off, another one takes it over within seconds (after a power cut, within about two minutes). These names are only tested on the wired LAN, so do the checks above with a wired laptop. From the Wi-Fi networks `IDEA` and `IDEA-Teachers`, `.local` names are not supported yet: there you open an Engine by its address (5.5).
 
 <div class="note">
 <b>Use <code>provision-fleet.sh</code>.</b> The older <code>script/install.sh</code> is out of date (it clones <code>koenswings/engine</code> and sets Node 20). Do not use it.
@@ -442,13 +442,13 @@ Do it once in Belgium (dry run) and again on site. Use a laptop with no other ne
 
 | ☐ | Test | How | Expected |
 |---|---|---|---|
-| ☐ | Laptop on **IDEA** opens Console | Join Wi-Fi `IDEA` with `idea911!`, browse to `http://idea.local` | IDEA Console loads, every Engine listed. The laptop has an address `10.42.1.x`. |
-| ☐ | Console by sticker name | Laptop on Wi-Fi `IDEA`: browse to `http://<STICKER>.local` (each sticker) | Console loads, every Engine listed |
+| ☐ | Wired laptop opens Console | Laptop on the **wired** LAN: browse to `http://idea.local` | IDEA Console loads, every Engine listed |
+| ☐ | Console by sticker name | Laptop on the **wired** LAN: browse to `http://<STICKER>.local` (each sticker) | Console loads, every Engine listed |
 | ☐ | Every Engine reachable | Browse to `http://<ENGINE-IP>` for each Engine | Console loads on each |
-| ☐ | **No internet on IDEA** | Browse to `https://example.com`. In a terminal: `ping -c2 1.1.1.1`, `nslookup example.com 1.1.1.1` | All fail (time-out / refused) |
+| ☐ | **No internet on IDEA** | Join Wi-Fi `IDEA` with `idea911!` (the laptop gets an address `10.42.1.x`). Browse to `https://example.com`. In a terminal: `ping -c2 1.1.1.1`, `nslookup example.com 1.1.1.1` | All fail (time-out / refused) |
 | ☐ | Router admin closed on IDEA | Browse to `http://10.42.1.1` and `http://10.42.0.1` | Fails |
 | ☐ | Students isolated | From phone A on IDEA, ping laptop B on IDEA | Fails |
-| ☐ | **Teachers: Pis yes, internet off** | Join `IDEA-Teachers` with `idea-teachers911!`. Open `http://idea.local`, then `https://example.com` | Console yes, internet no |
+| ☐ | **Teachers: Pis yes, internet off** | Join `IDEA-Teachers` with `idea-teachers911!`. Open an Engine by its address (5.5), then `https://example.com` | Console yes, internet no |
 | ☐ | **Teachers: internet when toggled on** | Turn on `Teachers-Internet` (section 9), then reload `https://example.com` | Internet works. Turn it off again: internet stops. |
 | ☐ | Pis have internet (updates) | `ssh pi@<ENGINE-IP> 'curl -sI https://deb.debian.org | head -1'` | `HTTP/... 200` |
 | ☐ | **Every Engine visible in Tailscale** | `tailscale status` on an admin laptop, or the admin console | Every sticker name (and the router) online, tagged `tag:idea` |
@@ -480,7 +480,7 @@ Switch it on only when the head teacher asks, and off again when the lesson is o
 * **Students** join Wi-Fi **`IDEA`** with **`idea911!`**. It opens the IDEA Console, Kolibri, Nextcloud and Kiwix, and nothing else: no internet.
 * **Teachers** join Wi-Fi **`IDEA-Teachers`** with **`idea-teachers911!`**. It reaches the same apps. Internet is off until it is switched on (section 9).
 * Teachers keep the `IDEA-Teachers` password to themselves.
-* **Opening the Console:** on a classroom computer, click the **IDEA** icon on the desktop or in the dock (*IDEA Classroom Computer: Installation Manual*). On any other device, type **`http://idea.local`** or **`http://<STICKER>.local`** (the name on any Engine's sticker), and set it as the browser's home page or bookmark it.
+* **Opening the Console:** on a classroom computer, click the **IDEA** icon on the desktop or in the dock (*IDEA Classroom Computer: Installation Manual*). On a device on the wired LAN, type **`http://idea.local`** or **`http://<STICKER>.local`** (the name on any Engine's sticker), and set it as the browser's home page or bookmark it.
 * **Default accounts** follow the `<name>911!` convention, for example `admin` / `admin911!`. The student account on the classroom computers, `learner`, has no password.
 
 **Change the passwords once the school is running.** The defaults are easy on purpose but anyone who knows the pattern can guess them.
@@ -521,7 +521,7 @@ The head teacher picks new passwords (at least 8 characters, different for stude
 | The router seems "bricked" | Reset (hold 10 s after boot) [1]. Otherwise use Cudy TFTP recovery with a **recent** stock image (2.4.6 / 2.5.30 for new-flash units) [1][2]. |
 | A Pi does not start | Check the PoE LED on that switch port and swap the cable. Try another PoE+ port. |
 | `throttled` is not `0x0` | Power problem: check the cable and HAT and switch budget. See the 5.1 USB power box. |
-| Console doesn't load from Wi-Fi but does from LAN | Check the rules `Allow-students-to-Engines`. Is the Pi in `10.42.0.2`-`.9` (5.5)? Try `http://<STICKER>.local` as well as `http://idea.local`: if only one of them fails, tell the IDEA team which one. |
+| Console doesn't load from Wi-Fi but does from LAN | Check the rules `Allow-students-to-Engines`. Is the Pi in `10.42.0.2`-`.9` (5.5)? `.local` names are not supported on the Wi-Fi yet: open the Engine by its address (5.5). |
 | Tailscale offline after a move | `ssh` in and run `tailscale status`. Check the WAN on the router. Starlink must be in bypass mode. |
 
 # Appendix C. Sources (read on 12 October 2026)

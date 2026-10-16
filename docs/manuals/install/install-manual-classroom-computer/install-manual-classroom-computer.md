@@ -212,7 +212,7 @@ Click the **IDEA** icon (desktop or dock). Chrome opens the **IDEA start page**,
 
 1. the computer's **home Engine** (5.3), if it has one;
 2. the **last Engine** that worked on this computer;
-3. **`http://idea.local`**: the IDEA router answers it with the Engines that are switched on, so it works with one Engine or many.
+3. **`http://idea.local`**: one of the Engines that are switched on answers it, so it works with one Engine or many. This works on the wired network; from the Wi-Fi it is not supported yet.
 
 The start page always has a **sticker-name field**. If no Engine answers, it says so in plain words (never a browser error) and asks for a sticker name: type the name on any Engine's sticker, for example `brave-otter`, and press Enter.
 
@@ -222,12 +222,12 @@ The Console lists **every** Engine of the school, whichever one you opened.
 
 ## 6.4 The manual way: open the Console by its sticker name
 
-This always works, also on a laptop, a phone or a computer without the IDEA image:
+This works on any computer on the wired network, also one without the IDEA image:
 
 1. In any browser, type **`http://<STICKER>.local`**, the sticker name of any Engine, for example `http://brave-otter.local` (http, not https).
 2. Set that address as the browser's **home page**, or ★ **bookmark** it.
 
-`http://idea.local` works the same way. Sticker names work from the Wi-Fi too: the IDEA router passes them on between the wired network and the Wi-Fi.
+`http://idea.local` works the same way. From the Wi-Fi, `.local` names are not supported yet.
 
 ## 6.5 Wi-Fi: IDEA or IDEA-Teachers
 
