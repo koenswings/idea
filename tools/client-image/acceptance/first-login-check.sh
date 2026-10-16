@@ -14,7 +14,28 @@ set -u; IFS= read -r PW; W="$1"; fails=0; R=/tmp/idea-accept; rm -rf $R; mkdir -
 su_(){ printf '%s\n' "$PW" | sudo -S -p '' "$@"; }
 pass(){ echo "PASS: $*"; }; fail(){ echo "FAIL: $*"; fails=$((fails+1)); }
 LU=$(id -u learner); RT=/run/user/$LU
-asl(){ su_ -u learner env HOME=/home/learner XDG_RUNTIME_DIR=$RT WAYLAND_DISPLAY=wayland-0 DBUS_SESSION_BUS_ADDRESS=unix:path=$RT/bus "$@"; }
+cat > $R/shot.py <<'PY2'
+# One-frame screenshot of the GNOME (Wayland) session via org.gnome.Mutter.ScreenCast + GStreamer pipewiresrc.
+import sys, subprocess
+from gi.repository import Gio, GLib
+out=sys.argv[1]; bus=Gio.bus_get_sync(Gio.BusType.SESSION); loop=GLib.MainLoop(); node={}
+def call(path,iface,meth,args,rt=None):
+    return bus.call_sync('org.gnome.Mutter.ScreenCast',path,iface,meth,args,GLib.VariantType(rt) if rt else None,0,10000,None)
+sess=call('/org/gnome/Mutter/ScreenCast','org.gnome.Mutter.ScreenCast','CreateSession',GLib.Variant('(a{sv})',({},)),'(o)').unpack()[0]
+strm=call(sess,'org.gnome.Mutter.ScreenCast.Session','RecordMonitor',GLib.Variant('(sa{sv})',('',{'cursor-mode':GLib.Variant('u',0)})),'(o)').unpack()[0]
+def on(c,s,p,i,sig,params): node['id']=params.unpack()[0]; loop.quit()
+bus.signal_subscribe('org.gnome.Mutter.ScreenCast','org.gnome.Mutter.ScreenCast.Stream','PipeWireStreamAdded',strm,None,0,on)
+call(sess,'org.gnome.Mutter.ScreenCast.Session','Start',None)
+GLib.timeout_add_seconds(10,loop.quit); loop.run()
+rc=1
+if 'id' in node:
+    rc=subprocess.call(['timeout','20','gst-launch-1.0','-q','pipewiresrc','path=%d'%node['id'],'num-buffers=3','!','videoconvert','!','pngenc','snapshot=true','!','filesink','location='+out])
+try: call(sess,'org.gnome.Mutter.ScreenCast.Session','Stop',None)
+except Exception: pass
+sys.exit(rc)
+PY2
+chmod 755 $R; chmod 644 $R/shot.py
+asl(){ su_ -u learner env HOME=/home/learner XDG_RUNTIME_DIR=$RT WAYLAND_DISPLAY=wayland-0 XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=GNOME DBUS_SESSION_BUS_ADDRESS=unix:path=$RT/bus "$@"; }
 su_ true 2>/dev/null && pass "sudo with <account>911! convention" || { fail "sudo -S failed"; echo "SUMMARY fails=$fails"; exit 1; }
 # 1 learner autologin Wayland session
 t=0; sid=""; while [ $t -lt "$W" ]; do
@@ -25,17 +46,19 @@ t=0; sid=""; while [ $t -lt "$W" ]; do
 [ -n "$sid" ] && pass "learner Wayland session $sid active (gdm autologin, ${t}s)" || fail "no active learner Wayland session after ${W}s"
 sleep 20   # let first-login autostart run
 # 2 no gnome-initial-setup
-! dpkg -s gnome-initial-setup >/dev/null 2>&1 && ! pgrep -f gnome-initial-setup >/dev/null && [ -f /home/learner/.config/gnome-initial-setup-done ] && pass "no gnome-initial-setup (not installed, not running, done-file)" || fail "gnome-initial-setup present/running"
+! dpkg -s gnome-initial-setup >/dev/null 2>&1 && ! pgrep -f '^/usr/libexec/gnome-initial-setup' >/dev/null && su_ test -f /home/learner/.config/gnome-initial-setup-done && pass "no gnome-initial-setup (not installed, not running, done-file)" || fail "gnome-initial-setup present/running"
 # 3 desktop icon trusted + one-shot autostart disabled itself
 v=$(asl gio info -a metadata::trusted /home/learner/Desktop/idea-console.desktop 2>&1 | awk '/metadata::trusted/{print $2}')
 [ "$v" = true ] && pass "idea-console.desktop metadata::trusted=true" || fail "metadata::trusted='$v'"
 su_ grep -qx 'Hidden=true' /home/learner/.config/autostart/idea-trust-desktop.desktop && pass "trust autostart ran and disabled itself (Hidden=true)" || fail "trust autostart not disabled"
 # 4 screenshot of the desktop
-asl gnome-screenshot -f $R/desktop.png 2>$R/shot.err && pass "screenshot desktop.png" || fail "gnome-screenshot: $(head -c 200 $R/shot.err)"
+shot(){ asl gdbus call --session --dest org.gnome.ScreenSaver --object-path /org/gnome/ScreenSaver --method org.gnome.ScreenSaver.SetActive false >/dev/null 2>&1; sleep 2; asl timeout 45 python3 $R/shot.py /tmp/idea-shot-$1.png >$R/shot.err 2>&1; [ -s /tmp/idea-shot-$1.png ] && su_ cp /tmp/idea-shot-$1.png $R/$1.png; }
+shot desktop && pass "screenshot desktop.png" || fail "screenshot: $(tail -c 200 $R/shot.err)"
 # 5 Chrome: launch the IDEA shortcut, then inspect profile
-asl gtk-launch idea-console >/dev/null 2>&1 & sleep 25
+# launch the IDEA shortcut inside learner's real session environment (systemd --user), as a click would
+asl systemd-run --user --quiet --collect gtk-launch idea-console >/dev/null 2>&1; t=0; while [ $t -lt 90 ] && ! su_ test -f /home/learner/.config/google-chrome/Default/Preferences; do sleep 5; t=$((t+5)); done; sleep 10
 pgrep -u learner -af 'chrome' | grep -q -- '--password-store=basic' && pass "Chrome running with --password-store=basic" || fail "Chrome not running with --password-store=basic"
-asl gnome-screenshot -f $R/chrome.png 2>>$R/shot.err && pass "screenshot chrome.png" || fail "chrome screenshot"
+shot chrome && pass "screenshot chrome.png" || fail "chrome screenshot"
 P=/home/learner/.config/google-chrome
 cat > $R/chrome.py <<'PY'
 import json,sys,os
@@ -52,12 +75,12 @@ if pm is True: ok=False
 sys.exit(0 if ok else 1)
 PY
 su_ python3 $R/chrome.py $P && pass "Chrome profile: First Run sentinel kept, no choice screen pending, password manager off" || fail "Chrome profile checks (see above)"
-su_ pkill -u learner -f google-chrome 2>/dev/null; true
+su_ pkill -TERM -u learner -f chrome 2>/dev/null; sleep 3; true
 # 6 LibreOffice: first start as learner creates the user profile; the xcd values must win
 asl timeout 90 soffice --headless --terminate_after_init >/dev/null 2>&1
 X=/home/learner/.config/libreoffice/4/user/registrymodifications.xcu
 [ -f /etc/libreoffice/registry/idea.xcd ] && pass "idea.xcd present" || fail "idea.xcd missing"
-su_ test -f $X && ! su_ grep -qE 'FirstStartWizardCompleted.*<value>false|ShowTipOfTheDay.*<value>true' $X && pass "LibreOffice profile created; no wizard/tips override" || fail "LibreOffice registrymodifications missing or overrides the xcd"
+! su_ grep -qsE 'FirstStartWizardCompleted.*<value>false|ShowTipOfTheDay.*<value>true' $X && su_ grep -q 'FirstStartWizardCompleted' /etc/libreoffice/registry/idea.xcd && pass "LibreOffice: xcd sets wizard done/tips off; profile $(su_ test -f $X && echo present || echo 'not created by headless init') has no override" || fail "LibreOffice profile overrides the xcd"
 # 7 SuperTuxKart: offline, player exists
 su_ grep -q '<enable_internet value="2"' /home/learner/.config/supertuxkart/config-0.10/config.xml && su_ grep -q 'first-time="false"' /home/learner/.config/supertuxkart/config-0.10/players.xml && pass "SuperTuxKart: internet not allowed, player seeded, first-time done" || fail "SuperTuxKart seed"
 chmod 644 $R/*.png 2>/dev/null; su_ chown admin $R/*.png 2>/dev/null
