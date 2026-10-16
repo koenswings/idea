@@ -35,7 +35,7 @@ The classroom computers (the student computers) are already connected to the sch
 
    Type the first line, for example `brave-otter`: small letters, with `-` between the words. The start page then remembers that IDEA box.
 
-![The start page when no IDEA box answers: No school server was found, with the field for the sticker name](../screenshots/IDEA-03.png)
+[[pending-shot: IDEA-03 | Start page when no IDEA box answers (text only: tutorial screenshots never show an error message)]]
 
 > **Two IDEA boxes at your school?** The Console shows the apps of all of them. You can also open a specific box by typing its sticker name in the field on the start page.
 
