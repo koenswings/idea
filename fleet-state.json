@@ -68,7 +68,7 @@
     "runner": "none",
     "grok_build": null,
     "note": "Spare fleet Pi (2026-09-28). Pi 4 / Debian 13 trixie / 240 GB SSD. Duration pool (idea#168, 2026-10-06): Engine config mdns:true, shared store automerge:3zoqdSVsEtj4ygNJPNcDyKWvdxo6, no static peers. On Tailscale as idea04 (100.108.39.45). pi password not set yet (Koen).",
-    "claim": "Atlas: idea#193 hw tests (Axle engine#205 first, then Kid builder#2 + nextcloud#7); Engine #205 4760d15 deployed",
+    "claim": "Axle: #219 flashCard proof (Steve 11:20)",
     "branch": null,
     "review_url": null
   },
