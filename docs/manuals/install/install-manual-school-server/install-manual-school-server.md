@@ -44,7 +44,7 @@ The IDEA school router arrives **pre-flashed** (see the *IDEA School Router – 
 | What | Name | Default password | Who uses it |
 |---|---|---|---|
 | Student Wi-Fi | `IDEA` | `idea911!` | Students' and classroom computers and phones. Reaches **only** the Pis (Console, Kolibri, Nextcloud, Kiwix). No internet. |
-| Teacher Wi-Fi | `IDEA-Teachers` | `idea-teachers911!` | Teachers. Reaches the Pis. Internet is **off** by default and can be switched on (section 9). |
+| Teacher Wi-Fi | `IDEA-Teachers` | `idea-teachers911!` | Teachers. Reaches the Pis. Internet is **on** by default; staff can switch it off (section 9). |
 | Router admin (LuCI and SSH on the wired LAN) | user `root` | `admin911!` | The installer and the IDEA team only. Over Tailscale the router accepts SSH keys only. |
 
 Give the students the `IDEA` network and its password. Give only the teachers the `IDEA-Teachers` network and its password.
@@ -99,7 +99,7 @@ The Pis get **no** USB-C power supply. The PoE+ HAT takes power from the Etherne
 ![Network zones and allowed traffic](diagrams/m1-zones.svg)
 
 * **IDEA (students):** devices reach only the Engines, however many there are (Console, Kolibri, Nextcloud, Kiwix). There is no forwarding to the internet, so outside DNS servers, VPNs and websites are all blocked. Students on the IDEA Wi-Fi cannot reach each other either (client isolation).
-* **IDEA-Teachers:** devices reach the Pis. Internet goes through **one** firewall rule, `Teachers-Internet`, which you can switch on or off (section 9). It starts **off**.
+* **IDEA-Teachers:** devices reach the Pis. Internet goes through **one** firewall rule, `Teachers-Internet`, which staff can switch off and on again (section 9). It starts **on**.
 * **LAN (wired):** the Pis may reach the internet for updates and Tailscale. They do not route traffic for anyone else.
 * **Tailscale:** the router and every Engine join the IDEA tailnet with the one fleet tag `tag:idea`. Admins reach every device. Devices with `tag:idea` reach nothing, not even each other. There are no exit nodes and no subnet routes.
 
@@ -160,7 +160,7 @@ If you ever get a plain Cudy router that is not pre-flashed, follow Appendix D i
 * Your laptop gets `10.42.0.1xx`. The LuCI page footer shows the IDEA image version.
 * **Network → Wireless** lists `IDEA` and `IDEA-Teachers` on both radios, all enabled.
 * A phone can join `IDEA` with `idea911!` and gets an address `10.42.1.x`.
-* **Network → Firewall → Traffic Rules** lists `Teachers-Internet`, unticked (off).
+* **Network → Firewall → Traffic Rules** lists `Teachers-Internet`, ticked (on).
 
 <div class="note">
 <b>Factory reset.</b> Holding the reset button gives back these IDEA defaults (Wi-Fi, passwords, firewall, <code>10.42.0.1</code>),
@@ -448,28 +448,30 @@ Do it once in Belgium (dry run) and again on site. Use a laptop with no other ne
 | ☐ | **No internet on IDEA** | Join Wi-Fi `IDEA` with `idea911!` (the laptop gets an address `10.42.1.x`). Browse to `https://example.com`. In a terminal: `ping -c2 1.1.1.1`, `nslookup example.com 1.1.1.1` | All fail (time-out / refused) |
 | ☐ | Router admin closed on IDEA | Browse to `http://10.42.1.1` and `http://10.42.0.1` | Fails |
 | ☐ | Students isolated | From phone A on IDEA, ping laptop B on IDEA | Fails |
-| ☐ | **Teachers: Pis yes, internet off** | Join `IDEA-Teachers` with `idea-teachers911!`. Open an Engine by its address (5.5), then `https://example.com` | Console yes, internet no |
-| ☐ | **Teachers: internet when toggled on** | Turn on `Teachers-Internet` (section 9), then reload `https://example.com` | Internet works. Turn it off again: internet stops. |
+| ☐ | **Teachers: Pis yes, internet on** | Join `IDEA-Teachers` with `idea-teachers911!`. Open an Engine by its address (5.5), then `https://example.com` | Console yes, internet yes |
+| ☐ | **Teachers: internet switched off** | Switch off `Teachers-Internet` (section 9), then reload `https://example.com` | Internet stops. Switch it on again: internet works. |
 | ☐ | Pis have internet (updates) | `ssh pi@<ENGINE-IP> 'curl -sI https://deb.debian.org | head -1'` | `HTTP/... 200` |
 | ☐ | **Every Engine visible in Tailscale** | `tailscale status` on an admin laptop, or the admin console | Every sticker name (and the router) online, tagged `tag:idea` |
 | ☐ | Stickers and report | Look at every case | Each sticker matches `hostname` on that Pi. Koen has the report (5.6b). |
 | ☐ | Power fine | `ssh pi@<ENGINE-IP> vcgencmd get_throttled` (for each Engine) | `throttled=0x0` |
 | ☐ | Reboot test | Pull the switch's power for 10 s, then plug it back in | After about 5 minutes, all of the above pass again |
 
-# 9. Switching teacher internet on and off
+# 9. Switching teacher internet off and on
 
-**LuCI** (from a wired laptop at the school, or over Tailscale): **Network → Firewall → Traffic Rules** → `Teachers-Internet` → tick (on) or untick (off) **Enable** → **Save & Apply**.
+Internet on the teacher Wi-Fi `IDEA-Teachers` is **on** by default. Staff can switch it off, also from far away, and switch it on again later.
+
+**LuCI** (from a wired laptop at the school, or over Tailscale): **Network → Firewall → Traffic Rules** → `Teachers-Internet` → untick **Enable** to switch it off, or tick it to switch it back on → **Save & Apply**.
 
 **SSH:**
 
 ```bash
-# ON
-ssh root@10.42.0.1 "uci set firewall.teachers_internet.enabled='1' && uci commit firewall && service firewall reload"
 # OFF
 ssh root@10.42.0.1 "uci set firewall.teachers_internet.enabled='0' && uci commit firewall && service firewall reload"
+# ON again (the default)
+ssh root@10.42.0.1 "uci set firewall.teachers_internet.enabled='1' && uci commit firewall && service firewall reload"
 ```
 
-**✔ Check:** a teacher laptop on IDEA-Teachers can (on) or cannot (off) open `https://example.com`. Connections that were already open may last a few more seconds.
+**✔ Check:** a teacher laptop on IDEA-Teachers cannot (off) or can (on) open `https://example.com`. Connections that were already open may last a few more seconds.
 
 Switch it on only when the head teacher asks, and off again when the lesson is over. It does not go off by itself.
 
@@ -478,7 +480,7 @@ Switch it on only when the head teacher asks, and off again when the lesson is o
 **Tell the head teacher and the teachers:**
 
 * **Students** join Wi-Fi **`IDEA`** with **`idea911!`**. It opens the IDEA Console, Kolibri, Nextcloud and Kiwix, and nothing else: no internet.
-* **Teachers** join Wi-Fi **`IDEA-Teachers`** with **`idea-teachers911!`**. It reaches the same apps. Internet is off until it is switched on (section 9).
+* **Teachers** join Wi-Fi **`IDEA-Teachers`** with **`idea-teachers911!`**. It reaches the same apps. Internet is on; staff can switch it off (section 9).
 * Teachers keep the `IDEA-Teachers` password to themselves.
 * **Opening the Console:** on a classroom computer, click the **IDEA** icon on the desktop or in the dock (*IDEA Classroom Computer: Installation Manual*). On a device on the wired LAN, type **`http://idea.local`** or **`http://<STICKER>.local`** (the name on any Engine's sticker), and set it as the browser's home page or bookmark it.
 * **Default accounts** follow the `<name>911!` convention, for example `admin` / `admin911!`. The student account on the classroom computers, `learner`, has no password.
@@ -638,7 +640,7 @@ The script `scripts/school-router-setup.sh` (full text in Appendix A) sets every
 * the `students` and `teachers` networks and zones
 * both SSIDs on 2.4 and 5 GHz, Wi-Fi country `ZW`
 * Engine addresses `.2`-`.9` by DHCP vendor class (no MAC reservations) and the switch at `.10`
-* the firewall rules, including `Teachers-Internet` (off)
+* the firewall rules, including `Teachers-Internet` (on)
 
 It was tested with OpenWrt 25.12.5's `uci` and `fw4` (rule set rendered and checked), but not yet on a real Cudy.
 
@@ -657,7 +659,7 @@ ssh root@192.168.1.1 'sh /tmp/school-router-setup.sh'
 * Your laptop gets `10.42.0.1xx`. `http://10.42.0.1` opens LuCI.
 * **Network → Wireless** lists `IDEA` and `IDEA-Teachers` on both radios, all enabled.
 * **Network → Firewall → Zones** lists `lan`, `wan`, `students`, `teachers`. The `students` and `teachers` zones have *Input: reject, Forward: reject* and no "allow forward to wan".
-* **Network → Firewall → Traffic Rules** lists `Allow-students-to-Engines`, `Allow-teachers-to-Engines`, the DHCP/DNS rules and `Teachers-Internet` (unticked = off).
+* **Network → Firewall → Traffic Rules** lists `Allow-students-to-Engines`, `Allow-teachers-to-Engines`, the DHCP/DNS rules and `Teachers-Internet` (ticked = on, the default).
 
 <div class="note">
 If you prefer clicking, every setting in the script can also be made in LuCI. The script is just faster and the same for every school.

@@ -236,7 +236,7 @@ The pre-flashed IDEA school router creates two Wi-Fi networks (*IDEA School Serv
 | Who uses this computer | Network |
 |---|---|
 | Students (default) | `IDEA`, password `idea911!`: Console and apps only, no internet |
-| Teacher's computer | `IDEA-Teachers`, password `idea-teachers911!`: Console and apps, plus internet when the teacher rule is on (off by default) |
+| Teacher's computer | `IDEA-Teachers`, password `idea-teachers911!`: Console and apps, plus internet (on by default; staff can switch it off) |
 
 The IDEA image already joins `IDEA`. Only a computer that the head teacher names for a teacher gets `IDEA-Teachers`. The learner account cannot change Wi-Fi, so an admin adds it: top-right menu → Wi-Fi → `IDEA-Teachers`, and give the `admin` password when Ubuntu asks. Never type the `IDEA-Teachers` password on a student computer.
 
