@@ -551,3 +551,5 @@
 {"ts":"2026-10-16T07:33:27Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Axle: agent-engine-dev#201+#206 pool hw test","previous":null}
 {"ts":"2026-10-16T07:41:15Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Axle: agent-engine-dev#201+#206 pool hw test"}
 {"ts":"2026-10-16T07:41:15Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-10-16T09:22:19Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"testing"}
+{"ts":"2026-10-16T09:22:19Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle: engine#219 flashCard hw proof (Steve 11:20; Atlas busy, took over Atlas's idea#193 claim)","previous":"Atlas: idea#193 hw tests (Axle engine#205 first, then Kid builder#2 + nextcloud#7); Engine #205 4760d15 deployed"}
