@@ -45,7 +45,7 @@ import json,sys
 u=sys.argv[1]
 print(json.dumps({
  "HomepageLocation":u,"HomepageIsNewTabPage":False,"ShowHomeButton":True,
- "RestoreOnStartup":4,"RestoreOnStartupURLs":[u],"NewTabPageLocation":u,
+ "RestoreOnStartup":4,"RestoreOnStartupURLs":[u],
  "LocalNetworkAccessAllowedForUrls":["file://*","http://*.local"],
  "BrowserSignin":0,"SyncDisabled":True,"SigninInterceptionEnabled":False,
  "PromotionalTabsEnabled":False,"DefaultBrowserSettingEnabled":False,"MetricsReportingEnabled":False,
