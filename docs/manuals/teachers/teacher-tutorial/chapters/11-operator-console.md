@@ -2,7 +2,7 @@
 
 # 11. The Console for the operator
 
-This chapter is for the school operator. Do not press **Start**, **Stop** or other action buttons unless your IDEA contact asks you to.
+This chapter is for the school operator.
 
 ## 11.1 Operator Login
 
