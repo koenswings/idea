@@ -38,7 +38,7 @@ Good to know:
 
 7. On the builder's page, the box **From USB sticks** shows each channel. A channel waiting for its turn says **Queued (number N in line)**, a channel being built says **Building N/M files**, and a finished channel says **Built version V: R resources.**
 
-[[pending-shot: C5-03 | Channel builder, From USB sticks box while a channel is Building N/M files]]
+   ![Channel builder, From USB sticks box while a channel is Building N/M files](../screenshots/C5-03.png)
 
 8. When the stick's line says **Built: you can pull the stick out.**, you can take your stick out. The channels stay on the IDEA box.
 
@@ -69,10 +69,10 @@ Your channel is built, but learners cannot see it yet. Someone who may manage ch
 
    ![Import from 'Channel builder (brave-otter)': the builder's channels, here IDEA-DEMO version 1, each with SELECT RESOURCES](../screenshots/C5-08.png)
 
-6. Choose the topics (or everything) and click **IMPORT**. When the task is finished, the channel is in the **Channels** list with the label **New** (see the figure at step 2).
+6. Choose the topics (or everything) and click **IMPORT**. When the task is finished, the channel is in the **Channels** list (Kolibri shows the label **New** until you click **Clear completed** in the task bar).
 7. Now use it like any other channel: add its resources to a lesson (3.4) or a quiz (3.5).
 
-[[pending-shot: C5-10 | Learner view: the new channel next to the other channels]]
+   ![Device > Channels: the new channel (here IDEA-DEMO, version 1) above the other channels](../screenshots/C5-10.png)
 
 ## 5.3 Update the channel
 
@@ -80,7 +80,7 @@ Your channel is built, but learners cannot see it yet. Someone who may manage ch
 2. Plug the stick in again. The builder sees what changed and builds a new version of the **same channel**. If nothing changed, it does nothing.
 3. In Kolibri, open **Device > Channels** and import the channel again from the builder, as in 5.2, to get the new version.
 
-[[pending-shot: C5-11 | Kolibri Device > Channels: importing the new version of the channel]]
+   ![Importing again from the builder: Kolibri shows New version available next to the channel already on the device. Click More information to update the channel](../screenshots/C5-11.png)
 
 ## 5.4 Build a channel by hand
 
