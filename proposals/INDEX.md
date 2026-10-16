@@ -6,6 +6,10 @@ Update this file whenever a proposal is added, approved, declined, or superseded
 
 ---
 
+## 2026-10-15-client-browser-and-server-discovery.md
+**Status:** Draft · **Author:** Steve (Lead Bot)
+Follow-up to the student client image (Koen's feedback): Google Chrome arm64 `.deb` (official since 2026-07-30) instead of Firefox, Google repo removed and package held, xtradeb Chromium `.deb` as fallback; desktop + app-menu icons opening apps in Chrome app mode (no Nextcloud sync client on shared machines); clients find servers via `http://idea.local`, a start page served by every Engine from the Automerge store with `/go/<app>` links, router mDNS reflector + dnsmasq fallback, no fixed IP, no per-school config. Corrects "Manual 2" → "the client install manual". PDF: `proposals/2026-10-15-client-browser-and-server-discovery/`.
+
 ## 2026-10-15-student-client-image.md
 **Status:** Approved by Koen 2026-10-15 · **Author:** Steve (Lead Bot)
 Repeatable Ubuntu Desktop 26.04 LTS image for shared student client Pis (one card for Pi 400 and Pi 500): one `learner` account (autologin, no password, no sudo), `admin` key-only SSH + support password for `su`, office/education/games app set (offline, .deb only), updates off (new tested image = update), image stored as a versioned SHA-verified artifact on every Engine and flashed from a Console Flash button; no reader allowlist: Engine stops auto-claiming unknown disks and refuses IDEA/system/in-use disks; optional read-only overlay switchable remotely. All open questions decided. Cross-model swap test (Pi 400↔500 after first boot) required. PDF: `proposals/2026-10-15-student-client-image/`.
