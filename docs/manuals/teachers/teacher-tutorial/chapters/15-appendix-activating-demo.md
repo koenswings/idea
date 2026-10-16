@@ -8,7 +8,7 @@ The demo setup fills Kolibri on an IDEA box with example data. It is for demo ID
 
 - the school **IDEA Demo School**
 - the class **Grade 5**
-- the admin account `admin`, the teacher `teacher1` (coach of Grade 5) and the learners `learner1` to `learner3`
+- the admin account `admin`, the teacher `teacher1` (coach of Grade 5) and the learners `learner1` to `learner3`. Learners have no password: they sign in with only their username.
 
 The accounts are listed in *Appendix: demo accounts*. Lessons are not created: the teacher makes them, as in chapter 3.
 
