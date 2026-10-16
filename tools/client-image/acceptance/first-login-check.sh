@@ -98,6 +98,7 @@ su_ pkill -KILL -u learner -f chrome 2>/dev/null; sleep 3
 su_ -u learner python3 -c "import json,sys;p=sys.argv[1];d=json.load(open(p));d.setdefault('profile',{}).update(exit_type='Crashed',exited_cleanly=False);json.dump(d,open(p,'w'))" $Pf
 asl /usr/local/bin/idea-chrome-clean-exit
 ex=$(su_ python3 -c "import json,sys;p=json.load(open(sys.argv[1]))['profile'];print(p.get('exit_type'),p.get('exited_cleanly'))" $Pf 2>&1)
+ex=$(printf '%s\n' "$ex" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -v '^$' | tail -n 1)   # strip blank lines / stray whitespace (sudo -S can emit a leading newline)
 asl systemd-run --user --scope --quiet --collect gtk-launch idea-console >/dev/null 2>&1; sleep 20
 shot chrome-after-crash
 [ "$ex" = "Normal True" ] && pgrep -u learner -f chrome >/dev/null && [ -s $R/chrome-after-crash.png ] && pass "power-cut sim: fix-up set exit_type=Normal, Chrome relaunched (check chrome-after-crash.png: no Restore bubble)" || fail "power-cut sim: profile '$ex' after fix-up / Chrome or screenshot missing"
