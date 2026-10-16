@@ -199,27 +199,27 @@ if [ -n "$SWITCH_MAC" ]; then
 fi
 
 # ---- Wi-Fi: same two SSIDs on 2.4 GHz (radio0) and 5 GHz (radio1) -------------
-for R in 0 1; do
-  uci set wireless.radio$R.country="$COUNTRY"
-  uci set wireless.radio$R.disabled='0'
-  uci -q delete wireless.default_radio$R || true
-  uci -q delete wireless.idea_s$R || true
-  uci set wireless.idea_s$R=wifi-iface
-  uci set wireless.idea_s$R.device="radio$R"
-  uci set wireless.idea_s$R.mode='ap'
-  uci set wireless.idea_s$R.network='students'
-  uci set wireless.idea_s$R.ssid='IDEA'
-  uci set wireless.idea_s$R.encryption='psk2'
-  uci set wireless.idea_s$R.key="$STUDENT_WIFI_KEY"
-  uci set wireless.idea_s$R.isolate='1'          # students cannot reach each other's devices
-  uci -q delete wireless.idea_t$R || true
-  uci set wireless.idea_t$R=wifi-iface
-  uci set wireless.idea_t$R.device="radio$R"
-  uci set wireless.idea_t$R.mode='ap'
-  uci set wireless.idea_t$R.network='teachers'
-  uci set wireless.idea_t$R.ssid='IDEA-Teachers'
-  uci set wireless.idea_t$R.encryption='psk2'
-  uci set wireless.idea_t$R.key="$TEACHER_WIFI_KEY"
+for RADIO in 0 1; do
+  uci set wireless.radio$RADIO.country="$COUNTRY"
+  uci set wireless.radio$RADIO.disabled='0'
+  uci -q delete wireless.default_radio$RADIO || true
+  uci -q delete wireless.idea_s$RADIO || true
+  uci set wireless.idea_s$RADIO=wifi-iface
+  uci set wireless.idea_s$RADIO.device="radio$RADIO"
+  uci set wireless.idea_s$RADIO.mode='ap'
+  uci set wireless.idea_s$RADIO.network='students'
+  uci set wireless.idea_s$RADIO.ssid='IDEA'
+  uci set wireless.idea_s$RADIO.encryption='psk2'
+  uci set wireless.idea_s$RADIO.key="$STUDENT_WIFI_KEY"
+  uci set wireless.idea_s$RADIO.isolate='1'          # students cannot reach each other's devices
+  uci -q delete wireless.idea_t$RADIO || true
+  uci set wireless.idea_t$RADIO=wifi-iface
+  uci set wireless.idea_t$RADIO.device="radio$RADIO"
+  uci set wireless.idea_t$RADIO.mode='ap'
+  uci set wireless.idea_t$RADIO.network='teachers'
+  uci set wireless.idea_t$RADIO.ssid='IDEA-Teachers'
+  uci set wireless.idea_t$RADIO.encryption='psk2'
+  uci set wireless.idea_t$RADIO.key="$TEACHER_WIFI_KEY"
 done
 
 # ---- firewall zones -------------------------------------------------------------
