@@ -2,7 +2,7 @@
 
 # 4. Kolibri for learners (try it yourself)
 
-Your learners open Kolibri the same way you do: on a classroom computer they double-click **IDEA** on the desktop and click **Open** on the Kolibri card in the Console (2.1). Show them this once.
+Your learners open Kolibri the same way you do: on a classroom computer they double-click **IDEA** on the desktop and click **Open** on the Kolibri card in the Console (2.2.1). Show them this once.
 
 Sign in as a learner in a second browser window (private window) to see exactly what your class sees. In the demo school, learners sign in with a username and password: `learner1` with `learner1911!`, and so on (the IDEA default is the account name followed by `911!`; check your school's setting).
 
