@@ -296,9 +296,13 @@ done
 write_hotplug
 uci -q del_list dhcp.@dnsmasq[0].addnhosts='/tmp/hosts/idea' || true
 uci add_list dhcp.@dnsmasq[0].addnhosts='/tmp/hosts/idea'
-# .local is not 'local=' in dnsmasq, so it would be forwarded upstream; keep it on the router
-uci -q del_list dhcp.@dnsmasq[0].local='/local/' || true
-uci add_list dhcp.@dnsmasq[0].local='/local/'
+# Keep *.local on the router (never forwarded upstream). OpenWrt's dnsmasq init reads 'local'
+# as ONE option, so a second value ('/lan/ /local/') renders 'local=/lan/ /local/' and dnsmasq
+# refuses to start. Keep local='/lan/' and use a 'server=/local/' list entry instead (#271).
+uci -q delete dhcp.@dnsmasq[0].local || true
+uci set dhcp.@dnsmasq[0].local='/lan/'
+uci -q del_list dhcp.@dnsmasq[0].server='/local/' || true
+uci add_list dhcp.@dnsmasq[0].server='/local/'
 ACTION=update IPADDR='' IDEA_HOSTS="$IDEA_HOSTS" IDEA_NET_PREFIX="$NET_PREFIX" IDEA_NO_HUP=1 sh "$HOTPLUG"
 
 uci commit
