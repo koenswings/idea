@@ -34,7 +34,7 @@ The classroom computers have **one** shortcut on the desktop, named **IDEA**. Th
 
 1. Double-click **IDEA** on the desktop. You can also find it in the app menu. It opens in Chrome.
 
-[[pending-shot: IDEA-01 | Student computer desktop with the one IDEA shortcut (text only for now: the screenshot tool captures browser pages, not a computer desktop)]]
+   ![The classroom computer desktop with the one IDEA shortcut](../screenshots/IDEA-01.png)
 
 2. A start page titled **IDEA** appears for a moment and says **Looking for the school server…**.
 

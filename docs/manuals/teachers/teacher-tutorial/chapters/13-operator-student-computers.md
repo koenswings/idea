@@ -53,7 +53,7 @@ Good to know:
 1. The first start takes a few minutes longer: the card sets itself up and names the computer after its Pi (the name on the sticker).
 2. The computer opens the student desktop by itself, with no password. The desktop has one shortcut, **IDEA**.
 
-[[pending-shot: SC-05 | The student desktop after the first start, with the IDEA shortcut]]
+![The student desktop after the first start, with the IDEA shortcut](../screenshots/IDEA-01.png)
 
 3. Double-click **IDEA**. Chrome opens the start page, finds the IDEA box and opens the Console (chapter 2). Check that **Open** on the Kolibri card works.
 

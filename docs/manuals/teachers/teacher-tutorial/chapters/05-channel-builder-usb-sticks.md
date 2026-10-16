@@ -20,8 +20,6 @@ Good to know:
 2. Inside `kolibri`, make **one folder per channel**, for example `Grade 5 Science`. The folder name becomes the channel name.
 3. Inside the channel folder, make **one folder per topic**, for example `Plants` and `Animals`, and copy your files into them. Each file becomes one resource. The builder takes PDF, EPUB, MP4/WebM video, MP3 and pictures.
 
-[[pending-shot: C5-01 | The stick in Windows File Explorer: kolibri > Grade 5 Science > Plants, Animals]]
-
 > **Optional: `channel.json`.** To set the channel's name, author, description or licence yourself, put a small text file named `channel.json` into the channel folder, for example:
 > `{"name":"Plants and Water","author":"Mary Okello","description":"Term 2","license":"CC BY","license_description":""}`
 > Without it (or if the file has a mistake), the channel gets the folder name, the stick's name as author, and the licence All Rights Reserved.
@@ -111,8 +109,6 @@ Your stick also appears in Nextcloud, so you can open its files or copy them int
    ![Inside the folder USB: IDEA-DEMO: the folders kolibri, Teacher Notes and Worksheets, and the file CREDITS.txt](../screenshots/C5-15.png)
 
 3. To keep a file, click **⋯** on its row, choose **Copy**, and copy it into one of your own folders (for example a course folder, or **School Files**).
-
-[[pending-shot: C5-16 | Nextcloud: the Copy dialog, copying from the USB folder into a course folder]]
 
 4. Pull the stick out when you are done. The **USB:** folder disappears; the files you copied stay in Nextcloud.
 
