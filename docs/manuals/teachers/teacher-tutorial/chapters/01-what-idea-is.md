@@ -12,6 +12,7 @@
 |---|---|
 | **IDEA box** | The small Raspberry Pi computer in the school that runs the apps. (On the demo it is named `wizardly-hugle`; your school's box has its own name.) |
 | **Console** | The web page that lists the apps and opens them. |
+| **IDEA shortcut** | The one shortcut on a classroom computer's desktop. It finds the IDEA box and opens the Console (chapter 2). |
 | **System Disk** | The IDEA box's own disk. The apps live on it. |
 | **IDEA Disk** | A USB disk or stick that the Console has prepared. It can become a **Files Disk** or a **Backup Disk**. |
 | **Spare disk** | An IDEA Disk that is still empty. |
@@ -33,5 +34,5 @@
 
 - **Part A (chapters 1 to 10)** is for teachers.
 - **Part B (chapters 11 and 12)** is for the school operator.
-- Each chapter has numbered steps with screenshots. The screenshots come from the IDEA demo box and use demo accounts whose names start with `demo` (see the appendix). Your school's names will be different.
+- Each chapter has numbered steps with screenshots. The screenshots come from the IDEA demo box and use the demo school **IDEA Demo School** with class **Grade 5** and the demo accounts in the appendix (`admin`, `teacher1`, `learner1` to `learner3`; each password is the account name followed by `911!`). Your school's names will be different.
 
