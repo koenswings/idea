@@ -20,7 +20,7 @@
 | **Backup Disk** | An IDEA Disk that keeps copies of the apps' data (chapter 10). |
 | **USB stick** | Your own USB stick (FAT32 or exFAT), filled on any computer. IDEA only reads it and never changes it (chapter 5). |
 | **Channel builder** | The IDEA app that turns a folder of your videos and PDFs into a Kolibri channel (chapter 5). |
-| **Operator** | The person at the school who looks after the IDEA box, with the IDEA contact on the phone (Part B). |
+| **Operator** | The person at the school who looks after the IDEA box (Part B). |
 
 ## 1.2 The apps
 

@@ -2,7 +2,7 @@
 
 # 13. Student computers: reset a card from the Console
 
-This chapter is for the school operator, with the IDEA contact on the phone (or the IDEA contact working remotely from the Console).
+This chapter is for the school operator.
 
 Every student computer (Raspberry Pi 400 or Pi 500) starts from a **microSD card** with the same IDEA student image. When a computer goes wrong (it no longer starts, the screen looks different, the card is full or a student changed settings), you do not repair it. You **reset the card**: the IDEA box writes a fresh copy of the student image onto it. This takes about 5 to 10 minutes.
 
@@ -61,9 +61,9 @@ Good to know:
 | Question | Answer |
 |---|---|
 | **The card is not listed.** | Check that the card is pushed fully into the reader and that the reader is plugged into **this** IDEA box. Try another USB port. |
-| **The Flash button is not there or the Console refuses.** | The IDEA box never writes to an IDEA Disk, the system disk, or a disk that is in use. Check that you picked the card and not another disk. Otherwise call your IDEA contact. |
+| **The Flash button is not there or the Console refuses.** | The IDEA box never writes to an IDEA Disk, the system disk, or a disk that is in use. Check that you picked the card and not another disk. Otherwise ask your IDEA contact. |
 | **The flash stopped with an error.** | Flash again. If it fails again, the card is probably worn out: use a new card. |
-| **The computer does not start after the reset.** | Try the card in another student computer. If it starts there, the computer may need a bootloader update: call your IDEA contact. |
+| **The computer does not start after the reset.** | Try the card in another student computer. If it starts there, the computer may need a bootloader update: ask your IDEA contact. |
 | **Can I install an extra program on one computer?** | No. It would be lost at the next reset. Ask your IDEA contact to add it to the next image version. |
 | **The IDEA shortcut says No IDEA server found.** | Check the network connection. Type the name on the IDEA box's sticker in the field on the start page (chapter 2). If it keeps happening, the card may belong to an IDEA box that has been switched off or moved: flash it again from the right box. |
 | **Can my IDEA contact do this remotely?** | Yes. Put the card in the reader and tell them. They press Flash from the Console, and you put the card back when the Console says it is done. |

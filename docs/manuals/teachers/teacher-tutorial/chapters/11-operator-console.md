@@ -34,7 +34,12 @@ The clipboard icon (top right) lists recent Console commands with ✓ (done) or 
 
 ![Command History](../screenshots/O4-01.png)
 
-## 11.5 Buttons to leave alone
+## 11.5 What the buttons do
 
-- The small **↺** next to the IDEA box name is **Reboot**: it restarts the whole IDEA box. Never press it during lessons.
-- **Erase this disk…**, **Install App**, **Make this a Files Disk**, **Make this a Backup Disk**, **Restore** and **Stop**: only with your IDEA contact on the phone. The System Disk has no Erase button.
+- **Start** and **Stop** start or stop an app. A stopped app cannot be opened.
+- **Install App** puts a new app on a disk.
+- **Make this a Files Disk** turns an empty IDEA Disk into a Files Disk for Nextcloud (chapter 12).
+- **Make this a Backup Disk** turns an empty IDEA Disk into a Backup Disk (chapter 12).
+- **Restore** brings an app back from the Backup Disk onto a spare disk (chapter 12).
+- **Erase this disk…** deletes everything on a disk. The System Disk has no Erase button.
+- The small **↺** next to the IDEA box name is **Reboot**. It restarts the whole IDEA box, so all apps are away for a few minutes. Use it outside lesson time.
