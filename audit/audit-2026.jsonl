@@ -552,3 +552,5 @@
 {"ts":"2026-10-16T15:29:57Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"idle"}
 {"ts":"2026-10-16T15:31:32Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":{"by":"Kid","for":"kid-seafile-main 502 chown fix + app-seafile#3 live check (Steve)","since":"2026-10-16T15:33Z"},"previous":null}
 {"ts":"2026-10-16T15:31:32Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"busy","previous":"idle"}
+{"ts":"2026-10-16T16:21:56Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":{"by":"Kid","for":"kid-seafile-main 502 chown fix + app-seafile#3 live check (Steve)","since":"2026-10-16T15:33Z"}}
+{"ts":"2026-10-16T16:21:56Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"busy"}
