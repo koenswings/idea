@@ -68,7 +68,7 @@
     "runner": "none",
     "grok_build": null,
     "note": "Spare fleet Pi (2026-09-28). Pi 4 / Debian 13 trixie / 240 GB SSD. Duration pool (idea#168, 2026-10-06): Engine config mdns:true, shared store automerge:3zoqdSVsEtj4ygNJPNcDyKWvdxo6, no static peers. On Tailscale as idea04 (100.108.39.45). pi password not set yet (Koen).",
-    "claim": "Axle: #219 flashCard proof (Steve 11:20)",
+    "claim": "Axle: #219 flashCard proof; then HELD running #219 test Engine (deploy/pr219-c28dc46+pr213, helper+PR sudoers, client images, spare card in reader) for Pixel Console #157 e2e + Marco SC-01..05 (Steve 11:32); restore/release only on Steve's word",
     "branch": null,
     "review_url": null
   },
