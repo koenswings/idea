@@ -42,7 +42,7 @@
     "role": "spare",
     "domain": "any",
     "pr": null,
-    "status": "idle",
+    "status": "testing",
     "host": "100.99.231.94",
     "tailscale": "100.99.231.94",
     "lan": "10.99.0.11",
@@ -51,7 +51,11 @@
     "note": "Spare fleet Pi (2026-09-28). Pi 5 / Debian 13 trixie / Intenso SSD. Duration pool (idea#168, 2026-10-06): Engine config mdns:true, shared store automerge:3zoqdSVsEtj4ygNJPNcDyKWvdxo6, no static peers. On Tailscale as idea01 (100.99.231.94).",
     "runner": "none",
     "grok_build": null,
-    "claim": null,
+    "claim": {
+      "by": "Kid",
+      "for": "idea#247 kit disk: Files Disk sunny-robin on sda serial …1354 (Steve)",
+      "since": "2026-10-16T18:20Z"
+    },
     "branch": null,
     "review_url": null
   },
