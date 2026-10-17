@@ -97,12 +97,17 @@
     "role": "kit-engine",
     "status": "kit",
     "lan": "10.99.0.138",
-    "host": "100.99.84.61",
-    "tailscale": "100.99.84.61",
+    "host": "100.96.98.10",
+    "tailscale": "100.96.98.10",
     "store": "automerge:3W6Gca6hLVPQABVrhy7uUC4pkw1p",
     "runner": "none",
     "grok_build": null,
-    "note": "Kit Engine (Pi 5, Waveshare D, NVMe), sticker sunny-robin, provisioned 2026-10-17. PENDING kit store: its /api/store-url already serves the shared KIT store 3W6G (seen 2026-10-17 11:43 CEST; previous own stores 3q7S, then KNTxK), but the switch, quarantine and field check are not yet confirmed (sunny-robin setup still in progress). Command log per-Engine (2jKS687XF857CCA9UaVqjyTihtap at 11:43 CEST). Tailscale tag:idea."
+    "note": "Kit Engine (Pi 5, Waveshare D), sticker sunny-robin. RE-PROVISIONED 2026-10-17 11:31-11:42 CEST after its NVMe died: USB boot from Intenso SSD Sata III AA000000000000003120 (512 GB, quick test HEALTHY 09:23), trixie Lite + cloud-init, EEPROM BOOT_ORDER=0xf614 (USB first; old config in ~/quarantine/eeprom-config-pre-bootorder-20261017-1021.txt), PSU_MAX_CURRENT=5000, usb_max_current_enable=1. SHARED KIT STORE 3W6G with kind-panda and happy-zebra (Koen 11:37; mDNS on, no static peers), own command log 2jKS687XF857CCA9UaVqjyTihtap; local override in ~/.idea-local (store-identity files skip-worktree). Briefly started on own store KNTx (never used, data in ~/quarantine/own-store-KNTx-*). Tailscale tag:idea as sunny-robin 100.96.98.10 (old node 100.99.84.61 removed by Koen). Kit store confirmed, field check passed before and after the 11:40 reboot (pm2_saved FAIL is the known pm2-logrotate false positive).",
+    "quarantine": {
+      "nvme": "DEAD 2026-10-17: Netac PCIe3 NVMe DRAM-less (1f40:1202) enumerates on PCIe but never ready (nvme0: Device not ready; aborting initialisation, CSTS=0x0, also after PCIe rescan); died with the ~08:00 power loss during a USB-disk hotplug. Old store 3q7SRjHDKSfGdKneTGWj6Q7Y5Agy unrecoverable. Removed from the Pi by Koen 10:19. Quarantined, do not reuse.",
+      "old_tailscale_node": "sunny-robin 100.99.84.61 removed deliberately by Koen 2026-10-17 (dead NVMe identity); replaced by 100.96.98.10.",
+      "power": "Recurring brief under-voltage ~2 s on cold boot (FIT, 3120 boots), EXT5V idle 5.18 V, min 5.127 V over 10 min of apt load; cable/port vs HAT comparison pending."
+    }
   },
   "kind-panda": {
     "role": "kit-engine",
