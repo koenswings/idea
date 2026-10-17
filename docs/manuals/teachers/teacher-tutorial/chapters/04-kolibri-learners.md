@@ -2,21 +2,23 @@
 
 # 4. Kolibri for learners (try it yourself)
 
-Sign in as a learner in a second browser window (private window) to see exactly what your class sees. On the demo school, learners sign in with their **username only, no password** (facility setting; check your school's setting).
+Your learners open Kolibri the same way you do: on a classroom computer they double-click **IDEA** on the desktop and click **Open** on the Kolibri card in the Console (2.2.1). Show them this once.
 
-> **Note on passwords.** The demo learners sign in without a password. A school can turn learner passwords on: sign in as a Kolibri admin, open **Facility > SETTINGS**, tick **Require password for learners**, then click **SAVE CHANGES**. Learners who have no password yet then need one set by the admin.
+Sign in as a learner in a second browser window (private window) to see exactly what your class sees. Learners have no password in Kolibri. They sign in with only their username, for example `learner1`.
+
+> **At an existing school.** A teacher with admin rights (or the Kolibri admin) turns this on in Kolibri: open **Facility > SETTINGS**, untick **Require password for learners**, then click **SAVE CHANGES**.
 
 ## 4.1 Do a lesson
 
-1. Sign in as `demo_learner1`. **HOME** shows **Your classes**, **Recent lessons** and **Recent quizzes**.
+1. Sign in as `learner1`. **HOME** shows **Your classes**, **Recent lessons** and **Recent quizzes**.
    ![Learner home](../screenshots/S1-01.png)
-2. Click **demo-Fractions lesson**. The 6 items are listed in order.
+2. Click **Fractions lesson**. Its items are listed in order.
    ![Lesson](../screenshots/S1-03.png)
-3. Watch the first video.
+3. Open the first item (**Cake in quarters**, a picture activity). Videos open the same way.
    ![Video](../screenshots/S1-04.png)
-4. Open an exercise, type an answer, click **CHECK**. Keep going until the exercise is complete ("5 correct" goal shown at the top).
+4. Exercises work like this (here the Khan Academy exercise **Add fractions with unlike denominators**): type an answer, click **CHECK**. Keep going until the goal at the top ("Get 5 correct") is reached.
    ![Exercise](../screenshots/S1-05.png)
-5. Sign out. Sign in as `demo_learner2` and open only one video, so the report shows a difference.
+5. Sign out. Sign in as `learner2` and open only one item, so the report shows a difference.
 
 ## 4.2 Take a quiz
 

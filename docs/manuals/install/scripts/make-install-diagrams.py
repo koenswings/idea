@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Generates the SVG diagrams for the two IDEA install manuals.
 Run:  python3 make-install-diagrams.py   (both manuals' build.py run it)
-m1-*.svg -> ../install-manual-school-server/diagrams/, m2-*.svg -> ../install-manual-client-pi400/diagrams/"""
+m1-*.svg -> ../install-manual-school-server/diagrams/, m2-*.svg -> ../install-manual-classroom-computer/diagrams/"""
 import os
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIRS = {"m1": os.path.join(BASE, "install-manual-school-server", "diagrams"),
-        "m2": os.path.join(BASE, "install-manual-client-pi400", "diagrams")}
+        "m2": os.path.join(BASE, "install-manual-classroom-computer", "diagrams")}
 FONT = "DejaVu Sans, Arial, sans-serif"
 
 class S:
@@ -87,7 +87,7 @@ def wiring():
     # Switch
     sx, sy = 740, 300
     s.rect(sx, sy, 330, 120, fill="#f0fff0")
-    s.text(sx + 165, sy + 86, "TP-Link TL-SG105PE  -  10.42.0.4", 14, "bold")
+    s.text(sx + 165, sy + 86, "TP-Link TL-SG105PE  -  10.42.0.10", 14, "bold")
     s.text(sx + 165, sy + 104, "ports 1-4 = PoE+ (power out), port 5 = normal", 10, italic=True, fill="#555")
     spx = {}
     for i in range(1, 6):
@@ -100,11 +100,11 @@ def wiring():
     s.line([(xs["LAN1"], cy + 89), (xs["LAN1"], cy + 140), (1115, cy + 140), (1115, 270), (spx[5], 270), (spx[5], sy + 12)], C_UP, 5)
     s.badge(1115, 450, 2, C_UP)
     # Pis
-    for k, (px, ip, port, col) in enumerate([(740, "10.42.0.2", 1, C_POE1), (920, "10.42.0.3", 2, C_POE2)]):
+    for k, (px, ip, port, col) in enumerate([(740, "10.42.0.2-.9 (DHCP)", 1, C_POE1), (920, "10.42.0.2-.9 (DHCP)", 2, C_POE2)]):
         py = 80
         s.rect(px, py, 150, 120, fill="#fff5f5")
-        s.text(px + 75, py + 22, f"Pi 5 #{k+1}", 14, "bold")
-        s.text(px + 75, py + 40, ip, 12, fill="#333")
+        s.text(px + 75, py + 22, "Engine 1 (Pi 5)" if k == 0 else "Engines 2-4", 14, "bold")
+        s.text(px + 75, py + 40, ip if k == 0 else "optional, ports 2-4", 12, fill="#333")
         s.text(px + 75, py + 56, "PoE+ HAT + NVMe", 10, fill="#555")
         s.port(px + 52, py + 72, "ETH", fill="#c9f0c9")
         s.text(px + 75, py + 140, "no USB-C power cable", 10, italic=True, fill="#a00")
@@ -124,7 +124,7 @@ def wiring():
     lx, ly = 40, 670
     s.text(lx, ly - 12, "Cables (all Cat5e/Cat6 Ethernet):", 12, "bold", anchor="start")
     items = [(1, C_WAN, "Starlink ETH -> Cudy WAN"), (2, C_UP, "Cudy LAN1 -> switch port 5"),
-             (3, C_POE1, "switch port 1 -> Pi #1"), (4, C_POE2, "switch port 2 -> Pi #2")]
+             (3, C_POE1, "switch port 1 -> Engine 1 (always)"), (4, C_POE2, "ports 2-4 -> one cable per extra Engine")]
     for i, (n, c, t) in enumerate(items):
         x = lx + i * 265
         s.badge(x + 12, ly + 12, n, c)
@@ -146,20 +146,20 @@ def zones():
         s.text(x + w/2, y + 26, title, 15, "bold")
         s.text(x + w/2, y + 48, sub, 11, fill="#333")
     zone(420, 60, 260, 110, "WAN  (Starlink -> internet)", "zone: wan", "#fff7e0")
-    zone(780, 230, 290, 170, "LAN  10.42.0.0/24  (wired)", "zone: lan\nPi #1 10.42.0.2 - Pi #2 10.42.0.3\nswitch 10.42.0.4\n(Console: http://10.42.0.2)", "#f0fff0")
-    zone(30, 130, 300, 140, "Wi-Fi 'IDEA'  10.42.1.0/24", "zone: students\nlaptops / Pi 400s of students\nclient isolation ON", "#fff0f0")
+    zone(780, 230, 290, 170, "LAN  10.42.0.0/24  (wired)", "zone: lan\nEngines 10.42.0.2-.9 (by DHCP)\nswitch 10.42.0.10\n(Console: http://idea.local)", "#f0fff0")
+    zone(30, 130, 300, 140, "Wi-Fi 'IDEA'  10.42.1.0/24", "zone: students\nlaptops / classroom computers\nclient isolation ON", "#fff0f0")
     zone(30, 380, 300, 140, "Wi-Fi 'IDEA-Teachers'  10.42.2.0/24", "zone: teachers\nteacher laptops / phones", "#f5f0ff")
     zone(420, 470, 260, 110, "tailscale0", "zone: tailscale\nadmin access to the router only", "#eefaff")
     G, R, O = "#2ca02c", "#d62728", "#ff7f0e"
     # students -> Pis allowed
     s.line([(330, 190), (760, 190), (760, 280), (780, 280)], G, 4, arrow=True)
-    s.text(545, 183, "ALLOW: to 10.42.0.2 and 10.42.0.3 only", 11, "bold", fill=G)
+    s.text(545, 183, "ALLOW: to the Engines (10.42.0.2-.9) only", 11, "bold", fill=G)
     # students -> WAN blocked
     s.line([(250, 130), (250, 100), (420, 100)], R, 4, dash="8,6", arrow=True)
     s.text(30, 70, "BLOCKED (no forwarding):\ninternet, outside DNS, VPNs", 11, "bold", fill=R, anchor="start")
     # teachers -> Pis
     s.line([(330, 430), (740, 430), (740, 360), (780, 360)], G, 4, arrow=True)
-    s.text(545, 446, "ALLOW: to the two Pis", 11, "bold", fill=G)
+    s.text(545, 446, "ALLOW: to the Engines (10.42.0.2-.9)", 11, "bold", fill=G)
     # teachers -> WAN toggle
     s.line([(200, 380), (200, 330), (370, 330), (370, 140), (420, 140)], O, 4, dash="3,5", arrow=True)
     s.text(377, 230, "ON/OFF switch:\nrule 'Teachers-Internet'", 11, "bold", fill=O, anchor="start")
@@ -200,7 +200,7 @@ def tailnet():
     for i, (n, x) in enumerate([("School A", 60), ("School B", 420), ("School C", 780)]):
         s.rect(x, 220, 260, 110, fill="#f0fff0")
         s.text(x + 130, 248, f"{n}  (tag:idea)", 14, "bold")
-        s.text(x + 130, 272, ["router\nbrave-otter - calm-heron", "router\nquick-lynx - tidy-crane", "router\nbold-gecko - warm-finch"][i], 11)
+        s.text(x + 130, 272, ["router\nbrave-otter  (1 Engine)", "router\nquick-lynx - tidy-crane  (2)", "router\nbold-gecko - warm-finch\nsoft-wren - keen-ibis  (4)"][i], 11)
         s.line([(550, 150), (x + 130, 215)], "#2ca02c", 3, arrow=True)
     s.line([(320, 300), (420, 300)], "#d62728", 3, dash="6,5", arrow=True, arrow_start=True)
     s.line([(680, 300), (780, 300)], "#d62728", 3, dash="6,5", arrow=True, arrow_start=True)
@@ -212,7 +212,7 @@ def tailnet():
 # ---------------------------------------------------------------- M2 Pi 400 wiring
 def pi400():
     s = S(1100, 640)
-    s.text(550, 30, "Raspberry Pi 400 + Raspberry Pi Monitor: ONE power supply", 20, "bold")
+    s.text(550, 30, "Raspberry Pi 400 (or Pi 500) + Raspberry Pi Monitor: ONE power supply", 20, "bold")
     # Pi 400 rear strip (as seen from behind)
     px, py = 230, 330
     s.rect(px, py, 640, 150, fill="#fff0f3", stroke="#c51a4a", sw=3, rx=14)
@@ -286,11 +286,11 @@ def budget():
 def cards():
     s = S(1100, 260)
     s.text(550, 28, "Preparing many micro-SD cards", 18, "bold")
-    steps = [("1. Download once", "ubuntu-26.04.1-preinstalled-\ndesktop-arm64+raspi.img.xz\n+ check SHA-256"),
+    steps = [("1. Get the IDEA image", "idea-client-26.04-<date>.img.xz\nfrom the IDEA team\n+ check SHA-256"),
              ("2. Write each card", "Raspberry Pi Imager\n'Use custom' -> the .img.xz\n(about 10 min/card)"),
-             ("3. Label", "label: school, PC no.\nKEEP the kit 16 GB card\nfor EEPROM rescue"),
-             ("4. First boot on Pi 400", "setup wizard: language,\nkeyboard, Wi-Fi, user"),
-             ("5. Finish", "homepage = Console,\nupdates, checklist")]
+             ("3. Home Engine (optional)", "idea-home.txt on the\nboot partition:\nthe Engine's sticker name"),
+             ("4. First boot", "Pi 400 or Pi 500:\nno wizard, learner\nlogs in by itself"),
+             ("5. Check + label", "IDEA icon opens the\nConsole; label the PC\nwith its idea-pc name")]
     for i, (t, sub) in enumerate(steps):
         x = 15 + i * 218
         s.rect(x, 60, 195, 150, fill=["#eef5ff", "#fff7e0", "#f4f4f4", "#f0fff0", "#fff0f0"][i])
@@ -298,7 +298,7 @@ def cards():
         s.text(x + 97, 125, sub, 10.5)
         if i < 4:
             s.line([(x + 197, 135), (x + 216, 135)], "#1f77b4", 4, arrow=True)
-    s.text(550, 240, "Optional faster route: set up ONE 'golden' Pi 400, copy its card to an image, write that image to the other cards (section 5.4).", 11, fill="#555")
+    s.text(550, 240, "One image for every Pi 400 and Pi 500. A card can move between the two models.", 11, fill="#555")
     s.save("m2-cards.svg")
 
 def timeline():
@@ -306,7 +306,7 @@ def timeline():
     s.text(550, 28, "Where to do each step", 18, "bold")
     s.rect(20, 50, 640, 180, fill="#eef5ff")
     s.text(340, 78, "In Belgium (home internet as 'WAN')", 15, "bold")
-    s.text(40, 108, "- flash + configure the Cudy (all OpenWrt settings)\n- join router + Pis to Tailscale\n- set the switch password\n- install Raspberry Pi OS + IDEA Engine on both Pis\n- download App/content (Kolibri, Kiwix ZIMs...)\n- full test with the final checklist, then label and pack", 12, anchor="start")
+    s.text(40, 108, "- check the pre-flashed IDEA router\n- join the Pis to Tailscale\n- set the switch password\n- install Raspberry Pi OS + IDEA Engine on each Pi\n- download App/content (Kolibri, Kiwix ZIMs...)\n- full test with the final checklist, then label and pack", 12, anchor="start")
     s.rect(690, 50, 390, 180, fill="#f0fff0")
     s.text(885, 78, "On site (with Starlink)", 15, "bold")
     s.text(710, 108, "- install dish, activate Starlink\n- Starlink app: Bypass mode ON\n- cable everything (wiring diagram)\n- power on, wait 5 minutes\n- check Tailscale is back online\n- final checklist with a laptop", 12, anchor="start")

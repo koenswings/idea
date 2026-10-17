@@ -103,6 +103,6 @@ Checks: structure, hygiene, docs currency (every file under `docs/` listed in `d
 
 Repo paths follow the nested layout: `agent-*-dev` at `idea/agents/<repo>`, `app-*` at `idea/agents/agent-app-dev/<repo>`. Remote tests run over SSH on the selected Pi in the same tree (`/home/pi/idea/agents/…`). `tools/quality/selftest.sh` runs the scanner against fixtures in `tools/quality/testdata/agents/` (no Pi needed).
 
-App upstream version checks are separate: App Dev Bot runs `tools/quality/check-app-versions.sh` in the Monday scan (`app-update` issues); that script is still a Phase 2 stub.
+App upstream version checks are separate: App Dev Bot runs `tools/quality/check-app-versions.sh` in the Monday scan (`app-update` issues; idea#88).
 
 **Full quality policy:** `docs/grok-bot-setup.md` §5 · **Implementation proposal:** `proposals/quality-scan-implementation.md` · **Layout:** `proposals/pi-checkout-layout.md`

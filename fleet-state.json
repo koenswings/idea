@@ -31,7 +31,7 @@
     "lan": "10.99.0.13",
     "runner": "none",
     "grok_build": null,
-    "version": "engine pool/engine-192-194-on-180@ecb69127814fd186b4977d78923a9d67e1ef65fe, console feat/live-metrics-liveness@a6b34449c84713094164e1ee11b40dd405b0e855",
+    "version": "engine deploy/main-ad3409a+pr213@53a701c6ff46fde0928c3f28c69b377da4219b73, console main@fc654b4af285db4d37ec070b9803c0af04ec4808",
     "mdns": true,
     "note": "Duration pool (idea#168, 2026-10-06): Engine config mdns:true, shared store automerge:3zoqdSVsEtj4ygNJPNcDyKWvdxo6, no static peers. SSH is key-only (password auth off 2026-09-27). Hardware test disk (idea#139 limited Files Disk run 2026-09-29): Intenso SSD 111.8G, USB bridge serial 26A1EE83197F (ID_USB_SERIAL_SHORT), disk serial 3813430-532011020 (ID_SERIAL_SHORT), single ext4 partition UUID a0bf8374-274e-4bef-b32e-cfbfd09d2884 label IDEA Disk (Disk B nextcloud image files-disk-b-nextcloud-20260929085050-4f38fe; partition grown to full disk). PRIOR dual-partition hw-roundtrip fixture SACRIFICED this run (was vfat 3E50-902A + ext4 378383c9-0612-4c82-9c07-8c34d15253ba). Match by serials/UUID, never by device name (currently sdc). idea03 root SSD serial AA202000000000004820 (sda) is never a test target. Claim: Atlas idea#139 limited Intenso-only completed 2026-09-29.",
     "branch": null,
@@ -46,7 +46,7 @@
     "host": "100.99.231.94",
     "tailscale": "100.99.231.94",
     "lan": "10.99.0.11",
-    "version": "engine pool/engine-192-194-on-180@ecb69127814fd186b4977d78923a9d67e1ef65fe, console feat/live-metrics-liveness@a6b34449c84713094164e1ee11b40dd405b0e855",
+    "version": "engine deploy/main-ad3409a+pr213@ef7041016c93bbecbaf6f4355839e51e5d7e6148, console main@fc654b4af285db4d37ec070b9803c0af04ec4808",
     "mdns": true,
     "note": "Spare fleet Pi (2026-09-28). Pi 5 / Debian 13 trixie / Intenso SSD. Duration pool (idea#168, 2026-10-06): Engine config mdns:true, shared store automerge:3zoqdSVsEtj4ygNJPNcDyKWvdxo6, no static peers. On Tailscale as idea01 (100.99.231.94).",
     "runner": "none",
@@ -63,7 +63,7 @@
     "host": "100.108.39.45",
     "tailscale": "100.108.39.45",
     "lan": "10.99.0.14",
-    "version": "engine pool/engine-192-194-on-180@ecb69127814fd186b4977d78923a9d67e1ef65fe, console feat/live-metrics-liveness@a6b34449c84713094164e1ee11b40dd405b0e855",
+    "version": "engine deploy/main-ad3409a+pr213@7b48e46258d5a98c1c46c7638276957238290d4a, console main@fc654b4af285db4d37ec070b9803c0af04ec4808",
     "mdns": true,
     "runner": "none",
     "grok_build": null,
@@ -85,12 +85,23 @@
     "mdns": false,
     "store": "automerge:6f8m5KxzARv9xwv4Lw18LgVUJzu",
     "console_port": 8081,
-    "note": "PRODUCTION home server (Koen 2026-10-07): Pi 500, Debian 12, full Engine+Console from main, OWN store 6f8m (never 3zoqd/4GQm). status 'production' (not idle) so find-available-pi.sh never allocates it and check-fleet-health.sh never counts it as a failure. mdns false until the pool and idea02 leave Koen's LAN, then true. Console on :8081 (:8080 = kolibri host-net). On Tailscale as 100.115.60.6; home LAN 192.168.0.231 (stays on Koen's home LAN, not the AX55 10.99.0.0/24 pool LAN). ssh via Tailscale 100.115.60.6 or ProxyJump idea04; no longer via idea01 (LAN split 2026-10-09). PRODUCTION MILKWISE since the cutover 2026-10-08 09:53 CEST: milkwise-wizardly-hugle-001 at http://192.168.0.231:3333/ (Engine status Running, autostarts on boot; daily 05:00 reboot in root cron). idea02's copy is stopped.",
+    "note": "PRODUCTION home server (Koen 2026-10-07): Pi 500, Debian 12, full Engine+Console from main, OWN store 6f8m (never 3zoqd/4GQm). status 'production' (not idle) so find-available-pi.sh never allocates it and check-fleet-health.sh never counts it as a failure. mdns false until the pool and idea02 leave Koen's LAN, then true. Console on :8081 (:8080 = kolibri host-net). On Tailscale as 100.115.60.6; home LAN 192.168.0.231 (stays on Koen's home LAN, not the AX55 10.99.0.0/24 pool LAN). ssh via Tailscale 100.115.60.6 or ProxyJump idea04; no longer via idea01 (LAN split 2026-10-09). PRODUCTION MILKWISE since the cutover 2026-10-08 09:53 CEST: milkwise-wizardly-hugle-001 at http://192.168.0.231:3333/ (Engine status Running, autostarts on boot; daily 05:00 reboot in root cron). idea02's copy is stopped. | 2026-10-16 (Atlas, Steve-approved option A): demo Kolibri 0.15.5 (container kolibri-g3c6r84l3pm6kf49upa-kolibri-1, :54189) has Kolibri superuser idea_ops (password follows <name>911! convention; Kolibri 0.15 forbids '-' in usernames); facility 'IDEA Demo School' 3797eff3ad77f95075b3f9889bcfee6b built via REST next to untouched demo-School.",
     "milkwise": {
       "state": "production",
       "url": "http://192.168.0.231:3333/",
       "instance": "milkwise-wizardly-hugle-001",
       "since": "2026-10-08"
     }
+  },
+  "sunny-robin": {
+    "role": "kit-engine",
+    "status": "kit",
+    "lan": "10.99.0.138",
+    "host": "100.99.84.61",
+    "tailscale": "100.99.84.61",
+    "store": "automerge:3q7SRjHDKSfGdKneTGWj6Q7Y5Agy",
+    "runner": "none",
+    "grok_build": null,
+    "note": "Kit Engine (Pi 5, Waveshare D, NVMe), sticker sunny-robin, provisioned 2026-10-17. OWN fresh store 3q7S (never 4GQm/22WU/2VroE), command log 2xx4nY1x67nFxQ7oWyFYeUtRStjo; local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea."
   }
 }

@@ -16,14 +16,14 @@ Good to know:
 
 1. Open Nextcloud from the Console and sign in. In **Files** you see the folder **School Files** (marked as **External storage** in the left menu).
    ![School Files in Nextcloud](../screenshots/F2-02.png)
-2. Open **School Files** to see what is on the disk (here `demo-Fractions-Worksheet-1.pdf`).
+2. Open **School Files** to see what is on the disk (here `Fractions-Worksheet-1.pdf`).
    ![School Files content](../screenshots/F2-03.png)
 
 ## 9.2 Share a file from School Files with your class
 
 1. On the file's row click **⋯ (Actions) > Show sharing options**, or click the share icon.
-2. In **Internal shares**, type the class group name (here `demo-Grade5A`) and choose it from the list. Keep **View only**. The group then appears under **Internal shares**.
-   ![File in School Files shared with demo-Grade5A](../screenshots/F2-06.png)
+2. In **Internal shares**, type the class group name (here `Grade 5`) and choose it from the list. Keep **View only**. The group then appears under **Internal shares**.
+   ![A file shared with Grade 5 (here a worksheet)](../screenshots/F2-06.png)
 3. A learner in that group signs in and finds the file in **All files** and under **Recently shared**.
    ![A learner sees the shared file](../screenshots/F2-07.png)
 

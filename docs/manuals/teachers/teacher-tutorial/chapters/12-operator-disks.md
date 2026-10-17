@@ -2,7 +2,7 @@
 
 # 12. Disks: Files Disk and Backup Disk
 
-This chapter is for the school operator, with the IDEA contact on the phone.
+This chapter is for the school operator.
 
 ## 12.1 A new disk (not yet an IDEA Disk)
 

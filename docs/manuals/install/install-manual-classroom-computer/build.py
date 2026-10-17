@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build install-manual-client-pi400.pdf with the IDEA house style (docs/house-style).
+"""Build install-manual-classroom-computer.pdf with the IDEA house style (docs/house-style).
 Usage: python3 build.py      (regenerates the install diagrams too, via ../scripts/make-install-diagrams.py)
 Fails if a 'to confirm' marker or a school-numbering leftover is in the source, a diagram or the PDF."""
 import os, re, subprocess, sys
@@ -19,7 +19,7 @@ STATUS = re.compile(r"^\*\*Status:\*\*.*\n+", re.M)   # status line on top of ea
 sys.path.insert(0, find_house_style(HERE))
 import housestyle
 
-NAME = "install-manual-client-pi400"
+NAME = "install-manual-classroom-computer"
 BAD = re.compile(r"to confirm|\bTODO\b|\bTBD\b|FIXME|10\.N\.|school-N|tag:school|idea<N>|school number\b", re.I)
 
 def fail(msg, lines):

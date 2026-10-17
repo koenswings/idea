@@ -12,6 +12,7 @@
 |---|---|
 | **IDEA box** | The small Raspberry Pi computer in the school that runs the apps. (On the demo it is named `wizardly-hugle`; your school's box has its own name.) |
 | **Console** | The web page that lists the apps and opens them. |
+| **IDEA shortcut** | The one shortcut on a classroom computer's desktop. It finds the IDEA box and opens the Console (chapter 2). |
 | **System Disk** | The IDEA box's own disk. The apps live on it. |
 | **IDEA Disk** | A USB disk or stick that the Console has prepared. It can become a **Files Disk** or a **Backup Disk**. |
 | **Spare disk** | An IDEA Disk that is still empty. |
@@ -19,7 +20,7 @@
 | **Backup Disk** | An IDEA Disk that keeps copies of the apps' data (chapter 10). |
 | **USB stick** | Your own USB stick (FAT32 or exFAT), filled on any computer. IDEA only reads it and never changes it (chapter 5). |
 | **Channel builder** | The IDEA app that turns a folder of your videos and PDFs into a Kolibri channel (chapter 5). |
-| **Operator** | The person at the school who looks after the IDEA box, with the IDEA contact on the phone (Part B). |
+| **Operator** | The person at the school who looks after the IDEA box (Part B). |
 
 ## 1.2 The apps
 
@@ -32,6 +33,6 @@
 ## 1.3 How to use this guide
 
 - **Part A (chapters 1 to 10)** is for teachers.
-- **Part B (chapters 11 and 12)** is for the school operator.
-- Each chapter has numbered steps with screenshots. The screenshots come from the IDEA demo box and use demo accounts whose names start with `demo` (see the appendix). Your school's names will be different.
+- **Part B (chapters 11 to 13)** is for the school operator.
+- Each chapter has numbered steps with screenshots. The screenshots come from the IDEA demo box and use the demo school **IDEA Demo School** with class **Grade 5** and the demo accounts in the appendix (`admin`, `teacher1`, `learner1` to `learner3`; teachers and the admin have a password: the account name followed by `911!`; learners sign in in Kolibri with only their username). Your school's names will be different.
 
