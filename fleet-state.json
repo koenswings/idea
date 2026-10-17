@@ -103,5 +103,16 @@
     "runner": "none",
     "grok_build": null,
     "note": "Kit Engine (Pi 5, Waveshare D, NVMe), sticker sunny-robin, provisioned 2026-10-17. OWN fresh store 3q7S (never 4GQm/22WU/2VroE), command log 2xx4nY1x67nFxQ7oWyFYeUtRStjo; local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea."
+  },
+  "kind-panda": {
+    "role": "kit-engine",
+    "status": "kit",
+    "lan": "10.99.0.127",
+    "host": "100.80.238.59",
+    "tailscale": "100.80.238.59",
+    "store": "automerge:4BNWQ7nSktjwMv7fK6ENwJBAKmQ9",
+    "runner": "none",
+    "grok_build": null,
+    "note": "Kit Engine (Pi 5, NVMe, cloned from FIT stick), sticker kind-panda, provisioned 2026-10-17. OWN fresh store 4BNW (never 4GQm/22WU/2VroE), command log 2yvcASaDPU5nnLaLx8CjuwsCP1CK; local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea."
   }
 }
