@@ -92,5 +92,16 @@
       "instance": "milkwise-wizardly-hugle-001",
       "since": "2026-10-08"
     }
+  },
+  "kind-panda": {
+    "role": "kit-engine",
+    "status": "kit",
+    "lan": "10.99.0.127",
+    "host": "100.80.238.59",
+    "tailscale": "100.80.238.59",
+    "store": "automerge:4BNWQ7nSktjwMv7fK6ENwJBAKmQ9",
+    "runner": "none",
+    "grok_build": null,
+    "note": "Kit Engine (Pi 5, NVMe, cloned from FIT stick), sticker kind-panda, provisioned 2026-10-17. OWN fresh store 4BNW (never 4GQm/22WU/2VroE), command log 2yvcASaDPU5nnLaLx8CjuwsCP1CK; local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea."
   }
 }
