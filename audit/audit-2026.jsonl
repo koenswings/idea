@@ -566,3 +566,12 @@
 {"ts":"2026-10-17T05:58:28Z","bot":"Grok Bot","action":"fleet_state_update","pi":"kind-panda","field":"runner","value":"none","previous":null}
 {"ts":"2026-10-17T05:58:28Z","bot":"Grok Bot","action":"fleet_state_update","pi":"kind-panda","field":"grok_build","value":null,"previous":null}
 {"ts":"2026-10-17T05:58:28Z","bot":"Grok Bot","action":"fleet_state_update","pi":"kind-panda","field":"note","value":"Kit Engine (Pi 5, NVMe, cloned from FIT stick), sticker kind-panda, provisioned 2026-10-17. OWN fresh store 4BNW (never 4GQm/22WU/2VroE), command log 2yvcASaDPU5nnLaLx8CjuwsCP1CK; local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea.","previous":null}
+{"ts":"2026-10-17T08:36:34Z","bot":"Grok Bot","action":"fleet_state_update","pi":"happy-zebra","field":"role","value":"kit-engine","previous":null,"created":true}
+{"ts":"2026-10-17T08:36:34Z","bot":"Grok Bot","action":"fleet_state_update","pi":"happy-zebra","field":"status","value":"kit","previous":null}
+{"ts":"2026-10-17T08:36:34Z","bot":"Grok Bot","action":"fleet_state_update","pi":"happy-zebra","field":"lan","value":"10.99.0.197","previous":null}
+{"ts":"2026-10-17T08:36:35Z","bot":"Grok Bot","action":"fleet_state_update","pi":"happy-zebra","field":"host","value":"100.102.94.100","previous":null}
+{"ts":"2026-10-17T08:36:35Z","bot":"Grok Bot","action":"fleet_state_update","pi":"happy-zebra","field":"tailscale","value":"100.102.94.100","previous":null}
+{"ts":"2026-10-17T08:36:35Z","bot":"Grok Bot","action":"fleet_state_update","pi":"happy-zebra","field":"store","value":"automerge:31JNN5j8ya7EEDv22bzfkSz5WtTK","previous":null}
+{"ts":"2026-10-17T08:36:35Z","bot":"Grok Bot","action":"fleet_state_update","pi":"happy-zebra","field":"runner","value":"none","previous":null}
+{"ts":"2026-10-17T08:36:35Z","bot":"Grok Bot","action":"fleet_state_update","pi":"happy-zebra","field":"grok_build","value":null,"previous":null}
+{"ts":"2026-10-17T08:36:35Z","bot":"Grok Bot","action":"fleet_state_update","pi":"happy-zebra","field":"note","value":"Kit Engine (Pi 5, Waveshare, no NVMe, boots from USB SSD INTENSO 512 GB serial AA000000000000010473; usb_max_current_enable=1, EEPROM PSU_MAX_CURRENT=5000), sticker happy-zebra, provisioned 2026-10-17. OWN fresh store 31JN (never 4GQm/22WU/2VroE), command log 2fMCeontC8dP5Ymq4jssYcbaVkUB; local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea. Router happy-zebra-router (100.110.73.52).","previous":null}

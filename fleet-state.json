@@ -114,5 +114,16 @@
     "runner": "none",
     "grok_build": null,
     "note": "Kit Engine (Pi 5, NVMe, cloned from FIT stick), sticker kind-panda, provisioned 2026-10-17. OWN fresh store 4BNW (never 4GQm/22WU/2VroE), command log 2yvcASaDPU5nnLaLx8CjuwsCP1CK; local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea."
+  },
+  "happy-zebra": {
+    "role": "kit-engine",
+    "status": "kit",
+    "lan": "10.99.0.197",
+    "host": "100.102.94.100",
+    "tailscale": "100.102.94.100",
+    "store": "automerge:31JNN5j8ya7EEDv22bzfkSz5WtTK",
+    "runner": "none",
+    "grok_build": null,
+    "note": "Kit Engine (Pi 5, Waveshare, no NVMe, boots from USB SSD INTENSO 512 GB serial AA000000000000010473; usb_max_current_enable=1, EEPROM PSU_MAX_CURRENT=5000), sticker happy-zebra, provisioned 2026-10-17. OWN fresh store 31JN (never 4GQm/22WU/2VroE), command log 2fMCeontC8dP5Ymq4jssYcbaVkUB; local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea. Router happy-zebra-router (100.110.73.52)."
   }
 }
