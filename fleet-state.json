@@ -92,5 +92,16 @@
       "instance": "milkwise-wizardly-hugle-001",
       "since": "2026-10-08"
     }
+  },
+  "sunny-robin": {
+    "role": "kit-engine",
+    "status": "kit",
+    "lan": "10.99.0.138",
+    "host": "100.99.84.61",
+    "tailscale": "100.99.84.61",
+    "store": "automerge:3q7SRjHDKSfGdKneTGWj6Q7Y5Agy",
+    "runner": "none",
+    "grok_build": null,
+    "note": "Kit Engine (Pi 5, Waveshare D, NVMe), sticker sunny-robin, provisioned 2026-10-17. OWN fresh store 3q7S (never 4GQm/22WU/2VroE), command log 2xx4nY1x67nFxQ7oWyFYeUtRStjo; local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea."
   }
 }
