@@ -96,7 +96,7 @@
   "sunny-robin": {
     "role": "kit-engine",
     "status": "kit",
-    "lan": "10.99.0.138",
+    "lan": "10.42.0.4",
     "host": "100.96.98.10",
     "tailscale": "100.96.98.10",
     "store": "automerge:3W6Gca6hLVPQABVrhy7uUC4pkw1p",
@@ -114,7 +114,7 @@
   "kind-panda": {
     "role": "kit-engine",
     "status": "kit",
-    "lan": "10.99.0.127",
+    "lan": "10.42.0.127",
     "host": "100.80.238.59",
     "tailscale": "100.80.238.59",
     "store": "automerge:3W6Gca6hLVPQABVrhy7uUC4pkw1p",
@@ -127,7 +127,7 @@
   "happy-zebra": {
     "role": "kit-engine",
     "status": "kit",
-    "lan": "10.99.0.197",
+    "lan": "10.42.0.3",
     "host": "100.102.94.100",
     "tailscale": "100.102.94.100",
     "store": "automerge:3W6Gca6hLVPQABVrhy7uUC4pkw1p",
