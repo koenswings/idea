@@ -1,10 +1,10 @@
 ---
 title: "IDEA for Teachers: Tutorial"
 subtitle: "Kolibri, Nextcloud, Wikipedia offline, Files Disk and Backup Disk"
-audience: "For Justice and the teachers he trains. Version 1.0, 13 October 2026"
+audience: "For Justice and the teachers he trains. Version 1.1, 19 October 2026 (the Zimbabwe kit)"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (kit of 18 October: Demo apps, Wikipedia names, full backups, known problems)
 
 # IDEA for Teachers: Tutorial
 

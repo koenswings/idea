@@ -306,7 +306,7 @@ def timeline():
     s.text(550, 28, "Where to do each step", 18, "bold")
     s.rect(20, 50, 640, 180, fill="#eef5ff")
     s.text(340, 78, "In Belgium (home internet as 'WAN')", 15, "bold")
-    s.text(40, 108, "- check the pre-flashed IDEA router\n- join the Pis to Tailscale\n- set the switch password\n- install Raspberry Pi OS + IDEA Engine on each Pi\n- download App/content (Kolibri, Kiwix ZIMs...)\n- full test with the final checklist, then label and pack", 12, anchor="start")
+    s.text(40, 108, "- check the pre-flashed IDEA router\n- join the Pis to Tailscale\n- set the switch password\n- install Raspberry Pi OS + IDEA Engine on each Pi\n- download App/content (Kolibri, Wikipedia ZIMs...)\n- full test with the final checklist, then label and pack", 12, anchor="start")
     s.rect(690, 50, 390, 180, fill="#f0fff0")
     s.text(885, 78, "On site (with Starlink)", 15, "bold")
     s.text(710, 108, "- install dish, activate Starlink\n- Starlink app: Bypass mode ON\n- cable everything (wiring diagram)\n- power on, wait 5 minutes\n- check Tailscale is back online\n- final checklist with a laptop", 12, anchor="start")

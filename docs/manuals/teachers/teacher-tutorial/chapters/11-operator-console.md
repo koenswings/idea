@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (kit: red dot for an absent box)
 
 # 11. The Console for the operator
 
@@ -15,7 +15,7 @@ This chapter is for the school operator.
 
 ## 11.2 The Network view: the IDEA box and its disks
 
-1. After login the left side shows **NETWORK**: **ALL APPS**, then the IDEA box with a green dot (online) and its disks.
+1. After login the left side shows **NETWORK**: **ALL APPS**, then the IDEA box with a green dot (online) and its disks. A box with a **red dot** is offline: switched off, or at another school.
    ![All apps](../screenshots/O2-01.png)
 2. Click the IDEA box name to select it, then click a disk (here **System Disk**). Each disk shows a role badge: **app**, **backup**, **files** or **empty**. The right side lists the apps on that disk.
    ![Disk view](../screenshots/O2-03.png)
@@ -27,6 +27,7 @@ This chapter is for the school operator.
    ![App details](../screenshots/O3-01.png)
 3. To check that an app really works, click **Open ↗**: the app's page must load.
 4. Only start or stop an app when your IDEA contact asks you to. Do not touch apps your IDEA contact did not mention.
+5. **Known problem.** The apps of an IDEA box with a red dot still show as running, in **ALL APPS** and on the teachers' **Apps** page, but they won't open. There is no fix yet. Do not try to start or stop them: just tell the teachers to use the apps of your own box.
 
 ## 11.4 Command History
 

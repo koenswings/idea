@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (Zimbabwe kit)
 
 # 1. What IDEA is
 
@@ -10,8 +10,9 @@
 
 | Word | Meaning |
 |---|---|
-| **IDEA box** | The small Raspberry Pi computer in the school that runs the apps. (On the demo it is named `wizardly-hugle`; your school's box has its own name.) |
+| **IDEA box** | The small Raspberry Pi computer in the school that runs the apps. Each box has its own name, on its sticker. The kit's three boxes are **sunny-robin**, **happy-zebra** and **kind-panda**. (The screenshots come from a demo box with another name.) |
 | **Console** | The web page that lists the apps and opens them. |
+| **Demo apps** | **Kolibri Demo**, **Nextcloud Demo** and **Wikipedia (Demo)**: practice copies with example content, on every IDEA box. Use them to follow this tutorial (1.3). |
 | **IDEA shortcut** | The one shortcut on a classroom computer's desktop. It finds the IDEA box and opens the Console (chapter 2). |
 | **System Disk** | The IDEA box's own disk. The apps live on it. |
 | **IDEA Disk** | A USB disk or stick that the Console has prepared. It can become a **Files Disk** or a **Backup Disk**. |
@@ -26,13 +27,14 @@
 
 | App | What you use it for | Chapters |
 |---|---|---|
-| **Kolibri** | Ready-made lessons, videos and exercises (for example Khan Academy). You make classes, lessons and quizzes and see each learner's progress. With the **channel builder** you turn your own files into a Kolibri channel. | 3, 4, 5 |
+| **Kolibri** | Ready-made lessons, videos and exercises (on the kit, for example CK-12, PhET, OpenStax and African Storybook). You make classes, lessons and quizzes and see each learner's progress. With the **channel builder** (not yet on the kit's boxes) you turn your own files into a Kolibri channel. | 3, 4, 5 |
 | **Nextcloud** | Your own files: share worksheets with a class, write documents together in **Nextcloud Office**, collect homework. | 6, 7, 9 |
-| **Kiwix** | Wikipedia and other reference books, offline. | 8 |
+| **Wikipedia** | The encyclopedia, offline: the full English Wikipedia, and a Simple English one in the Demo. | 8 |
 
 ## 1.3 How to use this guide
 
 - **Part A (chapters 1 to 10)** is for teachers.
 - **Part B (chapters 11 to 13)** is for the school operator.
-- Each chapter has numbered steps with screenshots. The screenshots come from the IDEA demo box and use the demo school **IDEA Demo School** with class **Grade 5** and the demo accounts in the appendix (`admin`, `teacher1`, `learner1` to `learner3`; teachers and the admin have a password: the account name followed by `911!`; learners sign in in Kolibri with only their username). Your school's names will be different.
+- Each chapter has numbered steps with screenshots. The screenshots come from the IDEA demo box and use the demo school **IDEA Demo School** with class **Grade 5** and the demo accounts in the appendix (`admin`, `teacher1`, `teacher2`, `learner1` to `learner3`; teachers and the admin have a password: the account name followed by `911!`; learners sign in in Kolibri with only their username). Your school's names will be different.
+- **Practise in the Demo apps.** Every IDEA box of the kit has six apps: the school's own **Kolibri**, **Nextcloud** and **Wikipedia**, and a Demo copy of each. Follow this tutorial in **Kolibri Demo**, **Nextcloud Demo** and **Wikipedia (Demo)**: they hold the demo school, the demo accounts and the example content. The school's own apps stay clean for real lessons.
 

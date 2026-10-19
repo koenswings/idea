@@ -1,10 +1,10 @@
 ---
 title: "IDEA School Server: Installation Manual"
 subtitle: "Raspberry Pi 5 Engines + Cudy router + PoE switch + Starlink"
-audience: "For Justice. Version 1.2, 15 October 2026"
+audience: "For Justice. Version 1.3, 19 October 2026 (the Zimbabwe kit)"
 cover_logo: "yes"
 ---
-**Status:** Authoritative (follows the school network design and the *IDEA School Router – Image and Automated Flashing* proposal; see the README for what is not yet installed on hardware) · **Maintained by:** Marco (with Atlas) · 15 October 2026 (pre-flashed router, Engine count not fixed, Starlink, `<name>911!` defaults)
+**Status:** Authoritative (follows the school network design and the *IDEA School Router – Image and Automated Flashing* proposal; see the README for what is not yet installed on hardware) · **Maintained by:** Marco (with Atlas) · 19 October 2026 (the Zimbabwe kit of 18 October: three Engines, six apps, one shared database, full backups, known problems)
 
 
 # How to use this manual
@@ -19,7 +19,7 @@ This manual takes one school from boxes to a working IDEA server. Each step has 
 <code>&lt;SOMETHING&gt;</code>, use your own value. Keep the real values in your password manager, not in this PDF.
 The IDEA default passwords below are not secret: they follow the public IDEA convention <code>&lt;name&gt;911!</code>.
 <ul>
-<li>IDEA defaults: router <code>root</code> / <code>admin911!</code>, switch <code>admin</code> / <code>admin911!</code>, Pi user <code>pi</code> / <code>pi911!</code> (keyboard only; SSH is key-only), classroom computer <code>admin</code> / <code>admin911!</code>, Wi-Fi <code>IDEA</code> / <code>idea911!</code> and <code>IDEA-Teachers</code> / <code>idea-teachers911!</code>.</li>
+<li>IDEA defaults: router <code>root</code> / <code>admin911!</code>, switch <code>admin</code> / <code>admin911!</code>, Pi user <code>pi</code> / <code>pi911!</code> (keyboard only; SSH is key-only; for the three kit Engines, ask Koen), classroom computer <code>admin</code> / <code>admin911!</code>, Wi-Fi <code>IDEA</code> / <code>idea911!</code> and <code>IDEA-Teachers</code> / <code>idea-teachers911!</code>.</li>
 <li><code>&lt;TAILSCALE-AUTH-KEY&gt;</code>: the one IDEA fleet key. Koen gives it to you as a file. Keep it in the file: it stays out of the command history.</li>
 <li><code>&lt;STICKER&gt;</code>: the name the installer gives a Pi, for example <code>brave-otter</code> (section 5.6). Write it on the sticker on the case.</li>
 </ul>
@@ -45,7 +45,7 @@ The IDEA school router arrives **pre-flashed** (see the *IDEA School Router – 
 
 | What | Name | Default password | Who uses it |
 |---|---|---|---|
-| Student Wi-Fi | `IDEA` | `idea911!` | Students' and classroom computers and phones. Reaches **only** the Pis (Console, Kolibri, Nextcloud, Kiwix). No internet. |
+| Student Wi-Fi | `IDEA` | `idea911!` | Students' and classroom computers and phones. Reaches **only** the Pis (Console, Kolibri, Nextcloud, Wikipedia). No internet. |
 | Teacher Wi-Fi | `IDEA-Teachers` | `idea-teachers911!` | Teachers. Reaches the Pis. Internet is **on** by default; staff can switch it off (section 9). |
 | Router admin (LuCI and SSH on the wired LAN) | user `root` | `admin911!` | The installer and the IDEA team only. Over Tailscale the router accepts SSH keys only. |
 
@@ -83,6 +83,77 @@ Two separate firewall zones need two separate networks, so the Wi-Fi networks ge
 (IDEA has no subnet routes), so the same addresses everywhere cause no clash.
 </div>
 
+# The Zimbabwe kit (handed over on 18 October 2026)
+
+*What the IDEA team already did on the kit, and what is left for you.*
+
+The kit was set up and tested in Belgium. You do **not** install its Engines yourself: for the three kit Engines,
+sections 5.2 to 5.8 are already done. Use those sections only for a new Engine later.
+
+| Part | In the kit |
+|---|---|
+| Engines | Three Raspberry Pi 5 Engines, installed and on Tailscale: **sunny-robin**, **happy-zebra** and **kind-panda**. The name is on each sticker. |
+| Disks | Each Engine has its own **Files Disk** (the folder *School Files* in Nextcloud) and its own **Backup Disk**. |
+| Router | A Cudy WR3000S with the IDEA router image (pre-flashed, section 2). |
+| Classroom computers | microSD cards with the IDEA client image (*IDEA Classroom Computer: Installation Manual*). |
+
+Passwords: the kit's sheet *IDEA Kit: Accounts and Passwords*. They follow the `<name>911!` rule. Kolibri learners and the
+classroom computers' `learner` account have no password. SSH logins use keys only.
+
+## The apps on every kit Engine
+
+*Six apps: the school's own three, and a Demo copy of each for training.*
+
+| Console card | What it is |
+|---|---|
+| **Kolibri** | The school's own Kolibri (school *IDEA School*) with 14 channels, for example CK-12, PhET, OpenStax and African Storybook. Only the `admin` account exists: the school creates its own teachers and learners. |
+| **Kolibri Demo** | A separate practice Kolibri: *IDEA Demo School*, class *Grade 5*, the demo accounts and the three IDEA-DEMO channels (Maths, Grade 5 Science, Early Reading). The teacher tutorial uses it. |
+| **Nextcloud** | The school's own Nextcloud, with the accounts `admin`, `teacher1` and `learner1`. |
+| **Nextcloud Demo** | A separate practice Nextcloud with the demo accounts and the folders *Worksheets* and *Teacher Notes*. |
+| **Wikipedia** | The full English Wikipedia, offline. |
+| **Wikipedia (Demo)** | Wikipedia in Simple English, used in the tutorial. |
+
+Everything the tutorial shows is done in the Demo apps, so the school's own apps stay clean.
+
+## One shared database, Engines that move
+
+*How the Engines find each other.*
+
+All IDEA Engines keep their information (Engines, disks, apps) in **one shared IDEA database**. On 18 October 2026 the
+three kit Engines were given a fresh, empty database, the same one on all three, so each Engine now knows only itself.
+Engines on the same network find each other by themselves (mDNS) and share the database: the Console of any of them
+then lists all of them. An Engine can move to another school without any change.
+
+<div class="warn">
+<b>Known problem: apps of an Engine that is not there.</b> Once two Engines have been on the same network, each one keeps
+listing the other one and its apps after they are apart (switched off, or at another school). Those apps look normal in
+the Console, but they <b>won't open</b>. There is no fix yet. Tell the teachers to use the apps marked
+"on <i>their own Engine's name</i>". Until the kit Engines are at their schools, switch on only one of them at a time on
+one network (Koen's decision of 18 October 2026, idea#286).
+</div>
+
+## Backups on the kit
+
+*What the Backup Disk keeps, and how long it takes.*
+
+Each Engine's Backup Disk takes **full** backups of every app, with their content (Kolibri channels and Wikipedia):
+about 164 GB per Engine, which fits on the 240 GB Backup Disk. The first backup of all apps takes about 2 h 15 min.
+An app is stopped while it is being backed up, so run backups outside lesson time. How to run one: *IDEA for Teachers:
+Tutorial*, chapter 12.
+
+## What is left for you at each school
+
+*The sections you still do.*
+
+| Section | For the kit |
+|---|---|
+| 1 Unboxing | Check the parts for this school; write the Engine's sticker name on the fill-in sheet. |
+| 2-3 Router | Check the pre-flashed router and its internet. |
+| 4 Switch | Only if the school has the PoE switch. |
+| 5.2-5.8 Engines | Already done. Only 5.6b: tell Koen which Engine went to which school. |
+| 7, 8 | Starlink, cabling and the final checklist. |
+| 9, 10 | Teacher internet, and telling the school. |
+
 # The big picture
 
 *How the parts fit together.*
@@ -108,7 +179,7 @@ The Pis get **no** USB-C power supply. The PoE+ HAT takes power from the Etherne
 
 ![Network zones and allowed traffic](diagrams/m1-zones.svg)
 
-* **IDEA (students):** devices reach only the Engines, however many there are (Console, Kolibri, Nextcloud, Kiwix). There is no forwarding to the internet, so outside DNS servers, VPNs and websites are all blocked. Students on the IDEA Wi-Fi cannot reach each other either (client isolation).
+* **IDEA (students):** devices reach only the Engines, however many there are (Console, Kolibri, Nextcloud, Wikipedia). There is no forwarding to the internet, so outside DNS servers, VPNs and websites are all blocked. Students on the IDEA Wi-Fi cannot reach each other either (client isolation).
 * **IDEA-Teachers:** devices reach the Pis. Internet goes through **one** firewall rule, `Teachers-Internet`, which staff can switch off and on again (section 9). It starts **on**.
 * **LAN (wired):** the Pis may reach the internet for updates and Tailscale. They do not route traffic for anyone else.
 * **Tailscale:** the router and every Engine join the IDEA tailnet with the one fleet tag `tag:idea`. Admins reach every device. Devices with `tag:idea` reach nothing, not even each other. There are no exit nodes and no subnet routes.
@@ -316,7 +387,9 @@ sudo reboot
 
 2. In LuCI **Status → Overview → DHCP leases**, note the new address (`10.42.0.2`-`.9`) and write it on the fill-in sheet. Which Engine gets which address is not fixed and does not matter. Below, `<ENGINE-IP>` means the address of the Engine you are working on (for a one-Engine school this is often `10.42.0.2`).
 
-**✔ Check:** `ping <ENGINE-IP>` answers, for every Engine.
+Engines installed since agent-engine-dev #216 set the vendor class themselves (script `idea-dhcp-vendor-class`); the step above is for an older Pi.
+
+**✔ Check:** `ping <ENGINE-IP>` answers, for every Engine, and every Engine's address is between `10.42.0.2` and `.9`. An address from `.100` to `.199` means the vendor class is missing: the Engine works on the cable, but Wi-Fi devices are refused (idea#284).
 
 ## 5.6 Install the IDEA Engine (and Console)
 
@@ -407,7 +480,7 @@ Repeat for each further Engine, with its own address and sticker name.
 
 **✔ Check:** `ssh pi@<ENGINE-IP> tailscale status` shows it online. The Tailscale admin console shows every sticker name with `tag:idea`.
 
-## 5.8 Apps and content (Kolibri, Nextcloud, Kiwix)
+## 5.8 Apps and content (Kolibri, Nextcloud, Wikipedia)
 
 *Add the apps and the learning content.*
 
@@ -415,6 +488,8 @@ The Engine starts apps from **App Disks**: drives with Docker Compose apps on th
 
 Koen gives you the App Disks for each school, ready to use. Plug them into the Pis in Belgium and check them there.
 Download content before you travel: Starlink data and time on site are limited.
+
+The kit Engines already have their six apps and content on their own disk (see "The apps on every kit Engine" at the start).
 
 **✔ Check:** in the Console, each app shows as *Running* and opens from a laptop on the LAN.
 
@@ -495,6 +570,9 @@ Do it once in Belgium (dry run) and again on site. Use a laptop with no other ne
 | ☐ | Laptop on **IDEA** opens Console | Join Wi-Fi `IDEA` with `idea911!`, browse to `http://idea.local` | IDEA Console loads, every Engine listed. The laptop has an address `10.42.1.x`. |
 | ☐ | Console by sticker name | Laptop on Wi-Fi `IDEA`: browse to `http://<STICKER>.local` (each sticker) | Console loads, every Engine listed |
 | ☐ | Every Engine reachable | Browse to `http://<ENGINE-IP>` for each Engine | Console loads on each |
+| ☐ | **Apps open from the Wi-Fi** | Laptop on `IDEA`: in the Console, click **Open** on each app of each Engine (the kit Engines have six) | Every app opens. "Refused" for all apps of one Engine: its address is outside `.2`-`.9` (5.5). |
+| ☐ | Only this school's Engines | Console → Operator Login → the network list | Every Engine of this school has a green dot. A red dot is an Engine that is not here: see the known problem in the kit chapter. |
+| ☐ | Disks | The same list, under each Engine | The Files Disk (badge *files*) and the Backup Disk (badge *backup*) are listed |
 | ☐ | **No internet on IDEA** | Browse to `https://example.com`. In a terminal: `ping -c2 1.1.1.1`, `nslookup example.com 1.1.1.1` | All fail (time-out / refused) |
 | ☐ | Router admin closed on IDEA | Browse to `http://10.42.1.1` and `http://10.42.0.1` | Fails |
 | ☐ | Students isolated | From phone A on IDEA, ping laptop B on IDEA | Fails |
@@ -503,7 +581,7 @@ Do it once in Belgium (dry run) and again on site. Use a laptop with no other ne
 | ☐ | Pis have internet (updates) | `ssh pi@<ENGINE-IP> 'curl -sI https://deb.debian.org | head -1'` | `HTTP/... 200` |
 | ☐ | **Every Engine visible in Tailscale** | `tailscale status` on an admin laptop, or the admin console | Every sticker name (and the router) online, tagged `tag:idea` |
 | ☐ | Stickers and report | Look at every case | Each sticker matches `hostname` on that Pi. Koen has the report (5.6b). |
-| ☐ | Power fine | `ssh pi@<ENGINE-IP> vcgencmd get_throttled` (for each Engine) | `throttled=0x0` |
+| ☐ | Power fine | `ssh pi@<ENGINE-IP> vcgencmd get_throttled` (for each Engine) | `throttled=0x0`. On 18 October kind-panda showed under-voltage at start-up (`0x50000`); if you see anything but `0x0`, check the cable and switch port and tell Koen. |
 | ☐ | Reboot test | Pull the switch's power for 10 s, then plug it back in | After about 5 minutes, all of the above pass again |
 
 # 9. Switching teacher internet off and on
@@ -533,18 +611,21 @@ Switch it on only when the head teacher asks, and off again when the lesson is o
 
 **Tell the head teacher and the teachers:**
 
-* **Students** join Wi-Fi **`IDEA`** with **`idea911!`**. It opens the IDEA Console, Kolibri, Nextcloud and Kiwix, and nothing else: no internet.
+* **Students** join Wi-Fi **`IDEA`** with **`idea911!`**. It opens the IDEA Console, Kolibri, Nextcloud and Wikipedia, and nothing else: no internet.
 * **Teachers** join Wi-Fi **`IDEA-Teachers`** with **`idea-teachers911!`**. It reaches the same apps. Internet is on; staff can switch it off (section 9).
 * Teachers keep the `IDEA-Teachers` password to themselves.
 * **Opening the Console:** on a classroom computer, click the **IDEA** icon on the desktop or in the dock (*IDEA Classroom Computer: Installation Manual*). On any other device, type **`http://idea.local`** or **`http://<STICKER>.local`** (the name on any Engine's sticker), and set it as the browser's home page or bookmark it.
-* **Default accounts** follow the `<name>911!` convention, for example `admin` / `admin911!`. The student account on the classroom computers, `learner`, has no password.
+* **Default accounts** follow the `<name>911!` convention, for example `admin` / `admin911!`. The student account on the classroom computers, `learner`, has no password, and Kolibri learners sign in with only their username. Remote logins (SSH) use keys only.
+* **Teacher computers:** the classroom computers join `IDEA`. Moving one to `IDEA-Teachers` needs the admin account and a terminal for now (*IDEA Classroom Computer: Installation Manual*, 6.5; temporary until idea#285 is fixed).
+* **Classroom computers reset at every restart.** Anything saved on the computer itself is gone after a restart: save work in Nextcloud.
+* **Apps that won't open:** the Console can still show the apps of an Engine that is switched off or at another school. They look normal but won't open (known problem, no fix yet). Use the apps marked "on" this school's Engine.
 
 **Change the passwords once the school is running.** The defaults are easy on purpose but anyone who knows the pattern can guess them.
 The head teacher picks new passwords (at least 8 characters, different for students and teachers). The IDEA team, or you over a wired laptop:
 
 1. LuCI → **Network → Wireless** → **Edit** on `IDEA` (both radios) → **Wireless Security → Key** → **Save & Apply**. The same for `IDEA-Teachers`.
 2. LuCI → **System → Administration → Router Password** for `root`.
-3. On each classroom computer, the `admin` password (`passwd` as admin), and the switch password (section 4).
+3. On each classroom computer, the `admin` password (`passwd` as admin). Switch off the reset first, or the change is lost at the next restart (*IDEA Classroom Computer: Installation Manual*, 6.6). Then the switch password (section 4).
 
 **✔ Check:** a phone joins with the new password and not with the old one. Every device on that Wi-Fi must join again with the new password.
 
@@ -588,6 +669,8 @@ The head teacher picks new passwords (at least 8 characters, different for stude
 | A Pi does not start | Check the PoE LED on that switch port and swap the cable. Try another PoE+ port. |
 | `throttled` is not `0x0` | Power problem: check the cable and HAT and switch budget. See the 5.1 USB power box. |
 | Console doesn't load from Wi-Fi but does from LAN | Check the rules `Allow-students-to-Engines`. Is the Pi in `10.42.0.2`-`.9` (5.5)? Try `http://<STICKER>.local` as well as `http://idea.local`: if only one of them fails, tell the IDEA team which one. |
+| All apps of one Engine "refused" from Wi-Fi, fine on a cable | The Engine's address is outside `10.42.0.2`-`.9` (idea#284). Check its lease in LuCI and tell the IDEA team. |
+| The Console shows apps that don't open | Their Engine is switched off or at another school: known problem (kit chapter). Use the apps of this school's Engines. |
 | Tailscale offline after a move | `ssh` in and run `tailscale status`. Check the WAN on the router. Starlink must be in bypass mode. |
 
 # Appendix C. Sources (read on 12 October 2026)
@@ -607,6 +690,7 @@ The head teacher picks new passwords (at least 8 characters, different for stude
 11. Raspberry Pi documentation, *Bootloader configuration*: `PSU_MAX_CURRENT`.
 12. Raspberry Pi documentation, *M.2 HAT+ → Boot from NVMe*: `raspberrypi.com/documentation/accessories/m2-hat-plus.html`.
 13. IDEA repos (read only): `koenswings/agent-engine-dev` (`README.md`, `docs/SCRIPTS.md`, `docs/PI_FLEET.md`, `script/provision-fleet.sh`, `config.yaml`) and `koenswings/idea` (`proposals/tailscale-remote-management.md`, `tools/fleet/*`).
+14. The kit (read 19 October 2026): `koenswings/idea` issues #284 (Engine vendor class), #285 (classroom computer Wi-Fi), #286 (kit database reset); `koenswings/agent-engine-dev` #241/#242 (full backups, 164 GB measured); the kit's *Accounts and Passwords* sheet.
 
 # Appendix D. Flashing and setting up a router by hand
 
@@ -641,8 +725,8 @@ Only for a Cudy WR3000S v1 that did **not** arrive pre-flashed. The flash script
 
 | File | Where | How to check it |
 |---|---|---|
-| **Cudy-signed intermediate image**: `WR3000S 1.0.zip`. Unzip it and use the `.bin` inside, **not** the .zip. As of Sept 2026 it is `cudy_wr3000s-v1-sysupgrade_20251119.bin`. | Cudy's Google Drive folder, linked from the OpenWrt wiki [1] and Cudy's "OpenWrt Software Download" page [2] | Size 14,945,872 bytes, MD5 `403e276f74fd29917fd4260294d1a137` [1]. Run `md5sum` on the file. The WR3000H/P files have almost the same name, so check the MD5! |
-| **Official OpenWrt 25.12.5** sysupgrade image: `openwrt-25.12.5-mediatek-filogic-cudy_wr3000s-v1-squashfs-sysupgrade.bin` | Firmware Selector [3]: `firmware-selector.openwrt.org/?target=mediatek%2Ffilogic&id=cudy_wr3000s-v1` | SHA-256 `b0a26c80fa458b4b743508a6a6de8aa9d19867fa3deb1c3c49e40194d61aa8b2` (from OpenWrt's `profiles.json` [4]). Run `sha256sum` on the file. |
+| **Cudy-signed intermediate image**: `WR3000S 1.0.zip`. Unzip it and use the `.bin` inside, **not** the .zip. As of Sept 2026 it is `cudy_wr3000s-v1-sysupgrade_20251119.bin`. | Cudy's Google Drive folder, linked from the OpenWrt wiki [1] and Cudy's "OpenWrt Software Download" page [2] | Size 14,945,872 bytes, MD5 <code>403e276f74fd2991<wbr>7fd4260294d1a137</code> [1]. Run `md5sum` on the file. The WR3000H/P files have almost the same name, so check the MD5! |
+| **Official OpenWrt 25.12.5** sysupgrade image: `openwrt-25.12.5-mediatek-filogic-cudy_wr3000s-v1-squashfs-sysupgrade.bin` | Firmware Selector [3]: `firmware-selector.openwrt.org/?target=mediatek%2Ffilogic&id=cudy_wr3000s-v1` | SHA-256 <code>b0a26c80fa458b4b<wbr>743508a6a6de8aa9<wbr>d19867fa3deb1c3c<wbr>49e40194d61aa8b2</code> (from OpenWrt's `profiles.json` [4]). Run `sha256sum` on the file. |
 
 <div class="warn">
 Do <b>not</b> pick the <code>...-ubootmod-...</code> files. That is an advanced layout which only a serial cable can undo [1].
