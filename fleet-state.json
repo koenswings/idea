@@ -96,7 +96,7 @@
   "sunny-robin": {
     "role": "kit-engine",
     "status": "kit",
-    "lan": "10.99.0.138",
+    "lan": "10.42.0.4",
     "host": "100.96.98.10",
     "tailscale": "100.96.98.10",
     "store": "automerge:3W6Gca6hLVPQABVrhy7uUC4pkw1p",
@@ -107,28 +107,34 @@
       "nvme": "DEAD 2026-10-17: Netac PCIe3 NVMe DRAM-less (1f40:1202) enumerates on PCIe but never ready (nvme0: Device not ready; aborting initialisation, CSTS=0x0, also after PCIe rescan); died with the ~08:00 power loss during a USB-disk hotplug. Old store 3q7SRjHDKSfGdKneTGWj6Q7Y5Agy unrecoverable. Removed from the Pi by Koen 10:19. Quarantined, do not reuse.",
       "old_tailscale_node": "sunny-robin 100.99.84.61 removed deliberately by Koen 2026-10-17 (dead NVMe identity); replaced by 100.96.98.10.",
       "power": "Recurring brief under-voltage ~2 s on cold boot (FIT, 3120 boots), EXT5V idle 5.18 V, min 5.127 V over 10 min of apt load; cable/port vs HAT comparison pending."
-    }
+    },
+    "version": "engine deploy/kit-229-232@adfd9d354ffd83c5ecc0a9eea64a474eae08de8f, console pr162@62bd2ba03544fd7b2ef490a07de2b8780f81105b (koenswings/agent-console-dev#162, unmerged; dist-only swap, checkout stays main@654224e)",
+    "deployed": "engine 2026-10-18 10:40:33 CEST (prev main@07456c3, backup ~/quarantine/engine-deploy-20261018-104000); console dist 2026-10-17 15:06:29 CEST (prev 7bf4772 in ~/quarantine/console-dist-7bf4772-20261017-150629). Steve-confirmed."
   },
   "kind-panda": {
     "role": "kit-engine",
     "status": "kit",
-    "lan": "10.99.0.127",
+    "lan": "10.42.0.127",
     "host": "100.80.238.59",
     "tailscale": "100.80.238.59",
     "store": "automerge:3W6Gca6hLVPQABVrhy7uUC4pkw1p",
     "runner": "none",
     "grok_build": null,
-    "note": "Kit Engine (Pi 5, NVMe, cloned from FIT stick), sticker kind-panda, provisioned 2026-10-17. Shared KIT store 3W6G (one store for kind-panda, happy-zebra, sunny-robin; Koen's correction 2026-10-17; never 4GQm/22WU/2VroE). Previous own store 4BNW quarantined in ~/quarantine/per-engine-store-20261017-113856. Command log is per-Engine (2yvcASaDPU5nnLaLx8CjuwsCP1CK, rotates daily). mDNS on, no static peers. Local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea. Disk station torn down 2026-10-17 11:31 CEST."
+    "note": "Kit Engine (Pi 5, NVMe, cloned from FIT stick), sticker kind-panda, provisioned 2026-10-17. Shared KIT store 3W6G (one store for kind-panda, happy-zebra, sunny-robin; Koen's correction 2026-10-17; never 4GQm/22WU/2VroE). Previous own store 4BNW quarantined in ~/quarantine/per-engine-store-20261017-113856. Command log is per-Engine (2yvcASaDPU5nnLaLx8CjuwsCP1CK, rotates daily). mDNS on, no static peers. Local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea. Disk station torn down 2026-10-17 11:31 CEST.",
+    "version": "engine deploy/kit-229-232@adfd9d354ffd83c5ecc0a9eea64a474eae08de8f, console pr162@62bd2ba03544fd7b2ef490a07de2b8780f81105b (koenswings/agent-console-dev#162, unmerged; dist-only swap, checkout stays main@654224e)",
+    "deployed": "engine 2026-10-18 10:43:40 CEST (prev 209b796 PR #229 tip, backup ~/quarantine/engine-deploy-20261018-104319); console dist 2026-10-17 15:06:38 CEST (prev 7bf4772 in ~/quarantine/console-dist-7bf4772-20261017-150638). Steve-confirmed."
   },
   "happy-zebra": {
     "role": "kit-engine",
     "status": "kit",
-    "lan": "10.99.0.197",
+    "lan": "10.42.0.3",
     "host": "100.102.94.100",
     "tailscale": "100.102.94.100",
     "store": "automerge:3W6Gca6hLVPQABVrhy7uUC4pkw1p",
     "runner": "none",
     "grok_build": null,
-    "note": "Kit Engine (Pi 5, Waveshare, no NVMe, boots from USB SSD INTENSO 512 GB serial AA000000000000010473; usb_max_current_enable=1, EEPROM PSU_MAX_CURRENT=5000), sticker happy-zebra, provisioned 2026-10-17. Shared KIT store 3W6G (one store for kind-panda, happy-zebra, sunny-robin; Koen's correction 2026-10-17; never 4GQm/22WU/2VroE). Previous own store 31JN quarantined in ~/quarantine/per-engine-store-20261017-113945. Command log is per-Engine (2fMCeontC8dP5Ymq4jssYcbaVkUB, rotates daily). mDNS on, no static peers. Local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea. Router happy-zebra-router (100.110.73.52)."
+    "note": "Kit Engine (Pi 5, Waveshare, no NVMe, boots from USB SSD INTENSO 512 GB serial AA000000000000010473; usb_max_current_enable=1, EEPROM PSU_MAX_CURRENT=5000), sticker happy-zebra, provisioned 2026-10-17. Shared KIT store 3W6G (one store for kind-panda, happy-zebra, sunny-robin; Koen's correction 2026-10-17; never 4GQm/22WU/2VroE). Previous own store 31JN quarantined in ~/quarantine/per-engine-store-20261017-113945. Command log is per-Engine (2fMCeontC8dP5Ymq4jssYcbaVkUB, rotates daily). mDNS on, no static peers. Local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea. Router happy-zebra-router (100.110.73.52).",
+    "version": "engine deploy/kit-229-232@adfd9d354ffd83c5ecc0a9eea64a474eae08de8f, console pr162@62bd2ba03544fd7b2ef490a07de2b8780f81105b (koenswings/agent-console-dev#162, unmerged; dist-only swap, checkout stays main@654224e)",
+    "deployed": "engine 2026-10-18 10:42:36 CEST (prev main@07456c3, backup ~/quarantine/engine-deploy-20261018-104214); console dist 2026-10-17 15:06:21 CEST (prev 7bf4772 in ~/quarantine/console-dist-7bf4772-20261017-150621). Steve-confirmed."
   }
 }
