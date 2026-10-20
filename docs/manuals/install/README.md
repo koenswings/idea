@@ -1,6 +1,8 @@
-**Status:** Authoritative (follows the school network design; not yet run on hardware) · **Maintained by:** Marco (with Atlas) · 15 October 2026
+**Status:** Authoritative (follows the school network design; not yet run on hardware) · **Maintained by:** Marco (with Atlas) · 19 October 2026
 
 # Install manuals
+
+19 October 2026: both manuals updated for the Zimbabwe kit handed over on 18 October 2026 (school server v1.3: new chapter "The Zimbabwe kit"; classroom computer v2.1: temporary IDEA-Teachers procedure for idea#285 and the reset on restart).
 
 | Folder | PDF | Topic |
 |---|---|---|

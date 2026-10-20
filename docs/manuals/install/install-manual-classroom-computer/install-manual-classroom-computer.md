@@ -1,10 +1,10 @@
 ---
 title: "IDEA Classroom Computer: Installation Manual"
 subtitle: "Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor + the IDEA client image"
-audience: "For Justice. Version 2.0, 15 October 2026"
+audience: "For Justice. Version 2.1, 19 October 2026 (the Zimbabwe kit)"
 cover_logo: "yes"
 ---
-**Status:** Authoritative (follows the student client image proposal and the student client browser proposal; the client image is not yet boot-tested on hardware, see the README) · **Maintained by:** Marco (with Atlas) · 15 October 2026 (IDEA client image, Pi 400 and Pi 500, Chrome, IDEA shortcut)
+**Status:** Authoritative (follows the student client image proposal and the student client browser proposal; the client image is not yet boot-tested on hardware, see the README) · **Maintained by:** Marco (with Atlas) · 19 October 2026 (kit of 18 October: US keyboard, reset on every restart, teacher Wi-Fi from the admin terminal until idea#285, known problems)
 
 
 # How to use this manual
@@ -133,7 +133,7 @@ Every classroom computer runs the same **IDEA client image**. It is the official
 | What | In the IDEA client image |
 |---|---|
 | Models | **One image for the Pi 400 and the Pi 500.** It picks the right display settings for each model at boot, so a card can move between a Pi 400 and a Pi 500. |
-| Student account | `learner`, logs in **automatically**, **no password**. It cannot change Wi-Fi, install software, add users or change the time. |
+| Student account | `learner`, logs in **automatically**, **no password**. It cannot change Wi-Fi (it cannot even list the networks), install software, add users or change the time. |
 | Admin account | `admin` (hidden from the login screen), password `admin911!`. The password only works at the keyboard: remote login (SSH) accepts the IDEA support keys only. |
 | Browser | **Google Chrome** is the only browser (Firefox is removed). Google is the default search engine. Chrome asks no first-run questions and never offers to save passwords. |
 | The IDEA icon | One **IDEA** icon on the desktop and in the dock (the app bar on the left). It opens the IDEA start page, which finds the Console (section 6.3). Chrome also opens the start page as its home page. |
@@ -141,8 +141,9 @@ Every classroom computer runs the same **IDEA client image**. It is the official
 | No pop-ups | No "choose a password for the new keyring", no Ubuntu welcome tour, no LibreOffice or GCompris first-start questions. |
 | Updates | **Off.** The computer never updates itself, so it stays as tested. The IDEA team updates by giving you a new image. |
 | Computer name | Set at first boot: `idea-pc-` plus the last 4 characters of the Pi's serial number, for example `idea-pc-3f2a`. |
-| Wi-Fi | Joins the school's student Wi-Fi `IDEA` (password `idea911!`) by itself. |
-| Keyboard, time zone | English (UK) keyboard layout, time zone Harare (Africa/Harare). |
+| Wi-Fi | Joins the school's student Wi-Fi `IDEA` (password `idea911!`) by itself. It is the only network on the card (teacher computers: 6.5). |
+| Keyboard, time zone | US keyboard layout (QWERTY), British English for dates and spelling, time zone Harare (Africa/Harare). |
+| Reset on every restart | **On.** Every restart puts the computer back as it was written: files saved on the computer and changed settings are gone. Students save their work in Nextcloud. An admin can switch the reset off and on again (6.6). |
 
 <div class="note">
 The IDEA client image needs a Pi 400 bootloader (EEPROM) dated <b>2022-11-25 or later</b> [6]. New kits almost always meet this. If a Pi 400 won't boot, update the EEPROM with the kit's 16 GB Raspberry Pi OS card (6.1). A Pi 500 is always new enough.
@@ -233,7 +234,7 @@ A computer can have a **home Engine**: the Engine its IDEA icon tries first. Wit
 *Switch the computer on with the IDEA card.*
 
 1. Put the IDEA card in (contacts facing down). Wire it as in 2.1 and connect power last.
-2. The first boot takes a few minutes: the card's partition is grown, and the computer gives itself its name and new keys. It may restart once.
+2. The first boot takes a few minutes: the card's partition is grown, and the computer gives itself its name and new keys. About 1-2 minutes after the very first start it restarts once by itself, to switch on the reset on restart. This happens only once.
 3. The desktop of the `learner` account opens by itself. There is no wizard and no password.
 
 **✔ Check:** you see the desktop with the **IDEA** icon, and the IDEA icon in the dock on the left. No pop-up asks for anything.
@@ -276,21 +277,60 @@ The pre-flashed IDEA school router creates two Wi-Fi networks (*IDEA School Serv
 | Students (default) | `IDEA`, password `idea911!`: Console and apps only, no internet |
 | Teacher's computer | `IDEA-Teachers`, password `idea-teachers911!`: Console and apps, plus internet (on by default; staff can switch it off) |
 
-The IDEA image already joins `IDEA`. Only a computer that the head teacher names for a teacher gets `IDEA-Teachers`. The learner account cannot change Wi-Fi, so an admin adds it: top-right menu → Wi-Fi → `IDEA-Teachers`, and give the `admin` password when Ubuntu asks. Keep the `IDEA-Teachers` password for teacher computers.
+The IDEA image joins `IDEA` by itself; it is the only network on the card. Only a computer that the head teacher names for a teacher gets `IDEA-Teachers`. Keep the `IDEA-Teachers` password for teacher computers.
 
-If the school has changed the `IDEA` password (*IDEA School Server: Installation Manual*, "Tell the school, and change the default passwords"), an admin enters the new one on each computer: top-right menu → Wi-Fi → `IDEA` → forget, then join again.
+<div class="warn">
+<b>Temporary procedure, until idea#285 is fixed.</b> The student account is locked: it cannot list Wi-Fi networks or
+join one, so <code>IDEA-Teachers</code> does not even appear in the Wi-Fi menu. An admin switches the computer from a
+terminal instead, as below. The steps follow the image's design but have not yet been tried on a kit card.
+A later image will make this simpler.
+</div>
+
+**For this session only** (the computer goes back to `IDEA` at the next restart):
+
+1. Press **Ctrl+Alt+T** to open a terminal.
+2. Type `su - admin` and the admin password `admin911!`.
+3. Join the teacher network (`sudo` asks for the admin password again):
+
+```bash
+sudo nmcli dev wifi rescan
+sudo nmcli dev wifi connect IDEA-Teachers password 'idea-teachers911!'
+```
+
+**To keep it after restarts** (the reset on restart would wipe it otherwise, 6.6):
+
+1. Terminal, `su - admin` as above, then `sudo idea-client-mode normal` and `sudo reboot`.
+2. After the restart, open a terminal again, `su - admin`, and run:
+
+```bash
+sudo nmcli dev wifi rescan
+sudo nmcli dev wifi connect IDEA-Teachers password 'idea-teachers911!'
+sudo nmcli con mod IDEA connection.autoconnect no
+sudo idea-client-mode overlay
+sudo reboot
+```
+
+**✔ Check:** after the restart the Wi-Fi icon shows `IDEA-Teachers`, and `sudo idea-client-mode status` says `running: overlay`. To make it a student computer again, write the card again (section 5) or reset it from the Console.
+
+If the school changes the `IDEA` password, each classroom computer needs the new one from the admin terminal too, with the reset switched off as above: `sudo nmcli con mod IDEA wifi-sec.psk '<NEW-PASSWORD>'`. This has not been tried on a card yet, so ask the IDEA team before you change the `IDEA` password. A card that is written or reset from the IDEA image comes back with `idea911!`.
 
 **Preparing in Belgium:** the IDEA network isn't there yet. You can test with a laptop hotspot or a spare IDEA router. No updates are needed: the image is complete.
 
 **✔ Check:** at school, the Wi-Fi icon shows "IDEA". Ubuntu may say "limited connectivity" or show no internet: that is **normal** on IDEA.
 
-## 6.6 The admin account
+## 6.6 The admin account and the reset on restart
 
-*The account for repairs and settings.*
+*The account for repairs and settings, and how to make a change that lasts.*
 
-You need `admin` only for repairs. On the login screen choose **Not listed?**, type `admin` and the password `admin911!`. Or, in a terminal of the learner account: `su - admin`.
+You need `admin` only for repairs. On the login screen choose **Not listed?**, type `admin` and the password `admin911!`. Or, in a terminal of the learner account (**Ctrl+Alt+T**): `su - admin`.
 
-Change it later like every IDEA default: the head teacher can pick a new admin password (`passwd` as admin).
+Every restart undoes all changes, also an admin's. `sudo idea-client-mode status` shows whether the reset is on. To make a change that lasts:
+
+1. `sudo idea-client-mode normal`, then restart.
+2. Make the change.
+3. `sudo idea-client-mode overlay`, then restart.
+
+Change the admin password later like every IDEA default: the head teacher can pick a new one (`passwd` as admin), with the reset switched off as above.
 
 ## 6.7 Final touches
 
@@ -313,7 +353,9 @@ Change it later like every IDEA default: the head teacher can pick a new admin p
 | ☐ | Wi-Fi | Connected to `IDEA` (or `IDEA-Teachers` on a teacher's computer) |
 | ☐ | IDEA icon (desktop and dock) | Opens the Console, which lists **every** Engine of the school |
 | ☐ | Sticker name | `http://<STICKER>.local` in Chrome opens the Console |
-| ☐ | Apps open from the Console | Kolibri / Kiwix / Nextcloud open |
+| ☐ | Apps open from the Console | Kolibri / Nextcloud / Wikipedia open (and their Demo copies) |
+| ☐ | Keyboard | Typing `@` and `"` gives those characters (US layout) |
+| ☐ | Reset on restart | `sudo idea-client-mode status` (as admin) says `running: overlay` |
 | ☐ | LibreOffice Writer | Opens straight away, no first-start questions |
 | ☐ | No internet on IDEA | `https://example.com` fails (expected) |
 | ☐ | Power stable | No lightning-bolt or under-voltage warning during 10 minutes of use |
@@ -331,10 +373,13 @@ Change it later like every IDEA default: the head teacher can pick a new admin p
 | Very slow first boot | That is normal: the first boot resizes the card. Give it 5 minutes. |
 | Wi-Fi 'IDEA' not shown | Is the router on? (*IDEA School Server: Installation Manual*, "Router: check the pre-flashed IDEA router".) |
 | Start page says no Engine found | Is an Engine switched on? Type a sticker name in the field, or try `http://<STICKER>.local` (6.4). Check that the computer is on IDEA/IDEA-Teachers. |
+| `IDEA-Teachers` is not in the Wi-Fi menu | Expected: the student account can't list networks. Use the admin terminal (6.5). |
+| Files or settings are gone after a restart | Expected: the reset on restart (6.6). Save work in Nextcloud. |
+| An app in the Console does not open | Its Engine may be switched off or at another school: the Console still shows its apps (known problem, no fix yet). Use the apps of this school's Engine. |
 | Desktop IDEA icon shows a red cross | Use the IDEA icon in the dock; log out and in once. Report it to the IDEA team. |
 | Something is broken beyond repair | Write the card again from the IDEA image (section 5). Nothing on the computer needs saving: students keep their work on the Engine (Nextcloud). |
 
-# Appendix B. Sources (read on 12-15 October 2026)
+# Appendix B. Sources (read on 12-19 October 2026)
 
 *Where the facts in this manual come from.*
 
@@ -346,3 +391,4 @@ Change it later like every IDEA default: the head teacher can pick a new admin p
 6. Ubuntu, *Install Ubuntu on the Raspberry Pi* (support table, minimum EEPROM dates, desktop image first-time setup wizard): `https://ubuntu.com/hardware/docs/boards/how-to/ubuntu_supported/raspberry-pi/`, and `ubuntu.com/download/raspberry-pi`.
 7. Ubuntu 26.10 release schedule: `https://documentation.ubuntu.com/release-notes/26.10/schedule/`.
 8. Raspberry Pi Imager OS list `os_list_imagingutility_v4.json` (Ubuntu Desktop 26.04.1: `init_format: none`). rpi-imager issue #862 (Ubuntu Desktop customisation, Wi-Fi regulatory domain via `cfg80211.ieee80211_regdom`).
+9. `koenswings/idea` `tools/client-image` (`client-image.conf`, `README.md` "Reset on reboot", `files/50-idea-learner.rules`, `files/idea-client-mode`) and issue #285 (learner Wi-Fi lock, admin workaround).

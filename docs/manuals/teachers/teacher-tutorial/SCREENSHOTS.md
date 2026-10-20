@@ -75,3 +75,14 @@ The text now uses the demo school **IDEA Demo School**, class **Grade 5** and th
 - Nextcloud learner (ch. 7): S3-01–S3-03 (`learner1`), S4-01, S4-02 (Drop Zone name visible).
 - Files Disk (ch. 9): F2-06 (shared with group Grade 5).
 - Channel builder (ch. 5, PR idea#205): C5-12–C5-15 if they show the Kolibri import as `demo_teacher1` (now `admin`).
+
+## To retake for the Zimbabwe kit (2026-10-19)
+
+The text (v1.1) follows the kit handed over on 18 October 2026. These shots still show the demo server or older content. Retake them on a kit Engine (one switched on at a time), with no error messages on screen.
+
+- Console Apps page / Network view without the Demo apps or the "on <Engine>" label, or showing wizardly-hugle or `kiwix-1.0.1`: CON-01, CON-04, O2-01, O2-03, O3-01, O4-01 (check), B2-00, B2-01, B2-10, B2-11, B2-12 (only Kolibri and Nextcloud ticked; the kit backs up all six apps), B2-13, B3-10a, B4-20–B4-28, F1-11, F1-12, F1-14, F2-01, C5-02.
+- Channel builder shots with idea01/idea03/idea04 (ch. 5, builder not on the kit): SC-01–SC-04.
+- Nextcloud shots with the group "Grade 5" (Nextcloud Demo has the groups teachers and learners): N1-01, N1-03, F2-06, F2-07.
+- F2-02: old "demo-" folder names (now Worksheets, Teacher Notes).
+- Khan Academy (not on the kit): K4-02, K4-03a, K4-03, K5-03, S1-05, S2-*.
+- W1-01: "Powered by Kiwix" footer (minor; caption now "The library page").

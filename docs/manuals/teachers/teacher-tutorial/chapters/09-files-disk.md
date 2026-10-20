@@ -1,8 +1,8 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (kit: one Files Disk per box)
 
 # 9. Your own files: the Files Disk
 
-A **Files Disk** is an **IDEA Disk** that the operator prepares in the Console (chapter 12). Its content appears in Nextcloud as the folder **School Files**. Use it to bring in material you downloaded elsewhere, for example worksheets you copied at another school.
+A **Files Disk** is an **IDEA Disk** that the operator prepares in the Console (chapter 12). Its content appears in Nextcloud as the folder **School Files**. Use it to bring in material you downloaded elsewhere, for example worksheets you copied at another school. On the kit, every IDEA box has its own Files Disk.
 
 > **Only a USB stick?** You can use a normal USB stick without a Files Disk: it appears in Nextcloud as a read-only **USB:** folder (5.5).
 
@@ -22,7 +22,7 @@ Good to know:
 ## 9.2 Share a file from School Files with your class
 
 1. On the file's row click **⋯ (Actions) > Show sharing options**, or click the share icon.
-2. In **Internal shares**, type the class group name (here `Grade 5`) and choose it from the list. Keep **View only**. The group then appears under **Internal shares**.
+2. In **Internal shares**, type the class group name (here `Grade 5`; in Nextcloud Demo on the kit, `learners`) and choose it from the list. Keep **View only**. The group then appears under **Internal shares**.
    ![A file shared with Grade 5 (here a worksheet)](../screenshots/F2-06.png)
 3. A learner in that group signs in and finds the file in **All files** and under **Recently shared**.
    ![A learner sees the shared file](../screenshots/F2-07.png)

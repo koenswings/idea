@@ -11,6 +11,7 @@ Good to know:
 - **Resetting wipes the card.** Anything saved on the computer itself (the local *Documents* folder) is gone. Students' work in **Nextcloud** stays: that is why students save there (chapter 7).
 - Every card is the same, so a card works in **any** student computer, Pi 400 or Pi 500.
 - The student computers **do not update themselves**. New software comes only with a new, tested image version, which you get by resetting the card.
+- **A restart already undoes most problems.** Every restart puts the computer back as its card was written (files and settings saved on the computer are gone). Try a restart first; reset the card only when that doesn't help.
 - You need a **USB card reader** plugged into the IDEA box. Any card reader works.
 
 ## 13.1 Before you start

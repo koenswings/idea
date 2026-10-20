@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (kit: Nextcloud Demo)
 
 # 7. Nextcloud for learners (try it yourself)
 
@@ -6,7 +6,7 @@ Learners open Nextcloud from the Console, like Kolibri: **IDEA** on the desktop,
 
 ## 7.1 Open class files and co-edit
 
-1. Sign in to Nextcloud as `learner1` (private window). Shared folders and files appear in **Files** with the teacher's name.
+1. Sign in to **Nextcloud Demo** as `learner1`, password `learner1911!` (private window). Shared folders and files appear in **Files** with the teacher's name.
    ![Learner files](../screenshots/S3-01.png)
 2. Open `Worksheets`: the learner can open and download the worksheets, not change them.
    ![Worksheets](../screenshots/S3-02.png)

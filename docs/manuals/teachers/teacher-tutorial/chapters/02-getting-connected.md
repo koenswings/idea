@@ -1,4 +1,4 @@
-**Status:** Authoritative (2.2.1 is a draft until the IDEA shortcut is on the student computers, idea#203) · **Maintained by:** Marco (with Atlas) · 16 October 2026 (chapter 2 in three parts, Koen review)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (kit: 'on <box>' labels, reset on restart, known problem with switched-off boxes)
 
 # 2. Getting connected and opening an app
 
@@ -16,6 +16,7 @@ The IDEA router at your school makes two Wi-Fi networks. Their names and first p
 | **IDEA-Teachers** | `idea-teachers911!` | Teachers only | The IDEA box, and the internet. Internet is **on**; your IDEA contact can switch it off when the head teacher asks. |
 
 - Give students only the **IDEA** password. Keep the **IDEA-Teachers** password among the teachers.
+- The classroom computers stay on **IDEA**. Your IDEA contact or the operator can move a teacher's classroom computer to **IDEA-Teachers**; for now that needs the admin account (*IDEA Classroom Computer: Installation Manual*, 6.5).
 - **Change the passwords later.** These first passwords are easy on purpose, but anyone who knows them can join. Once IDEA is running at your school, the head teacher chooses new passwords and asks the IDEA contact to set them on the router. After that, every phone and laptop must join again with the new password.
 
 To connect:
@@ -57,7 +58,7 @@ If the start page says **No school server was found**, check that the computer i
 
 If the Console does not open, type the address on the second line of the box's sticker instead, for example `http://brave-otter.local`.
 
-> **Two IDEA boxes at your school?** The Console shows the apps of all of them.
+> **Two IDEA boxes at your school?** The Console shows the apps of all of them. Each card says on which box the app runs, for example **on kind-panda**.
 
 ## 2.3 First steps in the Console
 
@@ -69,6 +70,8 @@ If the Console does not open, type the address on the second line of the box's s
 Good to know:
 
 - A card that is greyed out and says **Not available** is not running. Do not try to fix it: tell your school operator.
+- **Known problem: apps that don't open.** If an IDEA box is switched off, or was once connected to yours and is now at another school, the Console still shows its apps as if they worked. **Open** then gives a page that doesn't load. There is no fix yet. Use the apps that are **on** your own school's IDEA box (the name on its sticker).
+- **The classroom computers reset at every restart.** Anything saved on the computer itself is gone after a restart. Save work in Nextcloud (chapter 7).
 - Do not type numbers (addresses or ports) into the address bar. Always start from the Console and use **Open**.
 - A student computer that no longer works properly is not repaired: the operator resets its card (chapter 13). Students lose only what they saved on the computer itself, so let them save their work in Nextcloud (chapter 7).
 - The person icon at the top right (**Operator Login**) is for the operator (Part B). Teachers do not need it.

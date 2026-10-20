@@ -1,10 +1,10 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (kit: Kolibri Demo and Nextcloud Demo accounts)
 
 # Appendix: demo accounts
 
-This appendix lists the demo accounts and the demo content that the demo setup creates. Use it to follow the tutorial on a demo IDEA box.
+This appendix lists the demo accounts and the demo content that the demo setup creates. On the kit they are in the apps **Kolibri Demo** and **Nextcloud Demo** of every IDEA box. Use them to follow the tutorial.
 
-The demo school in Kolibri is **IDEA Demo School**. The same usernames work in Kolibri and in Nextcloud.
+The demo school in Kolibri Demo is **IDEA Demo School**. The same usernames work in Kolibri Demo and in Nextcloud Demo.
 
 **Passwords:**
 
@@ -14,21 +14,27 @@ The demo school in Kolibri is **IDEA Demo School**. The same usernames work in K
 
 | Username | Password | App | Role | Used in |
 |---|---|---|---|---|
-| admin | admin911! | Kolibri | Kolibri admin of IDEA Demo School | 3.2, 3.3, 5.2 |
-| teacher1 | teacher1911! | Kolibri | Coach of class Grade 5 | 3, 12.7 |
-| learner1 | none (username only) | Kolibri | Learner in Grade 5 | 4 |
-| learner2 | none (username only) | Kolibri | Learner in Grade 5 | 4 |
-| learner3 | none (username only) | Kolibri | Learner in Grade 5 | 3.3 |
-| teacher1 | teacher1911! | Nextcloud | Teacher (groups Grade 5, teachers) | 5.5, 6, 9 |
-| teacher2 | teacher2911! | Nextcloud | Teacher (group teachers) | 6.2 |
-| learner1 | learner1911! | Nextcloud | Learner (group Grade 5) | 7, 9.2 |
-| learner2 | learner2911! | Nextcloud | Learner (group Grade 5) | 7.1 |
+| admin | admin911! | Kolibri Demo | Kolibri admin of IDEA Demo School | 3.2, 3.3, 5.2 |
+| teacher1 | teacher1911! | Kolibri Demo | Coach of class Grade 5 | 3, 12.7 |
+| teacher2 | teacher2911! | Kolibri Demo | Coach of class Grade 5 | 3 |
+| learner1 | none (username only) | Kolibri Demo | Learner in Grade 5 | 4 |
+| learner2 | none (username only) | Kolibri Demo | Learner in Grade 5 | 4 |
+| learner3 | none (username only) | Kolibri Demo | Learner in Grade 5 | 3.3 |
+| admin | admin911! | Nextcloud Demo | Nextcloud administrator | |
+| teacher1 | teacher1911! | Nextcloud Demo | Teacher (group teachers) | 5.5, 6, 9 |
+| teacher2 | teacher2911! | Nextcloud Demo | Teacher (group teachers) | 6.2 |
+| learner1 | learner1911! | Nextcloud Demo | Learner (group learners) | 7, 9.2 |
+| learner2 | learner2911! | Nextcloud Demo | Learner (group learners) | 7.1 |
+| learner3 | learner3911! | Nextcloud Demo | Learner (group learners) | |
 
 **Demo content:**
 
 - Kolibri: the school **IDEA Demo School** with the class **Grade 5**.
-- Kolibri channels from the IDEA-DEMO disk, with one lesson each: **Science: plants, animals, earth and sky**, **Reading: African Storybook stories** and **Maths: fractions and multiplication**.
-- Kolibri: the **Fractions lesson** and the **Fractions quiz** that you make yourself in chapter 3.
-- Nextcloud: the folders **Worksheets** and **Drop Zone**, and the document **Lesson plan**.
+- Kolibri Demo: the three channels from the IDEA-DEMO disk, **Maths**, **Grade 5 Science** and **Early Reading** (videos, pictures and documents; no exercises).
+- Kolibri Demo: the **Fractions lesson** that you make yourself in chapter 3. (The **Fractions quiz** needs exercises: see 3.5.)
+- Nextcloud Demo: the folders **Worksheets** and **Teacher Notes** for `teacher1` and `teacher2`. You make the **Drop Zone** folder and the document **Lesson plan** yourself in chapter 6.
+- Wikipedia (Demo): Wikipedia in simple English.
+
+**The school's own apps** (not demo) start almost empty: **Kolibri** has only `admin` (the school creates its teachers and learners), **Nextcloud** has `admin`, `teacher1` and `learner1`. The passwords follow the same rule. Learners need a password in Nextcloud, not in Kolibri.
 
 The pictures on the IDEA-DEMO disk are from Zimbabwe for now. The file `CREDITS.txt` on the disk gives the source and licence of every file.

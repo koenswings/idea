@@ -1,9 +1,9 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026
 
 # Teacher tutorial
 
-`teacher-tutorial.pdf` ("IDEA for Teachers: Tutorial", 55 pages): Kolibri, Nextcloud, Wikipedia offline, Files Disk and
-Backup Disk on the demo server wizardly-hugle. Part A for teachers (chapters 01-10, including chapter 05 on the channel builder and USB sticks), Part B for the school
+`teacher-tutorial.pdf` ("IDEA for Teachers: Tutorial", 75 pages, v1.1 of 19 October 2026 for the Zimbabwe kit): Kolibri, Nextcloud, Wikipedia offline, Files Disk and
+Backup Disk. The text follows the kit (Engines sunny-robin, happy-zebra, kind-panda; apps Kolibri Demo, Nextcloud Demo and Wikipedia (Demo) for practice); most screenshots still come from the demo server, see `SCREENSHOTS.md` for the retake list. Part A for teachers (chapters 01-10, including chapter 05 on the channel builder and USB sticks), Part B for the school
 operator (11-13, including chapter 13 on resetting student computers), appendix with the demo accounts (14).
 
 Build: `python3 build.py` (uses `docs/house-style`; fails if a "to confirm" marker is left).

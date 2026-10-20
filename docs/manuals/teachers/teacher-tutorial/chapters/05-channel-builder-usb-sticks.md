@@ -1,8 +1,10 @@
-**Status:** Draft (feature live on the demo box; lands with the idea#193 release) · **Maintained by:** Marco (with Atlas) · 15 October 2026
+**Status:** Draft (feature live on the demo box, not on the kit; lands with the idea#193 release) · **Maintained by:** Marco (with Atlas) · 19 October 2026
 
 # 5. Make your own Kolibri channel: the channel builder and your USB stick
 
-This is the most useful chapter for teachers. The **channel builder** turns your own videos, PDFs and pictures into a **Kolibri channel**. Your learners then find it in Kolibri next to the Khan Academy lessons, and you can put it in lessons and quizzes (chapter 3).
+> **Not yet on the kit.** The kit's IDEA boxes (sunny-robin, happy-zebra, kind-panda) do not have the channel builder app yet. This chapter shows how it works on the demo box. Ask your IDEA contact before you plan lessons with it.
+
+This is the most useful chapter for teachers. The **channel builder** turns your own videos, PDFs and pictures into a **Kolibri channel**. Your learners then find it in Kolibri next to the other channels, and you can put it in lessons and quizzes (chapter 3).
 
 You do not need internet or an account. Bring your files on a normal **USB stick**, filled at home, in town or from a colleague.
 
