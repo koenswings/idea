@@ -99,6 +99,38 @@ Two Telegram facts drive this choice:
 | **(d) Topics supergroup** (forum group, one topic per person, school or incident) | One place for Koen, with a per-thread view. Scales well. Bots can post in a specific topic. | All members can read all topics, so there is no privacy between staff. Needs privacy mode off or admin rights for the bot, and someone to open new topics. | Opens the group and reads topic by topic | None | Medium, and can be muted per topic |
 | **(e) Hybrid: DMs plus a Koen-only monitor group with Topics** | Field staff get a simple private DM. The relay mirrors every exchange (in, out, photos) into a supergroup where only Koen and the bot are members, with one topic per field person. Escalations are flagged in the topic and also come to Koen directly. | Koen reads a copy, so replying means asking the bot (or a `/reply` command in the topic that the relay forwards). A bit more relay logic (about 30 extra lines). | Opens the monitor group, one topic per person. Live. | Full | Low (topics can be muted; escalations still come through) |
 
+# What it looks like: chat window examples
+
+These mockups all follow one scenario. Justice is at a school and the Console won't open on the teachers' laptops. The bot fixes that on its own (right Wi-Fi network, restart the Engine). A second problem needs a code change (Kolibri shows an error after being copied to the second disk), so the bot escalates it to Koen, and Koen steps in. They are drawings, not real screenshots.
+
+## Option (e) hybrid: Justice's phone and Koen's phone
+
+![Option (e): Justice's private chat with the bot next to Koen's monitor group](2026-10-20-telegram-field-support/img/e-hybrid.png)
+
+Justice only ever sees one private chat, "IdeaSupport". Koen has a group, "IDEA Support Monitor", where only he and the bot are members, with one topic per field person. Every message in Justice's chat appears there as "Justice: …" and "Bot: …".
+
+"Stepping in through the bot" means this: when the bot escalates, it posts a card with **Approve draft** and **Reply myself**. If Koen types his own answer in the topic, the relay sends it to Justice as a bot message starting with "Koen:". Justice can see it is Koen talking, even though it arrives in the bot chat.
+
+`/pause` in the topic stops the bot from answering by itself, so Koen can take over the whole conversation. Everything Koen types in the topic then goes to Justice. `/resume` hands the conversation back to the bot.
+
+## Option (a) private chats only
+
+![Option (a): Justice's chat and Koen's own chat with the bot](2026-10-20-telegram-field-support/img/a-private.png)
+
+Justice and Koen each have their own private chat with the bot. Koen only sees the escalations, not the rest of the conversation. He approves the draft or types a reply, and the bot passes it on as "Koen says: …".
+
+## Option (c) one group per person
+
+![Option (c): group with Koen, Justice and the bot](2026-10-20-telegram-field-support/img/c-group-per-person.png)
+
+Here Koen, Justice and the bot are in one small group, so Koen sees everything live and answers as himself. Justice sees Koen's own name and photo. A new group is needed for each field person.
+
+## Option (d) shared Topics group
+
+![Option (d): shared Topics group, topic per field person](2026-10-20-telegram-field-support/img/d-topics.png)
+
+Everyone is in one group, with one topic per person or school. Koen answers as himself inside the topic. Other field staff (here "Tendai") can open Justice's topic and read it.
+
 # Onboarding a new field person
 
 Common steps: the person installs Telegram. The relay only accepts **Telegram user ids** (numbers) on its allowlist. To capture the id, the person opens `https://t.me/IdeaSupportBot` (or the final username) and presses **Start**. The relay sees an unknown user, answers "Waiting for approval", and sends Koen the name, username and id with an approve request. When Koen approves, the id goes on the allowlist and the person gets a welcome message.
