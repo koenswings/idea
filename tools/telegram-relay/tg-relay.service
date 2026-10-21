@@ -1,0 +1,16 @@
+[Unit]
+Description=IDEA field-support Telegram relay (long-poll, no AI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Skips cleanly (no restart loop) until TELEGRAM_BOT_TOKEN is set in the env file.
+ExecCondition=/bin/sh -c 'grep -qE "^TELEGRAM_BOT_TOKEN=.+" %h/.config/tg-relay/env'
+ExecStart=/usr/bin/python3 %h/tg-relay/tg_relay.py
+Restart=always
+RestartSec=10
+UMask=0077
+
+[Install]
+WantedBy=default.target

@@ -21,12 +21,26 @@ class S:
             line = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             s.add(f'<text x="{x}" y="{y + i*size*1.25}" font-family="{FONT}" font-size="{size}" font-weight="{weight}" text-anchor="{anchor}" fill="{fill}"{st}>{line}</text>')
     def line(s, pts, color="#333", sw=4, dash=None, arrow=False, arrow_start=False):
+        """Polyline; arrowheads are drawn as explicit triangles (no SVG markers: WeasyPrint ignores marker orient)."""
         d = f' stroke-dasharray="{dash}"' if dash else ''
-        m = ' marker-end="url(#ah-%s)"' % color.strip('#') if arrow else ''
-        ms = ' marker-start="url(#as-%s)"' % color.strip('#') if arrow_start else ''
-        pts_s = " ".join(f"{x},{y}" for x, y in pts)
-        s.add(f'<polyline points="{pts_s}" fill="none" stroke="{color}" stroke-width="{sw}" stroke-linejoin="round" stroke-linecap="round"{d}{m}{ms}/>')
-        s.colors.add(color)
+        pts = list(pts)
+        L = max(14, sw * 4.0); W = max(12, sw * 3.2)
+        def head(tip, prev):
+            import math
+            dx, dy = tip[0] - prev[0], tip[1] - prev[1]; n = math.hypot(dx, dy) or 1
+            ux, uy = dx / n, dy / n
+            bx, by = tip[0] - ux * L, tip[1] - uy * L
+            s.add(f'<polygon points="{tip[0]},{tip[1]} {bx - uy*W/2},{by + ux*W/2} {bx + uy*W/2},{by - ux*W/2}" fill="{color}"/>')
+            return (bx + ux, by + uy)
+        draw = pts[:]
+        heads = []
+        if arrow: heads.append((pts[-1], pts[-2])); draw[-1] = (pts[-1][0] - (pts[-1][0]-pts[-2][0]) / (abs(pts[-1][0]-pts[-2][0]) + abs(pts[-1][1]-pts[-2][1]) or 1) * L * 0.9,
+                                                                 pts[-1][1] - (pts[-1][1]-pts[-2][1]) / (abs(pts[-1][0]-pts[-2][0]) + abs(pts[-1][1]-pts[-2][1]) or 1) * L * 0.9)
+        if arrow_start: heads.append((pts[0], pts[1])); draw[0] = (pts[0][0] - (pts[0][0]-pts[1][0]) / (abs(pts[0][0]-pts[1][0]) + abs(pts[0][1]-pts[1][1]) or 1) * L * 0.9,
+                                                                   pts[0][1] - (pts[0][1]-pts[1][1]) / (abs(pts[0][0]-pts[1][0]) + abs(pts[0][1]-pts[1][1]) or 1) * L * 0.9)
+        pts_s = " ".join(f"{x},{y}" for x, y in draw)
+        s.add(f'<polyline points="{pts_s}" fill="none" stroke="{color}" stroke-width="{sw}" stroke-linejoin="round" stroke-linecap="butt"{d}/>')
+        for tip, prev in heads: head(tip, prev)
     colors = set()
     def port(s, x, y, label, fill="#e8e8e8", w=46, h=34, sub=None, subfill="#555"):
         s.rect(x, y, w, h, fill=fill, stroke="#222", rx=4, sw=1.5)
@@ -55,15 +69,16 @@ def wiring():
     # Starlink dish
     s.add('<ellipse cx="90" cy="130" rx="55" ry="22" fill="#f4f4f4" stroke="#333" stroke-width="2"/>')
     s.add('<line x1="90" y1="152" x2="90" y2="190" stroke="#333" stroke-width="4"/>')
-    s.text(90, 95, "Starlink dish", 14, "bold")
+    s.text(20, 95, "Starlink dish (Standard)", 13, "bold", anchor="start")
     s.text(90, 212, "(outside, clear\nview of the sky)", 11, fill="#555")
     # Starlink router
     s.rect(30, 300, 170, 120, fill="#f7f7f7")
-    s.text(115, 325, "Starlink router", 14, "bold")
-    s.text(115, 345, "Bypass mode = ON\n(its Wi-Fi is OFF)", 11, fill="#a00")
+    s.text(115, 322, "Starlink router", 14, "bold")
+    s.text(115, 338, "- or the Starlink Mini -", 10, italic=True, fill="#555")
+    s.text(115, 353, "Bypass mode = ON (Wi-Fi OFF)", 10, fill="#a00")
     s.port(92, 378, "ETH*", fill="#ffe9a8")
     s.line([(90, 190), (90, 260), (60, 260), (60, 300)], "#555", 5)
-    s.text(150, 255, "Starlink cable\n(already attached)", 10, anchor="start", fill="#555")
+    s.text(150, 255, "Starlink cable (Standard;\nthe Mini has none)", 10, anchor="start", fill="#555")
     # Cudy router
     cx, cy = 300, 470
     s.rect(cx, cy, 380, 120, fill="#eef5ff")
@@ -129,46 +144,43 @@ def wiring():
         x = lx + i * 265
         s.badge(x + 12, ly + 12, n, c)
         s.text(x + 32, ly + 17, t, 12, anchor="start")
-    s.text(lx, ly + 52, "* Starlink Gen 3 router: use its Ethernet (LAN) port. Gen 2 router: needs the Starlink Ethernet Adapter.  Dashed red = mains power adapters.", 10, anchor="start", fill="#555")
+    s.text(lx, ly + 52, "* Standard Gen 3: the router's Ethernet port. Gen 2: Starlink Ethernet Adapter. Mini: one unit (no dish cable), its own port under the Starlink Plug.  Dashed red = mains power.", 10, anchor="start", fill="#555")
     s.save("m1-wiring.svg")
 
 # ---------------------------------------------------------------- M1 zones
 def zones():
-    s = S(1100, 640)
-    s.text(550, 30, "Network zones and what may talk to what", 20, "bold")
-    s.rect(430, 250, 240, 120, fill="#eef5ff", sw=3)
-    s.text(550, 285, "Cudy router", 16, "bold")
-    s.text(550, 307, "OpenWrt firewall", 12)
-    s.text(550, 327, "LAN 10.42.0.1 | IDEA 10.42.1.1", 11)
-    s.text(550, 345, "IDEA-Teachers 10.42.2.1", 11)
-    def zone(x, y, w, h, title, sub, fill):
-        s.rect(x, y, w, h, fill=fill)
-        s.text(x + w/2, y + 26, title, 15, "bold")
-        s.text(x + w/2, y + 48, sub, 11, fill="#333")
-    zone(420, 60, 260, 110, "WAN  (Starlink -> internet)", "zone: wan", "#fff7e0")
-    zone(780, 230, 290, 170, "LAN  10.42.0.0/24  (wired)", "zone: lan\nEngines 10.42.0.2-.9 (by DHCP)\nswitch 10.42.0.10\n(Console: http://idea.local)", "#f0fff0")
-    zone(30, 130, 300, 140, "Wi-Fi 'IDEA'  10.42.1.0/24", "zone: students\nlaptops / classroom computers\nclient isolation ON", "#fff0f0")
-    zone(30, 380, 300, 140, "Wi-Fi 'IDEA-Teachers'  10.42.2.0/24", "zone: teachers\nteacher laptops / phones", "#f5f0ff")
-    zone(420, 470, 260, 110, "tailscale0", "zone: tailscale\nadmin access to the router only", "#eefaff")
-    G, R, O = "#2ca02c", "#d62728", "#ff7f0e"
-    # students -> Pis allowed
-    s.line([(330, 190), (760, 190), (760, 280), (780, 280)], G, 4, arrow=True)
-    s.text(545, 183, "ALLOW: to the Engines (10.42.0.2-.9) only", 11, "bold", fill=G)
-    # students -> WAN blocked
-    s.line([(250, 130), (250, 100), (420, 100)], R, 4, dash="8,6", arrow=True)
-    s.text(30, 70, "BLOCKED (no forwarding):\ninternet, outside DNS, VPNs", 11, "bold", fill=R, anchor="start")
-    # teachers -> Pis
-    s.line([(330, 430), (740, 430), (740, 360), (780, 360)], G, 4, arrow=True)
-    s.text(545, 446, "ALLOW: to the Engines (10.42.0.2-.9)", 11, "bold", fill=G)
-    # teachers -> WAN toggle
-    s.line([(200, 380), (200, 330), (370, 330), (370, 140), (420, 140)], O, 4, dash="3,5", arrow=True)
-    s.text(377, 230, "ON/OFF switch:\nrule 'Teachers-Internet'", 11, "bold", fill=O, anchor="start")
-    # lan -> wan
-    s.line([(925, 230), (925, 115), (680, 115)], G, 4, arrow=True)
-    s.text(930, 170, "ALLOW: Pi updates\n+ Tailscale", 11, "bold", fill=G, anchor="start")
-    # router input
-    s.text(550, 400, "IDEA / Teachers -> router itself: only DHCP + DNS", 11, fill="#333")
-    s.text(550, 620, "Green = allowed, red dashed = blocked, orange dotted = can be switched on/off. Replies to allowed traffic are always let back in.", 11, fill="#555")
+    """Plain picture for non-network readers: who connects how, and what they can open."""
+    s = S(1100, 560)
+    s.text(550, 34, "Who connects where, and what they can open", 22, "bold")
+    hx = [40, 330, 640]
+    for x, t in zip(hx, ["Who", "Connects with", "Can open"]):
+        s.text(x, 80, t, 15, "bold", anchor="start", fill="#555")
+    G, R = "#2ca02c", "#d62728"
+    rows = [("Students", "laptops, phones,\nclassroom computers", "#fff0f0",
+             "Wi-Fi  IDEA", "password idea911!",
+             [(True, "Console and apps"), (False, "Internet")]),
+            ("Teachers", "laptops and phones", "#f5f0ff",
+             "Wi-Fi  IDEA-Teachers", "password idea-teachers911!",
+             [(True, "Console and apps"), (True, "Internet")]),
+            ("Engines", "the Raspberry Pi 5 servers", "#f0fff0",
+             "Ethernet cable", "to the switch (ports 1-4)",
+             [(True, "Internet, for updates"), (True, "IDEA team support")])]
+    for i, (who, sub, fill, how, how2, can) in enumerate(rows):
+        y = 100 + i * 145
+        s.rect(30, y, 260, 120, fill=fill, sw=2)
+        s.text(160, y + 50, who, 22, "bold")
+        s.text(160, y + 76, sub, 13, fill="#333")
+        s.line([(291, y + 60), (324, y + 60)], "#555", 4, arrow=True)
+        s.rect(325, y, 280, 120, fill="#eef5ff", sw=2)
+        s.text(465, y + 52, how, 19, "bold", fill="#1f4f99")
+        s.text(465, y + 80, how2, 13, fill="#333")
+        s.line([(606, y + 60), (639, y + 60)], "#555", 4, arrow=True)
+        s.rect(640, y, 430, 120, fill="#ffffff", sw=2)
+        for k, (ok, t) in enumerate(can):
+            yy = y + 45 + k * 40
+            s.text(670, yy, "YES" if ok else "NO", 16, "bold", anchor="start", fill=G if ok else R)
+            s.text(730, yy, t, 17, anchor="start")
+    s.text(550, 545, "The Console and apps open at http://idea.local. Students and teachers never plug a cable into the switch.", 13, fill="#555")
     s.save("m1-zones.svg")
 
 # ---------------------------------------------------------------- M1 flashing
@@ -212,11 +224,11 @@ def tailnet():
 # ---------------------------------------------------------------- M2 Pi 400 wiring
 def pi400():
     s = S(1100, 640)
-    s.text(550, 30, "Raspberry Pi 400 (or Pi 500) + Raspberry Pi Monitor: ONE power supply", 20, "bold")
+    s.text(550, 30, "Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor: which cable goes where", 20, "bold")
     # Pi 400 rear strip (as seen from behind)
     px, py = 230, 330
     s.rect(px, py, 640, 150, fill="#fff0f3", stroke="#c51a4a", sw=3, rx=14)
-    s.text(px + 320, py + 135, "Raspberry Pi 400 - seen from BEHIND (back edge, left to right)", 12, "bold", fill="#c51a4a")
+    s.text(px + 320, py + 135, "Keyboard computer - back edge (schematic: follow the icons printed next to each port)", 12, "bold", fill="#c51a4a")
     ports = [("GPIO", 70, "#ddd"), ("SD", 46, "#ddd"), ("micro\nHDMI", 46, "#cfe3ff"), ("micro\nHDMI ", 46, "#eee"),
              ("USB-C\nPWR", 56, "#fbd5d5"), ("USB3", 46, "#bcd4ff"), ("USB3", 46, "#bcd4ff"), ("USB2", 46, "#fff"), ("ETH", 50, "#eee")]
     x = px + 20; pos = {}
@@ -227,11 +239,11 @@ def pi400():
             s.text(x + w/2, py + 50 + i*13 - (6 if len(ls) > 1 else -4), l, 10, "bold")
         pos.setdefault(lab, []).append(x + w/2)
         x += w + 18
-    s.text(px + 320, py + 105, "micro-SD card (32 GB, Ubuntu) goes in the SD slot, contacts facing down", 10, italic=True, fill="#555")
+    s.text(px + 320, py + 105, "microSD card with the IDEA client image in the SD slot, contacts facing down", 10, italic=True, fill="#555")
     # PSU
     s.rect(380, 560, 200, 60, fill="#fbd5d5")
-    s.text(480, 585, "Official 15 W USB-C PSU", 12, "bold")
-    s.text(480, 603, "(from the kit) -> wall socket", 10)
+    s.text(480, 585, "The computer's own USB-C PSU", 12, "bold")
+    s.text(480, 603, "(Pi 400: 15 W, Pi 500: 27 W) -> wall socket", 10)
     pwr = pos["USB-C\nPWR"][0]
     s.line([(480, 560), (480, 520), (pwr, 520), (pwr, py + 74)], "#d62728", 5, arrow=True)
     s.badge(430, 520, 1, "#d62728")
@@ -246,12 +258,12 @@ def pi400():
     h0 = pos["micro\nHDMI"][0]
     s.line([(h0, py + 30), (h0, 280), (mx + 170, 280), (mx + 170, my + 104)], "#1f77b4", 5, arrow=True)
     s.badge(h0 - 0, 300, 2, "#1f77b4")
-    s.text(h0 - 18, 268, "micro-HDMI -> HDMI\n(cable from Pi 400 kit)", 10, anchor="end", fill="#1f77b4")
+    s.text(h0 - 18, 268, "micro-HDMI -> HDMI\n(either micro-HDMI port)", 10, anchor="end", fill="#1f77b4")
     # USB power to monitor
     u3 = pos["USB3"][0]
     s.line([(u3, py + 30), (u3, 300), (mx + 290, 300), (mx + 290, my + 104)], "#ff7f0e", 5, arrow=True)
     s.badge(u3 + 22, 300, 3, "#ff7f0e")
-    s.text(u3 + 40, 285, "USB-A -> USB-C\n(cable from monitor box)", 10, anchor="start", fill="#ff7f0e")
+    s.text(u3 + 40, 285, "USB-A -> USB-C\n(monitor power cable)", 10, anchor="start", fill="#ff7f0e")
     # mouse
     u2 = pos["USB2"][0]
     s.add(f'<ellipse cx="{u2+150}" cy="560" rx="28" ry="40" fill="#fff" stroke="#333" stroke-width="2"/>')
