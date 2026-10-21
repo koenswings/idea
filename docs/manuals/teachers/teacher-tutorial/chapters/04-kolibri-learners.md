@@ -16,7 +16,7 @@ Sign in as a learner in a second browser window (private window) to see exactly 
    ![Lesson](../screenshots/S1-03.png)
 3. Open the first item (**Cake in quarters**, a picture activity). Videos open the same way.
    ![Video](../screenshots/S1-04.png)
-4. Exercises work like this (here the Khan Academy exercise **Add fractions with unlike denominators**, from the demo box; Kolibri Demo on the kit has no exercises): type an answer, click **CHECK**. Keep going until the goal at the top ("Get 5 correct") is reached.
+4. Exercises work like this (here the Khan Academy exercise **Add fractions with unlike denominators**, in a Kolibri with the Khan Academy channel; Kolibri Demo has no exercises): type an answer, click **CHECK**. Keep going until the goal at the top ("Get 5 correct") is reached.
    ![Exercise](../screenshots/S1-05.png)
 5. Sign out. Sign in as `learner2` and open only one item, so the report shows a difference.
 

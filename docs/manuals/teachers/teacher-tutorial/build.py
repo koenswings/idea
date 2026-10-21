@@ -16,7 +16,7 @@ def find_house_style(here):
 STATUS = re.compile(r"^\*\*Status:\*\*.*\n+", re.M)   # status line on top of each source; not printed
 sys.path.insert(0, find_house_style(HERE)); import housestyle
 meta, _ = housestyle.split_front_matter(open(os.path.join(HERE, "teacher-tutorial.md"), encoding="utf-8").read())
-PARTS = {1: ("Part A", "For teachers"), 10: ("Part B", "For the school operator")}
+PARTS = {}
 # [[pending-shot: ID | caption]] = a screenshot still to be taken; rendered as a box, listed at the end of the build
 PENDING = re.compile(r"^\[\[pending-shot: *([A-Z0-9-]+) *\| *(.+?) *\]\]$", re.M)
 pending = []

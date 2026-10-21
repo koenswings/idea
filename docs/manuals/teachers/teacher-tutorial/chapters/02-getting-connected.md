@@ -72,7 +72,7 @@ Good to know:
 - **Known problem: apps that don't open.** If an IDEA box is switched off, or was once connected to yours and is now at another school, the Console still shows its apps as if they worked. **Open** then gives a page that doesn't load. There is no fix yet. Use the apps that are **on** your own school's IDEA box (the name on its sticker).
 - **The classroom computers reset at every restart.** Anything saved on the computer itself is gone after a restart. Save work in Nextcloud (chapter 6).
 - Do not type numbers (addresses or ports) into the address bar. Always start from the Console and use **Open**.
-- A student computer that no longer works properly is not repaired: the operator resets its card (chapter 12). Students lose only what they saved on the computer itself, so let them save their work in Nextcloud (chapter 6).
-- The person icon at the top right (**Operator Login**) is for the operator (Part B). Teachers do not need it.
+- A student computer that no longer works properly is not repaired: the operator resets its card (*IDEA for Operators: Tutorial*). Students lose only what they saved on the computer itself, so let them save their work in Nextcloud (chapter 6).
+- The person icon at the top right (**Operator Login**) is for the operator (*IDEA for Operators: Tutorial*). Teachers do not need it.
 
 > **Tip.** You can bookmark the page that opens. If the bookmark stops working, go back to the Console and use **Open** again.

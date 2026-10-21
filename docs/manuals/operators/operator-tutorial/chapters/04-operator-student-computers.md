@@ -1,26 +1,24 @@
 **Status:** Draft (feature not live yet; lands with idea#201 and idea#203: Console Client cards, Flash and the IDEA shortcut) · **Maintained by:** Marco (with Atlas) · 15 October 2026
 
-# 12. Student computers: reset a card from the Console
-
-This chapter is for the school operator.
+# 4. Student computers: reset a card from the Console
 
 Every student computer (Raspberry Pi 400 or Pi 500) starts from a **microSD card** with the same IDEA student image. When a computer goes wrong (it no longer starts, the screen looks different, the card is full or a student changed settings), you do not repair it. You **reset the card**: the IDEA box writes a fresh copy of the student image onto it. This takes about 5 to 10 minutes.
 
 Good to know:
 
-- **Resetting wipes the card.** Anything saved on the computer itself (the local *Documents* folder) is gone. Students' work in **Nextcloud** stays: that is why students save there (chapter 6).
+- **Resetting wipes the card.** Anything saved on the computer itself (the local *Documents* folder) is gone. Students' work in **Nextcloud** stays: that is why students save there (*IDEA for Teachers: Tutorial*, chapter 6).
 - Every card is the same, so a card works in **any** student computer, Pi 400 or Pi 500.
 - The student computers **do not update themselves**. New software comes only with a new, tested image version, which you get by resetting the card.
 - **A restart already undoes most problems.** Every restart puts the computer back as its card was written (files and settings saved on the computer are gone). Try a restart first; reset the card only when that doesn't help.
 - You need a **USB card reader** plugged into the IDEA box. Any card reader works.
 
-## 12.1 Before you start
+## 4.1 Before you start
 
 1. Switch the student computer off and take the microSD card out. Note the computer's name from its sticker (for example `idea-pc-3f2a`).
 2. Put the card into the card reader, and plug the card reader into a free USB port of the IDEA box.
-3. Open the Console and sign in with **Operator Login** (chapter 10).
+3. Open the Console and sign in with **Operator Login** (chapter 2).
 
-## 12.2 Find the card
+## 4.2 Find the card
 
 1. Click the IDEA box in the list on the left. Scroll down to **CLIENT CARDS**. It shows the client image the box will write, and every card in a card reader: the reader's name, the card's size and what is on it now.
 
@@ -30,7 +28,7 @@ Good to know:
 
 > **Never pick an IDEA Disk.** The Files Disk, the Backup Disk and app disks are never offered here, but always check the name and size before you continue.
 
-## 12.3 Reset (flash) the card
+## 4.3 Reset (flash) the card
 
 1. The card belongs to the IDEA box you flash it from: its **IDEA** shortcut tries that box first. Flash it from the IDEA box of the classroom it will be used in.
 2. Click **Flash…** on the card's row.
@@ -48,16 +46,16 @@ Good to know:
 
 6. Take the card out of the reader and put it back into the student computer. Switch the computer on.
 
-## 12.4 After the reset
+## 4.4 After the reset
 
 1. The first start takes a few minutes longer: the card sets itself up and names the computer after its Pi (the name on the sticker).
 2. The computer opens the student desktop by itself, with no password. The desktop has one shortcut, **IDEA**.
 
 ![The student desktop after the first start, with the IDEA shortcut](../screenshots/IDEA-01.png)
 
-3. Double-click **IDEA**. Chrome opens the start page, finds the IDEA box and opens the Console (chapter 2). Check that **Open** on the Kolibri card works.
+3. Double-click **IDEA**. Chrome opens the start page, finds the IDEA box and opens the Console (*IDEA for Teachers: Tutorial*, chapter 2). Check that **Open** on the Kolibri card works.
 
-## 12.5 Questions
+## 4.5 Questions
 
 | Question | Answer |
 |---|---|
@@ -66,5 +64,5 @@ Good to know:
 | **The flash stopped with an error.** | Flash again. If it fails again, the card is probably worn out: use a new card. |
 | **The computer does not start after the reset.** | Try the card in another student computer. If it starts there, the computer may need a bootloader update: ask your IDEA contact. |
 | **Can I install an extra program on one computer?** | No. It would be lost at the next reset. Ask your IDEA contact to add it to the next image version. |
-| **The IDEA shortcut says No IDEA server found.** | Check the network connection. Type the name on the IDEA box's sticker in the field on the start page (chapter 2). If it keeps happening, the card may belong to an IDEA box that has been switched off or moved: flash it again from the right box. |
+| **The IDEA shortcut says No IDEA server found.** | Check the network connection. Type the name on the IDEA box's sticker in the field on the start page (*IDEA for Teachers: Tutorial*, chapter 2). If it keeps happening, the card may belong to an IDEA box that has been switched off or moved: flash it again from the right box. |
 | **Can my IDEA contact do this remotely?** | Yes. Put the card in the reader and tell them. They press Flash from the Console, and you put the card back when the Console says it is done. |

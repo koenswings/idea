@@ -2,9 +2,9 @@
 
 # 3. Kolibri for teachers
 
-**About the examples in this chapter.** The screens in this chapter come from the IDEA demo setup. That setup is switched on (activated) on the demo IDEA box. It creates a Kolibri school named **IDEA Demo School**, with the class **Grade 5** and the demo accounts. The steps work the same at your school, but your school, class and account names will be different. On the kit, this demo setup is the app **Kolibri Demo**: open the **Kolibri Demo** card in the Console, not the **Kolibri** card. The demo accounts are listed in *Appendix: demo accounts* at the end of this tutorial.
+**About the examples in this chapter.** Every IDEA box comes with the demo setup switched on: the app **Kolibri Demo**, with the school **IDEA Demo School**, the class **Grade 5** and the demo accounts. The screens in this chapter come from it. Open the **Kolibri Demo** card in the Console, not the **Kolibri** card. The steps work the same in the school's own Kolibri, with your own school, class and account names. The demo accounts are listed in *Appendix: demo accounts* at the end of this tutorial.
 
-In the demo, you sign in as `teacher1` (or `teacher2`). The demo school has three channels from the IDEA-DEMO disk: **Maths**, **Grade 5 Science** and **Early Reading**. The demo lesson uses **Maths > Fractions**. The quiz in 3.5 was made on a demo box with **Khan Academy (English - US curriculum) > Math by grade > 5th grade > Add and subtract fractions**.
+In the demo, you sign in as `teacher1` (or `teacher2`). The demo school has three channels from the IDEA-DEMO disk: **Maths**, **Grade 5 Science** and **Early Reading**. The demo lesson uses **Maths > Fractions**. The quiz in 3.5 was made in a Kolibri with the **Khan Academy (English - US curriculum)** channel (**Math by grade > 5th grade > Add and subtract fractions**).
 
 ## 3.1 Signing in
 
@@ -51,7 +51,7 @@ A good lesson mixes resources that explain (videos, activities) with resources t
 
 Quizzes are built from exercises only.
 
-> **On the kit.** Khan Academy is not on the kit, and the three channels of **Kolibri Demo** have videos, pictures and documents but no exercises, so you can't make this quiz in Kolibri Demo. The steps are the same in the school's own **Kolibri**, with a channel that has exercises. The screenshots below come from the demo box.
+> **Exercises.** The three channels of **Kolibri Demo** have videos, pictures and documents, but no exercises, so this quiz can't be made in Kolibri Demo. The steps are the same in any Kolibri with a channel that has exercises. The screenshots below come from a Kolibri with the Khan Academy channel.
 
 1. Click **PLAN > QUIZZES > NEW QUIZ**.
    ![Quizzes tab](../screenshots/K4-01.png)

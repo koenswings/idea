@@ -2,7 +2,7 @@
 
 # 8. Your own files: the Files Disk
 
-A **Files Disk** is an **IDEA Disk** that the operator prepares in the Console (chapter 11). Its content appears in Nextcloud as the folder **School Files**. Use it to bring in material you downloaded elsewhere, for example worksheets you copied at another school. On the kit, every IDEA box has its own Files Disk.
+A **Files Disk** is an **IDEA Disk** that the operator prepares in the Console (*IDEA for Operators: Tutorial*). Its content appears in Nextcloud as the folder **School Files**. Use it to bring in material you downloaded elsewhere, for example worksheets you copied at another school. On the kit, every IDEA box has its own Files Disk.
 
 Good to know:
 

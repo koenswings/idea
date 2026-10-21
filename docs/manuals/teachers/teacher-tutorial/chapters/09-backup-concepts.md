@@ -2,7 +2,7 @@
 
 # 9. Keeping data safe: the Backup Disk
 
-The operator looks after backups (chapter 11). As a teacher you should know:
+The operator looks after backups (*IDEA for Operators: Tutorial*). As a teacher you should know:
 
 - A **Backup Disk** is a separate **IDEA Disk** with the **backup** badge in the Console.
 - It saves **every app in full**: Kolibri (classes, learners, progress, and the channels), Nextcloud (accounts, and the files inside Nextcloud) and Wikipedia. On the kit that is about 164 GB per IDEA box, which fits on its 240 GB Backup Disk.

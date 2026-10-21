@@ -2,7 +2,7 @@
 
 # Appendix: demo accounts
 
-This appendix lists the demo accounts and the demo content that the demo setup creates. On the kit they are in the apps **Kolibri Demo** and **Nextcloud Demo** of every IDEA box. Use them to follow the tutorial.
+This appendix lists the demo accounts and the demo content. The demo setup is on every IDEA box: the apps **Kolibri Demo** and **Nextcloud Demo**. Use them to follow the tutorial.
 
 The demo school in Kolibri Demo is **IDEA Demo School**. The same usernames work in Kolibri Demo and in Nextcloud Demo.
 
@@ -14,7 +14,7 @@ The demo school in Kolibri Demo is **IDEA Demo School**. The same usernames work
 | Username | Password | App | Role | Used in |
 |---|---|---|---|---|
 | admin | admin911! | Kolibri Demo | Kolibri admin of IDEA Demo School | 3.2, 3.3 |
-| teacher1 | teacher1911! | Kolibri Demo | Coach of class Grade 5 | 3, 11.7 |
+| teacher1 | teacher1911! | Kolibri Demo | Coach of class Grade 5 | 3 |
 | teacher2 | teacher2911! | Kolibri Demo | Coach of class Grade 5 | 3 |
 | learner1 | none (username only) | Kolibri Demo | Learner in Grade 5 | 4 |
 | learner2 | none (username only) | Kolibri Demo | Learner in Grade 5 | 4 |

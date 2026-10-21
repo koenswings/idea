@@ -2,7 +2,7 @@
 
 # 5. Nextcloud for teachers
 
-**About the examples in this chapter.** On the kit, use the app **Nextcloud Demo**. It has the demo teachers `teacher1` and `teacher2` (group `teachers`), the demo learners `learner1` to `learner3` (group `learners`), and in each teacher's files the folders `Worksheets` and `Teacher Notes`. The screens in this chapter come from the demo IDEA box, where the class group was called `Grade 5`: on the kit, pick `learners` wherever the steps say the class group. The steps work the same at your school, but your names will be different. The demo accounts are listed in *Appendix: demo accounts*.
+**About the examples in this chapter.** Every IDEA box comes with the demo setup switched on: the app **Nextcloud Demo**. It has the demo teachers `teacher1` and `teacher2` (group `teachers`), the demo learners `learner1` to `learner3` (group `learners`), and in each teacher's files the folders `Worksheets` and `Teacher Notes`. The screens in this chapter call the class group `Grade 5`: in Nextcloud Demo, pick `learners` wherever the steps say the class group. The steps work the same at your school, but your names will be different. The demo accounts are listed in *Appendix: demo accounts*.
 
 Office documents open in **Nextcloud Office**.
 
