@@ -4,7 +4,7 @@
 
 **About the examples in this chapter.** Every IDEA box comes with the demo setup switched on: the app **Kolibri Demo**, with the school **IDEA Demo School**, the class **Grade 5** and the demo accounts. The screens in this chapter come from it. Open the **Kolibri Demo** card in the Console, not the **Kolibri** card. The steps work the same in the school's own Kolibri, with your own school, class and account names. The demo accounts are listed in *Appendix: demo accounts* at the end of this tutorial.
 
-In the demo, you sign in as `teacher1` (or `teacher2`). The demo school has three channels from the IDEA-DEMO disk: **Maths**, **Grade 5 Science** and **Early Reading**. The demo lesson uses **Maths > Fractions**. The quiz in 3.5 was made in a Kolibri with the **Khan Academy (English - US curriculum)** channel (**Math by grade > 5th grade > Add and subtract fractions**).
+In the demo, you sign in as `teacher1` (or `teacher2`). The demo school has three Kolibri channels: **Maths**, **Grade 5 Science** and **Early Reading**. The demo lesson uses **Maths > Fractions**. The quiz in 3.5 was made in a Kolibri with the **Khan Academy (English - US curriculum)** channel (**Math by grade > 5th grade > Add and subtract fractions**).
 
 ## 3.1 Signing in
 

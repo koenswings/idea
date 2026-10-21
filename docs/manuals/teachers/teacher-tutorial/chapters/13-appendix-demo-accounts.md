@@ -29,11 +29,11 @@ The demo school in Kolibri Demo is **IDEA Demo School**. The same usernames work
 **Demo content:**
 
 - Kolibri: the school **IDEA Demo School** with the class **Grade 5**.
-- Kolibri Demo: the three channels from the IDEA-DEMO disk, **Maths**, **Grade 5 Science** and **Early Reading** (videos, pictures and documents; no exercises).
+- Kolibri Demo: three Kolibri channels, **Maths**, **Grade 5 Science** and **Early Reading** (videos, pictures and documents; no exercises).
 - Kolibri Demo: the **Fractions lesson** that you make yourself in chapter 3. (The **Fractions quiz** needs exercises: see 3.5.)
 - Nextcloud Demo: the folders **Worksheets** and **Teacher Notes** for `teacher1` and `teacher2`. You make the **Drop Zone** folder and the document **Lesson plan** yourself in chapter 5.
 - Wikipedia (Demo): Wikipedia in simple English.
 
 **The school's own apps** (not demo) start almost empty: **Kolibri** has only `admin` (the school creates its teachers and learners), **Nextcloud** has `admin`, `teacher1` and `learner1`. The passwords follow the same rule. Learners need a password in Nextcloud, not in Kolibri.
 
-The pictures on the IDEA-DEMO disk are from Zimbabwe for now. The file `CREDITS.txt` on the disk gives the source and licence of every file.
+The pictures in the demo content are from Zimbabwe for now. The file `CREDITS.txt` in the demo content gives the source and licence of every file.
