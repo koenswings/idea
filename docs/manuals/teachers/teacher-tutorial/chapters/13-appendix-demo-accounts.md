@@ -16,9 +16,9 @@ The demo school in Kolibri Demo is **IDEA Demo School**. The same usernames work
 | admin | admin911! | Kolibri Demo | Kolibri admin of IDEA Demo School | 3.2, 3.3 |
 | teacher1 | teacher1911! | Kolibri Demo | Coach of class Grade 5 | 3 |
 | teacher2 | teacher2911! | Kolibri Demo | Coach of class Grade 5 | 3 |
-| learner1 | none (username only) | Kolibri Demo | Learner in Grade 5 | 4 |
+| learner1 | none (username only) | Kolibri Demo | Learner in Grade 5 | 3.5, 4 |
 | learner2 | none (username only) | Kolibri Demo | Learner in Grade 5 | 4 |
-| learner3 | none (username only) | Kolibri Demo | Learner in Grade 5 | 3.3 |
+| learner3 | none (username only) | Kolibri Demo | Learner in Grade 5 | 3.3, 3.5 |
 | admin | admin911! | Nextcloud Demo | Nextcloud administrator | |
 | teacher1 | teacher1911! | Nextcloud Demo | Teacher (group teachers) | 5, 8 |
 | teacher2 | teacher2911! | Nextcloud Demo | Teacher (group teachers) | 5.2 |
@@ -29,8 +29,8 @@ The demo school in Kolibri Demo is **IDEA Demo School**. The same usernames work
 **Demo content:**
 
 - Kolibri: the school **IDEA Demo School** with the class **Grade 5**.
-- Kolibri Demo: three Kolibri channels, **Maths**, **Grade 5 Science** and **Early Reading** (videos, pictures and documents; no exercises).
-- Kolibri Demo: the **Fractions lesson** that you make yourself in chapter 3. (The **Fractions quiz** needs exercises: see 3.5.)
+- Kolibri Demo: three Kolibri channels, **Maths**, **Grade 5 Science** and **Early Reading** (videos, pictures and documents), with the exercises **Fractions practice** and **Times tables practice** (Maths) and **Reading: Rudo and the goat** (Early Reading).
+- Kolibri Demo: the lessons **Maths lesson**, **Grade 5 Science lesson** and **Early Reading lesson** and the quiz **Grade 5 Practice Quiz**, for the class **Grade 5**. `learner3` has already done the quiz and **Fractions practice**, so reports show results. You make the **Fractions lesson** yourself in chapter 3.
 - Nextcloud Demo: the folders **Worksheets** and **Teacher Notes** for `teacher1` and `teacher2`. You make the **Drop Zone** folder and the document **Lesson plan** yourself in chapter 5.
 - Wikipedia (Demo): Wikipedia in simple English.
 
