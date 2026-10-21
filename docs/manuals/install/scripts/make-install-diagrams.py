@@ -134,41 +134,38 @@ def wiring():
 
 # ---------------------------------------------------------------- M1 zones
 def zones():
-    s = S(1100, 640)
-    s.text(550, 30, "Network zones and what may talk to what", 20, "bold")
-    s.rect(430, 250, 240, 120, fill="#eef5ff", sw=3)
-    s.text(550, 285, "Cudy router", 16, "bold")
-    s.text(550, 307, "OpenWrt firewall", 12)
-    s.text(550, 327, "LAN 10.42.0.1 | IDEA 10.42.1.1", 11)
-    s.text(550, 345, "IDEA-Teachers 10.42.2.1", 11)
-    def zone(x, y, w, h, title, sub, fill):
-        s.rect(x, y, w, h, fill=fill)
-        s.text(x + w/2, y + 26, title, 15, "bold")
-        s.text(x + w/2, y + 48, sub, 11, fill="#333")
-    zone(420, 60, 260, 110, "WAN  (Starlink -> internet)", "zone: wan", "#fff7e0")
-    zone(780, 230, 290, 170, "LAN  10.42.0.0/24  (wired)", "zone: lan\nEngines 10.42.0.2-.9 (by DHCP)\nswitch 10.42.0.10\n(Console: http://idea.local)", "#f0fff0")
-    zone(30, 130, 300, 140, "Wi-Fi 'IDEA'  10.42.1.0/24", "zone: students\nlaptops / classroom computers\nclient isolation ON", "#fff0f0")
-    zone(30, 380, 300, 140, "Wi-Fi 'IDEA-Teachers'  10.42.2.0/24", "zone: teachers\nteacher laptops / phones", "#f5f0ff")
-    zone(420, 470, 260, 110, "tailscale0", "zone: tailscale\nadmin access to the router only", "#eefaff")
-    G, R, O = "#2ca02c", "#d62728", "#ff7f0e"
-    # students -> Pis allowed
-    s.line([(330, 190), (760, 190), (760, 280), (780, 280)], G, 4, arrow=True)
-    s.text(545, 183, "ALLOW: to the Engines (10.42.0.2-.9) only", 11, "bold", fill=G)
-    # students -> WAN blocked
-    s.line([(250, 130), (250, 100), (420, 100)], R, 4, dash="8,6", arrow=True)
-    s.text(30, 70, "BLOCKED (no forwarding):\ninternet, outside DNS, VPNs", 11, "bold", fill=R, anchor="start")
-    # teachers -> Pis
-    s.line([(330, 430), (740, 430), (740, 360), (780, 360)], G, 4, arrow=True)
-    s.text(545, 446, "ALLOW: to the Engines (10.42.0.2-.9)", 11, "bold", fill=G)
-    # teachers -> WAN toggle
-    s.line([(200, 380), (200, 330), (370, 330), (370, 140), (420, 140)], O, 4, dash="3,5", arrow=True)
-    s.text(377, 230, "ON/OFF switch:\nrule 'Teachers-Internet'", 11, "bold", fill=O, anchor="start")
-    # lan -> wan
-    s.line([(925, 230), (925, 115), (680, 115)], G, 4, arrow=True)
-    s.text(930, 170, "ALLOW: Pi updates\n+ Tailscale", 11, "bold", fill=G, anchor="start")
-    # router input
-    s.text(550, 400, "IDEA / Teachers -> router itself: only DHCP + DNS", 11, fill="#333")
-    s.text(550, 620, "Green = allowed, red dashed = blocked, orange dotted = can be switched on/off. Replies to allowed traffic are always let back in.", 11, fill="#555")
+    """Plain picture for non-network readers: who connects how, and what they can open."""
+    s = S(1100, 560)
+    s.text(550, 34, "Who connects where, and what they can open", 22, "bold")
+    hx = [40, 330, 640]
+    for x, t in zip(hx, ["Who", "Connects with", "Can open"]):
+        s.text(x, 80, t, 15, "bold", anchor="start", fill="#555")
+    G, R = "#2ca02c", "#d62728"
+    rows = [("Students", "laptops, phones,\nclassroom computers", "#fff0f0",
+             "Wi-Fi  IDEA", "password idea911!",
+             [(True, "Console and apps"), (False, "Internet")]),
+            ("Teachers", "laptops and phones", "#f5f0ff",
+             "Wi-Fi  IDEA-Teachers", "password idea-teachers911!",
+             [(True, "Console and apps"), (True, "Internet")]),
+            ("Engines", "the Raspberry Pi 5 servers", "#f0fff0",
+             "Ethernet cable", "to the switch (ports 1-4)",
+             [(True, "Internet, for updates"), (True, "IDEA team support")])]
+    for i, (who, sub, fill, how, how2, can) in enumerate(rows):
+        y = 100 + i * 145
+        s.rect(30, y, 260, 120, fill=fill, sw=2)
+        s.text(160, y + 50, who, 22, "bold")
+        s.text(160, y + 76, sub, 13, fill="#333")
+        s.line([(295, y + 60), (320, y + 60)], "#555", 4, arrow=True)
+        s.rect(325, y, 280, 120, fill="#eef5ff", sw=2)
+        s.text(465, y + 52, how, 19, "bold", fill="#1f4f99")
+        s.text(465, y + 80, how2, 13, fill="#333")
+        s.line([(610, y + 60), (635, y + 60)], "#555", 4, arrow=True)
+        s.rect(640, y, 430, 120, fill="#ffffff", sw=2)
+        for k, (ok, t) in enumerate(can):
+            yy = y + 45 + k * 40
+            s.text(670, yy, "YES" if ok else "NO", 16, "bold", anchor="start", fill=G if ok else R)
+            s.text(730, yy, t, 17, anchor="start")
+    s.text(550, 545, "The Console and apps open at http://idea.local. Students and teachers never plug a cable into the switch.", 13, fill="#555")
     s.save("m1-zones.svg")
 
 # ---------------------------------------------------------------- M1 flashing

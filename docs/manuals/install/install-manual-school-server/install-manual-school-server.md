@@ -1,10 +1,10 @@
 ---
 title: "IDEA School Server: Installation Manual"
 subtitle: "Raspberry Pi 5 Engines + Cudy router + PoE switch + Starlink"
-audience: "Version 1.4, 21 October 2026"
+audience: "Version 1.5, 21 October 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v1.4: review in line with the classroom computer manual: intro and parts list shortened; IDEA-team preparation, hand flashing, scripts and sources removed; wiring consolidated)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v1.5: single parts list, simple network picture, Taking Backups chapter, teacher-internet and password chapters removed)
 
 
 # Introduction
@@ -27,38 +27,16 @@ Each step has:
 
 *Check that you have every part before you start.*
 
-## 1.1 Router
-
 | ☐ | Item |
 |---|---|
-| ☐ | Cudy WR3000S router (pre-flashed, with IDEA sticker) + 12 V adapter + Ethernet cable |
-
-## 1.2 Switch
-
-| ☐ | Item |
-|---|---|
-| ☐ | TP-Link TL-SG105PE PoE+ switch (ports 1-4 PoE+) + 53.5 V adapter |
-
-## 1.3 Engines (one set per Engine)
-
-| ☐ | Item |
-|---|---|
-| ☐ | Raspberry Pi 5 Engine, assembled with PoE+ HAT and NVMe SSD, sticker with its name on the case |
-| ☐ | Files Disk |
-| ☐ | Backup Disk |
-
-## 1.4 Cables and power
-
-| ☐ | Item |
-|---|---|
+| ☐ | Cudy WR3000S router (pre-flashed, with IDEA sticker), its 12 V power adapter and an Ethernet cable |
+| ☐ | TP-Link TL-SG105PE PoE+ switch (ports 1-4 PoE+) and its 53.5 V power adapter |
+| ☐ | Per Engine: Raspberry Pi 5 Engine, assembled with PoE+ HAT and NVMe SSD, with its name on a sticker on the case |
+| ☐ | Per Engine: Files Disk |
+| ☐ | Per Engine: Backup Disk |
 | ☐ | Ethernet patch cables: one per Engine, plus one for the router-switch link |
 | ☐ | Plug adapters for Type G / Type D sockets |
 | ☐ | Power strip, ideally with surge protection |
-
-## 1.5 Starlink
-
-| ☐ | Item |
-|---|---|
 | ☐ | Starlink kit: dish, router, cable, power supply (Gen 2 also: Starlink Ethernet Adapter) |
 
 # 2. Wiring
@@ -76,14 +54,11 @@ Each step has:
 
 The Engines get **no** USB-C power supply: the PoE+ HAT takes power from the Ethernet cable. Never connect a USB-C supply at the same time as PoE. A free switch port can also take an extra access point instead of an Engine.
 
-## 2.1 Network zones
+## 2.1 Who connects where
 
-![Network zones and allowed traffic](diagrams/m1-zones.svg)
+![Who connects where, and what they can open](diagrams/m1-zones.svg)
 
-* **IDEA (students):** devices reach only the Engines, however many there are (Console, Kolibri, Nextcloud, Wikipedia). There is no forwarding to the internet, so outside DNS servers, VPNs and websites are all blocked. Students on the IDEA Wi-Fi cannot reach each other either (client isolation).
-* **IDEA-Teachers:** devices reach the Pis. Internet goes through **one** firewall rule, `Teachers-Internet`, which staff can switch off and on again (chapter 8). It starts **on**.
-* **LAN (wired):** the Pis may reach the internet for updates and Tailscale. They do not route traffic for anyone else.
-* **Tailscale:** the router and every Engine join the IDEA tailnet with the one fleet tag `tag:idea`. Admins reach every device. Devices with `tag:idea` reach nothing, not even each other. There are no exit nodes and no subnet routes.
+Students and teachers never plug into the switch: they use the Wi-Fi. Only the Engines (and the router) are on cables.
 
 # 3. Router: check the pre-flashed IDEA router
 
@@ -100,8 +75,9 @@ The router arrives pre-flashed with the IDEA settings. You do **not** flash it y
 
 ## 3.2 Check the IDEA settings
 
-1. Connect the 12 V adapter. Connect your laptop with a cable to **LAN2**. Leave WAN empty.
-2. Browse to `http://10.42.0.1` and log in as `root` with `admin911!`.
+1. Switch the router on: plug the Cudy router's own power adapter (the 12 V adapter from the Cudy box) into the round **power** socket on the back of the router, and into a wall socket. Wait 2 minutes.
+2. Connect your laptop with an Ethernet cable to the router port marked **LAN2**. Leave the **WAN** port empty for now.
+3. Browse to `http://10.42.0.1` and log in as `root` with `admin911!`.
 
 **✔ Check (all four):**
 
@@ -112,7 +88,7 @@ The router arrives pre-flashed with the IDEA settings. You do **not** flash it y
 
 <div class="note">
 <b>Factory reset.</b> Holding the reset button gives back these IDEA defaults (Wi-Fi, passwords, firewall, <code>10.42.0.1</code>),
-not plain OpenWrt. So a reset never leaves a school with an open network, but it does undo password changes from chapter 9.
+not plain OpenWrt. So a reset never leaves a school with an open network,.
 </div>
 
 ## 3.3 The school router's Wi-Fi networks and default passwords
@@ -120,7 +96,7 @@ not plain OpenWrt. So a reset never leaves a school with an open network, but it
 | What | Name | Default password | Who uses it |
 |---|---|---|---|
 | Student Wi-Fi | `IDEA` | `idea911!` | Students' and classroom computers and phones. Reaches **only** the Engines (Console, Kolibri, Nextcloud, Wikipedia). No internet. |
-| Teacher Wi-Fi | `IDEA-Teachers` | `idea-teachers911!` | Teachers. Reaches the Engines. Internet is **on** by default; staff can switch it off (chapter 8). |
+| Teacher Wi-Fi | `IDEA-Teachers` | `idea-teachers911!` | Teachers. Reaches the Engines. Internet is **on** by default. |
 | Router admin (LuCI and SSH on the wired LAN) | user `root` | `admin911!` | The installer and the IDEA team only. Over Tailscale the router accepts SSH keys only. |
 
 Give the students the `IDEA` network and its password. Give only the teachers the `IDEA-Teachers` network and its password.
@@ -170,22 +146,28 @@ The Engines arrive installed: operating system, IDEA Engine and Console, Tailsca
 
 **✔ Check:**
 
-* Every Engine's address is between `10.42.0.2` and `.9`. An address from `.100` to `.199` means the Engine works on the cable but Wi-Fi devices are refused: tell the IDEA team.
+* Every Engine's address is between `10.42.0.2` and `.9`.
+
 * A laptop on the wired LAN or on the Wi-Fi `IDEA` opens `http://<STICKER>.local` (the name on any sticker) and `http://idea.local`, and sees the IDEA Console with **every** Engine of this school listed.
 * In the Console, each app shows as *Running* and opens.
+
+<div class="note">
+<b>If an Engine has an address from <code>10.42.0.100</code> to <code>.199</code>.</b> The router gives every device on a cable an address. An Engine introduces itself to the router as an IDEA Engine and then gets one of the Engine addresses, <code>.2</code> to <code>.9</code>. Any other device on a cable, for example your laptop, gets an ordinary address from <code>.100</code> to <code>.199</code>. The Wi-Fi networks <code>IDEA</code> and <code>IDEA-Teachers</code> may only reach the Engine addresses. So an Engine with a <code>.1xx</code> address did not introduce itself as an Engine: it works for a laptop on a cable, but students and teachers on the Wi-Fi cannot open its Console or apps.
+<b>What to do:</b> restart that Engine (unplug its cable from the switch for 10 seconds, plug it back in, wait 5 minutes) and look again. If it still has a <code>.1xx</code> address, tell the IDEA team.
+</div>
 
 ## 5.2 The apps on each Engine
 
 | Console card | What it is |
 |---|---|
 | **Kolibri** | The school's own Kolibri (school *IDEA School*) with 14 channels, for example CK-12, PhET, OpenStax and African Storybook. Only the `admin` account exists: the school creates its own teachers and learners. |
-| **Kolibri Demo** | A separate practice Kolibri: *IDEA Demo School*, class *Grade 5*, the demo accounts and the three IDEA-DEMO channels (Maths, Grade 5 Science, Early Reading). The teacher tutorial uses it. |
+| **Kolibri Demo** | A separate practice Kolibri: *IDEA Demo School*, class *Grade 5*, the demo accounts and the three IDEA-DEMO channels (Maths, Grade 5 Science, Early Reading). Used in the *IDEA for Teachers: Tutorial*. |
 | **Nextcloud** | The school's own Nextcloud, with the accounts `admin`, `teacher1` and `learner1`. |
 | **Nextcloud Demo** | A separate practice Nextcloud with the demo accounts and the folders *Worksheets* and *Teacher Notes*. |
 | **Wikipedia** | The full English Wikipedia, offline. |
-| **Wikipedia (Demo)** | Wikipedia in Simple English, used in the tutorial. |
+| **Wikipedia (Demo)** | Wikipedia in Simple English, used in the *IDEA for Teachers: Tutorial*. |
 
-Everything the teacher tutorial shows is done in the Demo apps, so the school's own apps stay clean. Each Engine's **Backup Disk** takes full backups of every app. A full backup takes about 2 h 15 min and stops each app while it runs, so run backups outside lesson time (*IDEA for Teachers: Tutorial*, chapter 12).
+The Demo apps are for training: the *IDEA for Teachers: Tutorial* uses them for all its exercises (chapters 3 to 8), with the demo accounts in its appendix *Demo accounts*. So the school's own apps stay clean.
 
 <div class="warn">
 <b>Known problem: apps of an Engine that is not there.</b> Once two Engines have been on the same network, each one keeps
@@ -200,7 +182,13 @@ Send the IDEA team one short message per school: the school name and the sticker
 
 **✔ Check:** the IDEA team confirms that they have the names.
 
-# 6. On site: connect Starlink and final cabling
+# 6. Taking backups
+
+*Keep a copy of every app on the Backup Disk.*
+
+Each Engine's **Backup Disk** takes full backups of every app, with its content. A full backup of all apps takes about 2 h 15 min and stops each app while it runs, so run backups outside lesson time. How to run one: *IDEA for Teachers: Tutorial*, chapter 12.
+
+# 7. On site: connect Starlink and final cabling
 
 *Connect everything at the school.*
 
@@ -232,7 +220,7 @@ Starlink is only the internet on the Cudy **WAN** port. The school network works
 * The switch's PoE LEDs are on for every port with an Engine.
 * Unplug cable 1 for a minute: a laptop on `IDEA` still opens the Console. Plug it back in: Tailscale comes back by itself.
 
-# 7. Final checklist
+# 8. Final checklist
 
 *Check that everything works before you leave.*
 
@@ -248,57 +236,11 @@ Starlink is only the internet on the Cudy **WAN** port. The school network works
 | ☐ | Router admin closed on IDEA | Browse to `http://10.42.1.1` and `http://10.42.0.1` | Fails |
 | ☐ | Students isolated | From phone A on IDEA, ping laptop B on IDEA | Fails |
 | ☐ | **Teachers: Pis yes, internet on** | Join `IDEA-Teachers` with `idea-teachers911!`. Open `http://idea.local`, then `https://example.com` | Console yes, internet yes |
-| ☐ | **Teachers: internet switched off** | Switch off `Teachers-Internet` (chapter 8), then reload `https://example.com` | Internet stops. Switch it on again: internet works. |
 | ☐ | Pis have internet (updates) | `ssh pi@<ENGINE-IP> 'curl -sI https://deb.debian.org | head -1'` | `HTTP/... 200` |
 | ☐ | **Every Engine visible in Tailscale** | `tailscale status` on an admin laptop, or the admin console | Every sticker name (and the router) online, tagged `tag:idea` |
 | ☐ | Stickers and report | Look at every case | Each sticker matches `hostname` on that Pi. The IDEA team has the names (5.3). |
 | ☐ | Power fine | `ssh pi@<ENGINE-IP> vcgencmd get_throttled` (for each Engine) | `throttled=0x0`. If you see anything but `0x0`, check the cable and switch port and tell the IDEA team. |
 | ☐ | Reboot test | Pull the switch's power for 10 s, then plug it back in | After about 5 minutes, all of the above pass again |
-
-# 8. Switching teacher internet off and on
-
-*Turn internet on the teacher Wi-Fi off or on.*
-
-Internet on the teacher Wi-Fi `IDEA-Teachers` is **on** by default. Staff can switch it off, also from far away, and switch it on again later.
-
-**LuCI** (from a wired laptop at the school, or over Tailscale): **Network → Firewall → Traffic Rules** → `Teachers-Internet` → untick **Enable** to switch it off, or tick it to switch it back on → **Save & Apply**.
-
-**SSH:**
-
-```bash
-# OFF
-ssh root@10.42.0.1 "uci set firewall.teachers_internet.enabled='0' && uci commit firewall && service firewall reload"
-# ON again (the default)
-ssh root@10.42.0.1 "uci set firewall.teachers_internet.enabled='1' && uci commit firewall && service firewall reload"
-```
-
-**✔ Check:** a teacher laptop on IDEA-Teachers cannot (off) or can (on) open `https://example.com`. Connections that were already open may last a few more seconds.
-
-Switch it on only when the head teacher asks, and off again when the lesson is over. It does not go off by itself.
-
-# 9. Tell the school, and change the default passwords
-
-*Hand over to the school and set new passwords.*
-
-**Tell the head teacher and the teachers:**
-
-* **Students** join Wi-Fi **`IDEA`** with **`idea911!`**. It opens the IDEA Console, Kolibri, Nextcloud and Wikipedia, and nothing else: no internet.
-* **Teachers** join Wi-Fi **`IDEA-Teachers`** with **`idea-teachers911!`**. It reaches the same apps. Internet is on; staff can switch it off (chapter 8).
-* Teachers keep the `IDEA-Teachers` password to themselves.
-* **Opening the Console:** on a classroom computer, click the **IDEA** icon on the desktop or in the dock (*IDEA Classroom Computer: Installation Manual*). On any other device, type **`http://idea.local`** or **`http://<STICKER>.local`** (the name on any Engine's sticker), and set it as the browser's home page or bookmark it.
-* **Default accounts** follow the `<name>911!` convention, for example `admin` / `admin911!`. The student account on the classroom computers, `learner`, has no password, and Kolibri learners sign in with only their username.
-* **Teacher computers:** the classroom computers join `IDEA`. For a computer on `IDEA-Teachers`, ask the IDEA team.
-* **Classroom computers reset at every restart.** Anything saved on the computer itself is gone after a restart: save work in Nextcloud.
-* **Apps that won't open:** see the known problem in 5.2.
-
-**Change the passwords once the school is running.** The defaults are easy on purpose, but anyone who knows the pattern can guess them.
-The head teacher picks new passwords (at least 8 characters, different for students and teachers). Then, from a wired laptop:
-
-1. LuCI → **Network → Wireless** → **Edit** on `IDEA` (both radios) → **Wireless Security → Key** → **Save & Apply**. The same for `IDEA-Teachers`.
-2. LuCI → **System → Administration → Router Password** for `root`.
-3. The switch password (chapter 4). For the classroom computers' `admin` password, ask the IDEA team.
-
-**✔ Check:** a phone joins with the new password and not with the old one. Every device on that Wi-Fi must join again with the new password.
 
 # Appendix A. Troubleshooting
 
@@ -327,7 +269,7 @@ The head teacher picks new passwords (at least 8 characters, different for stude
 | Engine 4 (port 4, if fitted) | address 10.42.0.\_\_\_\_, sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
 | Starlink kit | router generation (Gen 3 / Gen 2 / Mini) ______, bypass on ☐ |
 | Switch | `10.42.0.10`, MAC (on its label) ____:____:____:____:____:____ |
-| Wi-Fi students | SSID `IDEA`, password `idea911!` (until changed), subnet `10.42.1.0/24` |
-| Wi-Fi teachers | SSID `IDEA-Teachers`, password `idea-teachers911!` (until changed), subnet `10.42.2.0/24` |
+| Wi-Fi students | SSID `IDEA`, password `idea911!`, subnet `10.42.1.0/24` |
+| Wi-Fi teachers | SSID `IDEA-Teachers`, password `idea-teachers911!`, subnet `10.42.2.0/24` |
 | Tailscale tag | `tag:idea` (the same for every school) |
 | Cudy serial number (label) | ______________________ (date code: ______) |
