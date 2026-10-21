@@ -1,10 +1,10 @@
 ---
 title: "IDEA School Server: Installation Manual"
 subtitle: "Raspberry Pi 5 Engines + Cudy router + PoE switch + Starlink"
-audience: "Version 1.5, 21 October 2026"
+audience: "Version 1.6, 21 October 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v1.5: single parts list, simple network picture, Taking Backups chapter, teacher-internet and password chapters removed)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v1.6: Starlink Standard and Mini both covered: parts, cabling, power, wiring diagram)
 
 
 # Introduction
@@ -37,7 +37,8 @@ Each step has:
 | ☐ | Ethernet patch cables: one per Engine, plus one for the router-switch link |
 | ☐ | Plug adapters for Type G / Type D sockets |
 | ☐ | Power strip, ideally with surge protection |
-| ☐ | Starlink kit: dish, router, cable, power supply (Gen 2 also: Starlink Ethernet Adapter) |
+| ☐ | Starlink kit. Standard: dish, router, cable, power supply (Gen 2 router also: Starlink Ethernet Adapter). Mini: dish with built-in router, kickstand and mount, 15 m DC power cable, power supply, Starlink Plug |
+| ☐ | Starlink Mini only: an outdoor Ethernet cable to the Cudy (Mini Starlink Cable; not in the Mini box. An ordinary RJ45 cable works, but the Mini is then no longer waterproof (IP67)) |
 
 # 2. Wiring
 
@@ -47,7 +48,7 @@ Each step has:
 
 | Cable | From | To | Notes |
 |---|---|---|---|
-| 1 | Starlink router, Ethernet port | Cudy **WAN** port (yellow) | Gen 3 router: built-in LAN port. Gen 2: Starlink Ethernet Adapter. Mini: its Ethernet cable. |
+| 1 | Starlink Ethernet port | Cudy **WAN** port (yellow) | Standard Gen 3: the router's Ethernet port. Gen 2: Starlink Ethernet Adapter. Mini: the port on the Mini itself (Ethernet cable from the kit list). |
 | 2 | Cudy **LAN1** | Switch **port 5** | Port 5 is the only port without PoE. Use it for the uplink. |
 | 3 | Switch **port 1** (PoE+) | Engine 1 Ethernet | This cable powers Engine 1. Every school has at least this one. |
 | 4… | Switch **ports 2, 3, 4** (PoE+) | Engines 2, 3, 4 (if the school has them) | One cable per extra Engine. Leave unused ports empty. |
@@ -195,21 +196,23 @@ Each Engine's **Backup Disk** takes full backups of every app, with its content.
 Starlink is only the internet on the Cudy **WAN** port. The school network works fully without it.
 
 1. **Install and activate Starlink** with the Starlink app (dish outside with a clear view of the sky). The **IDEA
-   project** owns the Starlink account; use the IDEA project's app login. Check that it works with a phone on the Starlink Wi-Fi, and check the app for obstructions. Write the router
-   generation on the fill-in sheet.
+   project** owns the Starlink account; use the IDEA project's app login. Check that it works with a phone on the Starlink Wi-Fi, and check the app for obstructions. Write the Starlink model (Standard Gen 3 / Gen 2, or Mini)
+   on the fill-in sheet.
 2. **Bypass mode:** with the phone still on the Starlink Wi-Fi, open the **Starlink app → Settings → Bypass mode** and
    switch it on. On a Gen 3 router the light turns violet.
 
    <div class="warn">Bypass mode switches the Starlink Wi-Fi off for good: from now on all Wi-Fi comes from the Cudy.
-   It can only be undone with a factory reset of the Starlink router. Do it last, after Starlink itself works.</div>
+   It can only be undone with a factory reset of the Starlink router (Standard) or of the Mini itself. Do it last, after Starlink itself works.</div>
 
-3. **Cable 1:** Gen 3 router: remove the rubber cover at the back and connect one of its Ethernet ports to the Cudy
-   **WAN** port. Gen 2 router: Starlink Ethernet Adapter between the router and the dish cable, adapter port to the
-   Cudy WAN. Starlink Mini: its Ethernet cable to the Cudy WAN. Nothing else plugs into the Starlink router.
+3. **Cable 1:** connect Starlink's Ethernet port to the Cudy **WAN** port. Nothing else plugs into Starlink.
+
+    * Standard Gen 3 router: remove the rubber cover at the back and use one of its Ethernet ports.
+    * Standard Gen 2 router: Starlink Ethernet Adapter between the router and the dish cable; its port goes to the Cudy WAN.
+    * Mini: remove the rubber **Starlink Plug** from the port on the Mini to reach its Ethernet (RJ45) port, and plug in the Mini Starlink Cable.
+
 4. Cable the rest exactly as in the wiring diagram: cable 2 (Cudy LAN1 → switch port 5), then one cable per Engine.
    Plug in the power adapters: Starlink, Cudy, switch. The Pis start by themselves through PoE.
-5. **Power:** if there is a UPS, put the **Cudy, the switch** (and so the Engines) on it. Starlink uses far more power
-   (about 75–100 W); keep it on mains unless the UPS is large.
+5. **Power:** Starlink uses its own power supply in its own mains socket; it is not powered over Ethernet (PoE). It uses far more power than the rest: Standard about 75–100 W, Mini 25–40 W on average (60 W at most). If there is a UPS, put the **Cudy and the switch** (and so the Engines) on it, and keep Starlink on mains unless the UPS is large.
 6. Wait 5 minutes. Leave the Cudy WAN on DHCP and keep bypass on.
 
 **✔ Check:**
@@ -267,7 +270,7 @@ Starlink is only the internet on the Cudy **WAN** port. The school network works
 | Engine 2 (port 2, if fitted) | address 10.42.0.\_\_\_\_, sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
 | Engine 3 (port 3, if fitted) | address 10.42.0.\_\_\_\_, sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
 | Engine 4 (port 4, if fitted) | address 10.42.0.\_\_\_\_, sticker name \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |
-| Starlink kit | router generation (Gen 3 / Gen 2 / Mini) ______, bypass on ☐ |
+| Starlink kit | model (Standard Gen 3 / Gen 2 / Mini) ______, bypass on ☐ |
 | Switch | `10.42.0.10`, MAC (on its label) ____:____:____:____:____:____ |
 | Wi-Fi students | SSID `IDEA`, password `idea911!`, subnet `10.42.1.0/24` |
 | Wi-Fi teachers | SSID `IDEA-Teachers`, password `idea-teachers911!`, subnet `10.42.2.0/24` |

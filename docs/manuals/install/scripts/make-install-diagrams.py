@@ -55,15 +55,16 @@ def wiring():
     # Starlink dish
     s.add('<ellipse cx="90" cy="130" rx="55" ry="22" fill="#f4f4f4" stroke="#333" stroke-width="2"/>')
     s.add('<line x1="90" y1="152" x2="90" y2="190" stroke="#333" stroke-width="4"/>')
-    s.text(90, 95, "Starlink dish", 14, "bold")
+    s.text(20, 95, "Starlink dish (Standard)", 13, "bold", anchor="start")
     s.text(90, 212, "(outside, clear\nview of the sky)", 11, fill="#555")
     # Starlink router
     s.rect(30, 300, 170, 120, fill="#f7f7f7")
-    s.text(115, 325, "Starlink router", 14, "bold")
-    s.text(115, 345, "Bypass mode = ON\n(its Wi-Fi is OFF)", 11, fill="#a00")
+    s.text(115, 322, "Starlink router", 14, "bold")
+    s.text(115, 338, "- or the Starlink Mini -", 10, italic=True, fill="#555")
+    s.text(115, 353, "Bypass mode = ON (Wi-Fi OFF)", 10, fill="#a00")
     s.port(92, 378, "ETH*", fill="#ffe9a8")
     s.line([(90, 190), (90, 260), (60, 260), (60, 300)], "#555", 5)
-    s.text(150, 255, "Starlink cable\n(already attached)", 10, anchor="start", fill="#555")
+    s.text(150, 255, "Starlink cable (Standard;\nthe Mini has none)", 10, anchor="start", fill="#555")
     # Cudy router
     cx, cy = 300, 470
     s.rect(cx, cy, 380, 120, fill="#eef5ff")
@@ -129,7 +130,7 @@ def wiring():
         x = lx + i * 265
         s.badge(x + 12, ly + 12, n, c)
         s.text(x + 32, ly + 17, t, 12, anchor="start")
-    s.text(lx, ly + 52, "* Starlink Gen 3 router: use its Ethernet (LAN) port. Gen 2 router: needs the Starlink Ethernet Adapter.  Dashed red = mains power adapters.", 10, anchor="start", fill="#555")
+    s.text(lx, ly + 52, "* Standard Gen 3: the router's Ethernet port. Gen 2: Starlink Ethernet Adapter. Mini: one unit (no dish cable), its own port under the Starlink Plug.  Dashed red = mains power.", 10, anchor="start", fill="#555")
     s.save("m1-wiring.svg")
 
 # ---------------------------------------------------------------- M1 zones
