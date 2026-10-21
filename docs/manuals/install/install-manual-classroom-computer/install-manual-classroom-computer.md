@@ -14,8 +14,6 @@ Each step has:
 1. **Do:** what to do.
 2. **✔ Check:** how to see that it worked.
 
-Where the Pi 400 and the Pi 500 differ, the manual says so.
-
 <div class="note">
 <b>Conventions.</b>
 <ul>
