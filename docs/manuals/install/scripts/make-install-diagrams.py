@@ -224,11 +224,11 @@ def tailnet():
 # ---------------------------------------------------------------- M2 Pi 400 wiring
 def pi400():
     s = S(1100, 640)
-    s.text(550, 30, "Raspberry Pi 400 (or Pi 500) + Raspberry Pi Monitor: ONE power supply", 20, "bold")
+    s.text(550, 30, "Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor: which cable goes where", 20, "bold")
     # Pi 400 rear strip (as seen from behind)
     px, py = 230, 330
     s.rect(px, py, 640, 150, fill="#fff0f3", stroke="#c51a4a", sw=3, rx=14)
-    s.text(px + 320, py + 135, "Raspberry Pi 400 - seen from BEHIND (back edge, left to right)", 12, "bold", fill="#c51a4a")
+    s.text(px + 320, py + 135, "Keyboard computer - back edge (schematic: follow the icons printed next to each port)", 12, "bold", fill="#c51a4a")
     ports = [("GPIO", 70, "#ddd"), ("SD", 46, "#ddd"), ("micro\nHDMI", 46, "#cfe3ff"), ("micro\nHDMI ", 46, "#eee"),
              ("USB-C\nPWR", 56, "#fbd5d5"), ("USB3", 46, "#bcd4ff"), ("USB3", 46, "#bcd4ff"), ("USB2", 46, "#fff"), ("ETH", 50, "#eee")]
     x = px + 20; pos = {}
@@ -239,11 +239,11 @@ def pi400():
             s.text(x + w/2, py + 50 + i*13 - (6 if len(ls) > 1 else -4), l, 10, "bold")
         pos.setdefault(lab, []).append(x + w/2)
         x += w + 18
-    s.text(px + 320, py + 105, "micro-SD card (32 GB, Ubuntu) goes in the SD slot, contacts facing down", 10, italic=True, fill="#555")
+    s.text(px + 320, py + 105, "microSD card with the IDEA client image in the SD slot, contacts facing down", 10, italic=True, fill="#555")
     # PSU
     s.rect(380, 560, 200, 60, fill="#fbd5d5")
-    s.text(480, 585, "Official 15 W USB-C PSU", 12, "bold")
-    s.text(480, 603, "(from the kit) -> wall socket", 10)
+    s.text(480, 585, "The computer's own USB-C PSU", 12, "bold")
+    s.text(480, 603, "(Pi 400: 15 W, Pi 500: 27 W) -> wall socket", 10)
     pwr = pos["USB-C\nPWR"][0]
     s.line([(480, 560), (480, 520), (pwr, 520), (pwr, py + 74)], "#d62728", 5, arrow=True)
     s.badge(430, 520, 1, "#d62728")
@@ -258,12 +258,12 @@ def pi400():
     h0 = pos["micro\nHDMI"][0]
     s.line([(h0, py + 30), (h0, 280), (mx + 170, 280), (mx + 170, my + 104)], "#1f77b4", 5, arrow=True)
     s.badge(h0 - 0, 300, 2, "#1f77b4")
-    s.text(h0 - 18, 268, "micro-HDMI -> HDMI\n(cable from Pi 400 kit)", 10, anchor="end", fill="#1f77b4")
+    s.text(h0 - 18, 268, "micro-HDMI -> HDMI\n(either micro-HDMI port)", 10, anchor="end", fill="#1f77b4")
     # USB power to monitor
     u3 = pos["USB3"][0]
     s.line([(u3, py + 30), (u3, 300), (mx + 290, 300), (mx + 290, my + 104)], "#ff7f0e", 5, arrow=True)
     s.badge(u3 + 22, 300, 3, "#ff7f0e")
-    s.text(u3 + 40, 285, "USB-A -> USB-C\n(cable from monitor box)", 10, anchor="start", fill="#ff7f0e")
+    s.text(u3 + 40, 285, "USB-A -> USB-C\n(monitor power cable)", 10, anchor="start", fill="#ff7f0e")
     # mouse
     u2 = pos["USB2"][0]
     s.add(f'<ellipse cx="{u2+150}" cy="560" rx="28" ry="40" fill="#fff" stroke="#333" stroke-width="2"/>')
