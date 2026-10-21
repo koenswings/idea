@@ -4,22 +4,17 @@ subtitle: "Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor + the IDEA client i
 audience: "Version 2.3, 21 October 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v2.3: shorter introduction and parts list, monitor power box, Appendix B removed)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v2.3: introduction = Do/Check + conventions and parts list, monitor power box, Appendix B removed)
 
 
 # Introduction
 
-## How to use this manual
+Each step has:
 
-| Chapter | What you do |
-|---|---|
-| 1. What is in the boxes | Check that every part is there |
-| 2. Wiring | Connect the computer and the monitor |
-| 3. The IDEA client image | Read what the computer already does by itself |
-| 4. First boot | Switch on, open the Console, check the Wi-Fi |
-| 5. Checklist for each computer | Test each computer before you hand it over |
-| 6. Update the IDEA client image | Put a newer image on a card, from the Console |
-| Appendix A | Troubleshooting |
+1. **Do:** what to do.
+2. **✔ Check:** how to see that it worked.
+
+Where the Pi 400 and the Pi 500 differ, the manual says so.
 
 <div class="note">
 <b>Conventions.</b>
