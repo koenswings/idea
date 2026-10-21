@@ -1,6 +1,6 @@
 **Status:** Draft (feature not live yet; lands with idea#201 and idea#203: Console Client cards, Flash and the IDEA shortcut) · **Maintained by:** Marco (with Atlas) · 15 October 2026
 
-# 13. Student computers: reset a card from the Console
+# 12. Student computers: reset a card from the Console
 
 This chapter is for the school operator.
 
@@ -8,19 +8,19 @@ Every student computer (Raspberry Pi 400 or Pi 500) starts from a **microSD card
 
 Good to know:
 
-- **Resetting wipes the card.** Anything saved on the computer itself (the local *Documents* folder) is gone. Students' work in **Nextcloud** stays: that is why students save there (chapter 7).
+- **Resetting wipes the card.** Anything saved on the computer itself (the local *Documents* folder) is gone. Students' work in **Nextcloud** stays: that is why students save there (chapter 6).
 - Every card is the same, so a card works in **any** student computer, Pi 400 or Pi 500.
 - The student computers **do not update themselves**. New software comes only with a new, tested image version, which you get by resetting the card.
 - **A restart already undoes most problems.** Every restart puts the computer back as its card was written (files and settings saved on the computer are gone). Try a restart first; reset the card only when that doesn't help.
 - You need a **USB card reader** plugged into the IDEA box. Any card reader works.
 
-## 13.1 Before you start
+## 12.1 Before you start
 
 1. Switch the student computer off and take the microSD card out. Note the computer's name from its sticker (for example `idea-pc-3f2a`).
 2. Put the card into the card reader, and plug the card reader into a free USB port of the IDEA box.
-3. Open the Console and sign in with **Operator Login** (chapter 11).
+3. Open the Console and sign in with **Operator Login** (chapter 10).
 
-## 13.2 Find the card
+## 12.2 Find the card
 
 1. Click the IDEA box in the list on the left. Scroll down to **CLIENT CARDS**. It shows the client image the box will write, and every card in a card reader: the reader's name, the card's size and what is on it now.
 
@@ -30,7 +30,7 @@ Good to know:
 
 > **Never pick an IDEA Disk.** The Files Disk, the Backup Disk and app disks are never offered here, but always check the name and size before you continue.
 
-## 13.3 Reset (flash) the card
+## 12.3 Reset (flash) the card
 
 1. The card belongs to the IDEA box you flash it from: its **IDEA** shortcut tries that box first. Flash it from the IDEA box of the classroom it will be used in.
 2. Click **Flash…** on the card's row.
@@ -48,7 +48,7 @@ Good to know:
 
 6. Take the card out of the reader and put it back into the student computer. Switch the computer on.
 
-## 13.4 After the reset
+## 12.4 After the reset
 
 1. The first start takes a few minutes longer: the card sets itself up and names the computer after its Pi (the name on the sticker).
 2. The computer opens the student desktop by itself, with no password. The desktop has one shortcut, **IDEA**.
@@ -57,7 +57,7 @@ Good to know:
 
 3. Double-click **IDEA**. Chrome opens the start page, finds the IDEA box and opens the Console (chapter 2). Check that **Open** on the Kolibri card works.
 
-## 13.5 Questions
+## 12.5 Questions
 
 | Question | Answer |
 |---|---|
