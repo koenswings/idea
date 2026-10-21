@@ -2,7 +2,7 @@
 
 # Install manuals
 
-19 October 2026: both manuals updated for the Zimbabwe kit handed over on 18 October 2026 (school server v1.3: new chapter "The Zimbabwe kit"; classroom computer v2.1: temporary IDEA-Teachers procedure for idea#285 and the reset on restart).
+21 October 2026: classroom computer v2.2 (field-install review: separate Pi 400 and Pi 500 parts lists, one wiring chapter for both models, preparation steps removed, image update from the Console). 19 October 2026: both manuals updated for the Zimbabwe kit handed over on 18 October 2026 (school server v1.3: new chapter "The Zimbabwe kit"; classroom computer v2.1: temporary IDEA-Teachers procedure for idea#285 and the reset on restart).
 
 | Folder | PDF | Topic |
 |---|---|---|

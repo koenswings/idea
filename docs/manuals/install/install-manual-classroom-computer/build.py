@@ -36,7 +36,7 @@ for svg in sorted(os.listdir(os.path.join(HERE, "diagrams"))):
         bad.append(f"diagrams/{svg}")
 if bad: fail("markers left in source", bad)
 out = os.path.join(HERE, NAME + ".pdf")
-housestyle.build(body, meta, out, base_url=HERE, keep_html=False)
+housestyle.build(body, meta, out, base_url=HERE, keep_html=False, note="")   # cover: version + date only (Koen review 21 Oct 2026)
 txt = subprocess.run(["pdftotext", "-layout", out, "-"], capture_output=True, text=True, check=True).stdout
 pages = txt.split("\f")
 bad = [f"p{n}: {l.strip()[:90]}" for n, pg in enumerate(pages, 1) for l in pg.split("\n") if BAD.search(l) or "**" in l]
