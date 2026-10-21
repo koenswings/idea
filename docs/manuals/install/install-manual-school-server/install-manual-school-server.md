@@ -1,13 +1,15 @@
 ---
 title: "IDEA Field Install Manual: School Server"
 subtitle: "Raspberry Pi 5 Engines + Cudy router + PoE switch + Starlink"
-audience: "Version 1.6, 21 October 2026"
+audience: "Version 1.7, 21 October 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v1.6: Starlink Standard and Mini both covered: parts, cabling, power, wiring diagram)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v1.7: opening paragraph, parts list = what IDEA delivers, diagram arrows fixed)
 
 
 # Introduction
+
+This manual sets up the IDEA school server: one or more Raspberry Pi 5 **Engines** with a pre-flashed Cudy router, a PoE switch and a Starlink internet connection. The Engines bring the IDEA Console, Kolibri, Nextcloud and Wikipedia to the school's computers and phones over the school's own Wi-Fi, and they keep working without internet. Everything arrives already set up: you connect it, check it and hand it over.
 
 Each step has:
 
@@ -36,9 +38,8 @@ Each step has:
 | ☐ | Per Engine: Backup Disk |
 | ☐ | Ethernet patch cables: one per Engine, plus one for the router-switch link |
 | ☐ | Plug adapters for Type G / Type D sockets |
-| ☐ | Power strip, ideally with surge protection |
-| ☐ | Starlink kit. Standard: dish, router, cable, power supply (Gen 2 router also: Starlink Ethernet Adapter). Mini: dish with built-in router, kickstand and mount, 15 m DC power cable, power supply, Starlink Plug |
-| ☐ | Starlink Mini only: an outdoor Ethernet cable to the Cudy (Mini Starlink Cable; not in the Mini box. An ordinary RJ45 cable works, but the Mini is then no longer waterproof (IP67)) |
+| ☐ | Starlink kit, one of:<ul><li><b>Standard</b>: dish, router, cable, power supply</li><li><b>Mini</b>: dish with built-in router, kickstand and mount, DC power cable, power supply</li></ul> |
+| ☐ | Ethernet cable from Starlink to the router (Cudy WAN port) |
 
 # 2. Wiring
 
@@ -48,7 +49,7 @@ Each step has:
 
 | Cable | From | To | Notes |
 |---|---|---|---|
-| 1 | Starlink Ethernet port | Cudy **WAN** port (yellow) | Standard Gen 3: the router's Ethernet port. Gen 2: Starlink Ethernet Adapter. Mini: the port on the Mini itself (Ethernet cable from the kit list). |
+| 1 | Starlink Ethernet port | Cudy **WAN** port (yellow) | Standard Gen 3: the router's Ethernet port. Gen 2: Starlink Ethernet Adapter. Mini: the port on the Mini itself. Use the Starlink-to-router Ethernet cable from chapter 1. |
 | 2 | Cudy **LAN1** | Switch **port 5** | Port 5 is the only port without PoE. Use it for the uplink. |
 | 3 | Switch **port 1** (PoE+) | Engine 1 Ethernet | This cable powers Engine 1. Every school has at least this one. |
 | 4… | Switch **ports 2, 3, 4** (PoE+) | Engines 2, 3, 4 (if the school has them) | One cable per extra Engine. Leave unused ports empty. |
@@ -208,7 +209,7 @@ Starlink is only the internet on the Cudy **WAN** port. The school network works
 
     * Standard Gen 3 router: remove the rubber cover at the back and use one of its Ethernet ports.
     * Standard Gen 2 router: Starlink Ethernet Adapter between the router and the dish cable; its port goes to the Cudy WAN.
-    * Mini: remove the rubber **Starlink Plug** from the port on the Mini to reach its Ethernet (RJ45) port, and plug in the Mini Starlink Cable.
+    * Mini: remove the rubber **Starlink Plug** from the port on the Mini to reach its Ethernet (RJ45) port, and plug in the Starlink-to-router Ethernet cable from chapter 1.
 
 4. Cable the rest exactly as in the wiring diagram: cable 2 (Cudy LAN1 → switch port 5), then one cable per Engine.
    Plug in the power adapters: Starlink, Cudy, switch. The Pis start by themselves through PoE.
