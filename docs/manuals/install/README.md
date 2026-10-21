@@ -2,13 +2,13 @@
 
 # Field Install Manuals
 
-21 October 2026: classroom computer v2.2 (field-install review: separate Pi 400 and Pi 500 parts lists, one wiring chapter for both models, preparation steps removed, image update from the Console). 19 October 2026: both manuals updated for the Zimbabwe kit handed over on 18 October 2026 (school server v1.3: new chapter "The Zimbabwe kit"; classroom computer v2.1: temporary IDEA-Teachers procedure for idea#285 and the reset on restart).
+19 October 2026: both manuals updated for the Zimbabwe kit handed over on 18 October 2026 (school server v1.3: new chapter "The Zimbabwe kit"; classroom computer v2.1: temporary IDEA-Teachers procedure for idea#285 and the reset on restart).
 
 | Folder | PDF | Topic |
 |---|---|---|
 | `install-manual-school-server/` | `idea-field-install-manual-school-server-v1.6.pdf`  | Starlink → Cudy WR3000S (OpenWrt + Tailscale) → TL-SG105PE PoE+ switch → Pi 5 IDEA Engines (one or more) |
 | `install-manual-classroom-computer/` | `idea-field-install-manual-classroom-computer-v2.3.pdf`  | Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor (one PSU) + the IDEA client image (Ubuntu Desktop 26.04.1 LTS, Chrome, IDEA icon) |
-| `scripts/` | – | `school-router-setup.sh`, `router-tailscale-zone.sh` (OpenWrt 25.12 uci; tested with the 25.12.5 x86 rootfs `uci` + `fw4 print`, not yet on a real Cudy; printed in the school-server manual, Appendix A) and `make-install-diagrams.py` (writes both manuals' `diagrams/*.svg`) |
+| `scripts/` | – | `school-router-setup.sh`, `router-tailscale-zone.sh` (OpenWrt 25.12 uci; tested with the 25.12.5 x86 rootfs `uci` + `fw4 print`, not yet on a real Cudy; no longer printed in the school-server manual) and `make-install-diagrams.py` (writes both manuals' `diagrams/*.svg`) |
 
 Build: `python3 build.py` in each manual folder writes `idea-field-install-manual-<name>-v<version>.pdf` (version from the cover line `Version X.Y` in the .md; older versioned PDFs in the folder are removed) (uses `docs/house-style`, regenerates the diagrams). It fails if a
 "to confirm" marker or a school-numbering leftover (`10.N.`, `school-N`, `tag:school`) is in the source, a diagram or the PDF.
