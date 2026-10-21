@@ -1,5 +1,5 @@
 ---
-title: "IDEA Classroom Computer: Installation Manual"
+title: "IDEA Field Install Manual: Classroom Computer"
 subtitle: "Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor + the IDEA client image"
 audience: "Version 2.3, 21 October 2026"
 cover_logo: "yes"
@@ -132,7 +132,7 @@ Every classroom computer runs the same **IDEA client image**. It is the official
 
 *Open the school's IDEA Console, with one click or by typing its address.*
 
-Every school uses the same addresses (*IDEA School Server: Installation Manual*). The Console is at `http://idea.local`, whichever and however many Engines the school has.
+Every school uses the same addresses (*IDEA Field Install Manual: School Server*). The Console is at `http://idea.local`, whichever and however many Engines the school has.
 
 ### 4.2.1 The IDEA icon and the start page
 
@@ -161,7 +161,7 @@ This always works, also on a laptop, a phone or a computer without the IDEA imag
 
 *Check that the computer is on the right Wi-Fi network.*
 
-The pre-flashed IDEA school router creates two Wi-Fi networks (*IDEA School Server: Installation Manual*, "The school router's Wi-Fi networks and default passwords"). The passwords are the IDEA defaults until the school changes them:
+The pre-flashed IDEA school router creates two Wi-Fi networks (*IDEA Field Install Manual: School Server*, "The school router's Wi-Fi networks and default passwords"). The passwords are the IDEA defaults until the school changes them:
 
 | Who uses this computer | Network |
 |---|---|
@@ -238,7 +238,7 @@ Nothing on the computer needs saving first: students keep their work on the Engi
 | No picture | Move cable 2 to the other micro-HDMI port. Check that the monitor isn't in standby (press ⏻). |
 | Monitor flashes on and off | Turn brightness and volume down. Unplug extra USB devices. Last resort: give the monitor its own power supply (box in chapter 2). |
 | Very slow first boot | That is normal: the first boot resizes the card. Give it 5 minutes. |
-| Wi-Fi 'IDEA' not shown | Is the router on? (*IDEA School Server: Installation Manual*, "Router: check the pre-flashed IDEA router".) |
+| Wi-Fi 'IDEA' not shown | Is the router on? (*IDEA Field Install Manual: School Server*, "Router: check the pre-flashed IDEA router".) |
 | Start page says no Engine found | Is an Engine switched on? Type a sticker name in the field, or try `http://<STICKER>.local` (4.2.2). Check that the computer is on IDEA/IDEA-Teachers. |
 | `IDEA-Teachers` is not in the Wi-Fi menu | Expected: the student account can't list networks. Ask the IDEA team (4.3). |
 | Files or settings are gone after a restart | Expected: the reset on restart (4.4). Save work in Nextcloud. |

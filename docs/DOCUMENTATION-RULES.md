@@ -60,8 +60,8 @@ Recent documents (≈ last 3 weeks). "box" = only on Koen's Grok Bot box.
 | IDEA Field Support Channel – Design | `proposals/2026-10-14-field-support-channel.md` (+ `proposals/2026-10-14-field-support-channel/` for PDF, diagram, build) | #188 |
 | Teacher tutorial | `docs/manuals/teachers/teacher-tutorial/` | #191 |
 | Lesson manuals (Form 3 variables, Grade 5A fractions) | `docs/manuals/teachers/lesson-manuals/` | #191 |
-| IDEA School Server: Installation Manual | `docs/manuals/install/install-manual-school-server/` | #191 |
-| IDEA Classroom Computer: Installation Manual | `docs/manuals/install/install-manual-classroom-computer/` | #191 |
+| IDEA Field Install Manual: School Server | `docs/manuals/install/install-manual-school-server/` | #191 |
+| IDEA Field Install Manual: Classroom Computer | `docs/manuals/install/install-manual-classroom-computer/` | #191 |
 | Router setup scripts | `docs/manuals/install/scripts/` | #191 |
 | Remote access guide (field engineer) | `docs/manuals/field/remote-access-guide/` | #191 |
 | House style module | `docs/house-style/` (single copy) | #191 |

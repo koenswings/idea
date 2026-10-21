@@ -16,7 +16,7 @@ The IDEA router at your school makes two Wi-Fi networks. Their names and first p
 | **IDEA-Teachers** | `idea-teachers911!` | Teachers only | The IDEA box, and the internet. Internet is **on**; your IDEA contact can switch it off when the head teacher asks. |
 
 - Give students only the **IDEA** password. Keep the **IDEA-Teachers** password among the teachers.
-- The classroom computers stay on **IDEA**. Your IDEA contact or the operator can move a teacher's classroom computer to **IDEA-Teachers**; for now that needs the admin account (*IDEA Classroom Computer: Installation Manual*, 6.5).
+- The classroom computers stay on **IDEA**. Your IDEA contact or the operator can move a teacher's classroom computer to **IDEA-Teachers**; for now that needs the admin account (*IDEA Field Install Manual: Classroom Computer*, 6.5).
 - **Change the passwords later.** These first passwords are easy on purpose, but anyone who knows them can join. Once IDEA is running at your school, the head teacher chooses new passwords and asks the IDEA contact to set them on the router. After that, every phone and laptop must join again with the new password.
 
 To connect:
