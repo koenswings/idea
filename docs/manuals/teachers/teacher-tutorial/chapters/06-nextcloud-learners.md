@@ -1,10 +1,10 @@
 **Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (kit: Nextcloud Demo)
 
-# 7. Nextcloud for learners (try it yourself)
+# 6. Nextcloud for learners (try it yourself)
 
 Learners open Nextcloud from the Console, like Kolibri: **IDEA** on the desktop, then **Open** on the Nextcloud card (2.2.1). They have no personal Nextcloud app on the classroom computer, so they always work in the browser.
 
-## 7.1 Open class files and co-edit
+## 6.1 Open class files and co-edit
 
 1. Sign in to **Nextcloud Demo** as `learner1`, password `learner1911!` (private window). Shared folders and files appear in **Files** with the teacher's name.
    ![Learner files](../screenshots/S3-01.png)
@@ -13,10 +13,10 @@ Learners open Nextcloud from the Console, like Kolibri: **IDEA** on the desktop,
 3. Open `Lesson plan.docx`: it opens in Nextcloud Office and the learner can type.
    ![Learner in document](../screenshots/S3-03.png)
 
-## 7.2 Hand in homework
+## 6.2 Hand in homework
 
 1. Open the File drop link from 6.3. The page says **File drop** and shows an **Upload** button; the learner cannot see other files.
    ![File drop](../screenshots/S4-01.png)
 2. Click **Upload** and choose the file (e.g. a photo of written work). If asked, type your name.
    ![Uploading: the bar shows the progress. When it is gone, the file is in the teacher's folder](../screenshots/S4-02.png)
-The teacher sees the file in `Drop Zone` (6.3).
+The teacher sees the file in `Drop Zone` (5.3).

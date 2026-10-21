@@ -2,9 +2,9 @@
 
 # 3. Kolibri for teachers
 
-**About the examples in this chapter.** The screens in this chapter come from the IDEA demo setup. That setup is switched on (activated) on the demo IDEA box. It creates a Kolibri school named **IDEA Demo School**, with the class **Grade 5** and the demo accounts. The steps work the same at your school, but your school, class and account names will be different. On the kit, this demo setup is the app **Kolibri Demo**: open the **Kolibri Demo** card in the Console, not the **Kolibri** card. How the demo setup is made is described in *Appendix: activating the demo setup* at the end of this tutorial. The demo accounts are listed in *Appendix: demo accounts* at the end of this tutorial.
+**About the examples in this chapter.** Every IDEA box comes with the demo setup switched on: the app **Kolibri Demo**, with the school **IDEA Demo School**, the class **Grade 5** and the demo accounts. The screens in this chapter come from it. Open the **Kolibri Demo** card in the Console, not the **Kolibri** card. The steps work the same in the school's own Kolibri, with your own school, class and account names. The demo accounts are listed in *Appendix: demo accounts* at the end of this tutorial.
 
-In the demo, you sign in as `teacher1` (or `teacher2`). The demo school has three channels from the IDEA-DEMO disk: **Maths**, **Grade 5 Science** and **Early Reading**. The demo lesson uses **Maths > Fractions**. The quiz in 3.5 was made on a demo box with **Khan Academy (English - US curriculum) > Math by grade > 5th grade > Add and subtract fractions**.
+In the demo, you sign in as `teacher1` (or `teacher2`). The demo school has three Kolibri channels: **Maths**, **Grade 5 Science** and **Early Reading**. The demo lesson uses **Maths > Fractions**. The quiz in 3.5 was made in a Kolibri with the **Khan Academy (English - US curriculum)** channel (**Math by grade > 5th grade > Add and subtract fractions**).
 
 ## 3.1 Signing in
 
@@ -51,7 +51,58 @@ A good lesson mixes resources that explain (videos, activities) with resources t
 
 Quizzes are built from exercises only.
 
-> **On the kit.** Khan Academy is not on the kit, and the three channels of **Kolibri Demo** have videos, pictures and documents but no exercises, so you can't make this quiz in Kolibri Demo. The steps are the same in the school's own **Kolibri**, with a channel that has exercises. The screenshots below come from the demo box.
+### Try it in Kolibri Demo
+
+Kolibri Demo has exercises and a quiz ready for the class **Grade 5**: in **Maths**, **Fractions practice** and **Times tables practice** (6 questions each; the goal is 4 correct out of the last 5); in **Early Reading**, **Reading: Rudo and the goat** (4 questions, all must be right); and the quiz **Grade 5 Practice Quiz** (10 questions). Try them first as a learner, then see the results as the teacher. Use a second browser window (private window) for the learner.
+
+**A. A learner does an exercise**
+
+1. **Do:** sign in to Kolibri Demo as `learner1` (no password). Under **Recent lessons**, click **Maths lesson**.<br>
+   **✔ Check:** **HOME** shows the class **Grade 5**, three lessons and the quiz **Grade 5 Practice Quiz**.
+   ![Learner home in Kolibri Demo](../screenshots/E1-01.png)
+2. **Do:** in the lesson, click **Fractions practice** (marked **Practice**).<br>
+   **✔ Check:** the lesson lists its items in order: videos, pictures, documents and the two practice exercises.
+   ![Maths lesson](../screenshots/E1-02.png)
+3. **Do:** read the question, click an answer (or type a number), then click **CHECK**.<br>
+   **✔ Check:** the goal **Get 4 correct** is shown at the top and bottom.
+   ![Exercise question](../screenshots/E1-03.png)
+4. **Do:** after a right answer, click **NEXT**. After a wrong answer, try again, then go on.<br>
+   **✔ Check:** a green tick appears at the bottom for each right answer.
+   ![Right answer](../screenshots/E1-04.png)
+5. **Do:** keep going until the goal is reached.<br>
+   **✔ Check:** **Resource completed** opens, with points. Click **MOVE ON** for the next item, or close the window.
+   ![Exercise completed](../screenshots/E1-05.png)
+
+**B. A learner takes the quiz**
+
+1. **Do:** still as `learner1`, go to **HOME** and click **Grade 5 Practice Quiz** under **Recent quizzes**.<br>
+   **✔ Check:** the quiz opens at **Question 1 of 10**. The list on the left shows all questions.
+   ![Quiz question](../screenshots/E2-01.png)
+2. **Do:** answer each question and use **NEXT** / **PREVIOUS**. Some questions have more than one right answer (**Choose all answers that apply**).<br>
+   **✔ Check:** answered questions get a blue dot in the list, and the bottom shows **10 of 10 questions answered**.
+   ![Last question](../screenshots/E2-02.png)
+3. **Do:** click **SUBMIT QUIZ**, then **SUBMIT QUIZ** again in the window that opens. Answers cannot be changed after that.
+   ![Submit quiz](../screenshots/E2-03.png)
+   **✔ Check:** the class page shows the quiz with its score, and the lesson as **In progress**.
+   ![Quiz score](../screenshots/E2-04.png)
+
+**C. The teacher sees progress**
+
+1. **Do:** in the teacher window, sign in to Kolibri Demo as `teacher1` and open **Coach > Grade 5**.<br>
+   **✔ Check:** **CLASS HOME** shows how many learners completed the quiz and started each lesson. **Class activity** lists what learners did.
+   ![Coach class home](../screenshots/E3-01.png)
+2. **Do:** click **REPORTS > LESSONS > Maths lesson**, then **Fractions practice**.<br>
+   **✔ Check:** each learner is listed as **Completed**, **Started** or **Has not started**, with the time spent.
+   ![Exercise report](../screenshots/E3-02.png)
+3. **Do:** click **REPORTS > QUIZZES > Grade 5 Practice Quiz**.<br>
+   **✔ Check:** each learner's progress and score. **DIFFICULT QUESTIONS** shows the questions many learners got wrong.
+   ![Quiz report](../screenshots/E3-03.png)
+
+In Kolibri Demo, `learner3` has already done the exercise and the quiz, so the reports are never empty. 3.6 explains the reports in more detail.
+
+### Make your own quiz
+
+The steps are the same in Kolibri Demo and in the school's own Kolibri. The screenshots below come from a Kolibri with the Khan Academy channel.
 
 1. Click **PLAN > QUIZZES > NEW QUIZ**.
    ![Quizzes tab](../screenshots/K4-01.png)
