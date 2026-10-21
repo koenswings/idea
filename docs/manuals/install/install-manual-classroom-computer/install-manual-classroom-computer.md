@@ -1,21 +1,15 @@
 ---
 title: "IDEA Classroom Computer: Installation Manual"
 subtitle: "Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor + the IDEA client image"
-audience: "Version 2.2, 21 October 2026"
+audience: "Version 2.3, 21 October 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative (follows the student client image proposal and the student client browser proposal; the client image is not yet boot-tested on hardware, see the README) · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v2.2: field-install review; preparation steps, teacher Wi-Fi switching and reset switching removed; image update from the Console)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v2.3: shorter introduction and parts list, monitor power box, Appendix B removed)
 
 
 # Introduction
 
-This manual sets up one classroom computer: a Raspberry Pi 400 or Raspberry Pi 500 keyboard computer with the official 15.6" Raspberry Pi Monitor, running the **IDEA client image** (Ubuntu Desktop 26.04 with everything already set up). The same image works on both models.
-
 ## How to use this manual
-
-*How the manual is organised and where to start.*
-
-This manual is for installing a computer that the IDEA team has already prepared: its microSD card already has the IDEA client image. Work through it from start to finish for the first computer. For the next ones, the wiring (chapter 2), the first boot (chapter 4) and the checklist (chapter 5) are enough.
 
 | Chapter | What you do |
 |---|---|
@@ -25,14 +19,7 @@ This manual is for installing a computer that the IDEA team has already prepared
 | 4. First boot | Switch on, open the Console, check the Wi-Fi |
 | 5. Checklist for each computer | Test each computer before you hand it over |
 | 6. Update the IDEA client image | Put a newer image on a card, from the Console |
-| Appendices | Troubleshooting and sources |
-
-Each step has:
-
-1. **Do:** what to do.
-2. **✔ Check:** how to see that it worked.
-
-Where the Pi 400 and the Pi 500 differ, the manual says so. Everywhere else, the text is the same for both. Numbers in square brackets, such as [1], point to the sources in Appendix B.
+| Appendix A | Troubleshooting |
 
 <div class="note">
 <b>Conventions.</b>
@@ -48,8 +35,6 @@ Where the Pi 400 and the Pi 500 differ, the manual says so. Everywhere else, the
 
 ## 1.1 Raspberry Pi 400
 
-*The parts of a Pi 400 computer.*
-
 | ☐ | Item | Use |
 |---|---|---|
 | ☐ | Raspberry Pi 400 keyboard computer (US QWERTY keyboard) | The computer |
@@ -59,8 +44,6 @@ Where the Pi 400 and the Pi 500 differ, the manual says so. Everywhere else, the
 
 ## 1.2 Raspberry Pi 500
 
-*The parts of a Pi 500 computer.*
-
 | ☐ | Item | Use |
 |---|---|---|
 | ☐ | Raspberry Pi 500 keyboard computer (US QWERTY keyboard) | The computer |
@@ -68,27 +51,19 @@ Where the Pi 400 and the Pi 500 differ, the manual says so. Everywhere else, the
 | ☐ | Raspberry Pi USB mouse | Mouse |
 | ☐ | 32 GB microSD card | The computer's card |
 
-Use each power supply only with its own model: the 27 W supply with a Pi 500, the 15 W supply with a Pi 400 [1].
-
-Check the **plug** of the power supply. Zimbabwe uses Type G (UK-style) and Type D sockets. If the plug is different, use a good adapter for each computer, or a power strip that takes the plug.
-
 ## 1.3 Raspberry Pi Monitor 15.6"
-
-*The monitor and its cables.*
 
 | ☐ | Item |
 |---|---|
-| ☐ | Raspberry Pi Monitor: 15.6", 1920 × 1080 IPS, built-in stand, 2 × 1.2 W speakers [2] |
-| ☐ | **USB-A to USB-C cable**: powers the monitor from the computer [2] |
+| ☐ | Raspberry Pi Monitor: 15.6", 1920 × 1080 IPS, built-in stand, 2 × 1.2 W speakers |
+| ☐ | **USB-A to USB-C cable**: powers the monitor from the computer |
 | ☐ | **micro-HDMI to HDMI cable**: carries the picture from the computer to the monitor |
-
-Monitor connectors: **HDMI** in (standard size, HDMI 1.4), **USB-C** (power in only), **3.5 mm** audio out. On the back are buttons for standby, brightness up/down and volume up/down [2].
 
 # 2. Wiring
 
 *Connect the cables in the right order.*
 
-The Pi 400 and the Pi 500 have the same ports on their back edge: two **micro-HDMI** ports, one **USB-C** power port, two blue **USB 3.0** ports, one white **USB 2.0** port, Ethernet, the **microSD** slot and the GPIO header [1]. Small icons are printed next to each port. The diagram shows the cables, not the exact order of the ports on your model: follow the icons.
+The Pi 400 and the Pi 500 have the same ports on their back edge: two **micro-HDMI** ports, one **USB-C** power port, two blue **USB 3.0** ports, one white **USB 2.0** port, Ethernet, the **microSD** slot and the GPIO header. Small icons are printed next to each port. The diagram shows the cables, not the exact order of the ports on your model: follow the icons.
 
 ![Keyboard computer and monitor wiring](diagrams/m2-wiring.svg)
 
@@ -97,9 +72,21 @@ The Pi 400 and the Pi 500 have the same ports on their back edge: two **micro-HD
 | 1 | The computer's own power supply (wall socket) | Computer **USB-C power** port |
 | 2 | Computer **micro-HDMI** port (either one) | Monitor **HDMI** (micro-HDMI to HDMI cable) |
 | 3 | Computer **USB 3.0** port (blue) | Monitor **USB-C** (USB-A to USB-C cable) |
-| 4 | Mouse | Computer **USB 2.0** port (white). Raspberry Pi recommends the white port for the mouse [1]. |
+| 4 | Mouse | Computer **USB 2.0** port (white). Raspberry Pi recommends the white port for the mouse. |
 
-The monitor takes its power from the computer, so one power supply runs both. The monitor then works in **Power Saving mode**: brightness up to 50 % and volume up to 60 % [3]. Plug nothing else power-hungry into the computer's USB ports: only the mouse, and at most a USB stick.
+The monitor takes its power from the computer, so one power supply runs both. The monitor then works in **Power Saving mode**: brightness up to 50 % and volume up to 60 %. Plug nothing else power-hungry into the computer's USB ports: only the mouse, and at most a USB stick.
+
+<div class="note">
+<b>Option: power the monitor from its own power supply.</b>
+<p>Instead of cable 3, the monitor can get its own power supply, plugged into the monitor's <b>USB-C</b> port. It then runs in <b>Full Power mode</b>: brightness and volume go up to 100 %. This also stops the flashing on and off that a weak USB supply can cause.</p>
+<ul>
+<li><b>What it must be:</b> a USB-C power supply with <b>USB Power Delivery (USB-PD)</b> that gives at least <b>5 V / 1.5 A</b>. The monitor uses only 4.5-6.5 W, so a small supply is enough.</li>
+<li><b>Suitable:</b> an official Raspberry Pi USB-C supply, such as a spare 15 W (5.1 V / 3 A) or 27 W (5.1 V / 5 A) supply, or any USB-C charger marked "PD" with a 5 V / 1.5 A or higher output. Use a USB-C to USB-C cable if the supply has no fixed cable.</li>
+<li><b>Not suitable:</b> any supply with a USB-A socket, or a USB-C supply without USB-PD: the monitor stays in Power Saving mode.</li>
+<li>If the bar still stops at 50, press and hold the brightness-up button for 3 seconds to switch to Full Power mode.</li>
+<li>It needs one more wall socket per computer.</li>
+</ul>
+</div>
 
 **Do (in this order):**
 
@@ -110,7 +97,7 @@ The monitor takes its power from the computer, so one power supply runs both. Th
 **✔ Check:**
 
 * The computer's LED lights up. Within 10-20 seconds the monitor shows a picture (rainbow/boot screen or Ubuntu logo).
-* Press the monitor's brightness-up button: the on-screen bar stops at 50. That is Power Saving mode, as expected [3].
+* Press the monitor's brightness-up button: the on-screen bar stops at 50. That is Power Saving mode, as expected.
 * The picture stays stable for 5 minutes with no flashing.
 
 If you get no picture, move cable 2 to the other micro-HDMI port.
@@ -206,7 +193,7 @@ Every restart undoes all changes, also an admin's. `sudo idea-client-mode status
 
 *Small things to finish the computer.*
 
-* Switch off: on a **Pi 400** with **Fn + F10**, on a **Pi 500** with the **power key** in the top-right corner of the keyboard [1], or the system menu → Power Off. Wait until the screen is black before you pull the plug.
+* Switch off: on a **Pi 400** with **Fn + F10**, on a **Pi 500** with the **power key** in the top-right corner of the keyboard, or the system menu → Power Off. Wait until the screen is black before you pull the plug.
 * The monitor's speakers work over HDMI. If there is no sound, choose *HDMI* under **Settings → Sound → Output**.
 * Label the card and the computer: `<SCHOOL> - idea-pc-____` (the name from **Settings → System → About**).
 
@@ -233,9 +220,7 @@ Every restart undoes all changes, also an admin's. `sudo idea-client-mode status
 
 # 6. Update the IDEA client image
 
-*Put a newer IDEA client image on a computer's card, from the Console.*
-
-The computer never updates itself. To give it a newer image, or to repair a broken card, an Engine writes the image to the card. The Engine keeps the verified client images, and the Console shows which version it has [4].
+The computer never updates itself. To give it a newer image, or to repair a broken card, an Engine writes the image to the card. The Engine keeps the verified client images, and the Console shows which version it has.
 
 **Do:**
 
@@ -258,7 +243,7 @@ Nothing on the computer needs saving first: students keep their work on the Engi
 | Problem | Try |
 |---|---|
 | No picture | Move cable 2 to the other micro-HDMI port. Check that the monitor isn't in standby (press ⏻). |
-| Monitor flashes on and off | Turn brightness and volume down [3]. Unplug extra USB devices. Last resort: a separate USB-C supply for the monitor. |
+| Monitor flashes on and off | Turn brightness and volume down. Unplug extra USB devices. Last resort: give the monitor its own power supply (box in chapter 2). |
 | Very slow first boot | That is normal: the first boot resizes the card. Give it 5 minutes. |
 | Wi-Fi 'IDEA' not shown | Is the router on? (*IDEA School Server: Installation Manual*, "Router: check the pre-flashed IDEA router".) |
 | Start page says no Engine found | Is an Engine switched on? Type a sticker name in the field, or try `http://<STICKER>.local` (4.2.2). Check that the computer is on IDEA/IDEA-Teachers. |
@@ -267,13 +252,3 @@ Nothing on the computer needs saving first: students keep their work on the Engi
 | An app in the Console does not open | Its Engine may be switched off or at another school: the Console still shows its apps (known problem, no fix yet). Use the apps of this school's Engine. |
 | Desktop IDEA icon shows a red cross | Use the IDEA icon in the dock; log out and in once. Report it to the IDEA team. |
 | Something is broken beyond repair | Write the card again from the Console (chapter 6). Nothing on the computer needs saving: students keep their work on the Engine (Nextcloud). |
-
-# Appendix B. Sources (read on 12-21 October 2026)
-
-*Where the facts in this manual come from.*
-
-1. Raspberry Pi documentation, *Keyboard computers* (Pi 400 and Pi 500 kit contents, ports, power input 15 W / 27 W supply, power key on the Pi 500, Fn + F10 on the Pi 400, mouse in the white USB 2.0 port): `raspberrypi.com/documentation/computers/keyboard-computers.html`, and *Power supply* (15 W supply for the Pi 400, 27 W for the Pi 5 family): `raspberrypi.com/documentation/computers/raspberry-pi.html#power-supply`.
-2. Raspberry Pi, *Raspberry Pi Monitor* product page (specification, USB-C power cable, buttons): `https://www.raspberrypi.com/products/raspberry-pi-monitor/`.
-3. Raspberry Pi documentation, *Raspberry Pi Monitor* (Power Saving mode when powered from a Raspberry Pi: 0-50 % brightness / 0-60 % volume; Full Power mode needs 1.5 A USB-PD): `raspberrypi.com/documentation/accessories/monitor.html`.
-4. IDEA Console code (`agent-console-dev`, main), *Client cards* and *Flash client card* (idea#201 §10.2); IDEA Engine code (`agent-engine-dev`, main), `idea-flash-card` and the client image store `/var/lib/idea/client-images`.
-5. IDEA client image build (`idea` repository, `tools/client-image`) (`client-image.conf`, `browser.sh` Chrome policy, `README.md` "Reset on reboot", `files/50-idea-learner.rules`, `files/idea-client-mode`) and issue #285 (learner Wi-Fi lock).
