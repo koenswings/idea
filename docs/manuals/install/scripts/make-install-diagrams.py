@@ -21,12 +21,26 @@ class S:
             line = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             s.add(f'<text x="{x}" y="{y + i*size*1.25}" font-family="{FONT}" font-size="{size}" font-weight="{weight}" text-anchor="{anchor}" fill="{fill}"{st}>{line}</text>')
     def line(s, pts, color="#333", sw=4, dash=None, arrow=False, arrow_start=False):
+        """Polyline; arrowheads are drawn as explicit triangles (no SVG markers: WeasyPrint ignores marker orient)."""
         d = f' stroke-dasharray="{dash}"' if dash else ''
-        m = ' marker-end="url(#ah-%s)"' % color.strip('#') if arrow else ''
-        ms = ' marker-start="url(#as-%s)"' % color.strip('#') if arrow_start else ''
-        pts_s = " ".join(f"{x},{y}" for x, y in pts)
-        s.add(f'<polyline points="{pts_s}" fill="none" stroke="{color}" stroke-width="{sw}" stroke-linejoin="round" stroke-linecap="round"{d}{m}{ms}/>')
-        s.colors.add(color)
+        pts = list(pts)
+        L = max(14, sw * 4.0); W = max(12, sw * 3.2)
+        def head(tip, prev):
+            import math
+            dx, dy = tip[0] - prev[0], tip[1] - prev[1]; n = math.hypot(dx, dy) or 1
+            ux, uy = dx / n, dy / n
+            bx, by = tip[0] - ux * L, tip[1] - uy * L
+            s.add(f'<polygon points="{tip[0]},{tip[1]} {bx - uy*W/2},{by + ux*W/2} {bx + uy*W/2},{by - ux*W/2}" fill="{color}"/>')
+            return (bx + ux, by + uy)
+        draw = pts[:]
+        heads = []
+        if arrow: heads.append((pts[-1], pts[-2])); draw[-1] = (pts[-1][0] - (pts[-1][0]-pts[-2][0]) / (abs(pts[-1][0]-pts[-2][0]) + abs(pts[-1][1]-pts[-2][1]) or 1) * L * 0.9,
+                                                                 pts[-1][1] - (pts[-1][1]-pts[-2][1]) / (abs(pts[-1][0]-pts[-2][0]) + abs(pts[-1][1]-pts[-2][1]) or 1) * L * 0.9)
+        if arrow_start: heads.append((pts[0], pts[1])); draw[0] = (pts[0][0] - (pts[0][0]-pts[1][0]) / (abs(pts[0][0]-pts[1][0]) + abs(pts[0][1]-pts[1][1]) or 1) * L * 0.9,
+                                                                   pts[0][1] - (pts[0][1]-pts[1][1]) / (abs(pts[0][0]-pts[1][0]) + abs(pts[0][1]-pts[1][1]) or 1) * L * 0.9)
+        pts_s = " ".join(f"{x},{y}" for x, y in draw)
+        s.add(f'<polyline points="{pts_s}" fill="none" stroke="{color}" stroke-width="{sw}" stroke-linejoin="round" stroke-linecap="butt"{d}/>')
+        for tip, prev in heads: head(tip, prev)
     colors = set()
     def port(s, x, y, label, fill="#e8e8e8", w=46, h=34, sub=None, subfill="#555"):
         s.rect(x, y, w, h, fill=fill, stroke="#222", rx=4, sw=1.5)

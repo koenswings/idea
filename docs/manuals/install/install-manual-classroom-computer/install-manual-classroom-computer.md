@@ -1,13 +1,15 @@
 ---
 title: "IDEA Field Install Manual: Classroom Computer"
 subtitle: "Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor + the IDEA client image"
-audience: "Version 2.3, 21 October 2026"
+audience: "Version 2.4, 21 October 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v2.3: introduction = Do/Check + conventions and parts list, monitor power box, Appendix B removed)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v2.4: opening paragraph restored, wiring diagram arrows fixed)
 
 
 # Introduction
+
+This manual sets up one classroom computer: a Raspberry Pi 400 or Raspberry Pi 500 keyboard computer with the official 15.6" Raspberry Pi Monitor, running the **IDEA client image** (Ubuntu Desktop 26.04 with everything already set up). The same image works on both models.
 
 Each step has:
 
