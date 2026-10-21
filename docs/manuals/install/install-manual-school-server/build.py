@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build install-manual-school-server.pdf with the IDEA house style (docs/house-style).
+"""Build idea-field-install-manual-school-server-v<version>.pdf with the IDEA house style (docs/house-style).
 Usage: python3 build.py      (regenerates the install diagrams too, via ../scripts/make-install-diagrams.py)
 Fails if a 'to confirm' marker or a school-numbering leftover is in the source, a diagram or the PDF."""
-import os, re, subprocess, sys
+import glob, os, re, subprocess, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 def find_house_style(here):
     """docs/house-style, found via $IDEA_HOUSE_STYLE or by walking up to the repo's docs/."""
@@ -35,10 +35,15 @@ for svg in sorted(os.listdir(os.path.join(HERE, "diagrams"))):
     if svg.endswith(".svg") and BAD.search(open(os.path.join(HERE, "diagrams", svg)).read()):
         bad.append(f"diagrams/{svg}")
 if bad: fail("markers left in source", bad)
-out = os.path.join(HERE, NAME + ".pdf")
+m = re.search(r"Version (\d+(?:\.\d+)+)", meta.get("audience", ""))
+if not m: sys.exit("BUILD FAILED: no 'Version X.Y' in the front matter audience line")
+PDF = f"idea-field-install-manual-{NAME.removeprefix('install-manual-')}-v{m.group(1)}.pdf"
+for old in glob.glob(os.path.join(HERE, "*.pdf")):
+    if os.path.basename(old) != PDF: os.remove(old)   # old unversioned / older versions
+out = os.path.join(HERE, PDF)
 housestyle.build(body, meta, out, base_url=HERE, keep_html=False, note="")   # cover: version + date only (Koen review 21 Oct 2026)
 txt = subprocess.run(["pdftotext", "-layout", out, "-"], capture_output=True, text=True, check=True).stdout
 pages = txt.split("\f")
 bad = [f"p{n}: {l.strip()[:90]}" for n, pg in enumerate(pages, 1) for l in pg.split("\n") if BAD.search(l) or "**" in l]
-if bad: fail(f"markers in {NAME}.pdf", bad)
-print("built", NAME + ".pdf", "pages:", len([p for p in pages if p.strip()]))
+if bad: fail(f"markers in {PDF}", bad)
+print("built", PDF, "pages:", len([p for p in pages if p.strip()]))

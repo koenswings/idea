@@ -1,5 +1,5 @@
 ---
-title: "IDEA School Server: Installation Manual"
+title: "IDEA Field Install Manual: School Server"
 subtitle: "Raspberry Pi 5 Engines + Cudy router + PoE switch + Starlink"
 audience: "Version 1.6, 21 October 2026"
 cover_logo: "yes"
