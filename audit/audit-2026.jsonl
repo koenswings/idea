@@ -594,3 +594,5 @@
 {"ts":"2026-10-18T13:58:00Z","bot":"Atlas","action":"fleet_state_update","pi":"kind-panda","field":"lan","value":"10.42.0.127","previous":"10.99.0.127"}
 {"ts":"2026-10-18T13:58:00Z","bot":"Atlas","action":"fleet_state_update","pi":"happy-zebra","field":"lan","value":"10.42.0.3","previous":"10.99.0.197"}
 {"ts":"2026-10-18T13:58:00Z","bot":"Atlas","action":"fleet_state_update","pi":"sunny-robin","field":"lan","value":"10.42.0.4","previous":"10.99.0.138"}
+{"ts":"2026-10-21T17:03:35Z","bot":"Kid","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-10-21T17:03:35Z","bot":"Kid","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Kid: idea#294 builder exercises + demo quiz (builder#9, app-kolibri#10)","previous":null}
