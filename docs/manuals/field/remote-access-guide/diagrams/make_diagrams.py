@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates the SVG diagrams for the Justice remote-access guide (same drawing helpers as ../../install-guides/diagrams/make_diagrams.py).
+"""Generates the SVG diagrams for the demo server remote-access guide (same drawing helpers as ../../install-guides/diagrams/make_diagrams.py).
 Run:  python3 make_diagrams.py   (writes *.svg next to this file)"""
 import os
 OUT = os.path.dirname(os.path.abspath(__file__))
@@ -56,11 +56,11 @@ def device(s, x, y, w, h, title, sub, fill):
 # ------------------------------------------------ overview
 def overview():
     s = S(1140, 470)
-    s.text(570, 32, "How Justice reaches wizardly-hugle", 20, "bold")
-    # Justice side
+    s.text(570, 32, "How you reach wizardly-hugle", 20, "bold")
+    # field side
     s.rect(20, 60, 300, 330, fill="#f0fff0", stroke=C_JUS, dash="8,5")
-    s.text(170, 86, "Justice (Zimbabwe or anywhere)", 13, "bold", fill=C_JUS)
-    device(s, 45, 105, 250, 120, "Justice's device", "Raspberry Pi with Ubuntu,\nlaptop, phone or tablet\n+ Tailscale app", "#ffffff")
+    s.text(170, 86, "You (Zimbabwe or anywhere)", 13, "bold", fill=C_JUS)
+    device(s, 45, 105, 250, 120, "Your device", "Raspberry Pi with Ubuntu,\nlaptop, phone or tablet\n+ Tailscale app", "#ffffff")
     s.rect(45, 245, 250, 125, fill="#ffffff")
     s.text(170, 270, "Web browser", 15, "bold")
     s.text(170, 294, "http://100.115.60.6:8081\n(IDEA Console)\nKolibri, Nextcloud, Kiwix", 11, fill="#333")
@@ -75,17 +75,17 @@ def overview():
     s.text(570, 345, "Nothing on wizardly-hugle is open to the public internet.", 11, italic=True, fill="#555")
     # Belgium side
     s.rect(820, 60, 300, 330, fill="#eef5ff", stroke=C_KOEN, dash="8,5")
-    s.text(970, 86, "Koen's home (Belgium)", 13, "bold", fill=C_KOEN)
+    s.text(970, 86, "IDEA (Belgium)", 13, "bold", fill=C_KOEN)
     s.rect(845, 105, 250, 265, fill="#ffffff")
     s.text(970, 132, "wizardly-hugle", 16, "bold")
     s.text(970, 152, "IDEA demo server, 100.115.60.6", 11, fill="#333")
-    apps = [("IDEA Console  :8081", "#cfe3ff"), ("Kolibri  :54189", "#e3f5e3"), ("Nextcloud  :50065", "#e3f5e3"),
-            ("Kiwix (Wikipedia)  :61312", "#e3f5e3"), ("MilkWise: do not touch", "#fbd5d5")]
+    apps = [("IDEA Console  :8081", "#cfe3ff"), ("Kolibri Demo  :54189", "#e3f5e3"), ("Nextcloud  :50065", "#e3f5e3"),
+            ("Wikipedia (Kiwix)  :61312", "#e3f5e3"), ("MilkWise: do not touch", "#fbd5d5")]
     for i, (a, f) in enumerate(apps):
         s.rect(865, 168 + i * 38, 210, 30, fill=f, rx=4, sw=1.2)
         s.text(970, 188 + i * 38, a, 11, "bold", fill="#a00" if "MilkWise" in a else "#111")
-    s.text(570, 430, "Justice signs in to Tailscale with his own account. Koen shares only this one machine with him.", 12, fill="#333")
-    s.text(570, 452, "The apps keep their own sign-in: Koen sends the passwords separately.", 12, fill="#333")
+    s.text(570, 430, "You sign in to Tailscale with your own account. The IDEA admin shares only this one machine with you.", 12, fill="#333")
+    s.text(570, 452, "The apps keep their own sign-in: see the IDEA Accounts and Passwords sheet.", 12, fill="#333")
     s.save("overview.svg")
 
 # ------------------------------------------------ share flow
@@ -93,12 +93,12 @@ def flow():
     s = S(1140, 520)
     s.text(570, 32, "Getting access: five steps", 20, "bold")
     s.rect(20, 55, 1100, 200, fill="#f0fff0", stroke=C_JUS, sw=1.5)
-    s.text(36, 80, "JUSTICE", 14, "bold", anchor="start", fill=C_JUS)
+    s.text(36, 80, "YOU", 14, "bold", anchor="start", fill=C_JUS)
     s.rect(20, 290, 1100, 200, fill="#eef5ff", stroke=C_KOEN, sw=1.5)
-    s.text(36, 315, "KOEN", 14, "bold", anchor="start", fill=C_KOEN)
+    s.text(36, 315, "IDEA ADMIN", 14, "bold", anchor="start", fill=C_KOEN)
     steps = [
         (40, 95, C_JUS, "1", "Create a Tailscale\naccount and install\nTailscale (Part B)"),
-        (260, 95, C_JUS, "2", "Send Koen the\nemail address of\nthe Tailscale account"),
+        (260, 95, C_JUS, "2", "Send the IDEA admin\nthe email address of\nyour Tailscale account"),
         (480, 330, C_KOEN, "3", "Admin console:\nMachines > wizardly-hugle\n... menu > Share"),
         (700, 95, C_JUS, "4", "Open the invite\n(email or link)\nand accept it"),
         (920, 95, C_JUS, "5", "wizardly-hugle is\nin the machine list:\nopen the Console"),
@@ -113,38 +113,38 @@ def flow():
     s.line([(672, 400), (795, 400), (795, 238)], "#555", 3, arrow=True)
     s.text(805, 300, "invite email\nor invite link", 10, anchor="start", fill="#555")
     s.line([(890, 165), (918, 165)], "#555", 3, arrow=True)
-    s.text(905, 400, "Later: Koen can revoke\nthe share at any time\n(Part A, section 2.3)", 12, anchor="start", fill="#a00")
+    s.text(905, 400, "Later: the IDEA admin\ncan revoke\nthe share at any time\n(Part A, section 2.3)", 12, anchor="start", fill="#a00")
     s.save("flow.svg")
 
-# ------------------------------------------------ what Justice sees
+# ------------------------------------------------ what the field engineer sees
 def privacy():
     s = S(1140, 430)
-    s.text(570, 32, "What the share gives Justice, and what it does not", 20, "bold")
+    s.text(570, 32, "What the share gives you, and what it does not", 20, "bold")
     s.rect(20, 60, 480, 320, fill="#eef5ff", stroke=C_KOEN)
-    s.text(260, 88, "Koen's tailnet (private network)", 14, "bold", fill=C_KOEN)
-    others = ["Koen's laptop", "Koen's phone", "other IDEA Pis", "test machines"]
+    s.text(260, 88, "IDEA tailnet (private network)", 14, "bold", fill=C_KOEN)
+    others = ["IDEA laptops", "IDEA phones", "other IDEA Pis", "test machines"]
     for i, o in enumerate(others):
         s.rect(45 + (i % 2) * 220, 110 + (i // 2) * 70, 200, 50, fill="#eeeeee", stroke="#999", sw=1.5)
         s.text(145 + (i % 2) * 220, 140 + (i // 2) * 70, o, 12, fill="#777")
-    s.text(260, 270, "Justice cannot see or reach these", 12, "bold", fill=C_BAD)
+    s.text(260, 270, "You cannot see or reach these", 12, "bold", fill=C_BAD)
     s.rect(130, 290, 260, 70, fill="#ffffff", stroke=C_KOEN, sw=3)
     s.text(260, 318, "wizardly-hugle", 15, "bold")
-    s.text(260, 340, "shared with Justice only", 11, fill="#333")
+    s.text(260, 340, "shared with you only", 11, fill="#333")
     s.rect(640, 60, 480, 320, fill="#f0fff0", stroke=C_JUS)
-    s.text(880, 88, "Justice's own tailnet", 14, "bold", fill=C_JUS)
+    s.text(880, 88, "Your own tailnet", 14, "bold", fill=C_JUS)
     for i, o in enumerate(["Ubuntu Pi", "phone / laptop"]):
         s.rect(665 + i * 220, 110, 200, 50, fill="#ffffff", stroke=C_JUS, sw=1.5)
         s.text(765 + i * 220, 140, o, 12)
     s.rect(750, 290, 260, 70, fill="#ffffff", stroke=C_KOEN, sw=3, dash="6,4")
     s.text(880, 318, "wizardly-hugle (shared)", 14, "bold")
-    s.text(880, 340, "appears in Justice's list", 11, fill="#333")
+    s.text(880, 340, "appears in your list", 11, fill="#333")
     s.line([(392, 325), (746, 325)], C_TS, 4, arrow=True)
     s.text(570, 312, "share", 12, "bold", fill=C_TS)
     s.line([(870, 165), (870, 286)], C_JUS, 3, arrow=True)
-    s.text(880, 225, "Justice's devices can open\nwizardly-hugle's web pages", 11, anchor="start", fill=C_JUS)
+    s.text(880, 225, "Your devices can open\nwizardly-hugle's web pages", 11, anchor="start", fill=C_JUS)
     s.line([(780, 286), (780, 168)], C_BAD, 3, dash="6,5", arrow=True)
-    s.text(770, 225, "wizardly-hugle cannot\nstart connections to\nJustice's devices", 11, anchor="end", fill=C_BAD)
-    s.text(570, 412, "Koen's other machines stay hidden. Koen can stop the share at any time.", 12, fill="#333")
+    s.text(770, 225, "wizardly-hugle cannot\nstart connections to\nyour devices", 11, anchor="end", fill=C_BAD)
+    s.text(570, 412, "Other IDEA machines stay hidden. The IDEA admin can stop the share at any time.", 12, fill="#333")
     s.save("privacy.svg")
 
 # ------------------------------------------------ troubleshooting checks
