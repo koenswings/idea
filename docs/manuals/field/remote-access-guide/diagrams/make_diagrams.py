@@ -56,14 +56,14 @@ def device(s, x, y, w, h, title, sub, fill):
 # ------------------------------------------------ overview
 def overview():
     s = S(1140, 470)
-    s.text(570, 32, "How you reach wizardly-hugle", 20, "bold")
+    s.text(570, 32, "How you reach idea", 20, "bold")
     # field side
     s.rect(20, 60, 300, 330, fill="#f0fff0", stroke=C_JUS, dash="8,5")
     s.text(170, 86, "You (Zimbabwe or anywhere)", 13, "bold", fill=C_JUS)
     device(s, 45, 105, 250, 120, "Your device", "Raspberry Pi with Ubuntu,\nlaptop, phone or tablet\n+ Tailscale app", "#ffffff")
     s.rect(45, 245, 250, 125, fill="#ffffff")
     s.text(170, 270, "Web browser", 15, "bold")
-    s.text(170, 294, "http://100.115.60.6:8081\n(IDEA Console)\nKolibri, Nextcloud, Kiwix", 11, fill="#333")
+    s.text(170, 294, "http://idea.tail2d60.ts.net:8081\n(IDEA Console)\nKolibri, Nextcloud, Kiwix", 11, fill="#333")
     s.line([(170, 228), (170, 242)], "#555", 3)
     # Internet cloud
     s.text(570, 112, "Internet", 17, "bold")
@@ -72,13 +72,13 @@ def overview():
     s.line([(300, 205), (840, 205)], C_TS, 6, arrow=True, arrow_start=True)
     s.text(570, 240, "Tailscale: a private,", 13, "bold", fill=C_TS)
     s.text(570, 258, "encrypted tunnel through the internet", 13, "bold", fill=C_TS)
-    s.text(570, 345, "Nothing on wizardly-hugle is open to the public internet.", 11, italic=True, fill="#555")
+    s.text(570, 345, "Nothing on idea is open to the public internet.", 11, italic=True, fill="#555")
     # Belgium side
     s.rect(820, 60, 300, 330, fill="#eef5ff", stroke=C_KOEN, dash="8,5")
     s.text(970, 86, "IDEA (Belgium)", 13, "bold", fill=C_KOEN)
     s.rect(845, 105, 250, 265, fill="#ffffff")
-    s.text(970, 132, "wizardly-hugle", 16, "bold")
-    s.text(970, 152, "IDEA demo server, 100.115.60.6", 11, fill="#333")
+    s.text(970, 132, "idea", 16, "bold")
+    s.text(970, 152, "IDEA demo server, idea.tail2d60.ts.net", 11, fill="#333")
     apps = [("IDEA Console  :8081", "#cfe3ff"), ("Kolibri Demo  :54189", "#e3f5e3"), ("Nextcloud  :50065", "#e3f5e3"),
             ("Wikipedia (Kiwix)  :61312", "#e3f5e3"), ("MilkWise: do not touch", "#fbd5d5")]
     for i, (a, f) in enumerate(apps):
@@ -99,9 +99,9 @@ def flow():
     steps = [
         (40, 95, C_JUS, "1", "Create a Tailscale\naccount and install\nTailscale (Part B)"),
         (260, 95, C_JUS, "2", "Send the IDEA admin\nthe email address of\nyour Tailscale account"),
-        (480, 330, C_KOEN, "3", "Admin console:\nMachines > wizardly-hugle\n... menu > Share"),
+        (480, 330, C_KOEN, "3", "Admin console:\nMachines > idea\n... menu > Share"),
         (700, 95, C_JUS, "4", "Open the invite\n(email or link)\nand accept it"),
-        (920, 95, C_JUS, "5", "wizardly-hugle is\nin the machine list:\nopen the Console"),
+        (920, 95, C_JUS, "5", "idea is\nin the machine list:\nopen the Console"),
     ]
     for x, y, c, n, t in steps:
         s.rect(x, y, 190, 140, fill="#ffffff", stroke=c)
@@ -128,7 +128,7 @@ def privacy():
         s.text(145 + (i % 2) * 220, 140 + (i // 2) * 70, o, 12, fill="#777")
     s.text(260, 270, "You cannot see or reach these", 12, "bold", fill=C_BAD)
     s.rect(130, 290, 260, 70, fill="#ffffff", stroke=C_KOEN, sw=3)
-    s.text(260, 318, "wizardly-hugle", 15, "bold")
+    s.text(260, 318, "idea", 15, "bold")
     s.text(260, 340, "shared with you only", 11, fill="#333")
     s.rect(640, 60, 480, 320, fill="#f0fff0", stroke=C_JUS)
     s.text(880, 88, "Your own tailnet", 14, "bold", fill=C_JUS)
@@ -136,14 +136,14 @@ def privacy():
         s.rect(665 + i * 220, 110, 200, 50, fill="#ffffff", stroke=C_JUS, sw=1.5)
         s.text(765 + i * 220, 140, o, 12)
     s.rect(750, 290, 260, 70, fill="#ffffff", stroke=C_KOEN, sw=3, dash="6,4")
-    s.text(880, 318, "wizardly-hugle (shared)", 14, "bold")
+    s.text(880, 318, "idea (shared)", 14, "bold")
     s.text(880, 340, "appears in your list", 11, fill="#333")
     s.line([(392, 325), (746, 325)], C_TS, 4, arrow=True)
     s.text(570, 312, "share", 12, "bold", fill=C_TS)
     s.line([(870, 165), (870, 286)], C_JUS, 3, arrow=True)
-    s.text(880, 225, "Your devices can open\nwizardly-hugle's web pages", 11, anchor="start", fill=C_JUS)
+    s.text(880, 225, "Your devices can open\nidea's web pages", 11, anchor="start", fill=C_JUS)
     s.line([(780, 286), (780, 168)], C_BAD, 3, dash="6,5", arrow=True)
-    s.text(770, 225, "wizardly-hugle cannot\nstart connections to\nyour devices", 11, anchor="end", fill=C_BAD)
+    s.text(770, 225, "idea cannot\nstart connections to\nyour devices", 11, anchor="end", fill=C_BAD)
     s.text(570, 412, "Other IDEA machines stay hidden. The IDEA admin can stop the share at any time.", 12, fill="#333")
     s.save("privacy.svg")
 
@@ -153,7 +153,7 @@ def checks():
     s.text(570, 30, "If something does not work: check in this order", 20, "bold")
     items = [("1", "Tailscale on?", "app connected /\ntailscale status"),
              ("2", "Signed in?", "your own account\n(not logged out)"),
-             ("3", "Share accepted?", "wizardly-hugle\nin your list"),
+             ("3", "Share accepted?", "idea\nin your list"),
              ("4", "Server online?", "tailscale ping\n100.115.60.6"),
              ("5", "Right address?", "http:// and the\nright port number")]
     for i, (n, t, sub) in enumerate(items):
