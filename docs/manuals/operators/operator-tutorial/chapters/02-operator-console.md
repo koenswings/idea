@@ -6,7 +6,7 @@
 
 1. In the Console, click the person icon (top right). The **Operator Login** panel opens with a username and a password field (the eye icon shows or hides the password).
    ![Operator Login](../screenshots/O1-01.png)
-2. Type the operator username and password and click **Log in**. The **Account** panel shows your name, the role **Operator**, **Change Password**, **Manage Operators** and **Log out**.
+2. Type the operator username and password (they are on the IDEA Kit *Accounts and Passwords* sheet) and click **Log in**. The **Account** panel shows your name, the role **Operator**, **Change Password**, **Manage Operators** and **Log out**.
    ![Account panel](../screenshots/O2-00.png)
 3. Close the panel with **✕**. Use **Log out** in the same panel when you are done.
 
