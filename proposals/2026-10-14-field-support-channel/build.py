@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build 2026-10-14-field-support-channel.pdf from proposals/2026-10-14-field-support-channel.md.
+"""Build idea-field-support-channel-design-v<version>.pdf from proposals/2026-10-14-field-support-channel.md.
 
 House style module: set IDEA_HOUSE_STYLE to the folder holding housestyle.py.
 Default: ./house-style next to this file, then <repo>/docs/house-style
@@ -15,4 +15,10 @@ import housestyle
 NAME = "2026-10-14-field-support-channel"
 PARENT = os.path.dirname(HERE)  # proposals/
 meta, body = housestyle.split_front_matter(open(os.path.join(PARENT, NAME + ".md"), encoding="utf-8").read())
-housestyle.build(body, meta, os.path.join(HERE, NAME + ".pdf"), base_url=PARENT, keep_html=False)
+import re, glob
+v = re.search(r"Version (\d+(?:\.\d+)+)", meta.get("audience", "")).group(1)
+OUT = os.path.join(HERE, f"idea-field-support-channel-design-v{v}.pdf")
+for old in glob.glob(os.path.join(HERE, "*.pdf")):
+    if old != OUT: os.remove(old)
+housestyle.build(body, meta, OUT, base_url=PARENT, keep_html=False, note="")   # cover: version + date only
+print("built", OUT)
