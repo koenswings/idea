@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build remote-access-guide.pdf with the IDEA house style (docs/house-style).
+"""Build idea-demo-server-remote-access-guide-v<version>.pdf with the IDEA house style (docs/house-style).
 Usage: python3 build.py   (regenerates the diagrams too)
 Fails if a 'to confirm' marker, a placeholder or a run-together bullet is left in the text or the PDF."""
 import os, re, subprocess, sys
@@ -16,7 +16,8 @@ def find_house_style(here):
     sys.exit("BUILD FAILED: docs/house-style not found; set IDEA_HOUSE_STYLE")
 STATUS = re.compile(r"^\*\*Status:\*\*.*\n+", re.M)   # status line on top of each source; not printed
 sys.path.insert(0, find_house_style(HERE)); import housestyle
-SRC, OUT = os.path.join(HERE, "remote-access-guide.md"), os.path.join(HERE, "remote-access-guide.pdf")
+import glob
+SRC = os.path.join(HERE, "remote-access-guide.md")
 WORDS = re.compile(r"to confirm|\bTODO\b|\bTBD\b|FIXME|\bXXX\b|lorem|placeholder|\[\?\]", re.I)
 ANGLE = re.compile(r"<[A-Z][A-Z0-9_-]{2,}>|&lt;[A-Z][A-Z0-9_-]{2,}&gt;")   # <ANGLE-BRACKET> placeholders (case-sensitive)
 class _Bad:
@@ -24,6 +25,11 @@ class _Bad:
 BAD = _Bad()
 subprocess.run([sys.executable, os.path.join(HERE, "diagrams", "make_diagrams.py")], check=True)
 meta, body = housestyle.split_front_matter(open(SRC, encoding="utf-8").read())
+m = re.search(r"Version (\d+(?:\.\d+)+)", meta.get("audience", ""))
+if not m: sys.exit("BUILD FAILED: no 'Version X.Y' in the front matter audience line")
+OUT = os.path.join(HERE, f"idea-demo-server-remote-access-guide-v{m.group(1)}.pdf")
+for old in glob.glob(os.path.join(HERE, "*.pdf")):
+    if old != OUT: os.remove(old)   # old unversioned / older versions
 body = STATUS.sub("", body, count=1)
 bad = [f"md:{i}: {l.strip()[:90]}" for i, l in enumerate(body.split("\n"), 1) if BAD.search(l)]
 if bad: sys.exit("BUILD FAILED: markers left in source:\n" + "\n".join(bad))
@@ -36,8 +42,7 @@ h2 + p, h2 + ol, h2 + ul { page-break-before: avoid; }
 h1.parttitle { page-break-before: avoid; border: none; font-size: 24pt; }
 .toc li { margin: 0.2mm 0; }"""
 housestyle.build(body, meta, OUT, base_url=HERE, extra_css=extra, keep_html=False,
-    note="IDEA - offline school computing. Prepared for Koen Swings's team.<br>"
-         "No passwords, keys or tokens are included. Koen sends the passwords separately.")
+    note="")   # cover: version + date only
 txt = subprocess.run(["pdftotext", "-layout", OUT, "-"], capture_output=True, text=True, check=True).stdout
 pages = txt.split("\f")
 problems = []
