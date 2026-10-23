@@ -1,6 +1,6 @@
 # Telegram relay for IDEA field support
 
-Option (e) of `proposals/2026-10-20-telegram-field-support.md`: field staff chat privately with the bot @IdeaSupportBot, and Koen follows every conversation in his "IDEA Support Monitor" Topics group, with one topic per person.
+Option (e) of `proposals/2026-10-20-telegram-field-support.md`: field staff chat privately with the bot [@IDEA_SupportBot](https://t.me/IDEA_SupportBot), and Koen follows every conversation in his "IDEA Support Monitor" Topics group, with one topic per person.
 
 - `tg_relay.py` is the long-poll daemon (`getUpdates`, 50 s). It is stdlib only and uses no AI.
 - `tg-send` is the CLI used by the support bot:
