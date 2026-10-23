@@ -62,6 +62,7 @@ Recent documents (≈ last 3 weeks). "box" = only on Koen's Grok Bot box.
 | Lesson manuals (Form 3 variables, Grade 5A fractions) | `docs/manuals/teachers/lesson-manuals/` | #191 |
 | IDEA Field Install Manual: School Server | `docs/manuals/install/install-manual-school-server/` | #191 |
 | IDEA Field Install Manual: Classroom Computer | `docs/manuals/install/install-manual-classroom-computer/` | #191 |
+| IDEA Kit: Accounts and Passwords (private) | `docs/manuals/install/accounts-and-passwords/` | #296 |
 | Router setup scripts | `docs/manuals/install/scripts/` | #191 |
 | Remote access guide (field engineer) | `docs/manuals/field/remote-access-guide/` | #191 |
 | House style module | `docs/house-style/` (single copy) | #191 |

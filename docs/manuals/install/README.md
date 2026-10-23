@@ -6,11 +6,12 @@
 
 | Folder | PDF | Topic |
 |---|---|---|
-| `install-manual-school-server/` | `idea-field-install-manual-school-server-v1.6.pdf`  | Starlink → Cudy WR3000S (OpenWrt + Tailscale) → TL-SG105PE PoE+ switch → Pi 5 IDEA Engines (one or more) |
-| `install-manual-classroom-computer/` | `idea-field-install-manual-classroom-computer-v2.3.pdf`  | Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor (one PSU) + the IDEA client image (Ubuntu Desktop 26.04.1 LTS, Chrome, IDEA icon) |
+| `install-manual-school-server/` | `idea-field-install-manual-school-server-v1.7.pdf`  | Starlink → Cudy WR3000S (OpenWrt + Tailscale) → TL-SG105PE PoE+ switch → Pi 5 IDEA Engines (one or more) |
+| `install-manual-classroom-computer/` | `idea-field-install-manual-classroom-computer-v2.4.pdf`  | Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor (one PSU) + the IDEA client image (Ubuntu Desktop 26.04.1 LTS, Chrome, IDEA icon) |
+| `accounts-and-passwords/` | `idea-accounts-and-passwords-v1.1.pdf` | IDEA Kit: Accounts and Passwords (v1.1). **Private:** every default account and password of the kit (classroom computers, Engines, apps, router, switch, Wi-Fi). For the IDEA team and installers; not left at the school. |
 | `scripts/` | – | `school-router-setup.sh`, `router-tailscale-zone.sh` (OpenWrt 25.12 uci; tested with the 25.12.5 x86 rootfs `uci` + `fw4 print`, not yet on a real Cudy; no longer printed in the school-server manual) and `make-install-diagrams.py` (writes both manuals' `diagrams/*.svg`) |
 
-Build: `python3 build.py` in each manual folder writes `idea-field-install-manual-<name>-v<version>.pdf` (version from the cover line `Version X.Y` in the .md; older versioned PDFs in the folder are removed) (uses `docs/house-style`, regenerates the diagrams). It fails if a
+Build: `python3 build.py` in each manual folder (the Accounts and Passwords sheet writes `idea-accounts-and-passwords-v<version>.pdf`) writes `idea-field-install-manual-<name>-v<version>.pdf` (version from the cover line `Version X.Y` in the .md; older versioned PDFs in the folder are removed) (uses `docs/house-style`, regenerates the diagrams). It fails if a
 "to confirm" marker or a school-numbering leftover (`10.N.`, `school-N`, `tag:school`) is in the source, a diagram or the PDF.
 
 Addressing and naming (school network design): every school uses the same subnets (wired `10.42.0.0/24`, Wi-Fi `10.42.1.0/24` and
