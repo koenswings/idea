@@ -46,6 +46,14 @@ Files: `manuals/teachers/teacher-tutorial/README.md`, `manuals/teachers/teacher-
 
 Files: `manuals/operators/operator-tutorial/operator-tutorial.md`, `manuals/operators/operator-tutorial/build.py`, `manuals/operators/operator-tutorial/chapters/*.md`, `manuals/operators/operator-tutorial/screenshots/*.png`, `manuals/operators/operator-tutorial/idea-for-operators-tutorial-v1.1.pdf`
 
+### Field support channel design (idea-field-support-channel-design-v1.0.pdf)
+**Status:** Authoritative  ·  **Maintained by:** Marco
+Design of the field support channel (Telegram @IDEA_SupportBot and idea-support email): what the bot answers itself, what goes to the IDEA admin.
+→ [proposals/2026-10-14-field-support-channel/](../proposals/2026-10-14-field-support-channel/)
+
+Files: `../proposals/2026-10-14-field-support-channel.md`, `../proposals/2026-10-14-field-support-channel/build.py`, `../proposals/2026-10-14-field-support-channel/concept.svg`, `../proposals/2026-10-14-field-support-channel/idea-field-support-channel-design-v1.0.pdf` (on main once #298 is merged)
+
+
 ### Lesson manuals (Grade 5A fractions, Form 3 variables)
 **Status:** Authoritative  ·  **Maintained by:** Marco / Tapiwa
 Step-by-step Kolibri lesson manuals for class teachers, with screenshots.
@@ -66,13 +74,6 @@ How the IDEA admin shares the demo server idea (earlier name wizardly-hugle) and
 → [docs/manuals/field/remote-access-guide/](manuals/field/remote-access-guide/)
 
 Files: `manuals/field/remote-access-guide/README.md`, `manuals/field/remote-access-guide/build.py`, `manuals/field/remote-access-guide/diagrams/checks.svg`, `manuals/field/remote-access-guide/diagrams/flow.svg`, `manuals/field/remote-access-guide/diagrams/make_diagrams.py`, `manuals/field/remote-access-guide/diagrams/overview.svg`, `manuals/field/remote-access-guide/diagrams/privacy.svg`, `manuals/field/remote-access-guide/remote-access-guide.md`, `manuals/field/remote-access-guide/idea-demo-server-remote-access-guide-v1.2.pdf`
-
-### Field support channel design (idea-field-support-channel-design-v1.0.pdf)
-**Status:** Authoritative  ·  **Maintained by:** Marco
-Design of the field support channel (Telegram @IDEA_SupportBot and idea-support email): what the bot answers itself, what goes to the IDEA admin.
-→ [proposals/2026-10-14-field-support-channel/](../proposals/2026-10-14-field-support-channel/)
-
-Files: `../proposals/2026-10-14-field-support-channel.md`, `../proposals/2026-10-14-field-support-channel/build.py`, `../proposals/2026-10-14-field-support-channel/concept.svg`, `../proposals/2026-10-14-field-support-channel/idea-field-support-channel-design-v1.0.pdf` (on main once #298 is merged)
 
 ## ops/boot-recovery.md
 **Status:** Authoritative  ·  **Maintained by:** Atlas
