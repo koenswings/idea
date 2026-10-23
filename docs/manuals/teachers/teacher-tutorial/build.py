@@ -33,7 +33,7 @@ for f in sorted(glob.glob(os.path.join(HERE, "chapters", "*.md"))):
         parts.append(f'<div class="part"><h1 class="parttitle" id="part-{a[-1].lower()}">{a}: {b}</h1></div>')
     for m in PENDING.finditer(t): pending.append(f"{m.group(1)} ({os.path.basename(f)}): {m.group(2)}")
     t = PENDING.sub(lambda m: f'<div class="confirm"><b>Screenshot pending retake ({m.group(1)}):</b> {m.group(2)}.</div>', t)
-    parts.append(t.replace("](../screenshots/", "](screenshots/").strip())
+    parts.append(t.replace("](../screenshots/", "](screenshots/").replace("](../../lesson-manuals/shots/", "](../lesson-manuals/shots/").strip())
 if bad:
     sys.exit("BUILD FAILED: 'to confirm' markers left:\n" + "\n".join(bad))
 extra = """figure img { max-height: 92mm; width: auto; max-width: 100%; display: block; margin: 0 auto; }
