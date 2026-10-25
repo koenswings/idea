@@ -35,6 +35,14 @@ Hosts: pool Pis idea01/03/04 expect `automerge:2VroE…`; kit Engines sunny-robi
 shared kit store `automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk` (kits only after Steve's GO naming the Engine). Any other
 host is refused; a store mismatch aborts before anything changes.
 
+From the box, prefer `tools/fleet/deploy-engine-remote.sh <ts-ip> <tip-sha> [--fetch main] [--dry-run|--yes]`: it holds a
+per-host box lock (`/tmp/idea-deploy-<host>.lock`) and the script holds `/tmp/idea-deploy.lock` on the Pi; either busy
+exits 75 without changing anything (two routines or two bots can no longer deploy the same Pi at once). If HEAD already
+equals the tip, the helpers match the repo and pm2 `engine` is online, it prints `already on <sha>, skipping` and exits 0.
+Temperature guard: before each step (install, build, root helpers, restart) above 75 C it pauses, polling every 30 s
+until below 65 C, and prints the peak per step at the end. The Console is not deployed by this script (build it
+separately, with the same 75/65 C rule).
+
 1. **Guard:** host is a pool Pi; `store-url.txt` is the expected store (2VroE); only
    `config.yaml`, `pm2.config.cjs` and `store-identity/*` have tracked local edits.
 2. **Save** `config.yaml`, `pm2.config.cjs` and the whole `store-identity/` folder

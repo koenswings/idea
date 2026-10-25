@@ -18,7 +18,14 @@
 # A plain discard + checkout puts those back, and a restarted pool Engine then joins idea02's
 # store (idea04, 2026-10-14). See docs/ops/engine-deploy-pool-pi.md.
 #
-# Env overrides (tests): ENGINE_DIR, HOST_NAME, EXPECT_STORE, BACKUP_ROOT, IDEA_LOCAL, SBIN, POST_RESTART_WAIT.
+# Lock: one deploy per Pi at a time (flock on $LOCK_FILE, default /tmp/idea-deploy.lock, non-blocking;
+# busy -> exit 75). Box side: tools/fleet/deploy-engine-remote.sh also locks per host on the box.
+# Already on target (HEAD = tip, helpers = repo, pm2 engine online): "already on <sha>, skipping", exit 0.
+# Temperature guard: before each build/install step, above TEMP_PAUSE (75 C) it pauses and polls every
+# TEMP_POLL s (30) until below TEMP_RESUME (65 C); the peak per step is logged and summarised at the end.
+# This script does not deploy the Console (see docs/ops/engine-deploy-pool-pi.md).
+# Env overrides (tests): ENGINE_DIR, HOST_NAME, EXPECT_STORE, BACKUP_ROOT, IDEA_LOCAL, SBIN, POST_RESTART_WAIT,
+# LOCK_FILE, TEMP_PAUSE, TEMP_RESUME, TEMP_POLL.
 set -euo pipefail
 
 ENGINE_DIR="${ENGINE_DIR:-/home/pi/idea/agents/agent-engine-dev}"
@@ -33,6 +40,38 @@ HELPERS="idea-flash-card idea-app-data idea-erase-disk"  # script/build_image_as
 SBIN="${SBIN:-/usr/local/sbin}"
 
 die() { echo "ABORT: $*" >&2; exit 3; }
+LOCK_FILE="${LOCK_FILE:-/tmp/idea-deploy.lock}"
+exec 9>>"$LOCK_FILE" || die "cannot open lock $LOCK_FILE"
+flock -n 9 || { echo "BUSY: another deploy holds $LOCK_FILE on $(hostname) ($(cat "$LOCK_FILE.pid" 2>/dev/null || echo '?')); not starting" >&2; exit 75; }
+echo "$$ $(date '+%F %T')" > "$LOCK_FILE.pid" 2>/dev/null || true
+
+TEMP_PAUSE="${TEMP_PAUSE:-75}"; TEMP_RESUME="${TEMP_RESUME:-65}"; TEMP_POLL="${TEMP_POLL:-30}"
+PEAKS=""
+temp_now() { command -v vcgencmd >/dev/null 2>&1 || return 1; vcgencmd measure_temp 2>/dev/null | grep -oE '[0-9]+(\.[0-9]+)?' | head -1; }
+gt() { awk -v a="$1" -v b="$2" 'BEGIN{exit !(a>b)}'; }
+# temp_guard <step>: wait while hot; record the step's peak (also sampled after the step by temp_mark).
+temp_guard() {
+  local step="$1" t peak=""
+  t=$(temp_now) || { echo "temp: vcgencmd not available, guard skipped ($step)"; return 0; }
+  peak=$t
+  if gt "$t" "$TEMP_PAUSE"; then
+    echo "TEMP PAUSE before $step: ${t} C > ${TEMP_PAUSE} C (throttled $(vcgencmd get_throttled 2>/dev/null | cut -d= -f2)); polling every ${TEMP_POLL}s until < ${TEMP_RESUME} C"
+    while gt "$t" "$TEMP_RESUME" || [ "$t" = "$TEMP_RESUME" ]; do
+      sleep "$TEMP_POLL"; t=$(temp_now) || break; gt "$t" "$peak" && peak=$t
+      echo "  temp ${t} C (waiting)"
+    done
+    echo "TEMP RESUME $step at ${t} C"
+  fi
+  PEAKS="$PEAKS $step=$peak"; echo "temp before $step: ${t} C"
+}
+temp_mark() {  # after a step: raise that step's recorded peak if it got hotter
+  local step="$1" t; t=$(temp_now) || return 0; echo "temp after $step: ${t} C"; PEAKS="$PEAKS $step=$t"
+}
+peak_summary() {
+  [ -n "$PEAKS" ] || return 0
+  echo "TEMP PEAKS per step (C):"
+  for kv in $PEAKS; do echo "$kv"; done | awk -F= '{ if(!($1 in m)){o[++n]=$1; m[$1]=$2} else if($2+0>m[$1]+0) m[$1]=$2 } END{for(i=1;i<=n;i++) printf "  %s %s\n", o[i], m[o[i]]}'
+}
 TIP=""; BRANCH=""; YES=""; DRY=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -68,6 +107,17 @@ for f in $mods; do
 done
 case "$(store_now)" in "$DEFAULT_STORE_PREFIX"*) die "store-url.txt is the repo default ($(store_now)); refusing";; esac
 echo "HOST $HOST_NAME HEAD $(git rev-parse --short HEAD) STORE $(store_now) local mods: $(echo $mods)"
+# Already on target: same commit, helpers equal to the repo assets, Engine online -> nothing to do.
+if git cat-file -e "$TIP^{commit}" 2>/dev/null && [ "$(git rev-parse HEAD)" = "$(git rev-parse "$TIP^{commit}")" ]; then
+  same=1
+  for h in $HELPERS; do
+    a="script/build_image_assets/$h"; [ -f "$a" ] || continue
+    [ "$(sha256sum < "$a" | cut -c1-64)" = "$(sha256sum < "$SBIN/$h" 2>/dev/null | cut -c1-64)" ] || { same=""; echo "on $TIP but $h differs from the repo: not skipping"; }
+  done
+  pid=$(pm2 pid engine 2>/dev/null | tail -1)
+  case "$pid" in ''|0) same=""; echo "on $TIP but pm2 engine is not online: not skipping" ;; esac
+  [ -n "$same" ] && { echo "already on $(git rev-parse --short HEAD), skipping (helpers match, pm2 engine pid $pid)"; exit 0; }
+fi
 if [ -z "$YES" ]; then
   echo "DRY RUN (nothing changed). Target $TIP$([ -n "$BRANCH" ] && echo " (would fetch origin $BRANCH first)")"
   git cat-file -e "$TIP^{commit}" 2>/dev/null && echo "  tip present: $(git log -1 --format='%h %s' "$TIP")" || echo "  tip NOT present locally (needs --fetch <branch>)"
@@ -123,8 +173,12 @@ check_store "after checkout"
 echo "restored: config.yaml sha $(sha256sum config.yaml | cut -c1-16), store $(store_now)"
 
 # 7. Build, verify again, restart
+temp_guard engine-install
 pnpm install --frozen-lockfile
+temp_mark engine-install
+temp_guard engine-build
 pnpm build
+temp_mark engine-build
 # DHCP option 60 "idea-engine" (idea#209 D8, idea#284): same step as the Engine's
 # installRootHelpers. Idempotent; never restarts NetworkManager or touches a link.
 # A failure only warns: check-fleet-health.sh reports a missing drop-in.
@@ -141,6 +195,7 @@ else
 fi
 # Root helpers (flash helper, app-data, erase-disk, sudoers): no Engine runs new code with an old helper.
 # install-root-helpers calls sudo itself (passwordless sudo, as pi) and runs visudo -cf on the sudoers files.
+temp_guard root-helpers
 if [ -x ./install-root-helpers ]; then
   ./install-root-helpers || die "install-root-helpers failed (code is updated, Engine NOT restarted; backup $BK)"
   for h in $HELPERS; do
@@ -153,10 +208,13 @@ if [ -x ./install-root-helpers ]; then
 else
   echo "WARN: ./install-root-helpers not in this Engine commit; root helpers NOT updated" >&2
 fi
+temp_mark root-helpers
+temp_guard pm2-restart
 verify_kept "before pm2 restart"
 check_store "before pm2 restart"
 pm2 restart engine --update-env
 pm2 save
 sleep "${POST_RESTART_WAIT:-5}"
 check_store "after pm2 restart"
+peak_summary
 echo "DEPLOYED $HOST_NAME HEAD $(git rev-parse --short HEAD) store $(store_now) backup $BK"

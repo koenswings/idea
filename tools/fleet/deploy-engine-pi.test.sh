@@ -48,7 +48,7 @@ setup() {  # repo with defaults committed, then the Pi's local edits on top
   echo "{}" > store-identity/store-template.json   # untracked, must survive
   cd "$WORK" || exit 1
 }
-run() { export POST_RESTART_WAIT=0; mkdir -p "$WORK/sbin-$1"; ENGINE_DIR="$R" HOST_NAME="${H:-idea04}" BACKUP_ROOT="$WORK/bk-$1" IDEA_LOCAL="$WORK/idea-local-$1" SBIN="$WORK/sbin-$1" bash "$SCRIPT" "$TIP" "${@:2}" > "$WORK/out" 2>&1; }
+run() { export POST_RESTART_WAIT=0 LOCK_FILE="$WORK/lock-$1"; mkdir -p "$WORK/sbin-$1"; ENGINE_DIR="$R" HOST_NAME="${H:-idea04}" BACKUP_ROOT="$WORK/bk-$1" IDEA_LOCAL="$WORK/idea-local-$1" SBIN="$WORK/sbin-$1" bash "$SCRIPT" "$TIP" "${@:2}" > "$WORK/out" 2>&1; }
 
 setup ok; run ok --yes; rc=$?
 check "deploy succeeds" [ "$rc" = 0 ]
@@ -121,5 +121,53 @@ setup kitdef; echo "$DEFAULT" > "$R/store-identity/store-url.txt"; H=happy-zebra
 check "kit: 4GQm default store aborts before any change" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
 setup unk; H=wizardly-hugle run unk --yes; rc=$?
 check "unknown host refused" [ "$rc" = 3 ] && grep -q "not a pool Pi or kit Engine" "$WORK/out"
+
+# Pi-side lock: busy -> exit 75, nothing changed
+setup lk; ( flock -x 9; sleep 5 ) 9>>"$WORK/lock-lk" & LKPID=$!; sleep 0.5
+run lk --yes; rc=$?; kill $LKPID 2>/dev/null; wait $LKPID 2>/dev/null
+check "lock busy exits 75" [ "$rc" = 75 ] && grep -q "BUSY" "$WORK/out"
+check "lock busy changes nothing" [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
+setup lk2; run lk2 --yes; rc=$?
+check "lock free deploys" [ "$rc" = 0 ]
+# Box-side lock (deploy-engine-remote.sh)
+REMOTE="$(dirname "$SCRIPT")/deploy-engine-remote.sh"
+( flock -x 8; sleep 5 ) 8>>"$WORK/idea-deploy-idea04.lock" & LKPID=$!; sleep 0.5
+BOX_LOCK_DIR="$WORK" SSH_CMD=true bash "$REMOTE" idea04 abc --dry-run > "$WORK/out" 2>&1; rc=$?; kill $LKPID 2>/dev/null; wait $LKPID 2>/dev/null
+check "box lock busy exits 75" [ "$rc" = 75 ]
+BOX_LOCK_DIR="$WORK" SSH_CMD=true bash "$REMOTE" idea04 abc --dry-run > "$WORK/out" 2>&1; rc=$?
+check "box lock free runs ssh" [ "$rc" = 0 ]
+
+# Already on target
+cat > "$WORK/bin/pm2" <<'SH'
+#!/usr/bin/env bash
+echo "$*" >> "$WORK/pm2.log"
+[ "$1" = pid ] && echo "${FAKE_PM2_PID:-}"
+exit 0
+SH
+chmod +x "$WORK/bin/pm2"
+WITH_HELPERS=1 setup on; git -C "$R" checkout -q "$TIP"; mkdir -p "$WORK/sbin-on"; cp "$R/script/build_image_assets/idea-flash-card" "$WORK/sbin-on/"
+FAKE_PM2_PID=4242 run on --yes; rc=$?
+check "already on target skips" [ "$rc" = 0 ] && grep -q "already on .*, skipping" "$WORK/out" && ! grep -q "restart" "$WORK/pm2.log" && [ ! -d "$WORK/bk-on" ]
+WITH_HELPERS=1 setup onh; git -C "$R" checkout -q "$TIP"; mkdir -p "$WORK/sbin-onh"; echo old > "$WORK/sbin-onh/idea-flash-card"
+FAKE_PM2_PID=4242 run onh --yes; rc=$?
+check "on target but old helper: deploys" [ "$rc" = 0 ] && grep -q "differs from the repo: not skipping" "$WORK/out" && grep -q "restart engine" "$WORK/pm2.log"
+WITH_HELPERS=1 setup onp; git -C "$R" checkout -q "$TIP"; mkdir -p "$WORK/sbin-onp"; cp "$R/script/build_image_assets/idea-flash-card" "$WORK/sbin-onp/"
+FAKE_PM2_PID=0 run onp --yes; rc=$?
+check "on target but engine offline: deploys" [ "$rc" = 0 ] && grep -q "not online: not skipping" "$WORK/out"
+
+# Temperature guard (mocked vcgencmd reads a queue of temps; last value repeats)
+cat > "$WORK/bin/vcgencmd" <<'SH'
+#!/usr/bin/env bash
+[ "$1" = get_throttled ] && { echo throttled=0x0; exit 0; }
+q="$WORK/temps"; t=$(head -1 "$q"); [ "$(wc -l < "$q")" -gt 1 ] && sed -i 1d "$q"; echo "temp=${t}'C"
+SH
+chmod +x "$WORK/bin/vcgencmd"
+setup hot; printf '%s\n' 80.1 78.0 70.0 64.0 60.0 > "$WORK/temps"; TEMP_POLL=0 run hot --yes; rc=$?
+check "temp: hot pauses then resumes" [ "$rc" = 0 ] && grep -q "TEMP PAUSE before engine-install: 80.1" "$WORK/out" && grep -q "TEMP RESUME engine-install at 64.0" "$WORK/out"
+check "temp: 70 C is not enough to resume" grep -q "temp 70.0 C (waiting)" "$WORK/out"
+check "temp: peak summary per step" grep -q "TEMP PEAKS" "$WORK/out" && grep -qE "^  engine-install 80.1" "$WORK/out" && grep -qE "^  engine-build 60.0" "$WORK/out"
+setup cool; printf '%s\n' 50.0 > "$WORK/temps"; TEMP_POLL=0 run cool --yes; rc=$?
+check "temp: cool never pauses" [ "$rc" = 0 ] && ! grep -q "TEMP PAUSE" "$WORK/out"
+rm -f "$WORK/bin/vcgencmd"
 
 echo "passed $pass, failed $fail"; [ "$fail" = 0 ]
