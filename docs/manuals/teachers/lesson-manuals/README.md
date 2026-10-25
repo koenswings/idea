@@ -1,6 +1,6 @@
 **Status:** Authoritative · **Maintained by:** Marco (with Tapiwa) · 23 October 2026
 
-> **Superseded for teachers (23 October 2026).** Both lessons are now chapter 10, *Worked examples*, of *IDEA for Teachers: Tutorial* v1.6 (`../teacher-tutorial/`). Give teachers the tutorial, not these PDFs. The old PDFs are kept in `superseded/`. The `.md` sources and `shots/` stay here: the tutorial reuses the screenshots, and the duration tests in koenswings/agent-app-dev use the sources.
+> **Superseded for teachers (25 October 2026)** by *IDEA for Teachers: Tutorial* v1.6 (`../teacher-tutorial/`). Its chapter 3 now covers teaching one class period (3.7) and reading Reports (3.6) with Kolibri Demo; these lessons only exist on test disks, so they are not in the tutorial. The old PDFs are kept in `superseded/`. The `.md` sources and `shots/` stay here for the duration tests in koenswings/agent-app-dev.
 
 # Lesson manuals (Kolibri)
 

@@ -1,6 +1,6 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 23 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 October 2026
 
-> v1.6 (23 October 2026): `idea-for-teachers-tutorial-v1.6.pdf`. New chapter 10, *Worked examples*: the Grade 5A fractions and Form 3 variables lessons from `../lesson-manuals/` (screenshots reused from `../lesson-manuals/shots/`).
+> v1.6 (25 October 2026): `idea-for-teachers-tutorial-v1.6.pdf`. Teaching one class period, reading Reports and troubleshooting added to chapter 3 (3.6, 3.7).
 > The v1.5 PDF is kept in `superseded/`.
 
 # Teacher tutorial
