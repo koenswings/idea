@@ -1,10 +1,10 @@
 ---
 title: "IDEA Field Install Manual: Classroom Computer"
 subtitle: "Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor + the IDEA client image"
-audience: "Version 2.4, 21 October 2026"
+audience: "Version 2.5, 25 October 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v2.4: opening paragraph restored, wiring diagram arrows fixed)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 October 2026 (v2.5: sticker names, idea.local as the easy way in; v2.4: opening paragraph restored, wiring diagram arrows fixed)
 
 
 # Introduction

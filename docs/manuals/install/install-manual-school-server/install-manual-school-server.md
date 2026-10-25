@@ -1,10 +1,10 @@
 ---
 title: "IDEA Field Install Manual: School Server"
 subtitle: "Raspberry Pi 5 Engines + Cudy router + PoE switch + Starlink"
-audience: "Version 1.7, 21 October 2026"
+audience: "Version 1.8, 25 October 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 21 October 2026 (v1.7: opening paragraph, parts list = what IDEA delivers, diagram arrows fixed)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 October 2026 (v1.8: sticker names, idea.local as the easy way in; v1.7: opening paragraph, parts list = what IDEA delivers, diagram arrows fixed)
 
 
 # Introduction
