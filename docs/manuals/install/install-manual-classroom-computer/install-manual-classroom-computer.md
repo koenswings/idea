@@ -134,7 +134,7 @@ Every classroom computer runs the same **IDEA client image**. It is the official
 
 *Open the school's IDEA Console, with one click or by typing its address.*
 
-Every school uses the same addresses (*IDEA Field Install Manual: School Server*). The Console is at `http://idea.local`, whichever and however many Engines the school has.
+Every school uses the same addresses (*IDEA Field Install Manual: School Server*). The easy way in is `http://idea.local`: it opens the Console on whichever Engine answers, whichever and however many Engines the school has, and that Console lists every Engine. To reach one particular Engine, use its sticker name (4.2.2).
 
 ### 4.2.1 The IDEA icon and the start page
 
@@ -142,22 +142,22 @@ Click the **IDEA** icon (desktop or dock). Chrome opens the **IDEA start page**,
 
 1. the computer's **home Engine**, if the IDEA team gave it one;
 2. the **last Engine** that worked on this computer;
-3. **`http://idea.local`**: the IDEA router answers it with the Engines that are switched on, so it works with one Engine or many.
+3. **`http://idea.local`**: it opens on whichever Engine answers, so it works with one Engine or many.
 
-The start page always has a **sticker-name field**. If no Engine answers, it says so in plain words and asks for a sticker name: type the name on any Engine's sticker, for example `brave-otter`, and press Enter.
+The start page always has a **sticker-name field**. If no Engine answers, it says so in plain words and asks for a sticker name: type the name on any Engine's sticker (two lowercase words, for example `brave-otter`), and press Enter.
 
 The Console lists **every** Engine of the school, whichever one you opened.
 
 **✔ Check:** the IDEA Console opens within a few seconds and lists every Engine of the school.
 
-### 4.2.2 The manual way: open the Console by its sticker name
+### 4.2.2 Open one particular Engine by its sticker name
 
-This always works, also on a laptop, a phone or a computer without the IDEA image:
+Use this to reach one particular Engine. It always works, also on a laptop, a phone or a computer without the IDEA image:
 
 1. In any browser, type **`http://<STICKER>.local`**, the sticker name of any Engine, for example `http://brave-otter.local` (http, not https).
 2. Set that address as the browser's **home page**, or ★ **bookmark** it.
 
-`http://idea.local` works the same way. Sticker names work from the Wi-Fi too: the IDEA router passes them on between the wired network and the Wi-Fi.
+`http://idea.local` also works in any browser and opens whichever Engine answers. Both work from the Wi-Fi as well as on a cable.
 
 ## 4.3 Wi-Fi: IDEA or IDEA-Teachers
 

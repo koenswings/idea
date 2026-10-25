@@ -20,7 +20,7 @@ Each step has:
 <b>Conventions.</b>
 <ul>
 <li>IDEA default passwords follow the public convention <code>&lt;name&gt;911!</code>: router <code>root</code> / <code>admin911!</code>, switch <code>admin</code> / <code>admin911!</code>, Pi user <code>pi</code> / <code>pi911!</code> (keyboard only; SSH is key-only), classroom computer <code>admin</code> / <code>admin911!</code>, Wi-Fi <code>IDEA</code> / <code>idea911!</code> and <code>IDEA-Teachers</code> / <code>idea-teachers911!</code>. This manual has no secret keys or tokens in it.</li>
-<li>Values in <code>&lt;ANGLE BRACKETS&gt;</code> are placeholders. <code>&lt;STICKER&gt;</code>: the two-word sticker name of an Engine, for example <code>brave-otter</code>. <code>&lt;ENGINE-IP&gt;</code>: the address of the Engine you are working on (<code>10.42.0.2</code> to <code>.9</code>).</li>
+<li>Values in <code>&lt;ANGLE BRACKETS&gt;</code> are placeholders. <code>&lt;STICKER&gt;</code>: the sticker name of an Engine, two lowercase words with no digits, for example <code>brave-otter</code> (see 5). <code>&lt;ENGINE-IP&gt;</code>: the address of the Engine you are working on (<code>10.42.0.2</code> to <code>.9</code>).</li>
 <li>Where this manual says "each Engine", do the step once per Engine. A school starts with one Engine and can add more later.</li>
 </ul>
 </div>
@@ -141,6 +141,13 @@ An admin can still reach its web page through a Pi with an SSH tunnel: <code>ssh
 
 The Engines arrive installed: operating system, IDEA Engine and Console, Tailscale, apps and content, and the name on the sticker. You do **not** install anything on them.
 
+**The sticker name.** Each Engine has its own name: two lowercase words, an adjective and a noun, with no digits, for example `brave-otter`. The installer picks the name, prints it at the end of the install and saves it on the Engine in `/home/pi/STICKER.txt`. That name is written on the sticker on the case. Engines have no numbers: the sticker name is how everyone tells them apart.
+
+**Two ways to open the Console.**
+
+* **The easy way:** `http://idea.local`. It opens the Console on whichever Engine answers first, and that Console lists every Engine of the school.
+* **One particular Engine:** `http://<STICKER>.local`, with the name from the sticker on its case, for example `http://brave-otter.local`. Its Console lists every Engine too.
+
 ## 5.1 Connect and check
 
 1. Plug the first Engine into switch **port 1** (further Engines into ports 2, 3, 4). The PoE+ HAT powers it. Wait 3-5 minutes.
@@ -150,7 +157,7 @@ The Engines arrive installed: operating system, IDEA Engine and Console, Tailsca
 
 * Every Engine's address is between `10.42.0.2` and `.9`.
 
-* A laptop on the wired LAN or on the Wi-Fi `IDEA` opens `http://<STICKER>.local` (the name on any sticker) and `http://idea.local`, and sees the IDEA Console with **every** Engine of this school listed.
+* A laptop on the wired LAN or on the Wi-Fi `IDEA` opens `http://idea.local`, and also `http://<STICKER>.local` for each sticker, and each time sees the IDEA Console with **every** Engine of this school listed.
 * In the Console, each app shows as *Running* and opens.
 
 <div class="note">
@@ -180,7 +187,7 @@ the Console, but they <b>won't open</b>. There is no fix yet. Tell the teachers 
 
 ## 5.3 Tell the IDEA team which Engines this school has
 
-Send the IDEA team one short message per school: the school name and the sticker name of each Engine. Send it again whenever an Engine moves to another school.
+Send the IDEA team one short message per school: the school name and the sticker name of each Engine, for example "Kasese Primary: brave-otter, calm-heron". The sticker names are all we need; there is no numbering to add. Send it again whenever an Engine moves to another school.
 
 **✔ Check:** the IDEA team confirms that they have the names.
 
@@ -231,7 +238,7 @@ Starlink is only the internet on the Cudy **WAN** port. The school network works
 | ☐ | Test | How | Expected |
 |---|---|---|---|
 | ☐ | Laptop on **IDEA** opens Console | Join Wi-Fi `IDEA` with `idea911!`, browse to `http://idea.local` | IDEA Console loads, every Engine listed. The laptop has an address `10.42.1.x`. |
-| ☐ | Console by sticker name | Laptop on Wi-Fi `IDEA`: browse to `http://<STICKER>.local` (each sticker) | Console loads, every Engine listed |
+| ☐ | Console by sticker name | Laptop on Wi-Fi `IDEA`: browse to `http://<STICKER>.local` (each sticker) | That Engine's Console loads, every Engine listed |
 | ☐ | Every Engine reachable | Browse to `http://<ENGINE-IP>` for each Engine | Console loads on each |
 | ☐ | **Apps open from the Wi-Fi** | Laptop on `IDEA`: in the Console, click **Open** on each app of each Engine | Every app opens. "Refused" for all apps of one Engine: its address is outside `.2`-`.9` (5.1). |
 | ☐ | Only this school's Engines | Console → Operator Login → the network list | Every Engine of this school has a green dot. A red dot is an Engine that is not here: see the known problem in 5.2. |
@@ -242,7 +249,7 @@ Starlink is only the internet on the Cudy **WAN** port. The school network works
 | ☐ | **Teachers: Pis yes, internet on** | Join `IDEA-Teachers` with `idea-teachers911!`. Open `http://idea.local`, then `https://example.com` | Console yes, internet yes |
 | ☐ | Pis have internet (updates) | `ssh pi@<ENGINE-IP> 'curl -sI https://deb.debian.org | head -1'` | `HTTP/... 200` |
 | ☐ | **Every Engine visible in Tailscale** | `tailscale status` on an admin laptop, or the admin console | Every sticker name (and the router) online, tagged `tag:idea` |
-| ☐ | Stickers and report | Look at every case | Each sticker matches `hostname` on that Pi. The IDEA team has the names (5.3). |
+| ☐ | Stickers and report | Look at every case | Each sticker matches `hostname` on that Pi (and `/home/pi/STICKER.txt`). The IDEA team has the names (5.3). |
 | ☐ | Power fine | `ssh pi@<ENGINE-IP> vcgencmd get_throttled` (for each Engine) | `throttled=0x0`. If you see anything but `0x0`, check the cable and switch port and tell the IDEA team. |
 | ☐ | Reboot test | Pull the switch's power for 10 s, then plug it back in | After about 5 minutes, all of the above pass again |
 
