@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (kit: Kolibri Demo, no Khan Academy on the kit)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 October 2026 (v1.6: 3.6 report table, 3.7 teaching one class period; kit: Kolibri Demo, no Khan Academy on the kit)
 
 # 3. Kolibri for teachers
 
@@ -128,3 +128,49 @@ Do this after learners have worked (chapter 4).
 Reports can be printed or exported as CSV (icons top right).
 
 > **Tip.** Do not chase 100%. Look for the question most learners got wrong and teach it again.
+
+### What the lesson report means
+
+| Kolibri shows | What it means | What to do |
+|---|---|---|
+| **Completed** | The learner finished the resource or the lesson | Nothing. Give them the next lesson or a quiz |
+| **Started** | The learner began but did not finish | They can finish next time. Note the name |
+| **Has not started** | The learner did not open it | Ask them. Often they did not sign in with their own name, or the lesson was not visible to learners |
+
+You do not need every learner at 100% after one class. Check that they signed in, worked through the explaining resources and tried the exercises.
+
+## 3.7 Teaching one class period
+
+This puts 3.4, 3.6 and chapter 4 together for one lesson. In Kolibri Demo, use `teacher1`, the class **Grade 5** and the **Maths lesson**.
+
+**Before class**
+
+1. **Do:** sign in as `teacher1`, open **Coach > Grade 5 > PLAN > LESSONS** and click **Maths lesson** (3.4).<br>
+   **✔ Check:** the resources are in the order you want: explaining resources (videos, pictures, documents) first, exercises last.
+2. **Do:** check **Recipients**.<br>
+   **✔ Check:** it shows **Entire class** or the class **Grade 5**.
+3. **Do:** switch on **Visible to learners**.<br>
+   **✔ Check:** the switch is on. Learners see the lesson the next time they open **HOME**.
+
+**During class**
+
+1. **Do:** ask every learner to open Kolibri Demo and sign in with **their own** username (chapter 4).<br>
+   **✔ Check:** each learner sees **Maths lesson** on **HOME**. A learner who uses someone else's name, or does not sign in, does not appear in Reports.
+2. **Do:** tell the class to go through the explaining resources first, then do the exercises, in the order of the lesson.
+3. **Do:** walk the room. Help learners who are stuck, but do not do the exercises for them.
+
+**After class**
+
+1. **Do:** open **REPORTS > LESSONS > Maths lesson** (3.6).<br>
+   **✔ Check:** each learner is listed as **Completed**, **Started** or **Has not started**. The table in 3.6 says what to do about each.
+2. **Do:** pick the one thing most learners found hard and teach it again next time. Do not chase 100%.
+
+### If something is wrong
+
+| What you see | What to do |
+|---|---|
+| The lesson is not on a learner's screen | Check that **Recipients** shows the class and that **Visible to learners** is on |
+| A learner cannot sign in | Check that they type their own username. If it still does not work, tell your school operator |
+| Reports is empty | Learners must sign in with their own name before they start |
+| A resource is missing from the lesson | Tell your school operator |
+| The Kolibri card in the Console has no **Open** | Tell your school operator. Do not try to fix it yourself |
