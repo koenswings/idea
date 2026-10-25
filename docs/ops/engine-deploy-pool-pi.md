@@ -24,6 +24,25 @@ Run from the ops box, one Pi at a time:
     ssh idea04 'bash -s -- <tip-sha> --fetch <branch>'        < tools/fleet/deploy-engine-pi.sh   # checks only
     ssh idea04 'bash -s -- <tip-sha> --fetch <branch> --yes'  < tools/fleet/deploy-engine-pi.sh
 
+`--dry-run` (same as leaving out `--yes`) is read-only and lists the sha256 of every file it would keep and the
+helper changes it would make. Kept always, whatever `git status` shows (skip-worktree included): `config.yaml`,
+`pm2.config.cjs`, all of `store-identity/` and `~/.idea-local`, restored byte-for-byte and sha256-checked; a repo
+default store (`4GQm…`) aborts. After the build it runs `./install-root-helpers` (flash/app-data/erase helpers and
+sudoers), checks each helper's sha256 against `script/build_image_assets/` and `visudo -c`, then `pm2 restart engine`
+and `pm2 save`, and re-checks the store after the restart. An Engine commit without `install-root-helpers` only warns.
+
+Hosts: pool Pis idea01/03/04 expect `automerge:2VroE…`; kit Engines sunny-robin, happy-zebra, kind-panda expect the one
+shared kit store `automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk` (kits only after Steve's GO naming the Engine). Any other
+host is refused; a store mismatch aborts before anything changes.
+
+From the box, prefer `tools/fleet/deploy-engine-remote.sh <ts-ip> <tip-sha> [--fetch main] [--dry-run|--yes]`: it holds a
+per-host box lock (`/tmp/idea-deploy-<host>.lock`) and the script holds `/tmp/idea-deploy.lock` on the Pi; either busy
+exits 75 without changing anything (two routines or two bots can no longer deploy the same Pi at once). If HEAD already
+equals the tip, the helpers match the repo and pm2 `engine` is online, it prints `already on <sha>, skipping` and exits 0.
+Temperature guard: before each step (install, build, root helpers, restart) above 75 C it pauses, polling every 30 s
+until below 65 C, and prints the peak per step at the end. The Console is not deployed by this script (build it
+separately, with the same 75/65 C rule).
+
 1. **Guard:** host is a pool Pi; `store-url.txt` is the expected store (2VroE); only
    `config.yaml`, `pm2.config.cjs` and `store-identity/*` have tracked local edits.
 2. **Save** `config.yaml`, `pm2.config.cjs` and the whole `store-identity/` folder
