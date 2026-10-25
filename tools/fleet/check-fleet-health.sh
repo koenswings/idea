@@ -10,10 +10,15 @@
 #   versions   deployed Engine/Console HEADs match .version in fleet-state
 #              ("engine main@<sha>, console main@<sha>"); skipped when .version is unset
 #   disk       root filesystem use below $DISK_MAX_PCT (default 90)
+#   dhcp       DHCP vendor class (idea#209 D8, idea#284): with NetworkManager, the drop-in
+#              /etc/NetworkManager/conf.d/90-idea-dhcp-vendor-class.conf sets
+#              ipv4.dhcp-vendor-class-identifier=idea-engine; without NM, /etc/dhcpcd.conf
+#              has "vendorclassid idea-engine". And every IPv4 address the Pi holds on a kit
+#              LAN (10.42.0.0/24) is in 10.42.0.2-.9 (the router's Engine range).
 # A Pi with a claim (or status other than idle) is still checked and reported, but it
 # is marked "claimed" and never counts as a failure; its versions are not compared.
 #
-# Usage: tools/fleet/check-fleet-health.sh [--origin] [--pi NAME]... [--alert]
+# Usage: tools/fleet/check-fleet-health.sh [--origin] [--pi NAME]... [--alert] [--dhcp]
 #   --origin   git fetch, then read fleet-state.json from origin/main instead of the
 #              working tree, so claims made since the last pull are seen (routine use)
 #   --pi NAME  only check this Pi (repeatable)
@@ -25,6 +30,10 @@
 #              missing) and never removed, even on a healthy run; the report then shows
 #              alert.hold=true, alert.fleet_changes_paused=true and alert.hold_file.
 #              Remove HOLD to hand PAUSED back to the health check.
+#   --dhcp     field check: also exit 1 when ANY checked Pi, claimed or not (kit Engines
+#              have status "kit"), fails the dhcp check. The report always lists those
+#              Pis in .dhcp_unhealthy; without --dhcp they fail the run only when unclaimed.
+#              e.g. tools/fleet/check-fleet-health.sh --pi kind-panda --dhcp
 # Exit: 0 all unclaimed Pis healthy, 1 at least one unhealthy, 2 usage/state error.
 #
 # Env overrides (used by the tests): STATE_REPO (repo for --origin), STATE_FILE, HEALTH_DIR, SSH_BIN, CURL_BIN,
@@ -59,11 +68,13 @@ CURL_PROXY_ARGS=(); [ -n "$CURL_PROXY" ] && CURL_PROXY_ARGS=(--proxy "$CURL_PROX
 ONLY=()
 ALERT=0
 ORIGIN=0
+DHCP_STRICT=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --pi) [ $# -ge 2 ] || { echo "usage: --pi NAME" >&2; exit 2; }; ONLY+=("$2"); shift 2 ;;
     --alert) ALERT=1; shift ;;
     --origin) ORIGIN=1; shift ;;
+    --dhcp) DHCP_STRICT=1; shift ;;
     -h|--help) sed -n '2,40p' "$0"; exit 0 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
@@ -105,6 +116,11 @@ let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{
 echo "ENGINE_SHA=$(git -C '"$ENGINE_DIR"' rev-parse HEAD 2>/dev/null)"
 echo "CONSOLE_SHA=$(git -C '"$CONSOLE_DIR"' rev-parse HEAD 2>/dev/null)"
 echo "DISK_PCT=$(df -P / 2>/dev/null | awk "NR==2{gsub(/%/,\"\",\$5);print \$5}")"
+if [ -d /etc/NetworkManager/conf.d ]; then
+  if grep -qx "ipv4.dhcp-vendor-class-identifier=idea-engine" /etc/NetworkManager/conf.d/90-idea-dhcp-vendor-class.conf 2>/dev/null; then echo DHCP_VC=nm; else echo DHCP_VC=missing-nm; fi
+elif grep -Eq "^[[:space:]]*vendorclassid[[:space:]]+idea-engine[[:space:]]*$" /etc/dhcpcd.conf 2>/dev/null; then echo DHCP_VC=dhcpcd
+else echo DHCP_VC=missing-dhcpcd; fi
+echo "KIT_ADDRS=$(ip -4 -o addr show 2>/dev/null | grep -o "inet 10\.42\.0\.[0-9]*" | cut -d" " -f2 | tr "\n" " ")"
 '
 
 kv() { printf '%s\n' "$1" | sed -n "s/^$2=//p" | head -1; }
@@ -148,8 +164,8 @@ for PI in "${PIS[@]}"; do
   reachable=true
   if [ $ssh_rc -eq 255 ] || { [ $ssh_rc -ne 0 ] && [ -z "$out" ]; }; then reachable=false; fi
 
-  e_status=""; e_user=""; e_restarts=""; e_sha=""; c_sha=""; disk=""; prev=""
-  engine_ok=false; versions_ok=null; disk_ok=false
+  e_status=""; e_user=""; e_restarts=""; e_sha=""; c_sha=""; disk=""; prev=""; dhcp_vc=""; kit_addrs=""
+  engine_ok=false; versions_ok=null; disk_ok=false; dhcp_ok=false
   exp_engine="$(sed -n 's/.*engine [^@,]*@\([0-9a-f]\{7,40\}\).*/\1/p' <<<"$version")"
   exp_console="$(sed -n 's/.*console [^@,]*@\([0-9a-f]\{7,40\}\).*/\1/p' <<<"$version")"
   if ! $reachable; then
@@ -185,6 +201,22 @@ for PI in "${PIS[@]}"; do
     if [[ "$disk" =~ ^[0-9]+$ ]]; then
       if [ "$disk" -lt "$DISK_MAX_PCT" ]; then disk_ok=true; else problems+=("root disk ${disk}% full (limit ${DISK_MAX_PCT}%)"); fi
     else problems+=("root disk usage unreadable"); fi
+
+    # dhcp (idea#284): vendor-class config present, kit LAN lease inside .2-.9
+    dhcp_vc="$(kv "$out" DHCP_VC)"; kit_addrs="$(kv "$out" KIT_ADDRS)"; kit_addrs="${kit_addrs% }"
+    dhcp_ok=true
+    case "$dhcp_vc" in
+      nm|dhcpcd) ;;
+      missing-nm) dhcp_ok=false; problems+=("DHCP vendor class drop-in /etc/NetworkManager/conf.d/90-idea-dhcp-vendor-class.conf missing or not idea-engine") ;;
+      missing-dhcpcd) dhcp_ok=false; problems+=("DHCP vendor class missing: no NetworkManager conf.d and no 'vendorclassid idea-engine' in /etc/dhcpcd.conf") ;;
+      *) dhcp_ok=false; problems+=("DHCP vendor class check unreadable") ;;
+    esac
+    for a in $kit_addrs; do
+      last="${a##*.}"
+      if ! [[ "$last" =~ ^[0-9]+$ ]] || [ "$last" -lt 2 ] || [ "$last" -gt 9 ]; then
+        dhcp_ok=false; problems+=("kit LAN address $a outside the Engine range 10.42.0.2-.9")
+      fi
+    done
   fi
 
   ok=true; [ ${#problems[@]} -gt 0 ] && ok=false
@@ -196,6 +228,7 @@ for PI in "${PIS[@]}"; do
     --argjson versions_ok "$versions_ok" --arg e_sha "${e_sha:0:7}" --arg c_sha "${c_sha:0:7}" \
     --arg exp_engine "$exp_engine" --arg exp_console "$exp_console" \
     --argjson disk_ok "$disk_ok" --arg disk "$disk" --argjson max "$DISK_MAX_PCT" \
+    --argjson dhcp_ok "$dhcp_ok" --arg dhcp_vc "$dhcp_vc" --arg kit_addrs "$kit_addrs" \
     --argjson problems "$( [ ${#problems[@]} -gt 0 ] && printf '%s\n' "${problems[@]}" | jq -R . | jq -sc . || echo '[]')" \
     'def n: if .=="" then null else (tonumber? // .) end; def s: if .=="" then null else . end;
      {pi:$pi, host:$host, status:$status, claim:($claim|s), claimed:$claimed, ok:$ok,
@@ -204,7 +237,8 @@ for PI in "${PIS[@]}"; do
         console:{ok:$console_ok, http:($http|n), port:($console_port|n)},
         engine:{ok:$engine_ok, status:($e_status|s), user:($e_user|s), restarts:($e_restarts|n), previous_restarts:($prev|n)},
         versions:{ok:$versions_ok, engine:($e_sha|s), console:($c_sha|s), expected_engine:($exp_engine|s), expected_console:($exp_console|s)},
-        disk:{ok:$disk_ok, used_pct:($disk|n), max_pct:$max}},
+        disk:{ok:$disk_ok, used_pct:($disk|n), max_pct:$max},
+        dhcp:{ok:$dhcp_ok, vendor_class:($dhcp_vc|s), kit_lan_addresses:(if $kit_addrs=="" then [] else ($kit_addrs|split(" ")) end)}},
       problems:$problems}')")
 done
 
@@ -213,7 +247,8 @@ echo "$new_restarts" > "$RESTARTS_FILE.tmp" && mv "$RESTARTS_FILE.tmp" "$RESTART
 report="$(printf '%s\n' "${results[@]}" | jq -sc --argjson now "$NOW" '
   {checked_at: ($now|todate), pis: .,
    unhealthy: [.[] | select(.ok|not) | select(.claimed|not) | .pi],
-   claimed_with_problems: [.[] | select(.ok|not) | select(.claimed) | .pi]}
+   claimed_with_problems: [.[] | select(.ok|not) | select(.claimed) | .pi],
+   dhcp_unhealthy: [.[] | select(.checks.dhcp.ok == false) | .pi]}
   | .ok = (.unhealthy|length==0)')"
 
 if [ $ALERT -eq 1 ]; then
@@ -253,4 +288,6 @@ if [ $ALERT -eq 1 ]; then
 fi
 
 jq . <<<"$report"
-jq -e '.ok' <<<"$report" >/dev/null && exit 0 || exit 1
+jq -e '.ok' <<<"$report" >/dev/null || exit 1
+if [ $DHCP_STRICT -eq 1 ] && jq -e '.dhcp_unhealthy|length>0' <<<"$report" >/dev/null; then exit 1; fi
+exit 0

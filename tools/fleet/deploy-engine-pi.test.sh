@@ -19,14 +19,27 @@ cat > "$WORK/bin/pnpm" <<'SH'
 [ "$1" = build ] && [ -n "${FAKE_BUILD_CLOBBER:-}" ] && git checkout -q -- store-identity/store-url.txt
 exit 0
 SH
+# Fake sudo/systemctl/nmcli: log only. FAKE_SUDO_FAIL=<regex> makes matching sudo calls fail.
+cat > "$WORK/bin/sudo" <<'SH'
+#!/usr/bin/env bash
+echo "$*" >> "$WORK/sudo.log"
+[ -n "${FAKE_SUDO_FAIL:-}" ] && [[ "$*" =~ $FAKE_SUDO_FAIL ]] && exit 1
+exit 0
+SH
+cat > "$WORK/bin/systemctl" <<'SH'
+#!/usr/bin/env bash
+[ -n "${FAKE_NM_ACTIVE:-}" ]
+SH
 chmod +x "$WORK/bin/"*; export PATH="$WORK/bin:$PATH" WORK
 
 setup() {  # repo with defaults committed, then the Pi's local edits on top
-  R="$WORK/repo-$1"; rm -rf "$R" "$WORK/pm2.log"; mkdir -p "$R/store-identity"; cd "$R" || exit 1
+  R="$WORK/repo-$1"; rm -rf "$R" "$WORK/pm2.log" "$WORK/sudo.log"; mkdir -p "$R/store-identity"; cd "$R" || exit 1
   git init -q; git config user.email t@t; git config user.name t
   echo "mdns: true" > config.yaml; echo "module.exports={}" > pm2.config.cjs
   echo "$DEFAULT" > store-identity/store-url.txt; echo "automerge:cmdlogDefault" > store-identity/command-log-url.txt
-  git add -A; git commit -qm base; echo v2 > engine.txt; git add -A; git commit -qm tip
+  git add -A; git commit -qm base; echo v2 > engine.txt
+  if [ -n "${WITH_VC:-}" ]; then mkdir -p script/build_image_assets; echo '#!/bin/bash' > script/build_image_assets/idea-dhcp-vendor-class; fi
+  git add -A; git commit -qm tip
   TIP=$(git rev-parse HEAD); git checkout -q HEAD~1
   echo "mdns: true # local" > config.yaml; echo "module.exports={local:1}" > pm2.config.cjs
   echo "$POOL" > store-identity/store-url.txt; echo "automerge:cmdlogPool" > store-identity/command-log-url.txt
@@ -63,5 +76,19 @@ check "unexpected tracked change aborts" [ "$rc" = 3 ]
 setup dry; run dry; rc=$?
 check "dry run exits 0" [ "$rc" = 0 ]
 check "dry run changes nothing" [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
+
+# DHCP vendor class (idea#284)
+setup noasset; run noasset --yes; rc=$?
+check "no asset: deploy ok and step skipped" [ "$rc" = 0 ] && grep -q "not in this Engine commit, skipped" "$WORK/out" && [ ! -e "$WORK/sudo.log" ]
+WITH_VC=1 setup vc; FAKE_NM_ACTIVE=1 run vc --yes; rc=$?
+check "vc: deploy succeeds" [ "$rc" = 0 ]
+check "vc: helper installed root-owned 0755" grep -qx -- "-n install -o root -g root -m 0755 script/build_image_assets/idea-dhcp-vendor-class /usr/local/sbin/idea-dhcp-vendor-class" "$WORK/sudo.log"
+check "vc: helper run after install" [ "$(sed -n 2p "$WORK/sudo.log")" = "-n /usr/local/sbin/idea-dhcp-vendor-class" ]
+check "vc: only NM config reloaded" [ "$(sed -n 3p "$WORK/sudo.log")" = "-n nmcli general reload conf" ] && ! grep -Eq "restart|connection (up|down)|device (disconnect|reapply)" "$WORK/sudo.log"
+check "vc: pm2 restarted afterwards" grep -q "restart engine" "$WORK/pm2.log"
+WITH_VC=1 setup vcnonm; run vcnonm --yes; rc=$?
+check "vc without NetworkManager: no nmcli" [ "$rc" = 0 ] && ! grep -q nmcli "$WORK/sudo.log"
+WITH_VC=1 setup vcfail; FAKE_SUDO_FAIL='idea-dhcp-vendor-class$' run vcfail --yes; rc=$?
+check "vc failure only warns, deploy completes" [ "$rc" = 0 ] && grep -q "WARN: DHCP vendor class not applied" "$WORK/out" && grep -q "restart engine" "$WORK/pm2.log"
 
 echo "passed $pass, failed $fail"; [ "$fail" = 0 ]
