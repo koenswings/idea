@@ -29,7 +29,11 @@ helper changes it would make. Kept always, whatever `git status` shows (skip-wor
 `pm2.config.cjs`, all of `store-identity/` and `~/.idea-local`, restored byte-for-byte and sha256-checked; a repo
 default store (`4GQm…`) aborts. After the build it runs `./install-root-helpers` (flash/app-data/erase helpers and
 sudoers), checks each helper's sha256 against `script/build_image_assets/` and `visudo -c`, then `pm2 restart engine`
-and `pm2 save`. An Engine commit without `install-root-helpers` only warns.
+and `pm2 save`, and re-checks the store after the restart. An Engine commit without `install-root-helpers` only warns.
+
+Hosts: pool Pis idea01/03/04 expect `automerge:2VroE…`; kit Engines sunny-robin, happy-zebra, kind-panda expect the one
+shared kit store `automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk` (kits only after Steve's GO naming the Engine). Any other
+host is refused; a store mismatch aborts before anything changes.
 
 1. **Guard:** host is a pool Pi; `store-url.txt` is the expected store (2VroE); only
    `config.yaml`, `pm2.config.cjs` and `store-identity/*` have tracked local edits.

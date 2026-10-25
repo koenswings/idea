@@ -48,7 +48,7 @@ setup() {  # repo with defaults committed, then the Pi's local edits on top
   echo "{}" > store-identity/store-template.json   # untracked, must survive
   cd "$WORK" || exit 1
 }
-run() { mkdir -p "$WORK/sbin-$1"; ENGINE_DIR="$R" HOST_NAME="${H:-idea04}" BACKUP_ROOT="$WORK/bk-$1" IDEA_LOCAL="$WORK/idea-local-$1" SBIN="$WORK/sbin-$1" bash "$SCRIPT" "$TIP" "${@:2}" > "$WORK/out" 2>&1; }
+run() { export POST_RESTART_WAIT=0; mkdir -p "$WORK/sbin-$1"; ENGINE_DIR="$R" HOST_NAME="${H:-idea04}" BACKUP_ROOT="$WORK/bk-$1" IDEA_LOCAL="$WORK/idea-local-$1" SBIN="$WORK/sbin-$1" bash "$SCRIPT" "$TIP" "${@:2}" > "$WORK/out" 2>&1; }
 
 setup ok; run ok --yes; rc=$?
 check "deploy succeeds" [ "$rc" = 0 ]
@@ -110,5 +110,16 @@ WITH_HELPERS=1 setup rhbad; FAKE_HELPER_BAD=1 run rhbad --yes; rc=$?
 check "helpers: sha mismatch aborts before restart" [ "$rc" = 3 ] && [ ! -e "$WORK/pm2.log" ]
 setup norh; run norh --yes; rc=$?
 check "helpers: missing install-root-helpers only warns" [ "$rc" = 0 ] && grep -q "WARN: ./install-root-helpers not in" "$WORK/out"
+
+# Kit Engines: shared kit store 3Vvvig, never the pool store or the repo default
+KIT=automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk
+setup kit; echo "$KIT" > "$R/store-identity/store-url.txt"; H=sunny-robin run kit --yes; rc=$?
+check "kit: matching kit store deploys" [ "$rc" = 0 ] && [ "$(git -C "$R" rev-parse HEAD)" = "$TIP" ] && [ "$(cat "$R/store-identity/store-url.txt")" = "$KIT" ] && grep -q "store $KIT" "$WORK/out"
+setup kitpool; H=kind-panda run kitpool --yes; rc=$?
+check "kit: pool store on a kit aborts before any change" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ] && [ ! -d "$WORK/bk-kitpool" ]
+setup kitdef; echo "$DEFAULT" > "$R/store-identity/store-url.txt"; H=happy-zebra run kitdef --yes; rc=$?
+check "kit: 4GQm default store aborts before any change" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
+setup unk; H=wizardly-hugle run unk --yes; rc=$?
+check "unknown host refused" [ "$rc" = 3 ] && grep -q "not a pool Pi or kit Engine" "$WORK/out"
 
 echo "passed $pass, failed $fail"; [ "$fail" = 0 ]

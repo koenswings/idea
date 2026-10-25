@@ -18,12 +18,13 @@
 # A plain discard + checkout puts those back, and a restarted pool Engine then joins idea02's
 # store (idea04, 2026-10-14). See docs/ops/engine-deploy-pool-pi.md.
 #
-# Env overrides (tests): ENGINE_DIR, HOST_NAME, EXPECT_STORE, BACKUP_ROOT, IDEA_LOCAL, SBIN.
+# Env overrides (tests): ENGINE_DIR, HOST_NAME, EXPECT_STORE, BACKUP_ROOT, IDEA_LOCAL, SBIN, POST_RESTART_WAIT.
 set -euo pipefail
 
 ENGINE_DIR="${ENGINE_DIR:-/home/pi/idea/agents/agent-engine-dev}"
 HOST_NAME="${HOST_NAME:-$(hostname)}"
 POOL_STORE="automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH"   # idea01/03/04 since 2026-10-13 (fleet-state.json)
+KIT_STORE="automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk"   # ONE shared kit store (sunny-robin, happy-zebra, kind-panda; reset 2026-10-18)
 BACKUP_ROOT="${BACKUP_ROOT:-/home/pi/quarantine}"
 KEEP="config.yaml pm2.config.cjs"                    # plus every file in store-identity/
 IDEA_LOCAL="${IDEA_LOCAL:-$HOME/.idea-local}"        # kit local override, outside the repo; kept too
@@ -47,7 +48,8 @@ done
 
 case "$HOST_NAME" in
   idea01|idea03|idea04) EXPECT_STORE="${EXPECT_STORE:-$POOL_STORE}" ;;
-  *) die "not a pool Pi ($HOST_NAME); never idea02, wizardly-hugle or Milkwise" ;;
+  sunny-robin|happy-zebra|kind-panda) EXPECT_STORE="${EXPECT_STORE:-$KIT_STORE}" ;;  # only after Steve's GO naming the Engine
+  *) die "not a pool Pi or kit Engine ($HOST_NAME); never idea02, wizardly-hugle or Milkwise" ;;
 esac
 cd "$ENGINE_DIR"
 store_now() { tr -d '[:space:]' < store-identity/store-url.txt; }
@@ -155,4 +157,6 @@ verify_kept "before pm2 restart"
 check_store "before pm2 restart"
 pm2 restart engine --update-env
 pm2 save
+sleep "${POST_RESTART_WAIT:-5}"
+check_store "after pm2 restart"
 echo "DEPLOYED $HOST_NAME HEAD $(git rev-parse --short HEAD) store $(store_now) backup $BK"
