@@ -39,6 +39,8 @@ setup() {  # repo with defaults committed, then the Pi's local edits on top
   echo "$DEFAULT" > store-identity/store-url.txt; echo "automerge:cmdlogDefault" > store-identity/command-log-url.txt
   git add -A; git commit -qm base; echo v2 > engine.txt
   if [ -n "${WITH_VC:-}" ]; then mkdir -p script/build_image_assets; echo '#!/bin/bash' > script/build_image_assets/idea-dhcp-vendor-class; fi
+  if [ -n "${WITH_HELPERS:-}" ]; then mkdir -p script/build_image_assets; echo flash-v2 > script/build_image_assets/idea-flash-card
+    printf '#!/bin/sh\n[ -n "$FAKE_HELPER_BAD" ] && { echo old > "$SBIN/idea-flash-card"; exit 0; }\ncp script/build_image_assets/idea-flash-card "$SBIN/"\n' > install-root-helpers; chmod +x install-root-helpers; fi
   git add -A; git commit -qm tip
   TIP=$(git rev-parse HEAD); git checkout -q HEAD~1
   echo "mdns: true # local" > config.yaml; echo "module.exports={local:1}" > pm2.config.cjs
@@ -46,7 +48,7 @@ setup() {  # repo with defaults committed, then the Pi's local edits on top
   echo "{}" > store-identity/store-template.json   # untracked, must survive
   cd "$WORK" || exit 1
 }
-run() { ENGINE_DIR="$R" HOST_NAME="${H:-idea04}" BACKUP_ROOT="$WORK/bk-$1" bash "$SCRIPT" "$TIP" "${@:2}" > "$WORK/out" 2>&1; }
+run() { mkdir -p "$WORK/sbin-$1"; ENGINE_DIR="$R" HOST_NAME="${H:-idea04}" BACKUP_ROOT="$WORK/bk-$1" IDEA_LOCAL="$WORK/idea-local-$1" SBIN="$WORK/sbin-$1" bash "$SCRIPT" "$TIP" "${@:2}" > "$WORK/out" 2>&1; }
 
 setup ok; run ok --yes; rc=$?
 check "deploy succeeds" [ "$rc" = 0 ]
@@ -61,7 +63,7 @@ check "backup holds store-identity" [ -f "$WORK"/bk-ok/engine-deploy-*/store-ide
 
 setup clob; FAKE_BUILD_CLOBBER=1 run clob --yes; rc=$?
 check "store reset before restart aborts" [ "$rc" = 3 ]
-check "abort names the store" grep -q "before pm2 restart: store-url.txt" "$WORK/out"
+check "abort names the store" grep -q "before pm2 restart: store-identity/store-url.txt" "$WORK/out"
 check "no pm2 restart after abort" [ ! -e "$WORK/pm2.log" ]
 
 setup wrong; echo "$DEFAULT" > "$R/store-identity/store-url.txt"; run wrong --yes; rc=$?
@@ -90,5 +92,23 @@ WITH_VC=1 setup vcnonm; run vcnonm --yes; rc=$?
 check "vc without NetworkManager: no nmcli" [ "$rc" = 0 ] && ! grep -q nmcli "$WORK/sudo.log"
 WITH_VC=1 setup vcfail; FAKE_SUDO_FAIL='idea-dhcp-vendor-class$' run vcfail --yes; rc=$?
 check "vc failure only warns, deploy completes" [ "$rc" = 0 ] && grep -q "WARN: DHCP vendor class not applied" "$WORK/out" && grep -q "restart engine" "$WORK/pm2.log"
+
+# Always keep store-identity even when git hides it (skip-worktree, kits) and ~/.idea-local
+setup skip; git -C "$R" update-index --skip-worktree store-identity/store-url.txt store-identity/command-log-url.txt
+echo "local=1" > "$WORK/idea-local-skip"; run skip --yes; rc=$?
+check "skip-worktree: deploy succeeds" [ "$rc" = 0 ]
+check "skip-worktree: store-url kept" [ "$(cat "$R/store-identity/store-url.txt")" = "$POOL" ]
+check "idea-local kept and backed up" [ "$(cat "$WORK/idea-local-skip")" = local=1 ] && ls "$WORK"/bk-skip/engine-deploy-*/idea-local >/dev/null 2>&1
+check "pm2 save after restart" grep -q "^save" "$WORK/pm2.log"
+# --dry-run flag
+setup dry2; run dry2 --dry-run; rc=$?
+check "--dry-run lists kept sha256 and changes nothing" [ "$rc" = 0 ] && grep -q "store-identity/store-url.txt" "$WORK/out" && [ ! -e "$WORK/pm2.log" ] && [ ! -d "$WORK/bk-dry2" ]
+# Root helpers
+WITH_HELPERS=1 setup rh; run rh --yes; rc=$?
+check "helpers: installed and verified" [ "$rc" = 0 ] && grep -q "helper idea-flash-card sha" "$WORK/out" && grep -q -- "-n visudo -c" "$WORK/sudo.log"
+WITH_HELPERS=1 setup rhbad; FAKE_HELPER_BAD=1 run rhbad --yes; rc=$?
+check "helpers: sha mismatch aborts before restart" [ "$rc" = 3 ] && [ ! -e "$WORK/pm2.log" ]
+setup norh; run norh --yes; rc=$?
+check "helpers: missing install-root-helpers only warns" [ "$rc" = 0 ] && grep -q "WARN: ./install-root-helpers not in" "$WORK/out"
 
 echo "passed $pass, failed $fail"; [ "$fail" = 0 ]

@@ -24,6 +24,13 @@ Run from the ops box, one Pi at a time:
     ssh idea04 'bash -s -- <tip-sha> --fetch <branch>'        < tools/fleet/deploy-engine-pi.sh   # checks only
     ssh idea04 'bash -s -- <tip-sha> --fetch <branch> --yes'  < tools/fleet/deploy-engine-pi.sh
 
+`--dry-run` (same as leaving out `--yes`) is read-only and lists the sha256 of every file it would keep and the
+helper changes it would make. Kept always, whatever `git status` shows (skip-worktree included): `config.yaml`,
+`pm2.config.cjs`, all of `store-identity/` and `~/.idea-local`, restored byte-for-byte and sha256-checked; a repo
+default store (`4GQm…`) aborts. After the build it runs `./install-root-helpers` (flash/app-data/erase helpers and
+sudoers), checks each helper's sha256 against `script/build_image_assets/` and `visudo -c`, then `pm2 restart engine`
+and `pm2 save`. An Engine commit without `install-root-helpers` only warns.
+
 1. **Guard:** host is a pool Pi; `store-url.txt` is the expected store (2VroE); only
    `config.yaml`, `pm2.config.cjs` and `store-identity/*` have tracked local edits.
 2. **Save** `config.yaml`, `pm2.config.cjs` and the whole `store-identity/` folder
