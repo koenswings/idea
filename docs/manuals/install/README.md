@@ -18,8 +18,7 @@ Addressing and naming (school network design): every school uses the same subnet
 `10.42.2.0/24`). The installer names each Pi with a unique two-word sticker name. One Tailscale tag (`tag:idea`) and one fleet
 key for all schools.
 
-**Not yet true on hardware:** the sticker naming (`provision-fleet.sh … auto=<ip>`, the `Sticker name:` line,
-`/home/pi/STICKER.txt`) and the Console listing all Engines from the database come from the Engine's sticker-hostname change, which is not merged yet (the Console part, listing all Engines from the database, is merged).
+**Sticker names:** merged in agent-engine-dev#201 (installer names the Pi, prints it and saves `/home/pi/STICKER.txt`) and agent-console-dev#152 (the Console lists every Engine from the network database). `http://idea.local` stays as the easy way in (idea#184).
 The classroom computer manual describes the IDEA client image, which is built but not yet boot-tested on a Pi 400 and a Pi 500.
 
 No auth keys or tokens: everything in `<ANGLE BRACKETS>` is a placeholder. The router defaults (`IDEA`/`idea911!`, `IDEA-Teachers`/`idea-teachers911!`, `root`/`admin911!`) follow the public `<name>911!` convention (*IDEA School Router – Image and Automated Flashing* proposal); the client image's `admin` account uses `admin911!`.

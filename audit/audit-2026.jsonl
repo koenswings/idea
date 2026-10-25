@@ -596,3 +596,4 @@
 {"ts":"2026-10-18T13:58:00Z","bot":"Atlas","action":"fleet_state_update","pi":"sunny-robin","field":"lan","value":"10.42.0.4","previous":"10.99.0.138"}
 {"ts":"2026-10-25T09:21:38Z","bot":"unknown","action":"quality_scan","mode":"pr","repos":["idea"],"ok":false,"violation_count":18}
 {"ts":"2026-10-25T09:21:44Z","bot":"unknown","action":"quality_scan","mode":"pr","repos":["idea"],"ok":false,"violation_count":18}
+{"ts":"2026-10-25T09:21:56Z","bot":"unknown","action":"quality_scan","mode":"pr","repos":["idea"],"ok":true,"violation_count":0}
