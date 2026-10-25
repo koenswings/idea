@@ -33,8 +33,12 @@ Run from the ops box, one Pi at a time:
 4. **Check out** the tip (`git checkout --detach <tip>`; no `-f`, no reset).
 5. **Restore** every saved file and check each one is byte-identical to the saved copy.
 6. **Verify the store:** `store-url.txt` must equal the expected store, otherwise abort.
-7. `pnpm install --frozen-lockfile`, `pnpm build`, **verify the store again**, then
-   `pm2 restart engine --update-env`.
+7. `pnpm install --frozen-lockfile`, `pnpm build`, then the **DHCP vendor class**
+   (idea#284): when the tip has `script/build_image_assets/idea-dhcp-vendor-class`, install
+   it to `/usr/local/sbin/idea-dhcp-vendor-class` (root, 0755), run it (idempotent) and, if
+   NetworkManager is active, `nmcli general reload conf` (no NM restart, no link change).
+   A failure there only warns; `check-fleet-health.sh` reports a missing drop-in.
+8. **Verify the store again**, then `pm2 restart engine --update-env`.
 
 Any failed check aborts with exit 3 **before** `pm2 restart`, so the running Engine keeps its
 store. The backup folder stays for a manual restore.
@@ -42,7 +46,7 @@ store. The backup folder stays for a manual restore.
 ## 4. After the deploy
 - `cat store-identity/store-url.txt` and the Engine log (`~/.pm2/logs/engine-*.log`, lines
   `Store: 2VroE-…`) show 2VroE.
-- `tools/fleet/check-fleet-health.sh` is healthy for the Pi.
+- `tools/fleet/check-fleet-health.sh` is healthy for the Pi (including `checks.dhcp`).
 
 ## 5. Rollback
 `git checkout --detach $(cat <backup>/HEAD)`, copy the backup's `config.yaml`,

@@ -7,7 +7,7 @@
 # Steps: guard host + store -> save config.yaml, pm2.config.cjs and every store-identity/ file
 # -> discard those local edits -> git checkout --detach <tip> -> restore the saved files
 # -> verify they are byte-identical and store-url.txt is still the expected store
-# -> pnpm install + build -> verify again -> pm2 restart engine.
+# -> pnpm install + build -> DHCP vendor class (idea#284) -> verify again -> pm2 restart engine.
 # Any failed check aborts BEFORE pm2 restart (exit 3); the running Engine keeps its old store.
 # Without --yes it only runs the read-only checks and prints the plan.
 #
@@ -80,6 +80,20 @@ echo "restored: config.yaml sha $(sha256sum config.yaml | cut -c1-16), store $(s
 # 7. Build, verify again, restart
 pnpm install --frozen-lockfile
 pnpm build
+# DHCP option 60 "idea-engine" (idea#209 D8, idea#284): same step as the Engine's
+# installRootHelpers. Idempotent; never restarts NetworkManager or touches a link.
+# A failure only warns: check-fleet-health.sh reports a missing drop-in.
+VC_ASSET=script/build_image_assets/idea-dhcp-vendor-class
+VC_HELPER=/usr/local/sbin/idea-dhcp-vendor-class
+if [ -f "$VC_ASSET" ]; then
+  if sudo -n install -o root -g root -m 0755 "$VC_ASSET" "$VC_HELPER" && sudo -n "$VC_HELPER"; then
+    if systemctl is-active --quiet NetworkManager; then sudo -n nmcli general reload conf || echo "WARN: nmcli general reload conf failed" >&2; fi
+  else
+    echo "WARN: DHCP vendor class not applied (idea#284); check-fleet-health.sh will report it" >&2
+  fi
+else
+  echo "DHCP vendor class: $VC_ASSET not in this Engine commit, skipped"
+fi
 check_store "before pm2 restart"
 pm2 restart engine --update-env
 echo "DEPLOYED $HOST_NAME HEAD $(git rev-parse --short HEAD) store $(store_now) backup $BK"

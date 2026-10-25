@@ -42,8 +42,8 @@ export SSH_BIN="$WORK/ssh" CURL_BIN="$WORK/curl"
 unset ALL_PROXY IDEA_SOCKS_PROXY; export SOCKS_PROBE_ADDR=127.0.0.1:1
 
 E=df1a250aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; C=b4eff52bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-healthy() { printf 'ENGINE_STATUS=online\nENGINE_USER=pi\nENGINE_RESTARTS=%s\nENGINE_SHA=%s\nCONSOLE_SHA=%s\nDISK_PCT=%s\n' \
-  "${1:-0}" "${2:-$E}" "${3:-$C}" "${4:-37}"; }
+healthy() { printf 'ENGINE_STATUS=online\nENGINE_USER=pi\nENGINE_RESTARTS=%s\nENGINE_SHA=%s\nCONSOLE_SHA=%s\nDISK_PCT=%s\nDHCP_VC=%s\nKIT_ADDRS=%s\n' \
+  "${1:-0}" "${2:-$E}" "${3:-$C}" "${4:-37}" "${5:-nm}" "${6:-}"; }
 reset() {
   rm -rf "${HEALTH_DIR:?}" "${FAKE:?}"/*
   cat > "$STATE_FILE" <<'JSON'
@@ -253,6 +253,55 @@ check "socks: listening probe port -> socks5h proxy" test "$(sort -u "$FAKE/prox
 reset; IDEA_SOCKS_PROXY=none SOCKS_PROBE_ADDR=127.0.0.1:$LPORT run
 check "socks: IDEA_SOCKS_PROXY=none forces direct" test "$(sort -u "$FAKE/proxy.log")" = none
 kill $LPID 2>/dev/null; wait $LPID 2>/dev/null
+
+# 14. dhcp (idea#284): vendor-class drop-in present, kit LAN lease inside 10.42.0.2-.9
+reset; healthy 0 "$E" "$C" 37 nm "10.42.0.3 " > "$FAKE/10.0.0.1.ssh"; healthy 0 "$E" "$C" 37 dhcpcd > "$FAKE/10.0.0.2.ssh"; run
+check "dhcp: NM drop-in + .3 lease, and dhcpcd line -> healthy" test "$RC:$(j '.ok'):$(j '.dhcp_unhealthy|length')" = "0:true:0"
+check "dhcp: report lists kit LAN addresses" test "$(j '.pis[0].checks.dhcp.kit_lan_addresses|join(",")'):$(j '.pis[0].checks.dhcp.vendor_class')" = "10.42.0.3:nm"
+reset; healthy 0 "$E" "$C" 37 missing-nm > "$FAKE/10.0.0.1.ssh"; run
+check "dhcp: missing NM drop-in fails the run" test "$RC:$(j '.unhealthy|join(",")'):$(j '.dhcp_unhealthy|join(",")')" = "1:p1:p1"
+check "dhcp: problem names the drop-in" has_problem p1 '90-idea-dhcp-vendor-class\.conf missing'
+reset; healthy 0 "$E" "$C" 37 missing-dhcpcd > "$FAKE/10.0.0.1.ssh"; run
+check "dhcp: no NM and no dhcpcd vendorclassid fails" has_problem p1 "no 'vendorclassid idea-engine'"
+reset; healthy | sed '/^DHCP_VC=/d' > "$FAKE/10.0.0.1.ssh"; run
+check "dhcp: unreadable check fails (old/odd Pi)" has_problem p1 'DHCP vendor class check unreadable'
+for addr in 10.42.0.127 10.42.0.1 10.42.0.10; do
+  reset; healthy 0 "$E" "$C" 37 nm "$addr " > "$FAKE/10.0.0.1.ssh"; run
+  check "dhcp: kit LAN lease $addr outside .2-.9 fails" test "$RC:$(j '.pis[0].checks.dhcp.ok')" = "1:false"
+  check "dhcp: problem names $addr" has_problem p1 "kit LAN address ${addr//./\\.} outside the Engine range"
+done
+for addr in 10.42.0.2 10.42.0.9; do
+  reset; healthy 0 "$E" "$C" 37 nm "$addr " > "$FAKE/10.0.0.1.ssh"; run
+  check "dhcp: kit LAN lease $addr (range edge) is fine" test "$RC:$(j '.pis[0].checks.dhcp.ok')" = "0:true"
+done
+reset; healthy 0 "$E" "$C" 37 nm "10.42.0.5 10.42.0.200 " > "$FAKE/10.0.0.1.ssh"; run
+check "dhcp: one bad address among several fails" has_problem p1 'kit LAN address 10\.42\.0\.200 outside'
+reset; healthy 0 "$E" "$C" 37 nm > "$FAKE/10.0.0.1.ssh"; run
+check "dhcp: no kit LAN address (pool LAN 10.99) -> no lease check" test "$RC:$(j '.pis[0].checks.dhcp.ok')" = "0:true"
+# kit Engines have status "kit" (claimed): reported in dhcp_unhealthy; --dhcp makes that fail the run
+reset; jq '.p2.status="kit" | .p2.role="kit-engine"' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+healthy 0 "$E" "$C" 37 nm "10.42.0.127 " > "$FAKE/10.0.0.2.ssh"; run
+check "dhcp: claimed kit Engine with .127 -> listed, plain run still exit 0" test "$RC:$(j '.dhcp_unhealthy|join(",")'):$(j '.claimed_with_problems|join(",")')" = "0:p2:p2"
+run --dhcp
+check "dhcp: --dhcp fails on the claimed kit Engine" test "$RC" = 1
+run --dhcp --pi p1
+check "dhcp: --dhcp --pi on a good Pi exits 0" test "$RC" = 0
+# the real remote snippet parses `ip -4 -o addr show` (fake ssh that executes the command with a stub ip)
+reset; mkdir -p "$WORK/ipbin"
+cat > "$WORK/ipbin/ip" <<'SH'
+#!/usr/bin/env bash
+echo "2: eth0    inet 10.42.0.7/24 brd 10.42.0.255 scope global dynamic noprefixroute eth0\       valid_lft 43000sec preferred_lft 43000sec"
+echo "3: docker0    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0\       valid_lft forever preferred_lft forever"
+echo "4: tailscale0    inet 100.64.1.2/32 scope global tailscale0\       valid_lft forever preferred_lft forever"
+SH
+cat > "$WORK/xssh" <<SH
+#!/usr/bin/env bash
+PATH="$WORK/ipbin:\$PATH" bash -c "\${!#}" 2>/dev/null
+SH
+chmod +x "$WORK/ipbin/ip" "$WORK/xssh"
+OUT="$(SSH_BIN="$WORK/xssh" "$CFH" --pi p1)"
+check "dhcp: remote snippet reports only the 10.42.0.x address" test "$(j '.pis[0].checks.dhcp.kit_lan_addresses|join(",")')" = "10.42.0.7"
+check "dhcp: remote snippet reports a vendor-class state" test "$(j '.pis[0].checks.dhcp.vendor_class | test("^(nm|dhcpcd|missing-nm|missing-dhcpcd)$")')" = true
 
 check "real fleet-state.json untouched" test "$(real_fp)" = "$REAL_BEFORE"
 echo "---"
