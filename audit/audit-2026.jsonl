@@ -594,6 +594,9 @@
 {"ts":"2026-10-18T13:58:00Z","bot":"Atlas","action":"fleet_state_update","pi":"kind-panda","field":"lan","value":"10.42.0.127","previous":"10.99.0.127"}
 {"ts":"2026-10-18T13:58:00Z","bot":"Atlas","action":"fleet_state_update","pi":"happy-zebra","field":"lan","value":"10.42.0.3","previous":"10.99.0.197"}
 {"ts":"2026-10-18T13:58:00Z","bot":"Atlas","action":"fleet_state_update","pi":"sunny-robin","field":"lan","value":"10.42.0.4","previous":"10.99.0.138"}
+{"ts":"2026-10-25T09:21:38Z","bot":"unknown","action":"quality_scan","mode":"pr","repos":["idea"],"ok":false,"violation_count":18}
+{"ts":"2026-10-25T09:21:44Z","bot":"unknown","action":"quality_scan","mode":"pr","repos":["idea"],"ok":false,"violation_count":18}
+{"ts":"2026-10-25T09:21:56Z","bot":"unknown","action":"quality_scan","mode":"pr","repos":["idea"],"ok":true,"violation_count":0}
 {"ts":"2026-10-25T12:46:06Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-25T12:46:06Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: idea#284 on-Pi proof engine#245 d95b58f (Steve 2026-10-25 13:44)","previous":null}
 {"ts":"2026-10-25T12:48:26Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}

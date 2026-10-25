@@ -6,8 +6,8 @@
 
 | Folder | PDF | Topic |
 |---|---|---|
-| `install-manual-school-server/` | `idea-field-install-manual-school-server-v1.7.pdf`  | Starlink → Cudy WR3000S (OpenWrt + Tailscale) → TL-SG105PE PoE+ switch → Pi 5 IDEA Engines (one or more) |
-| `install-manual-classroom-computer/` | `idea-field-install-manual-classroom-computer-v2.4.pdf`  | Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor (one PSU) + the IDEA client image (Ubuntu Desktop 26.04.1 LTS, Chrome, IDEA icon) |
+| `install-manual-school-server/` | `idea-field-install-manual-school-server-v1.8.pdf`  | Starlink → Cudy WR3000S (OpenWrt + Tailscale) → TL-SG105PE PoE+ switch → Pi 5 IDEA Engines (one or more) |
+| `install-manual-classroom-computer/` | `idea-field-install-manual-classroom-computer-v2.5.pdf`  | Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor (one PSU) + the IDEA client image (Ubuntu Desktop 26.04.1 LTS, Chrome, IDEA icon) |
 | `accounts-and-passwords/` | `idea-accounts-and-passwords-v1.1.pdf` | IDEA Kit: Accounts and Passwords (v1.1). **Private:** every default account and password of the kit (classroom computers, Engines, apps, router, switch, Wi-Fi). For the IDEA team and installers; not left at the school. |
 | `scripts/` | – | `school-router-setup.sh`, `router-tailscale-zone.sh` (OpenWrt 25.12 uci; tested with the 25.12.5 x86 rootfs `uci` + `fw4 print`, not yet on a real Cudy; no longer printed in the school-server manual) and `make-install-diagrams.py` (writes both manuals' `diagrams/*.svg`) |
 
@@ -18,8 +18,7 @@ Addressing and naming (school network design): every school uses the same subnet
 `10.42.2.0/24`). The installer names each Pi with a unique two-word sticker name. One Tailscale tag (`tag:idea`) and one fleet
 key for all schools.
 
-**Not yet true on hardware:** the sticker naming (`provision-fleet.sh … auto=<ip>`, the `Sticker name:` line,
-`/home/pi/STICKER.txt`) and the Console listing all Engines from the database come from the Engine's sticker-hostname change, which is not merged yet (the Console part, listing all Engines from the database, is merged).
+**Sticker names:** merged in agent-engine-dev#201 (installer names the Pi, prints it and saves `/home/pi/STICKER.txt`) and agent-console-dev#152 (the Console lists every Engine from the network database). `http://idea.local` stays as the easy way in (idea#184).
 The classroom computer manual describes the IDEA client image, which is built but not yet boot-tested on a Pi 400 and a Pi 500.
 
 No auth keys or tokens: everything in `<ANGLE BRACKETS>` is a placeholder. The router defaults (`IDEA`/`idea911!`, `IDEA-Teachers`/`idea-teachers911!`, `root`/`admin911!`) follow the public `<name>911!` convention (*IDEA School Router – Image and Automated Flashing* proposal); the client image's `admin` account uses `admin911!`.
