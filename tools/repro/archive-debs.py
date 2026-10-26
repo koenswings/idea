@@ -8,7 +8,10 @@ Writes DIR/<file>.deb, DIR/SHA256SUMS (our own hash of what we stored), DIR/inde
 Every downloaded file is checked against the mirror's Packages SHA256; a mismatch is fatal.
 Packages not installed from a mirror (e.g. google-chrome-stable from a pinned .deb) appear in missing.tsv.
 """
+import socket
 import argparse, time, gzip, hashlib, json, lzma, os, sys, urllib.parse, urllib.request
+
+socket.setdefaulttimeout(180)   # no read can hang forever (Launchpad stalls)
 
 def fetch(url, timeout=120, tries=5):
     for i in range(tries):

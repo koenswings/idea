@@ -15,7 +15,7 @@ import hashlib, os, sys
 
 SIDECARS = ["packages.tsv", "images.tsv", "files.sha256", "dist.sha256"]
 REQUIRED = ["schema", "batch", "deviceType", "arch", "model", "osRelease", "imageCommit", "imageBranch", "imageTag",
-            "imageVersion", "packageArchive", "secrets", "deployedAt", "evidence", "confidence", "open"]
+            "imageVersion", "packageArchive", "packageArchiveSha256", "packageArchiveUrl", "secrets", "deployedAt", "evidence", "confidence", "open"]
 SCHEMA = "idea-deployment-record/1"
 DEVICE_TYPES = {"client", "router", "engine"}
 

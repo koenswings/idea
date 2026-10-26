@@ -47,6 +47,7 @@ difference in a compare. `n/a` means the key does not apply. Unknown extra keys 
 | `packageArchive` | yes | box path of the exact package/input archive (the directory always has a `SHA256SUMS`) |
 | `packageArchiveSha256` | yes | sha256 of the archive asset, or of its `SHA256SUMS` |
 | `packageArchiveUrl` | yes | release asset URL, or `not published yet (Koen 2026-10-26)` |
+| `packageArchiveParts`, `packageArchiveTarSha256` | optional | number/names of split tar parts and the sha256 of each tar (when the archive is split) |
 | `secrets` | yes | which secrets were given and when (names only) |
 | `deployedAt`, `evidence`, `confidence`, `open` | yes | provenance and gaps |
 

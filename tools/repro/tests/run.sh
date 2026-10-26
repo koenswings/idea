@@ -108,6 +108,8 @@ imageSha256=n/a
 imageManifest=n/a
 nodeVersion=UNKNOWN
 packageArchive=/x
+packageArchiveSha256=UNKNOWN
+packageArchiveUrl=not published yet
 secrets=none
 deployedAt=d1
 evidence=e
@@ -127,6 +129,8 @@ printf '%064d  d.js\n' 3 > "$RE/dist.sha256"
 tf "record check catches stale contentSha256" python3 "$R/compare-record.py" --check "$RE"
 printf 'tool\t1.0\n' > "$RE/packages.tsv"; sed -i '/^contentSha256/d' "$RE/record.txt"
 tf "record check requires 3-column packages.tsv" python3 "$R/compare-record.py" --check "$RE"
+grep -v '^packageArchiveUrl=' "$RA/record.txt" > "$T/rec/nourl.txt"; mkdir -p "$T/rec/n"; cp "$T/rec/nourl.txt" "$T/rec/n/record.txt"
+tf "record check requires packageArchiveUrl" python3 "$R/compare-record.py" --check "$T/rec/n"
 t "volatile.txt holds record keys" grep -qx 'key:capturedUtc' "$R/volatile.txt"
 for d in "$R"/../../deployments/*/*/*/; do [ -f "$d/record.txt" ] || continue
   python3 "$R/compare-record.py" --check "$d" >/dev/null || no "committed record valid: $d"; done; ok "committed records valid"
