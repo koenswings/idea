@@ -1,0 +1,24 @@
+# RETRO record (idea#322), written 2026-10-26 from box evidence (card-log.md, build logs). Not captured on the device.
+# UNKNOWN = not recoverable from the box; fill in with tools/repro/capture-device.sh when the device is next online.
+schema=idea-deployment-record/1
+batch=zimbabwe-2026-10
+deviceType=router
+hostname=kind-panda-router
+stickerName=kind-panda
+model=Cudy WR3000S v1
+osRelease=OpenWrt 25.12.5
+imageCommit=b2f00bc
+imageBranch=fix/router-image-dnsmasq-local-teachers-off (#271, squash-merged)
+imageTag=
+setupRef=7eedd03
+imageFile=idea-router-0.1.0-dev-b2f00bc-cudy_wr3000s-v1-squashfs-sysupgrade.bin
+imageSha256=8e084dc0d891f8141277f0f152307a12c2cc6f13759e561a659232b9cc1ace61
+imageManifest=manifests/router/idea-router-0.1.0-dev-b2f00bc-cudy_wr3000s-v1
+contentSha256=dee4275a665ae4865dc326ba16ae0d427779aaf359e6101ad2425489875ebc4f
+confidence=likely: the only build in router-fix-out/SHA256SUMS and the head of #271; not yet confirmed on a device
+imageBuilderSha256=7fb6cf626582ebcbfb46974da48c1eae577213f38879eaf6b1d982041e843461
+cudyIntermediate=cudy_wr3000s-v1-sysupgrade_20251119.bin sha256 463e6e31e7361ec8177d2c3a136674297fd179eafaa166fe459731cdf1b35773 (URL UNKNOWN)
+packageArchive=/workspace/idea-archive/router/b2f00bc-openwrt-25.12.5/apk (box); offline rebuild byte-identical 2026-10-26
+secrets=root password + Tailscale key at enrol time (not recorded)
+deployedAt=UNKNOWN (#271)
+open=confirm with capture-device.sh

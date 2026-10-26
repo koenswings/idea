@@ -1,0 +1,26 @@
+# RETRO record (idea#322), written 2026-10-26 from box evidence (card-log.md, build logs). Not captured on the device.
+# UNKNOWN = not recoverable from the box; fill in with tools/repro/capture-device.sh when the device is next online.
+schema=idea-deployment-record/1
+batch=zimbabwe-2026-10
+deviceType=client-card
+arch=aarch64
+osRelease=Ubuntu 26.04.1 preinstalled desktop arm64+raspi
+baseImageSha256=8216f54c...544d6a
+aptPins=tools/client-image/apt-pins.tsv
+packageArchive=/workspace/idea-archive/client/s15-291b962 (box); release asset pending approval
+secrets=flash-time Wi-Fi PSK (value not recorded)
+evidence=/workspace/client-card-patch/card-log.md (box, 2026-10-17, wh)
+cardId=UNKNOWN (reflashed reflash-1)
+deployedAt=2026-10-17 (wh)
+imageId=s15
+imageCommit=291b96253d407f21bf38091e92128bf2149fc974
+imageBranch=main
+imageTag=
+imageVersion=26.04-20261017-291b962
+imageFile=idea-client-26.04-20261017-291b962-s15.img.xz
+imageXzSha256=dd6f6d408a16cdb614d090b02bd771634eb4a74beaeb774a674dc332333ffa6c
+imageManifest=manifests/client/idea-client-26.04-20261017-291b962-s15
+contentSha256=0746a2def620716adca0a9ec7213438945f73d7067700292b73c2f7866d56da8
+readBackSha256=6cadd6b2... (13999996928 bytes)
+previousCardId=pmx6b5vpzn62cmaeygi
+open=confirm with capture-device.sh

@@ -1,0 +1,24 @@
+# RETRO record (idea#322), written 2026-10-26 from box evidence (card-log.md, build logs). Not captured on the device.
+# UNKNOWN = not recoverable from the box; fill in with tools/repro/capture-device.sh when the device is next online.
+schema=idea-deployment-record/1
+batch=zimbabwe-2026-10
+deviceType=client-card
+arch=aarch64
+osRelease=Ubuntu 26.04.1 preinstalled desktop arm64+raspi
+baseImageSha256=8216f54c...544d6a
+aptPins=tools/client-image/apt-pins.tsv
+packageArchive=/workspace/idea-archive/client/s15-291b962 (box); release asset pending approval
+secrets=flash-time Wi-Fi PSK (value not recorded)
+evidence=/workspace/client-card-patch/card-log.md (box, 2026-10-17, wh)
+cardId=9qqttxdncddatorix8h
+deployedAt=2026-10-17 (wh)
+imageId=s14
+imageCommit=f00748e
+imageBranch=origin/feat/client-image-build (not on main)
+imageTag=
+imageVersion=26.04-20261016-f00748e
+imageFile=idea-client-26.04-20261016-f00748e-s14.img (psk-patched)
+imageXzSha256=1f1641cf... (full: idea-archive/client/inputs/SHA256SUMS)
+imageManifest=UNKNOWN (s14 image no longer on the box; package list = s15, see build-20261017-121651.log)
+postInstall.patch=tools/client-image/field/patch-client-cards.sh 2026-10-17 PASS: keyboard us, Chrome NewTabPageLocation removed, Engine META.yaml removed (original sha256 82ada65e...)
+open=confirm with capture-device.sh
