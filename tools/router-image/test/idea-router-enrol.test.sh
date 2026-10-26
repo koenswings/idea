@@ -14,6 +14,8 @@ cat > "$WORK/bin/fssh" <<'SH'
 echo "ssh $*" >> "$WORK/argv.log"
 R="$WORK/r"; cmd="${!#}"
 [ -n "${FAKE_DOWN:-}" ] && exit 255
+# FAKE_NEEDPW: router with a root password and no authorized key (fresh IDEA image, idea#276)
+[ -n "${FAKE_NEEDPW:-}" ] && [ "${VIA_SSHPASS:-}" != ok ] && exit 255
 case "$cmd" in
   true) exit 0 ;;
   *"/etc/idea/sticker"*) n=$(sed -n "s/.*hostname='\([a-z-]*\)'.*/\1/p" <<<"$cmd"); echo "$n" > "$R/sticker"; echo "$n" > "$R/hostname" ;;
@@ -33,13 +35,27 @@ SH
 cat > "$WORK/bin/fscp" <<'SH'
 #!/usr/bin/env bash
 echo "scp $*" >> "$WORK/argv.log"
+[ -n "${FAKE_NEEDPW:-}" ] && [ "${VIA_SSHPASS:-}" != ok ] && exit 1
 src="${@: -2:1}"; cp "$src" "$WORK/r/tskey"
+SH
+# Mock sshpass: must be called as 'sshpass -e', must get the password in env SSHPASS (never argv).
+cat > "$WORK/bin/fsshpass" <<'SH'
+#!/usr/bin/env bash
+echo "sshpass $*" >> "$WORK/argv.log"
+[ "$1" = -e ] || { echo "mock sshpass: expected -e" >&2; exit 90; }
+shift
+[ "${SSHPASS:-}" = "$(cat "$WORK/pwexpect")" ] && VIA_SSHPASS=ok
+unset SSHPASS; export VIA_SSHPASS
+exec "$@"
 SH
 chmod +x "$WORK/bin/"*; export WORK
 reset() { rm -rf "$WORK/r" "$WORK/argv.log" "$WORK/log"; mkdir -p "$WORK/r"; printf '%s\n' "$SECRET" > "$WORK/key"; chmod 600 "$WORK/key"; }
-run() { IDEA_FLEET_KEY="$WORK/key" IDEA_ROUTER_LOG="$WORK/log" IDEA_VERIFY_SLEEP=0 SSH="$WORK/bin/fssh" SCP="$WORK/bin/fscp" \
+run() { SSHPASS_CMD="$WORK/bin/fsshpass" IDEA_FLEET_KEY="$WORK/key" IDEA_ROUTER_LOG="$WORK/log" IDEA_VERIFY_SLEEP=0 SSH="$WORK/bin/fssh" SCP="$WORK/bin/fscp" \
         bash "$SCRIPT" "$@" > "$WORK/out" 2>&1; }
 noleak() { ! grep -rqF "$SECRET" "$WORK/out" "$WORK/log" "$WORK/argv.log" 2>/dev/null; }
+PW="fake-pw-$RANDOM$RANDOM-not-real"; printf '%s\n' "$PW" > "$WORK/pwexpect"
+pwfile() { printf '%s\n' "$PW" > "$WORK/pw"; chmod 600 "$WORK/pw"; }
+nopwleak() { ! grep -rqF "$PW" "$WORK/out" "$WORK/log" "$WORK/argv.log" 2>/dev/null; }
 
 reset; run sunny-robin; rc=$?
 check "enrol succeeds" [ "$rc" = 0 ]
@@ -83,5 +99,39 @@ reset; FAKE_UPFAIL=1 run sunny-robin; rc=$?
 check "tailscale up failure -> rc 5" [ "$rc" = 5 ]
 check "key removed after failure" [ ! -e "$WORK/r/tskey" ]
 check "failure: key never leaked" noleak
+
+# ---- password mode (idea#276) against a password-only mock router ----
+reset; FAKE_NEEDPW=1 run sunny-robin; rc=$?
+check "pw-only router, key mode -> rc 4" [ "$rc" = 4 ]
+check "key mode uses BatchMode" grep -q "BatchMode=yes" "$WORK/argv.log"
+
+reset; pwfile; FAKE_NEEDPW=1 IDEA_ROUTER_PASSWORD_FILE="$WORK/pw" run sunny-robin; rc=$?
+check "password file mode enrols" [ "$rc" = 0 ]
+check "password mode: tailscale up ran" [ -f "$WORK/r/up" ]
+check "password mode: key removed" [ ! -e "$WORK/r/tskey" ]
+check "password mode: every ssh/scp went through sshpass -e" [ "$(grep -c '^sshpass -e ' "$WORK/argv.log")" -ge 5 ]
+nobatch() { ! grep -q "BatchMode=yes" "$WORK/argv.log"; }; check "password mode: no BatchMode" nobatch
+check "password mode: logged as mode=password" grep -q "mode=password" "$WORK/log"
+check "password never in argv/output/log" nopwleak
+check "password mode: key never leaked" noleak
+
+reset; FAKE_NEEDPW=1 run --password-stdin sunny-robin < "$WORK/pwexpect"; rc=$?
+check "--password-stdin enrols" [ "$rc" = 0 ]
+check "--password-stdin: password never in argv/output/log" nopwleak
+
+reset; FAKE_NEEDPW=1 run --password-stdin sunny-robin < /dev/null; rc=$?
+check "--password-stdin empty -> rc 3" [ "$rc" = 3 ]
+check "empty stdin: router untouched" [ ! -e "$WORK/argv.log" ]
+
+reset; pwfile; chmod 644 "$WORK/pw"; IDEA_ROUTER_PASSWORD_FILE="$WORK/pw" run sunny-robin; rc=$?
+check "password file mode 644 -> rc 3" [ "$rc" = 3 ]
+check "password file mode message" grep -q "password file .* has mode 644, must be 600" "$WORK/out"
+check "bad password file: router untouched" [ ! -e "$WORK/argv.log" ]
+
+reset; IDEA_ROUTER_PASSWORD_FILE="$WORK/nope" run sunny-robin; rc=$?
+check "password file missing -> rc 3" [ "$rc" = 3 ]
+
+reset; printf 'wrong-fake-pw\n' > "$WORK/pw"; chmod 600 "$WORK/pw"; FAKE_NEEDPW=1 IDEA_ROUTER_PASSWORD_FILE="$WORK/pw" run sunny-robin; rc=$?
+check "wrong password -> rc 4" [ "$rc" = 4 ]
 
 echo "$pass passed, $fail failed"; [ "$fail" = 0 ]

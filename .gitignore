@@ -30,3 +30,7 @@ __pycache__/
 # update-fleet-state.sh lock and temp files
 fleet-state.json.lock
 .fleet-state.*
+
+# Router backups hold radio calibration and, after enrol, the router's Tailscale identity: never in git (idea#278)
+router-backups/
+*sysupgrade-backup*

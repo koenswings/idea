@@ -4,6 +4,7 @@
 # Usage: tools/router-image/build.sh [OUTDIR]   (env: WORK=/path/cache, ALLOW_LABEL_TODO=1)
 set -euo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd); REPO=$(cd "$HERE/../.." && pwd)
+# shellcheck source=SCRIPTDIR/config.env
 . "$HERE/config.env"
 OUT=${1:-$PWD/out}; WORK=${WORK:-$HOME/.cache/idea-router-ib}
 mkdir -p "$OUT" "$WORK"
@@ -34,7 +35,7 @@ chmod 755 "$F/etc/uci-defaults/90-idea-setup" "$F"/usr/share/idea/*.sh
 PKGS=$(grep -v '^\s*#' "$HERE/packages.txt" | xargs)
 make -C "$IB" image PROFILE="$PROFILE" PACKAGES="$PKGS" FILES="$F" \
   EXTRA_IMAGE_NAME="idea-$IDEA_ROUTER_VERSION" BIN_DIR="$OUT/bin" -j"${JOBS:-2}"
-SRC=$(ls "$OUT"/bin/*"$PROFILE"-squashfs-sysupgrade.bin | grep -v ubootmod)
+SRC=""; for f in "$OUT"/bin/*"$PROFILE"-squashfs-sysupgrade.bin; do case "$f" in *ubootmod*) ;; *) SRC=$f ;; esac; done
 NAME="idea-router-$IDEA_ROUTER_VERSION-$GIT-$PROFILE-squashfs-sysupgrade.bin"
 cp "$SRC" "$OUT/$NAME"; (cd "$OUT" && sha256sum "$NAME" > SHA256SUMS && cat SHA256SUMS)
 cp "$OUT"/bin/*.manifest "$OUT/" 2>/dev/null || true
