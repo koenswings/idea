@@ -1,6 +1,6 @@
 # Engine record (idea#322) from Atlas's read-only capture of sunny-robin, 2026-10-26T18:54:11Z
 # (capture file sha256 1c24ac6441dda922aef829217b7ef2fb432c65d2b7c8504eb2e1ef75380b2184, raw copy in capture.txt).
-# No changes were made on the kit. Sidecars: packages.tsv (dpkg, 1258), images.tsv (docker image ids; repo digests not captured).
+# No changes were made on the kit. Sidecars: packages.tsv, images.tsv, files.sha256, dist.sha256 (capture-engine-record.sh), helpers.sha256, capture.txt (Atlas probe).
 schema=idea-deployment-record/1
 batch=zimbabwe-2026-10
 deviceType=engine
@@ -10,7 +10,7 @@ recordLabel=capture-2026-10-26
 capturedUtc=2026-10-26T18:54:11Z
 captureHost=box (Atlas, read-only probe sha256 fd3af5e70c12718a69c6c9d55c3890e1cbbb9cd91fd83d59448f6bd933652ed1)
 arch=aarch64
-model=Raspberry Pi 5 (Waveshare D case), USB SSD Intenso AA000000000000003120
+model=Raspberry Pi 5 Model B Rev 1.1 (Waveshare D case), USB SSD Intenso AA000000000000003120
 kernel=6.18.50+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.18.50-1+rpt1 (2026-09-11)
 osRelease=Debian GNU/Linux 13 (trixie) 13.7 (Raspberry Pi OS Lite)
 imageCommit=adfd9d354ffd83c5ecc0a9eea64a474eae08de8f
@@ -20,24 +20,24 @@ imageVersion=1.0
 imageFile=n/a
 imageSha256=n/a
 imageManifest=n/a
-contentSha256=UNKNOWN (files.sha256/dist.sha256 not captured on device)
-engineDirtyFiles=3 untracked: script/.zz-kolibri-morango.ts, store-identity/command-log-archive/, store-identity/command-log-day.txt
-engineSkipWorktree=UNKNOWN
+contentSha256=dd7216fd541e4e4993d83732ebd4bea0980ad98584fe7d8c6dd4439a4a5115d5
+engineDirtyFiles=0 tracked; 3 untracked: script/.zz-kolibri-morango.ts, store-identity/command-log-archive/, store-identity/command-log-day.txt
+engineSkipWorktree=2
 enginePrevious=main@07456c3
-notes=dockerPins/aptPins: none on the kit; versions differing from 2026-10-26 pins archived in /workspace/idea322-archive/kit-sunny-robin/. Untracked helper script/.zz-kolibri-morango.ts present (postInstall.morango).
+notes=No apt changes since 2026-10-17: /var/log/apt/history.log last session 2026-10-17 12:24 (smartmontools), dpkg.log has no entries after 2026-10-17, unattended-upgrades not installed (raspi-config 20261026 is only a version string). Kit versions differing from 2026-10-26 pins (Docker, Tailscale 1.104.1) archived in /workspace/idea322-archive/kit-sunny-robin/. helpers.sha256: the 6 /usr/local/sbin/idea-* helpers, all equal to script/build_image_assets/* at adfd9d3.
 consoleCheckout=main@654224e
 consoleCommit=62bd2ba03544fd7b2ef490a07de2b8780f81105b (agent-console-dev#162, unmerged; dist-only swap)
-consoleDistSha256=UNKNOWN
+consoleDistSha256=3570acfd61489e83ebcf54a6d6d33debf3a55caf2878167d339ffffecf90cf11
 lockfileSha256=37fd94bcc8c528652d898a8b2acd7eb02841fbd91b3c05ca247bfef6eba4b3c3
 nodeVersion=v22.20.0 (via n: /usr/local/n/versions/node/22.20.0; distro nodejs 20.19.2+dfsg-1+deb13u3 also installed)
-npmVersion=UNKNOWN
-pnpmVersion=UNKNOWN
-pm2Version=UNKNOWN (pm2 jlist shows 8.0.0 in pm2_env; pm2-logrotate module 3.0.0)
+npmVersion=10.9.3
+pnpmVersion=10.33.0
+pm2Version=7.0.4
 dockerVersion=docker-ce 5:29.9.1-1~debian.13~trixie, containerd.io 2.4.2-2~debian.13~trixie, buildx 0.38.0-1~debian.13~trixie, compose 5.6.0-1~debian.13~trixie, model-plugin 1.2.6-1~debian.13~trixie
-tailscaleVersion=UNKNOWN (tarball install, not in dpkg; binary not hashed)
-appKolibriCommit=UNKNOWN (image koenswings/kolibri:1.0-0.15.5-dev id sha256:d1442711e1ba...)
+tailscaleVersion=1.104.1 (commit 7f4efe814ff14b064eb080344389ceb9ea2d37ac; /usr/sbin/tailscale sha256 6c2c134a..., tailscaled 6367abc3...; = pkgs.tailscale.com tailscale_1.104.1_arm64.tgz)
+appKolibriCommit=2cab08c (version: in /instances/<kolibri>/compose.yaml of both Kolibri instances) + MORANGO hand edit (postInstall.morango)
 dockerPins=none at adfd9d3 (get.docker.com latest; archive holds today's pinned Docker debs, see debs/docker/NOTE.txt)
-aptPins=none at adfd9d3 (Debian unpinned; packages.tsv UNKNOWN until captured)
+aptPins=none at adfd9d3 (Debian unpinned; installed versions in packages.tsv)
 postInstall.morango=2026-10-17: MORANGO_SYSTEM_ID=idea-${hostname}-${port} added by hand to /instances/<id>/compose.yaml of Kolibri and Kolibri Demo (app-kolibri#8; procedure: agent-engine-dev docs/REPRODUCIBLE_BUILDS.md §7)
 packageArchive=/workspace/idea322-archive/release-kit-adfd9d3/
 packageArchiveUrl=https://github.com/koenswings/agent-engine-dev/releases/tag/field/zimbabwe-2026-10/engine-adfd9d3
@@ -46,6 +46,6 @@ packageArchiveParts=kit-adfd9d3-archive.tar.part-00:f5dabbb6e708f5d02bbfd6920a7d
 packageArchiveTarSha256=b88af91cfab6f49405995f54c08d861a063a1efd76bd5ec07fd45637e189ec92 (kit-adfd9d3-archive.tar = the parts joined)
 secrets=Tailscale auth key at build time (name only; value never recorded). Capture holds no keys/tokens/passwords.
 deployedAt=2026-10-18 10:40:33 CEST (Engine); Console dist 2026-10-17
-evidence=read-only capture /workspace/idea-archive/captures/sunny-robin-20261026T185411Z.txt (Atlas, 2026-10-26)
+evidence=read-only captures: /workspace/idea-archive/captures/sunny-robin-20261026T185411Z.txt (Atlas probe, sha256 1c24ac64...b2184) and sunny-robin-engine-record-20261026T190638Z.tar (capture-engine-record.sh @958ff0b, sha256 33ec73dc3bd0e85be30816cebbf98e1a961d81e6e7b39dbeae5bcc0afa56035d)
 confidence=captured on device
-open=npm/pnpm/pm2/tailscale versions, app-kolibri commit, image repo digests, Engine files/dist hashes (capture-engine-record.sh not run)
+open=none
