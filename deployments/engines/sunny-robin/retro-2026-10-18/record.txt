@@ -1,0 +1,42 @@
+# RETRO record (idea#322), written 2026-10-26 from git history (agent-engine-dev adfd9d3) and fleet-state.json (@4e515d4).
+# Not captured on the Engine. UNKNOWN = not recoverable from the box; fill in from agent-engine-dev
+# script/capture-engine-record.sh (read-only) when the Engine is next online. Sidecar: files.sha256 (tracked files at adfd9d3).
+schema=idea-deployment-record/1
+batch=zimbabwe-2026-10
+deviceType=engine
+hostname=sunny-robin
+stickerName=sunny-robin
+arch=aarch64
+model=Raspberry Pi 5 (Waveshare D case), USB SSD Intenso AA000000000000003120
+kernel=UNKNOWN
+osRelease=Raspberry Pi OS trixie Lite + cloud-init (re-provisioned 2026-10-17 11:31-11:42 CEST on USB SSD)
+imageCommit=adfd9d354ffd83c5ecc0a9eea64a474eae08de8f
+imageBranch=deploy/kit-229-232 (agent-engine-dev; merge of feat/engine-lan-address, not on main)
+imageTag=
+imageVersion=1.0
+imageFile=n/a
+imageSha256=n/a
+imageManifest=n/a
+contentSha256=UNKNOWN
+engineDirtyFiles=UNKNOWN
+engineSkipWorktree=UNKNOWN (fleet-state: ~/.idea-local override, store-identity files skip-worktree)
+enginePrevious=main@07456c3
+consoleCommit=62bd2ba03544fd7b2ef490a07de2b8780f81105b (agent-console-dev#162, unmerged; dist-only swap)
+consoleCheckout=main@654224e
+consoleDistSha256=UNKNOWN
+lockfileSha256=37fd94bcc8c528652d898a8b2acd7eb02841fbd91b3c05ca247bfef6eba4b3c3
+nodeVersion=UNKNOWN (expected v22.20.0 from NODE_VERSION at adfd9d3)
+npmVersion=UNKNOWN
+pnpmVersion=UNKNOWN (expected 10.33.0 from PNPM_VERSION at adfd9d3)
+pm2Version=UNKNOWN (installed unpinned)
+dockerVersion=UNKNOWN
+tailscaleVersion=UNKNOWN (installed as the latest stable tarball)
+appKolibriCommit=UNKNOWN
+aptPins=none at adfd9d3 (Debian unpinned; packages.tsv UNKNOWN until captured)
+postInstall.morango=2026-10-17: MORANGO_SYSTEM_ID=idea-${hostname}-${port} added by hand to /instances/<id>/compose.yaml of Kolibri and Kolibri Demo (app-kolibri#8; procedure: agent-engine-dev docs/REPRODUCIBLE_BUILDS.md §7)
+packageArchive=/workspace/idea322-archive/engine-adfd9d3 (box); release kit-adfd9d3-archive on koenswings/agent-engine-dev (prepared, NOT published, needs Koen's go)
+secrets=Tailscale auth key at build time (name only; value never recorded)
+deployedAt=2026-10-18 10:40:33 CEST (Engine); Console dist 2026-10-17
+evidence=fleet-state.json @4e515d4 (version/deployed/note); agent-engine-dev git adfd9d3
+confidence=likely: fleet-state version line, Steve-confirmed deploy; not captured on the device
+open=capture with capture-engine-record.sh: packages.tsv, images.tsv, dist.sha256, tool versions, local overrides
