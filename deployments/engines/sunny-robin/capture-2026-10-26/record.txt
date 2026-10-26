@@ -1,0 +1,51 @@
+# Engine record (idea#322) from Atlas's read-only capture of sunny-robin, 2026-10-26T18:54:11Z
+# (capture file sha256 1c24ac6441dda922aef829217b7ef2fb432c65d2b7c8504eb2e1ef75380b2184, raw copy in capture.txt).
+# No changes were made on the kit. Sidecars: packages.tsv (dpkg, 1258), images.tsv (docker image ids; repo digests not captured).
+schema=idea-deployment-record/1
+batch=zimbabwe-2026-10
+deviceType=engine
+hostname=sunny-robin
+stickerName=sunny-robin
+recordLabel=capture-2026-10-26
+capturedUtc=2026-10-26T18:54:11Z
+captureHost=box (Atlas, read-only probe sha256 fd3af5e70c12718a69c6c9d55c3890e1cbbb9cd91fd83d59448f6bd933652ed1)
+arch=aarch64
+model=Raspberry Pi 5 (Waveshare D case), USB SSD Intenso AA000000000000003120
+kernel=6.18.50+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.18.50-1+rpt1 (2026-09-11)
+osRelease=Debian GNU/Linux 13 (trixie) 13.7 (Raspberry Pi OS Lite)
+imageCommit=adfd9d354ffd83c5ecc0a9eea64a474eae08de8f
+imageBranch=deploy/kit-229-232 (agent-engine-dev; merge of feat/engine-lan-address, not on main)
+imageTag=field/zimbabwe-2026-10/engine-adfd9d3
+imageVersion=1.0
+imageFile=n/a
+imageSha256=n/a
+imageManifest=n/a
+contentSha256=UNKNOWN (files.sha256/dist.sha256 not captured on device)
+engineDirtyFiles=3 untracked: script/.zz-kolibri-morango.ts, store-identity/command-log-archive/, store-identity/command-log-day.txt
+engineSkipWorktree=UNKNOWN
+enginePrevious=main@07456c3
+notes=dockerPins/aptPins: none on the kit; versions differing from 2026-10-26 pins archived in /workspace/idea322-archive/kit-sunny-robin/. Untracked helper script/.zz-kolibri-morango.ts present (postInstall.morango).
+consoleCheckout=main@654224e
+consoleCommit=62bd2ba03544fd7b2ef490a07de2b8780f81105b (agent-console-dev#162, unmerged; dist-only swap)
+consoleDistSha256=UNKNOWN
+lockfileSha256=37fd94bcc8c528652d898a8b2acd7eb02841fbd91b3c05ca247bfef6eba4b3c3
+nodeVersion=v22.20.0 (via n: /usr/local/n/versions/node/22.20.0; distro nodejs 20.19.2+dfsg-1+deb13u3 also installed)
+npmVersion=UNKNOWN
+pnpmVersion=UNKNOWN
+pm2Version=UNKNOWN (pm2 jlist shows 8.0.0 in pm2_env; pm2-logrotate module 3.0.0)
+dockerVersion=docker-ce 5:29.9.1-1~debian.13~trixie, containerd.io 2.4.2-2~debian.13~trixie, buildx 0.38.0-1~debian.13~trixie, compose 5.6.0-1~debian.13~trixie, model-plugin 1.2.6-1~debian.13~trixie
+tailscaleVersion=UNKNOWN (tarball install, not in dpkg; binary not hashed)
+appKolibriCommit=UNKNOWN (image koenswings/kolibri:1.0-0.15.5-dev id sha256:d1442711e1ba...)
+dockerPins=none at adfd9d3 (get.docker.com latest; archive holds today's pinned Docker debs, see debs/docker/NOTE.txt)
+aptPins=none at adfd9d3 (Debian unpinned; packages.tsv UNKNOWN until captured)
+postInstall.morango=2026-10-17: MORANGO_SYSTEM_ID=idea-${hostname}-${port} added by hand to /instances/<id>/compose.yaml of Kolibri and Kolibri Demo (app-kolibri#8; procedure: agent-engine-dev docs/REPRODUCIBLE_BUILDS.md §7)
+packageArchive=/workspace/idea322-archive/release-kit-adfd9d3/
+packageArchiveUrl=https://github.com/koenswings/agent-engine-dev/releases/tag/field/zimbabwe-2026-10/engine-adfd9d3
+packageArchiveSha256=3a2d0262f1108fd5c3e388a9b34470285631292633a259f771274dfac0b04f25
+packageArchiveParts=kit-adfd9d3-archive.tar.part-00:f5dabbb6e708f5d02bbfd6920a7d8935058301ed09e953dde9d4ee16f1d7dc2c,kit-adfd9d3-archive.tar.part-01:e2315dfca264b9cedc934be66acf98ddbceaeb7ab95d7557d27a82e000b27b1b,kit-adfd9d3-archive.tar.part-02:f04b5b1e297e6a34e4909a72fc3bde357f723316306dd00260f7856e117645f7,kit-adfd9d3-archive.tar.part-03:dd35cb4f70b9bfa9afb20d1f34aaedf8515a5401cd328e4947277a671d01d0a2,kit-adfd9d3-archive.tar.part-04:85ef6f0bd45b22cde1ea3cd5c2993abaf982eb99a7b71a35aec9e065af706b41,kit-adfd9d3-archive.tar.part-05:a9fa8f4322a916ab7d48354545c67db8b80544b4cd9869a7f59725163d434fd4
+packageArchiveTarSha256=b88af91cfab6f49405995f54c08d861a063a1efd76bd5ec07fd45637e189ec92 (kit-adfd9d3-archive.tar = the parts joined)
+secrets=Tailscale auth key at build time (name only; value never recorded). Capture holds no keys/tokens/passwords.
+deployedAt=2026-10-18 10:40:33 CEST (Engine); Console dist 2026-10-17
+evidence=read-only capture /workspace/idea-archive/captures/sunny-robin-20261026T185411Z.txt (Atlas, 2026-10-26)
+confidence=captured on device
+open=npm/pnpm/pm2/tailscale versions, app-kolibri commit, image repo digests, Engine files/dist hashes (capture-engine-record.sh not run)
