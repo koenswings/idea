@@ -108,7 +108,16 @@
       "power": "Recurring brief under-voltage ~2 s on cold boot (FIT, 3120 boots), EXT5V idle 5.18 V, min 5.127 V over 10 min of apt load; cable/port vs HAT comparison pending."
     },
     "version": "engine deploy/kit-229-232@adfd9d354ffd83c5ecc0a9eea64a474eae08de8f, console pr162@62bd2ba03544fd7b2ef490a07de2b8780f81105b (koenswings/agent-console-dev#162, unmerged; dist-only swap, checkout stays main@654224e)",
-    "deployed": "engine 2026-10-18 10:40:33 CEST (prev main@07456c3, backup ~/quarantine/engine-deploy-20261018-104000); console dist 2026-10-17 15:06:29 CEST (prev 7bf4772 in ~/quarantine/console-dist-7bf4772-20261017-150629). Steve-confirmed."
+    "deployed": "engine 2026-10-18 10:40:33 CEST (prev main@07456c3, backup ~/quarantine/engine-deploy-20261018-104000); console dist 2026-10-17 15:06:29 CEST (prev 7bf4772 in ~/quarantine/console-dist-7bf4772-20261017-150629). Steve-confirmed.",
+    "router": {
+      "name": "sunny-robin-router",
+      "model": "Cudy WR3000S v1 (cudy,wr3000s-v1)",
+      "tailscale": "100.96.34.29",
+      "firmware": "OpenWrt 25.12.5 r33051-f5dae5ece4 (mediatek/filogic, kernel 6.12.94, squashfs, upstream builddate 2026-06-29)",
+      "mac_lan": "d4:0d:ab:50:ce:7e",
+      "mac_wan": "d4:0d:ab:50:ce:7f",
+      "read": "2026-10-26 19:42 CET, read-only over Tailscale via LuCI ubus (port 22 not open on Tailscale), router uptime 114 s at read; no changes made (idea#288 first contact)"
+    }
   },
   "kind-panda": {
     "role": "kit-engine",
