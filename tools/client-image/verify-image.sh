@@ -24,19 +24,9 @@ grep -q '^overlayroot=' /etc/overlayroot.conf && ok "overlayroot present: $(grep
 ls /etc/ssh/ssh_host_* >/dev/null 2>&1 && bad "ssh host keys baked in" || ok "no ssh host keys"
 # --- idea#202 fixes (2026-10-15) ---
 # 1 config.txt: KMS overlay per model, not in [all]
-python3 - /boot/firmware/config.txt <<'P' && ok "config.txt: [pi4] vc4-kms-v3d + [pi5] vc4-kms-v3d-pi5, none in [all], disable_fw_kms_setup=1" || bad "config.txt KMS sections"
-import sys
-sec="all"; seen={}
-for l in open(sys.argv[1]):
-    l=l.strip()
-    if l.startswith("[") and l.endswith("]"): sec=l[1:-1]; continue
-    if l.startswith("dtoverlay=vc4-kms-v3d"): seen.setdefault(sec,[]).append(l)
-    if l=="disable_fw_kms_setup=1": seen["fwkms"]=1
-assert "dtoverlay=vc4-kms-v3d" not in seen.get("all",[]), "kms in [all]"
-assert seen.get("pi4")==["dtoverlay=vc4-kms-v3d"], seen.get("pi4")
-assert seen.get("pi5")==["dtoverlay=vc4-kms-v3d-pi5"], seen.get("pi5")
-assert seen.get("fwkms")==1
-P
+# 1b idea#304: usb_max_current_enable=1 in [pi5] only, [pi4] byte-identical to s15 (files/check-config-txt.py)
+while IFS= read -r r; do case "$r" in ok:*) ok "${r#ok:   }";; *) bad "${r#FAIL: }";; esac
+done < <(python3 $B/files/check-config-txt.py /boot/firmware/config.txt 2>&1 || true)
 l=$(tail -n 30 /boot/firmware/config.txt | grep -E '^\[' | tail -1); [ "$l" = "[all]" ] && ok "config.txt ends in [all]" || bad "config.txt last section is '$l'"
 [ -f /boot/firmware/overlays/vc4-kms-v3d-pi5.dtbo ] || [ -f /boot/firmware/current/overlays/vc4-kms-v3d-pi5.dtbo ] && ok "vc4-kms-v3d-pi5.dtbo present" || bad "pi5 overlay dtbo missing"
 c=/boot/firmware/current/cmdline.txt; [ -f $c ] || c=/boot/firmware/cmdline.txt
