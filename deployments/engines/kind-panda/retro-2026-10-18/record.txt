@@ -35,10 +35,12 @@ appKolibriCommit=UNKNOWN
 dockerPins=none at adfd9d3 (get.docker.com latest; archive holds today's pinned Docker debs, see debs/docker/NOTE.txt)
 aptPins=none at adfd9d3 (Debian unpinned; packages.tsv UNKNOWN until captured)
 postInstall.morango=2026-10-17: MORANGO_SYSTEM_ID=idea-${hostname}-${port} added by hand to /instances/<id>/compose.yaml of Kolibri and Kolibri Demo (app-kolibri#8; procedure: agent-engine-dev docs/REPRODUCIBLE_BUILDS.md §7)
-packageArchive=/workspace/idea322-archive/engine-adfd9d3 (box); release kit-adfd9d3-archive on koenswings/agent-engine-dev (prepared, NOT published, needs Koen's go)
-archiveUrl=https://github.com/koenswings/agent-engine-dev/releases/tag/kit-adfd9d3-archive
-archiveSha256=kit-adfd9d3-archive.tar.part-00:b88af91cfab6f49405995f54c08d861a063a1efd76bd5ec07fd45637e189ec92
-archiveStatus=pending publication (prepared on the box, needs Koen's go; asset URL https://github.com/koenswings/agent-engine-dev/releases/download/kit-adfd9d3-archive/kit-adfd9d3-archive.tar.part-00)
+packageArchive=GitHub prerelease field/zimbabwe-2026-10/engine-adfd9d3 on koenswings/agent-engine-dev (assets kit-adfd9d3-archive.tar.part-00..05) + box copy
+sourceTag=field/zimbabwe-2026-10/engine-adfd9d3 (agent-engine-dev, annotated tag on adfd9d3)
+archiveUrl=https://github.com/koenswings/agent-engine-dev/releases/tag/field/zimbabwe-2026-10/engine-adfd9d3 (prerelease, published 2026-10-26)
+archiveSha256=kit-adfd9d3-archive.tar.part-00:f5dabbb6e708f5d02bbfd6920a7d8935058301ed09e953dde9d4ee16f1d7dc2c,kit-adfd9d3-archive.tar.part-01:e2315dfca264b9cedc934be66acf98ddbceaeb7ab95d7557d27a82e000b27b1b,kit-adfd9d3-archive.tar.part-02:f04b5b1e297e6a34e4909a72fc3bde357f723316306dd00260f7856e117645f7,kit-adfd9d3-archive.tar.part-03:dd35cb4f70b9bfa9afb20d1f34aaedf8515a5401cd328e4947277a671d01d0a2,kit-adfd9d3-archive.tar.part-04:85ef6f0bd45b22cde1ea3cd5c2993abaf982eb99a7b71a35aec9e065af706b41,kit-adfd9d3-archive.tar.part-05:a9fa8f4322a916ab7d48354545c67db8b80544b4cd9869a7f59725163d434fd4,SHA256SUMS:3a2d0262f1108fd5c3e388a9b34470285631292633a259f771274dfac0b04f25
+archiveTarSha256=b88af91cfab6f49405995f54c08d861a063a1efd76bd5ec07fd45637e189ec92 (kit-adfd9d3-archive.tar = the parts joined)
+archiveBoxPath=/workspace/idea322-archive/release-kit-adfd9d3 (box copy; unpacked inputs in /workspace/idea322-archive/engine-adfd9d3)
 secrets=Tailscale auth key at build time (name only; value never recorded)
 deployedAt=2026-10-18 10:43:40 CEST (Engine); Console dist 2026-10-17
 evidence=fleet-state.json @4e515d4 (version/deployed/note); agent-engine-dev git adfd9d3
