@@ -68,10 +68,11 @@ cp "$SRC" "$OUT/$NAME"; (cd "$OUT" && sha256sum "$NAME" > SHA256SUMS && cat SHA2
 cp "$OUT"/bin/*.manifest "$OUT/" 2>/dev/null || true
 # --- package pins + manifest (idea#322) ---
 sed 's/ - /\t/' "$OUT"/bin/*.manifest | LC_ALL=C sort > "$OUT/packages.tsv"
-if "$REPO/tools/repro/compare-manifest.sh" "$HERE/package-pins.tsv" "$OUT/packages.tsv"; then echo "package pins: match"
+if "$REPO/tools/repro/compare-manifest.sh" "$HERE/package-pins.tsv" <(cut -f1,2 "$OUT/packages.tsv"); then echo "package pins: match"
 elif [ "$BUILD_KIND" = release ]; then echo "refusing release: packages differ from package-pins.tsv" >&2; exit 1
 else echo "WARNING (dev build): packages differ from package-pins.tsv" >&2; fi
 RT="$WORK/rootfs"; rm -rf "$RT"; "$REPO/tools/repro/extract-rootfs.sh" "$OUT/$NAME" "$RT" >/dev/null
+"$REPO/tools/repro/router-packages.sh" "$RT" > "$OUT/packages.tsv"   # 3 columns: package, version, arch
 MOUT="${MANIFEST_OUT:-$REPO/manifests/router/${NAME%-squashfs-sysupgrade.bin}}"
 "$REPO/tools/repro/write-manifest.sh" --out "$MOUT" --kind router --name "${NAME%-squashfs-sysupgrade.bin}" --rootfs "$RT" \
   --packages "$OUT/packages.tsv" --inputs "$INPUTS" --image "$OUT/$NAME"

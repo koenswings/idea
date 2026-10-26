@@ -1,1818 +1,1818 @@
-3cpio	0.14.0-1ubuntu1
-accountsservice	23.13.9-8ubuntu5.2
-acl	2.3.2-2
-adduser	3.153ubuntu1
-adwaita-icon-theme	50.0-1
-aisleriot	1:3.22.35-5
-alsa-base	1.0.25+dfsg-0ubuntu9
-alsa-topology-conf	1.2.5.1-3build1
-alsa-ucm-conf	1.2.15.3-1ubuntu1.5
-alsa-utils	1.2.15.2-1ubuntu1
-anacron	2.3-45ubuntu1
-apparmor	5.0.2-0ubuntu1~26.04.1
-appstream	1.1.2-1
-apt	3.2.0
-apt-config-icons	1.1.2-1
-apt-config-icons-hidpi	1.1.2-1
-aptdaemon	2.0.2build1
-aptdaemon-data	2.0.2build1
-aspell	0.60.8.2-3
-aspell-en	2020.12.07-0-1.1build1
-at-spi2-common	2.60.4-0ubuntu0.1
-at-spi2-core	2.60.4-0ubuntu0.1
-avahi-daemon	0.8-18ubuntu1.1
-baobab	49.1-2
-base-files	14ubuntu6.2
-base-passwd	3.6.8
-bash	5.3-2ubuntu1
-bash-completion	1:2.16.0-8build1
-bc	1.07.1-4build1
-bind9-dnsutils	1:9.20.24-1ubuntu0.2
-bind9-host	1:9.20.24-1ubuntu0.2
-bind9-libs	1:9.20.24-1ubuntu0.2
-binutils	2.46-3ubuntu2
-binutils-aarch64-linux-gnu	2.46-3ubuntu2
-binutils-common	2.46-3ubuntu2
-bluez	5.85-4ubuntu0.1
-bluez-cups	5.85-4ubuntu0.1
-bluez-obexd	5.85-4ubuntu0.1
-bolt	0.9.10-1
-brltty	6.7-1ubuntu6
-bsdextrautils	2.41.3-3ubuntu2
-bsdutils	1:2.41.3-3ubuntu2
-bubblewrap	0.11.1-1ubuntu0.1
-busybox-initramfs	1:1.37.0-7ubuntu1
-busybox-static	1:1.37.0-7ubuntu1
-ca-certificates	20260601~26.04.1
-chrony	4.8-2ubuntu1
-cloud-guest-utils	0.33-1build1
-cloud-init	26.1-0ubuntu3~26.04.1
-cloud-init-base	26.1-0ubuntu3~26.04.1
-colord	1.4.8-3
-colord-data	1.4.8-3
-command-not-found	23.04.0build1
-console-setup	1.237ubuntu3.1
-console-setup-linux	1.237ubuntu3.1
-coreutils	9.5-1ubuntu2+0.0.0~ubuntu25
-coreutils-from-uutils	0.0.0~ubuntu25
-cpio	2.15+dfsg-2.1
-cpp	4:15.2.0-5ubuntu1
-cpp-15	15.2.0-16ubuntu1
-cpp-15-aarch64-linux-gnu	15.2.0-16ubuntu1
-cpp-aarch64-linux-gnu	4:15.2.0-5ubuntu1
-cracklib-runtime	2.9.6-5.2build3
-crash	9.0.1+~16.3-1ubuntu1
-cron	3.0pl1-200ubuntu1
-cron-daemon-common	3.0pl1-200ubuntu1
-cryptsetup	2:2.8.4-1ubuntu4
-cryptsetup-bin	2:2.8.4-1ubuntu4
-cups	2.4.16-1ubuntu1.3
-cups-browsed	2.1.1-0ubuntu3
-cups-bsd	2.4.16-1ubuntu1.3
-cups-client	2.4.16-1ubuntu1.3
-cups-common	2.4.16-1ubuntu1.3
-cups-core-drivers	2.4.16-1ubuntu1.3
-cups-daemon	2.4.16-1ubuntu1.3
-cups-filters	2.0.1-0ubuntu4.1
-cups-filters-core-drivers	2.0.1-0ubuntu4.1
-cups-ipp-utils	2.4.16-1ubuntu1.3
-cups-pk-helper	0.2.6-2.1build1
-cups-ppdc	2.4.16-1ubuntu1.3
-cups-server-common	2.4.16-1ubuntu1.3
-curl	8.18.0-1ubuntu2.8
-dash	0.5.12-12ubuntu3
-dbus	1.16.2-2ubuntu4
-dbus-bin	1.16.2-2ubuntu4
-dbus-daemon	1.16.2-2ubuntu4
-dbus-session-bus-common	1.16.2-2ubuntu4
-dbus-system-bus-common	1.16.2-2ubuntu4
-dbus-user-session	1.16.2-2ubuntu4
-dc	1.07.1-4build1
-dconf-cli	0.49.0-4
-dconf-gsettings-backend	0.49.0-4
-dconf-service	0.49.0-4
-debconf	1.5.92
-debconf-i18n	1.5.92
-debianutils	5.23.2build1
-desktop-file-utils	0.28-1build1
-device-tree-compiler	1.7.2-2ubuntu1
-dhcpcd-base	1:10.3.0-7
-dictionaries-common	1.31.4
-diffutils	1:3.12-1
-dirmngr	2.4.8-4ubuntu3
-distro-info-data	0.72-0ubuntu0.26.04.1
-dmidecode	3.6-2build1
-dmsetup	2:1.02.205-2ubuntu3
-dmz-cursor-theme	0.4.5.3build1
-dns-root-data	2025080400build1
-dnsmasq-base	2.92-1ubuntu0.4
-docbook-xml	4.5-13build1
-dosfstools	4.2-1.2build1
-dpkg	1.23.7ubuntu1
-dracut	110-11
-dracut-core	110-11
-dracut-install	110-11
-e2fsprogs	1.47.2-3ubuntu4
-eatmydata	131-2build1
-ed	1.22.4-1
-eject	2.41.3-3ubuntu2
-emacsen-common	3.0.8build1
-enchant-2	2.8.2+dfsg1-3build1
-espeak-ng-data	1.52.0+dfsg-5build1
-ethtool	1:6.19-1
-evolution-data-server	3.56.2-8
-evolution-data-server-common	3.56.2-8
-exfatprogs	1.3.2-1
-fdisk	2.41.3-3ubuntu2
-file	1:5.46-5build2
-findutils	4.10.0-3build2
-firmware-sof-signed	2025.12.2-1
-flashrom	1.6.0-2ubuntu1
-fontconfig	2.17.1-3ubuntu1
-fontconfig-config	2.17.1-3ubuntu1
-fonts-crosextra-caladea	20200211-2
-fonts-crosextra-carlito	20230309-2
-fonts-dejavu-core	2.37-8build1
-fonts-dejavu-mono	2.37-8build1
-fonts-droid-fallback	1:8.1.0r7-1~1.gbp36536bbuild1
-fonts-freefont-ttf	20211204+svn4273-4build1
-fonts-liberation	1:2.1.5-3build1
-fonts-liberation-sans-narrow	1:1.07.6-4build1
-fonts-noto-cjk	1:20240730+repack1-1build1
-fonts-noto-color-emoji	2.051-1build1
-fonts-noto-core	20201225-2build1
-fonts-noto-mono	20201225-2build1
-fonts-noto-ui-core	20201225-2build1
-fonts-opensymbol	4:102.12+LibO26.2.6.3-0ubuntu0.26.04.2
-fonts-sil-andika	6.200-1
-fonts-ubuntu	0.869+git20240321-0ubuntu2
-fonts-urw-base35	20200910-8build1
-foomatic-db-compressed-ppds	20250819-1build1
-fprintd	1.94.5-4
-friendly-recovery	0.2.42build1
-ftp	20260211-1
-fuse3	3.18.2-1
-fwupd-signed	1.55+1.7-1
-gamemode	1.8.2-2build1
-gamemode-daemon	1.8.2-2build1
-gcc-15-base	15.2.0-16ubuntu1
-gcc-16-base	16-20260322-1ubuntu1
-gcompris-qt	26.1-2
-gcompris-qt-data	26.1-2
-gcr	3.41.2-6
-gcr4	4.4.0.1-8
-gdb	17.1-2ubuntu1
-gdisk	1.0.10-2build1
-gdm3	50.1-0ubuntu0.1
-geoclue-2.0	2.7.2-2ubuntu3
-geocode-glib-common	3.26.4-3
-gettext-base	0.23.2-1
-ghostscript	10.06.0~dfsg-3ubuntu1
-gir1.2-accountsservice-1.0	23.13.9-8ubuntu5.2
-gir1.2-adw-1	1.9.1-0ubuntu0.1
-gir1.2-atk-1.0	2.60.4-0ubuntu0.1
-gir1.2-atspi-2.0	2.60.4-0ubuntu0.1
-gir1.2-dbusmenu-glib-0.4	18.10.20180917~bzr492+repack1-4build1
-gir1.2-freedesktop	1.86.0-6build1
-gir1.2-gck-2	4.4.0.1-8
-gir1.2-gcr-4	4.4.0.1-8
-gir1.2-gdesktopenums-3.0	50.0-1ubuntu2
-gir1.2-gdkpixbuf-2.0	2.44.5+dfsg-4ubuntu1
-gir1.2-gdm-1.0	50.1-0ubuntu0.1
-gir1.2-geoclue-2.0	2.7.2-2ubuntu3
-gir1.2-girepository-3.0	2.88.0-1
-gir1.2-glib-2.0	2.88.0-1
-gir1.2-gmenu-3.0	3.38.1-1ubuntu1
-gir1.2-gnomeautoar-0.1	0.4.5-5
-gir1.2-gnomebg-4.0	44.5-1ubuntu1
-gir1.2-gnomebluetooth-3.0	47.1-5
-gir1.2-gnomedesktop-3.0	44.5-1ubuntu1
-gir1.2-gnomedesktop-4.0	44.5-1ubuntu1
-gir1.2-gnomeqr-4.0	44.5-1ubuntu1
-gir1.2-graphene-1.0	1.10.8-5build1
-gir1.2-gstreamer-1.0	1.28.2-1
-gir1.2-gtk-3.0	3.24.52-0ubuntu1
-gir1.2-gtk-4.0	4.22.4+ds-0ubuntu0.1
-gir1.2-gweather-4.0	4.4.4-4
-gir1.2-harfbuzz-0.0	12.3.2-2
-gir1.2-ibus-1.0	1.5.34~rc2-1
-gir1.2-mutter-18	50.1-0ubuntu2.2
-gir1.2-nm-1.0	1.54.3-2ubuntu3
-gir1.2-nma4-1.0	1.10.6-7
-gir1.2-notify-0.7	0.8.8-1
-gir1.2-packagekitglib-1.0	1.3.4-3ubuntu1.2
-gir1.2-pango-1.0	1.57.0-1
-gir1.2-polkit-1.0	127-2ubuntu1
-gir1.2-rsvg-2.0	2.61.3+dfsg-3
-gir1.2-secret-1	0.21.7-2build1
-gir1.2-snapd-2	1.72-0ubuntu3
-gir1.2-soup-3.0	3.6.6-1
-gir1.2-upowerglib-1.0	1.91.1-1
-gir1.2-vte-2.91	0.84.0-2
-gir1.2-wnck-3.0	43.3-1build1
-gjs	1.88.0-1
-glib-networking	2.80.1-1build2
-glib-networking-common	2.80.1-1build2
-glib-networking-services	2.80.1-1build2
-glycin-loaders	2.1.1+ds-0ubuntu1
-glycin-thumbnailers	2.1.1+ds-0ubuntu1
-gnome-accessibility-themes	3.28-5
-gnome-bluetooth-3-common	47.1-5
-gnome-bluetooth-sendto	47.1-5
-gnome-calculator	1:50.0-1ubuntu1
-gnome-characters	50.0-1
-gnome-chess	1:49.2-2
-gnome-clocks	50.0-1
-gnome-control-center	1:50.3-0ubuntu0.1
-gnome-control-center-data	1:50.3-0ubuntu0.1
-gnome-control-center-faces	1:50.3-0ubuntu0.1
-gnome-desktop3-data	44.5-1ubuntu1
-gnome-disk-utility	46.1-2ubuntu2
-gnome-font-viewer	49.0-1
-gnome-keyring	50.0-1
-gnome-keyring-pkcs11	50.0-1
-gnome-logs	49.0-1
-gnome-menus	3.38.1-1ubuntu1
-gnome-mines	1:49.0.1-2
-gnome-online-accounts	3.58.0-1
-gnome-package-updater	43.0-4build1
-gnome-packagekit-common	43.0-4build1
-gnome-remote-desktop	50.2-0ubuntu0.1
-gnome-screenshot	41.0-3build1
-gnome-session-bin	50.1-0ubuntu0.1
-gnome-session-canberra	0.30-18ubuntu3
-gnome-session-common	50.1-0ubuntu0.1
-gnome-settings-daemon	50.0-1ubuntu1
-gnome-settings-daemon-common	50.0-1ubuntu1
-gnome-shell	50.1-0ubuntu1.2
-gnome-shell-common	50.1-0ubuntu1.2
-gnome-shell-ubuntu-extensions	50.26.04.7ubuntu
-gnome-sudoku	1:49.3-1
-gnome-text-editor	50.1-0ubuntu0.1
-gnome-themes-extra	3.28-5
-gnome-themes-extra-data	3.28-5
-gnome-user-docs	50.0-0ubuntu1
-gnu-coreutils	9.7-3ubuntu2
-gnupg	2.4.8-4ubuntu3
-gnupg-l10n	2.4.8-4ubuntu3
-gnupg-utils	2.4.8-4ubuntu3
-google-chrome-stable	155.0.8059.79-1
-gpg	2.4.8-4ubuntu3
-gpg-agent	2.4.8-4ubuntu3
-gpg-wks-client	2.4.8-4ubuntu3
-gpgconf	2.4.8-4ubuntu3
-gpgsm	2.4.8-4ubuntu3
-gpgv	2.4.8-4ubuntu3
-grep	3.12-1
-groff-base	1.23.0-10
-gsettings-desktop-schemas	50.0-1ubuntu2
-gsettings-ubuntu-schemas	0.0.7+21.10.20210712-0ubuntu4
-gst-audio-thumbnailer	1.0.0-0ubuntu1
-gst-video-thumbnailer	1.0.0-0ubuntu1
-gstreamer1.0-alsa	1.28.2-1
-gstreamer1.0-gl	1.28.2-1
-gstreamer1.0-packagekit	1.3.4-3ubuntu1.2
-gstreamer1.0-pipewire	1.6.2-1ubuntu1.1
-gstreamer1.0-plugins-base	1.28.2-1
-gstreamer1.0-plugins-base-apps	1.28.2-1
-gstreamer1.0-plugins-good	1.28.2-2ubuntu0.1
-gstreamer1.0-tools	1.28.2-1
-gstreamer1.0-x	1.28.2-1
-gtk-update-icon-cache	4.22.4+ds-0ubuntu0.1
-gtk2-engines-murrine	0.98.2-4ubuntu1
-gtk2-engines-pixbuf	2.24.33-10
-guile-3.0-libs	3.0.11-2
-gvfs	1.60.0-1
-gvfs-backends	1.60.0-1
-gvfs-common	1.60.0-1
-gvfs-daemons	1.60.0-1
-gvfs-fuse	1.60.0-1
-gvfs-libs	1.60.0-1
-gzip	1.14-1~exp2ubuntu1.1
-hdparm	9.65+ds-1.1build1
-heif-gdk-pixbuf	1.21.2-3ubuntu0.4
-heif-thumbnailer	1.21.2-3ubuntu0.4
-hicolor-icon-theme	0.18-2build1
-hoichess	0.22.0-3build2
-hostname	3.25build1
-hplip	3.24.4+dfsg0-0ubuntu8.1
-hplip-data	3.24.4+dfsg0-0ubuntu8.1
-hunspell-en-gb	1:25.2.3-1build1
-hunspell-en-us	1:2020.12.07-4build1
-ibus	1.5.34~rc2-1
-ibus-data	1.5.34~rc2-1
-ibus-gtk	1.5.34~rc2-1
-ibus-gtk3	1.5.34~rc2-1
-ibus-gtk4	1.5.34~rc2-1
-ibus-table	1.17.16-1build1
-ibverbs-providers	61.0-2ubuntu3
-iio-sensor-proxy	3.8-1
-im-config	0.62
-inetutils-telnet	2:2.7-2ubuntu1.1
-info	7.2-5ubuntu2
-init	1.69
-init-system-helpers	1.69
-initramfs-tools-bin	0.151ubuntu1
-initramfs-tools-core	0.151ubuntu1
-inputattach	1:1.8.1-2build2
-install-info	7.2-5ubuntu2
-ipp-usb	0.9.31-1
-iproute2	6.19.0-1ubuntu1.1
-iptables	1.8.11-2ubuntu3
-iputils-ping	3:20250605-1ubuntu1
-iputils-tracepath	3:20250605-1ubuntu1
-iso-codes	4.20.1-1
-iw	6.17-1
-kalzium	4:25.12.3-0ubuntu1
-kalzium-data	4:25.12.3-0ubuntu1
-kbd	2.7.1-2ubuntu2
-kded6	6.24.0-0ubuntu1
-kdump-tools	1:1.10.7ubuntu3
-kexec-tools	1:2.0.32-3ubuntu1
-keyboard-configuration	1.237ubuntu3.1
-kio6	6.24.0-0ubuntu1
-klibc-utils	2.0.14-1ubuntu2
-kmod	34.2-2ubuntu2
-krb5-locales	1.22.1-2ubuntu4.1
-kturtle	4:25.12.3-0ubuntu1
-kwallet6	6.24.0-0ubuntu1
-language-pack-en	1:26.04+20260818
-language-pack-en-base	1:26.04+20260818
-language-selector-common	0.228build1
-language-selector-gnome	0.228build1
-laptop-detect	0.16+nmu1build1
-ldap-utils	2.6.10+dfsg-1ubuntu5
-less	668-1build1
-libaa1	1.4p5-51.1build1
-libabsl20260107	20260107.0-4
-libabw-0.1-1	0.1.3-1build6
-libaccountsservice0	23.13.9-8ubuntu5.2
-libacl1	2.3.2-2
-libadwaita-1-0	1.9.1-0ubuntu0.1
-libangelscript2.38.0	2.38.0+ds-2
-libao-common	1.2.2+20180113-1.2ubuntu2
-libao4	1.2.2+20180113-1.2ubuntu2
-libaom3	3.13.1-2
-libapparmor1	5.0.2-0ubuntu1~26.04.1
-libappstream5	1.1.2-1
-libapt-pkg7.0	3.2.0
-libarchive13t64	3.8.5-1ubuntu2.2
-libargon2-1	0~20190702+dfsg-5
-libaribb24-0t64	1.0.3-3
-libasound2-data	1.2.15.3-1ubuntu1.1
-libasound2t64	1.2.15.3-1ubuntu1.1
-libaspell15	0.60.8.2-3
-libass9	1:0.17.4-2
-libassuan9	3.0.2-2build1
-libastro1	4:25.12.3-0ubuntu1
-libasyncns0	0.8-7
-libatasmart4	0.19-6
-libatk-adaptor	2.60.4-0ubuntu0.1
-libatk-bridge2.0-0t64	2.60.4-0ubuntu0.1
-libatk1.0-0t64	2.60.4-0ubuntu0.1
-libatomic1	16-20260322-1ubuntu1
-libatopology2t64	1.2.15.3-1ubuntu1.1
-libatspi2.0-0t64	2.60.4-0ubuntu0.1
-libattr1	1:2.5.2-4
-libaudit-common	1:4.1.2-1build1
-libaudit1	1:4.1.2-1build1
-libauthen-sasl-perl	2.2000-1
-libavahi-client3	0.8-18ubuntu1.1
-libavahi-common-data	0.8-18ubuntu1.1
-libavahi-common3	0.8-18ubuntu1.1
-libavahi-core7	0.8-18ubuntu1.1
-libavahi-glib1	0.8-18ubuntu1.1
-libavc1394-0	0.5.4-5build4
-libavcodec62	7:8.0.1-3ubuntu2
-libavformat62	7:8.0.1-3ubuntu2
-libavutil60	7:8.0.1-3ubuntu2
-libayatana-appindicator3-1	0.5.94-1build1
-libayatana-ido3-0.4-0	0.10.4-1build1
-libayatana-indicator3-7	0.9.4-2
-libb2-1	0.98.1-1.1build2
-libbasicobjects0t64	0.6.2-3build1
-libbinutils	2.46-3ubuntu2
-libblkid1	2.41.3-3ubuntu2
-libblockdev-crypto3	3.4.0-1
-libblockdev-fs3	3.4.0-1
-libblockdev-loop3	3.4.0-1
-libblockdev-mdraid3	3.4.0-1
-libblockdev-nvme3	3.4.0-1
-libblockdev-part3	3.4.0-1
-libblockdev-smart3	3.4.0-1
-libblockdev-swap3	3.4.0-1
-libblockdev-utils3	3.4.0-1
-libblockdev3	3.4.0-1
-libbluetooth3	5.85-4ubuntu0.1
-libbluray3	1:1.4.1-1
-libboost-iostreams1.90.0	1.90.0-6ubuntu1
-libboost-locale1.90.0	1.90.0-6ubuntu1
-libboost-thread1.90.0	1.90.0-6ubuntu1
-libbpf1	1:1.6.3-1ubuntu1
-libbrlapi0.8	6.7-1ubuntu6
-libbrotli1	1.2.0-3build1
-libbsd0	0.12.2-2build2
-libbytesize-common	2.12-1
-libbytesize1	2.12-1
-libbz2-1.0	1.0.8-6build2
-libc-bin	2.43-2ubuntu2.3
-libc-gconv-modules-extra	2.43-2ubuntu2.3
-libc6	2.43-2ubuntu2.3
-libcaca0	0.99.beta20-6ubuntu2.1
-libcairo-gobject-perl	1.005-4build4
-libcairo-gobject2	1.18.4-3
-libcairo-perl	1.109-5build1
-libcairo-script-interpreter2	1.18.4-3
-libcairo2	1.18.4-3
-libcamel-1.2-64t64	3.56.2-8
-libcanberra-gtk3-0	0.30-18ubuntu3
-libcanberra-gtk3-module	0.30-18ubuntu3
-libcanberra-pulse	0.30-18ubuntu3
-libcanberra0	0.30-18ubuntu3
-libcap-ng0	0.8.5-4build5
-libcap2	1:2.75-10ubuntu2
-libcap2-bin	1:2.75-10ubuntu2
-libcares2	1.34.6-1
-libcbor0.10	0.10.2-2ubuntu3
-libcddb2	1.3.2-7.1fakesync1build1
-libcdio-cdda2t64	10.2+2.0.2-2
-libcdio-paranoia2t64	10.2+2.0.2-2
-libcdio19t64	2.2.0-4build1
-libcdparanoia0	3.10.2+debian-14ubuntu2
-libcdr-0.1-1	0.1.7-1build4
-libchromaprint1	1.6.0-2build1
-libcjson1	1.7.19-2
-libclone-perl	0.47-1
-libclucene-contribs1t64	2.3.3.4+dfsg-1.3
-libclucene-core1t64	2.3.3.4+dfsg-1.3
-libcodec2-1.2	1.2.0-4
-libcolamd3	1:7.12.2+dfsg-1ubuntu1
-libcollection4t64	0.6.2-3build1
-libcolord-gtk4-1t64	0.3.1-2
-libcolord2	1.4.8-3
-libcolorhug2	1.4.8-3
-libcom-err2	1.47.2-3ubuntu4
-libcrack2	2.9.6-5.2build3
-libcrypt-urandom-perl	0.55-1
-libcrypt1	1:4.5.1-1
-libcryptsetup12	2:2.8.4-1ubuntu4
-libctf-nobfd0	2.46-3ubuntu2
-libctf0	2.46-3ubuntu2
-libcue2	2.2.1-4.2
-libcups2t64	2.4.16-1ubuntu1.3
-libcupsfilters2-common	2.1.1-0ubuntu5
-libcupsfilters2t64	2.1.1-0ubuntu5
-libcupsimage2t64	2.4.16-1ubuntu1.3
-libcurl3t64-gnutls	8.18.0-1ubuntu2.8
-libcurl4t64	8.18.0-1ubuntu2.8
-libdaemon0	0.14-7.1ubuntu5
-libdata-dump-perl	1.25-1
-libdatrie1	0.2.14-1
-libdav1d7	1.5.3-1
-libdb5.3t64	5.3.28+dfsg2-10ubuntu1
-libdbus-1-3	1.16.2-2ubuntu4
-libdbusmenu-glib4	18.10.20180917~bzr492+repack1-4build1
-libdbusmenu-gtk3-4	18.10.20180917~bzr492+repack1-4build1
-libdc1394-25	2.2.6-6
-libdconf1	0.49.0-4
-libdebconfclient0	0.280ubuntu1
-libdebuginfod-common	0.194-4
-libdebuginfod1t64	0.194-4
-libdecor-0-0	0.2.5-1
-libdecor-0-plugin-1-gtk	0.2.5-1
-libdee-1.0-4	1.2.7+17.10.20170616-8build1
-libdeflate0	1.23-2ubuntu1
-libdevmapper1.02.1	2:1.02.205-2ubuntu3
-libdex-1-1	1.1.0-1
-libdhash1t64	0.6.2-3build1
-libdisplay-info3	0.3.0-1
-libdjvulibre-text	3.5.29-1
-libdjvulibre21	3.5.29-1
-libdotconf0	1.4.1-1build1
-libdouble-conversion3	3.4.0-1
-libdrm-amdgpu1	2.4.131-1
-libdrm-common	2.4.131-1
-libdrm2	2.4.131-1
-libdtovl0	20250514-0ubuntu3
-libduktape207	2.7.0+tests-0ubuntu4
-libdv4t64	1.0.0-17.1build2
-libdvbpsi10	1.3.3-1build2
-libdvdnav4	7.0.0-2
-libdvdread8t64	7.0.1-1
-libdw1t64	0.194-4
-libe-book-0.1-1	0.1.3-2build9
-libeatmydata1	131-2build1
-libebackend-1.2-11t64	3.56.2-8
-libebml5	1.4.5-2
-libebook-1.2-21t64	3.56.2-8
-libebook-contacts-1.2-4t64	3.56.2-8
-libecal-2.0-3	3.56.2-8
-libedata-book-1.2-27t64	3.56.2-8
-libedata-cal-2.0-2t64	3.56.2-8
-libedataserver-1.2-27t64	3.56.2-8
-libedataserverui-1.2-4t64	3.56.2-8
-libedit2	3.1-20251016-1
-libeditorconfig0	0.12.10+~0.17.1-3ubuntu0.1
-libefivar1t64	39-2
-libegl-mesa0	26.0.8-1ubuntu0.3
-libegl1	1.7.0-3
-libei1	1.5.0-3
-libeis1	1.5.0-3
-libelf1t64	0.194-4
-libenchant-2-2	2.8.2+dfsg1-3build1
-libencode-locale-perl	1.05-3
-libeot0	0.01-5build4
-libepoxy0	1.5.10-2build1
-libepubgen-0.1-1	0.1.1-1ubuntu8
-libespeak-ng1	1.52.0+dfsg-5build1
-libestr0	0.1.11-2build1
-libetonyek-0.1-1	0.1.13-2
-libevdev2	1.13.6+dfsg-1
-libevent-2.1-7t64	2.1.12-stable-10ubuntu0.2
-libexempi8	2.6.6-2build1
-libexif12	0.6.25-2ubuntu0.1
-libexiv2-28	0.28.8+dfsg-1
-libexiv2-data	0.28.8+dfsg-1
-libexpat1	2.7.4-1
-libext2fs2t64	1.47.2-3ubuntu4
-libexttextcat-2.0-0	3.4.7-2
-libexttextcat-data	3.4.7-2
-libextutils-depends-perl	0.8002-1
-libfaad2	2.11.2-1build1
-libfastjson4	1.2304.0-2build1
-libfdisk1	2.41.3-3ubuntu2
-libfdt1	1.7.2-2ubuntu1
-libffi8	3.5.2-4
-libfftw3-single3	3.3.10-2fakesync1build3
-libfido2-1	1.16.0-2build1
-libfile-basedir-perl	0.09-2
-libfile-desktopentry-perl	0.23-1
-libfile-listing-perl	6.16-1
-libfile-mimeinfo-perl	0.36-2
-libflac14	1.5.0+ds-5
-libfluidsynth3	2.4.8+dfsg-1
-libfont-afm-perl	1.20-4
-libfontconfig1	2.17.1-3ubuntu1
-libfontenc1	1:1.1.8-1build2
-libfprint-2-2	1:1.95.1+tod1-0ubuntu2
-libfprint-2-tod1	1:1.95.1+tod1-0ubuntu2
-libfreeaptx0	0.2.2-1build1
-libfreehand-0.1-1	0.1.2-3build4
-libfreerdp-server3-3	3.30.0+dfsg-0ubuntu0.26.04.2
-libfreerdp3-3	3.30.0+dfsg-0ubuntu0.26.04.2
-libfreetype6	2.14.2+dfsg-1ubuntu0.1
-libfribidi0	1.0.16-5
-libftdi1-2	1.6~rc1-1build1
-libfuse3-4	3.18.2-1
-libfyaml0	0.9.4-1
-libgamemode0	1.8.2-2build1
-libgamemodeauto0	1.8.2-2build1
-libgbm1	26.0.8-1ubuntu0.3
-libgc1	1:8.2.12-1
-libgcc-s1	16-20260322-1ubuntu1
-libgck-1-0	3.41.2-6
-libgck-2-2	4.4.0.1-8
-libgcr-4-4	4.4.0.1-8
-libgcr-base-3-1	3.41.2-6
-libgcr-ui-3-1	3.41.2-6
-libgcrypt20	1.12.0-2ubuntu1
-libgd3	2.3.3-13ubuntu2
-libgdbm-compat4t64	1.26-1build1
-libgdbm6t64	1.26-1build1
-libgdk-pixbuf-2.0-0	2.44.5+dfsg-4ubuntu1
-libgdk-pixbuf2.0-bin	2.44.5+dfsg-4ubuntu1
-libgdk-pixbuf2.0-common	2.44.5+dfsg-4ubuntu1
-libgdm1	50.1-0ubuntu0.1
-libgee-0.8-2	0.20.8-2
-libgeoclue-2-0	2.7.2-2ubuntu3
-libgeocode-glib-2-0	3.26.4-3
-libgexiv2-2	0.14.6-2
-libgif7	5.2.2-1ubuntu3.2
-libgirepository-1.0-1	1.86.0-6build1
-libgirepository-2.0-0	2.88.0-1
-libgjs0	1.88.0-1
-libgl1	1.7.0-3
-libgl1-mesa-dri	26.0.8-1ubuntu0.3
-libgles2	1.7.0-3
-libglib-object-introspection-perl	0.052-1
-libglib-perl	3:1.329.4-1
-libglib2.0-0t64	2.88.0-1
-libglib2.0-bin	2.88.0-1
-libglib2.0-data	2.88.0-1
-libglvnd0	1.7.0-3
-libglx-mesa0	26.0.8-1ubuntu0.3
-libglx0	1.7.0-3
-libglycin-2-0	2.1.1+ds-0ubuntu1
-libglycin-gtk4-2-0	2.1.1+ds-0ubuntu1
-libgme0	0.6.4-1
-libgmp10	2:6.3.0+dfsg-5ubuntu2
-libgnome-autoar-0-0	0.4.5-5
-libgnome-bg-4-2t64	44.5-1ubuntu1
-libgnome-bluetooth-3.0-13	47.1-5
-libgnome-bluetooth-ui-3.0-13	47.1-5
-libgnome-desktop-3-20t64	44.5-1ubuntu1
-libgnome-desktop-4-2t64	44.5-1ubuntu1
-libgnome-menu-3-0	3.38.1-1ubuntu1
-libgnome-qr-4-0	44.5-1ubuntu1
-libgnutls30t64	3.8.12-2ubuntu1.1
-libgoa-1.0-0b	3.58.0-1
-libgoa-1.0-common	3.58.0-1
-libgoa-backend-1.0-2	3.58.0-1
-libgomp1	16-20260322-1ubuntu1
-libgpg-error0	1.58-2
-libgpgme45	2.0.1-2build1
-libgpgmepp7	2.0.0-2
-libgphoto2-6t64	2.5.33-1ubuntu1.1
-libgphoto2-l10n	2.5.33-1ubuntu1.1
-libgphoto2-port12t64	2.5.33-1ubuntu1.1
-libgpiolib0	20250514-0ubuntu3
-libgpm2	1.20.7-12build1
-libgprofng0	2.46-3ubuntu2
-libgps32	3.27.5-0.1
-libgraphene-1.0-0	1.10.8-5build1
-libgraphite2-3	1.3.14-11ubuntu1.1
-libgs-common	10.06.0~dfsg-3ubuntu1
-libgs10	10.06.0~dfsg-3ubuntu1
-libgs10-common	10.06.0~dfsg-3ubuntu1
-libgsf-1-114	1.14.53-1.1
-libgsf-1-common	1.14.53-1.1
-libgsm1	1.0.23-2
-libgsound0t64	1.0.3-4
-libgssapi-krb5-2	1.22.1-2ubuntu4.1
-libgssdp-1.6-0	1.6.4-5
-libgstreamer-gl1.0-0	1.28.2-1
-libgstreamer-plugins-base1.0-0	1.28.2-1
-libgstreamer-plugins-extra1.0-0	1.28.2-1ubuntu1.1
-libgstreamer1.0-0	1.28.2-1
-libgtk-3-0t64	3.24.52-0ubuntu1
-libgtk-3-bin	3.24.52-0ubuntu1
-libgtk-3-common	3.24.52-0ubuntu1
-libgtk-4-1	4.22.4+ds-0ubuntu0.1
-libgtk-4-bin	4.22.4+ds-0ubuntu0.1
-libgtk-4-common	4.22.4+ds-0ubuntu0.1
-libgtk3-perl	0.038-3
-libgtksourceview-5-0	5.18.0-3
-libgtksourceview-5-common	5.18.0-3
-libgtop-2.0-11	2.41.3-2ubuntu1
-libgtop2-common	2.41.3-2ubuntu1
-libgudev-1.0-0	1:238-7build1
-libgupnp-1.6-0	1.6.9-4
-libgupnp-av-1.0-3	0.14.4-3
-libgupnp-dlna-2.0-4	0.12.0-8
-libgusb2a	0.4.9-7
-libgweather-4-0t64	4.4.4-4
-libgweather-4-common	4.4.4-4
-libgxps2t64	0.3.2-6
-libhandy-1-0	1.8.3-3build1
-libharfbuzz-gobject0	12.3.2-2
-libharfbuzz-icu0	12.3.2-2
-libharfbuzz-subset0	12.3.2-2
-libharfbuzz0b	12.3.2-2
-libheif-plugin-aomdec	1.21.2-3ubuntu0.4
-libheif-plugin-aomenc	1.21.2-3ubuntu0.4
-libheif1	1.21.2-3ubuntu0.4
-libhidapi-hidraw0	0.15.0-2
-libhogweed6t64	3.10.2-1
-libhpmud0	3.24.4+dfsg0-0ubuntu8.1
-libhtml-form-perl	6.13-1build1
-libhtml-format-perl	2.16-2
-libhtml-parser-perl	3.83-1ubuntu0.1
-libhtml-tagset-perl	3.24-1
-libhtml-tree-perl	5.07-3
-libhttp-cookies-perl	6.11-1
-libhttp-daemon-perl	6.16-1ubuntu0.26.04.1
-libhttp-date-perl	6.06-1ubuntu0.26.04.1
-libhttp-message-perl	7.01-1ubuntu1
-libhttp-negotiate-perl	6.01-2
-libhunspell-1.7-0	1.7.2+really1.7.2-11
-libhwy1t64	1.3.0-2
-libhyphen0	2.8.8-7build4
-libibus-1.0-5	1.5.34~rc2-1
-libibverbs1	61.0-2ubuntu3
-libical3t64	3.0.20-2build1
-libice6	2:1.1.1-1build1
-libicu78	78.2-2ubuntu1
-libidn12	1.43-2ubuntu0.26.04.1
-libidn2-0	2.3.8-4build1
-libiec61883-0	1.2.0-8
-libieee1284-3t64	0.2.11-14.1build2
-libijs-0.35	0.35-16
-libimagequant0	4.4.1-1
-libimobiledevice-1.0-6	1.4.0-1build1
-libimobiledevice-glue-1.0-0	1.3.2-2build1
-libinchi1.07	1.07.3+dfsg-2
-libindi-data	1.9.9+dfsg-6
-libindiclient1	1.9.9+dfsg-6
-libini-config5t64	0.6.2-3build1
-libinih1	61-1ubuntu1
-libinireader0	61-1ubuntu1
-libinput-bin	1.31.1-1ubuntu1.1
-libinput10	1.31.1-1ubuntu1.1
-libinsights0	0.9.3ubuntu
-libinstpatch-1.0-2	1.1.7-1.1
-libio-html-perl	1.004-3
-libio-socket-ssl-perl	2.098-1
-libio-stringy-perl	2.113-2
-libip4tc2	1.8.11-2ubuntu3
-libip6tc2	1.8.11-2ubuntu3
-libipa-hbac0t64	2.12.0-1ubuntu5.2
-libipc-system-simple-perl	1.30-2
-libisl23	0.27-1build1
-libixml11t64	1:1.14.25-1ubuntu1
-libjack-jackd2-0	1.9.22~dfsg-5build1
-libjansson4	2.14-2build4
-libjavascriptcoregtk-4.1-0	2.52.3-0ubuntu0.26.04.3
-libjavascriptcoregtk-6.0-1	2.52.3-0ubuntu0.26.04.3
-libjbig0	2.1-6.1ubuntu3
-libjbig2dec0	0.20-1ubuntu0.26.04.1
-libjemalloc2	5.3.0-4
-libjpeg-turbo8	2.1.5-4ubuntu4
-libjpeg8	8c-2ubuntu12
-libjs-sphinxdoc	8.2.3-12
-libjson-c5	0.18+ds-3
-libjson-glib-1.0-0	1.10.8+ds-2
-libjson-glib-1.0-common	1.10.8+ds-2
-libjxl-gdk-pixbuf	0.11.1-6ubuntu4.2
-libjxl0.11	0.11.1-6ubuntu4.2
-libk5crypto3	1.22.1-2ubuntu4.1
-libkate1	0.4.1-12
-libkeyutils1	1.6.3-6ubuntu3
-libkf6archive-data	6.24.0-0ubuntu1
-libkf6archive6	6.24.0-0ubuntu1
-libkf6attica6	6.24.0-0ubuntu1
-libkf6bookmarks-data	6.24.0-0ubuntu1
-libkf6bookmarks6	6.24.0-0ubuntu1
-libkf6bookmarkswidgets6	6.24.0-0ubuntu1
-libkf6breezeicons6	6.24.0-0ubuntu1
-libkf6codecs-data	6.24.0-0ubuntu1
-libkf6codecs6	6.24.0-0ubuntu1
-libkf6colorscheme-data	6.24.0-0ubuntu1
-libkf6colorscheme6	6.24.0-0ubuntu1
-libkf6completion-data	6.24.0-0ubuntu1
-libkf6completion6	6.24.0-0ubuntu1
-libkf6config-data	6.24.0-0ubuntu1
-libkf6configcore6	6.24.0-0ubuntu1
-libkf6configgui6	6.24.0-0ubuntu1
-libkf6configwidgets-data	6.24.0-0ubuntu1
-libkf6configwidgets6	6.24.0-0ubuntu1
-libkf6coreaddons-data	6.24.0-0ubuntu1.1
-libkf6coreaddons6	6.24.0-0ubuntu1.1
-libkf6crash6	6.24.0-0ubuntu1
-libkf6dbusaddons-data	6.24.0-0ubuntu1
-libkf6dbusaddons6	6.24.0-0ubuntu1
-libkf6doctools6	6.24.0-0ubuntu1
-libkf6globalaccel-data	6.24.0-0ubuntu1
-libkf6globalaccel6	6.24.0-0ubuntu1
-libkf6guiaddons-data	6.24.0-0ubuntu1
-libkf6guiaddons6	6.24.0-0ubuntu1
-libkf6i18n-data	6.24.0-0ubuntu1
-libkf6i18n6	6.24.0-0ubuntu1
-libkf6i18nqml6	6.24.0-0ubuntu1
-libkf6iconthemes-data	6.24.0-0ubuntu2
-libkf6iconthemes6	6.24.0-0ubuntu2
-libkf6iconwidgets6	6.24.0-0ubuntu2
-libkf6itemviews-data	6.24.0-0ubuntu1
-libkf6itemviews6	6.24.0-0ubuntu1
-libkf6jobwidgets-data	6.24.0-0ubuntu1
-libkf6jobwidgets6	6.24.0-0ubuntu1
-libkf6kiocore6	6.24.0-0ubuntu1
-libkf6kiofilewidgets6	6.24.0-0ubuntu1
-libkf6kiogui6	6.24.0-0ubuntu1
-libkf6kiowidgets6	6.24.0-0ubuntu1
-libkf6newstuff-data	6.24.0-0ubuntu1
-libkf6newstuffcore6	6.24.0-0ubuntu1
-libkf6newstuffwidgets6	6.24.0-0ubuntu1
-libkf6notifications-data	6.24.0-0ubuntu1
-libkf6notifications6	6.24.0-0ubuntu1
-libkf6package-data	6.24.0-0ubuntu1
-libkf6package6	6.24.0-0ubuntu1
-libkf6parts-data	6.24.0-0ubuntu1
-libkf6parts6	6.24.0-0ubuntu1
-libkf6plotting6	6.24.0-0ubuntu1
-libkf6service-bin	6.24.0-0ubuntu1
-libkf6service-data	6.24.0-0ubuntu1
-libkf6service6	6.24.0-0ubuntu1
-libkf6solid-data	6.24.0-0ubuntu1
-libkf6solid6	6.24.0-0ubuntu1
-libkf6sonnet-data	6.24.0-0ubuntu1
-libkf6sonnetcore6	6.24.0-0ubuntu1
-libkf6sonnetui6	6.24.0-0ubuntu1
-libkf6syndication6	6.24.0-0ubuntu1
-libkf6textwidgets-data	6.24.0-0ubuntu1
-libkf6textwidgets6	6.24.0-0ubuntu1
-libkf6unitconversion-data	6.24.0-0ubuntu1
-libkf6unitconversion6	6.24.0-0ubuntu1
-libkf6wallet-data	6.24.0-0ubuntu1
-libkf6wallet6	6.24.0-0ubuntu1
-libkf6walletbackend6	6.24.0-0ubuntu1
-libkf6widgetsaddons-data	6.24.0-0ubuntu1
-libkf6widgetsaddons6	6.24.0-0ubuntu1
-libkf6windowsystem-data	6.24.0-0ubuntu1
-libkf6windowsystem6	6.24.0-0ubuntu1
-libkf6xmlgui-data	6.24.0-0ubuntu1
-libkf6xmlgui6	6.24.0-0ubuntu1
-libklibc	2.0.14-1ubuntu2
-libkmod2	34.2-2ubuntu2
-libkrb5-3	1.22.1-2ubuntu4.1
-libkrb5support0	1.22.1-2ubuntu4.1
-libksba8	1.6.7-2build1
-liblangtag-common	0.6.8-2
-liblangtag1	0.6.8-2
-liblc3-1	1.1.3+dfsg-1build1
-liblcms2-2	2.17-1ubuntu0.2
-liblcms2-utils	2.17-1ubuntu0.2
-libldacbt-abr2	2.0.2.3+git20200429+ed310a0-5build1
-libldacbt-enc2	2.0.2.3+git20200429+ed310a0-5build1
-libldap-common	2.6.10+dfsg-1ubuntu5
-libldap2	2.6.10+dfsg-1ubuntu5
-libldb2	2:2.11.0+samba4.23.6+dfsg-1ubuntu2.2
-liblerc4	4.0.0+ds-5ubuntu2
-liblirc-client0t64	0.10.2-0.10ubuntu1
-libllvm21	1:21.1.8-6ubuntu1
-liblmdb0	0.9.31-1build2
-liblocale-gettext-perl	1.07-8
-liblouis-data	3.36.0-1
-liblouis20	3.36.0-1
-liblouisutdml-bin	2.12.0-8build1
-liblouisutdml-data	2.12.0-8build1
-liblouisutdml9t64	2.12.0-8build1
-liblsof0	4.99.4+dfsg-2build2
-libltdl7	2.5.4-9
-liblua5.4-0	5.4.8-1build1
-liblwp-mediatypes-perl	6.04-2
-liblwp-protocol-https-perl	6.14-1
-liblz4-1	1.10.0-8
-liblzma5	5.8.3-1
-liblzo2-2	2.10-3build2
-libmad0	0.16.4-2ubuntu1
-libmaeparser1	1.3.3-4
-libmagic-mgc	1:5.46-5build2
-libmagic1t64	1:5.46-5build2
-libmailtools-perl	2.22-1
-libmalcontent-0-0	0.14.0-0ubuntu1.1
-libmalcontent-common	0.14.0-0ubuntu1.1
-libmanette-0.2-0	0.2.13-1
-libmarblewidget-qt6-28	4:25.12.3-0ubuntu1
-libmatroska7	1.7.1-2
-libmaxminddb0	1.12.2-1build2
-libmbedcrypto16	3.6.5-0.1ubuntu2
-libmbim-glib4	1.32.0-2ubuntu1
-libmbim-proxy	1.32.0-2ubuntu1
-libmbim-utils	1.32.0-2ubuntu1
-libmcpp0	2.7.2-5.3build1
-libmd0	1.1.0-2build4
-libmd4c-html0	0.5.2-2build1
-libmd4c0	0.5.2-2build1
-libmediaart-2.0-0	1.9.7-3
-libmhash2	0.9.9.9-11
-libmikmod3	3.3.13-1build1
-libminizip1t64	1:1.3.dfsg+really1.3.1-1ubuntu3.1
-libmm-glib0	1.25.95-1ubuntu1
-libmng2	2.0.3+dfsg-5
-libmnl0	1.0.5-3build1
-libmount1	2.41.3-3ubuntu2
-libmozjs-140-0	140.8.0-4
-libmp3lame0	3.101~svn6525+dfsg-2
-libmpc3	1.3.1-3
-libmpcdec6	2:0.1~r495-3build1
-libmpfr6	4.2.2-3
-libmpg123-0t64	1.33.3-2
-libmsgraph-1-1	0.3.3-3build1
-libmspub-0.1-1	0.1.4-4build1
-libmtdev1t64	1.1.7-1build1
-libmtp-common	1.1.22-1ubuntu1
-libmtp-runtime	1.1.22-1ubuntu1
-libmtp9t64	1.1.22-1ubuntu1
-libmutter-18-0	50.1-0ubuntu2.2
-libmwaw-0.3-3	0.3.22-2
-libmysofa1	1.3.3+dfsg-1ubuntu2
-libmythes-1.2-0	2:1.2.5-2build1
-libnautilus-extension4	1:50.2.2-0ubuntu0.1
-libncurses6	6.6+20251231-1
-libncursesw6	6.6+20251231-1
-libndp0	1.9-1build1
-libnet-dbus-perl	1.2.0-2build4
-libnet-http-perl	6.24-1build1
-libnet-smtp-ssl-perl	1.04-2
-libnet-ssleay-perl	1.94-3
-libnetfilter-conntrack3	1.1.1-1
-libnetpbm11t64	2:11.10.02-1build1
-libnetplan1	1.2-1ubuntu5
-libnettle8t64	3.10.2-1
-libnewt0.52	0.52.25-1ubuntu3
-libnfnetlink0	1.0.2-3build1
-libnfs14	5.0.2-1ubuntu1.1
-libnfsidmap1	1:2.8.5-1ubuntu1
-libnftables1	1.1.6-1
-libnftnl11	1.3.1-1
-libnghttp2-14	1.68.0-2ubuntu0.2
-libnl-3-200	3.12.0-2
-libnl-genl-3-200	3.12.0-2
-libnl-route-3-200	3.12.0-2
-libnlopt-cxx0	2.7.1-7.1ubuntu1
-libnm0	1.54.3-2ubuntu3
-libnma-common	1.10.6-7
-libnma-gtk4-0	1.10.6-7
-libnma0	1.10.6-7
-libnorm1t64	1.5.9+dfsg-4
-libnotify-bin	0.8.8-1
-libnotify4	0.8.8-1
-libnova-0.16-0t64	0.16-6
-libnpth0t64	1.8-3build1
-libnspr4	2:4.38.2-1ubuntu1
-libnss-mdns	0.15.1-5
-libnss-sss	2.12.0-1ubuntu5.2
-libnss-systemd	259.5-0ubuntu3.4
-libnss3	2:3.120-1ubuntu2.1
-libntfs-3g89t64	1:2022.10.3-5ubuntu1.1
-libnuma1	2.0.19-1build1
-libnvme1t64	1.16.1-4
-libodfgen-0.1-1	0.1.8-3build1
-liboeffis1	1.5.0-3
-libogg0	1.3.6-2
-libopenal-data	1:1.25.1-2
-libopenal1	1:1.25.1-2
-libopenbabel7	3.1.1+dfsg-11ubuntu5
-libopengl0	1.7.0-3
-libopenjp2-7	2.5.4-1ubuntu0.1
-libopenmpt-modplug1	0.8.9.0-openmpt1-2build3
-libopenmpt0t64	0.8.4-1
-libopus0	1.6.1-1
-libopusfile0	0.12-4build4
-liborc-0.4-0t64	1:0.4.42-2
-liborcus-0.21-0	0.21.0-4
-liborcus-parser-0.21-0	0.21.0-4
-libp11-kit0	0.26.2-2
-libpackagekit-glib2-18	1.3.4-3ubuntu1.2
-libpagemaker-0.0-0	0.0.4-1build5
-libpam-cap	1:2.75-10ubuntu2
-libpam-fprintd	1.94.5-4
-libpam-gnome-keyring	50.0-1
-libpam-modules	1.7.0-5ubuntu3.1
-libpam-modules-bin	1.7.0-5ubuntu3.1
-libpam-pwquality	1.4.5-5build1
-libpam-runtime	1.7.0-5ubuntu3.1
-libpam-sss	2.12.0-1ubuntu5.2
-libpam-systemd	259.5-0ubuntu3.4
-libpam0g	1.7.0-5ubuntu3.1
-libpanel-1-1	1.10.3-1
-libpanel-common	1.10.3-1
-libpango-1.0-0	1.57.0-1
-libpangocairo-1.0-0	1.57.0-1
-libpangoft2-1.0-0	1.57.0-1
-libpangoxft-1.0-0	1.57.0-1
-libpaper-utils	2.2.5-0.3maysync1
-libpaper2	2.2.5-0.3maysync1
-libparted2t64	3.6-6
-libpath-utils1t64	0.6.2-3build1
-libpcap0.8t64	1.10.6-1ubuntu1
-libpcaudio0	1.3-1build1
-libpci3	1:3.14.0-1build2
-libpciaccess0	0.18.1-1ubuntu4.1
-libpcre2-16-0	10.46-1build1
-libpcre2-32-0	10.46-1build1
-libpcre2-8-0	10.46-1build1
-libpcsclite1	2.4.1-1
-libperl5.40	5.40.1-7ubuntu0.1
-libpgm-5.3-0t64	5.3.128~dfsg-2.1build2
-libphonenumber8	8.13.51+ds-5
-libphonon-l10n	4:4.12.0-7
-libphonon4qt6-4t64	4:4.12.0-7
-libpipeline1	1.5.8-2
-libpipewire-0.3-0t64	1.6.2-1ubuntu1.1
-libpipewire-0.3-common	1.6.2-1ubuntu1.1
-libpipewire-0.3-modules	1.6.2-1ubuntu1.1
-libpixman-1-0	0.46.4-1
-libpkcs11-helper1t64	1.31.0-1
-libplist-2.0-4	2.7.0+git20250820-1build1
-libplymouth5	24.004.60+git20250831.4a3c171d-0ubuntu8
-libpng16-16t64	1.6.57-1
-libpolkit-agent-1-0	127-2ubuntu1
-libpolkit-gobject-1-0	127-2ubuntu1
-libpoppler-cpp3	26.01.0-2ubuntu0.1
-libpoppler-glib8t64	26.01.0-2ubuntu0.1
-libpoppler156	26.01.0-2ubuntu0.1
-libpopt0	1.19+dfsg-2build1
-libportal-gtk4-1	0.9.1-2build1
-libportal1	0.9.1-2build1
-libppd2	2:2.1.1-0ubuntu2
-libppd2-common	2:2.1.1-0ubuntu2
-libppsdocument-4.0-6	50.2-0ubuntu0.1
-libppsview-4.0-5	50.2-0ubuntu0.1
-libproc2-0	2:4.0.4-9ubuntu1
-libprotobuf-lite32t64	3.21.12-15ubuntu1
-libprotobuf32t64	3.21.12-15ubuntu1
-libproxy1v5	0.5.12-1
-libpsl5t64	0.21.2-1.1build2
-libpulse-mainloop-glib0	1:17.0+dfsg1-2ubuntu4
-libpulse0	1:17.0+dfsg1-2ubuntu4
-libpwquality-common	1.4.5-5build1
-libpwquality1	1.4.5-5build1
-libpython3-stdlib	3.14.3-0ubuntu2
-libpython3.14	3.14.4-1ubuntu0.1
-libpython3.14-minimal	3.14.4-1ubuntu0.1
-libpython3.14-stdlib	3.14.4-1ubuntu0.1
-libqca-qt6-2	2.3.10-2
-libqmi-glib5	1.38.0-1
-libqmi-proxy	1.38.0-1
-libqmi-utils	1.38.0-1
-libqpdf30	12.3.2-1
-libqqwing2v5	1.3.4-3build1
-libqrtr-glib0	1.2.2-2ubuntu1
-libqt5charts5	5.15.18-1
-libqt5concurrent5t64	5.15.18+dfsg-1ubuntu1
-libqt5core5t64	5.15.18+dfsg-1ubuntu1
-libqt5dbus5t64	5.15.18+dfsg-1ubuntu1
-libqt5gui5t64	5.15.18+dfsg-1ubuntu1
-libqt5multimedia5	5.15.18-1
-libqt5multimediawidgets5	5.15.18-1
-libqt5network5t64	5.15.18+dfsg-1ubuntu1
-libqt5positioning5	5.15.18+dfsg-1
-libqt5printsupport5t64	5.15.18+dfsg-1ubuntu1
-libqt5qml5	5.15.18+dfsg-2
-libqt5qmlmodels5	5.15.18+dfsg-2
-libqt5quick5	5.15.18+dfsg-2
-libqt5quickwidgets5	5.15.18+dfsg-2
-libqt5qxlsx0t64	1.4.4-1.1build8
-libqt5script5	5.15.18+dfsg-1
-libqt5serialport5	5.15.18-1
-libqt5webchannel5	5.15.18-1
-libqt5webengine-data	5.15.19+dfsg2-4
-libqt5webenginecore5	5.15.19+dfsg2-4
-libqt5webenginewidgets5	5.15.19+dfsg2-4
-libqt5widgets5t64	5.15.18+dfsg-1ubuntu1
-libqt6charts6	6.10.2-1
-libqt6core5compat6	6.10.2-1
-libqt6core6t64	6.10.2+dfsg-7
-libqt6dbus6	6.10.2+dfsg-7
-libqt6graphs6	6.10.2-2
-libqt6gui6	6.10.2+dfsg-7
-libqt6multimedia6	6.10.2-2
-libqt6network6	6.10.2+dfsg-7
-libqt6opengl6	6.10.2+dfsg-7
-libqt6openglwidgets6	6.10.2+dfsg-7
-libqt6positioning6	6.10.2-1
-libqt6printsupport6	6.10.2+dfsg-7
-libqt6qml6	6.10.2+dfsg-3
-libqt6qmlmeta6	6.10.2+dfsg-3
-libqt6qmlmodels6	6.10.2+dfsg-3
-libqt6qmlworkerscript6	6.10.2+dfsg-3
-libqt6quick3d6	6.10.2-1
-libqt6quick3druntimerender6	6.10.2-1
-libqt6quick3dutils6	6.10.2-1
-libqt6quick6	6.10.2+dfsg-3
-libqt6quickcontrols2-6	6.10.2+dfsg-3
-libqt6quickshapes6	6.10.2+dfsg-3
-libqt6quicktemplates2-6	6.10.2+dfsg-3
-libqt6quickwidgets6	6.10.2+dfsg-3
-libqt6sensors6	6.10.2-1
-libqt6serialport6	6.10.2-1
-libqt6shadertools6	6.10.2-1
-libqt6sql6	6.10.2+dfsg-7
-libqt6statemachine6	6.10.2-1
-libqt6svg6	6.10.2-2
-libqt6svgwidgets6	6.10.2-2
-libqt6texttospeech6	6.10.2-1
-libqt6waylandclient6	6.10.2+dfsg-7
-libqt6webchannel6	6.10.2-1
-libqt6webengine6-data	6.10.2+dfsg-1
-libqt6webenginecore6	6.10.2+dfsg-1
-libqt6webenginecore6-bin	6.10.2+dfsg-1
-libqt6webenginewidgets6	6.10.2+dfsg-1
-libqt6widgets6	6.10.2+dfsg-7
-libqt6xml6	6.10.2+dfsg-7
-librabbitmq4	0.15.0-1ubuntu0.26.04.2
-libraptor2-0	2.0.16-6build1
-libraqm0	0.10.4-1
-librasqal3t64	0.9.33-3
-librav1e0.8	0.8.1-7
-libraw1394-11	2.1.2-2build4
-librdf0t64	1.0.17-8
-libreadline8t64	8.3-4
-libref-array1t64	0.6.2-3build1
-libreoffice-base-core	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-calc	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-common	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-core	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-draw	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-gtk3	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-impress	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-style-colibre	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-uiconfig-calc	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-uiconfig-common	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-uiconfig-draw	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-uiconfig-impress	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-uiconfig-writer	4:26.2.6.3-0ubuntu0.26.04.2
-libreoffice-writer	4:26.2.6.3-0ubuntu0.26.04.2
-libresid-builder0c2a	2.1.1-16build1
-librest-1.0-0	0.10.2-1
-librevenge-0.0-0	0.0.5-3build2
-librist4	0.2.11+dfsg-1build1
-libroc0.4	0.4.0+dfsg-5ubuntu3.1
-librsvg2-2	2.61.3+dfsg-3
-librsvg2-common	2.61.3+dfsg-3
-librtmp1	2.4+20151223.gitfa8646d.1-3
-librygel-core-2.8-0	45.0-1ubuntu1
-librygel-db-2.8-0	45.0-1ubuntu1
-librygel-renderer-2.8-0	45.0-1ubuntu1
-librygel-server-2.8-0	45.0-1ubuntu1
-libsamplerate0	0.2.2-4build2
-libsane-common	1.4.0-1ubuntu1
-libsane-hpaio	3.24.4+dfsg0-0ubuntu8.1
-libsane1	1.4.0-1ubuntu1
-libsasl2-2	2.1.28+dfsg1-9ubuntu3
-libsasl2-modules	2.1.28+dfsg1-9ubuntu3
-libsasl2-modules-db	2.1.28+dfsg1-9ubuntu3
-libsasl2-modules-gssapi-mit	2.1.28+dfsg1-9ubuntu3
-libsbc1	2.1-1build1
-libsdl-image1.2	1.2.12-14build1
-libsdl-mixer1.2	1.2.12-19build2
-libsdl-net1.2	1.2.8-6build2
-libsdl-pango1	0.1.2-8build3
-libsdl1.2debian	1.2.72-1
-libsdl2-2.0-0	2.32.10+dfsg-6
-libsdl2-classic	2.32.10+dfsg-6
-libsdl2-gfx-1.0-0	1.0.4+dfsg-7
-libsdl2-image-2.0-0	2.8.8+dfsg-2
-libsdl2-mixer-2.0-0	2.8.1+dfsg-5
-libsdl2-pango4	2.1.5-2build1
-libsdl2-ttf-2.0-0	2.24.0+dfsg-3
-libsdl3-0	3.4.2+ds-1ubuntu1
-libseccomp2	2.6.0-2ubuntu5
-libsecret-1-0	0.21.7-2build1
-libsecret-common	0.21.7-2build1
-libselinux1	3.9-4build1
-libsemanage-common	3.9-1build1
-libsemanage2	3.9-1build1
-libsensors-config	1:3.6.2-2build1
-libsensors5	1:3.6.2-2build1
-libsepol2	3.9-2
-libsframe3	2.46-3ubuntu2
-libshaderc1	2026.1-1
-libsharpyuv0	1.5.0-0.1build1
-libshine3	3.1.1-3build1
-libshout3	2.4.6-1build3
-libshp4	1.6.2-1
-libsidplay2	2.1.1-16build1
-libsimdutf31	8.0.0-1
-libslang2	2.3.3-5build1
-libsm6	2:1.2.6-1build1
-libsmartcols1	2.41.3-3ubuntu2
-libsmbclient0	2:4.23.6+dfsg-1ubuntu2.2
-libsnapd-glib-2-1	1.72-0ubuntu3
-libsnappy1v5	1.2.2-2
-libsndfile1	1.2.2-4
-libsnmp-base	5.9.4+dfsg-2ubuntu3
-libsnmp40t64	5.9.4+dfsg-2ubuntu3
-libsodium23	1.0.18-2
-libsonic0	0.2.0-13build2
-libsoup-3.0-0	3.6.6-1
-libsoup-3.0-common	3.6.6-1
-libsoxr0	0.1.3-4.1
-libspa-0.2-bluetooth	1.6.2-1ubuntu1.1
-libspa-0.2-modules	1.6.2-1ubuntu1.1
-libspatialaudio0t64	0.3.0+git20180730+dfsg1-3
-libspeechd-module0	0.12.1-2ubuntu1
-libspeechd2	0.12.1-2ubuntu1
-libspeex1	1.2.1-3build1
-libspeexdsp1	1.2.1-3build1
-libspelling-1-2	0.4.9-1build1
-libspelling-common	0.4.9-1build1
-libsqlite3-0	3.46.1-9ubuntu0.2
-libsquish0	1.15-4
-libsrt1.5-gnutls	1.5.4-3
-libss2	1.47.2-3ubuntu4
-libssh-4	0.11.3-1ubuntu2.1
-libssh2-1t64	1.11.1-1ubuntu0.26.04.3
-libssl3t64	3.5.5-1ubuntu3.4
-libsss-certmap0	2.12.0-1ubuntu5.2
-libsss-idmap0	2.12.0-1ubuntu5.2
-libsss-nss-idmap0	2.12.0-1ubuntu5.2
-libstartup-notification0	0.12-8build1
-libstdc++6	16-20260322-1ubuntu1
-libstemmer0d	3.0.1-1
-libsuitesparseconfig7	1:7.12.2+dfsg-1ubuntu1
-libsvtav1enc2	2.3.0+dfsg-1build1
-libswresample6	7:8.0.1-3ubuntu2
-libswscale9	7:8.0.1-3ubuntu2
-libsysprof-6-6	50.0-1
-libsysprof-6-modules	50.0-1
-libsystemd-shared	259.5-0ubuntu3.4
-libsystemd0	259.5-0ubuntu3.4
-libt4k-common0t64	0.1.1-13build1
-libtag2	2.2.1-3
-libtalloc2	2:2.4.3+samba4.23.6+dfsg-1ubuntu2.2
-libtasn1-6	4.21.0-2
-libtcl8.6	8.6.17+dfsg-1build1
-libtdb1	2:1.4.14+samba4.23.6+dfsg-1ubuntu2.2
-libteamdctl0	1.31-1build4
-libtevent0t64	2:0.17.1+samba4.23.6+dfsg-1ubuntu2.2
-libtext-charwidth-perl	0.04-11build4
-libtext-iconv-perl	1.7-8.1
-libtext-wrapi18n-perl	0.06-10
-libthai-data	0.1.30-1
-libthai0	0.1.30-1
-libtheora1	1.2.0+dfsg-6
-libtheoradec2	1.2.0+dfsg-6
-libtheoraenc2	1.2.0+dfsg-6
-libtie-ixhash-perl	1.23-4
-libtiff6	4.7.0-3ubuntu5
-libtimedate-perl	2.3300-2
-libtinfo6	6.6+20251231-1
-libtinysparql-3.0-0	3.11.0-1
-libtirpc-common	1.3.7-0.1
-libtirpc3t64	1.3.7-0.1
-libtotem-plparser-common	3.26.6-3
-libtotem-plparser18	3.26.6-3
-libtraceevent1	1:1.8.7-1
-libtraceevent1-plugin	1:1.8.7-1
-libtracefs1	1.8.2-1ubuntu1
-libtry-tiny-perl	0.32-1
-libts0t64	1.22-1.1build2
-libtss2-esys-3.0.2-0t64	4.1.3-6
-libtss2-mu-4.0.1-0t64	4.1.3-6
-libtss2-rc0t64	4.1.3-6
-libtss2-sys1t64	4.1.3-6
-libtss2-tcti-cmd0t64	4.1.3-6
-libtss2-tcti-device0t64	4.1.3-6
-libtss2-tcti-libtpms0t64	4.1.3-6
-libtss2-tcti-mssim0t64	4.1.3-6
-libtss2-tcti-spi-helper0t64	4.1.3-6
-libtss2-tcti-swtpm0t64	4.1.3-6
-libtss2-tctildr0t64	4.1.3-6
-libtwolame0	0.4.0-2build4
-libuchardet0	0.0.8-2
-libudev1	259.5-0ubuntu3.4
-libudfread3	1.2.0-2
-libudisks2-0	2.10.91-1ubuntu2
-libunibreak6	6.1-3build1
-libunistring5	1.3-2build1
-libunity-protocol-private0	7.1.4+19.04.20190319-6.1ubuntu1
-libunity-scopes-json-def-desktop	7.1.4+19.04.20190319-6.1ubuntu1
-libunity9	7.1.4+19.04.20190319-6.1ubuntu1
-libuno-cppu3t64	4:26.2.6.3-0ubuntu0.26.04.2
-libuno-cppuhelpergcc3-3t64	4:26.2.6.3-0ubuntu0.26.04.2
-libuno-purpenvhelpergcc3-3t64	4:26.2.6.3-0ubuntu0.26.04.2
-libuno-sal3t64	4:26.2.6.3-0ubuntu0.26.04.2
-libuno-salhelpergcc3-3t64	4:26.2.6.3-0ubuntu0.26.04.2
-libunwind8	1.8.3-0ubuntu1
-libupnp17t64	1:1.14.25-1ubuntu1
-libupower-glib3	1.91.1-1
-liburcu8t64	0.15.6-1
-liburi-perl	5.34-2build1
-liburing2	2.14-1
-libusb-1.0-0	2:1.0.29-2build1
-libusbmuxd-2.0-7	2.1.1-1
-libuuid1	2.41.3-3ubuntu2
-libuv1t64	1.51.0-2ubuntu1
-libv4l-0t64	1.32.0-2ubuntu1
-libv4lconvert0t64	1.32.0-2ubuntu1
-libva-drm2	2.23.0-1ubuntu1
-libva-wayland2	2.23.0-1ubuntu1
-libva-x11-2	2.23.0-1ubuntu1
-libva2	2.23.0-1ubuntu1
-libvdpau1	1.5-4
-libvisio-0.1-1	0.1.10-1build1
-libvisual-0.4-0	0.4.2-4
-libvlc5	3.0.23-1
-libvlccore9	3.0.23-1
-libvolume-key1	0.3.12-10build2
-libvorbis0a	1.3.7-3build2
-libvorbisenc2	1.3.7-3build2
-libvorbisfile3	1.3.7-3build2
-libvpx12	1.16.0-3
-libvte-2.91-0	0.84.0-2
-libvte-2.91-common	0.84.0-2
-libvte-2.91-gtk4-0	0.84.0-2
-libvulkan1	1.4.341.0-1
-libwacom-common	2.18.0-1
-libwacom9	2.18.0-1
-libwavpack1	5.9.0-1
-libwayland-client0	1.24.0-2
-libwayland-cursor0	1.24.0-2
-libwayland-egl1	1.24.0-2
-libwayland-server0	1.24.0-2
-libwbclient0	2:4.23.6+dfsg-1ubuntu2.2
-libwebkit2gtk-4.1-0	2.52.3-0ubuntu0.26.04.3
-libwebkitgtk-6.0-4	2.52.3-0ubuntu0.26.04.3
-libwebp7	1.5.0-0.1build1
-libwebpdemux2	1.5.0-0.1build1
-libwebpmux3	1.5.0-0.1build1
-libwebrtc-audio-processing-1-3	1.3-3build2
-libwhoopsie-preferences0	23build4
-libwhoopsie0	0.2.82ubuntu
-libwinpr3-3	3.30.0+dfsg-0ubuntu0.26.04.2
-libwireplumber-0.5-0	0.5.13-1ubuntu1
-libwmf-0.2-7	0.2.14-1
-libwmf-0.2-7-gtk	0.2.14-1
-libwmflite-0.2-7	0.2.14-1
-libwnck-3-0	43.3-1build1
-libwnck-3-common	43.3-1build1
-libwpd-0.10-10	0.10.3-2build3
-libwpg-0.3-3	0.3.4-3build2
-libwps-0.4-4	0.4.14-2build2
-libwrap0	7.6.q-36build2
-libwww-perl	6.81-1ubuntu0.1
-libwww-robotrules-perl	6.02-1build1
-libx11-6	2:1.8.13-1
-libx11-data	2:1.8.13-1
-libx11-protocol-perl	0.56-9
-libx11-xcb1	2:1.8.13-1
-libx264-165	2:0.165.3222+gitb35605ac-3build1
-libx265-215	4.1-4
-libxau6	1:1.0.11-1build2
-libxaw7	2:1.0.16-1build1
-libxcb-cursor0	0.1.6-1
-libxcb-dri3-0	1.17.0-2ubuntu1
-libxcb-glx0	1.17.0-2ubuntu1
-libxcb-icccm4	0.4.2-1build1
-libxcb-image0	0.4.0-2build2
-libxcb-keysyms1	0.4.1-1build1
-libxcb-present0	1.17.0-2ubuntu1
-libxcb-randr0	1.17.0-2ubuntu1
-libxcb-render-util0	0.3.10-1build1
-libxcb-render0	1.17.0-2ubuntu1
-libxcb-res0	1.17.0-2ubuntu1
-libxcb-shape0	1.17.0-2ubuntu1
-libxcb-shm0	1.17.0-2ubuntu1
-libxcb-sync1	1.17.0-2ubuntu1
-libxcb-util1	0.4.1-1build1
-libxcb-xfixes0	1.17.0-2ubuntu1
-libxcb-xinerama0	1.17.0-2ubuntu1
-libxcb-xinput0	1.17.0-2ubuntu1
-libxcb-xkb1	1.17.0-2ubuntu1
-libxcb-xv0	1.17.0-2ubuntu1
-libxcb1	1.17.0-2ubuntu1
-libxcomposite1	1:0.4.6-1build1
-libxcursor1	1:1.2.3-1build1
-libxcvt0	0.1.3-1build1
-libxdamage1	1:1.1.7-1
-libxdmcp6	1:1.1.5-2
-libxext6	2:1.3.4-1build3
-libxfixes3	1:6.0.0-2build2
-libxfont2	1:2.0.6-2ubuntu0.2
-libxft2	2.3.6-1build2
-libxi6	2:1.8.2-2
-libxinerama1	2:1.1.4-3build2
-libxkbcommon-x11-0	1.13.1-1
-libxkbcommon0	1.13.1-1
-libxkbfile1	1:1.1.0-1build5
-libxkbregistry0	1.13.1-1
-libxml-parser-perl	2.47-1ubuntu1
-libxml-twig-perl	1:3.54-1build1
-libxml-xpathengine-perl	0.14-2
-libxml2-16	2.15.2+dfsg-0.1ubuntu0.1
-libxmlb2	0.3.24-2
-libxmlsec1-1	1.3.9-1
-libxmlsec1-nss1	1.3.9-1
-libxmp4	4.6.3-1
-libxmu6	2:1.1.3-4
-libxmuu1	2:1.1.3-4
-libxpm4	1:3.5.17-1ubuntu0.26.04.1
-libxrandr2	2:1.5.4-1build1
-libxrender1	1:0.9.12-1build1
-libxres1	2:1.2.1-1build2
-libxshmfence1	1.3.3-1build1
-libxslt1.1	1.1.45-0.1
-libxss1	1:1.2.3-1build4
-libxt6t64	1:1.2.1-1.3build1
-libxtables12	1.8.11-2ubuntu3
-libxtst6	2:1.2.5-1build1
-libxv1	2:1.0.13-1
-libxvidcore4	2:1.3.7-3
-libxxf86dga1	2:1.1.5-1build2
-libxxf86vm1	1:1.1.4-2
-libxxhash0	0.8.3-2build1
-libyajl2	2.1.0-5.1
-libyaml-0-2	0.2.5-2build3
-libyelp-1-0	49.0-5ubuntu0.1
-libzmq5	4.3.5-1build3
-libzstd1	1.5.7+dfsg-3
-libzvbi-common	0.2.44-1ubuntu2
-libzvbi0t64	0.2.44-1ubuntu2
-linux-base	4.15ubuntu5
-linux-firmware	20260319.git217ca6e4.1ubuntu
-linux-firmware-amd-graphics	20260319.git217ca6e4-0ubuntu3.1
-linux-firmware-amd-misc	20260319.git217ca6e4-0ubuntu1.1
-linux-firmware-broadcom-wireless	20260319.git217ca6e4-0ubuntu1.1
-linux-firmware-intel-graphics	20260319.git217ca6e4-0ubuntu2.1
-linux-firmware-intel-misc	20260319.git217ca6e4-0ubuntu1.2
-linux-firmware-intel-wireless	20260319.git217ca6e4-0ubuntu2.1
-linux-firmware-marvell-prestera	20260319.git217ca6e4-0ubuntu1.2
-linux-firmware-marvell-wireless	20260319.git217ca6e4-0ubuntu1.1
-linux-firmware-mediatek	20260319.git217ca6e4-0ubuntu1.2
-linux-firmware-mellanox-spectrum	20260319.git217ca6e4-0ubuntu1.1
-linux-firmware-misc	20260319.git217ca6e4-0ubuntu2.2
-linux-firmware-netronome	20260319.git217ca6e4-0ubuntu1.1
-linux-firmware-nvidia-graphics	20260319.git217ca6e4-0ubuntu1.1
-linux-firmware-qlogic	20260319.git217ca6e4-0ubuntu1.1
-linux-firmware-qualcomm-graphics	20260319.git217ca6e4-0ubuntu1.1
-linux-firmware-qualcomm-misc	20260319.git217ca6e4-0ubuntu2.1
-linux-firmware-qualcomm-wireless	20260319.git217ca6e4-0ubuntu1.2
-linux-firmware-raspi	14-0ubuntu1.1
-linux-firmware-realtek	20260319.git217ca6e4-0ubuntu1.2
-linux-image-7.0.0-1017-raspi	7.0.0-1017.17
-linux-image-raspi	7.0.0-1017.17
-linux-main-modules-zfs-7.0.0-1017-raspi	7.0.0-1017.17
-linux-modules-7.0.0-1017-raspi	7.0.0-1017.17
-linux-sound-base	1.0.25+dfsg-0ubuntu9
-linux-sysctl-defaults	4.15ubuntu5
-locales	2.43-2ubuntu2.3
-locales-all	2.43-2ubuntu2.3
-localsearch	3.11.0-1ubuntu1.1
-login	1:4.16.0-2+really2.41.3-3ubuntu2
-login.defs	1:4.17.4-2ubuntu3
-logrotate	3.22.0-1build1
-logsave	1.47.2-3ubuntu4
-loupe	50.0-0ubuntu2
-lsb-release	12.1-2build1
-lshw	02.19.git.2021.06.19.996aaad9c7-2.1ubuntu3
-lsof	4.99.4+dfsg-2build2
-luit	2.0.20250912-1
-makedumpfile	1:1.7.7-1
-man-db	2.13.1-1build1
-manpages	6.17-1
-marble	4:25.12.3-0ubuntu1
-marble-data	4:25.12.3-0ubuntu1
-marble-plugins	4:25.12.3-0ubuntu1
-marble-qt-data	4:25.12.3-0ubuntu1
-mawk	1.3.4.20260129-1
-media-types	14.0.0build1
-mesa-libgallium	26.0.8-1ubuntu0.3
-mesa-vulkan-drivers	26.0.8-1ubuntu0.3
-mobile-broadband-provider-info	20251101-1build1
-modemmanager	1.25.95-1ubuntu1
-mokutil	0.7.2-2
-mount	2.41.3-3ubuntu2
-mscompress	0.4-10build2
-mtr-tiny	0.95-1.1ubuntu2
-mutter-common	50.1-0ubuntu2.2
-mutter-common-bin	50.1-0ubuntu2.2
-nano	8.7.1-1ubuntu0.1
-nautilus	1:50.2.2-0ubuntu0.1
-nautilus-data	1:50.2.2-0ubuntu0.1
-nautilus-sendto	3.8.6-8ubuntu1
-nbd-client	1:3.26.1-6.1ubuntu2
-ncurses-base	6.6+20251231-1
-ncurses-bin	6.6+20251231-1
-netbase	6.5build1
-netcat-openbsd	1.234-1
-netpbm	2:11.10.02-1build1
-netplan-generator	1.2-1ubuntu5
-netplan.io	1.2-1ubuntu5
-network-manager	1.54.3-2ubuntu3
-network-manager-config-connectivity-ubuntu	1.54.3-2ubuntu3
-network-manager-l10n	1.54.3-2ubuntu3
-network-manager-openvpn	1.12.5-1
-network-manager-openvpn-gnome	1.12.5-1
-network-manager-pptp	1.2.12-6
-network-manager-pptp-gnome	1.2.12-6
-networkd-dispatcher	2.2.4-1.1ubuntu1
-nftables	1.1.6-1
-nm-connection-editor	1.36.0-4ubuntu1
-ntfs-3g	1:2022.10.3-5ubuntu1.1
-numactl	2.0.19-1build1
-ocl-icd-libopencl1	2.3.4-1
-openprinting-ppds	20250819-1build1
-openssh-client	1:10.2p1-2ubuntu3.8
-openssh-server	1:10.2p1-2ubuntu3.8
-openssh-sftp-server	1:10.2p1-2ubuntu3.8
-openssl	3.5.5-1ubuntu3.4
-openssl-provider-legacy	3.5.5-1ubuntu3.4
-openvpn	2.7.0-1ubuntu1.2
-orca	50.2-0ubuntu0.1
-overlayroot	0.58ubuntu
-p11-kit	0.26.2-2
-p11-kit-modules	0.26.2-2
-packagekit	1.3.4-3ubuntu1.2
-papers	50.2-0ubuntu0.1
-papers-common	50.2-0ubuntu0.1
-parted	3.6-6
-passwd	1:4.17.4-2ubuntu3
-pci.ids	0.0~2026.02.12-1
-pciutils	1:3.14.0-1build2
-pcmciautils	018-19
-pemmican-common	1.0.3-0ubuntu3
-pemmican-desktop	1.0.3-0ubuntu3
-perl	5.40.1-7ubuntu0.1
-perl-base	5.40.1-7ubuntu0.1
-perl-modules-5.40	5.40.1-7ubuntu0.1
-perl-openssl-defaults	7build4
-phonon-backend-vlc-common	0.12.0-3build5
-phonon4qt6	4:4.12.0-7
-phonon4qt6-backend-vlc	0.12.0-3build5
-piboot-try	1.1ubuntu0.1
-pinentry-curses	1.3.2-3ubuntu1
-pinentry-gnome3	1.3.2-3ubuntu1
-pipewire	1.6.2-1ubuntu1.1
-pipewire-alsa	1.6.2-1ubuntu1.1
-pipewire-audio	1.6.2-1ubuntu1.1
-pipewire-bin	1.6.2-1ubuntu1.1
-pipewire-pulse	1.6.2-1ubuntu1.1
-pkexec	127-2ubuntu1
-plymouth	24.004.60+git20250831.4a3c171d-0ubuntu8
-plymouth-label	24.004.60+git20250831.4a3c171d-0ubuntu8
-plymouth-theme-spinner	24.004.60+git20250831.4a3c171d-0ubuntu8
-plymouth-theme-ubuntu-text	24.004.60+git20250831.4a3c171d-0ubuntu8
-policykit-desktop-privileges	0.22build1
-polkitd	127-2ubuntu1
-poppler-data	0.4.12-1build1
-poppler-utils	26.01.0-2ubuntu0.1
-power-profiles-daemon	0.30-2
-powermgmt-base	1.38ubuntu2
-ppp	2.5.2-1+1.2
-pptp-linux	1.10.0-2build1
-printer-driver-brlaser	6.2.8-1
-printer-driver-c2esp	27-11ubuntu8
-printer-driver-foo2zjs	20200505dfsg0-3ubuntu1
-printer-driver-foo2zjs-common	20200505dfsg0-3ubuntu1
-printer-driver-hpcups	3.24.4+dfsg0-0ubuntu8.1
-printer-driver-m2300w	0.51-15build3
-printer-driver-min12xxw	0.0.9-11build4
-printer-driver-pnm2ppa	1.13+nondbs-0ubuntu11
-printer-driver-postscript-hp	3.24.4+dfsg0-0ubuntu8.1
-printer-driver-ptouch	1.7.1-1build1
-printer-driver-pxljr	1.4+repack0-6build3
-printer-driver-sag-gdi	0.1-8build1
-printer-driver-splix	2.0.1-2
-procps	2:4.0.4-9ubuntu1
-psmisc	23.7-2ubuntu2
-ptyxis	50.1-1ubuntu2
-publicsuffix	20260129.1928-1
-python-apt-common	3.1.0ubuntu1.1
-python-babel-localedata	2.17.0-2
-python3	3.14.3-0ubuntu2
-python3-apt	3.1.0ubuntu1.1
-python3-aptdaemon	2.0.2build1
-python3-aptdaemon.gtk3widgets	2.0.2build1
-python3-attr	25.4.0-1build1
-python3-autocommand	2.2.2-4
-python3-babel	2.17.0-2
-python3-bcrypt	5.0.0-3build1
-python3-blinker	1.9.0-2build1
-python3-brlapi	6.7-1ubuntu6
-python3-cairo	1.27.0-2build2
-python3-certifi	2026.1.4+ds-1
-python3-cffi-backend	2.0.0-3build1
-python3-chardet	5.2.0+dfsg-2build1
-python3-click	8.2.0+0.really.8.1.8-1build1
-python3-commandnotfound	23.04.0build1
-python3-configobj	5.0.9-1build1
-python3-cryptography	46.0.5-1ubuntu2
-python3-cups	2.0.4-3build1
-python3-cupshelpers	1.5.18-4ubuntu2
-python3-dasbus	1.7-2build1
-python3-dbus	1.4.0-1build2
-python3-debconf	1.5.92
-python3-defer	1.0.6-2.1ubuntu2
-python3-distro	1.9.0-1build1
-python3-gdbm	3.14.3-0ubuntu2
-python3-gi	3.56.2-1
-python3-httplib2	0.22.0-1ubuntu0.1
-python3-ibus-1.0	1.5.34~rc2-1
-python3-idna	3.11-1ubuntu0.1
-python3-inflect	7.5.0-1build1
-python3-jaraco.context	6.0.1-2
-python3-jaraco.functools	4.1.0-1build1
-python3-jaraco.text	4.0.0-1build1
-python3-jinja2	3.1.6-1build1
-python3-json-pointer	2.4-4
-python3-jsonpatch	1.32-6
-python3-jsonschema	4.19.2-6ubuntu2
-python3-jsonschema-specifications	2023.12.1-4
-python3-jwt	2.10.1-4ubuntu1
-python3-launchpadlib	2.1.0-1build1
-python3-lazr.restfulclient	0.14.6-3build1
-python3-lazr.uri	1.0.6-7build1
-python3-linkify-it	2.0.3-1ubuntu3
-python3-louis	3.36.0-1
-python3-markdown-it	3.0.0-3build1
-python3-markupsafe	3.0.3-1build1
-python3-mdurl	0.1.2-1build1
-python3-minimal	3.14.3-0ubuntu2
-python3-more-itertools	10.8.0-1build1
-python3-netplan	1.2-1ubuntu5
-python3-oauthlib	3.3.1-1build1
-python3-olefile	0.47-1build1
-python3-passlib	1.9.3-1ubuntu1
-python3-pexpect	4.9-4
-python3-pil	12.1.1-2ubuntu1.2
-python3-pkg-resources	78.1.1-0.1build1
-python3-psutil	7.1.0-1ubuntu1
-python3-ptyprocess	0.7.0-6build1
-python3-pygments	2.19.2+dfsg-1
-python3-pyparsing	3.3.2-2
-python3-pyudev	0.24.3+tests-0ubuntu2
-python3-referencing	0.36.2-1ubuntu2
-python3-requests	2.32.5+dfsg-1ubuntu1
-python3-rich	13.9.4-1.2
-python3-rpds-py	0.27.1-2ubuntu3
-python3-serial	3.5-2build1
-python3-setproctitle	1.3.7-2build1
-python3-setuptools	78.1.1-0.1build1
-python3-software-properties	0.120.1
-python3-speechd	0.12.1-2ubuntu1
-python3-sss	2.12.0-1ubuntu5.2
-python3-typeguard	4.4.4-2
-python3-typing-extensions	4.15.0-2
-python3-uc-micro	1.0.3-1build1
-python3-urllib3	2.6.3-1ubuntu1.1
-python3-wadllib	2.0.0-3
-python3-xdg	0.28-3
-python3-xkit	0.5.0ubuntu8
-python3-yaml	6.0.3-1build1
-python3-zipp	3.23.0-1build1
-python3.14	3.14.4-1ubuntu0.1
-python3.14-gdbm	3.14.4-1ubuntu0.1
-python3.14-minimal	3.14.4-1ubuntu0.1
-qml6-module-qt-labs-folderlistmodel	6.10.2+dfsg-3
-qml6-module-qt-labs-qmlmodels	6.10.2+dfsg-3
-qml6-module-qtcharts	6.10.2-1
-qml6-module-qtcore	6.10.2+dfsg-3
-qml6-module-qtgraphs	6.10.2-2
-qml6-module-qtmultimedia	6.10.2-2
-qml6-module-qtqml	6.10.2+dfsg-3
-qml6-module-qtqml-models	6.10.2+dfsg-3
-qml6-module-qtqml-workerscript	6.10.2+dfsg-3
-qml6-module-qtquick	6.10.2+dfsg-3
-qml6-module-qtquick-controls	6.10.2+dfsg-3
-qml6-module-qtquick-dialogs	6.10.2+dfsg-3
-qml6-module-qtquick-effects	6.10.2+dfsg-3
-qml6-module-qtquick-layouts	6.10.2+dfsg-3
-qml6-module-qtquick-particles	6.10.2+dfsg-3
-qml6-module-qtquick-shapes	6.10.2+dfsg-3
-qml6-module-qtquick-templates	6.10.2+dfsg-3
-qml6-module-qtquick-window	6.10.2+dfsg-3
-qml6-module-qtquick3d	6.10.2-1
-qml6-module-qtsensors	6.10.2-1
-qt6-image-formats-plugins	6.10.2-1
-qt6-svg-plugins	6.10.2-2
-quadrapassel	1:49.2.3-2
-raspi-utils	20250514-0ubuntu3
-raspi-utils-core	20250514-0ubuntu3
-raspi-utils-dt	20250514-0ubuntu3
-raspi-utils-eeprom	20250514-0ubuntu3
-raspi-utils-otp	20250514-0ubuntu3
-readline-common	8.3-4
-resources	1.10.2-0ubuntu3.1
-rfkill	2.41.3-3ubuntu2
-rpi-eeprom	28.14-0ubuntu1
-rpi-eeprom-firmware	28.14-0ubuntu1
-rsync	3.4.1+ds1-7ubuntu0.3
-rsyslog	8.2512.0-1ubuntu4.1
-rtkit	0.14-1
-rust-coreutils	0.8.0-0ubuntu3
-rygel	45.0-1ubuntu1
-samba-libs	2:4.23.6+dfsg-1ubuntu2.2
-sane-airscan	0.99.36-2ubuntu1
-sane-utils	1.4.0-1ubuntu1
-sbsigntool	0.9.4-3.1ubuntu9
-screen	4.9.1-3ubuntu2
-seahorse	47.0.1-3build1
-secureboot-db	1.9build2
-sed	4.9-2ubuntu1
-sensible-utils	0.0.26build1
-sgml-base	1.31+nmu1build1
-sgml-data	2.0.11+nmu1build1
-shared-mime-info	2.4-5build3
-snapd	2.76.3+ubuntu26.04
-software-properties-common	0.120.1
-sound-icons	0.1-8build1
-sound-theme-freedesktop	0.8-7build1
-speech-dispatcher	0.12.1-2ubuntu1
-speech-dispatcher-audio-plugins	0.12.1-2ubuntu1
-speech-dispatcher-espeak-ng	0.12.1-2ubuntu1
-spice-vdagent	0.23.0-1
-squashfs-tools	1:4.7.5-1
-ssl-cert	1.1.3ubuntu2
-sssd	2.12.0-1ubuntu5.2
-sssd-ad	2.12.0-1ubuntu5.2
-sssd-ad-common	2.12.0-1ubuntu5.2
-sssd-common	2.12.0-1ubuntu5.2
-sssd-ipa	2.12.0-1ubuntu5.2
-sssd-krb5	2.12.0-1ubuntu5.2
-sssd-krb5-common	2.12.0-1ubuntu5.2
-sssd-ldap	2.12.0-1ubuntu5.2
-sssd-proxy	2.12.0-1ubuntu5.2
-stellarium	25.4-1
-stellarium-data	25.4-1
-stockfish	17-1build1
-strace	6.19+ds-0ubuntu5
-sudo	1.9.17p2-1ubuntu3
-sudo-common	1.2ubuntu
-sudo-rs	0.2.13-0ubuntu1
-supertuxkart	1.5-2build1
-supertuxkart-data	1.5-2build1
-switcheroo-control	3.0-2
-sysprof	50.0-1
-sysstat	12.7.7-0ubuntu2
-system-config-printer-common	1.5.18-4ubuntu2
-system-config-printer-udev	1.5.18-4ubuntu2
-systemd	259.5-0ubuntu3.4
-systemd-cryptsetup	259.5-0ubuntu3.4
-systemd-hwe-hwdb	259.5.3ubuntu
-systemd-oomd	259.5-0ubuntu3.4
-systemd-resolved	259.5-0ubuntu3.4
-systemd-sysv	259.5-0ubuntu3.4
-sysvinit-utils	3.15-5ubuntu1
-tar	1.35+dfsg-4ubuntu0.4
-tcl	8.6.16build1
-tcl8.6	8.6.17+dfsg-1build1
-tcpdump	4.99.6-1
-tecla	49.0-2
-telnet	0.17+2.7-2ubuntu1.1
-time	1.9-0.4
-timgm6mb-soundfont	1.3-5build1
-tinysparql	3.11.0-1
-tnftp	20260211-1
-tpm-udev	4.1.3-6
-trace-cmd	3.3.3-1ubuntu2
-tuxmath	2.0.3-10build1
-tuxmath-data	2.0.3-10build1
-tuxpaint	1:0.9.35-1
-tuxpaint-data	1:0.9.35-1
-tuxpaint-plugins-default	1:0.9.35-1
-tuxpaint-stamps-default	2025.05.26-1
-tuxtype	1.8.3-7build1
-tuxtype-data	1.8.3-7build1
-tzdata	2026c-0ubuntu0.26.04.1
-ubuntu-docs	26.04.1
-ubuntu-drivers-common	1:0.10.9
-ubuntu-insights	0.9.3ubuntu
-ubuntu-keyring	2023.11.28.1build1
-ubuntu-raspi-settings	26.04.3
-ubuntu-raspi-settings-desktop	26.04.3
-ubuntu-release-upgrader-core	1:26.04.23
-ubuntu-report	1.7.3ubuntu4
-ubuntu-session	50.1-0ubuntu0.1
-ubuntu-settings	26.04.6
-ubuntu-standard	1.570.3
-ubuntu-wallpapers	26.04.2
-ubuntu-wallpapers-resolute	26.04.2
-ucf	3.0052ubuntu1
-udev	259.5-0ubuntu3.4
-udisks2	2.10.91-1ubuntu2
-ufw	0.36.2-9build1
-uno-libs-private	4:26.2.6.3-0ubuntu0.26.04.2
-unzip	6.0-29ubuntu1
-update-inetd	4.54build1
-upower	1.91.1-1
-ure	4:26.2.6.3-0ubuntu0.26.04.2
-usb-modeswitch	2.6.2-1ubuntu1
-usb-modeswitch-data	20191128-7build1
-usb.ids	2025.12.13-1
-usbmuxd	1.1.1-7
-usbutils	1:019-1
-user-session-migration	0.5.1
-util-linux	2.41.3-3ubuntu2
-uuid-runtime	2.41.3-3ubuntu2
-vim-common	2:9.1.2141-1ubuntu4.8
-vim-tiny	2:9.1.2141-1ubuntu4.8
-vlc-data	3.0.23-1
-vlc-plugin-base	3.0.23-1
-vlc-plugin-video-output	3.0.23-1
-wamerican	2020.12.07-4build1
-webp-pixbuf-loader	0.2.7-3
-wget	1.25.0-2ubuntu4.4
-whiptail	0.52.25-1ubuntu3
-whoopsie-preferences	23build4
-wireless-regdb	2026.02.04-0ubuntu1
-wireplumber	0.5.13-1ubuntu1
-wpasupplicant	2:2.11-0ubuntu5
-wsdd	2:0.8-5ubuntu1
-x11-common	1:7.7+26ubuntu1
-x11-utils	7.7+7build1
-x11-xkb-utils	7.7+9build1
-x11-xserver-utils	7.7+11build1
-xauth	1:1.1.2-1.1build1
-xbrlapi	6.7-1ubuntu6
-xcursor-themes	1.0.6-0ubuntu2
-xdg-dbus-proxy	0.1.7-1
-xdg-desktop-portal	1.21.1+ds-1ubuntu3
-xdg-desktop-portal-gnome	50.0-0ubuntu1
-xdg-desktop-portal-gtk	1.15.3-2ubuntu1
-xdg-terminal-exec	0.14.0-1
-xdg-user-dirs	0.19-1
-xdg-user-dirs-gtk	0.16-1
-xdg-utils	1.2.1-2ubuntu2
-xfonts-base	1:1.0.5+nmu1build1
-xfonts-encodings	1:1.0.5-0ubuntu3
-xfonts-utils	1:7.7+7build1
-xkb-data	2.46-2
-xml-core	0.19build1
-xserver-common	2:21.1.22-1ubuntu1
-xwayland	2:24.1.10-1
-xxd	2:9.1.2141-1ubuntu4.8
-xz-utils	5.8.3-1
-yaru-theme-gnome-shell	26.04.5.1ubuntu
-yaru-theme-gtk	26.04.5.1ubuntu
-yaru-theme-icon	26.04.5.1ubuntu
-yaru-theme-sound	26.04.5.1ubuntu
-yelp	49.0-5ubuntu0.1
-yelp-xsl	49.0-2
-zenity	4.2.1-1
-zenity-common	4.2.1-1
-zip	3.0-15ubuntu3
-zlib1g	1:1.3.dfsg+really1.3.1-1ubuntu3.1
-zram-tools	0.3.7-1build1
-zstd	1.5.7+dfsg-3
+3cpio	0.14.0-1ubuntu1	arm64
+accountsservice	23.13.9-8ubuntu5.2	arm64
+acl	2.3.2-2	arm64
+adduser	3.153ubuntu1	all
+adwaita-icon-theme	50.0-1	all
+aisleriot	1:3.22.35-5	arm64
+alsa-base	1.0.25+dfsg-0ubuntu9	all
+alsa-topology-conf	1.2.5.1-3build1	all
+alsa-ucm-conf	1.2.15.3-1ubuntu1.5	all
+alsa-utils	1.2.15.2-1ubuntu1	arm64
+anacron	2.3-45ubuntu1	arm64
+apparmor	5.0.2-0ubuntu1~26.04.1	arm64
+appstream	1.1.2-1	arm64
+apt	3.2.0	arm64
+apt-config-icons	1.1.2-1	all
+apt-config-icons-hidpi	1.1.2-1	all
+aptdaemon	2.0.2build1	all
+aptdaemon-data	2.0.2build1	all
+aspell	0.60.8.2-3	arm64
+aspell-en	2020.12.07-0-1.1build1	all
+at-spi2-common	2.60.4-0ubuntu0.1	all
+at-spi2-core	2.60.4-0ubuntu0.1	arm64
+avahi-daemon	0.8-18ubuntu1.1	arm64
+baobab	49.1-2	arm64
+base-files	14ubuntu6.2	arm64
+base-passwd	3.6.8	arm64
+bash	5.3-2ubuntu1	arm64
+bash-completion	1:2.16.0-8build1	all
+bc	1.07.1-4build1	arm64
+bind9-dnsutils	1:9.20.24-1ubuntu0.2	arm64
+bind9-host	1:9.20.24-1ubuntu0.2	arm64
+bind9-libs	1:9.20.24-1ubuntu0.2	arm64
+binutils	2.46-3ubuntu2	arm64
+binutils-aarch64-linux-gnu	2.46-3ubuntu2	arm64
+binutils-common	2.46-3ubuntu2	arm64
+bluez	5.85-4ubuntu0.1	arm64
+bluez-cups	5.85-4ubuntu0.1	arm64
+bluez-obexd	5.85-4ubuntu0.1	arm64
+bolt	0.9.10-1	arm64
+brltty	6.7-1ubuntu6	arm64
+bsdextrautils	2.41.3-3ubuntu2	arm64
+bsdutils	1:2.41.3-3ubuntu2	arm64
+bubblewrap	0.11.1-1ubuntu0.1	arm64
+busybox-initramfs	1:1.37.0-7ubuntu1	arm64
+busybox-static	1:1.37.0-7ubuntu1	arm64
+ca-certificates	20260601~26.04.1	all
+chrony	4.8-2ubuntu1	arm64
+cloud-guest-utils	0.33-1build1	all
+cloud-init	26.1-0ubuntu3~26.04.1	all
+cloud-init-base	26.1-0ubuntu3~26.04.1	all
+colord	1.4.8-3	arm64
+colord-data	1.4.8-3	all
+command-not-found	23.04.0build1	all
+console-setup	1.237ubuntu3.1	all
+console-setup-linux	1.237ubuntu3.1	all
+coreutils	9.5-1ubuntu2+0.0.0~ubuntu25	all
+coreutils-from-uutils	0.0.0~ubuntu25	all
+cpio	2.15+dfsg-2.1	arm64
+cpp	4:15.2.0-5ubuntu1	arm64
+cpp-15	15.2.0-16ubuntu1	arm64
+cpp-15-aarch64-linux-gnu	15.2.0-16ubuntu1	arm64
+cpp-aarch64-linux-gnu	4:15.2.0-5ubuntu1	arm64
+cracklib-runtime	2.9.6-5.2build3	arm64
+crash	9.0.1+~16.3-1ubuntu1	arm64
+cron	3.0pl1-200ubuntu1	arm64
+cron-daemon-common	3.0pl1-200ubuntu1	all
+cryptsetup	2:2.8.4-1ubuntu4	arm64
+cryptsetup-bin	2:2.8.4-1ubuntu4	arm64
+cups	2.4.16-1ubuntu1.3	arm64
+cups-browsed	2.1.1-0ubuntu3	arm64
+cups-bsd	2.4.16-1ubuntu1.3	arm64
+cups-client	2.4.16-1ubuntu1.3	arm64
+cups-common	2.4.16-1ubuntu1.3	all
+cups-core-drivers	2.4.16-1ubuntu1.3	arm64
+cups-daemon	2.4.16-1ubuntu1.3	arm64
+cups-filters	2.0.1-0ubuntu4.1	arm64
+cups-filters-core-drivers	2.0.1-0ubuntu4.1	arm64
+cups-ipp-utils	2.4.16-1ubuntu1.3	arm64
+cups-pk-helper	0.2.6-2.1build1	arm64
+cups-ppdc	2.4.16-1ubuntu1.3	arm64
+cups-server-common	2.4.16-1ubuntu1.3	all
+curl	8.18.0-1ubuntu2.8	arm64
+dash	0.5.12-12ubuntu3	arm64
+dbus	1.16.2-2ubuntu4	arm64
+dbus-bin	1.16.2-2ubuntu4	arm64
+dbus-daemon	1.16.2-2ubuntu4	arm64
+dbus-session-bus-common	1.16.2-2ubuntu4	all
+dbus-system-bus-common	1.16.2-2ubuntu4	all
+dbus-user-session	1.16.2-2ubuntu4	arm64
+dc	1.07.1-4build1	arm64
+dconf-cli	0.49.0-4	arm64
+dconf-gsettings-backend	0.49.0-4	arm64
+dconf-service	0.49.0-4	arm64
+debconf	1.5.92	all
+debconf-i18n	1.5.92	all
+debianutils	5.23.2build1	arm64
+desktop-file-utils	0.28-1build1	arm64
+device-tree-compiler	1.7.2-2ubuntu1	arm64
+dhcpcd-base	1:10.3.0-7	arm64
+dictionaries-common	1.31.4	all
+diffutils	1:3.12-1	arm64
+dirmngr	2.4.8-4ubuntu3	arm64
+distro-info-data	0.72-0ubuntu0.26.04.1	all
+dmidecode	3.6-2build1	arm64
+dmsetup	2:1.02.205-2ubuntu3	arm64
+dmz-cursor-theme	0.4.5.3build1	all
+dns-root-data	2025080400build1	all
+dnsmasq-base	2.92-1ubuntu0.4	arm64
+docbook-xml	4.5-13build1	all
+dosfstools	4.2-1.2build1	arm64
+dpkg	1.23.7ubuntu1	arm64
+dracut	110-11	all
+dracut-core	110-11	arm64
+dracut-install	110-11	arm64
+e2fsprogs	1.47.2-3ubuntu4	arm64
+eatmydata	131-2build1	all
+ed	1.22.4-1	arm64
+eject	2.41.3-3ubuntu2	arm64
+emacsen-common	3.0.8build1	all
+enchant-2	2.8.2+dfsg1-3build1	arm64
+espeak-ng-data	1.52.0+dfsg-5build1	arm64
+ethtool	1:6.19-1	arm64
+evolution-data-server	3.56.2-8	arm64
+evolution-data-server-common	3.56.2-8	all
+exfatprogs	1.3.2-1	arm64
+fdisk	2.41.3-3ubuntu2	arm64
+file	1:5.46-5build2	arm64
+findutils	4.10.0-3build2	arm64
+firmware-sof-signed	2025.12.2-1	all
+flashrom	1.6.0-2ubuntu1	arm64
+fontconfig	2.17.1-3ubuntu1	arm64
+fontconfig-config	2.17.1-3ubuntu1	arm64
+fonts-crosextra-caladea	20200211-2	all
+fonts-crosextra-carlito	20230309-2	all
+fonts-dejavu-core	2.37-8build1	all
+fonts-dejavu-mono	2.37-8build1	all
+fonts-droid-fallback	1:8.1.0r7-1~1.gbp36536bbuild1	all
+fonts-freefont-ttf	20211204+svn4273-4build1	all
+fonts-liberation	1:2.1.5-3build1	all
+fonts-liberation-sans-narrow	1:1.07.6-4build1	all
+fonts-noto-cjk	1:20240730+repack1-1build1	all
+fonts-noto-color-emoji	2.051-1build1	all
+fonts-noto-core	20201225-2build1	all
+fonts-noto-mono	20201225-2build1	all
+fonts-noto-ui-core	20201225-2build1	all
+fonts-opensymbol	4:102.12+LibO26.2.6.3-0ubuntu0.26.04.2	all
+fonts-sil-andika	6.200-1	all
+fonts-ubuntu	0.869+git20240321-0ubuntu2	all
+fonts-urw-base35	20200910-8build1	all
+foomatic-db-compressed-ppds	20250819-1build1	all
+fprintd	1.94.5-4	arm64
+friendly-recovery	0.2.42build1	all
+ftp	20260211-1	all
+fuse3	3.18.2-1	arm64
+fwupd-signed	1.55+1.7-1	arm64
+gamemode	1.8.2-2build1	arm64
+gamemode-daemon	1.8.2-2build1	arm64
+gcc-15-base	15.2.0-16ubuntu1	arm64
+gcc-16-base	16-20260322-1ubuntu1	arm64
+gcompris-qt	26.1-2	arm64
+gcompris-qt-data	26.1-2	all
+gcr	3.41.2-6	arm64
+gcr4	4.4.0.1-8	arm64
+gdb	17.1-2ubuntu1	arm64
+gdisk	1.0.10-2build1	arm64
+gdm3	50.1-0ubuntu0.1	arm64
+geoclue-2.0	2.7.2-2ubuntu3	arm64
+geocode-glib-common	3.26.4-3	all
+gettext-base	0.23.2-1	arm64
+ghostscript	10.06.0~dfsg-3ubuntu1	arm64
+gir1.2-accountsservice-1.0	23.13.9-8ubuntu5.2	arm64
+gir1.2-adw-1	1.9.1-0ubuntu0.1	arm64
+gir1.2-atk-1.0	2.60.4-0ubuntu0.1	arm64
+gir1.2-atspi-2.0	2.60.4-0ubuntu0.1	arm64
+gir1.2-dbusmenu-glib-0.4	18.10.20180917~bzr492+repack1-4build1	arm64
+gir1.2-freedesktop	1.86.0-6build1	arm64
+gir1.2-gck-2	4.4.0.1-8	arm64
+gir1.2-gcr-4	4.4.0.1-8	arm64
+gir1.2-gdesktopenums-3.0	50.0-1ubuntu2	arm64
+gir1.2-gdkpixbuf-2.0	2.44.5+dfsg-4ubuntu1	arm64
+gir1.2-gdm-1.0	50.1-0ubuntu0.1	arm64
+gir1.2-geoclue-2.0	2.7.2-2ubuntu3	arm64
+gir1.2-girepository-3.0	2.88.0-1	arm64
+gir1.2-glib-2.0	2.88.0-1	arm64
+gir1.2-gmenu-3.0	3.38.1-1ubuntu1	arm64
+gir1.2-gnomeautoar-0.1	0.4.5-5	arm64
+gir1.2-gnomebg-4.0	44.5-1ubuntu1	arm64
+gir1.2-gnomebluetooth-3.0	47.1-5	arm64
+gir1.2-gnomedesktop-3.0	44.5-1ubuntu1	arm64
+gir1.2-gnomedesktop-4.0	44.5-1ubuntu1	arm64
+gir1.2-gnomeqr-4.0	44.5-1ubuntu1	arm64
+gir1.2-graphene-1.0	1.10.8-5build1	arm64
+gir1.2-gstreamer-1.0	1.28.2-1	arm64
+gir1.2-gtk-3.0	3.24.52-0ubuntu1	arm64
+gir1.2-gtk-4.0	4.22.4+ds-0ubuntu0.1	arm64
+gir1.2-gweather-4.0	4.4.4-4	arm64
+gir1.2-harfbuzz-0.0	12.3.2-2	arm64
+gir1.2-ibus-1.0	1.5.34~rc2-1	arm64
+gir1.2-mutter-18	50.1-0ubuntu2.2	arm64
+gir1.2-nm-1.0	1.54.3-2ubuntu3	arm64
+gir1.2-nma4-1.0	1.10.6-7	arm64
+gir1.2-notify-0.7	0.8.8-1	arm64
+gir1.2-packagekitglib-1.0	1.3.4-3ubuntu1.2	arm64
+gir1.2-pango-1.0	1.57.0-1	arm64
+gir1.2-polkit-1.0	127-2ubuntu1	arm64
+gir1.2-rsvg-2.0	2.61.3+dfsg-3	arm64
+gir1.2-secret-1	0.21.7-2build1	arm64
+gir1.2-snapd-2	1.72-0ubuntu3	arm64
+gir1.2-soup-3.0	3.6.6-1	arm64
+gir1.2-upowerglib-1.0	1.91.1-1	arm64
+gir1.2-vte-2.91	0.84.0-2	arm64
+gir1.2-wnck-3.0	43.3-1build1	arm64
+gjs	1.88.0-1	arm64
+glib-networking	2.80.1-1build2	arm64
+glib-networking-common	2.80.1-1build2	all
+glib-networking-services	2.80.1-1build2	arm64
+glycin-loaders	2.1.1+ds-0ubuntu1	arm64
+glycin-thumbnailers	2.1.1+ds-0ubuntu1	arm64
+gnome-accessibility-themes	3.28-5	all
+gnome-bluetooth-3-common	47.1-5	all
+gnome-bluetooth-sendto	47.1-5	arm64
+gnome-calculator	1:50.0-1ubuntu1	arm64
+gnome-characters	50.0-1	arm64
+gnome-chess	1:49.2-2	arm64
+gnome-clocks	50.0-1	arm64
+gnome-control-center	1:50.3-0ubuntu0.1	arm64
+gnome-control-center-data	1:50.3-0ubuntu0.1	all
+gnome-control-center-faces	1:50.3-0ubuntu0.1	all
+gnome-desktop3-data	44.5-1ubuntu1	all
+gnome-disk-utility	46.1-2ubuntu2	arm64
+gnome-font-viewer	49.0-1	arm64
+gnome-keyring	50.0-1	arm64
+gnome-keyring-pkcs11	50.0-1	arm64
+gnome-logs	49.0-1	arm64
+gnome-menus	3.38.1-1ubuntu1	arm64
+gnome-mines	1:49.0.1-2	arm64
+gnome-online-accounts	3.58.0-1	arm64
+gnome-package-updater	43.0-4build1	arm64
+gnome-packagekit-common	43.0-4build1	all
+gnome-remote-desktop	50.2-0ubuntu0.1	arm64
+gnome-screenshot	41.0-3build1	arm64
+gnome-session-bin	50.1-0ubuntu0.1	arm64
+gnome-session-canberra	0.30-18ubuntu3	arm64
+gnome-session-common	50.1-0ubuntu0.1	all
+gnome-settings-daemon	50.0-1ubuntu1	arm64
+gnome-settings-daemon-common	50.0-1ubuntu1	all
+gnome-shell	50.1-0ubuntu1.2	arm64
+gnome-shell-common	50.1-0ubuntu1.2	all
+gnome-shell-ubuntu-extensions	50.26.04.7ubuntu	all
+gnome-sudoku	1:49.3-1	arm64
+gnome-text-editor	50.1-0ubuntu0.1	arm64
+gnome-themes-extra	3.28-5	arm64
+gnome-themes-extra-data	3.28-5	all
+gnome-user-docs	50.0-0ubuntu1	all
+gnu-coreutils	9.7-3ubuntu2	arm64
+gnupg	2.4.8-4ubuntu3	all
+gnupg-l10n	2.4.8-4ubuntu3	all
+gnupg-utils	2.4.8-4ubuntu3	arm64
+google-chrome-stable	155.0.8059.79-1	arm64
+gpg	2.4.8-4ubuntu3	arm64
+gpg-agent	2.4.8-4ubuntu3	arm64
+gpg-wks-client	2.4.8-4ubuntu3	arm64
+gpgconf	2.4.8-4ubuntu3	arm64
+gpgsm	2.4.8-4ubuntu3	arm64
+gpgv	2.4.8-4ubuntu3	arm64
+grep	3.12-1	arm64
+groff-base	1.23.0-10	arm64
+gsettings-desktop-schemas	50.0-1ubuntu2	all
+gsettings-ubuntu-schemas	0.0.7+21.10.20210712-0ubuntu4	all
+gst-audio-thumbnailer	1.0.0-0ubuntu1	arm64
+gst-video-thumbnailer	1.0.0-0ubuntu1	arm64
+gstreamer1.0-alsa	1.28.2-1	arm64
+gstreamer1.0-gl	1.28.2-1	arm64
+gstreamer1.0-packagekit	1.3.4-3ubuntu1.2	arm64
+gstreamer1.0-pipewire	1.6.2-1ubuntu1.1	arm64
+gstreamer1.0-plugins-base	1.28.2-1	arm64
+gstreamer1.0-plugins-base-apps	1.28.2-1	arm64
+gstreamer1.0-plugins-good	1.28.2-2ubuntu0.1	arm64
+gstreamer1.0-tools	1.28.2-1	arm64
+gstreamer1.0-x	1.28.2-1	arm64
+gtk-update-icon-cache	4.22.4+ds-0ubuntu0.1	arm64
+gtk2-engines-murrine	0.98.2-4ubuntu1	arm64
+gtk2-engines-pixbuf	2.24.33-10	arm64
+guile-3.0-libs	3.0.11-2	arm64
+gvfs	1.60.0-1	arm64
+gvfs-backends	1.60.0-1	arm64
+gvfs-common	1.60.0-1	all
+gvfs-daemons	1.60.0-1	arm64
+gvfs-fuse	1.60.0-1	arm64
+gvfs-libs	1.60.0-1	arm64
+gzip	1.14-1~exp2ubuntu1.1	arm64
+hdparm	9.65+ds-1.1build1	arm64
+heif-gdk-pixbuf	1.21.2-3ubuntu0.4	arm64
+heif-thumbnailer	1.21.2-3ubuntu0.4	arm64
+hicolor-icon-theme	0.18-2build1	all
+hoichess	0.22.0-3build2	arm64
+hostname	3.25build1	arm64
+hplip	3.24.4+dfsg0-0ubuntu8.1	arm64
+hplip-data	3.24.4+dfsg0-0ubuntu8.1	all
+hunspell-en-gb	1:25.2.3-1build1	all
+hunspell-en-us	1:2020.12.07-4build1	all
+ibus	1.5.34~rc2-1	arm64
+ibus-data	1.5.34~rc2-1	all
+ibus-gtk	1.5.34~rc2-1	arm64
+ibus-gtk3	1.5.34~rc2-1	arm64
+ibus-gtk4	1.5.34~rc2-1	arm64
+ibus-table	1.17.16-1build1	all
+ibverbs-providers	61.0-2ubuntu3	arm64
+iio-sensor-proxy	3.8-1	arm64
+im-config	0.62	all
+inetutils-telnet	2:2.7-2ubuntu1.1	arm64
+info	7.2-5ubuntu2	arm64
+init	1.69	arm64
+init-system-helpers	1.69	all
+initramfs-tools-bin	0.151ubuntu1	arm64
+initramfs-tools-core	0.151ubuntu1	all
+inputattach	1:1.8.1-2build2	arm64
+install-info	7.2-5ubuntu2	arm64
+ipp-usb	0.9.31-1	arm64
+iproute2	6.19.0-1ubuntu1.1	arm64
+iptables	1.8.11-2ubuntu3	arm64
+iputils-ping	3:20250605-1ubuntu1	arm64
+iputils-tracepath	3:20250605-1ubuntu1	arm64
+iso-codes	4.20.1-1	all
+iw	6.17-1	arm64
+kalzium	4:25.12.3-0ubuntu1	arm64
+kalzium-data	4:25.12.3-0ubuntu1	all
+kbd	2.7.1-2ubuntu2	arm64
+kded6	6.24.0-0ubuntu1	arm64
+kdump-tools	1:1.10.7ubuntu3	arm64
+kexec-tools	1:2.0.32-3ubuntu1	arm64
+keyboard-configuration	1.237ubuntu3.1	all
+kio6	6.24.0-0ubuntu1	arm64
+klibc-utils	2.0.14-1ubuntu2	arm64
+kmod	34.2-2ubuntu2	arm64
+krb5-locales	1.22.1-2ubuntu4.1	all
+kturtle	4:25.12.3-0ubuntu1	arm64
+kwallet6	6.24.0-0ubuntu1	arm64
+language-pack-en	1:26.04+20260818	all
+language-pack-en-base	1:26.04+20260818	all
+language-selector-common	0.228build1	all
+language-selector-gnome	0.228build1	all
+laptop-detect	0.16+nmu1build1	all
+ldap-utils	2.6.10+dfsg-1ubuntu5	arm64
+less	668-1build1	arm64
+libaa1	1.4p5-51.1build1	arm64
+libabsl20260107	20260107.0-4	arm64
+libabw-0.1-1	0.1.3-1build6	arm64
+libaccountsservice0	23.13.9-8ubuntu5.2	arm64
+libacl1	2.3.2-2	arm64
+libadwaita-1-0	1.9.1-0ubuntu0.1	arm64
+libangelscript2.38.0	2.38.0+ds-2	arm64
+libao-common	1.2.2+20180113-1.2ubuntu2	all
+libao4	1.2.2+20180113-1.2ubuntu2	arm64
+libaom3	3.13.1-2	arm64
+libapparmor1	5.0.2-0ubuntu1~26.04.1	arm64
+libappstream5	1.1.2-1	arm64
+libapt-pkg7.0	3.2.0	arm64
+libarchive13t64	3.8.5-1ubuntu2.2	arm64
+libargon2-1	0~20190702+dfsg-5	arm64
+libaribb24-0t64	1.0.3-3	arm64
+libasound2-data	1.2.15.3-1ubuntu1.1	all
+libasound2t64	1.2.15.3-1ubuntu1.1	arm64
+libaspell15	0.60.8.2-3	arm64
+libass9	1:0.17.4-2	arm64
+libassuan9	3.0.2-2build1	arm64
+libastro1	4:25.12.3-0ubuntu1	arm64
+libasyncns0	0.8-7	arm64
+libatasmart4	0.19-6	arm64
+libatk-adaptor	2.60.4-0ubuntu0.1	arm64
+libatk-bridge2.0-0t64	2.60.4-0ubuntu0.1	arm64
+libatk1.0-0t64	2.60.4-0ubuntu0.1	arm64
+libatomic1	16-20260322-1ubuntu1	arm64
+libatopology2t64	1.2.15.3-1ubuntu1.1	arm64
+libatspi2.0-0t64	2.60.4-0ubuntu0.1	arm64
+libattr1	1:2.5.2-4	arm64
+libaudit-common	1:4.1.2-1build1	all
+libaudit1	1:4.1.2-1build1	arm64
+libauthen-sasl-perl	2.2000-1	all
+libavahi-client3	0.8-18ubuntu1.1	arm64
+libavahi-common-data	0.8-18ubuntu1.1	arm64
+libavahi-common3	0.8-18ubuntu1.1	arm64
+libavahi-core7	0.8-18ubuntu1.1	arm64
+libavahi-glib1	0.8-18ubuntu1.1	arm64
+libavc1394-0	0.5.4-5build4	arm64
+libavcodec62	7:8.0.1-3ubuntu2	arm64
+libavformat62	7:8.0.1-3ubuntu2	arm64
+libavutil60	7:8.0.1-3ubuntu2	arm64
+libayatana-appindicator3-1	0.5.94-1build1	arm64
+libayatana-ido3-0.4-0	0.10.4-1build1	arm64
+libayatana-indicator3-7	0.9.4-2	arm64
+libb2-1	0.98.1-1.1build2	arm64
+libbasicobjects0t64	0.6.2-3build1	arm64
+libbinutils	2.46-3ubuntu2	arm64
+libblkid1	2.41.3-3ubuntu2	arm64
+libblockdev-crypto3	3.4.0-1	arm64
+libblockdev-fs3	3.4.0-1	arm64
+libblockdev-loop3	3.4.0-1	arm64
+libblockdev-mdraid3	3.4.0-1	arm64
+libblockdev-nvme3	3.4.0-1	arm64
+libblockdev-part3	3.4.0-1	arm64
+libblockdev-smart3	3.4.0-1	arm64
+libblockdev-swap3	3.4.0-1	arm64
+libblockdev-utils3	3.4.0-1	arm64
+libblockdev3	3.4.0-1	arm64
+libbluetooth3	5.85-4ubuntu0.1	arm64
+libbluray3	1:1.4.1-1	arm64
+libboost-iostreams1.90.0	1.90.0-6ubuntu1	arm64
+libboost-locale1.90.0	1.90.0-6ubuntu1	arm64
+libboost-thread1.90.0	1.90.0-6ubuntu1	arm64
+libbpf1	1:1.6.3-1ubuntu1	arm64
+libbrlapi0.8	6.7-1ubuntu6	arm64
+libbrotli1	1.2.0-3build1	arm64
+libbsd0	0.12.2-2build2	arm64
+libbytesize-common	2.12-1	all
+libbytesize1	2.12-1	arm64
+libbz2-1.0	1.0.8-6build2	arm64
+libc-bin	2.43-2ubuntu2.3	arm64
+libc-gconv-modules-extra	2.43-2ubuntu2.3	arm64
+libc6	2.43-2ubuntu2.3	arm64
+libcaca0	0.99.beta20-6ubuntu2.1	arm64
+libcairo-gobject-perl	1.005-4build4	arm64
+libcairo-gobject2	1.18.4-3	arm64
+libcairo-perl	1.109-5build1	arm64
+libcairo-script-interpreter2	1.18.4-3	arm64
+libcairo2	1.18.4-3	arm64
+libcamel-1.2-64t64	3.56.2-8	arm64
+libcanberra-gtk3-0	0.30-18ubuntu3	arm64
+libcanberra-gtk3-module	0.30-18ubuntu3	arm64
+libcanberra-pulse	0.30-18ubuntu3	arm64
+libcanberra0	0.30-18ubuntu3	arm64
+libcap-ng0	0.8.5-4build5	arm64
+libcap2	1:2.75-10ubuntu2	arm64
+libcap2-bin	1:2.75-10ubuntu2	arm64
+libcares2	1.34.6-1	arm64
+libcbor0.10	0.10.2-2ubuntu3	arm64
+libcddb2	1.3.2-7.1fakesync1build1	arm64
+libcdio-cdda2t64	10.2+2.0.2-2	arm64
+libcdio-paranoia2t64	10.2+2.0.2-2	arm64
+libcdio19t64	2.2.0-4build1	arm64
+libcdparanoia0	3.10.2+debian-14ubuntu2	arm64
+libcdr-0.1-1	0.1.7-1build4	arm64
+libchromaprint1	1.6.0-2build1	arm64
+libcjson1	1.7.19-2	arm64
+libclone-perl	0.47-1	arm64
+libclucene-contribs1t64	2.3.3.4+dfsg-1.3	arm64
+libclucene-core1t64	2.3.3.4+dfsg-1.3	arm64
+libcodec2-1.2	1.2.0-4	arm64
+libcolamd3	1:7.12.2+dfsg-1ubuntu1	arm64
+libcollection4t64	0.6.2-3build1	arm64
+libcolord-gtk4-1t64	0.3.1-2	arm64
+libcolord2	1.4.8-3	arm64
+libcolorhug2	1.4.8-3	arm64
+libcom-err2	1.47.2-3ubuntu4	arm64
+libcrack2	2.9.6-5.2build3	arm64
+libcrypt-urandom-perl	0.55-1	arm64
+libcrypt1	1:4.5.1-1	arm64
+libcryptsetup12	2:2.8.4-1ubuntu4	arm64
+libctf-nobfd0	2.46-3ubuntu2	arm64
+libctf0	2.46-3ubuntu2	arm64
+libcue2	2.2.1-4.2	arm64
+libcups2t64	2.4.16-1ubuntu1.3	arm64
+libcupsfilters2-common	2.1.1-0ubuntu5	all
+libcupsfilters2t64	2.1.1-0ubuntu5	arm64
+libcupsimage2t64	2.4.16-1ubuntu1.3	arm64
+libcurl3t64-gnutls	8.18.0-1ubuntu2.8	arm64
+libcurl4t64	8.18.0-1ubuntu2.8	arm64
+libdaemon0	0.14-7.1ubuntu5	arm64
+libdata-dump-perl	1.25-1	all
+libdatrie1	0.2.14-1	arm64
+libdav1d7	1.5.3-1	arm64
+libdb5.3t64	5.3.28+dfsg2-10ubuntu1	arm64
+libdbus-1-3	1.16.2-2ubuntu4	arm64
+libdbusmenu-glib4	18.10.20180917~bzr492+repack1-4build1	arm64
+libdbusmenu-gtk3-4	18.10.20180917~bzr492+repack1-4build1	arm64
+libdc1394-25	2.2.6-6	arm64
+libdconf1	0.49.0-4	arm64
+libdebconfclient0	0.280ubuntu1	arm64
+libdebuginfod-common	0.194-4	all
+libdebuginfod1t64	0.194-4	arm64
+libdecor-0-0	0.2.5-1	arm64
+libdecor-0-plugin-1-gtk	0.2.5-1	arm64
+libdee-1.0-4	1.2.7+17.10.20170616-8build1	arm64
+libdeflate0	1.23-2ubuntu1	arm64
+libdevmapper1.02.1	2:1.02.205-2ubuntu3	arm64
+libdex-1-1	1.1.0-1	arm64
+libdhash1t64	0.6.2-3build1	arm64
+libdisplay-info3	0.3.0-1	arm64
+libdjvulibre-text	3.5.29-1	all
+libdjvulibre21	3.5.29-1	arm64
+libdotconf0	1.4.1-1build1	arm64
+libdouble-conversion3	3.4.0-1	arm64
+libdrm-amdgpu1	2.4.131-1	arm64
+libdrm-common	2.4.131-1	all
+libdrm2	2.4.131-1	arm64
+libdtovl0	20250514-0ubuntu3	arm64
+libduktape207	2.7.0+tests-0ubuntu4	arm64
+libdv4t64	1.0.0-17.1build2	arm64
+libdvbpsi10	1.3.3-1build2	arm64
+libdvdnav4	7.0.0-2	arm64
+libdvdread8t64	7.0.1-1	arm64
+libdw1t64	0.194-4	arm64
+libe-book-0.1-1	0.1.3-2build9	arm64
+libeatmydata1	131-2build1	arm64
+libebackend-1.2-11t64	3.56.2-8	arm64
+libebml5	1.4.5-2	arm64
+libebook-1.2-21t64	3.56.2-8	arm64
+libebook-contacts-1.2-4t64	3.56.2-8	arm64
+libecal-2.0-3	3.56.2-8	arm64
+libedata-book-1.2-27t64	3.56.2-8	arm64
+libedata-cal-2.0-2t64	3.56.2-8	arm64
+libedataserver-1.2-27t64	3.56.2-8	arm64
+libedataserverui-1.2-4t64	3.56.2-8	arm64
+libedit2	3.1-20251016-1	arm64
+libeditorconfig0	0.12.10+~0.17.1-3ubuntu0.1	arm64
+libefivar1t64	39-2	arm64
+libegl-mesa0	26.0.8-1ubuntu0.3	arm64
+libegl1	1.7.0-3	arm64
+libei1	1.5.0-3	arm64
+libeis1	1.5.0-3	arm64
+libelf1t64	0.194-4	arm64
+libenchant-2-2	2.8.2+dfsg1-3build1	arm64
+libencode-locale-perl	1.05-3	all
+libeot0	0.01-5build4	arm64
+libepoxy0	1.5.10-2build1	arm64
+libepubgen-0.1-1	0.1.1-1ubuntu8	arm64
+libespeak-ng1	1.52.0+dfsg-5build1	arm64
+libestr0	0.1.11-2build1	arm64
+libetonyek-0.1-1	0.1.13-2	arm64
+libevdev2	1.13.6+dfsg-1	arm64
+libevent-2.1-7t64	2.1.12-stable-10ubuntu0.2	arm64
+libexempi8	2.6.6-2build1	arm64
+libexif12	0.6.25-2ubuntu0.1	arm64
+libexiv2-28	0.28.8+dfsg-1	arm64
+libexiv2-data	0.28.8+dfsg-1	all
+libexpat1	2.7.4-1	arm64
+libext2fs2t64	1.47.2-3ubuntu4	arm64
+libexttextcat-2.0-0	3.4.7-2	arm64
+libexttextcat-data	3.4.7-2	all
+libextutils-depends-perl	0.8002-1	all
+libfaad2	2.11.2-1build1	arm64
+libfastjson4	1.2304.0-2build1	arm64
+libfdisk1	2.41.3-3ubuntu2	arm64
+libfdt1	1.7.2-2ubuntu1	arm64
+libffi8	3.5.2-4	arm64
+libfftw3-single3	3.3.10-2fakesync1build3	arm64
+libfido2-1	1.16.0-2build1	arm64
+libfile-basedir-perl	0.09-2	all
+libfile-desktopentry-perl	0.23-1	all
+libfile-listing-perl	6.16-1	all
+libfile-mimeinfo-perl	0.36-2	all
+libflac14	1.5.0+ds-5	arm64
+libfluidsynth3	2.4.8+dfsg-1	arm64
+libfont-afm-perl	1.20-4	all
+libfontconfig1	2.17.1-3ubuntu1	arm64
+libfontenc1	1:1.1.8-1build2	arm64
+libfprint-2-2	1:1.95.1+tod1-0ubuntu2	arm64
+libfprint-2-tod1	1:1.95.1+tod1-0ubuntu2	arm64
+libfreeaptx0	0.2.2-1build1	arm64
+libfreehand-0.1-1	0.1.2-3build4	arm64
+libfreerdp-server3-3	3.30.0+dfsg-0ubuntu0.26.04.2	arm64
+libfreerdp3-3	3.30.0+dfsg-0ubuntu0.26.04.2	arm64
+libfreetype6	2.14.2+dfsg-1ubuntu0.1	arm64
+libfribidi0	1.0.16-5	arm64
+libftdi1-2	1.6~rc1-1build1	arm64
+libfuse3-4	3.18.2-1	arm64
+libfyaml0	0.9.4-1	arm64
+libgamemode0	1.8.2-2build1	arm64
+libgamemodeauto0	1.8.2-2build1	arm64
+libgbm1	26.0.8-1ubuntu0.3	arm64
+libgc1	1:8.2.12-1	arm64
+libgcc-s1	16-20260322-1ubuntu1	arm64
+libgck-1-0	3.41.2-6	arm64
+libgck-2-2	4.4.0.1-8	arm64
+libgcr-4-4	4.4.0.1-8	arm64
+libgcr-base-3-1	3.41.2-6	arm64
+libgcr-ui-3-1	3.41.2-6	arm64
+libgcrypt20	1.12.0-2ubuntu1	arm64
+libgd3	2.3.3-13ubuntu2	arm64
+libgdbm-compat4t64	1.26-1build1	arm64
+libgdbm6t64	1.26-1build1	arm64
+libgdk-pixbuf-2.0-0	2.44.5+dfsg-4ubuntu1	arm64
+libgdk-pixbuf2.0-bin	2.44.5+dfsg-4ubuntu1	arm64
+libgdk-pixbuf2.0-common	2.44.5+dfsg-4ubuntu1	all
+libgdm1	50.1-0ubuntu0.1	arm64
+libgee-0.8-2	0.20.8-2	arm64
+libgeoclue-2-0	2.7.2-2ubuntu3	arm64
+libgeocode-glib-2-0	3.26.4-3	arm64
+libgexiv2-2	0.14.6-2	arm64
+libgif7	5.2.2-1ubuntu3.2	arm64
+libgirepository-1.0-1	1.86.0-6build1	arm64
+libgirepository-2.0-0	2.88.0-1	arm64
+libgjs0	1.88.0-1	arm64
+libgl1	1.7.0-3	arm64
+libgl1-mesa-dri	26.0.8-1ubuntu0.3	arm64
+libgles2	1.7.0-3	arm64
+libglib-object-introspection-perl	0.052-1	arm64
+libglib-perl	3:1.329.4-1	arm64
+libglib2.0-0t64	2.88.0-1	arm64
+libglib2.0-bin	2.88.0-1	arm64
+libglib2.0-data	2.88.0-1	all
+libglvnd0	1.7.0-3	arm64
+libglx-mesa0	26.0.8-1ubuntu0.3	arm64
+libglx0	1.7.0-3	arm64
+libglycin-2-0	2.1.1+ds-0ubuntu1	arm64
+libglycin-gtk4-2-0	2.1.1+ds-0ubuntu1	arm64
+libgme0	0.6.4-1	arm64
+libgmp10	2:6.3.0+dfsg-5ubuntu2	arm64
+libgnome-autoar-0-0	0.4.5-5	arm64
+libgnome-bg-4-2t64	44.5-1ubuntu1	arm64
+libgnome-bluetooth-3.0-13	47.1-5	arm64
+libgnome-bluetooth-ui-3.0-13	47.1-5	arm64
+libgnome-desktop-3-20t64	44.5-1ubuntu1	arm64
+libgnome-desktop-4-2t64	44.5-1ubuntu1	arm64
+libgnome-menu-3-0	3.38.1-1ubuntu1	arm64
+libgnome-qr-4-0	44.5-1ubuntu1	arm64
+libgnutls30t64	3.8.12-2ubuntu1.1	arm64
+libgoa-1.0-0b	3.58.0-1	arm64
+libgoa-1.0-common	3.58.0-1	all
+libgoa-backend-1.0-2	3.58.0-1	arm64
+libgomp1	16-20260322-1ubuntu1	arm64
+libgpg-error0	1.58-2	arm64
+libgpgme45	2.0.1-2build1	arm64
+libgpgmepp7	2.0.0-2	arm64
+libgphoto2-6t64	2.5.33-1ubuntu1.1	arm64
+libgphoto2-l10n	2.5.33-1ubuntu1.1	all
+libgphoto2-port12t64	2.5.33-1ubuntu1.1	arm64
+libgpiolib0	20250514-0ubuntu3	arm64
+libgpm2	1.20.7-12build1	arm64
+libgprofng0	2.46-3ubuntu2	arm64
+libgps32	3.27.5-0.1	arm64
+libgraphene-1.0-0	1.10.8-5build1	arm64
+libgraphite2-3	1.3.14-11ubuntu1.1	arm64
+libgs-common	10.06.0~dfsg-3ubuntu1	all
+libgs10	10.06.0~dfsg-3ubuntu1	arm64
+libgs10-common	10.06.0~dfsg-3ubuntu1	all
+libgsf-1-114	1.14.53-1.1	arm64
+libgsf-1-common	1.14.53-1.1	all
+libgsm1	1.0.23-2	arm64
+libgsound0t64	1.0.3-4	arm64
+libgssapi-krb5-2	1.22.1-2ubuntu4.1	arm64
+libgssdp-1.6-0	1.6.4-5	arm64
+libgstreamer-gl1.0-0	1.28.2-1	arm64
+libgstreamer-plugins-base1.0-0	1.28.2-1	arm64
+libgstreamer-plugins-extra1.0-0	1.28.2-1ubuntu1.1	arm64
+libgstreamer1.0-0	1.28.2-1	arm64
+libgtk-3-0t64	3.24.52-0ubuntu1	arm64
+libgtk-3-bin	3.24.52-0ubuntu1	arm64
+libgtk-3-common	3.24.52-0ubuntu1	all
+libgtk-4-1	4.22.4+ds-0ubuntu0.1	arm64
+libgtk-4-bin	4.22.4+ds-0ubuntu0.1	arm64
+libgtk-4-common	4.22.4+ds-0ubuntu0.1	all
+libgtk3-perl	0.038-3	all
+libgtksourceview-5-0	5.18.0-3	arm64
+libgtksourceview-5-common	5.18.0-3	all
+libgtop-2.0-11	2.41.3-2ubuntu1	arm64
+libgtop2-common	2.41.3-2ubuntu1	all
+libgudev-1.0-0	1:238-7build1	arm64
+libgupnp-1.6-0	1.6.9-4	arm64
+libgupnp-av-1.0-3	0.14.4-3	arm64
+libgupnp-dlna-2.0-4	0.12.0-8	arm64
+libgusb2a	0.4.9-7	arm64
+libgweather-4-0t64	4.4.4-4	arm64
+libgweather-4-common	4.4.4-4	all
+libgxps2t64	0.3.2-6	arm64
+libhandy-1-0	1.8.3-3build1	arm64
+libharfbuzz-gobject0	12.3.2-2	arm64
+libharfbuzz-icu0	12.3.2-2	arm64
+libharfbuzz-subset0	12.3.2-2	arm64
+libharfbuzz0b	12.3.2-2	arm64
+libheif-plugin-aomdec	1.21.2-3ubuntu0.4	arm64
+libheif-plugin-aomenc	1.21.2-3ubuntu0.4	arm64
+libheif1	1.21.2-3ubuntu0.4	arm64
+libhidapi-hidraw0	0.15.0-2	arm64
+libhogweed6t64	3.10.2-1	arm64
+libhpmud0	3.24.4+dfsg0-0ubuntu8.1	arm64
+libhtml-form-perl	6.13-1build1	all
+libhtml-format-perl	2.16-2	all
+libhtml-parser-perl	3.83-1ubuntu0.1	arm64
+libhtml-tagset-perl	3.24-1	all
+libhtml-tree-perl	5.07-3	all
+libhttp-cookies-perl	6.11-1	all
+libhttp-daemon-perl	6.16-1ubuntu0.26.04.1	all
+libhttp-date-perl	6.06-1ubuntu0.26.04.1	all
+libhttp-message-perl	7.01-1ubuntu1	all
+libhttp-negotiate-perl	6.01-2	all
+libhunspell-1.7-0	1.7.2+really1.7.2-11	arm64
+libhwy1t64	1.3.0-2	arm64
+libhyphen0	2.8.8-7build4	arm64
+libibus-1.0-5	1.5.34~rc2-1	arm64
+libibverbs1	61.0-2ubuntu3	arm64
+libical3t64	3.0.20-2build1	arm64
+libice6	2:1.1.1-1build1	arm64
+libicu78	78.2-2ubuntu1	arm64
+libidn12	1.43-2ubuntu0.26.04.1	arm64
+libidn2-0	2.3.8-4build1	arm64
+libiec61883-0	1.2.0-8	arm64
+libieee1284-3t64	0.2.11-14.1build2	arm64
+libijs-0.35	0.35-16	arm64
+libimagequant0	4.4.1-1	arm64
+libimobiledevice-1.0-6	1.4.0-1build1	arm64
+libimobiledevice-glue-1.0-0	1.3.2-2build1	arm64
+libinchi1.07	1.07.3+dfsg-2	arm64
+libindi-data	1.9.9+dfsg-6	all
+libindiclient1	1.9.9+dfsg-6	arm64
+libini-config5t64	0.6.2-3build1	arm64
+libinih1	61-1ubuntu1	arm64
+libinireader0	61-1ubuntu1	arm64
+libinput-bin	1.31.1-1ubuntu1.1	arm64
+libinput10	1.31.1-1ubuntu1.1	arm64
+libinsights0	0.9.3ubuntu	arm64
+libinstpatch-1.0-2	1.1.7-1.1	arm64
+libio-html-perl	1.004-3	all
+libio-socket-ssl-perl	2.098-1	all
+libio-stringy-perl	2.113-2	all
+libip4tc2	1.8.11-2ubuntu3	arm64
+libip6tc2	1.8.11-2ubuntu3	arm64
+libipa-hbac0t64	2.12.0-1ubuntu5.2	arm64
+libipc-system-simple-perl	1.30-2	all
+libisl23	0.27-1build1	arm64
+libixml11t64	1:1.14.25-1ubuntu1	arm64
+libjack-jackd2-0	1.9.22~dfsg-5build1	arm64
+libjansson4	2.14-2build4	arm64
+libjavascriptcoregtk-4.1-0	2.52.3-0ubuntu0.26.04.3	arm64
+libjavascriptcoregtk-6.0-1	2.52.3-0ubuntu0.26.04.3	arm64
+libjbig0	2.1-6.1ubuntu3	arm64
+libjbig2dec0	0.20-1ubuntu0.26.04.1	arm64
+libjemalloc2	5.3.0-4	arm64
+libjpeg-turbo8	2.1.5-4ubuntu4	arm64
+libjpeg8	8c-2ubuntu12	arm64
+libjs-sphinxdoc	8.2.3-12	all
+libjson-c5	0.18+ds-3	arm64
+libjson-glib-1.0-0	1.10.8+ds-2	arm64
+libjson-glib-1.0-common	1.10.8+ds-2	all
+libjxl-gdk-pixbuf	0.11.1-6ubuntu4.2	arm64
+libjxl0.11	0.11.1-6ubuntu4.2	arm64
+libk5crypto3	1.22.1-2ubuntu4.1	arm64
+libkate1	0.4.1-12	arm64
+libkeyutils1	1.6.3-6ubuntu3	arm64
+libkf6archive-data	6.24.0-0ubuntu1	all
+libkf6archive6	6.24.0-0ubuntu1	arm64
+libkf6attica6	6.24.0-0ubuntu1	arm64
+libkf6bookmarks-data	6.24.0-0ubuntu1	all
+libkf6bookmarks6	6.24.0-0ubuntu1	arm64
+libkf6bookmarkswidgets6	6.24.0-0ubuntu1	arm64
+libkf6breezeicons6	6.24.0-0ubuntu1	arm64
+libkf6codecs-data	6.24.0-0ubuntu1	all
+libkf6codecs6	6.24.0-0ubuntu1	arm64
+libkf6colorscheme-data	6.24.0-0ubuntu1	all
+libkf6colorscheme6	6.24.0-0ubuntu1	arm64
+libkf6completion-data	6.24.0-0ubuntu1	all
+libkf6completion6	6.24.0-0ubuntu1	arm64
+libkf6config-data	6.24.0-0ubuntu1	all
+libkf6configcore6	6.24.0-0ubuntu1	arm64
+libkf6configgui6	6.24.0-0ubuntu1	arm64
+libkf6configwidgets-data	6.24.0-0ubuntu1	all
+libkf6configwidgets6	6.24.0-0ubuntu1	arm64
+libkf6coreaddons-data	6.24.0-0ubuntu1.1	all
+libkf6coreaddons6	6.24.0-0ubuntu1.1	arm64
+libkf6crash6	6.24.0-0ubuntu1	arm64
+libkf6dbusaddons-data	6.24.0-0ubuntu1	all
+libkf6dbusaddons6	6.24.0-0ubuntu1	arm64
+libkf6doctools6	6.24.0-0ubuntu1	arm64
+libkf6globalaccel-data	6.24.0-0ubuntu1	all
+libkf6globalaccel6	6.24.0-0ubuntu1	arm64
+libkf6guiaddons-data	6.24.0-0ubuntu1	all
+libkf6guiaddons6	6.24.0-0ubuntu1	arm64
+libkf6i18n-data	6.24.0-0ubuntu1	all
+libkf6i18n6	6.24.0-0ubuntu1	arm64
+libkf6i18nqml6	6.24.0-0ubuntu1	arm64
+libkf6iconthemes-data	6.24.0-0ubuntu2	all
+libkf6iconthemes6	6.24.0-0ubuntu2	arm64
+libkf6iconwidgets6	6.24.0-0ubuntu2	arm64
+libkf6itemviews-data	6.24.0-0ubuntu1	all
+libkf6itemviews6	6.24.0-0ubuntu1	arm64
+libkf6jobwidgets-data	6.24.0-0ubuntu1	all
+libkf6jobwidgets6	6.24.0-0ubuntu1	arm64
+libkf6kiocore6	6.24.0-0ubuntu1	arm64
+libkf6kiofilewidgets6	6.24.0-0ubuntu1	arm64
+libkf6kiogui6	6.24.0-0ubuntu1	arm64
+libkf6kiowidgets6	6.24.0-0ubuntu1	arm64
+libkf6newstuff-data	6.24.0-0ubuntu1	all
+libkf6newstuffcore6	6.24.0-0ubuntu1	arm64
+libkf6newstuffwidgets6	6.24.0-0ubuntu1	arm64
+libkf6notifications-data	6.24.0-0ubuntu1	all
+libkf6notifications6	6.24.0-0ubuntu1	arm64
+libkf6package-data	6.24.0-0ubuntu1	all
+libkf6package6	6.24.0-0ubuntu1	arm64
+libkf6parts-data	6.24.0-0ubuntu1	all
+libkf6parts6	6.24.0-0ubuntu1	arm64
+libkf6plotting6	6.24.0-0ubuntu1	arm64
+libkf6service-bin	6.24.0-0ubuntu1	arm64
+libkf6service-data	6.24.0-0ubuntu1	all
+libkf6service6	6.24.0-0ubuntu1	arm64
+libkf6solid-data	6.24.0-0ubuntu1	all
+libkf6solid6	6.24.0-0ubuntu1	arm64
+libkf6sonnet-data	6.24.0-0ubuntu1	all
+libkf6sonnetcore6	6.24.0-0ubuntu1	arm64
+libkf6sonnetui6	6.24.0-0ubuntu1	arm64
+libkf6syndication6	6.24.0-0ubuntu1	arm64
+libkf6textwidgets-data	6.24.0-0ubuntu1	all
+libkf6textwidgets6	6.24.0-0ubuntu1	arm64
+libkf6unitconversion-data	6.24.0-0ubuntu1	all
+libkf6unitconversion6	6.24.0-0ubuntu1	arm64
+libkf6wallet-data	6.24.0-0ubuntu1	all
+libkf6wallet6	6.24.0-0ubuntu1	arm64
+libkf6walletbackend6	6.24.0-0ubuntu1	arm64
+libkf6widgetsaddons-data	6.24.0-0ubuntu1	all
+libkf6widgetsaddons6	6.24.0-0ubuntu1	arm64
+libkf6windowsystem-data	6.24.0-0ubuntu1	all
+libkf6windowsystem6	6.24.0-0ubuntu1	arm64
+libkf6xmlgui-data	6.24.0-0ubuntu1	all
+libkf6xmlgui6	6.24.0-0ubuntu1	arm64
+libklibc	2.0.14-1ubuntu2	arm64
+libkmod2	34.2-2ubuntu2	arm64
+libkrb5-3	1.22.1-2ubuntu4.1	arm64
+libkrb5support0	1.22.1-2ubuntu4.1	arm64
+libksba8	1.6.7-2build1	arm64
+liblangtag-common	0.6.8-2	all
+liblangtag1	0.6.8-2	arm64
+liblc3-1	1.1.3+dfsg-1build1	arm64
+liblcms2-2	2.17-1ubuntu0.2	arm64
+liblcms2-utils	2.17-1ubuntu0.2	arm64
+libldacbt-abr2	2.0.2.3+git20200429+ed310a0-5build1	arm64
+libldacbt-enc2	2.0.2.3+git20200429+ed310a0-5build1	arm64
+libldap-common	2.6.10+dfsg-1ubuntu5	all
+libldap2	2.6.10+dfsg-1ubuntu5	arm64
+libldb2	2:2.11.0+samba4.23.6+dfsg-1ubuntu2.2	arm64
+liblerc4	4.0.0+ds-5ubuntu2	arm64
+liblirc-client0t64	0.10.2-0.10ubuntu1	arm64
+libllvm21	1:21.1.8-6ubuntu1	arm64
+liblmdb0	0.9.31-1build2	arm64
+liblocale-gettext-perl	1.07-8	arm64
+liblouis-data	3.36.0-1	all
+liblouis20	3.36.0-1	arm64
+liblouisutdml-bin	2.12.0-8build1	arm64
+liblouisutdml-data	2.12.0-8build1	all
+liblouisutdml9t64	2.12.0-8build1	arm64
+liblsof0	4.99.4+dfsg-2build2	arm64
+libltdl7	2.5.4-9	arm64
+liblua5.4-0	5.4.8-1build1	arm64
+liblwp-mediatypes-perl	6.04-2	all
+liblwp-protocol-https-perl	6.14-1	all
+liblz4-1	1.10.0-8	arm64
+liblzma5	5.8.3-1	arm64
+liblzo2-2	2.10-3build2	arm64
+libmad0	0.16.4-2ubuntu1	arm64
+libmaeparser1	1.3.3-4	arm64
+libmagic-mgc	1:5.46-5build2	arm64
+libmagic1t64	1:5.46-5build2	arm64
+libmailtools-perl	2.22-1	all
+libmalcontent-0-0	0.14.0-0ubuntu1.1	arm64
+libmalcontent-common	0.14.0-0ubuntu1.1	all
+libmanette-0.2-0	0.2.13-1	arm64
+libmarblewidget-qt6-28	4:25.12.3-0ubuntu1	arm64
+libmatroska7	1.7.1-2	arm64
+libmaxminddb0	1.12.2-1build2	arm64
+libmbedcrypto16	3.6.5-0.1ubuntu2	arm64
+libmbim-glib4	1.32.0-2ubuntu1	arm64
+libmbim-proxy	1.32.0-2ubuntu1	arm64
+libmbim-utils	1.32.0-2ubuntu1	arm64
+libmcpp0	2.7.2-5.3build1	arm64
+libmd0	1.1.0-2build4	arm64
+libmd4c-html0	0.5.2-2build1	arm64
+libmd4c0	0.5.2-2build1	arm64
+libmediaart-2.0-0	1.9.7-3	arm64
+libmhash2	0.9.9.9-11	arm64
+libmikmod3	3.3.13-1build1	arm64
+libminizip1t64	1:1.3.dfsg+really1.3.1-1ubuntu3.1	arm64
+libmm-glib0	1.25.95-1ubuntu1	arm64
+libmng2	2.0.3+dfsg-5	arm64
+libmnl0	1.0.5-3build1	arm64
+libmount1	2.41.3-3ubuntu2	arm64
+libmozjs-140-0	140.8.0-4	arm64
+libmp3lame0	3.101~svn6525+dfsg-2	arm64
+libmpc3	1.3.1-3	arm64
+libmpcdec6	2:0.1~r495-3build1	arm64
+libmpfr6	4.2.2-3	arm64
+libmpg123-0t64	1.33.3-2	arm64
+libmsgraph-1-1	0.3.3-3build1	arm64
+libmspub-0.1-1	0.1.4-4build1	arm64
+libmtdev1t64	1.1.7-1build1	arm64
+libmtp-common	1.1.22-1ubuntu1	all
+libmtp-runtime	1.1.22-1ubuntu1	arm64
+libmtp9t64	1.1.22-1ubuntu1	arm64
+libmutter-18-0	50.1-0ubuntu2.2	arm64
+libmwaw-0.3-3	0.3.22-2	arm64
+libmysofa1	1.3.3+dfsg-1ubuntu2	arm64
+libmythes-1.2-0	2:1.2.5-2build1	arm64
+libnautilus-extension4	1:50.2.2-0ubuntu0.1	arm64
+libncurses6	6.6+20251231-1	arm64
+libncursesw6	6.6+20251231-1	arm64
+libndp0	1.9-1build1	arm64
+libnet-dbus-perl	1.2.0-2build4	arm64
+libnet-http-perl	6.24-1build1	all
+libnet-smtp-ssl-perl	1.04-2	all
+libnet-ssleay-perl	1.94-3	arm64
+libnetfilter-conntrack3	1.1.1-1	arm64
+libnetpbm11t64	2:11.10.02-1build1	arm64
+libnetplan1	1.2-1ubuntu5	arm64
+libnettle8t64	3.10.2-1	arm64
+libnewt0.52	0.52.25-1ubuntu3	arm64
+libnfnetlink0	1.0.2-3build1	arm64
+libnfs14	5.0.2-1ubuntu1.1	arm64
+libnfsidmap1	1:2.8.5-1ubuntu1	arm64
+libnftables1	1.1.6-1	arm64
+libnftnl11	1.3.1-1	arm64
+libnghttp2-14	1.68.0-2ubuntu0.2	arm64
+libnl-3-200	3.12.0-2	arm64
+libnl-genl-3-200	3.12.0-2	arm64
+libnl-route-3-200	3.12.0-2	arm64
+libnlopt-cxx0	2.7.1-7.1ubuntu1	arm64
+libnm0	1.54.3-2ubuntu3	arm64
+libnma-common	1.10.6-7	all
+libnma-gtk4-0	1.10.6-7	arm64
+libnma0	1.10.6-7	arm64
+libnorm1t64	1.5.9+dfsg-4	arm64
+libnotify-bin	0.8.8-1	arm64
+libnotify4	0.8.8-1	arm64
+libnova-0.16-0t64	0.16-6	arm64
+libnpth0t64	1.8-3build1	arm64
+libnspr4	2:4.38.2-1ubuntu1	arm64
+libnss-mdns	0.15.1-5	arm64
+libnss-sss	2.12.0-1ubuntu5.2	arm64
+libnss-systemd	259.5-0ubuntu3.4	arm64
+libnss3	2:3.120-1ubuntu2.1	arm64
+libntfs-3g89t64	1:2022.10.3-5ubuntu1.1	arm64
+libnuma1	2.0.19-1build1	arm64
+libnvme1t64	1.16.1-4	arm64
+libodfgen-0.1-1	0.1.8-3build1	arm64
+liboeffis1	1.5.0-3	arm64
+libogg0	1.3.6-2	arm64
+libopenal-data	1:1.25.1-2	all
+libopenal1	1:1.25.1-2	arm64
+libopenbabel7	3.1.1+dfsg-11ubuntu5	arm64
+libopengl0	1.7.0-3	arm64
+libopenjp2-7	2.5.4-1ubuntu0.1	arm64
+libopenmpt-modplug1	0.8.9.0-openmpt1-2build3	arm64
+libopenmpt0t64	0.8.4-1	arm64
+libopus0	1.6.1-1	arm64
+libopusfile0	0.12-4build4	arm64
+liborc-0.4-0t64	1:0.4.42-2	arm64
+liborcus-0.21-0	0.21.0-4	arm64
+liborcus-parser-0.21-0	0.21.0-4	arm64
+libp11-kit0	0.26.2-2	arm64
+libpackagekit-glib2-18	1.3.4-3ubuntu1.2	arm64
+libpagemaker-0.0-0	0.0.4-1build5	arm64
+libpam-cap	1:2.75-10ubuntu2	arm64
+libpam-fprintd	1.94.5-4	arm64
+libpam-gnome-keyring	50.0-1	arm64
+libpam-modules	1.7.0-5ubuntu3.1	arm64
+libpam-modules-bin	1.7.0-5ubuntu3.1	arm64
+libpam-pwquality	1.4.5-5build1	arm64
+libpam-runtime	1.7.0-5ubuntu3.1	all
+libpam-sss	2.12.0-1ubuntu5.2	arm64
+libpam-systemd	259.5-0ubuntu3.4	arm64
+libpam0g	1.7.0-5ubuntu3.1	arm64
+libpanel-1-1	1.10.3-1	arm64
+libpanel-common	1.10.3-1	all
+libpango-1.0-0	1.57.0-1	arm64
+libpangocairo-1.0-0	1.57.0-1	arm64
+libpangoft2-1.0-0	1.57.0-1	arm64
+libpangoxft-1.0-0	1.57.0-1	arm64
+libpaper-utils	2.2.5-0.3maysync1	arm64
+libpaper2	2.2.5-0.3maysync1	arm64
+libparted2t64	3.6-6	arm64
+libpath-utils1t64	0.6.2-3build1	arm64
+libpcap0.8t64	1.10.6-1ubuntu1	arm64
+libpcaudio0	1.3-1build1	arm64
+libpci3	1:3.14.0-1build2	arm64
+libpciaccess0	0.18.1-1ubuntu4.1	arm64
+libpcre2-16-0	10.46-1build1	arm64
+libpcre2-32-0	10.46-1build1	arm64
+libpcre2-8-0	10.46-1build1	arm64
+libpcsclite1	2.4.1-1	arm64
+libperl5.40	5.40.1-7ubuntu0.1	arm64
+libpgm-5.3-0t64	5.3.128~dfsg-2.1build2	arm64
+libphonenumber8	8.13.51+ds-5	arm64
+libphonon-l10n	4:4.12.0-7	all
+libphonon4qt6-4t64	4:4.12.0-7	arm64
+libpipeline1	1.5.8-2	arm64
+libpipewire-0.3-0t64	1.6.2-1ubuntu1.1	arm64
+libpipewire-0.3-common	1.6.2-1ubuntu1.1	all
+libpipewire-0.3-modules	1.6.2-1ubuntu1.1	arm64
+libpixman-1-0	0.46.4-1	arm64
+libpkcs11-helper1t64	1.31.0-1	arm64
+libplist-2.0-4	2.7.0+git20250820-1build1	arm64
+libplymouth5	24.004.60+git20250831.4a3c171d-0ubuntu8	arm64
+libpng16-16t64	1.6.57-1	arm64
+libpolkit-agent-1-0	127-2ubuntu1	arm64
+libpolkit-gobject-1-0	127-2ubuntu1	arm64
+libpoppler-cpp3	26.01.0-2ubuntu0.1	arm64
+libpoppler-glib8t64	26.01.0-2ubuntu0.1	arm64
+libpoppler156	26.01.0-2ubuntu0.1	arm64
+libpopt0	1.19+dfsg-2build1	arm64
+libportal-gtk4-1	0.9.1-2build1	arm64
+libportal1	0.9.1-2build1	arm64
+libppd2	2:2.1.1-0ubuntu2	arm64
+libppd2-common	2:2.1.1-0ubuntu2	all
+libppsdocument-4.0-6	50.2-0ubuntu0.1	arm64
+libppsview-4.0-5	50.2-0ubuntu0.1	arm64
+libproc2-0	2:4.0.4-9ubuntu1	arm64
+libprotobuf-lite32t64	3.21.12-15ubuntu1	arm64
+libprotobuf32t64	3.21.12-15ubuntu1	arm64
+libproxy1v5	0.5.12-1	arm64
+libpsl5t64	0.21.2-1.1build2	arm64
+libpulse-mainloop-glib0	1:17.0+dfsg1-2ubuntu4	arm64
+libpulse0	1:17.0+dfsg1-2ubuntu4	arm64
+libpwquality-common	1.4.5-5build1	all
+libpwquality1	1.4.5-5build1	arm64
+libpython3-stdlib	3.14.3-0ubuntu2	arm64
+libpython3.14	3.14.4-1ubuntu0.1	arm64
+libpython3.14-minimal	3.14.4-1ubuntu0.1	arm64
+libpython3.14-stdlib	3.14.4-1ubuntu0.1	arm64
+libqca-qt6-2	2.3.10-2	arm64
+libqmi-glib5	1.38.0-1	arm64
+libqmi-proxy	1.38.0-1	arm64
+libqmi-utils	1.38.0-1	arm64
+libqpdf30	12.3.2-1	arm64
+libqqwing2v5	1.3.4-3build1	arm64
+libqrtr-glib0	1.2.2-2ubuntu1	arm64
+libqt5charts5	5.15.18-1	arm64
+libqt5concurrent5t64	5.15.18+dfsg-1ubuntu1	arm64
+libqt5core5t64	5.15.18+dfsg-1ubuntu1	arm64
+libqt5dbus5t64	5.15.18+dfsg-1ubuntu1	arm64
+libqt5gui5t64	5.15.18+dfsg-1ubuntu1	arm64
+libqt5multimedia5	5.15.18-1	arm64
+libqt5multimediawidgets5	5.15.18-1	arm64
+libqt5network5t64	5.15.18+dfsg-1ubuntu1	arm64
+libqt5positioning5	5.15.18+dfsg-1	arm64
+libqt5printsupport5t64	5.15.18+dfsg-1ubuntu1	arm64
+libqt5qml5	5.15.18+dfsg-2	arm64
+libqt5qmlmodels5	5.15.18+dfsg-2	arm64
+libqt5quick5	5.15.18+dfsg-2	arm64
+libqt5quickwidgets5	5.15.18+dfsg-2	arm64
+libqt5qxlsx0t64	1.4.4-1.1build8	arm64
+libqt5script5	5.15.18+dfsg-1	arm64
+libqt5serialport5	5.15.18-1	arm64
+libqt5webchannel5	5.15.18-1	arm64
+libqt5webengine-data	5.15.19+dfsg2-4	all
+libqt5webenginecore5	5.15.19+dfsg2-4	arm64
+libqt5webenginewidgets5	5.15.19+dfsg2-4	arm64
+libqt5widgets5t64	5.15.18+dfsg-1ubuntu1	arm64
+libqt6charts6	6.10.2-1	arm64
+libqt6core5compat6	6.10.2-1	arm64
+libqt6core6t64	6.10.2+dfsg-7	arm64
+libqt6dbus6	6.10.2+dfsg-7	arm64
+libqt6graphs6	6.10.2-2	arm64
+libqt6gui6	6.10.2+dfsg-7	arm64
+libqt6multimedia6	6.10.2-2	arm64
+libqt6network6	6.10.2+dfsg-7	arm64
+libqt6opengl6	6.10.2+dfsg-7	arm64
+libqt6openglwidgets6	6.10.2+dfsg-7	arm64
+libqt6positioning6	6.10.2-1	arm64
+libqt6printsupport6	6.10.2+dfsg-7	arm64
+libqt6qml6	6.10.2+dfsg-3	arm64
+libqt6qmlmeta6	6.10.2+dfsg-3	arm64
+libqt6qmlmodels6	6.10.2+dfsg-3	arm64
+libqt6qmlworkerscript6	6.10.2+dfsg-3	arm64
+libqt6quick3d6	6.10.2-1	arm64
+libqt6quick3druntimerender6	6.10.2-1	arm64
+libqt6quick3dutils6	6.10.2-1	arm64
+libqt6quick6	6.10.2+dfsg-3	arm64
+libqt6quickcontrols2-6	6.10.2+dfsg-3	arm64
+libqt6quickshapes6	6.10.2+dfsg-3	arm64
+libqt6quicktemplates2-6	6.10.2+dfsg-3	arm64
+libqt6quickwidgets6	6.10.2+dfsg-3	arm64
+libqt6sensors6	6.10.2-1	arm64
+libqt6serialport6	6.10.2-1	arm64
+libqt6shadertools6	6.10.2-1	arm64
+libqt6sql6	6.10.2+dfsg-7	arm64
+libqt6statemachine6	6.10.2-1	arm64
+libqt6svg6	6.10.2-2	arm64
+libqt6svgwidgets6	6.10.2-2	arm64
+libqt6texttospeech6	6.10.2-1	arm64
+libqt6waylandclient6	6.10.2+dfsg-7	arm64
+libqt6webchannel6	6.10.2-1	arm64
+libqt6webengine6-data	6.10.2+dfsg-1	all
+libqt6webenginecore6	6.10.2+dfsg-1	arm64
+libqt6webenginecore6-bin	6.10.2+dfsg-1	arm64
+libqt6webenginewidgets6	6.10.2+dfsg-1	arm64
+libqt6widgets6	6.10.2+dfsg-7	arm64
+libqt6xml6	6.10.2+dfsg-7	arm64
+librabbitmq4	0.15.0-1ubuntu0.26.04.2	arm64
+libraptor2-0	2.0.16-6build1	arm64
+libraqm0	0.10.4-1	arm64
+librasqal3t64	0.9.33-3	arm64
+librav1e0.8	0.8.1-7	arm64
+libraw1394-11	2.1.2-2build4	arm64
+librdf0t64	1.0.17-8	arm64
+libreadline8t64	8.3-4	arm64
+libref-array1t64	0.6.2-3build1	arm64
+libreoffice-base-core	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+libreoffice-calc	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+libreoffice-common	4:26.2.6.3-0ubuntu0.26.04.2	all
+libreoffice-core	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+libreoffice-draw	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+libreoffice-gtk3	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+libreoffice-impress	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+libreoffice-style-colibre	4:26.2.6.3-0ubuntu0.26.04.2	all
+libreoffice-uiconfig-calc	4:26.2.6.3-0ubuntu0.26.04.2	all
+libreoffice-uiconfig-common	4:26.2.6.3-0ubuntu0.26.04.2	all
+libreoffice-uiconfig-draw	4:26.2.6.3-0ubuntu0.26.04.2	all
+libreoffice-uiconfig-impress	4:26.2.6.3-0ubuntu0.26.04.2	all
+libreoffice-uiconfig-writer	4:26.2.6.3-0ubuntu0.26.04.2	all
+libreoffice-writer	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+libresid-builder0c2a	2.1.1-16build1	arm64
+librest-1.0-0	0.10.2-1	arm64
+librevenge-0.0-0	0.0.5-3build2	arm64
+librist4	0.2.11+dfsg-1build1	arm64
+libroc0.4	0.4.0+dfsg-5ubuntu3.1	arm64
+librsvg2-2	2.61.3+dfsg-3	arm64
+librsvg2-common	2.61.3+dfsg-3	arm64
+librtmp1	2.4+20151223.gitfa8646d.1-3	arm64
+librygel-core-2.8-0	45.0-1ubuntu1	arm64
+librygel-db-2.8-0	45.0-1ubuntu1	arm64
+librygel-renderer-2.8-0	45.0-1ubuntu1	arm64
+librygel-server-2.8-0	45.0-1ubuntu1	arm64
+libsamplerate0	0.2.2-4build2	arm64
+libsane-common	1.4.0-1ubuntu1	all
+libsane-hpaio	3.24.4+dfsg0-0ubuntu8.1	arm64
+libsane1	1.4.0-1ubuntu1	arm64
+libsasl2-2	2.1.28+dfsg1-9ubuntu3	arm64
+libsasl2-modules	2.1.28+dfsg1-9ubuntu3	arm64
+libsasl2-modules-db	2.1.28+dfsg1-9ubuntu3	arm64
+libsasl2-modules-gssapi-mit	2.1.28+dfsg1-9ubuntu3	arm64
+libsbc1	2.1-1build1	arm64
+libsdl-image1.2	1.2.12-14build1	arm64
+libsdl-mixer1.2	1.2.12-19build2	arm64
+libsdl-net1.2	1.2.8-6build2	arm64
+libsdl-pango1	0.1.2-8build3	arm64
+libsdl1.2debian	1.2.72-1	arm64
+libsdl2-2.0-0	2.32.10+dfsg-6	arm64
+libsdl2-classic	2.32.10+dfsg-6	arm64
+libsdl2-gfx-1.0-0	1.0.4+dfsg-7	arm64
+libsdl2-image-2.0-0	2.8.8+dfsg-2	arm64
+libsdl2-mixer-2.0-0	2.8.1+dfsg-5	arm64
+libsdl2-pango4	2.1.5-2build1	arm64
+libsdl2-ttf-2.0-0	2.24.0+dfsg-3	arm64
+libsdl3-0	3.4.2+ds-1ubuntu1	arm64
+libseccomp2	2.6.0-2ubuntu5	arm64
+libsecret-1-0	0.21.7-2build1	arm64
+libsecret-common	0.21.7-2build1	all
+libselinux1	3.9-4build1	arm64
+libsemanage-common	3.9-1build1	all
+libsemanage2	3.9-1build1	arm64
+libsensors-config	1:3.6.2-2build1	all
+libsensors5	1:3.6.2-2build1	arm64
+libsepol2	3.9-2	arm64
+libsframe3	2.46-3ubuntu2	arm64
+libshaderc1	2026.1-1	arm64
+libsharpyuv0	1.5.0-0.1build1	arm64
+libshine3	3.1.1-3build1	arm64
+libshout3	2.4.6-1build3	arm64
+libshp4	1.6.2-1	arm64
+libsidplay2	2.1.1-16build1	arm64
+libsimdutf31	8.0.0-1	arm64
+libslang2	2.3.3-5build1	arm64
+libsm6	2:1.2.6-1build1	arm64
+libsmartcols1	2.41.3-3ubuntu2	arm64
+libsmbclient0	2:4.23.6+dfsg-1ubuntu2.2	arm64
+libsnapd-glib-2-1	1.72-0ubuntu3	arm64
+libsnappy1v5	1.2.2-2	arm64
+libsndfile1	1.2.2-4	arm64
+libsnmp-base	5.9.4+dfsg-2ubuntu3	all
+libsnmp40t64	5.9.4+dfsg-2ubuntu3	arm64
+libsodium23	1.0.18-2	arm64
+libsonic0	0.2.0-13build2	arm64
+libsoup-3.0-0	3.6.6-1	arm64
+libsoup-3.0-common	3.6.6-1	all
+libsoxr0	0.1.3-4.1	arm64
+libspa-0.2-bluetooth	1.6.2-1ubuntu1.1	arm64
+libspa-0.2-modules	1.6.2-1ubuntu1.1	arm64
+libspatialaudio0t64	0.3.0+git20180730+dfsg1-3	arm64
+libspeechd-module0	0.12.1-2ubuntu1	arm64
+libspeechd2	0.12.1-2ubuntu1	arm64
+libspeex1	1.2.1-3build1	arm64
+libspeexdsp1	1.2.1-3build1	arm64
+libspelling-1-2	0.4.9-1build1	arm64
+libspelling-common	0.4.9-1build1	all
+libsqlite3-0	3.46.1-9ubuntu0.2	arm64
+libsquish0	1.15-4	arm64
+libsrt1.5-gnutls	1.5.4-3	arm64
+libss2	1.47.2-3ubuntu4	arm64
+libssh-4	0.11.3-1ubuntu2.1	arm64
+libssh2-1t64	1.11.1-1ubuntu0.26.04.3	arm64
+libssl3t64	3.5.5-1ubuntu3.4	arm64
+libsss-certmap0	2.12.0-1ubuntu5.2	arm64
+libsss-idmap0	2.12.0-1ubuntu5.2	arm64
+libsss-nss-idmap0	2.12.0-1ubuntu5.2	arm64
+libstartup-notification0	0.12-8build1	arm64
+libstdc++6	16-20260322-1ubuntu1	arm64
+libstemmer0d	3.0.1-1	arm64
+libsuitesparseconfig7	1:7.12.2+dfsg-1ubuntu1	arm64
+libsvtav1enc2	2.3.0+dfsg-1build1	arm64
+libswresample6	7:8.0.1-3ubuntu2	arm64
+libswscale9	7:8.0.1-3ubuntu2	arm64
+libsysprof-6-6	50.0-1	arm64
+libsysprof-6-modules	50.0-1	arm64
+libsystemd-shared	259.5-0ubuntu3.4	arm64
+libsystemd0	259.5-0ubuntu3.4	arm64
+libt4k-common0t64	0.1.1-13build1	arm64
+libtag2	2.2.1-3	arm64
+libtalloc2	2:2.4.3+samba4.23.6+dfsg-1ubuntu2.2	arm64
+libtasn1-6	4.21.0-2	arm64
+libtcl8.6	8.6.17+dfsg-1build1	arm64
+libtdb1	2:1.4.14+samba4.23.6+dfsg-1ubuntu2.2	arm64
+libteamdctl0	1.31-1build4	arm64
+libtevent0t64	2:0.17.1+samba4.23.6+dfsg-1ubuntu2.2	arm64
+libtext-charwidth-perl	0.04-11build4	arm64
+libtext-iconv-perl	1.7-8.1	arm64
+libtext-wrapi18n-perl	0.06-10	all
+libthai-data	0.1.30-1	all
+libthai0	0.1.30-1	arm64
+libtheora1	1.2.0+dfsg-6	arm64
+libtheoradec2	1.2.0+dfsg-6	arm64
+libtheoraenc2	1.2.0+dfsg-6	arm64
+libtie-ixhash-perl	1.23-4	all
+libtiff6	4.7.0-3ubuntu5	arm64
+libtimedate-perl	2.3300-2	all
+libtinfo6	6.6+20251231-1	arm64
+libtinysparql-3.0-0	3.11.0-1	arm64
+libtirpc-common	1.3.7-0.1	all
+libtirpc3t64	1.3.7-0.1	arm64
+libtotem-plparser-common	3.26.6-3	all
+libtotem-plparser18	3.26.6-3	arm64
+libtraceevent1	1:1.8.7-1	arm64
+libtraceevent1-plugin	1:1.8.7-1	arm64
+libtracefs1	1.8.2-1ubuntu1	arm64
+libtry-tiny-perl	0.32-1	all
+libts0t64	1.22-1.1build2	arm64
+libtss2-esys-3.0.2-0t64	4.1.3-6	arm64
+libtss2-mu-4.0.1-0t64	4.1.3-6	arm64
+libtss2-rc0t64	4.1.3-6	arm64
+libtss2-sys1t64	4.1.3-6	arm64
+libtss2-tcti-cmd0t64	4.1.3-6	arm64
+libtss2-tcti-device0t64	4.1.3-6	arm64
+libtss2-tcti-libtpms0t64	4.1.3-6	arm64
+libtss2-tcti-mssim0t64	4.1.3-6	arm64
+libtss2-tcti-spi-helper0t64	4.1.3-6	arm64
+libtss2-tcti-swtpm0t64	4.1.3-6	arm64
+libtss2-tctildr0t64	4.1.3-6	arm64
+libtwolame0	0.4.0-2build4	arm64
+libuchardet0	0.0.8-2	arm64
+libudev1	259.5-0ubuntu3.4	arm64
+libudfread3	1.2.0-2	arm64
+libudisks2-0	2.10.91-1ubuntu2	arm64
+libunibreak6	6.1-3build1	arm64
+libunistring5	1.3-2build1	arm64
+libunity-protocol-private0	7.1.4+19.04.20190319-6.1ubuntu1	arm64
+libunity-scopes-json-def-desktop	7.1.4+19.04.20190319-6.1ubuntu1	all
+libunity9	7.1.4+19.04.20190319-6.1ubuntu1	arm64
+libuno-cppu3t64	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+libuno-cppuhelpergcc3-3t64	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+libuno-purpenvhelpergcc3-3t64	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+libuno-sal3t64	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+libuno-salhelpergcc3-3t64	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+libunwind8	1.8.3-0ubuntu1	arm64
+libupnp17t64	1:1.14.25-1ubuntu1	arm64
+libupower-glib3	1.91.1-1	arm64
+liburcu8t64	0.15.6-1	arm64
+liburi-perl	5.34-2build1	all
+liburing2	2.14-1	arm64
+libusb-1.0-0	2:1.0.29-2build1	arm64
+libusbmuxd-2.0-7	2.1.1-1	arm64
+libuuid1	2.41.3-3ubuntu2	arm64
+libuv1t64	1.51.0-2ubuntu1	arm64
+libv4l-0t64	1.32.0-2ubuntu1	arm64
+libv4lconvert0t64	1.32.0-2ubuntu1	arm64
+libva-drm2	2.23.0-1ubuntu1	arm64
+libva-wayland2	2.23.0-1ubuntu1	arm64
+libva-x11-2	2.23.0-1ubuntu1	arm64
+libva2	2.23.0-1ubuntu1	arm64
+libvdpau1	1.5-4	arm64
+libvisio-0.1-1	0.1.10-1build1	arm64
+libvisual-0.4-0	0.4.2-4	arm64
+libvlc5	3.0.23-1	arm64
+libvlccore9	3.0.23-1	arm64
+libvolume-key1	0.3.12-10build2	arm64
+libvorbis0a	1.3.7-3build2	arm64
+libvorbisenc2	1.3.7-3build2	arm64
+libvorbisfile3	1.3.7-3build2	arm64
+libvpx12	1.16.0-3	arm64
+libvte-2.91-0	0.84.0-2	arm64
+libvte-2.91-common	0.84.0-2	arm64
+libvte-2.91-gtk4-0	0.84.0-2	arm64
+libvulkan1	1.4.341.0-1	arm64
+libwacom-common	2.18.0-1	all
+libwacom9	2.18.0-1	arm64
+libwavpack1	5.9.0-1	arm64
+libwayland-client0	1.24.0-2	arm64
+libwayland-cursor0	1.24.0-2	arm64
+libwayland-egl1	1.24.0-2	arm64
+libwayland-server0	1.24.0-2	arm64
+libwbclient0	2:4.23.6+dfsg-1ubuntu2.2	arm64
+libwebkit2gtk-4.1-0	2.52.3-0ubuntu0.26.04.3	arm64
+libwebkitgtk-6.0-4	2.52.3-0ubuntu0.26.04.3	arm64
+libwebp7	1.5.0-0.1build1	arm64
+libwebpdemux2	1.5.0-0.1build1	arm64
+libwebpmux3	1.5.0-0.1build1	arm64
+libwebrtc-audio-processing-1-3	1.3-3build2	arm64
+libwhoopsie-preferences0	23build4	arm64
+libwhoopsie0	0.2.82ubuntu	arm64
+libwinpr3-3	3.30.0+dfsg-0ubuntu0.26.04.2	arm64
+libwireplumber-0.5-0	0.5.13-1ubuntu1	arm64
+libwmf-0.2-7	0.2.14-1	arm64
+libwmf-0.2-7-gtk	0.2.14-1	arm64
+libwmflite-0.2-7	0.2.14-1	arm64
+libwnck-3-0	43.3-1build1	arm64
+libwnck-3-common	43.3-1build1	all
+libwpd-0.10-10	0.10.3-2build3	arm64
+libwpg-0.3-3	0.3.4-3build2	arm64
+libwps-0.4-4	0.4.14-2build2	arm64
+libwrap0	7.6.q-36build2	arm64
+libwww-perl	6.81-1ubuntu0.1	all
+libwww-robotrules-perl	6.02-1build1	all
+libx11-6	2:1.8.13-1	arm64
+libx11-data	2:1.8.13-1	all
+libx11-protocol-perl	0.56-9	all
+libx11-xcb1	2:1.8.13-1	arm64
+libx264-165	2:0.165.3222+gitb35605ac-3build1	arm64
+libx265-215	4.1-4	arm64
+libxau6	1:1.0.11-1build2	arm64
+libxaw7	2:1.0.16-1build1	arm64
+libxcb-cursor0	0.1.6-1	arm64
+libxcb-dri3-0	1.17.0-2ubuntu1	arm64
+libxcb-glx0	1.17.0-2ubuntu1	arm64
+libxcb-icccm4	0.4.2-1build1	arm64
+libxcb-image0	0.4.0-2build2	arm64
+libxcb-keysyms1	0.4.1-1build1	arm64
+libxcb-present0	1.17.0-2ubuntu1	arm64
+libxcb-randr0	1.17.0-2ubuntu1	arm64
+libxcb-render-util0	0.3.10-1build1	arm64
+libxcb-render0	1.17.0-2ubuntu1	arm64
+libxcb-res0	1.17.0-2ubuntu1	arm64
+libxcb-shape0	1.17.0-2ubuntu1	arm64
+libxcb-shm0	1.17.0-2ubuntu1	arm64
+libxcb-sync1	1.17.0-2ubuntu1	arm64
+libxcb-util1	0.4.1-1build1	arm64
+libxcb-xfixes0	1.17.0-2ubuntu1	arm64
+libxcb-xinerama0	1.17.0-2ubuntu1	arm64
+libxcb-xinput0	1.17.0-2ubuntu1	arm64
+libxcb-xkb1	1.17.0-2ubuntu1	arm64
+libxcb-xv0	1.17.0-2ubuntu1	arm64
+libxcb1	1.17.0-2ubuntu1	arm64
+libxcomposite1	1:0.4.6-1build1	arm64
+libxcursor1	1:1.2.3-1build1	arm64
+libxcvt0	0.1.3-1build1	arm64
+libxdamage1	1:1.1.7-1	arm64
+libxdmcp6	1:1.1.5-2	arm64
+libxext6	2:1.3.4-1build3	arm64
+libxfixes3	1:6.0.0-2build2	arm64
+libxfont2	1:2.0.6-2ubuntu0.2	arm64
+libxft2	2.3.6-1build2	arm64
+libxi6	2:1.8.2-2	arm64
+libxinerama1	2:1.1.4-3build2	arm64
+libxkbcommon-x11-0	1.13.1-1	arm64
+libxkbcommon0	1.13.1-1	arm64
+libxkbfile1	1:1.1.0-1build5	arm64
+libxkbregistry0	1.13.1-1	arm64
+libxml-parser-perl	2.47-1ubuntu1	arm64
+libxml-twig-perl	1:3.54-1build1	all
+libxml-xpathengine-perl	0.14-2	all
+libxml2-16	2.15.2+dfsg-0.1ubuntu0.1	arm64
+libxmlb2	0.3.24-2	arm64
+libxmlsec1-1	1.3.9-1	arm64
+libxmlsec1-nss1	1.3.9-1	arm64
+libxmp4	4.6.3-1	arm64
+libxmu6	2:1.1.3-4	arm64
+libxmuu1	2:1.1.3-4	arm64
+libxpm4	1:3.5.17-1ubuntu0.26.04.1	arm64
+libxrandr2	2:1.5.4-1build1	arm64
+libxrender1	1:0.9.12-1build1	arm64
+libxres1	2:1.2.1-1build2	arm64
+libxshmfence1	1.3.3-1build1	arm64
+libxslt1.1	1.1.45-0.1	arm64
+libxss1	1:1.2.3-1build4	arm64
+libxt6t64	1:1.2.1-1.3build1	arm64
+libxtables12	1.8.11-2ubuntu3	arm64
+libxtst6	2:1.2.5-1build1	arm64
+libxv1	2:1.0.13-1	arm64
+libxvidcore4	2:1.3.7-3	arm64
+libxxf86dga1	2:1.1.5-1build2	arm64
+libxxf86vm1	1:1.1.4-2	arm64
+libxxhash0	0.8.3-2build1	arm64
+libyajl2	2.1.0-5.1	arm64
+libyaml-0-2	0.2.5-2build3	arm64
+libyelp-1-0	49.0-5ubuntu0.1	arm64
+libzmq5	4.3.5-1build3	arm64
+libzstd1	1.5.7+dfsg-3	arm64
+libzvbi-common	0.2.44-1ubuntu2	all
+libzvbi0t64	0.2.44-1ubuntu2	arm64
+linux-base	4.15ubuntu5	all
+linux-firmware	20260319.git217ca6e4.1ubuntu	all
+linux-firmware-amd-graphics	20260319.git217ca6e4-0ubuntu3.1	all
+linux-firmware-amd-misc	20260319.git217ca6e4-0ubuntu1.1	all
+linux-firmware-broadcom-wireless	20260319.git217ca6e4-0ubuntu1.1	all
+linux-firmware-intel-graphics	20260319.git217ca6e4-0ubuntu2.1	all
+linux-firmware-intel-misc	20260319.git217ca6e4-0ubuntu1.2	all
+linux-firmware-intel-wireless	20260319.git217ca6e4-0ubuntu2.1	all
+linux-firmware-marvell-prestera	20260319.git217ca6e4-0ubuntu1.2	all
+linux-firmware-marvell-wireless	20260319.git217ca6e4-0ubuntu1.1	all
+linux-firmware-mediatek	20260319.git217ca6e4-0ubuntu1.2	all
+linux-firmware-mellanox-spectrum	20260319.git217ca6e4-0ubuntu1.1	all
+linux-firmware-misc	20260319.git217ca6e4-0ubuntu2.2	all
+linux-firmware-netronome	20260319.git217ca6e4-0ubuntu1.1	all
+linux-firmware-nvidia-graphics	20260319.git217ca6e4-0ubuntu1.1	all
+linux-firmware-qlogic	20260319.git217ca6e4-0ubuntu1.1	all
+linux-firmware-qualcomm-graphics	20260319.git217ca6e4-0ubuntu1.1	all
+linux-firmware-qualcomm-misc	20260319.git217ca6e4-0ubuntu2.1	all
+linux-firmware-qualcomm-wireless	20260319.git217ca6e4-0ubuntu1.2	all
+linux-firmware-raspi	14-0ubuntu1.1	arm64
+linux-firmware-realtek	20260319.git217ca6e4-0ubuntu1.2	all
+linux-image-7.0.0-1017-raspi	7.0.0-1017.17	arm64
+linux-image-raspi	7.0.0-1017.17	arm64
+linux-main-modules-zfs-7.0.0-1017-raspi	7.0.0-1017.17	arm64
+linux-modules-7.0.0-1017-raspi	7.0.0-1017.17	arm64
+linux-sound-base	1.0.25+dfsg-0ubuntu9	all
+linux-sysctl-defaults	4.15ubuntu5	all
+locales	2.43-2ubuntu2.3	all
+locales-all	2.43-2ubuntu2.3	arm64
+localsearch	3.11.0-1ubuntu1.1	arm64
+login	1:4.16.0-2+really2.41.3-3ubuntu2	arm64
+login.defs	1:4.17.4-2ubuntu3	all
+logrotate	3.22.0-1build1	arm64
+logsave	1.47.2-3ubuntu4	arm64
+loupe	50.0-0ubuntu2	arm64
+lsb-release	12.1-2build1	all
+lshw	02.19.git.2021.06.19.996aaad9c7-2.1ubuntu3	arm64
+lsof	4.99.4+dfsg-2build2	arm64
+luit	2.0.20250912-1	arm64
+makedumpfile	1:1.7.7-1	arm64
+man-db	2.13.1-1build1	arm64
+manpages	6.17-1	all
+marble	4:25.12.3-0ubuntu1	arm64
+marble-data	4:25.12.3-0ubuntu1	all
+marble-plugins	4:25.12.3-0ubuntu1	arm64
+marble-qt-data	4:25.12.3-0ubuntu1	all
+mawk	1.3.4.20260129-1	arm64
+media-types	14.0.0build1	all
+mesa-libgallium	26.0.8-1ubuntu0.3	arm64
+mesa-vulkan-drivers	26.0.8-1ubuntu0.3	arm64
+mobile-broadband-provider-info	20251101-1build1	all
+modemmanager	1.25.95-1ubuntu1	arm64
+mokutil	0.7.2-2	arm64
+mount	2.41.3-3ubuntu2	arm64
+mscompress	0.4-10build2	arm64
+mtr-tiny	0.95-1.1ubuntu2	arm64
+mutter-common	50.1-0ubuntu2.2	all
+mutter-common-bin	50.1-0ubuntu2.2	arm64
+nano	8.7.1-1ubuntu0.1	arm64
+nautilus	1:50.2.2-0ubuntu0.1	arm64
+nautilus-data	1:50.2.2-0ubuntu0.1	all
+nautilus-sendto	3.8.6-8ubuntu1	arm64
+nbd-client	1:3.26.1-6.1ubuntu2	arm64
+ncurses-base	6.6+20251231-1	all
+ncurses-bin	6.6+20251231-1	arm64
+netbase	6.5build1	all
+netcat-openbsd	1.234-1	arm64
+netpbm	2:11.10.02-1build1	arm64
+netplan-generator	1.2-1ubuntu5	arm64
+netplan.io	1.2-1ubuntu5	arm64
+network-manager	1.54.3-2ubuntu3	arm64
+network-manager-config-connectivity-ubuntu	1.54.3-2ubuntu3	all
+network-manager-l10n	1.54.3-2ubuntu3	all
+network-manager-openvpn	1.12.5-1	arm64
+network-manager-openvpn-gnome	1.12.5-1	arm64
+network-manager-pptp	1.2.12-6	arm64
+network-manager-pptp-gnome	1.2.12-6	arm64
+networkd-dispatcher	2.2.4-1.1ubuntu1	all
+nftables	1.1.6-1	arm64
+nm-connection-editor	1.36.0-4ubuntu1	arm64
+ntfs-3g	1:2022.10.3-5ubuntu1.1	arm64
+numactl	2.0.19-1build1	arm64
+ocl-icd-libopencl1	2.3.4-1	arm64
+openprinting-ppds	20250819-1build1	all
+openssh-client	1:10.2p1-2ubuntu3.8	arm64
+openssh-server	1:10.2p1-2ubuntu3.8	arm64
+openssh-sftp-server	1:10.2p1-2ubuntu3.8	arm64
+openssl	3.5.5-1ubuntu3.4	arm64
+openssl-provider-legacy	3.5.5-1ubuntu3.4	arm64
+openvpn	2.7.0-1ubuntu1.2	arm64
+orca	50.2-0ubuntu0.1	all
+overlayroot	0.58ubuntu	all
+p11-kit	0.26.2-2	arm64
+p11-kit-modules	0.26.2-2	arm64
+packagekit	1.3.4-3ubuntu1.2	arm64
+papers	50.2-0ubuntu0.1	arm64
+papers-common	50.2-0ubuntu0.1	all
+parted	3.6-6	arm64
+passwd	1:4.17.4-2ubuntu3	arm64
+pci.ids	0.0~2026.02.12-1	all
+pciutils	1:3.14.0-1build2	arm64
+pcmciautils	018-19	arm64
+pemmican-common	1.0.3-0ubuntu3	all
+pemmican-desktop	1.0.3-0ubuntu3	all
+perl	5.40.1-7ubuntu0.1	arm64
+perl-base	5.40.1-7ubuntu0.1	arm64
+perl-modules-5.40	5.40.1-7ubuntu0.1	all
+perl-openssl-defaults	7build4	arm64
+phonon-backend-vlc-common	0.12.0-3build5	all
+phonon4qt6	4:4.12.0-7	arm64
+phonon4qt6-backend-vlc	0.12.0-3build5	arm64
+piboot-try	1.1ubuntu0.1	arm64
+pinentry-curses	1.3.2-3ubuntu1	arm64
+pinentry-gnome3	1.3.2-3ubuntu1	arm64
+pipewire	1.6.2-1ubuntu1.1	arm64
+pipewire-alsa	1.6.2-1ubuntu1.1	arm64
+pipewire-audio	1.6.2-1ubuntu1.1	all
+pipewire-bin	1.6.2-1ubuntu1.1	arm64
+pipewire-pulse	1.6.2-1ubuntu1.1	arm64
+pkexec	127-2ubuntu1	arm64
+plymouth	24.004.60+git20250831.4a3c171d-0ubuntu8	arm64
+plymouth-label	24.004.60+git20250831.4a3c171d-0ubuntu8	arm64
+plymouth-theme-spinner	24.004.60+git20250831.4a3c171d-0ubuntu8	arm64
+plymouth-theme-ubuntu-text	24.004.60+git20250831.4a3c171d-0ubuntu8	arm64
+policykit-desktop-privileges	0.22build1	all
+polkitd	127-2ubuntu1	arm64
+poppler-data	0.4.12-1build1	all
+poppler-utils	26.01.0-2ubuntu0.1	arm64
+power-profiles-daemon	0.30-2	arm64
+powermgmt-base	1.38ubuntu2	all
+ppp	2.5.2-1+1.2	arm64
+pptp-linux	1.10.0-2build1	arm64
+printer-driver-brlaser	6.2.8-1	arm64
+printer-driver-c2esp	27-11ubuntu8	arm64
+printer-driver-foo2zjs	20200505dfsg0-3ubuntu1	arm64
+printer-driver-foo2zjs-common	20200505dfsg0-3ubuntu1	all
+printer-driver-hpcups	3.24.4+dfsg0-0ubuntu8.1	arm64
+printer-driver-m2300w	0.51-15build3	arm64
+printer-driver-min12xxw	0.0.9-11build4	arm64
+printer-driver-pnm2ppa	1.13+nondbs-0ubuntu11	arm64
+printer-driver-postscript-hp	3.24.4+dfsg0-0ubuntu8.1	arm64
+printer-driver-ptouch	1.7.1-1build1	arm64
+printer-driver-pxljr	1.4+repack0-6build3	arm64
+printer-driver-sag-gdi	0.1-8build1	all
+printer-driver-splix	2.0.1-2	arm64
+procps	2:4.0.4-9ubuntu1	arm64
+psmisc	23.7-2ubuntu2	arm64
+ptyxis	50.1-1ubuntu2	arm64
+publicsuffix	20260129.1928-1	all
+python-apt-common	3.1.0ubuntu1.1	all
+python-babel-localedata	2.17.0-2	all
+python3	3.14.3-0ubuntu2	arm64
+python3-apt	3.1.0ubuntu1.1	arm64
+python3-aptdaemon	2.0.2build1	all
+python3-aptdaemon.gtk3widgets	2.0.2build1	all
+python3-attr	25.4.0-1build1	all
+python3-autocommand	2.2.2-4	all
+python3-babel	2.17.0-2	all
+python3-bcrypt	5.0.0-3build1	arm64
+python3-blinker	1.9.0-2build1	all
+python3-brlapi	6.7-1ubuntu6	arm64
+python3-cairo	1.27.0-2build2	arm64
+python3-certifi	2026.1.4+ds-1	all
+python3-cffi-backend	2.0.0-3build1	arm64
+python3-chardet	5.2.0+dfsg-2build1	all
+python3-click	8.2.0+0.really.8.1.8-1build1	all
+python3-commandnotfound	23.04.0build1	all
+python3-configobj	5.0.9-1build1	all
+python3-cryptography	46.0.5-1ubuntu2	arm64
+python3-cups	2.0.4-3build1	arm64
+python3-cupshelpers	1.5.18-4ubuntu2	all
+python3-dasbus	1.7-2build1	all
+python3-dbus	1.4.0-1build2	arm64
+python3-debconf	1.5.92	all
+python3-defer	1.0.6-2.1ubuntu2	all
+python3-distro	1.9.0-1build1	all
+python3-gdbm	3.14.3-0ubuntu2	arm64
+python3-gi	3.56.2-1	arm64
+python3-httplib2	0.22.0-1ubuntu0.1	all
+python3-ibus-1.0	1.5.34~rc2-1	all
+python3-idna	3.11-1ubuntu0.1	all
+python3-inflect	7.5.0-1build1	all
+python3-jaraco.context	6.0.1-2	all
+python3-jaraco.functools	4.1.0-1build1	all
+python3-jaraco.text	4.0.0-1build1	all
+python3-jinja2	3.1.6-1build1	all
+python3-json-pointer	2.4-4	all
+python3-jsonpatch	1.32-6	all
+python3-jsonschema	4.19.2-6ubuntu2	all
+python3-jsonschema-specifications	2023.12.1-4	all
+python3-jwt	2.10.1-4ubuntu1	all
+python3-launchpadlib	2.1.0-1build1	all
+python3-lazr.restfulclient	0.14.6-3build1	all
+python3-lazr.uri	1.0.6-7build1	all
+python3-linkify-it	2.0.3-1ubuntu3	all
+python3-louis	3.36.0-1	all
+python3-markdown-it	3.0.0-3build1	all
+python3-markupsafe	3.0.3-1build1	arm64
+python3-mdurl	0.1.2-1build1	all
+python3-minimal	3.14.3-0ubuntu2	arm64
+python3-more-itertools	10.8.0-1build1	all
+python3-netplan	1.2-1ubuntu5	arm64
+python3-oauthlib	3.3.1-1build1	all
+python3-olefile	0.47-1build1	all
+python3-passlib	1.9.3-1ubuntu1	all
+python3-pexpect	4.9-4	all
+python3-pil	12.1.1-2ubuntu1.2	arm64
+python3-pkg-resources	78.1.1-0.1build1	all
+python3-psutil	7.1.0-1ubuntu1	arm64
+python3-ptyprocess	0.7.0-6build1	all
+python3-pygments	2.19.2+dfsg-1	all
+python3-pyparsing	3.3.2-2	all
+python3-pyudev	0.24.3+tests-0ubuntu2	all
+python3-referencing	0.36.2-1ubuntu2	all
+python3-requests	2.32.5+dfsg-1ubuntu1	all
+python3-rich	13.9.4-1.2	all
+python3-rpds-py	0.27.1-2ubuntu3	arm64
+python3-serial	3.5-2build1	all
+python3-setproctitle	1.3.7-2build1	arm64
+python3-setuptools	78.1.1-0.1build1	all
+python3-software-properties	0.120.1	all
+python3-speechd	0.12.1-2ubuntu1	all
+python3-sss	2.12.0-1ubuntu5.2	arm64
+python3-typeguard	4.4.4-2	all
+python3-typing-extensions	4.15.0-2	all
+python3-uc-micro	1.0.3-1build1	all
+python3-urllib3	2.6.3-1ubuntu1.1	all
+python3-wadllib	2.0.0-3	all
+python3-xdg	0.28-3	all
+python3-xkit	0.5.0ubuntu8	all
+python3-yaml	6.0.3-1build1	arm64
+python3-zipp	3.23.0-1build1	all
+python3.14	3.14.4-1ubuntu0.1	arm64
+python3.14-gdbm	3.14.4-1ubuntu0.1	arm64
+python3.14-minimal	3.14.4-1ubuntu0.1	arm64
+qml6-module-qt-labs-folderlistmodel	6.10.2+dfsg-3	arm64
+qml6-module-qt-labs-qmlmodels	6.10.2+dfsg-3	arm64
+qml6-module-qtcharts	6.10.2-1	arm64
+qml6-module-qtcore	6.10.2+dfsg-3	arm64
+qml6-module-qtgraphs	6.10.2-2	arm64
+qml6-module-qtmultimedia	6.10.2-2	arm64
+qml6-module-qtqml	6.10.2+dfsg-3	arm64
+qml6-module-qtqml-models	6.10.2+dfsg-3	arm64
+qml6-module-qtqml-workerscript	6.10.2+dfsg-3	arm64
+qml6-module-qtquick	6.10.2+dfsg-3	arm64
+qml6-module-qtquick-controls	6.10.2+dfsg-3	arm64
+qml6-module-qtquick-dialogs	6.10.2+dfsg-3	arm64
+qml6-module-qtquick-effects	6.10.2+dfsg-3	arm64
+qml6-module-qtquick-layouts	6.10.2+dfsg-3	arm64
+qml6-module-qtquick-particles	6.10.2+dfsg-3	arm64
+qml6-module-qtquick-shapes	6.10.2+dfsg-3	arm64
+qml6-module-qtquick-templates	6.10.2+dfsg-3	arm64
+qml6-module-qtquick-window	6.10.2+dfsg-3	arm64
+qml6-module-qtquick3d	6.10.2-1	arm64
+qml6-module-qtsensors	6.10.2-1	arm64
+qt6-image-formats-plugins	6.10.2-1	arm64
+qt6-svg-plugins	6.10.2-2	arm64
+quadrapassel	1:49.2.3-2	arm64
+raspi-utils	20250514-0ubuntu3	arm64
+raspi-utils-core	20250514-0ubuntu3	arm64
+raspi-utils-dt	20250514-0ubuntu3	arm64
+raspi-utils-eeprom	20250514-0ubuntu3	arm64
+raspi-utils-otp	20250514-0ubuntu3	all
+readline-common	8.3-4	all
+resources	1.10.2-0ubuntu3.1	arm64
+rfkill	2.41.3-3ubuntu2	arm64
+rpi-eeprom	28.14-0ubuntu1	arm64
+rpi-eeprom-firmware	28.14-0ubuntu1	all
+rsync	3.4.1+ds1-7ubuntu0.3	arm64
+rsyslog	8.2512.0-1ubuntu4.1	arm64
+rtkit	0.14-1	arm64
+rust-coreutils	0.8.0-0ubuntu3	arm64
+rygel	45.0-1ubuntu1	arm64
+samba-libs	2:4.23.6+dfsg-1ubuntu2.2	arm64
+sane-airscan	0.99.36-2ubuntu1	arm64
+sane-utils	1.4.0-1ubuntu1	arm64
+sbsigntool	0.9.4-3.1ubuntu9	arm64
+screen	4.9.1-3ubuntu2	arm64
+seahorse	47.0.1-3build1	arm64
+secureboot-db	1.9build2	arm64
+sed	4.9-2ubuntu1	arm64
+sensible-utils	0.0.26build1	all
+sgml-base	1.31+nmu1build1	all
+sgml-data	2.0.11+nmu1build1	all
+shared-mime-info	2.4-5build3	arm64
+snapd	2.76.3+ubuntu26.04	arm64
+software-properties-common	0.120.1	all
+sound-icons	0.1-8build1	all
+sound-theme-freedesktop	0.8-7build1	all
+speech-dispatcher	0.12.1-2ubuntu1	arm64
+speech-dispatcher-audio-plugins	0.12.1-2ubuntu1	arm64
+speech-dispatcher-espeak-ng	0.12.1-2ubuntu1	arm64
+spice-vdagent	0.23.0-1	arm64
+squashfs-tools	1:4.7.5-1	arm64
+ssl-cert	1.1.3ubuntu2	all
+sssd	2.12.0-1ubuntu5.2	arm64
+sssd-ad	2.12.0-1ubuntu5.2	arm64
+sssd-ad-common	2.12.0-1ubuntu5.2	arm64
+sssd-common	2.12.0-1ubuntu5.2	arm64
+sssd-ipa	2.12.0-1ubuntu5.2	arm64
+sssd-krb5	2.12.0-1ubuntu5.2	arm64
+sssd-krb5-common	2.12.0-1ubuntu5.2	arm64
+sssd-ldap	2.12.0-1ubuntu5.2	arm64
+sssd-proxy	2.12.0-1ubuntu5.2	arm64
+stellarium	25.4-1	arm64
+stellarium-data	25.4-1	all
+stockfish	17-1build1	arm64
+strace	6.19+ds-0ubuntu5	arm64
+sudo	1.9.17p2-1ubuntu3	arm64
+sudo-common	1.2ubuntu	all
+sudo-rs	0.2.13-0ubuntu1	arm64
+supertuxkart	1.5-2build1	arm64
+supertuxkart-data	1.5-2build1	all
+switcheroo-control	3.0-2	arm64
+sysprof	50.0-1	arm64
+sysstat	12.7.7-0ubuntu2	arm64
+system-config-printer-common	1.5.18-4ubuntu2	all
+system-config-printer-udev	1.5.18-4ubuntu2	arm64
+systemd	259.5-0ubuntu3.4	arm64
+systemd-cryptsetup	259.5-0ubuntu3.4	arm64
+systemd-hwe-hwdb	259.5.3ubuntu	all
+systemd-oomd	259.5-0ubuntu3.4	arm64
+systemd-resolved	259.5-0ubuntu3.4	arm64
+systemd-sysv	259.5-0ubuntu3.4	arm64
+sysvinit-utils	3.15-5ubuntu1	arm64
+tar	1.35+dfsg-4ubuntu0.4	arm64
+tcl	8.6.16build1	arm64
+tcl8.6	8.6.17+dfsg-1build1	arm64
+tcpdump	4.99.6-1	arm64
+tecla	49.0-2	arm64
+telnet	0.17+2.7-2ubuntu1.1	all
+time	1.9-0.4	arm64
+timgm6mb-soundfont	1.3-5build1	all
+tinysparql	3.11.0-1	arm64
+tnftp	20260211-1	arm64
+tpm-udev	4.1.3-6	all
+trace-cmd	3.3.3-1ubuntu2	arm64
+tuxmath	2.0.3-10build1	arm64
+tuxmath-data	2.0.3-10build1	all
+tuxpaint	1:0.9.35-1	arm64
+tuxpaint-data	1:0.9.35-1	all
+tuxpaint-plugins-default	1:0.9.35-1	arm64
+tuxpaint-stamps-default	2025.05.26-1	all
+tuxtype	1.8.3-7build1	arm64
+tuxtype-data	1.8.3-7build1	all
+tzdata	2026c-0ubuntu0.26.04.1	all
+ubuntu-docs	26.04.1	all
+ubuntu-drivers-common	1:0.10.9	arm64
+ubuntu-insights	0.9.3ubuntu	arm64
+ubuntu-keyring	2023.11.28.1build1	all
+ubuntu-raspi-settings	26.04.3	all
+ubuntu-raspi-settings-desktop	26.04.3	all
+ubuntu-release-upgrader-core	1:26.04.23	all
+ubuntu-report	1.7.3ubuntu4	arm64
+ubuntu-session	50.1-0ubuntu0.1	all
+ubuntu-settings	26.04.6	all
+ubuntu-standard	1.570.3	arm64
+ubuntu-wallpapers	26.04.2	all
+ubuntu-wallpapers-resolute	26.04.2	all
+ucf	3.0052ubuntu1	all
+udev	259.5-0ubuntu3.4	arm64
+udisks2	2.10.91-1ubuntu2	arm64
+ufw	0.36.2-9build1	all
+uno-libs-private	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+unzip	6.0-29ubuntu1	arm64
+update-inetd	4.54build1	all
+upower	1.91.1-1	arm64
+ure	4:26.2.6.3-0ubuntu0.26.04.2	arm64
+usb-modeswitch	2.6.2-1ubuntu1	arm64
+usb-modeswitch-data	20191128-7build1	all
+usb.ids	2025.12.13-1	all
+usbmuxd	1.1.1-7	arm64
+usbutils	1:019-1	arm64
+user-session-migration	0.5.1	arm64
+util-linux	2.41.3-3ubuntu2	arm64
+uuid-runtime	2.41.3-3ubuntu2	arm64
+vim-common	2:9.1.2141-1ubuntu4.8	all
+vim-tiny	2:9.1.2141-1ubuntu4.8	arm64
+vlc-data	3.0.23-1	all
+vlc-plugin-base	3.0.23-1	arm64
+vlc-plugin-video-output	3.0.23-1	arm64
+wamerican	2020.12.07-4build1	all
+webp-pixbuf-loader	0.2.7-3	arm64
+wget	1.25.0-2ubuntu4.4	arm64
+whiptail	0.52.25-1ubuntu3	arm64
+whoopsie-preferences	23build4	arm64
+wireless-regdb	2026.02.04-0ubuntu1	all
+wireplumber	0.5.13-1ubuntu1	arm64
+wpasupplicant	2:2.11-0ubuntu5	arm64
+wsdd	2:0.8-5ubuntu1	all
+x11-common	1:7.7+26ubuntu1	all
+x11-utils	7.7+7build1	arm64
+x11-xkb-utils	7.7+9build1	arm64
+x11-xserver-utils	7.7+11build1	arm64
+xauth	1:1.1.2-1.1build1	arm64
+xbrlapi	6.7-1ubuntu6	arm64
+xcursor-themes	1.0.6-0ubuntu2	all
+xdg-dbus-proxy	0.1.7-1	arm64
+xdg-desktop-portal	1.21.1+ds-1ubuntu3	arm64
+xdg-desktop-portal-gnome	50.0-0ubuntu1	arm64
+xdg-desktop-portal-gtk	1.15.3-2ubuntu1	arm64
+xdg-terminal-exec	0.14.0-1	all
+xdg-user-dirs	0.19-1	arm64
+xdg-user-dirs-gtk	0.16-1	arm64
+xdg-utils	1.2.1-2ubuntu2	all
+xfonts-base	1:1.0.5+nmu1build1	all
+xfonts-encodings	1:1.0.5-0ubuntu3	all
+xfonts-utils	1:7.7+7build1	arm64
+xkb-data	2.46-2	all
+xml-core	0.19build1	all
+xserver-common	2:21.1.22-1ubuntu1	all
+xwayland	2:24.1.10-1	arm64
+xxd	2:9.1.2141-1ubuntu4.8	arm64
+xz-utils	5.8.3-1	arm64
+yaru-theme-gnome-shell	26.04.5.1ubuntu	all
+yaru-theme-gtk	26.04.5.1ubuntu	all
+yaru-theme-icon	26.04.5.1ubuntu	all
+yaru-theme-sound	26.04.5.1ubuntu	all
+yelp	49.0-5ubuntu0.1	arm64
+yelp-xsl	49.0-2	all
+zenity	4.2.1-1	arm64
+zenity-common	4.2.1-1	all
+zip	3.0-15ubuntu3	arm64
+zlib1g	1:1.3.dfsg+really1.3.1-1ubuntu3.1	arm64
+zram-tools	0.3.7-1build1	all
+zstd	1.5.7+dfsg-3	arm64

@@ -89,4 +89,50 @@ python3 "$R/archive-debs.py" --manifest "$T/want.tsv" --out "$T/arch" --mirror "
 printf 'Package: tool\nVersion: 1.0\nArchitecture: arm64\nFilename: pool/tool_1.0_arm64.deb\nSHA256: %064d\n\n' 7 | gzip > "$M/dists/resolute/main/binary-arm64/Packages.gz"
 tf "archive-debs fails on sha256 mismatch" python3 "$R/archive-debs.py" --manifest "$T/want.tsv" --out "$T/arch2" --mirror "file://$M" --suite resolute --comp main
 
+# --- deployment records (compare-record.py)
+RE="$T/rec/e"; RA="$T/rec/a"; mkdir -p "$RE" "$RA"
+cat > "$RE/record.txt" <<'R'
+schema=idea-deployment-record/1
+batch=b1
+deviceType=engine
+hostname=h1
+arch=aarch64
+model=m
+osRelease=os
+imageCommit=abc
+imageBranch=main
+imageTag=
+imageVersion=1
+imageFile=n/a
+imageSha256=n/a
+imageManifest=n/a
+nodeVersion=UNKNOWN
+packageArchive=/x
+secrets=none
+deployedAt=d1
+evidence=e
+confidence=c
+open=o
+R
+printf 'tool\t1.0\tarm64\n' > "$RE/packages.tsv"; printf '%064d  a.js\n' 1 > "$RE/files.sha256"; printf '%064d  d.js\n' 2 > "$RE/dist.sha256"
+echo "contentSha256=$(cat "$RE/files.sha256" "$RE/dist.sha256" | sha256sum | cut -d' ' -f1)" >> "$RE/record.txt"
+cp "$RE"/* "$RA/"; sed -i 's/^hostname=h1/hostname=h2/; s/^deployedAt=d1/deployedAt=d2/; s/^nodeVersion=UNKNOWN/nodeVersion=v22/' "$RA/record.txt"
+t "record check passes (engine contentSha256)" python3 "$R/compare-record.py" --check "$RE"
+t "records equal apart from volatile keys and UNKNOWN" python3 "$R/compare-record.py" "$RE" "$RA"
+printf 'tool\t1.1\tarm64\n' > "$RA/packages.tsv"
+tf "record compare detects package change" python3 "$R/compare-record.py" "$RE" "$RA"
+cp "$RE/packages.tsv" "$RA/"; sed -i 's/^imageCommit=abc/imageCommit=def/' "$RA/record.txt"
+tf "record compare detects commit change" python3 "$R/compare-record.py" "$RE" "$RA"
+printf '%064d  d.js\n' 3 > "$RE/dist.sha256"
+tf "record check catches stale contentSha256" python3 "$R/compare-record.py" --check "$RE"
+printf 'tool\t1.0\n' > "$RE/packages.tsv"; sed -i '/^contentSha256/d' "$RE/record.txt"
+tf "record check requires 3-column packages.tsv" python3 "$R/compare-record.py" --check "$RE"
+t "volatile.txt holds record keys" grep -qx 'key:capturedUtc' "$R/volatile.txt"
+for d in "$R"/../../deployments/*/*/*/; do [ -f "$d/record.txt" ] || continue
+  python3 "$R/compare-record.py" --check "$d" >/dev/null || no "committed record valid: $d"; done; ok "committed records valid"
+
+# --- router-packages 3 columns
+RR="$T/rr"; mkdir -p "$RR/lib/apk/db"; printf 'P:busybox\nV:1.37.0-r6\nA:aarch64_cortex-a53\n\nP:base-files\nV:1711\nA:aarch64_cortex-a53\n' > "$RR/lib/apk/db/installed"
+t "router-packages prints package, version, arch" bash -c "[ \"\$('$R/router-packages.sh' '$RR' | head -1)\" = \"\$(printf 'base-files\t1711\taarch64_cortex-a53')\" ]"
+
 echo "repro tests: $pass passed, $fail failed"; [ $fail = 0 ]

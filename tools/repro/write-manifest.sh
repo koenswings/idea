@@ -3,7 +3,7 @@
 # Writes the per-build manifest directory (idea#322), to be committed under manifests/<kind>/<name>/:
 #   build.env        BUILD_KIND/BUILD_SHA/BUILD_TAG/BUILD_STAMP/NAME/KIND (from the environment set by repro_release_guard)
 #   inputs.tsv       name, url, sha256, bytes of every downloaded input
-#   packages.tsv     package <TAB> version, sorted
+#   packages.tsv     package <TAB> version <TAB> arch, sorted (same sidecar as deployments/ records)
 #   content.tsv.xz   content manifest of ROOT (content-manifest.py), xz -9e; content.sha256 = sha256 of the plain tsv
 #   image.sha256     sha256 of the image file (when --image is given; may be added later with --image only)
 # No secrets: images carry none (secrets are injected at flash time), and this script never reads secret files.

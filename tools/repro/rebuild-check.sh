@@ -29,7 +29,7 @@ fi
 if [ -n "$IMG" ]; then
   ROOT="$T/root"; "$HERE/extract-rootfs.sh" "$IMG" "$ROOT" >/dev/null
   if [ -z "$PKGS" ]; then PKGS="$T/packages.tsv"
-    if [ "$KIND" = client ]; then awk '/^Package:/{p=$2} /^Version:/{print p"\t"$2}' "$ROOT/var/lib/dpkg/status" | LC_ALL=C sort > "$PKGS"
+    if [ "$KIND" = client ]; then dpkg-query --admindir="$ROOT/var/lib/dpkg" -W -f='${Package}\t${Version}\t${Architecture}\n' | LC_ALL=C sort -u > "$PKGS"
     else "$HERE/router-packages.sh" "$ROOT" > "$PKGS"; fi; fi
 fi
 [ -n "$ROOT" ] || { echo "give --rootfs, --image or --rebuild" >&2; exit 2; }

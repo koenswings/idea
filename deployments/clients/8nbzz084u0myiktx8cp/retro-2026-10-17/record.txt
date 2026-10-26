@@ -2,23 +2,28 @@
 # UNKNOWN = not recoverable from the box; fill in with tools/repro/capture-device.sh when the device is next online.
 schema=idea-deployment-record/1
 batch=zimbabwe-2026-10
-deviceType=client-card
+deviceType=client
 arch=aarch64
+model=UNKNOWN (Raspberry Pi classroom client, SD card)
 osRelease=Ubuntu 26.04.1 preinstalled desktop arm64+raspi
-baseImageSha256=8216f54c...544d6a
-aptPins=tools/client-image/apt-pins.tsv
-packageArchive=/workspace/idea-archive/client/s15-291b962 (box); release asset pending approval
-secrets=flash-time Wi-Fi PSK (value not recorded)
-evidence=/workspace/client-card-patch/card-log.md (box, 2026-10-17, wh)
+baseImageSha256=8216f54cc1df2fcf7de37530a7edccdd200abd7dcfbc5d4f0407df7513544d6a
+chromeDebSha256=245fa8da4a52c15bee7811d3e17892792cabd6361ac5b7e9c78ba6482ad18315
+aptPins=tools/client-image/apt-pins.tsv (build input); installed list = packages.tsv
+packageArchive=/workspace/idea-archive/release-assets/field-zimbabwe-2026-10-client-291b962 (box; .deb tars + SHA256SUMS + missing-packages.tsv)
+packageArchiveSha256=PENDING (sha256 of SHA256SUMS)
+packageArchiveUrl=not published yet (Koen 2026-10-26); planned: koenswings/idea release field/zimbabwe-2026-10/client-s15
+secrets=flash-time Wi-Fi PSK (name only; value never recorded)
+evidence=/workspace/client-card-patch/card-log.md (box, sha256 4b7b93a479573ff661b73ac54c850539b235420ed54ff544373fe9a8e952db23)
 cardId=8nbzz084u0myiktx8cp
 deployedAt=2026-10-17 (wh)
-imageId=s14
-imageCommit=f00748e
-imageBranch=origin/feat/client-image-build (not on main)
-imageTag=
+imageCommit=f00748eb (tag field/zimbabwe-2026-10/client-s14; branch feat/client-image-build, not on main)
+imageBranch=feat/client-image-build
+imageTag=field/zimbabwe-2026-10/client-s14
 imageVersion=26.04-20261016-f00748e
-imageFile=idea-client-26.04-20261016-f00748e-s14.img (psk-patched)
-imageXzSha256=1f1641cf... (full: idea-archive/client/inputs/SHA256SUMS)
-imageManifest=UNKNOWN (s14 image no longer on the box; package list = s15, see build-20261017-121651.log)
-postInstall.patch=tools/client-image/field/patch-client-cards.sh 2026-10-17 PASS: keyboard us, Chrome NewTabPageLocation removed, Engine META.yaml removed (original sha256 82ada65e...)
-open=confirm with capture-device.sh
+imageFile=idea-client-26.04-20261016-f00748e-s14.img (psk-patched; box copy gone, contained the Wi-Fi PSK, never publish)
+imageSha256=54e6b2d0bfaa52f23114004da94718e6d6dba9daea616a77302e0fea627c5ace (raw); xz 1f1641cff062325c0575de6f0157e4444e5202c17df42df9649dc8ae4769f4d2
+imageManifest=UNKNOWN (no s14 manifest; installed package list identical to s15 per build-20261017-121651.log, so packages.tsv = manifests/client/idea-client-26.04-20261017-291b962-s15/packages.tsv)
+contentSha256=UNKNOWN
+postInstall.cardpatch=2026-10-17 on wh: tools/client-image/field/patch-client-cards.sh (original sha256 82ada65ec84fef6cdb4882a80f36c9c9932b744251d9d0d38c3377e6525dbf57; committed copy is sanitised) PASS: keyboard us, Chrome NewTabPageLocation removed, Engine META.yaml removed, Wi-Fi PSK checked by hash
+confidence=high: card-log.md lists this card as PASS
+open=confirm with tools/repro/capture-device.sh; s14 packages.tsv is inferred from s15

@@ -15,7 +15,7 @@ def main():
         sys.exit("usage: content-manifest.py ROOT [VOLATILE_FILE]")
     root = sys.argv[1]
     vol = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "volatile.txt")
-    globs = [l.strip() for l in open(vol) if l.strip() and not l.lstrip().startswith("#")]
+    globs = [l.strip() for l in open(vol) if l.strip() and not l.lstrip().startswith("#") and not l.startswith("key:")]
     if not os.path.isdir(root):
         sys.exit(f"not a directory: {root}")
     no_owner = os.environ.get("REPRO_NO_OWNER") == "1"

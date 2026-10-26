@@ -35,3 +35,27 @@ etc/passwd-
 etc/group-
 etc/subuid-
 etc/subgid-
+
+# record.txt keys (deployments/, idea-deployment-record/1) that are never compared: they change per capture or install.
+# Union of the image side and the Engine side (agent-engine-dev VOLATILE_KEYS). Format: key:<name>.
+key:capturedUtc
+key:hostname
+key:stickerName
+key:cardId
+key:captureHost
+key:uptime
+key:recordLabel
+key:notes
+key:batch
+key:deployedAt
+key:evidence
+key:confidence
+key:open
+key:packageArchive
+key:packageArchiveSha256
+key:packageArchiveUrl
+key:secrets
+key:buildOptions
+key:buildSourceFlags
+key:previousCardId
+key:readBackSha256

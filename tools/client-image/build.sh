@@ -80,10 +80,10 @@ printf 'BROWSER=%q\nCHROME_DEB=%q\n' "$BROWSER" "$CHROME_DEB" > "$S/browser.env"
 echo "IDEA_CLIENT_VERSION=$VER" > "$S/version.env"
 
 chroot "$MNT" /bin/bash /root/.idea-build/customise.sh
-chroot "$MNT" dpkg-query -W -f='${Package}\t${Version}\n' > "$OUT/$NAME.MANIFEST.txt"
+chroot "$MNT" dpkg-query -W -f='${Package}\t${Version}\t${Architecture}\n' | LC_ALL=C sort -u > "$OUT/$NAME.MANIFEST.txt"
 chroot "$MNT" /bin/bash /root/.idea-build/verify-image.sh
 if [ -n "$PINS" ]; then
-  if "$REPO/tools/repro/compare-manifest.sh" "$PINS" "$OUT/$NAME.MANIFEST.txt"; then echo "apt pins: installed list = pins"
+  if "$REPO/tools/repro/compare-manifest.sh" "$PINS" <(cut -f1,2 "$OUT/$NAME.MANIFEST.txt"); then echo "apt pins: installed list = pins"
   elif [ "$BUILD_KIND" = release ]; then echo "refusing release: installed packages differ from $PINS" >&2; exit 1
   else echo "WARNING (dev build): installed packages differ from pins" >&2; fi; fi
 
