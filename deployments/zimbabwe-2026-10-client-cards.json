@@ -1,0 +1,46 @@
+{
+  "format": "idea-deployment/1",
+  "batch": "zimbabwe-2026-10",
+  "device_type": "client-card (Raspberry Pi, Ubuntu 26.04.1 desktop arm64)",
+  "recorded_at": "2026-10-26",
+  "recorded_by": "retro-record for #322 from box evidence (no device access)",
+  "count_expected": 10,
+  "images": [
+    {"id": "s14", "git_sha": "f00748e", "git_branch": "origin/feat/client-image-build", "git_tag": null, "on_main": false,
+     "version": "26.04-20261016-f00748e", "image_file": "idea-client-26.04-20261016-f00748e-s14.img (psk-patched)",
+     "image_sha256_raw": "54e6b2d0 (see archive SHA256SUMS)", "image_xz_sha256": "1f1641cf (see archive)",
+     "unpatched_xz_sha256": "15039bc6 (see archive)", "image_present_on_box": false,
+     "manifest_dir": null, "note": "Installed package list identical to s15 (build-20261017-121651.log, 1815 packages)"},
+    {"id": "s15", "git_sha": "291b96253d407f21bf38091e92128bf2149fc974", "git_tag": null, "on_main": true,
+     "version": "26.04-20261017-291b962", "image_file": "idea-client-26.04-20261017-291b962-s15.img.xz",
+     "image_xz_sha256": "dd6f6d408a16cdb614d090b02bd771634eb4a74beaeb774a674dc332333ffa6c",
+     "read_back_sha256_prefix": "6cadd6b2", "read_back_bytes": 13999996928,
+     "manifest_dir": "manifests/client/idea-client-26.04-20261017-291b962-s15",
+     "content_sha256": "0746a2def620716adca0a9ec7213438945f73d7067700292b73c2f7866d56da8"}
+  ],
+  "inputs": [
+    {"name": "ubuntu-26.04.1-preinstalled-desktop-arm64+raspi.img.xz", "url": "https://cdimage.ubuntu.com/releases/26.04.1/release/", "sha256_prefix": "8216f54c", "sha256_suffix": "544d6a"},
+    {"name": "google-chrome-stable arm64 deb", "sha256_prefix": "245fa8da", "note": "full hash in the archive inputs/SHA256SUMS"},
+    {"name": "apt packages", "pins": "tools/client-image/apt-pins.tsv", "source": "https://ports.ubuntu.com/ubuntu-ports resolute{,-updates,-security}"}
+  ],
+  "post_install_changes": [
+    {"script": "tools/client-image/field/patch-client-cards.sh", "original_sha256_prefix": "82ada65e", "date": "2026-10-17", "host": "wh",
+     "effect": ["keyboard layout -> us", "remove Chrome NewTabPageLocation policy", "remove stale Engine META.yaml", "Wi-Fi PSK check/fix (secret value not recorded)"]}
+  ],
+  "devices": [
+    {"id": "8nbzz084u0myiktx8cp", "image": "s14", "patches": ["patch-client-cards.sh 2026-10-17 PASS"]},
+    {"id": "9qqttxdncddatorix8h", "image": "s14", "patches": ["patch-client-cards.sh 2026-10-17 PASS"]},
+    {"id": "ivuhrvg10resw5xcde1", "image": "s14", "patches": ["patch-client-cards.sh 2026-10-17 PASS"]},
+    {"id": "orx0hdq4po36orzp1dl", "image": "s14", "patches": ["patch-client-cards.sh 2026-10-17 PASS"]},
+    {"id": "b5d5j51g3aebdmop51z", "image": "s14", "patches": ["patch-client-cards.sh 2026-10-17 PASS"]},
+    {"id": "tvkj9ikz9jvr6w25liu", "image": "s14", "patches": ["patch-client-cards.sh 2026-10-17 PASS"]},
+    {"id": "reflash-1 (was pmx6b5vpzn62cmaeygi, wrong psk)", "image": "s15", "patches": []},
+    {"id": "reflash-2 (was v55frduh38x3ko0zszt)", "image": "s15", "patches": []}
+  ],
+  "unaccounted": {"count": 2, "note": "Not in the 17 Oct card log; image unknown (s14 or s15). Capture one to find out."},
+  "not_on_cards": {"s16": "13f6917 was built 2026-10-26, after the kits shipped"},
+  "evidence": ["/workspace/client-card-patch/card-log.md (box)", "client-image-build/build-20261017-121651.log (box)"],
+  "package_archive": {"location": "/workspace/idea-archive/client/ (box, outside git)", "durable": "pending: GitHub release asset, see deployments/README.md"},
+  "verification": "tools/repro/capture-device.sh <name> <user@ip>, then compare its dpkg list with manifests/.../packages.tsv",
+  "open": ["2 cards unaccounted", "s14 image is no longer on the box (only the hashes); f00748e is not on main and has no tag"]
+}

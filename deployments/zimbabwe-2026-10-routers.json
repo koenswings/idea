@@ -1,0 +1,39 @@
+{
+  "format": "idea-deployment/1",
+  "batch": "zimbabwe-2026-10",
+  "device_type": "router (Cudy WR3000S v1, OpenWrt 25.12.5)",
+  "recorded_at": "2026-10-26",
+  "recorded_by": "retro-record for #322 from box evidence (no device access)",
+  "count_expected": 3,
+  "images": [
+    {"id": "b2f00bc", "git_sha": "b2f00bc", "git_branch": "fix/router-image-dnsmasq-local-teachers-off (#271, squash-merged)", "git_tag": null, "on_main": false,
+     "setup_ref": "7eedd03",
+     "image_file": "idea-router-0.1.0-dev-b2f00bc-cudy_wr3000s-v1-squashfs-sysupgrade.bin",
+     "image_sha256": "8e084dc0d891f8141277f0f152307a12c2cc6f13759e561a659232b9cc1ace61",
+     "manifest_dir": "manifests/router/idea-router-0.1.0-dev-b2f00bc-cudy_wr3000s-v1",
+     "content_sha256": "dee4275a665ae4865dc326ba16ae0d427779aaf359e6101ad2425489875ebc4f",
+     "confidence": "likely: the only build in router-fix-out/SHA256SUMS and the head of #271; not yet confirmed on a device"}
+  ],
+  "other_builds_not_shipped": [
+    {"git_sha": "1d371b3", "image_sha256_prefix": "a77611a2"},
+    {"git_sha": "22003ba", "image_sha256_prefix": "25dcae10"}
+  ],
+  "inputs": [
+    {"name": "openwrt-imagebuilder-25.12.5-mediatek-filogic.Linux-x86_64.tar.zst",
+     "url": "https://downloads.openwrt.org/releases/25.12.5/targets/mediatek/filogic/openwrt-imagebuilder-25.12.5-mediatek-filogic.Linux-x86_64.tar.zst",
+     "sha256": "7fb6cf626582ebcbfb46974da48c1eae577213f38879eaf6b1d982041e843461"},
+    {"name": "cudy_wr3000s-v1-sysupgrade_20251119.bin (Cudy intermediate firmware)", "url": "TODO: Cudy download page URL not recorded",
+     "sha256": "463e6e31e7361ec8177d2c3a136674297fd179eafaa166fe459731cdf1b35773", "md5": "403e276f74fd29917fd4260294d1a137", "size": 14945872},
+    {"name": "feeds", "lock": "tools/router-image/feeds.lock"},
+    {"name": "apk packages", "pins": "tools/router-image/package-pins.tsv (187)"}
+  ],
+  "post_install_changes": [{"script": "tools/router-image/idea-router-enrol", "effect": ["per-router enrolment; secrets not recorded"]}],
+  "devices": [
+    {"id": "sunny-robin", "image": "b2f00bc"},
+    {"id": "happy-zebra", "image": "b2f00bc"},
+    {"id": "kind-panda", "image": "b2f00bc"}
+  ],
+  "package_archive": {"location": "/workspace/idea-archive/router/b2f00bc-openwrt-25.12.5/ (box, outside git; SHA256SUMS.archive)", "durable": "pending: GitHub release asset"},
+  "verification": "tools/repro/capture-device.sh <name> root@<ip>, then compare its apk list with manifests/router/.../packages.tsv",
+  "open": ["Confirm b2f00bc on one router through a capture", "Cudy intermediate URL", "Tag b2f00bc (not on main)", "Device names are the kit names from #271; mapping of names to kits per Axle"]
+}

@@ -1,0 +1,3 @@
+# s15 reference (idea-client-26.04-20261017-291b962-s15.img, read with debugfs on the box 2026-10-17 13:08:06)
+df423101f6a529b7d6241dc313a1639c9f0ebebc35ba5462ccc380e36f7438da  /etc/default/keyboard
+7b8431d10c50c678bed89fa235a55227d43c90054931707eda6b0fa2ec3d2d0b  /etc/opt/chrome/policies/managed/idea.json

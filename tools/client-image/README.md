@@ -13,7 +13,7 @@ out/idea-client-26.04-<YYYYMMDD>-<gitsha>.MANIFEST.txt   # every package + versi
 ## Run
 
 ```
-sudo tools/client-image/build.sh [--base ubuntu-26.04.1-...+raspi.img.xz] [--secrets FILE] [--out DIR] [--work DIR] [--no-xz]
+sudo tools/client-image/build.sh [--dev] [--base ubuntu-26.04.1-...+raspi.img.xz] [--out DIR] [--work DIR] [--no-xz] [--apt-pins FILE|none] [--manifest-out DIR]
 ```
 
 * Host: Linux amd64 with `qemu-user-static` (binfmt `aarch64` with the `F` flag) or a native arm64 Pi.
@@ -28,14 +28,32 @@ sudo tools/client-image/build.sh [--base ubuntu-26.04.1-...+raspi.img.xz] [--sec
   and PARTUUID are unchanged; cloud-init `growpart` + `resizefs` expand root to the full card on first boot.
 * ~25 GB free disk; 30-60 min under qemu on an 8-core box.
 
-## Secrets (never in git, never printed)
+## Reproducible builds (idea#322)
 
-* Release guard: `build.sh` refuses to build unless `WIFI_PSK` is the field key `idea911!`. A build with any other key
-  (e.g. `secrets-test.env`) needs `--test-secrets` and is named `...-TEST.img.xz`; never flash a -TEST image for a school.
+* **Release = clean tree, HEAD exactly at a tag, HEAD on `origin/main`.** Otherwise `build.sh` refuses; `--dev`
+  builds anything and names the image `...-dev` (never for the field). The version date is the commit date.
+* **apt pinned:** `apt-pins.tsv` (package, version; the s14/s15 kit list) - requested packages are installed at
+  their pinned versions and a release fails unless the full installed list equals the pins. Ubuntu ports has no dated
+  snapshots, so the exact `.deb`s are archived per build with `tools/repro/archive-debs.py` (see `deployments/README.md`).
+* **Inputs verified:** base image + Chrome `.deb` by sha256 (`client-image.conf`); mismatch = file kept as `.bad`, build fails.
+* **Manifest:** every build writes `manifests/client/<name>/` (build.env, inputs.tsv, packages.tsv, content.tsv.xz,
+  image.sha256). Commit it. `tools/repro/rebuild-check.sh --manifest-dir manifests/client/<name> --image <img>` (or
+  `--rebuild`) compares content; volatile paths are listed in `tools/repro/volatile.txt`.
 
-Copy `secrets.env.example` to `~/.config/idea-client-image/secrets.env` (chmod 600) or pass `--secrets`.
-It holds the support **authorized_keys** path (public keys only) and the per-school **Wi-Fi PSK**. `build.sh` refuses a secrets file inside the repo and a private key in the keys file;
-`scan-secrets.sh` fails the build if a secret value appears anywhere except the root-only NetworkManager profile (PSK).
+## Secrets: flash time only (never in the image, never in git, never printed)
+
+The image holds **no** Wi-Fi key and **no** SSH keys (idea#322). After writing a card, before its first boot:
+
+```
+tools/client-image/set-card-timezone.sh --timezone Africa/Harare --boot /media/$USER/system-boot   # idea#208 (PR #319)
+tools/client-image/set-card-secrets.sh --boot /media/$USER/system-boot    # files from ~/.config/idea-client-image/secrets.env
+```
+
+`set-card-secrets.sh` writes `idea-secrets/wifi-psk` and `idea-secrets/admin_authorized_keys` to the boot partition;
+on first boot `idea-firstboot` runs `idea-secrets-apply` (writes the root-only NetworkManager profile from
+`/usr/share/idea/IDEA.nmconnection.template`, installs admin's keys), then wipes the files from the boot partition.
+Copy `secrets.env.example` to `~/.config/idea-client-image/secrets.env` (chmod 600). `scan-secrets.sh` fails the build
+if a Wi-Fi profile, psk, admin authorized_keys, private key or Tailscale key is in the image.
 
 **Local admin password rule:** the hidden `admin` account's local (console / `su - admin`) password follows Koen's
 convention **`<accountname>911!`**, i.e. `admin911!` (`ADMIN_USER` in `client-image.conf`). It is a documented

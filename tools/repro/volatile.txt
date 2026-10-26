@@ -1,0 +1,37 @@
+# Paths (shell globs, relative to the root, no leading /) whose CONTENT is not compared: known non-deterministic.
+# They are still listed in content.tsv (type + path) so a missing or extra file is caught. idea#322.
+etc/machine-id
+var/lib/dbus/machine-id
+etc/ssh/ssh_host_*
+etc/hostname
+etc/idea-client-version
+etc/idea/version
+var/log/*
+var/cache/*
+var/lib/apt/lists/*
+var/lib/dpkg/*-old
+var/lib/dpkg/status
+var/lib/systemd/*
+var/lib/ucf/*
+var/lib/apt/extended_states
+var/lib/apk/*
+lib/apk/db/*
+usr/lib/opkg/*
+tmp/*
+run/*
+*/__pycache__/*
+*.pyc
+etc/ld.so.cache
+boot/initrd.img*
+boot/firmware/initrd.img*
+boot/firmware/*/initrd.img*
+initrd.img*
+usr/share/info/dir
+var/lib/AccountsService/users/*
+etc/.pwd.lock
+etc/shadow-
+etc/gshadow-
+etc/passwd-
+etc/group-
+etc/subuid-
+etc/subgid-
