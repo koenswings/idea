@@ -11,7 +11,7 @@ chromeDebSha256=245fa8da4a52c15bee7811d3e17892792cabd6361ac5b7e9c78ba6482ad18315
 aptPins=tools/client-image/apt-pins.tsv (build input); installed list = packages.tsv
 packageArchive=/workspace/idea-archive/release-assets/field-zimbabwe-2026-10-client-291b962 (box; .deb tars + SHA256SUMS + missing-packages.tsv)
 packageArchiveSha256=8a666f6e5f25da5cef9e8c761b7c9b0a895191f197c481b19d011fda00313517 (sha256 of SHA256SUMS)
-packageArchiveUrl=not published yet (Koen 2026-10-26); planned: koenswings/idea release field/zimbabwe-2026-10/client-s15
+packageArchiveUrl=https://github.com/koenswings/idea/releases/tag/field/zimbabwe-2026-10/client-s15 (two tars in 450 MB chunks; cat *.chunk* per tar, check CHUNKS.SHA256SUMS then SHA256SUMS)
 secrets=flash-time Wi-Fi PSK (name only; value never recorded)
 evidence=/workspace/client-card-patch/card-log.md (box, sha256 4b7b93a479573ff661b73ac54c850539b235420ed54ff544373fe9a8e952db23)
 cardId=tvkj9ikz9jvr6w25liu
