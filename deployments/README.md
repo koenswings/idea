@@ -18,10 +18,14 @@ which secrets were given, and nothing more.
 |---|---|---|
 | `record.txt` | yes | `#` comments, then one `key=value` per line (schema below) |
 | `packages.tsv` | yes (when known) | `package<TAB>version<TAB>arch`, sorted. Clients: `dpkg-query -W -f='${Package}\t${Version}\t${Architecture}\n'`. Routers: apk `P/V/A` (`tools/repro/router-packages.sh`). Engines: dpkg-query as for clients |
-| `images.tsv` | optional | `ref<TAB>image id<TAB>repo digests` (Docker images; Engines) |
-| `files.sha256` | optional | `sha256sum` lines of tracked files, sorted by path (Engines: git-tracked Engine files) |
+| `images.tsv` | optional | `ref<TAB>image id<TAB>repo digests` (Docker images; Engines). A capture that only sees image ids writes `UNKNOWN` in the digests column; compare treats an `UNKNOWN` column as never differing (same rule as `record.txt`) |
+| `files.sha256` | optional | `sha256sum` lines, sorted by path, of **git-tracked Engine files only**. System file hashes from a probe capture never go here |
 | `dist.sha256` | optional | `sha256sum` lines of a compiled `dist/`, sorted by path (Engines) |
+| `helpers.sha256` | optional | `sha256sum` lines, sorted by path, of every `/usr/local/sbin/idea-*` file on an Engine. Compared keyed by path, only when the expected record has it |
 | `capture.txt` | optional | raw output of `tools/repro/capture-device.sh` |
+
+System file hashes from a probe capture get their own sidecar: `helpers.sha256` for `/usr/local/sbin/idea-*`;
+any other system file hash stays in the raw `capture.txt` and is not copied into `files.sha256`.
 
 `tools/client-image/apt-pins.tsv` and `tools/router-image/package-pins.tsv` are **build inputs** (two columns).
 Records always use `packages.tsv`.

@@ -2,18 +2,20 @@
 """compare-record.py - compare two deployment record directories (idea-deployment-record/1, idea#322).
 
 Usage: compare-record.py EXPECTED_DIR ACTUAL_DIR [--volatile tools/repro/volatile.txt] [--ignore-path P ...]
-       compare-record.py --check DIR        (schema/required keys + engine contentSha256 consistency)
+       compare-record.py --check DIR        (schema/required keys, sidecar line formats, engine contentSha256)
 Shared by clients, routers and Engines (agent-engine-dev uses this copy). Rules:
   record.txt     key=value; keys listed as "key:<name>" in volatile.txt are skipped; UNKNOWN on either side never differs
   packages.tsv   package<TAB>version<TAB>arch  (keyed by package:arch)
-  images.tsv     ref<TAB>image id<TAB>digests  (keyed by ref)
-  files.sha256 / dist.sha256   sha256sum lines (keyed by path; --ignore-path exact or prefix ending in /)
+  images.tsv     ref<TAB>image id<TAB>digests  (keyed by ref; an UNKNOWN column never differs)
+  files.sha256 / dist.sha256 / helpers.sha256   sha256sum lines (keyed by path; --ignore-path exact or prefix ending in /)
+                 helpers.sha256 = hashes of the Engine's /usr/local/sbin/idea-* files
 A sidecar is compared only when the EXPECTED side has it; missing on the actual side is a difference.
 Exit 0 = content-identical, 1 = differences (printed), 2 = usage error.
 """
-import hashlib, os, sys
+import hashlib, os, re, sys
 
-SIDECARS = ["packages.tsv", "images.tsv", "files.sha256", "dist.sha256"]
+SIDECARS = ["packages.tsv", "images.tsv", "files.sha256", "dist.sha256", "helpers.sha256"]
+SHA_LINE = re.compile(r"^(?:[0-9a-f]{64}|UNKNOWN)  \*?\S.*$")
 REQUIRED = ["schema", "batch", "deviceType", "arch", "model", "osRelease", "imageCommit", "imageBranch", "imageTag",
             "imageVersion", "packageArchive", "packageArchiveSha256", "packageArchiveUrl", "secrets", "deployedAt", "evidence", "confidence", "open"]
 SCHEMA = "idea-deployment-record/1"
@@ -52,7 +54,12 @@ def diff_maps(label, e, a, skip=lambda k: False):
     for k in sorted(set(e) | set(a)):
         if skip(k) or unknown(e.get(k)) or unknown(a.get(k)):
             continue
-        if e.get(k) != a.get(k):
+        ev, av = e.get(k), a.get(k)
+        if label == "images.tsv" and ev is not None and av is not None:
+            ec, ac = ev.split("\t"), av.split("\t")
+            if len(ec) == len(ac) and all(x == y or unknown(x) or unknown(y) for x, y in zip(ec, ac)):
+                continue
+        if ev != av:
             out.append(f"{label}: {k}: expected {e.get(k)!r} actual {a.get(k)!r}")
     return out
 
@@ -80,6 +87,13 @@ def check(d):
     if os.path.exists(p):
         bad = [l for l in lines(p) if len(l.split("\t")) != 3]
         if bad: errs.append(f"packages.tsv: {len(bad)} lines without 3 tab-separated columns")
+    for s in ("files.sha256", "dist.sha256", "helpers.sha256"):
+        p = os.path.join(d, s)
+        if os.path.exists(p):
+            ls = lines(p); bad = [l for l in ls if not SHA_LINE.match(l)]
+            if bad: errs.append(f"{s}: {len(bad)} lines not in sha256sum format")
+            paths = [l.partition("  ")[2].lstrip("*") for l in ls]
+            if s == "helpers.sha256" and paths != sorted(paths): errs.append(f"{s}: not sorted by path")
     return errs
 
 def main(argv):

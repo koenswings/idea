@@ -32,6 +32,24 @@ if command -v docker >/dev/null 2>&1; then
   sec "docker-containers"; $S docker ps -a --format '{{.Names}}\t{{.Image}}\t{{.Status}}' 2>/dev/null | sort
   for n in $($S docker ps -aq 2>/dev/null); do $S docker inspect --format '{{.Name}}\t{{.Image}}' "$n" 2>/dev/null; done | sort
 fi
+sec "runtime-versions"
+v(){ if command -v "$1" >/dev/null 2>&1; then o=$("$@" 2>/dev/null | head -1); echo "$1=${o:-UNKNOWN}"; else echo "$1=UNKNOWN"; fi; }
+v tailscale version; v node --version; v npm --version; v pnpm --version; v pm2 --version
+sec "console-dist-hashes"
+CD=""; for c in /home/pi/idea/agents/agent-console-dev/dist /home/pi/console/dist; do [ -d "$c" ] && { CD=$c; break; }; done
+if [ -n "$CD" ]; then echo "dir=$CD"; (cd "$CD" && find . -type f 2>/dev/null | sed 's|^\./||' | sort | while IFS= read -r f; do sha256sum "$f"; done); else echo "UNKNOWN (no console dist)"; fi
+sec "kolibri-git"
+k=0; for d in $(find /home/pi/idea -maxdepth 4 -type d -name 'app-kolibri*' 2>/dev/null | sort); do
+  { [ -d "$d/.git" ] || [ -f "$d/.git" ]; } || continue; k=1
+  echo "dir=$d head=$(git -C "$d" rev-parse HEAD 2>/dev/null || echo UNKNOWN)"; done
+[ $k = 1 ] || echo "UNKNOWN (no app-kolibri checkout under /home/pi/idea)"
+sec "helpers-sha256"
+for f in $(ls -d /usr/local/sbin/idea-* 2>/dev/null | sort); do [ -f "$f" ] || continue; h=$($S sha256sum "$f" 2>/dev/null | cut -d' ' -f1); echo "${h:-UNKNOWN}  $f"; done
+sec "apt-auto-update"
+if command -v systemctl >/dev/null 2>&1; then for u in apt-daily.timer apt-daily-upgrade.timer unattended-upgrades; do
+  echo "$u enabled=$(systemctl is-enabled "$u" 2>/dev/null || true) active=$(systemctl is-active "$u" 2>/dev/null || true)"; done
+else echo "systemctl=UNKNOWN"; fi
+echo "--- /var/log/apt/history.log (tail)"; if [ -r /var/log/apt/history.log ]; then tail -n 40 /var/log/apt/history.log; else $S tail -n 40 /var/log/apt/history.log 2>/dev/null || echo UNKNOWN; fi
 command -v pm2 >/dev/null 2>&1 && { sec "pm2"; pm2 jlist 2>/dev/null | tr ',' '\n' | grep -E '"(name|status|pm_cwd|version)"' | head -60; }
 sec "file-hashes"
 for d in ${HASH_DIRS:-/etc /usr/local /usr/share/idea /opt /boot/firmware /www}; do
