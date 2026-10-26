@@ -22,6 +22,10 @@ systemctl is-enabled idea-snap-hold.service >/dev/null 2>&1 && ok "snap hold on 
 grep -q '^overlayroot=' /etc/overlayroot.conf && ok "overlayroot present: $(grep '^overlayroot=' /etc/overlayroot.conf)" || bad "overlayroot conf"
 [ ! -s /etc/machine-id ] && ok "machine-id blank" || bad "machine-id baked in"
 ls /etc/ssh/ssh_host_* >/dev/null 2>&1 && bad "ssh host keys baked in" || ok "no ssh host keys"
+# idea#208: no country time zone in the image; flash-time zone applied at boot
+[ "$TIMEZONE" = UTC ] && [ "$(cat /etc/timezone 2>/dev/null)" = UTC ] && [ "$(readlink -f /etc/localtime)" = "$(readlink -f /usr/share/zoneinfo/UTC)" ] && ok "time zone default UTC (no country zone)" || bad "image time zone is '$(cat /etc/timezone 2>/dev/null)', want UTC"
+[ ! -e /boot/firmware/idea-timezone.txt ] && ok "no idea-timezone.txt baked on boot partition" || bad "idea-timezone.txt baked into image"
+[ -x /usr/local/sbin/idea-timezone ] && systemctl is-enabled idea-timezone.service >/dev/null 2>&1 && ok "idea-timezone boot unit enabled" || bad "idea-timezone boot unit"
 # --- idea#202 fixes (2026-10-15) ---
 # 1 config.txt: KMS overlay per model, not in [all]
 python3 - /boot/firmware/config.txt <<'P' && ok "config.txt: [pi4] vc4-kms-v3d + [pi5] vc4-kms-v3d-pi5, none in [all], disable_fw_kms_setup=1" || bad "config.txt KMS sections"

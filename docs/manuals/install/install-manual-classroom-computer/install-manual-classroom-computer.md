@@ -113,7 +113,7 @@ Every classroom computer runs the same **IDEA client image**. It is the official
 | Updates | **Off.** The computer never updates itself, so it stays as tested. A newer image is written to the card from the Console (chapter 6). |
 | Computer name | Set at first boot: `idea-pc-` plus the last 4 characters of the Pi's serial number, for example `idea-pc-3f2a`. |
 | Wi-Fi | Joins the school's student Wi-Fi `IDEA` (password `idea911!`) by itself. It is the only network on the card (teacher computers: 4.3). |
-| Keyboard, time zone | US keyboard layout (QWERTY), British English for dates and spelling, time zone Harare (Africa/Harare). |
+| Keyboard, time zone | US keyboard layout (QWERTY), British English for dates and spelling, time zone set when the card is written: the Engine uses its own time zone (e.g. Africa/Harare); a card written with Raspberry Pi Imager alone stays on UTC unless `idea-timezone.txt` is added to its boot partition. |
 | Reset on every restart | **On.** Every restart puts the computer back as it was written: files saved on the computer and changed settings are gone. Students save their work in Nextcloud. |
 
 # 4. First boot

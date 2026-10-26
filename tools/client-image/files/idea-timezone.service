@@ -1,0 +1,12 @@
+[Unit]
+Description=IDEA: apply the time zone set at flash time (idea-timezone.txt on the boot partition)
+After=local-fs.target boot-firmware.mount
+RequiresMountsFor=/boot/firmware
+Before=time-sync.target display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/idea-timezone
+
+[Install]
+WantedBy=multi-user.target
