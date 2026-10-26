@@ -32,9 +32,13 @@ pm2Version=UNKNOWN (installed unpinned)
 dockerVersion=UNKNOWN
 tailscaleVersion=UNKNOWN (installed as the latest stable tarball)
 appKolibriCommit=UNKNOWN
+dockerPins=none at adfd9d3 (get.docker.com latest; archive holds today's pinned Docker debs, see debs/docker/NOTE.txt)
 aptPins=none at adfd9d3 (Debian unpinned; packages.tsv UNKNOWN until captured)
 postInstall.morango=2026-10-17: MORANGO_SYSTEM_ID=idea-${hostname}-${port} added by hand to /instances/<id>/compose.yaml of Kolibri and Kolibri Demo (app-kolibri#8; procedure: agent-engine-dev docs/REPRODUCIBLE_BUILDS.md §7)
 packageArchive=/workspace/idea322-archive/engine-adfd9d3 (box); release kit-adfd9d3-archive on koenswings/agent-engine-dev (prepared, NOT published, needs Koen's go)
+archiveUrl=https://github.com/koenswings/agent-engine-dev/releases/tag/kit-adfd9d3-archive
+archiveSha256=kit-adfd9d3-archive.tar.part-00:b88af91cfab6f49405995f54c08d861a063a1efd76bd5ec07fd45637e189ec92
+archiveStatus=pending publication (prepared on the box, needs Koen's go; asset URL https://github.com/koenswings/agent-engine-dev/releases/download/kit-adfd9d3-archive/kit-adfd9d3-archive.tar.part-00)
 secrets=Tailscale auth key at build time (name only; value never recorded)
 deployedAt=2026-10-18 10:40:33 CEST (Engine); Console dist 2026-10-17
 evidence=fleet-state.json @4e515d4 (version/deployed/note); agent-engine-dev git adfd9d3
