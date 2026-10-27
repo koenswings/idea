@@ -105,8 +105,11 @@ import sys,re
 p=sys.argv[1]; s=open(p).read()
 if '# IDEA: per-model KMS' not in s:                              # once only: a re-run must not strip the [pi4] line
     s=re.sub(r'(?m)^dtoverlay=vc4-kms-v3d[ \t]*\n','',s)        # exact line only; cma-128 variants stay
-    i=s.rfind('\n[all]'); blk='\n# IDEA: per-model KMS overlay (Pi 400 = pi4, Pi 500 = pi5)\n[pi4]\ndtoverlay=vc4-kms-v3d\n\n[pi5]\ndtoverlay=vc4-kms-v3d-pi5\n'
+    i=s.rfind('\n[all]'); blk='\n# IDEA: per-model KMS overlay (Pi 400 = pi4, Pi 500 = pi5)\n[pi4]\ndtoverlay=vc4-kms-v3d\n\n[pi5]\ndtoverlay=vc4-kms-v3d-pi5\nusb_max_current_enable=1\n'
     s=s[:i]+blk+s[i:] if i>=0 else s+blk+'\n[all]\n'
+# idea#304: Pi 500 USB boot on a 3 A supply - lift the 600 mA USB current limit, [pi5] ONLY (never [all]; [pi4] untouched)
+if 'usb_max_current_enable=1' not in s:
+    s=s.replace('[pi5]\ndtoverlay=vc4-kms-v3d-pi5\n','[pi5]\ndtoverlay=vc4-kms-v3d-pi5\nusb_max_current_enable=1\n',1)
 open(p,'w').write(s)
 P
 

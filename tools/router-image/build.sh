@@ -9,6 +9,7 @@
 # manifest (build.env, inputs.tsv, packages.tsv, content.tsv.xz, image.sha256) -> manifests/router/<name>/.
 set -euo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd); REPO=$(cd "$HERE/../.." && pwd)
+# shellcheck source=SCRIPTDIR/config.env
 . "$HERE/config.env"
 . "$REPO/tools/repro/lib.sh"
 DEV=0; [ "${1:-}" = --dev ] && { DEV=1; shift; }
@@ -62,7 +63,7 @@ chmod 755 "$F/etc/uci-defaults/90-idea-setup" "$F"/usr/share/idea/*.sh
 PKGS=$(grep -v '^\s*#' "$HERE/packages.txt" | xargs)
 make -C "$IB" image PROFILE="$PROFILE" PACKAGES="$PKGS" FILES="$F" \
   EXTRA_IMAGE_NAME="idea-$IDEA_ROUTER_VERSION" BIN_DIR="$OUT/bin" -j"${JOBS:-2}"
-SRC=$(find "$OUT/bin" -maxdepth 1 -name "*${PROFILE}-squashfs-sysupgrade.bin" ! -name "*ubootmod*" | head -1)
+SRC=""; for f in "$OUT"/bin/*"$PROFILE"-squashfs-sysupgrade.bin; do case "$f" in *ubootmod*) ;; *) SRC=$f ;; esac; done
 NAME="idea-router-$IDEA_ROUTER_VERSION-$GIT-$PROFILE-squashfs-sysupgrade.bin"
 cp "$SRC" "$OUT/$NAME"; (cd "$OUT" && sha256sum "$NAME" > SHA256SUMS && cat SHA256SUMS)
 cp "$OUT"/bin/*.manifest "$OUT/" 2>/dev/null || true
