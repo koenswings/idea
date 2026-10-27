@@ -14,6 +14,11 @@ Grok Build runner path parked, idea#147), fleet-Pi test claim protocol (§4.6), 
 control (§5), routines, team structure, and Bot descriptions.
 → [docs/grok-bot-setup.md](grok-bot-setup.md)
 
+## ops/security-overview.md
+**Status:** Draft (idea#181)  ·  **Maintained by:** Atlas / Steve
+Ops view of IDEA security: Tailscale tag:idea/ACL, school network zones, the <account>911! default-password convention, SSH key-only, pm2 as pi, sudoers, secrets handling, backups and open risks. Contains no secret values.
+→ [docs/ops/security-overview.md](ops/security-overview.md)
+
 ## README.md
 **Status:** Authoritative  ·  **Maintained by:** Koen / Steve
 Short orientation for the `docs/` folder.
