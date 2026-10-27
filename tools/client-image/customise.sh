@@ -103,8 +103,8 @@ sed -i "s/@BROWSER_DESKTOP@/$BROWSER_DESKTOP/" /etc/dconf/db/local.d/00-idea; dc
 python3 - /boot/firmware/config.txt <<'P'
 import sys,re
 p=sys.argv[1]; s=open(p).read()
-s=re.sub(r'(?m)^dtoverlay=vc4-kms-v3d[ \t]*\n','',s)            # exact line only; cma-128 variants stay
-if '# IDEA: per-model KMS' not in s:
+if '# IDEA: per-model KMS' not in s:                              # once only: a re-run must not strip the [pi4] line
+    s=re.sub(r'(?m)^dtoverlay=vc4-kms-v3d[ \t]*\n','',s)        # exact line only; cma-128 variants stay
     i=s.rfind('\n[all]'); blk='\n# IDEA: per-model KMS overlay (Pi 400 = pi4, Pi 500 = pi5)\n[pi4]\ndtoverlay=vc4-kms-v3d\n\n[pi5]\ndtoverlay=vc4-kms-v3d-pi5\n'
     s=s[:i]+blk+s[i:] if i>=0 else s+blk+'\n[all]\n'
 open(p,'w').write(s)
