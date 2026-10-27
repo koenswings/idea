@@ -1,1 +1,3 @@
 # 2 of the 10 kit client cards are not in the 17 Oct card log; image unknown (s14+patch or s15). Capture them.
+# 2026-10-27 (idea#288): 9 distinct clients seen on the sunny-robin kit LAN (kit-hosts-zimbabwe-2026-10.tsv) against 10 cards;
+# the 10th client and the card-id <-> host mapping stay open until capture-device.sh runs on each client.

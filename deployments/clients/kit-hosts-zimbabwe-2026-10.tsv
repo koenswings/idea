@@ -1,0 +1,15 @@
+# Kit classroom clients seen on the sunny-robin kit LAN (idea#288). Read-only sources, 2026-10-27 CET:
+#  - router DHCP leases (cat /tmp/dhcp.leases on sunny-robin-router, read 2026-10-27 ~18:55 CET; IPs move between leases)
+#  - Wi-Fi unlock run logs (box /workspace/state/client-wifi-unlock/<ip>.log; host/model from the client itself)
+# hostname suffix = last 4 hex digits of the Pi serial (/proc/device-tree/serial-number).
+# Card-id (deployments/clients/<card-id>/) to host mapping is UNKNOWN until capture-device.sh runs on each client.
+# hostname	serialSuffix	model	wifiMac	leaseIp	wifiUnlock	note
+idea-pc-35f2	35f2	Raspberry Pi 500 Rev 1.0	2c:cf:67:df:1c:5f	10.42.1.184	VERIFIED	was a duplicate idea-pc-5b4c; rename to idea-pc-35f2 agreed by Koen (2026-10-27); router lease shows idea-pc-35f2 and the client reported host=idea-pc-35f2 after 18:43 CET (rename-35f2.log)
+idea-pc-5b4c	5b4c	Raspberry Pi 500 Rev 1.0	2c:cf:67:db:1f:99	10.42.1.59	VERIFIED	the genuine 5b4c; lease has no hostname (*)
+idea-pc-58c3	58c3	Raspberry Pi 500 Rev 1.0	2c:cf:67:df:84:4c	10.42.1.221	VERIFIED	
+idea-pc-671c	671c	Raspberry Pi 500 Rev 1.0	2c:cf:67:df:3e:30	10.42.2.183	VERIFIED	unlock at 10.42.1.183
+idea-pc-841d	841d	Raspberry Pi 500 Rev 1.0	2c:cf:67:d6:bf:0c	10.42.2.153	VERIFIED	unlock at 10.42.1.153
+idea-pc-f63a	f63a	Raspberry Pi 500 Rev 1.0	2c:cf:67:db:22:21	10.42.2.176	VERIFIED	unlock at 10.42.1.176
+idea-pc-fc95	fc95	Raspberry Pi 500 Rev 1.0	2c:cf:67:df:9e:f6	10.42.2.45	VERIFIED	unlock at 10.42.1.45; 2c:cf:67:df:9e:f5 (10.42.0.194, no hostname) is probably its wired port, unconfirmed
+idea-pc-9f95	9f95	Raspberry Pi 400 Rev 1.0	d8:3a:dd:c7:19:2b	10.42.2.136	VERIFIED	unlock at 10.42.1.136
+idea-pc-7d02	7d02	Raspberry Pi 400 Rev 1.0	d8:3a:dd:c7:0c:1a	10.42.2.52	VERIFIED	unlock at 10.42.1.52
