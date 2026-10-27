@@ -118,11 +118,20 @@ check "box: only the 3 known failures → pass" "$tst.status==\"passed\" and ($t
 out="$(scan env BOT_NAME=Atlas FAKE_OUT="$T/known3plus.out" FAKE_TRC=1)"
 check "box: 3 known + 1 other → fail" "$tst.status==\"failed\" and $tst.other_failures==[\"$O1\"] and ($tst.known_box_exceptions|length)==3 and .ok==false" "$out"
 out="$(scan env BOT_NAME=Atlas FAKE_OUT="$T/known1.out" FAKE_TRC=1)"
-check "box: listed tests passing is fine" "$tst.status==\"passed\" and ($tst.known_box_exceptions_missing|length)==0" "$out"
+check "box: listed tests passing is fine" "$tst.status==\"passed\" and ($tst.known_box_exceptions_missing|length)==3" "$out"
 out="$(scan env BOT_NAME=Atlas FAKE_TRC=1)"
 check "box: rc!=0 with no parsed failure → fail" "$tst.status==\"failed\"" "$out"
 out="$(scan env BOT_NAME=Atlas)"
-check "box: listed test missing/renamed → warning" "($tst.known_box_exceptions_missing|length)==3 and ([.findings[]|select(.rule==\"tests.known_box_exception_missing\" and .severity==\"warning\")]|length)==3 and .ok==true" "$out"
+check "box: listed test missing/renamed → warning" "($tst.known_box_exceptions_missing|length)==6 and ([.findings[]|select(.rule==\"tests.known_box_exception_missing\" and .severity==\"warning\")]|length)==6 and .ok==true" "$out"
+# File-level [docker-setup] entries (idea#109/#111/#81)
+F1='dist-test/test/automated/instance-start-status.test.js > Running only after compose up; failures end in Error (idea#109, real containers)'
+{ printf ' FAIL  %s\nError: /usr/bin/bash: line 1: docker: command not found\n    exit code: 127\n⎯⎯[1/2]⎯\n\n' "$F1"; printf ' FAIL  %s\nAssertionError: expected 1 to be 2\n⎯⎯[2/2]⎯\n' "$K1"; } >"$T/file-docker.out"
+printf ' FAIL  %s\nError: ENOSPC: no space left on device (docker: command not found later)\n⎯⎯[1/1]⎯\n' "$F1" >"$T/file-other.out"
+out="$(scan env BOT_NAME=Atlas FAKE_OUT="$T/file-docker.out" FAKE_TRC=1)"
+check "box: file failing with docker-not-found → exception" "$tst.status==\"passed\" and ($tst.known_box_exceptions|index(\"$F1\"))!=null" "$out"
+out="$(scan env BOT_NAME=Atlas FAKE_OUT="$T/file-other.out" FAKE_TRC=1)"
+check "box: same file, other error → fail" "$tst.status==\"failed\" and $tst.other_failures==[\"$F1\"]" "$out"
+
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_OUT="$T/known3.out" FAKE_RC=1)"
 check "pool: known test failing → fail" "$tst.status==\"failed\" and $tst.where==\"pool\" and .ok==false" "$out"
 

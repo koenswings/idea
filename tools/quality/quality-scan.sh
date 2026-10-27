@@ -702,28 +702,44 @@ run_engine_tests_box() {
 
 QUALITY_SCAN_BOX_EXCEPTIONS="${QUALITY_SCAN_BOX_EXCEPTIONS:-${SCRIPT_DIR}/engine-box-exceptions.txt}"
 
-# Failed vitest tests, one "<file> > <suite> > <test>" per line (deduped).
+# Failed vitest tests: "<file> > <suite> > <test><TAB><docker>" per line (deduped),
+# <docker>=1 when that failure's first Error line is "docker: command not found".
 engine_failed_tests() {
-  printf '%s\n' "$1" | sed -n 's/^ *FAIL  \(.*[^ ]\) *$/\1/p' | sort -u
+  printf '%s\n' "$1" | awk '
+    function flush() { if (name != "") print name "\t" dock; name = ""; dock = 0; seen = 0 }
+    /^ *FAIL  / { flush(); n = $0; sub(/^ *FAIL  /, "", n); sub(/ +$/, "", n); name = n; next }
+    name != "" && !seen && /^[A-Za-z]*Error:/ { seen = 1; if ($0 ~ /^Error: .*line [0-9]+: docker: command not found *$/) dock = 1; next }
+    /⎯\[[0-9]+\/[0-9]+\]⎯/ { flush() }
+    END { flush() }' | sort -u
 }
 
 engine_result() {
   local repo="$1" where="$2" detail="$3" rc="$4" out="$5"
   local known_json='[]' unknown_json='[]' missing_json='[]'
   if [[ "$where" == "box" && -f "$QUALITY_SCAN_BOX_EXCEPTIONS" ]]; then
-    local failed known=() unknown=() missing=() line t
-    local entries=()
+    local failed known=() unknown=() missing=() line t dock
+    local entries=() names=()
     while IFS= read -r line; do
       [[ -z "$line" || "$line" == \#* ]] && continue
+      line="${line%% ## *}"
       entries+=("$line")
+      names+=("${line#\[docker-setup\] }")
     done <"$QUALITY_SCAN_BOX_EXCEPTIONS"
     failed="$(engine_failed_tests "$out")"
-    while IFS= read -r t; do
+    while IFS=$'\t' read -r t dock; do
       [[ -z "$t" ]] && continue
       local hit=0 e
-      for e in "${entries[@]}"; do [[ "$t" == "$e" ]] && hit=1 && break; done
+      for e in "${entries[@]}"; do
+        if [[ "$e" == "[docker-setup] $t" ]]; then
+          [[ "$dock" == 1 ]] && hit=1
+          break
+        elif [[ "$e" == "$t" ]]; then
+          hit=1; break
+        fi
+      done
       if [[ $hit -eq 1 ]]; then known+=("$t"); else unknown+=("$t"); fi
     done <<<"$failed"
+    entries=("${names[@]}")
     # Listed test missing or renamed: its name appears nowhere in the output.
     for e in "${entries[@]}"; do
       # here-string, not a pipe: grep -q + pipefail would SIGPIPE printf on big output
