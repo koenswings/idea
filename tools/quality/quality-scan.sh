@@ -15,8 +15,8 @@ if [[ -z "${IDEA_ROOT}" ]]; then
   exit 2
 fi
 
-FLEET_FIND="${IDEA_ROOT}/tools/fleet/find-available-pi.sh"
-FLEET_STATE="${IDEA_ROOT}/fleet-state.json"
+FLEET_FIND="${QUALITY_SCAN_FLEET_FIND:-${IDEA_ROOT}/tools/fleet/find-available-pi.sh}"
+FLEET_STATE="${QUALITY_SCAN_FLEET_STATE:-${IDEA_ROOT}/fleet-state.json}"
 BOT_NAME="${BOT_NAME:-unknown}"
 
 DEFAULT_REPOS=(
@@ -51,6 +51,18 @@ Paths (canonical Pi / local layout):
   app-*           → <IDEA_ROOT>/agents/agent-app-dev/<name>
   --repo-root DIR → override parent of agents/ (fixtures: DIR/agents/<name>)
   remote tests    → same nesting under /home/pi/idea/
+
+Engine tests (idea#335): run on the box by default (refused on a fleet Pi).
+  QUALITY_SCAN_ENGINE_PI=<pi>  use a claimed idle pool Pi instead (pm2 engine
+                               stopped, restored and released afterwards; needs BOT_NAME;
+                               never idea01 while live, idea02, production or kits)
+  QUALITY_SCAN_SOCKS=host:port SSH via SOCKS5 (box: 127.0.0.1:1055)
+  QUALITY_SCAN_TEST_LOG=FILE   append raw Engine test output to FILE
+  Box runs only: failures listed in tools/quality/engine-box-exceptions.txt (the
+  Docker-only tests) are reported as tests.known_box_exceptions and do not fail
+  the scan; any other failure does. On a pool Pi every failure counts.
+  Before a release, run the Engine tests through the pool-Pi path
+  (QUALITY_SCAN_ENGINE_PI=<pi>), not on the box.
 EOF
 }
 
@@ -91,7 +103,7 @@ fi
 
 # --- Finding accumulators (temp files for jq assembly) ---
 TMPDIR_SCAN="$(mktemp -d)"
-trap 'rm -rf "$TMPDIR_SCAN"' EXIT
+trap 'engine_pool_restore 2>/dev/null || true; rm -rf "$TMPDIR_SCAN"' EXIT
 FINDINGS_FILE="$TMPDIR_SCAN/findings.jsonl"
 RESULTS_FILE="$TMPDIR_SCAN/results.jsonl"
 : >"$FINDINGS_FILE"
@@ -611,6 +623,224 @@ check_bakeins() {
   esac
 }
 
+# --- Engine test placement (idea#335; agent-engine-dev AGENTS.md "Where Engine tests run") ---
+# Default: run Engine tests on the box (no live Engine). Optional: a claimed idle
+# pool Pi with `pm2 stop engine` (QUALITY_SCAN_ENGINE_PI=<pi>). Never next to a live
+# production Engine (idea01 while live, idea02, 'idea'/production, kit Engines).
+# The idea#105 pre-flight in the Engine suite is NOT touched: IDEA_TEST_ALLOW_LIVE is
+# always unset for the test command.
+QUALITY_SCAN_ENGINE_PI="${QUALITY_SCAN_ENGINE_PI:-}"
+QUALITY_SCAN_SOCKS="${QUALITY_SCAN_SOCKS:-}"
+QUALITY_SCAN_UFS="${QUALITY_SCAN_UFS:-${IDEA_ROOT}/tools/fleet/update-fleet-state.sh}"
+QUALITY_SCAN_SSH="${QUALITY_SCAN_SSH:-ssh}"
+export BOT_NAME
+
+engine_ssh() {
+  # engine_ssh <host> <remote command...>
+  local host="$1"; shift
+  local opts=(-o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new)
+  if [[ -n "$QUALITY_SCAN_SOCKS" ]]; then
+    opts+=(-o "ProxyCommand=nc -X 5 -x ${QUALITY_SCAN_SOCKS} %h %p")
+  fi
+  "$QUALITY_SCAN_SSH" "${opts[@]}" "pi@${host}" "$@"
+}
+
+# Prints a refusal reason (and returns 1) when <pi> may never host Engine tests.
+engine_pi_forbidden() {
+  local pi="$1" role status claim
+  case "$pi" in
+    idea02|idea|wizardly-hugle) echo "never_live_production:${pi}"; return 0 ;;
+  esac
+  role="$(jq -r --arg p "$pi" '.[$p].role // ""' "$FLEET_STATE" 2>/dev/null || true)"
+  status="$(jq -r --arg p "$pi" '.[$p].status // ""' "$FLEET_STATE" 2>/dev/null || true)"
+  claim="$(jq -r --arg p "$pi" '.[$p].claim // empty' "$FLEET_STATE" 2>/dev/null || true)"
+  if [[ -z "$role" ]]; then echo "unknown_pi:${pi}"; return 0; fi
+  case "$role" in
+    production|golden|kit-engine|kit*) echo "never_live_production:${pi}:role=${role}"; return 0 ;;
+  esac
+  case "$status" in
+    production|kit|hold|paused) echo "never_live_production:${pi}:status=${status}"; return 0 ;;
+  esac
+  if [[ "$status" != "idle" ]]; then echo "pi_not_idle:${pi}:status=${status}"; return 0; fi
+  if [[ -n "$claim" ]]; then echo "pi_claimed:${pi}"; return 0; fi
+  return 1
+}
+
+engine_cmd_string() {
+  local root="$1"
+  if grep -q '"test:full"' "$root/package.json" 2>/dev/null; then
+    echo "pnpm test:full"
+  else
+    echo "pnpm test"
+  fi
+}
+
+# Box path (default). Prints the checks.tests JSON.
+run_engine_tests_box() {
+  local repo="$1" root="$2" me out rc=0 cmd
+  me="$(this_hostname)"
+  if [[ -f "$FLEET_STATE" ]] && jq -e --arg h "$me" 'has($h)' "$FLEET_STATE" >/dev/null 2>&1; then
+    jq -nc --arg h "$me" '{status:"skipped",reason:"engine_tests_not_on_fleet_pi",host:$h,note:"run on the box, or set QUALITY_SCAN_ENGINE_PI to a claimed idle pool Pi"}'
+    return
+  fi
+  if [[ "$me" == idea0[0-9]* || "$me" == "idea" || "$me" == wizardly-hugle ]]; then
+    jq -nc --arg h "$me" '{status:"skipped",reason:"engine_tests_not_on_fleet_pi",host:$h}'
+    return
+  fi
+  cmd="$(engine_cmd_string "$root")"
+  if [[ "$QUALITY_SCAN_DRY_RUN_TESTS" == "1" ]]; then
+    jq -nc --arg c "$cmd" '{status:"skipped",reason:"dry_run_tests",where:"box",cmd:$c}'
+    return
+  fi
+  set +e
+  out="$(cd "$root" && env -u IDEA_TEST_ALLOW_LIVE bash -c "$cmd" 2>&1)"
+  rc=$?
+  set -e
+  if [[ -n "${QUALITY_SCAN_TEST_LOG:-}" ]]; then printf '%s\n' "$out" >>"$QUALITY_SCAN_TEST_LOG"; fi
+  engine_result "$repo" "box" "box (${me:-local})" "$rc" "$out"
+}
+
+QUALITY_SCAN_BOX_EXCEPTIONS="${QUALITY_SCAN_BOX_EXCEPTIONS:-${SCRIPT_DIR}/engine-box-exceptions.txt}"
+
+# Failed vitest tests: "<file> > <suite> > <test><TAB><docker>" per line (deduped),
+# <docker>=1 when that failure's first Error line is "docker: command not found".
+engine_failed_tests() {
+  printf '%s\n' "$1" | awk '
+    function flush() { if (name != "") print name "\t" dock; name = ""; dock = 0; seen = 0 }
+    /^ *FAIL  / { flush(); n = $0; sub(/^ *FAIL  /, "", n); sub(/ +$/, "", n); name = n; next }
+    name != "" && !seen && /^[A-Za-z]*Error:/ { seen = 1; if ($0 ~ /^Error: .*line [0-9]+: docker: command not found *$/) dock = 1; next }
+    /⎯\[[0-9]+\/[0-9]+\]⎯/ { flush() }
+    END { flush() }' | sort -u
+}
+
+engine_result() {
+  local repo="$1" where="$2" detail="$3" rc="$4" out="$5"
+  local known_json='[]' unknown_json='[]' missing_json='[]'
+  if [[ "$where" == "box" && -f "$QUALITY_SCAN_BOX_EXCEPTIONS" ]]; then
+    local failed known=() unknown=() missing=() line t dock
+    local entries=() names=()
+    while IFS= read -r line; do
+      [[ -z "$line" || "$line" == \#* ]] && continue
+      line="${line%% ## *}"
+      entries+=("$line")
+      names+=("${line#\[docker-setup\] }")
+    done <"$QUALITY_SCAN_BOX_EXCEPTIONS"
+    failed="$(engine_failed_tests "$out")"
+    while IFS=$'\t' read -r t dock; do
+      [[ -z "$t" ]] && continue
+      local hit=0 e
+      for e in "${entries[@]}"; do
+        if [[ "$e" == "[docker-setup] $t" ]]; then
+          [[ "$dock" == 1 ]] && hit=1
+          break
+        elif [[ "$e" == "$t" ]]; then
+          hit=1; break
+        fi
+      done
+      if [[ $hit -eq 1 ]]; then known+=("$t"); else unknown+=("$t"); fi
+    done <<<"$failed"
+    entries=("${names[@]}")
+    # Listed test missing or renamed: its name appears nowhere in the output.
+    for e in "${entries[@]}"; do
+      # here-string, not a pipe: grep -q + pipefail would SIGPIPE printf on big output
+      if ! grep -qF -- "${e##* > }" <<<"$out"; then
+        missing+=("$e")
+        add_finding "$repo" "tests.known_box_exception_missing" "warning" "tools/quality/engine-box-exceptions.txt" \
+          "Known box exception not found in the test output (missing or renamed?): ${e}"
+      fi
+    done
+    [[ ${#known[@]} -gt 0 ]] && known_json="$(printf '%s\n' "${known[@]}" | jq -R . | jq -sc .)"
+    [[ ${#unknown[@]} -gt 0 ]] && unknown_json="$(printf '%s\n' "${unknown[@]}" | jq -R . | jq -sc .)"
+    [[ ${#missing[@]} -gt 0 ]] && missing_json="$(printf '%s\n' "${missing[@]}" | jq -R . | jq -sc .)"
+    # Non-zero exit with only listed failures (and at least one) → pass.
+    if [[ "$rc" -ne 0 && ${#known[@]} -gt 0 && ${#unknown[@]} -eq 0 ]]; then
+      jq -nc --arg w "$where" --arg d "$detail" --argjson rc "$rc" --argjson k "$known_json" --argjson m "$missing_json" \
+        '{status:"passed",where:$w,detail:$d,exit_code:$rc,known_box_exceptions:$k,known_box_exceptions_missing:$m}'
+      return
+    fi
+  fi
+  if [[ "$rc" -ne 0 ]]; then
+    local sev="error"
+    [[ "$MODE" == "full" ]] && sev="critical"
+    add_finding "$repo" "tests.failed" "$sev" "." \
+      "Tests failed (rc=${rc}) via ${detail}: $(echo "$out" | tail -c 500)"
+    jq -nc --arg w "$where" --arg d "$detail" --argjson rc "$rc" --argjson k "$known_json" --argjson u "$unknown_json" --argjson m "$missing_json" \
+      '{status:"failed",where:$w,detail:$d,exit_code:$rc,known_box_exceptions:$k,other_failures:$u,known_box_exceptions_missing:$m}'
+  else
+    jq -nc --arg w "$where" --arg d "$detail" --argjson m "$missing_json" \
+      '{status:"passed",where:$w,detail:$d,known_box_exceptions:[],known_box_exceptions_missing:$m}'
+  fi
+}
+
+# Pool-Pi path (opt-in). Claims, stops pm2 engine as pi, runs, restores, releases.
+ENGINE_POOL_PI=""; ENGINE_POOL_HOST=""; ENGINE_POOL_WAS_ONLINE=0; ENGINE_POOL_CLAIMED=0
+engine_pool_restore() {
+  [[ -n "$ENGINE_POOL_PI" ]] || return 0
+  if [[ $ENGINE_POOL_WAS_ONLINE -eq 1 ]]; then
+    engine_ssh "$ENGINE_POOL_HOST" "pm2 start engine >/dev/null" >/dev/null 2>&1 \
+      || echo "WARN: pm2 start engine failed on ${ENGINE_POOL_PI}; restore by hand" >&2
+    ENGINE_POOL_WAS_ONLINE=0
+  fi
+  if [[ $ENGINE_POOL_CLAIMED -eq 1 ]]; then
+    STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" --null "$ENGINE_POOL_PI" claim >/dev/null 2>&1 || true
+    STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" "$ENGINE_POOL_PI" status idle >/dev/null 2>&1 || true
+    ENGINE_POOL_CLAIMED=0
+  fi
+  ENGINE_POOL_PI=""
+}
+
+run_engine_tests_pool() {
+  local repo="$1" root="$2" pi="$QUALITY_SCAN_ENGINE_PI" host why online out rc=0 cmd remote_path
+  if why="$(engine_pi_forbidden "$pi")"; then
+    jq -nc --arg r "${why%%:*}" --arg d "$why" '{status:"skipped",reason:$r,detail:$d}'
+    return
+  fi
+  if [[ "$BOT_NAME" == "unknown" || -z "$BOT_NAME" ]]; then
+    jq -nc '{status:"skipped",reason:"claim_needs_bot_name"}'
+    return
+  fi
+  host="$(pi_host_for "$pi")"
+  [[ -n "$host" ]] || { jq -nc --arg pi "$pi" '{status:"skipped",reason:"pi_unreachable",pi:$pi}'; return; }
+  cmd="$(engine_cmd_string "$root")"
+  if [[ "$QUALITY_SCAN_DRY_RUN_TESTS" == "1" ]]; then
+    jq -nc --arg pi "$pi" --arg c "$cmd" '{status:"skipped",reason:"dry_run_tests",where:"pool",pi:$pi,cmd:$c}'
+    return
+  fi
+  if ! engine_ssh "$host" true >/dev/null 2>&1; then
+    jq -nc --arg pi "$pi" '{status:"skipped",reason:"pi_unreachable",pi:$pi}'
+    return
+  fi
+  online="$(engine_ssh "$host" "pm2 jlist 2>/dev/null" 2>/dev/null \
+    | jq -r '[.[] | select(.name=="engine" and .pm2_env.status=="online")] | length' 2>/dev/null || echo 0)"
+  if [[ "$pi" == "idea01" && "${online:-0}" != "0" ]]; then
+    jq -nc '{status:"skipped",reason:"never_live_production",detail:"idea01 Engine is live"}'
+    return
+  fi
+  # Claim (update-fleet-state.sh holds the flock).
+  if ! STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" "$pi" claim "${BOT_NAME} quality-scan engine tests" >/dev/null 2>&1; then
+    jq -nc --arg pi "$pi" '{status:"skipped",reason:"claim_failed",pi:$pi}'
+    return
+  fi
+  ENGINE_POOL_PI="$pi"; ENGINE_POOL_HOST="$host"; ENGINE_POOL_CLAIMED=1
+  STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" "$pi" status testing >/dev/null 2>&1 || true
+  if [[ "${online:-0}" != "0" ]]; then
+    ENGINE_POOL_WAS_ONLINE=1
+    if ! engine_ssh "$host" "pm2 stop engine >/dev/null" >/dev/null 2>&1; then
+      engine_pool_restore
+      jq -nc --arg pi "$pi" '{status:"skipped",reason:"pm2_stop_failed",pi:$pi}'
+      return
+    fi
+  fi
+  remote_path="/home/pi/idea/agents/${repo}"
+  set +e
+  out="$(engine_ssh "$host" "cd ${remote_path} && env -u IDEA_TEST_ALLOW_LIVE ${cmd}" 2>&1)"
+  rc=$?
+  set -e
+  engine_pool_restore
+  if [[ -n "${QUALITY_SCAN_TEST_LOG:-}" ]]; then printf '%s\n' "$out" >>"$QUALITY_SCAN_TEST_LOG"; fi
+  engine_result "$repo" "pool" "claimed pool Pi ${pi} (pm2 engine stopped)" "$rc" "$out"
+}
+
 # --- Tests ---
 run_tests_for_repo() {
   local repo="$1" root="$2"
@@ -641,6 +871,15 @@ run_tests_for_repo() {
       jq -nc '{status:"skipped",reason:"no-harness"}'
       return
     fi
+  fi
+
+  if [[ "$domain" == "engine" ]]; then
+    if [[ -n "$QUALITY_SCAN_ENGINE_PI" ]]; then
+      run_engine_tests_pool "$repo" "$root"
+    else
+      run_engine_tests_box "$repo" "$root"
+    fi
+    return
   fi
 
   IFS='|' read -r status pi reason < <(resolve_pi "$domain")
@@ -679,11 +918,11 @@ run_tests_for_repo() {
       cmd=(bash -c 'pnpm test && pnpm typecheck')
       ;;
     app-dev)
-      # idea#335: install deps first via agent-app-dev#22's script/ensure-deps.sh
-      # (`npm run setup`), then run every smoke.mjs.
+      # idea#335: install deps first: `sh script/ensure-deps.sh` in the checkout
+      # (agent-app-dev#22; fallback `npm run setup`), then run every smoke.mjs.
       # tests/app-milkwise/smoke.mjs is ALWAYS skipped: it starts Milkwise
       # containers, and the scan must never start (or touch) Milkwise.
-      cmd=(bash -c 'set -e; if grep -q "\"setup\"" package.json 2>/dev/null; then npm run setup; fi; for f in tests/*/smoke.mjs tests/smoke.mjs; do [ -f "$f" ] || continue; case "$f" in tests/app-milkwise/*) echo "skip $f (starts Milkwise containers; never allowed)"; continue ;; esac; node "$f"; done')
+      cmd=(bash -c 'set -e; if [ -f script/ensure-deps.sh ]; then sh script/ensure-deps.sh; elif grep -q "\"setup\"" package.json 2>/dev/null; then npm run setup; fi; for f in tests/*/smoke.mjs tests/smoke.mjs; do [ -f "$f" ] || continue; case "$f" in tests/app-milkwise/*) echo "skip $f (starts Milkwise containers; never allowed)"; continue ;; esac; node "$f"; done')
       ;;
   esac
 

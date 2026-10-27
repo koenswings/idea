@@ -400,7 +400,9 @@ BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> status idle
 
 **Where tests run (idea#152, 2026-09-28):**
 - On-Pi hardware tests (`script/hw-roundtrip.ts`, `pnpm test:hw`) run on **idea03**, which keeps a hardware test disk docked permanently.
-- `pnpm test:full` runs on **idea01 or idea04**. Its preflight (idea#105) refuses to run on idea03 while the test disk is docked.
+- `pnpm test:full` runs on **the Grok Bot box** by default, or on a **claimed idle pool Pi with `pm2 stop engine`**. It never runs next to a live production Engine: idea01 while it serves the fleet, idea02, 'idea', or kit Engines (idea#335; agent-engine-dev AGENTS.md "Where Engine tests run"). Its preflight (idea#105) refuses live hosts, and it refuses idea03 while the test disk is docked; never override it with `IDEA_TEST_ALLOW_LIVE=1`.
+- `tools/quality/quality-scan.sh` follows the same rule. It runs Engine tests on the box by default and refuses when run on a fleet Pi. `QUALITY_SCAN_ENGINE_PI=<pi>` (with `BOT_NAME` set) claims that idle pool Pi through `update-fleet-state.sh`, stops the pm2 Engine as pi, runs the tests, then restarts the Engine and releases the claim. `QUALITY_SCAN_SOCKS=127.0.0.1:1055` routes SSH from the box. Covered by `tools/quality/engine-placement.test.sh`.
+- On the box, the Docker-only Engine tests listed in `tools/quality/engine-box-exceptions.txt` (instance-lifecycle and the two app-versioning tests) are reported as `tests.known_box_exceptions` and do not fail the scan. Any other failure still fails it, and a listed test that is missing or renamed gives a warning. On the pool-Pi path every failure counts. **Before a release, the Engine tests run through the pool-Pi path** (`QUALITY_SCAN_ENGINE_PI=<pi>`), not on the box.
 
 **idea03 hardware test disk.** Identify it only by these IDs, never by a device name such as `sdb`:
 

@@ -153,6 +153,13 @@ static_unit() {
 static_unit
 
 
+# idea#335: Engine test placement (box default, claimed pool Pi, refusals)
+if bash "${SCRIPT_DIR}/engine-placement.test.sh" >/dev/null 2>&1; then
+  echo "PASS engine-placement (idea#335)"; pass=$((pass + 1))
+else
+  echo "FAIL engine-placement (idea#335): run tools/quality/engine-placement.test.sh"; fail=$((fail + 1))
+fi
+
 echo "---"
 echo "selftest: $pass passed, $fail failed"
 if [[ $fail -gt 0 ]]; then

@@ -1,0 +1,17 @@
+# Known box exceptions (idea#335, PR #343; Steve option c).
+# Engine tests that need real Docker containers. The box has no Docker (and none is
+# installed), so these fail there. They are reported as checks.tests.known_box_exceptions
+# and do not fail the scan, but ONLY when Engine tests run on the box. On the pool-Pi
+# path every failure counts. Before a release, run the Engine tests through the
+# pool-Pi path (QUALITY_SCAN_ENGINE_PI=<pi>).
+# One entry per line: "<compiled test file> > <suite> > <test>", exactly as vitest prints it.
+dist-test/test/automated/instance-lifecycle.test.js > Instance lifecycle (automated, real containers) > instance reaches Running and container responds to HTTP after dock
+dist-test/test/automated/app-versioning.test.js > App versioning (automated, real containers) > v1.0 dock: version is read from disk and stored in instanceOf
+dist-test/test/automated/app-versioning.test.js > App versioning (automated, real containers) > minor upgrade (v1.0→v1.1): instanceOf updated, lastStarted refreshed
+# File-level entries ("[docker-setup] ..."): the whole file fails in setup. They count
+# as an exception ONLY when that failure's first Error line is the missing-Docker
+# error "docker: command not found"; any other error in the same file still fails.
+# Text after " ## " is a comment (issue reference).
+[docker-setup] dist-test/test/automated/instance-start-status.test.js > Running only after compose up; failures end in Error (idea#109, real containers) ## idea#109
+[docker-setup] dist-test/test/automated/no-env-values-in-logs.test.js > startInstance History entry holds no .env values (idea#111, real containers) ## idea#111
+[docker-setup] dist-test/test/automated/service-image-tar-load.test.js > Service images load from services/*.tar on the App Disk (idea#81, real containers) ## idea#81
