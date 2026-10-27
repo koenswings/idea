@@ -6,7 +6,8 @@
 #     --image FILE                     unpack a built image (extract-rootfs.sh) and compare
 #     --rebuild                        check out BUILD_SHA from build.env in a temp worktree, run that kind's
 #                                      build.sh (client: sudo; router: x86_64), then compare the new image
-# Compares: content.tsv (content-manifest.py, volatile paths ignored) and packages.tsv. image.sha256 is reported
+# Compares: content.tsv (content-manifest.py, volatile paths ignored), packages.tsv and, when the manifest dir has
+# image-manifest.tsv.xz and an image is given, the v2 image manifest (image-manifest.sh + compare-image-manifest.py). image.sha256 is reported
 # only (byte-identical images are not required, Koen 2026-10-26).
 set -euo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd); REPO=$(git -C "$HERE" rev-parse --show-toplevel)
@@ -26,21 +27,31 @@ if [ $REBUILD = 1 ]; then
     *) echo "unknown KIND $KIND" >&2; exit 2;; esac
   IMG=$(find "$T/out" -maxdepth 1 \( -name "idea-*.img" -o -name "idea-router-*.bin" \) | head -1)
 fi
-if [ -n "$IMG" ]; then
+V1=0; [ -f "$MD/content.tsv.xz" ] && V1=1   # v2-only manifest dirs skip the (large) rootfs extraction
+if [ -n "$IMG" ] && [ $V1 = 1 ]; then
   ROOT="$T/root"; "$HERE/extract-rootfs.sh" "$IMG" "$ROOT" >/dev/null
   if [ -z "$PKGS" ]; then PKGS="$T/packages.tsv"
     if [ "$KIND" = client ]; then dpkg-query --admindir="$ROOT/var/lib/dpkg" -W -f='${Package}\t${Version}\t${Architecture}\n' | LC_ALL=C sort -u > "$PKGS"
     else "$HERE/router-packages.sh" "$ROOT" > "$PKGS"; fi; fi
 fi
-[ -n "$ROOT" ] || { echo "give --rootfs, --image or --rebuild" >&2; exit 2; }
+[ -n "$ROOT" ] || [ -n "$IMG" ] || { echo "give --rootfs, --image or --rebuild" >&2; exit 2; }
 OWN=$(sed -n 's/^CONTENT_OWNERS=//p' "$MD/build.env"); [ "${OWN:-1}" = 0 ] && export REPRO_NO_OWNER=1
-python3 "$HERE/content-manifest.py" "$ROOT" > "$T/content.tsv"
+[ -n "$ROOT" ] && python3 "$HERE/content-manifest.py" "$ROOT" > "$T/content.tsv"
 rc=0
-echo "== content ($KIND $(sed -n 's/^NAME=//p' "$MD/build.env"))"; "$HERE/compare-manifest.sh" "$MD/content.tsv.xz" "$T/content.tsv" || rc=1
-if [ -n "$PKGS" ]; then echo "== packages"; "$HERE/compare-manifest.sh" "$MD/packages.tsv" "$PKGS" || rc=1
+if [ -f "$MD/content.tsv.xz" ] && [ -n "$ROOT" ]; then
+  echo "== content ($KIND $(sed -n 's/^NAME=//p' "$MD/build.env"))"; "$HERE/compare-manifest.sh" "$MD/content.tsv.xz" "$T/content.tsv" || rc=1
+fi
+if [ -n "$PKGS" ] && [ -f "$MD/packages.tsv" ]; then echo "== packages"; "$HERE/compare-manifest.sh" "$MD/packages.tsv" "$PKGS" || rc=1
 else echo "== packages: not checked (no package list for this source)"; fi
-if [ -n "$IMG" ] && [ -f "$MD/image.sha256" ]; then
-  [ "$(cut -d' ' -f1 "$MD/image.sha256")" = "$(sha256sum "$IMG" | cut -d' ' -f1)" ] && echo "== image: byte-identical (bonus)" \
+if [ -f "$MD/image-manifest.tsv.xz" ]; then
+  if [ -n "$IMG" ]; then echo "== image manifest v2 (per partition + partition table)"
+    "$HERE/image-manifest.sh" "$IMG" "$T/image-manifest.tsv" >/dev/null || rc=1
+    python3 "$HERE/compare-image-manifest.py" "$MD/image-manifest.tsv.xz" "$T/image-manifest.tsv" || rc=1
+  else echo "== image manifest v2: not checked (needs --image or --rebuild)"; fi
+fi
+IS="$MD/image.sha256"; case "$IMG" in *.xz) IS="$MD/image.xz.sha256";; esac
+if [ -n "$IMG" ] && [ -f "$IS" ]; then
+  [ "$(cut -d' ' -f1 "$IS")" = "$(sha256sum "$IMG" | cut -d' ' -f1)" ] && echo "== image: byte-identical (bonus)" \
     || echo "== image: not byte-identical (not required)"; fi
 [ $rc = 0 ] && echo "REBUILD CHECK: PASS" || echo "REBUILD CHECK: FAIL"
 exit $rc

@@ -1,0 +1,18 @@
+# Extra volatile globs for v2 image manifests (image-manifest.py), on top of volatile.txt. idea#322.
+# Relative to each partition root; fnmatch "*" also matches "/". Found by comparing s15 vs s16 (2026-10-27):
+# each one changes on every build even from the same commit and inputs.
+# omit:GLOB = drop the entry entirely (its NAME is random, e.g. mktemp); plain GLOB = keep the line, hide content.
+*initrd.img*
+omit:var/lib/dracut/console-setup-dir/etc/console-setup/tmpkbd.*
+var/lib/dracut/console-setup-dir/bin/setupcon
+var/lib/update-notifier/updates-available
+var/lib/command-not-found/commands.db.metadata
+var/lib/update-notifier/*-stamp
+var/lib/PackageKit/*
+var/lib/fwupd/*
+var/backups/*
+etc/ssl/private/ssl-cert-snakeoil.key
+etc/ssl/certs/ssl-cert-snakeoil.pem
+var/lib/systemd/random-seed
+var/lib/NetworkManager/secret_key
+var/lib/NetworkManager/*.lease
