@@ -511,6 +511,8 @@ check_staleness() {
     local df doc_ts age
     while IFS= read -r df; do
       [[ -z "$df" ]] && continue
+      # Stylesheets are static assets, not docs that describe the source (idea#308)
+      [[ "$df" == *.css ]] && continue
       doc_ts="$(latest_commit_ts "$root" "$df")"
       [[ "$doc_ts" == "0" ]] && continue
       if [[ "$tip" -gt 0 && $(( tip - doc_ts )) -gt $((30 * 86400)) ]]; then
