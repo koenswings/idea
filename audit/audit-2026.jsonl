@@ -652,3 +652,5 @@
 {"ts":"2026-10-27T07:33:40Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-engine-fail"],"ok":false,"violation_count":1}
 {"ts":"2026-10-27T07:33:40Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-console-fail"],"ok":false,"violation_count":4}
 {"ts":"2026-10-27T07:40:32Z","bot":"unknown","action":"quality_scan","mode":"full","repos":["idea","agent-engine-dev","agent-console-dev","agent-app-dev","app-kolibri","app-nextcloud","app-kiwix","app-milkwise"],"ok":false,"violation_count":7}
+{"ts":"2026-10-27T17:46:45Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-10-27T17:46:45Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: agent-app-dev idea#335","previous":null}
