@@ -132,6 +132,25 @@ TSX
   fi
 }
 bakein_unit
+trap - RETURN   # bakein_unit's RETURN trap (its tmp is local) must not fire on later returns
+
+# idea#308: static docs/ assets are skipped by docs.missing_from_index and staleness.doc
+# shellcheck source=lib-static-assets.sh
+source "${SCRIPT_DIR}/lib-static-assets.sh"
+static_unit() {
+  local p
+  for p in docs/interfaces.json docs/styles/markdown.css docs/styles/tomorrow.css docs/sample.yaml \
+           docs/manuals/teachers/teacher-tutorial/screenshots/E1-01.png \
+           docs/manuals/teachers/teacher-tutorial/superseded/old.pdf docs/assets/logo.SVG; do
+    if is_static_doc_asset "$p"; then echo "PASS static-unit: $p is static"; pass=$((pass + 1))
+    else echo "FAIL static-unit: $p should be static"; fail=$((fail + 1)); fi
+  done
+  for p in docs/USB-STICKS.md docs/ARCHITECTURE.md docs/styles/README.md docs/superseded/notes.md docs/notes.txt docs/build.sh; do
+    if is_static_doc_asset "$p"; then echo "FAIL static-unit: $p must still be checked"; fail=$((fail + 1))
+    else echo "PASS static-unit: $p is checked"; pass=$((pass + 1)); fi
+  done
+}
+static_unit
 
 
 echo "---"
