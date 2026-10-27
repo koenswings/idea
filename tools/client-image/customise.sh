@@ -28,7 +28,7 @@ apt-get autoremove -y -q; apt-get clean
 
 # --- locale, time zone, keyboard ---
 sed -i "s/^# *${LOCALE} /${LOCALE} /" /etc/locale.gen; locale-gen >/dev/null; update-locale LANG=$LOCALE
-ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime; echo $TIMEZONE > /etc/timezone
+ln -sf "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime; echo "$TIMEZONE" > /etc/timezone   # UTC; school zone at flash time (idea#208)
 printf 'XKBMODEL="pc105"\nXKBLAYOUT="%s"\nXKBVARIANT="%s"\nXKBOPTIONS=""\nBACKSPACE="guess"\n' "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT" > /etc/default/keyboard
 
 # --- accounts (§4) ---
@@ -131,6 +131,9 @@ systemctl --global mask tracker-miner-fs-3.service 2>/dev/null || true
 install -m 755 $B/files/idea-firstboot /usr/local/sbin/idea-firstboot
 sed -i "s/@PREFIX@/$HOSTNAME_PREFIX/" /usr/local/sbin/idea-firstboot
 cp $B/files/idea-firstboot.service /etc/systemd/system/; systemctl enable idea-firstboot.service
+# time zone from the boot partition (idea-timezone.txt, written at flash time), every boot (idea#208)
+install -m 755 $B/files/idea-timezone /usr/local/sbin/idea-timezone
+cp $B/files/idea-timezone.service /etc/systemd/system/; systemctl enable idea-timezone.service
 rm -f /etc/ssh/ssh_host_*; : > /etc/machine-id; rm -f /var/lib/dbus/machine-id
 
 # --- reset level B (reset-on-reboot): tmpfs overlay over root, switched by kernel arg overlayroot=tmpfs ---
