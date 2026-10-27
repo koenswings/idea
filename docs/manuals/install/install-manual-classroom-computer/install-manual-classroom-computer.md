@@ -1,10 +1,10 @@
 ---
 title: "IDEA Field Install Manual: Classroom Computer"
 subtitle: "Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor + the IDEA client image"
-audience: "Version 2.5, 25 October 2026"
+audience: "Version 2.6, 27 October 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 October 2026 (v2.5: sticker names, idea.local as the easy way in; v2.4: opening paragraph restored, wiring diagram arrows fixed)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 27 October 2026 (v2.6: learners may join any Wi-Fi network, including IDEA-Teachers (idea#285); v2.5: sticker names, idea.local as the easy way in; v2.4: opening paragraph restored, wiring diagram arrows fixed)
 
 
 # Introduction
@@ -104,7 +104,7 @@ Every classroom computer runs the same **IDEA client image**. It is the official
 | What | In the IDEA client image |
 |---|---|
 | Models | **One image for the Pi 400 and the Pi 500.** It picks the right display settings for each model at boot, so a card can move between a Pi 400 and a Pi 500. |
-| Student account | `learner`, logs in **automatically**, **no password**. It cannot change Wi-Fi (it cannot even list the networks), install software, add users or change the time. |
+| Student account | `learner`, logs in **automatically**, **no password**. It can see the Wi-Fi networks and join any of them, including `IDEA-Teachers` (4.3). It cannot install software, add users or change the time. |
 | Admin account | `admin` (hidden from the login screen), password `admin911!`. The password only works at the keyboard: remote login (SSH) accepts the IDEA support keys only. |
 | Browser | **Google Chrome** is the only browser (Firefox is removed). Google is the default search engine. Chrome asks no first-run questions and never offers to save passwords. |
 | The IDEA icon | One **IDEA** icon on the desktop and in the dock (the app bar on the left). It opens the IDEA start page, which finds the Console (section 4.2). Chrome also opens the start page as its home page. |
@@ -112,7 +112,7 @@ Every classroom computer runs the same **IDEA client image**. It is the official
 | No pop-ups | No "choose a password for the new keyring", no Ubuntu welcome tour, no LibreOffice or GCompris first-start questions. |
 | Updates | **Off.** The computer never updates itself, so it stays as tested. A newer image is written to the card from the Console (chapter 6). |
 | Computer name | Set at first boot: `idea-pc-` plus the last 4 characters of the Pi's serial number, for example `idea-pc-3f2a`. |
-| Wi-Fi | Joins the school's student Wi-Fi `IDEA` (password `idea911!`) by itself. It is the only network on the card (teacher computers: 4.3). |
+| Wi-Fi | Joins the school's student Wi-Fi `IDEA` (password `idea911!`) by itself. The student account can join another network from the Wi-Fi menu (4.3). |
 | Keyboard, time zone | US keyboard layout (QWERTY), British English for dates and spelling, time zone set when the card is written: the Engine uses its own time zone (e.g. Africa/Harare); a card written with Raspberry Pi Imager alone stays on UTC unless `idea-timezone.txt` is added to its boot partition. |
 | Reset on every restart | **On.** Every restart puts the computer back as it was written: files saved on the computer and changed settings are gone. Students save their work in Nextcloud. |
 
@@ -170,7 +170,7 @@ The pre-flashed IDEA school router creates two Wi-Fi networks (*IDEA Field Insta
 | Students (default) | `IDEA`, password `idea911!`: Console and apps only, no internet |
 | Teacher's computer | `IDEA-Teachers`, password `idea-teachers911!`: Console and apps, plus internet (on by default; staff can switch it off) |
 
-The IDEA image joins `IDEA` by itself; it is the only network on the card. Only a computer that the head teacher names for a teacher gets `IDEA-Teachers`: ask the IDEA team for it. Keep the `IDEA-Teachers` password for teacher computers.
+The IDEA image joins `IDEA` by itself. To put a teacher's computer on `IDEA-Teachers`, open the Wi-Fi menu at the top right, choose `IDEA-Teachers` and type its password. The student account may join any network, so no admin step is needed. Keep the `IDEA-Teachers` password among the teachers, so students' computers stay on `IDEA`.
 
 If the school changes the `IDEA` password, every classroom computer needs the new one. Ask the IDEA team before you change it. A card that is written from the IDEA image comes back with `idea911!`.
 
@@ -242,7 +242,7 @@ Nothing on the computer needs saving first: students keep their work on the Engi
 | Very slow first boot | That is normal: the first boot resizes the card. Give it 5 minutes. |
 | Wi-Fi 'IDEA' not shown | Is the router on? (*IDEA Field Install Manual: School Server*, "Router: check the pre-flashed IDEA router".) |
 | Start page says no Engine found | Is an Engine switched on? Type a sticker name in the field, or try `http://<STICKER>.local` (4.2.2). Check that the computer is on IDEA/IDEA-Teachers. |
-| `IDEA-Teachers` is not in the Wi-Fi menu | Expected: the student account can't list networks. Ask the IDEA team (4.3). |
+| `IDEA-Teachers` is not in the Wi-Fi menu | Move closer to the router and open the menu again. If it still doesn't show, check the router (*IDEA Field Install Manual: School Server*) or ask the IDEA team (4.3). |
 | Files or settings are gone after a restart | Expected: the reset on restart (4.4). Save work in Nextcloud. |
 | An app in the Console does not open | Its Engine may be switched off or at another school: the Console still shows its apps (known problem, no fix yet). Use the apps of this school's Engine. |
 | Desktop IDEA icon shows a red cross | Use the IDEA icon in the dock; log out and in once. Report it to the IDEA team. |

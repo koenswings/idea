@@ -12,6 +12,7 @@ Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment,
 | `find-available-pi.sh <domain>` | Return first idle Pi matching domain from fleet-state.json |
 | `deploy.sh <pi> <component> <repo> <branch>` | Full deploy sequence (engine/console/app-disk) |
 | `deploy-engine-pi.sh <tip> [--fetch <branch>] [--yes]` | Option-2 Engine deploy on ONE pool Pi (run via `ssh <pi> bash -s`): keeps config.yaml, pm2.config.cjs and store-identity/ across the checkout, aborts before pm2 restart if store-url.txt is not 2VroE; applies the Engine's DHCP vendor class (idea#284) after the build. **Implemented**; tests: `deploy-engine-pi.test.sh`. Runbook: `docs/ops/engine-deploy-pool-pi.md` |
+| `build-console-pi.sh [--dir <console dir>]` | Builds the Console on a Pi (run via `ssh <pi> bash -s`) and keeps the optional `dist/hidden-instances.json` hide list (agent-console-dev#166, idea#212) byte for byte across `vite build`, which empties dist/. If the file is absent, nothing is created. **Implemented**; tests: `build-console-pi.test.sh` |
 | `teardown.sh <pi>` | Reverse deploy, restore main, mark Pi idle |
 | `update-golden.sh <component> <version>` | Update golden Pi to new version of a component |
 | `set-golden-pi.sh` | Designate new golden Pi if current unavailable |
@@ -35,6 +36,7 @@ Quality scan and version monitoring scripts. Lead Bot and App Dev Bot call these
 | `quality-scan.sh` | Full/PR quality gate: structure, hygiene, docs currency, domain bake-ins, staleness (full only), domain tests via Pi selection. JSON report on stdout; audit line in `audit/`. | **Implemented** |
 | `check-app-versions.sh` | Read app.yaml monitors, query DockerHub / http-scrape, return JSON updates (idea#88) | **Implemented** |
 | `selftest.sh` | Runs `quality-scan.sh` against `testdata/` fixtures (structural; no Pi required) | **Implemented** |
+| `lib-static-assets.sh` | `is_static_doc_asset`: docs/ files that are static assets (stylesheets, images, PDFs, sample JSON/YAML/CSV data, `styles/` `assets/` `screenshots/` `superseded/` folders), skipped by `docs.missing_from_index` and `staleness.doc` (idea#308). Markdown is always checked. | **Implemented** |
 
 ```bash
 ./tools/quality/quality-scan.sh

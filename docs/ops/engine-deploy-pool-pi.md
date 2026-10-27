@@ -41,7 +41,7 @@ exits 75 without changing anything (two routines or two bots can no longer deplo
 equals the tip, the helpers match the repo and pm2 `engine` is online, it prints `already on <sha>, skipping` and exits 0.
 Temperature guard: before each step (install, build, root helpers, restart) above 75 C it pauses, polling every 30 s
 until below 65 C, and prints the peak per step at the end. The Console is not deployed by this script (build it
-separately, with the same 75/65 C rule).
+separately with `tools/fleet/build-console-pi.sh`, which keeps `dist/hidden-instances.json`, with the same 75/65 C rule).
 
 1. **Guard:** host is a pool Pi; `store-url.txt` is the expected store (2VroE); only
    `config.yaml`, `pm2.config.cjs` and `store-identity/*` have tracked local edits.

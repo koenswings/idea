@@ -7,6 +7,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib-static-assets.sh
+source "${SCRIPT_DIR}/lib-static-assets.sh"
 IDEA_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || true)"
 if [[ -z "${IDEA_ROOT}" ]]; then
   echo "ERROR: cannot resolve idea repo root" >&2
@@ -424,6 +426,7 @@ check_docs_currency() {
     index_content="$(cat "$root/docs/INDEX.md")"
     for f in "${docs_files[@]+"${docs_files[@]}"}"; do
       [[ -z "$f" ]] && continue
+      is_static_doc_asset "$f" && continue   # idea#308
       local base name
       base="$(basename "$f")"
       # listed if INDEX mentions path or basename
@@ -511,6 +514,7 @@ check_staleness() {
     local df doc_ts age
     while IFS= read -r df; do
       [[ -z "$df" ]] && continue
+      is_static_doc_asset "$df" && continue   # idea#308
       doc_ts="$(latest_commit_ts "$root" "$df")"
       [[ "$doc_ts" == "0" ]] && continue
       if [[ "$tip" -gt 0 && $(( tip - doc_ts )) -gt $((30 * 86400)) ]]; then
