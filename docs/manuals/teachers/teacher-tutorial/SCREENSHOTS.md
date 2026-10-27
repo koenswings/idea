@@ -56,11 +56,11 @@ Hosts: Console :8081, Kolibri :54189, Nextcloud :50065 (Collabora :9980), Kiwix 
 | S3-03 | 06-nextcloud-learners.md | learner1 | yes |
 | S4-01 | 06-nextcloud-learners.md | anonymous link | yes |
 | S4-02 | 06-nextcloud-learners.md | anonymous link | yes |
-| W1-01 | 07-wikipedia-offline.md | none | yes |
-| W1-02 | 07-wikipedia-offline.md | none | yes |
-| W1-03a | 07-wikipedia-offline.md | none | yes |
-| W1-03 | 07-wikipedia-offline.md | none | yes |
-| W1-04 | 07-wikipedia-offline.md | none | yes |
+| W1-01 | 07-wikipedia-offline.md | retake in full Wikipedia app (idea#295) | pending |
+| W1-02 | 07-wikipedia-offline.md | retake in full Wikipedia app (idea#295) | pending |
+| W1-03a | 07-wikipedia-offline.md | retake in full Wikipedia app (idea#295) | pending |
+| W1-03 | 07-wikipedia-offline.md | retake in full Wikipedia app (idea#295) | pending |
+| W1-04 | 07-wikipedia-offline.md | retake in full Wikipedia app (idea#295) | pending |
 | CON-01 | 10-console-basics.md | none | yes |
 
 Not captured (skipped by rule): F1 files disk, B2–B4 backup/restore, C3–C4 operator disk view (needs Operator Login). Files Disk F2 shots not taken (no Files Disk on wh).
