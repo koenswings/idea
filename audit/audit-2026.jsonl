@@ -652,3 +652,11 @@
 {"ts":"2026-10-27T07:33:40Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-engine-fail"],"ok":false,"violation_count":1}
 {"ts":"2026-10-27T07:33:40Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-console-fail"],"ok":false,"violation_count":4}
 {"ts":"2026-10-27T07:40:32Z","bot":"unknown","action":"quality_scan","mode":"full","repos":["idea","agent-engine-dev","agent-console-dev","agent-app-dev","app-kolibri","app-nextcloud","app-kiwix","app-milkwise"],"ok":false,"violation_count":7}
+{"ts":"2026-10-27T17:46:07Z","bot":"unknown","action":"quality_scan","mode":"full","repos":["idea","agent-engine-dev","agent-console-dev","app-kolibri"],"ok":false,"violation_count":1}
+{"ts":"2026-10-27T17:52:09Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-pass"],"ok":true,"violation_count":0}
+{"ts":"2026-10-27T17:52:09Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-console-pass"],"ok":true,"violation_count":0}
+{"ts":"2026-10-27T17:52:09Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-fail-structure"],"ok":false,"violation_count":4}
+{"ts":"2026-10-27T17:52:09Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-fail-hygiene"],"ok":false,"violation_count":3}
+{"ts":"2026-10-27T17:52:09Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-fail-docs"],"ok":false,"violation_count":1}
+{"ts":"2026-10-27T17:52:10Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-engine-fail"],"ok":false,"violation_count":1}
+{"ts":"2026-10-27T17:52:10Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-console-fail"],"ok":false,"violation_count":4}

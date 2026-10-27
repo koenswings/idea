@@ -679,8 +679,11 @@ run_tests_for_repo() {
       cmd=(bash -c 'pnpm test && pnpm typecheck')
       ;;
     app-dev)
-      # run all smoke.mjs
-      cmd=(bash -c 'set -e; for f in tests/*/smoke.mjs tests/smoke.mjs; do [ -f "$f" ] || continue; node "$f"; done')
+      # idea#335: install deps first via agent-app-dev#22's script/ensure-deps.sh
+      # (`npm run setup`), then run every smoke.mjs.
+      # tests/app-milkwise/smoke.mjs is ALWAYS skipped: it starts Milkwise
+      # containers, and the scan must never start (or touch) Milkwise.
+      cmd=(bash -c 'set -e; if grep -q "\"setup\"" package.json 2>/dev/null; then npm run setup; fi; for f in tests/*/smoke.mjs tests/smoke.mjs; do [ -f "$f" ] || continue; case "$f" in tests/app-milkwise/*) echo "skip $f (starts Milkwise containers; never allowed)"; continue ;; esac; node "$f"; done')
       ;;
   esac
 
