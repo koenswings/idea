@@ -15,7 +15,7 @@ if [[ -z "${IDEA_ROOT}" ]]; then
   exit 2
 fi
 
-FLEET_FIND="${IDEA_ROOT}/tools/fleet/find-available-pi.sh"
+FLEET_FIND="${QUALITY_SCAN_FLEET_FIND:-${IDEA_ROOT}/tools/fleet/find-available-pi.sh}"
 FLEET_STATE="${QUALITY_SCAN_FLEET_STATE:-${IDEA_ROOT}/fleet-state.json}"
 BOT_NAME="${BOT_NAME:-unknown}"
 
@@ -855,11 +855,11 @@ run_tests_for_repo() {
       cmd=(bash -c 'pnpm test && pnpm typecheck')
       ;;
     app-dev)
-      # idea#335: install deps first via agent-app-dev#22's script/ensure-deps.sh
-      # (`npm run setup`), then run every smoke.mjs.
+      # idea#335: install deps first: `sh script/ensure-deps.sh` in the checkout
+      # (agent-app-dev#22; fallback `npm run setup`), then run every smoke.mjs.
       # tests/app-milkwise/smoke.mjs is ALWAYS skipped: it starts Milkwise
       # containers, and the scan must never start (or touch) Milkwise.
-      cmd=(bash -c 'set -e; if grep -q "\"setup\"" package.json 2>/dev/null; then npm run setup; fi; for f in tests/*/smoke.mjs tests/smoke.mjs; do [ -f "$f" ] || continue; case "$f" in tests/app-milkwise/*) echo "skip $f (starts Milkwise containers; never allowed)"; continue ;; esac; node "$f"; done')
+      cmd=(bash -c 'set -e; if [ -f script/ensure-deps.sh ]; then sh script/ensure-deps.sh; elif grep -q "\"setup\"" package.json 2>/dev/null; then npm run setup; fi; for f in tests/*/smoke.mjs tests/smoke.mjs; do [ -f "$f" ] || continue; case "$f" in tests/app-milkwise/*) echo "skip $f (starts Milkwise containers; never allowed)"; continue ;; esac; node "$f"; done')
       ;;
   esac
 

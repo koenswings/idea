@@ -103,6 +103,25 @@ out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=0)"
 check "pool engine offline passes" "$tst.status==\"passed\"" "$out"
 lognot "offline: no pm2 start" "pm2 start engine"
 
+# app-dev (idea#335, Kid): `sh script/ensure-deps.sh` runs before smokes; milkwise smoke never runs
+A="$T/root/agents/agent-app-dev"
+mkdir -p "$A/script" "$A/tests/app-x" "$A/tests/app-milkwise"
+echo '{}' >"$A/package.json"
+echo 'echo ensure-deps >>"$FAKE_LOG"' >"$A/script/ensure-deps.sh"
+echo 'require("fs").appendFileSync(process.env.FAKE_LOG, "smoke app-x\n")' >"$A/tests/app-x/smoke.mjs"
+echo 'require("fs").appendFileSync(process.env.FAKE_LOG, "smoke milkwise\n")' >"$A/tests/app-milkwise/smoke.mjs"
+sed -i 's/require("fs")/(await import("fs"))/' "$A/tests/app-x/smoke.mjs" "$A/tests/app-milkwise/smoke.mjs"
+printf '#!/usr/bin/env bash\necho idea03\n' >"$T/bin/fakefind"; chmod +x "$T/bin/fakefind"
+git -C "$A" init -q; git -C "$A" -c user.email=t@t -c user.name=t add -A; git -C "$A" -c user.email=t@t -c user.name=t commit -qm init
+: >"$T/log"
+out="$(PATH="$T/bin:$PATH" FAKE_LOG="$T/log" QUALITY_SCAN_FLEET_STATE="$T/state.json" QUALITY_SCAN_FLEET_FIND="$T/bin/fakefind" \
+  QUALITY_SCAN_LOCAL_TESTS=1 QUALITY_SCAN_DRY_RUN_TESTS=0 BOT_NAME=Atlas "$SCAN" --repo-root "$T/root" --repos agent-app-dev 2>/dev/null || true)"
+check "app-dev smokes pass" "$tst.status==\"passed\"" "$out"
+first="$(head -1 "$T/log")"
+if [[ "$first" == ensure-deps ]]; then echo "PASS app-dev: ensure-deps.sh runs first"; pass=$((pass+1)); else echo "FAIL app-dev: first log line '$first'"; fail=$((fail+1)); fi
+loghas "app-dev: app-x smoke ran" "smoke app-x"
+lognot "app-dev: milkwise smoke never runs" "smoke milkwise"
+
 echo "---"
 echo "engine-placement: ${pass} passed, ${fail} failed"
 [[ $fail -eq 0 ]]
