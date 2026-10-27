@@ -48,4 +48,6 @@ secrets=Tailscale auth key at build time (name only; value never recorded). Capt
 deployedAt=2026-10-18 10:40:33 CEST (Engine); Console dist 2026-10-17
 evidence=read-only captures: /workspace/idea-archive/captures/sunny-robin-20261026T185411Z.txt (Atlas probe, sha256 1c24ac64...b2184) and sunny-robin-engine-record-20261026T190638Z.tar (capture-engine-record.sh @958ff0b, sha256 33ec73dc3bd0e85be30816cebbf98e1a961d81e6e7b39dbeae5bcc0afa56035d)
 confidence=captured on device
+kolibriInstances=:62650 Engine Kolibri MORANGO_SYSTEM_ID=idea-sunny-robin-62650 instance_id 65fb422ad074f056c6c34b4e0c0b2973; :64439 container x8g6piyvdc5m80uljoc-kolibri-1 (not Engine-listed) MORANGO_SYSTEM_ID=idea-sunny-robin-64439 instance_id 0eb293613aad2ebb5f204d186b8a5d1c; unique
+postInstall.morangoCheck=2026-10-26 12:32 CET app-kolibri#8 kit step: all SKIP (already set), nothing changed, no restart
 open=none

@@ -44,4 +44,4 @@ secrets=Tailscale auth key at build time (name only; value never recorded)
 deployedAt=2026-10-18 10:40:33 CEST (Engine); Console dist 2026-10-17
 evidence=fleet-state.json @4e515d4 (version/deployed/note); agent-engine-dev git adfd9d3
 confidence=likely: fleet-state version line, Steve-confirmed deploy; not captured on the device
-open=capture with capture-engine-record.sh: packages.tsv, images.tsv, dist.sha256, tool versions, local overrides
+open=none: superseded by the on-device capture deployments/engines/sunny-robin/capture-2026-10-26 (idea#288)

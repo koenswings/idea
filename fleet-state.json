@@ -117,6 +117,57 @@
       "mac_lan": "d4:0d:ab:50:ce:7e",
       "mac_wan": "d4:0d:ab:50:ce:7f",
       "read": "2026-10-26 19:42 CET, read-only over Tailscale via LuCI ubus (port 22 not open on Tailscale), router uptime 114 s at read; no changes made (idea#288 first contact)"
+    },
+    "clients": {
+      "source": "deployments/clients/kit-hosts-zimbabwe-2026-10.tsv (read-only, 2026-10-27 CET)",
+      "hosts": {
+        "idea-pc-35f2": {
+          "model": "Raspberry Pi 500 Rev 1.0",
+          "wifi_mac": "2c:cf:67:df:1c:5f",
+          "lease_ip": "10.42.1.184"
+        },
+        "idea-pc-5b4c": {
+          "model": "Raspberry Pi 500 Rev 1.0",
+          "wifi_mac": "2c:cf:67:db:1f:99",
+          "lease_ip": "10.42.1.59"
+        },
+        "idea-pc-58c3": {
+          "model": "Raspberry Pi 500 Rev 1.0",
+          "wifi_mac": "2c:cf:67:df:84:4c",
+          "lease_ip": "10.42.1.221"
+        },
+        "idea-pc-671c": {
+          "model": "Raspberry Pi 500 Rev 1.0",
+          "wifi_mac": "2c:cf:67:df:3e:30",
+          "lease_ip": "10.42.2.183"
+        },
+        "idea-pc-841d": {
+          "model": "Raspberry Pi 500 Rev 1.0",
+          "wifi_mac": "2c:cf:67:d6:bf:0c",
+          "lease_ip": "10.42.2.153"
+        },
+        "idea-pc-f63a": {
+          "model": "Raspberry Pi 500 Rev 1.0",
+          "wifi_mac": "2c:cf:67:db:22:21",
+          "lease_ip": "10.42.2.176"
+        },
+        "idea-pc-fc95": {
+          "model": "Raspberry Pi 500 Rev 1.0",
+          "wifi_mac": "2c:cf:67:df:9e:f6",
+          "lease_ip": "10.42.2.45"
+        },
+        "idea-pc-9f95": {
+          "model": "Raspberry Pi 400 Rev 1.0",
+          "wifi_mac": "d8:3a:dd:c7:19:2b",
+          "lease_ip": "10.42.2.136"
+        },
+        "idea-pc-7d02": {
+          "model": "Raspberry Pi 400 Rev 1.0",
+          "wifi_mac": "d8:3a:dd:c7:0c:1a",
+          "lease_ip": "10.42.2.52"
+        }
+      },
+      "pending": "idea-pc-35f2 (serial ..35f2, MAC 2c:cf:67:df:1c:5f) was a duplicate idea-pc-5b4c; rename agreed by Koen 2026-10-27 and observed on the client 18:43 CET; confirm it survives the next reboot"
     }
   },
   "kind-panda": {
