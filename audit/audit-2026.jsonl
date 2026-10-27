@@ -651,3 +651,4 @@
 {"ts":"2026-10-27T07:33:39Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-fail-docs"],"ok":false,"violation_count":1}
 {"ts":"2026-10-27T07:33:40Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-engine-fail"],"ok":false,"violation_count":1}
 {"ts":"2026-10-27T07:33:40Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-console-fail"],"ok":false,"violation_count":4}
+{"ts":"2026-10-27T07:40:32Z","bot":"unknown","action":"quality_scan","mode":"full","repos":["idea","agent-engine-dev","agent-console-dev","agent-app-dev","app-kolibri","app-nextcloud","app-kiwix","app-milkwise"],"ok":false,"violation_count":7}

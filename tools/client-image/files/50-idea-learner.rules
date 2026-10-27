@@ -1,7 +1,7 @@
-// IDEA client: learner may not change system, network, software, users or power policy.
+// IDEA client: learner may not change system, software, users or power policy.
 polkit.addRule(function(action, subject) {
   if (subject.user !== "learner") return;
-  var deny = ["org.freedesktop.NetworkManager.", "org.freedesktop.packagekit.", "org.freedesktop.accounts.",
+  var deny = ["org.freedesktop.packagekit.", "org.freedesktop.accounts.",
               "org.freedesktop.timedate1.", "org.freedesktop.hostname1.", "org.freedesktop.locale1.",
               "org.freedesktop.udisks2.modify-device", "org.freedesktop.udisks2.encrypted",
               "org.freedesktop.fwupd.", "io.snapcraft.", "com.ubuntu.pro.", "org.freedesktop.systemd1.manage-units"];

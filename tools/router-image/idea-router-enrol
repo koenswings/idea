@@ -2,34 +2,71 @@
 # idea-router-enrol — flash-station step after the IDEA image has booted (proposal 2026-10-15 §4.3, §5.4, §6.1):
 # write the sticker name, set the hostname, join the IDEA tailnet with the fleet key, verify, remove the key.
 #
-# Usage: idea-router-enrol <sticker-name>[-router] [router-ip]     (router-ip default 10.42.0.1)
+# Usage: idea-router-enrol [--password-stdin] <sticker-name>[-router] [router-ip]     (router-ip default 10.42.0.1)
 # Env:   IDEA_FLEET_KEY   key file (default ~/.config/idea-router/fleet-authkey, must be mode 600)
 #        IDEA_ROOT_PASSWORD_FILE  root password for the router (default ~/.config/idea-router/root-password, mode 600;
 #                 idea#322: no longer baked into the image). Missing file: warning, password left unset.
 #        IDEA_ROUTER_LOG  log file (default ~/.local/state/idea-router/enrol.log)
-#        SSH / SCP        override the ssh/scp commands (tests)
-# Exit:  0 enrolled (or already enrolled), 2 usage, 3 key file problem, 4 router unreachable, 5 tailscale up / verify failed
+#        IDEA_ROUTER_PASSWORD_FILE  password mode (idea#276): root password of a freshly flashed router, read from
+#                         this file (mode 600). --password-stdin reads it from stdin instead. Used only through
+#                         `sshpass -e` (env SSHPASS), so it is never on a command line, in `ps` or in a log.
+#                         Without either, key mode: ssh -o BatchMode=yes with the station's own SSH key.
+#        IDEA_ROUTER_USER / IDEA_ROUTER_PORT  login user (root) and SSH port (22); tests only
+#        SSH / SCP / SSHPASS_CMD  override the ssh/scp/sshpass commands (tests)
+# Exit:  0 enrolled (or already enrolled), 2 usage, 3 key/password file problem, 4 router unreachable, 5 tailscale up / verify failed
 #
 # Key rules (§4.3): the key is never printed, never on a command line (local or remote), never in a log.
 # It is copied to /tmp/tskey on the router (RAM), used via --auth-key=file:/tmp/tskey, then removed.
 set -euo pipefail
 
+PW_STDIN=0
+if [ "${1:-}" = --password-stdin ]; then PW_STDIN=1; shift; fi
 STICKER="${1:-}"
 ROUTER="${2:-10.42.0.1}"
+RUSER="${IDEA_ROUTER_USER:-root}"
+RPORT="${IDEA_ROUTER_PORT:-22}"
+PWFILE="${IDEA_ROUTER_PASSWORD_FILE:-}"
 KEY="${IDEA_FLEET_KEY:-$HOME/.config/idea-router/fleet-authkey}"
 RPW="${IDEA_ROOT_PASSWORD_FILE:-$HOME/.config/idea-router/root-password}"
 LOG="${IDEA_ROUTER_LOG:-$HOME/.local/state/idea-router/enrol.log}"
 TAG="tag:idea"
 RKEY=/tmp/tskey
-SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR)
+SSH_OPTS=(-o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR)
 read -r -a SSH_CMD <<< "${SSH:-ssh}"
 read -r -a SCP_CMD <<< "${SCP:-scp -O}"
+read -r -a SSHPASS_CMD <<< "${SSHPASS_CMD:-sshpass}"
 
 die()  { local rc="$1"; shift; echo "FAIL: $*" >&2; logline "FAIL rc=$rc $*"; exit "$rc"; }
 logline() { mkdir -p "$(dirname "$LOG")" 2>/dev/null || true; printf '%s router=%s sticker=%s %s\n' "$(date -Is)" "$ROUTER" "${STICKER:-?}" "$*" >> "$LOG" 2>/dev/null || true; }
-rsh()  { "${SSH_CMD[@]}" "${SSH_OPTS[@]}" "root@$ROUTER" "$@"; }
+# Password mode: the password lives only in the shell variable PW and reaches sshpass as env SSHPASS (sshpass -e).
+PW=""
+auth() {  # auth <cmd...>: run ssh/scp with key or password auth
+  if [ -n "$PW" ]; then SSHPASS="$PW" "${SSHPASS_CMD[@]}" -e "$@"; else "$@"; fi
+}
+rsh()  { auth "${SSH_CMD[@]}" "${SSH_OPTS[@]}" -p "$RPORT" "$RUSER@$ROUTER" "$@"; }
 
 [[ "$STICKER" =~ ^[a-z]+-[a-z]+(-router)?$ ]] || { echo "usage: $0 <sticker-name like sunny-robin or sunny-robin-router> [router-ip]" >&2; exit 2; }
+
+# --- password mode (idea#276): first login on a freshly flashed router, no key baked into the image ---
+if [ "$PW_STDIN" = 1 ]; then
+  IFS= read -r PW || true
+  [ -n "$PW" ] || die 3 "--password-stdin: no password on stdin"
+elif [ -n "$PWFILE" ]; then
+  [ -f "$PWFILE" ] || die 3 "password file missing: $PWFILE"
+  pmode=$(stat -c %a "$PWFILE")
+  [ "$pmode" = 600 ] || die 3 "password file $PWFILE has mode $pmode, must be 600 (chmod 600 it)"
+  [ "$(stat -c %u "$PWFILE")" = "$(id -u)" ] || die 3 "password file $PWFILE is not owned by $(id -un)"
+  IFS= read -r PW < "$PWFILE" || true
+  [ -n "$PW" ] || die 3 "password file $PWFILE is empty"
+fi
+if [ -n "$PW" ]; then
+  command -v "${SSHPASS_CMD[0]}" >/dev/null || die 3 "password mode needs sshpass (apt install sshpass)"
+  SSH_OPTS+=(-o PubkeyAuthentication=no -o 'PreferredAuthentications=password,keyboard-interactive' -o NumberOfPasswordPrompts=1)
+  MODE=password
+else
+  SSH_OPTS+=(-o BatchMode=yes)   # key mode: never prompt
+  MODE=key
+fi
 
 # --- key file checks (before touching the router) ---
 [ -f "$KEY" ] || die 3 "fleet key file missing: $KEY"
@@ -43,7 +80,7 @@ key_pushed=0
 cleanup() { [ "$key_pushed" = 1 ] && rsh "rm -f $RKEY" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 
-rsh true >/dev/null 2>&1 || die 4 "router $ROUTER does not answer on SSH"
+rsh true >/dev/null 2>&1 || die 4 "router $ROUTER does not answer on SSH ($MODE mode)"
 
 # --- 1. sticker + hostname (idempotent) ---
 rsh "mkdir -p /etc/idea && printf '%s\n' '$STICKER' > /etc/idea/sticker \
@@ -74,7 +111,7 @@ fi
 
 # --- 3. push key (file only), tailscale up ---
 key_pushed=1
-"${SCP_CMD[@]}" "${SSH_OPTS[@]}" -q "$KEY" "root@$ROUTER:$RKEY" >/dev/null 2>&1 || die 5 "scp of fleet key to router failed"
+auth "${SCP_CMD[@]}" "${SSH_OPTS[@]}" -P "$RPORT" -q "$KEY" "$RUSER@$ROUTER:$RKEY" >/dev/null 2>&1 || die 5 "scp of fleet key to router failed"
 rsh "chmod 600 $RKEY" || die 5 "chmod key on router failed"
 # --reset: re-runs with other flags do not fail. --accept-dns=false: dnsmasq stays the LAN resolver (idea.local).
 # --accept-routes=false: the router routes only its own LAN (tailscale0 zone has no forwarding, manual 3.7).
@@ -92,4 +129,4 @@ for _ in 1 2 3 4 5 6; do enrolled && break; sleep "${IDEA_VERIFY_SLEEP:-5}"; don
 enrolled || die 5 "tailscale status does not show $STICKER online with $TAG"
 ip=$(rsh "tailscale ip -4 2>/dev/null" 2>/dev/null | head -1 || true)
 echo "PASS enrolled: $STICKER online, $TAG, ${ip:-no-ip}"
-logline "PASS enrolled ip=${ip:-?}"
+logline "PASS enrolled mode=$MODE ip=${ip:-?}"

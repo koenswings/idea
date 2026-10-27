@@ -1,5 +1,7 @@
 **Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 October 2026
 
+> v1.8 (27 October 2026): `idea-for-teachers-tutorial-v1.8.pdf`. Chapter 2.1: a classroom computer can join IDEA-Teachers from its Wi-Fi menu (idea#285).
+>
 > v1.6 (25 October 2026): `idea-for-teachers-tutorial-v1.6.pdf`. Teaching one class period, reading Reports and troubleshooting added to chapter 3 (3.6, 3.7).
 > The v1.5 PDF is kept in `superseded/`.
 

@@ -2,12 +2,14 @@
 
 # Field Install Manuals
 
+27 October 2026: classroom computer v2.6: learners may join any Wi-Fi network, including IDEA-Teachers (idea#285).
+
 19 October 2026: both manuals updated for the Zimbabwe kit handed over on 18 October 2026 (school server v1.3: new chapter "The Zimbabwe kit"; classroom computer v2.1: temporary IDEA-Teachers procedure for idea#285 and the reset on restart).
 
 | Folder | PDF | Topic |
 |---|---|---|
 | `install-manual-school-server/` | `idea-field-install-manual-school-server-v1.8.pdf`  | Starlink → Cudy WR3000S (OpenWrt + Tailscale) → TL-SG105PE PoE+ switch → Pi 5 IDEA Engines (one or more) |
-| `install-manual-classroom-computer/` | `idea-field-install-manual-classroom-computer-v2.5.pdf`  | Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor (one PSU) + the IDEA client image (Ubuntu Desktop 26.04.1 LTS, Chrome, IDEA icon) |
+| `install-manual-classroom-computer/` | `idea-field-install-manual-classroom-computer-v2.6.pdf`  | Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor (one PSU) + the IDEA client image (Ubuntu Desktop 26.04.1 LTS, Chrome, IDEA icon) |
 | `accounts-and-passwords/` | `idea-accounts-and-passwords-v1.1.pdf` | IDEA Kit: Accounts and Passwords (v1.1). **Private:** every default account and password of the kit (classroom computers, Engines, apps, router, switch, Wi-Fi). For the IDEA team and installers; not left at the school. |
 | `scripts/` | – | `school-router-setup.sh`, `router-tailscale-zone.sh` (OpenWrt 25.12 uci; tested with the 25.12.5 x86 rootfs `uci` + `fw4 print`, not yet on a real Cudy; no longer printed in the school-server manual) and `make-install-diagrams.py` (writes both manuals' `diagrams/*.svg`) |
 

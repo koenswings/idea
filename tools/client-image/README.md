@@ -64,7 +64,7 @@ convention, not a secret: `customise.sh` hashes it (SHA-512, random salt) at bui
 
 | | |
 |---|---|
-| §4 accounts | `learner`: GDM autologin, no password, no sudo/adm/lpadmin, polkit denies network/software/users/time. `admin`: hidden, sudo, SSH key only (`AllowUsers admin`, no passwords), local password for `su - admin` |
+| §4 accounts | `learner`: GDM autologin, no password, no sudo/adm/lpadmin, polkit denies software/users/time (Wi-Fi is open to learner since idea#285). `admin`: hidden, sudo, SSH key only (`AllowUsers admin`, no passwords), local password for `su - admin` |
 | §6 apps | from `.deb` only (`client-image.conf`); build fails if any package has no arm64 candidate |
 | §7 updates off | `unattended-upgrades`, `update-notifier`, Software, Pro client, fwupd removed; apt/fwupd/motd timers masked; `APT::Periodic::*=0`; snaps held forever at first boot; `snapd.refresh.timer` masked |
 | browser (idea#203 §1) | **Google Chrome stable**, official arm64 `.deb` pinned in `client-image.conf` (`CHROME_DEB`, `CHROME_DEB_SHA256`), fetched once into `work/` and sha-checked, installed offline; Google apt source + cron job removed, `apt-mark hold`. Fallback: `build.sh --browser chromium` (xtradeb PPA `.deb`, same hold + policies). Managed policy (`browser.sh`): home/startup = `file:///usr/share/idea/start.html`, `LocalNetworkAccessAllowedForUrls` = `file://*`, `http://*.local`, sign-in/sync/promos/default-browser prompt/component updates off |
