@@ -1,7 +1,7 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 27 October 2026
 
-> v1.6 (25 October 2026): `idea-for-teachers-tutorial-v1.6.pdf`. Teaching one class period, reading Reports and troubleshooting added to chapter 3 (3.6, 3.7).
-> The v1.5 PDF is kept in `superseded/`.
+> v1.7 (27 October 2026): `idea-for-teachers-tutorial-v1.7.pdf`. Chapter 7 (Wikipedia offline) rewritten to match its Wikipedia (Demo) screenshots (idea#295).
+> The v1.6 and v1.5 PDFs are kept in `superseded/`.
 
 # Teacher tutorial
 
