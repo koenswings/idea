@@ -44,7 +44,7 @@ k=0; for d in $(find /home/pi/idea -maxdepth 4 -type d -name 'app-kolibri*' 2>/d
   echo "dir=$d head=$(git -C "$d" rev-parse HEAD 2>/dev/null || echo UNKNOWN)"; done
 [ $k = 1 ] || echo "UNKNOWN (no app-kolibri checkout under /home/pi/idea)"
 sec "helpers-sha256"
-for f in $(ls -d /usr/local/sbin/idea-* 2>/dev/null | sort); do [ -f "$f" ] || continue; h=$($S sha256sum "$f" 2>/dev/null | cut -d' ' -f1); echo "${h:-UNKNOWN}  $f"; done
+for f in /usr/local/sbin/idea-*; do [ -f "$f" ] || continue; h=$($S sha256sum "$f" 2>/dev/null | cut -d' ' -f1); echo "${h:-UNKNOWN}  $f"; done
 sec "apt-auto-update"
 if command -v systemctl >/dev/null 2>&1; then for u in apt-daily.timer apt-daily-upgrade.timer unattended-upgrades; do
   echo "$u enabled=$(systemctl is-enabled "$u" 2>/dev/null || true) active=$(systemctl is-active "$u" 2>/dev/null || true)"; done
