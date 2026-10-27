@@ -1,0 +1,267 @@
+#!/usr/bin/env bash
+# idea-router-flash — flash station: Cudy stock -> Cudy intermediate OpenWrt -> IDEA image -> self-test -> enrol
+# (idea#277; proposal 2026-10-15 §6). Scripts the chain that worked by hand on router 3 (2026-10-17).
+#
+# Usage: idea-router-flash <sticker-name>[-router] <intermediate.bin> <idea-...-squashfs-sysupgrade.bin>
+# Env:   IDEA_ROUTER_PASSWORD_FILE  root password of the IDEA image (mode 600; admin911! per config.env). Required.
+#                                   Used only via `sshpass -e` and passed on to idea-router-enrol (password mode, #276).
+#        IDEA_STOCK_PASSWORD_FILE   stock Cudy admin password (mode 600), if the stock UI asks for one.
+#        IDEA_FLEET_KEY             fleet Tailscale key for idea-router-enrol (default ~/.config/idea-router/fleet-authkey)
+#        IDEA_ROUTER_BACKUPS        backup root (default ~/router-backups). Per router: <root>/<sticker>/, mode 700,
+#                                   files mode 600. SECRET after enrol (Tailscale identity), see README. Never in git.
+#        IDEA_IMAGE_SHA256          expected sha256 of the IDEA image (default: from SHA256SUMS next to the image)
+#        IDEA_ROUTER_LOG_DIR        log dir (default ~/.local/state/idea-router); flash.log never holds a secret
+#        IDEA_WAIT_INTERMEDIATE / IDEA_WAIT_IDEA  seconds to wait for each image to boot (300 / 600), IDEA_POLL (5)
+#        Tests only: IP (default "sudo ip"), SSH, SCP, SSHPASS_CMD, CHROME, NODE, ENROL, and the config.env values.
+# Exit:  0 done, 2 usage, 3 preflight (files, modes, tools), 4 router unreachable / timeout, 5 step failed,
+#        6 MISMATCH (refuses to continue, also on later runs, until the operator removes <dir>/.state/MISMATCH).
+#
+# Resumable: every finished step leaves <dir>/.state/<step>.done; a re-run skips those (after re-checking the sha256 of
+# every backup already taken). Cleanup on every exit (success or failure): temporary eth1 addresses this run added,
+# the headless Chromium and its throwaway profile, and the image/backup copies in the router's /tmp.
+set -euo pipefail
+umask 077
+HERE=$(cd "$(dirname "$0")" && pwd)
+# shellcheck source=SCRIPTDIR/config.env
+. "$HERE/config.env"
+# env overrides for every config.env value used here (tests, other station layouts)
+INTERMEDIATE_MD5=${IDEA_INTERMEDIATE_MD5:-$INTERMEDIATE_MD5}; INTERMEDIATE_SIZE=${IDEA_INTERMEDIATE_SIZE:-$INTERMEDIATE_SIZE}
+STOCK_URL=${IDEA_STOCK_URL:-$STOCK_URL}; INTERMEDIATE_IP=${IDEA_INTERMEDIATE_IP:-$INTERMEDIATE_IP}
+IDEA_IP=${IDEA_ROUTER_IP:-$IDEA_IP}; FLASH_IFACE=${IDEA_FLASH_IFACE:-$FLASH_IFACE}
+STATION_ADDR_INTERMEDIATE=${IDEA_STATION_ADDR_INTERMEDIATE:-$STATION_ADDR_INTERMEDIATE}
+STATION_ADDR_IDEA=${IDEA_STATION_ADDR_IDEA:-$STATION_ADDR_IDEA}
+
+STICKER="${1:-}"; INTER="${2:-}"; IMAGE="${3:-}"
+PWFILE="${IDEA_ROUTER_PASSWORD_FILE:-}"
+BACKUPS="${IDEA_ROUTER_BACKUPS:-$HOME/router-backups}"
+LOGDIR="${IDEA_ROUTER_LOG_DIR:-$HOME/.local/state/idea-router}"
+WAIT_INT="${IDEA_WAIT_INTERMEDIATE:-300}"; WAIT_IDEA="${IDEA_WAIT_IDEA:-600}"; POLL="${IDEA_POLL:-5}"
+ENROL="${ENROL:-$HERE/idea-router-enrol}"
+read -r -a IP_CMD <<< "${IP:-sudo ip}"
+read -r -a SSH_CMD <<< "${SSH:-ssh}"
+read -r -a SCP_CMD <<< "${SCP:-scp -O}"
+read -r -a SSHPASS_BIN <<< "${SSHPASS_CMD:-sshpass}"
+SSH_OPTS=(-o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR)
+SSH_INT=(-o BatchMode=yes)   # intermediate OpenWrt: root, no password
+SSH_PW=(-o PubkeyAuthentication=no -o 'PreferredAuthentications=password,keyboard-interactive' -o NumberOfPasswordPrompts=1)
+RIMG=/tmp/idea-sysupgrade.bin
+
+ts()   { date +%Y%m%d-%H%M%S; }
+log()  { mkdir -p "$LOGDIR"; printf '%s sticker=%s %s\n' "$(date -Is)" "${STICKER:-?}" "$*" >> "$LOGDIR/flash.log" 2>/dev/null || true; }
+say()  { echo "$*"; log "$*"; }
+die()  { local rc="$1"; shift; echo "FAIL: $*" >&2; log "FAIL rc=$rc $*"; exit "$rc"; }
+mismatch() { mkdir -p "$STATE"; printf '%s %s\n' "$(date -Is)" "$*" > "$STATE/MISMATCH"; chmod 600 "$STATE/MISMATCH"; die 6 "MISMATCH: $*"; }
+
+[[ "$STICKER" =~ ^[a-z]+-[a-z]+(-router)?$ ]] && [ -n "$INTER" ] && [ -n "$IMAGE" ] || {
+  echo "usage: $0 <sticker-name like sunny-robin-router> <intermediate.bin> <idea-...-squashfs-sysupgrade.bin>" >&2; exit 2; }
+
+DIR="$BACKUPS/$STICKER"; STATE="$DIR/.state"
+done_() { [ -f "$STATE/$1.done" ]; }
+mark()  { date -Is > "$STATE/$1.done"; log "STEP $1 done"; }
+
+# ---- preflight (always, also on resume) ----
+for t in sha256sum md5sum "${SSH_CMD[0]}" "${SCP_CMD[0]}" "${SSHPASS_BIN[0]}"; do command -v "$t" >/dev/null || die 3 "missing tool: $t"; done
+[ -n "$PWFILE" ] || die 3 "IDEA_ROUTER_PASSWORD_FILE is not set (root password of the IDEA image, mode 600)"
+for f in "$PWFILE" ${IDEA_STOCK_PASSWORD_FILE:+"$IDEA_STOCK_PASSWORD_FILE"}; do
+  [ -f "$f" ] || die 3 "password file missing: $f"
+  [ "$(stat -c %a "$f")" = 600 ] || die 3 "password file $f has mode $(stat -c %a "$f"), must be 600"
+  [ "$(stat -c %u "$f")" = "$(id -u)" ] || die 3 "password file $f is not owned by $(id -un)"
+done
+IFS= read -r PW < "$PWFILE" || true; [ -n "$PW" ] || die 3 "password file $PWFILE is empty"
+[ -f "$INTER" ] || die 3 "intermediate image missing: $INTER"
+[ -f "$IMAGE" ] || die 3 "IDEA image missing: $IMAGE"
+case "$(basename "$IMAGE")" in *ubootmod*) die 3 "refusing a ubootmod image (only a serial cable can undo it)";; esac
+case "$(basename "$IMAGE")" in *squashfs-sysupgrade.bin) ;; *) die 3 "IDEA image must be a *squashfs-sysupgrade.bin";; esac
+isize=$(stat -c %s "$INTER"); imd5=$(md5sum < "$INTER" | cut -d' ' -f1)
+[ "$isize" = "$INTERMEDIATE_SIZE" ] || die 3 "intermediate image size $isize, expected $INTERMEDIATE_SIZE (wrong file? WR3000H/P names look alike)"
+[ "$imd5" = "$INTERMEDIATE_MD5" ] || die 3 "intermediate image md5 $imd5, expected $INTERMEDIATE_MD5"
+want="${IDEA_IMAGE_SHA256:-}"
+if [ -z "$want" ] && [ -f "$(dirname "$IMAGE")/SHA256SUMS" ]; then
+  want=$(awk -v n="$(basename "$IMAGE")" '$2==n || $2=="*"n {print $1}' "$(dirname "$IMAGE")/SHA256SUMS")
+fi
+[ -n "$want" ] || die 3 "no expected sha256 for $(basename "$IMAGE") (SHA256SUMS next to it, or IDEA_IMAGE_SHA256)"
+ISHA=$(sha256sum < "$IMAGE" | cut -d' ' -f1)
+[ "$ISHA" = "$want" ] || die 3 "IDEA image sha256 $ISHA, expected $want"
+
+# ---- backup folder (mode 700), resume checks ----
+mkdir -p "$BACKUPS" "$DIR" "$STATE"; chmod 700 "$BACKUPS" "$DIR" "$STATE"
+[ -f "$STATE/MISMATCH" ] && die 6 "an earlier run stopped on a mismatch: $(cat "$STATE/MISMATCH") -- inspect, then remove $STATE/MISMATCH to retry"
+for s in "$DIR"/*.sha256; do
+  [ -e "$s" ] || continue
+  (cd "$DIR" && sha256sum -c --status "$(basename "$s")") || mismatch "backup changed since it was taken: ${s%.sha256}"
+done
+say "START flash $STICKER (intermediate md5 ok, IDEA image sha256 ${ISHA:0:12}, backups in $DIR)"
+
+# ---- cleanup on every exit ----
+ADDED=(); BROWSER_PID=""; PROFILE=""; RTMP=""
+cleanup() {
+  local rc=$?
+  [ -n "$RTMP" ] && { rsh_idea "rm -f $RTMP" >/dev/null 2>&1 || rsh_int "rm -f $RTMP" >/dev/null 2>&1 || true; }
+  if [ -n "$BROWSER_PID" ]; then  # the whole browser process group (renderers, GPU, crashpad) goes
+    kill -TERM -- "-$BROWSER_PID" 2>/dev/null || true
+    local _; for _ in $(seq 50); do kill -0 -- "-$BROWSER_PID" 2>/dev/null || break; sleep 0.1; done
+    kill -KILL -- "-$BROWSER_PID" 2>/dev/null || true; wait "$BROWSER_PID" 2>/dev/null || true
+  fi
+  [ -n "$PROFILE" ] && { rm -rf "$PROFILE" 2>/dev/null || { sleep 1; rm -rf "$PROFILE"; }; log "cleanup: browser profile removed"; }
+  local a; for a in "${ADDED[@]}"; do "${IP_CMD[@]}" addr del "$a" dev "$FLASH_IFACE" >/dev/null 2>&1 || true; log "cleanup: removed $a from $FLASH_IFACE"; done
+  [ "$rc" = 0 ] || echo "Stopped (rc $rc). Fix the cause and re-run the same command: finished steps are skipped. Log: $LOGDIR/flash.log" >&2
+}
+trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+addr() {  # add a temporary station address once; cleanup removes what this run added
+  "${IP_CMD[@]}" -o addr show dev "$FLASH_IFACE" 2>/dev/null | grep -qF " ${1} " && return 0
+  "${IP_CMD[@]}" addr add "$1" dev "$FLASH_IFACE" || die 5 "could not add $1 on $FLASH_IFACE"
+  ADDED+=("$1"); log "added $1 on $FLASH_IFACE"
+}
+rsh_int()  { "${SSH_CMD[@]}" "${SSH_OPTS[@]}" "${SSH_INT[@]}" "root@$INTERMEDIATE_IP" "$@"; }
+rsh_idea() { SSHPASS="$PW" "${SSHPASS_BIN[@]}" -e "${SSH_CMD[@]}" "${SSH_OPTS[@]}" "${SSH_PW[@]}" "root@$IDEA_IP" "$@"; }
+waitfor() {  # waitfor <seconds> <cmd...>
+  local end=$((SECONDS + $1)); shift
+  until "$@" >/dev/null 2>&1; do [ "$SECONDS" -lt "$end" ] || return 1; sleep "$POLL"; done
+}
+fetch() {  # fetch <rsh-fn> <remote-path-or-device> <local-name>: copy over ssh, compare sha256 with the router, mode 600
+  local fn="$1" src="$2" out="$DIR/$3" l r
+  "$fn" "cat $src" > "$out.part" || die 5 "could not read $src from the router"
+  l=$(sha256sum < "$out.part" | cut -d' ' -f1)
+  r=$("$fn" "sha256sum $src" | cut -d' ' -f1) || die 5 "could not sha256 $src on the router"
+  [ -n "$r" ] && [ "$l" = "$r" ] || { mv "$out.part" "$out.BAD"; mismatch "$src sha256 differs: local $l router ${r:-none}"; }
+  mv "$out.part" "$out"; chmod 600 "$out"
+  printf '%s  %s\n' "$l" "$3" > "$out.sha256"; chmod 600 "$out.sha256"
+  say "OK   $3 saved, sha256 ${l:0:12} matches the router"
+}
+browser() {
+  local chrome="${CHROME:-}" n
+  if [ -z "$chrome" ]; then for n in chromium chromium-browser google-chrome google-chrome-stable; do
+    chrome=$(command -v "$n" || true); [ -n "$chrome" ] && break; done; fi
+  [ -n "$chrome" ] || die 3 "no Chromium/Chrome found (apt install chromium)"
+  [ -n "$BROWSER_PID" ] && return 0
+  PROFILE=$(mktemp -d "${TMPDIR:-/tmp}/idea-router-flash-chrome.XXXXXX")
+  local sandbox=(); [ "$(id -u)" = 0 ] && sandbox=(--no-sandbox)
+  mkdir -p "$PROFILE/tmp"   # Chromium's own temp files live inside the profile, so one rm removes everything
+  TMPDIR="$PROFILE/tmp" setsid "$chrome" --headless=new --disable-gpu --no-first-run --no-default-browser-check "${sandbox[@]}" \
+    --user-data-dir="$PROFILE" --remote-debugging-address=127.0.0.1 --remote-debugging-port=0 about:blank \
+    >/dev/null 2>&1 & BROWSER_PID=$!
+  waitfor 30 test -s "$PROFILE/DevToolsActivePort" || die 5 "headless browser did not start"
+}
+stock_ui() {  # stock_ui <backup|upload> [env...]
+  local node="${NODE:-node}" flags=()
+  command -v "$node" >/dev/null || die 3 "node not found (needed for the browser step)"
+  [ "$("$node" -p 'parseInt(process.versions.node)')" -ge 22 ] || flags=(--experimental-websocket)
+  [ -n "$BROWSER_PID" ] || die 5 "internal: browser not started"
+  env CDP_PORT_FILE="$PROFILE/DevToolsActivePort" STOCK_URL="$STOCK_URL" STOCK_UPGRADE_PATH="$STOCK_UPGRADE_PATH" \
+      STOCK_BACKUP_PATH="$STOCK_BACKUP_PATH" STOCK_PASSWORD_FILE="${IDEA_STOCK_PASSWORD_FILE:-}" "${@:2}" \
+      "$node" "${flags[@]}" --no-warnings "$HERE/stock-ui.mjs" "$1"
+}
+
+# ---- 1. stock config backup (browser) ----
+if ! done_ stock-backup; then
+  browser   # started here in the main shell, so the EXIT trap knows it
+  tmpd=$(mktemp -d "$DIR/.dl.XXXXXX")
+  out=$(stock_ui backup OUT_DIR="$tmpd") || { rc=$?; grep -v '^DOWNLOADED=' <<<"${out:-}" || true; die 5 "stock config backup failed (rc $rc, stock UI at $STOCK_URL)"; }
+  grep -v '^DOWNLOADED=' <<<"$out" || true
+  f=$(sed -n 's/^DOWNLOADED=//p' <<<"$out"); [ -n "$f" ] && [ -s "$tmpd/$f" ] || die 5 "stock config backup: no file downloaded"
+  name="stock-config-$(ts).bin"; mv "$tmpd/$f" "$DIR/$name"; rm -rf "$tmpd"; chmod 600 "$DIR/$name"
+  (cd "$DIR" && sha256sum "$name" > "$name.sha256" && chmod 600 "$name.sha256")
+  say "OK   stock config backup: $name"; mark stock-backup
+fi
+
+# ---- 2. intermediate image through the stock web UI (browser; md5 + size checked against the page) ----
+if ! done_ stock-upload; then
+  browser
+  rc=0; stock_ui upload IMAGE="$INTER" EXPECT_MD5="$INTERMEDIATE_MD5" EXPECT_SIZE="$INTERMEDIATE_SIZE" || rc=$?
+  [ "$rc" = 6 ] && mismatch "stock upgrade page shows another md5/size than $(basename "$INTER")"
+  [ "$rc" = 0 ] || die 5 "stock web upload failed (rc $rc)"
+  say "OK   intermediate image uploaded, md5 + size confirmed by the stock UI"; mark stock-upload
+fi
+
+# ---- 3. intermediate OpenWrt up (temp address 192.168.1.50), right board ----
+if ! done_ intermediate-up; then
+  addr "$STATION_ADDR_INTERMEDIATE"
+  say "...  waiting up to ${WAIT_INT}s for the intermediate image on $INTERMEDIATE_IP"
+  waitfor "$WAIT_INT" rsh_int true || die 4 "intermediate image not answering on $INTERMEDIATE_IP. Recovery: Cudy TFTP (recovery.bin on 192.168.1.88, hold reset at power-on), proposal 6.3"
+  board=$(rsh_int "cat /tmp/sysinfo/board_name" | tr -d '\r\n')
+  [ "$board" = "$BOARD_NAME" ] || mismatch "board is '$board', expected '$BOARD_NAME'"
+  say "OK   intermediate OpenWrt up, board $board"; mark intermediate-up
+fi
+
+# ---- 4. Factory / bdinfo calibration dumps (mtd2, mtd3), sha256 against the router ----
+if ! done_ mtd-dump; then
+  addr "$STATION_ADDR_INTERMEDIATE"
+  mtd=$(rsh_int "cat /proc/mtd") || die 4 "cannot read /proc/mtd"
+  grep -q '^mtd2:.*"Factory"' <<<"$mtd" || mismatch "mtd2 is not Factory: $(grep '^mtd2:' <<<"$mtd" | tr -d '\n')"
+  grep -q '^mtd3:.*"bdinfo"' <<<"$mtd" || mismatch "mtd3 is not bdinfo: $(grep '^mtd3:' <<<"$mtd" | tr -d '\n')"
+  fetch rsh_int /dev/mtd2 mtd2-Factory.bin
+  fetch rsh_int /dev/mtd3 mtd3-bdinfo.bin
+  mark mtd-dump
+fi
+
+# ---- 5. sysupgrade backup of the intermediate image ----
+if ! done_ intermediate-backup; then
+  addr "$STATION_ADDR_INTERMEDIATE"
+  RTMP=/tmp/idea-int-backup.tar.gz
+  rsh_int "sysupgrade -b $RTMP" >/dev/null || die 5 "sysupgrade -b on the intermediate image failed"
+  fetch rsh_int "$RTMP" "sysupgrade-backup-intermediate-$(ts).tar.gz"
+  rsh_int "rm -f $RTMP" || true; RTMP=""
+  mark intermediate-backup
+fi
+
+# ---- 6. IDEA image to the router, sha256 check, sysupgrade -T ----
+if ! done_ image-test; then
+  addr "$STATION_ADDR_INTERMEDIATE"
+  RTMP=$RIMG
+  "${SCP_CMD[@]}" "${SSH_OPTS[@]}" "${SSH_INT[@]}" -q "$IMAGE" "root@$INTERMEDIATE_IP:$RIMG" || die 5 "scp of the IDEA image failed"
+  r=$(rsh_int "sha256sum $RIMG" | cut -d' ' -f1)
+  [ "$r" = "$ISHA" ] || mismatch "IDEA image on the router has sha256 ${r:-none}, expected $ISHA"
+  rsh_int "sysupgrade -T $RIMG" >/dev/null 2>&1 || die 5 "sysupgrade -T rejects the IDEA image (wrong board/profile?)"
+  say "OK   IDEA image on the router, sha256 ok, sysupgrade -T ok"; mark image-test
+fi
+
+# ---- 7. sysupgrade -n to the IDEA image (connection drops while it flashes) ----
+if ! done_ sysupgrade; then
+  addr "$STATION_ADDR_INTERMEDIATE"
+  r=$(rsh_int "sha256sum $RIMG" | cut -d' ' -f1) || true
+  [ "$r" = "$ISHA" ] || die 5 "IDEA image no longer in the router's /tmp (rebooted?): remove $STATE/image-test.done and re-run"
+  RTMP=""   # sysupgrade consumes it
+  rsh_int "sysupgrade -n $RIMG" >/dev/null 2>&1 || true
+  say "OK   sysupgrade -n started"; mark sysupgrade
+fi
+
+# ---- 8. IDEA image up (temp address 10.42.0.50), /etc/idea/version ----
+if ! done_ idea-up; then
+  addr "$STATION_ADDR_IDEA"
+  say "...  waiting up to ${WAIT_IDEA}s for /etc/idea/version on $IDEA_IP"
+  waitfor "$WAIT_IDEA" rsh_idea "test -s /etc/idea/version" || die 4 "IDEA image not answering on $IDEA_IP (or no /etc/idea/version). Recovery: proposal 6.3"
+  rsh_idea "cat /etc/idea/version" > "$DIR/idea-version.txt"; chmod 600 "$DIR/idea-version.txt"
+  say "OK   IDEA image up: $(tr '\n' ' ' < "$DIR/idea-version.txt")"; mark idea-up
+fi
+
+# ---- 9. self-test ----
+if ! done_ self-test; then
+  addr "$STATION_ADDR_IDEA"
+  board=$(rsh_idea "cat /tmp/sysinfo/board_name" | tr -d '\r\n')
+  [ "$board" = "$BOARD_NAME" ] || mismatch "IDEA image reports board '$board'"
+  rsh_idea "sh /usr/share/idea/school-router-setup.sh --check" > "$DIR/self-test.txt" 2>&1 \
+    || { chmod 600 "$DIR/self-test.txt"; die 5 "self-test (school-router-setup.sh --check) failed, see $DIR/self-test.txt"; }
+  chmod 600 "$DIR/self-test.txt"
+  say "OK   self-test passed"; mark self-test
+fi
+
+# ---- 10. Tailscale enrol (idea-router-enrol, password mode #276) ----
+if ! done_ enrol; then
+  addr "$STATION_ADDR_IDEA"
+  IDEA_ROUTER_PASSWORD_FILE="$PWFILE" "$ENROL" "$STICKER" "$IDEA_IP" || die 5 "idea-router-enrol failed (rc $?)"
+  mark enrol
+fi
+
+# ---- 11. final sysupgrade backup: holds the Tailscale identity -> SECRET (README, idea#278) ----
+if ! done_ final-backup; then
+  addr "$STATION_ADDR_IDEA"
+  RTMP=/tmp/idea-final-backup.tar.gz
+  rsh_idea "sysupgrade -b $RTMP" >/dev/null || die 5 "sysupgrade -b on the IDEA image failed"
+  fetch rsh_idea "$RTMP" "sysupgrade-backup-final-$STICKER-$(ts).tar.gz"
+  rsh_idea "rm -f $RTMP" || true; RTMP=""
+  say "OK   final backup is SECRET (Tailscale identity): stays in $DIR, never in git/issues/shared places"
+  mark final-backup
+fi
+say "PASS $STICKER flashed, tested and enrolled; backups in $DIR"
