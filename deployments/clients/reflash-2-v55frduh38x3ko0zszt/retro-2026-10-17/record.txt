@@ -1,0 +1,30 @@
+# RETRO record (idea#322), written 2026-10-26 from box evidence (card-log.md, build logs). Not captured on the device.
+# UNKNOWN = not recoverable from the box; fill in with tools/repro/capture-device.sh when the device is next online.
+schema=idea-deployment-record/1
+batch=zimbabwe-2026-10
+deviceType=client
+arch=aarch64
+model=UNKNOWN (Raspberry Pi classroom client, SD card)
+osRelease=Ubuntu 26.04.1 preinstalled desktop arm64+raspi
+baseImageSha256=8216f54cc1df2fcf7de37530a7edccdd200abd7dcfbc5d4f0407df7513544d6a
+chromeDebSha256=245fa8da4a52c15bee7811d3e17892792cabd6361ac5b7e9c78ba6482ad18315
+aptPins=tools/client-image/apt-pins.tsv (build input); installed list = packages.tsv
+packageArchive=/workspace/idea-archive/release-assets/field-zimbabwe-2026-10-client-291b962 (box; .deb tars + SHA256SUMS + missing-packages.tsv)
+packageArchiveSha256=8a666f6e5f25da5cef9e8c761b7c9b0a895191f197c481b19d011fda00313517 (sha256 of SHA256SUMS)
+packageArchiveUrl=https://github.com/koenswings/idea/releases/tag/field/zimbabwe-2026-10/client-s15 (two tars in 450 MB chunks; cat *.chunk* per tar, check CHUNKS.SHA256SUMS then SHA256SUMS)
+secrets=flash-time Wi-Fi PSK (name only; value never recorded)
+evidence=/workspace/client-card-patch/card-log.md (box, sha256 4b7b93a479573ff661b73ac54c850539b235420ed54ff544373fe9a8e952db23)
+cardId=UNKNOWN (new card)
+previousCardId=v55frduh38x3ko0zszt
+deployedAt=2026-10-17 (wh)
+imageCommit=291b96253d407f21bf38091e92128bf2149fc974
+imageBranch=main
+imageTag=field/zimbabwe-2026-10/client-s15
+imageVersion=26.04-20261017-291b962
+imageFile=idea-client-26.04-20261017-291b962-s15.img.xz (published: https://github.com/koenswings/idea/releases/tag/field/zimbabwe-2026-10/client-s15 as .part00-.part09 + IMAGE.SHA256SUMS; cat parts > .img.xz; default credentials only)
+imageSha256=dd6f6d408a16cdb614d090b02bd771634eb4a74beaeb774a674dc332333ffa6c (xz)
+readBackSha256=6cadd6b295ced889c96a894e6d3c5e7358037d2fd377a1c7a21ed695303fa353 (13999996928 bytes)
+imageManifest=manifests/client/idea-client-26.04-20261017-291b962-s15
+contentSha256=0746a2def620716adca0a9ec7213438945f73d7067700292b73c2f7866d56da8
+confidence=high: card-log.md records the reflash and read-back hash
+open=confirm with tools/repro/capture-device.sh

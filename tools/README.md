@@ -9,7 +9,6 @@ Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment,
 | Script | Purpose |
 |--------|---------|
 | `strip-cloud-init-sudoers.sh` | Remove cloud-init `pi ALL=(ALL) NOPASSWD:ALL` so Engine sudoers win (idea#153). **Implemented.** |
-| `idea-setup.sh` | Discover all `idea*` Pis via Tailscale, verify dependencies, initialise fleet-state.json. Skips Grok Build and the GitHub Actions runner by default; `--with-grok-build` opts in (parked path, idea#147). Still a stub. |
 | `find-available-pi.sh <domain>` | Return first idle Pi matching domain from fleet-state.json |
 | `deploy.sh <pi> <component> <repo> <branch>` | Full deploy sequence (engine/console/app-disk) |
 | `deploy-engine-pi.sh <tip> [--fetch <branch>] [--yes]` | Option-2 Engine deploy on ONE pool Pi (run via `ssh <pi> bash -s`): keeps config.yaml, pm2.config.cjs and store-identity/ across the checkout, aborts before pm2 restart if store-url.txt is not 2VroE; applies the Engine's DHCP vendor class (idea#284) after the build. **Implemented**; tests: `deploy-engine-pi.test.sh`. Runbook: `docs/ops/engine-deploy-pool-pi.md` |
@@ -23,7 +22,7 @@ Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment,
 | `duration-test-health-wrap.sh` | `before`/`after` wrapper: `check-fleet-health.sh --origin` + optional intentional `PAUSED` around reboot churn |
 | `DURATION_TESTS.md` | Ops checklist for duration walks: claim → run → reboot baseline → teardown → health clear |
 
-Status: `find-available-pi`, `update-fleet-state`, `check-fleet-health`, `strip-cloud-init-sudoers`, and duration-test Ops hooks (`duration-test-*.sh`) are implemented; `deploy` / `teardown` / `update-golden` / `set-golden-pi` / `idea-setup` remain stubs (idea#107).
+Status: `find-available-pi`, `update-fleet-state`, `check-fleet-health`, `strip-cloud-init-sudoers`, and duration-test Ops hooks (`duration-test-*.sh`) are implemented; `deploy` / `teardown` / `update-golden` / `set-golden-pi` remain stubs (idea#107). `idea-setup.sh` was removed (idea#273): new Pis are built with the Engine's `build-engine`.
 
 `idea02` is the dedicated golden Pi (`role: golden`): it always runs the latest merged `main`, keeps MilkWise as a real workload, and is never used for PR review. Its `version` records the mains it runs (for example `engine main@<sha>, console main@<sha>`) and its `status` stays `idle`; `role: golden` is what excludes it from review allocation. Review Pis (currently `idea03`, `role: review`) are picked by `find-available-pi.sh`. After every merge to `main`, Ops (Atlas) moves the golden Pi to `main` and updates its `version` (`update-golden.sh` once implemented, idea#107). This dedicated-golden model (idea#118) replaces the temporary single-Pi rule from idea PR #112.
 

@@ -27,6 +27,7 @@ case "$cmd" in
   "rm -f /tmp/tskey") rm -f "$R/tskey" ;;
   "test ! -e /tmp/tskey") [ ! -e "$R/tskey" ] ;;
   "tailscale ip -4"*) echo 100.64.1.2 ;;
+  "passwd root"*) cat > "$R/rootpw" ;;
   *) echo "mock: unknown $cmd" >&2; exit 1 ;;
 esac
 SH
@@ -37,9 +38,11 @@ src="${@: -2:1}"; cp "$src" "$WORK/r/tskey"
 SH
 chmod +x "$WORK/bin/"*; export WORK
 reset() { rm -rf "$WORK/r" "$WORK/argv.log" "$WORK/log"; mkdir -p "$WORK/r"; printf '%s\n' "$SECRET" > "$WORK/key"; chmod 600 "$WORK/key"; }
-run() { IDEA_FLEET_KEY="$WORK/key" IDEA_ROUTER_LOG="$WORK/log" IDEA_VERIFY_SLEEP=0 SSH="$WORK/bin/fssh" SCP="$WORK/bin/fscp" \
+run() { IDEA_ROOT_PASSWORD_FILE="${RPWF:-$WORK/nopw}" IDEA_FLEET_KEY="$WORK/key" IDEA_ROUTER_LOG="$WORK/log" IDEA_VERIFY_SLEEP=0 SSH="$WORK/bin/fssh" SCP="$WORK/bin/fscp" \
         bash "$SCRIPT" "$@" > "$WORK/out" 2>&1; }
 noleak() { ! grep -rqF "$SECRET" "$WORK/out" "$WORK/log" "$WORK/argv.log" 2>/dev/null; }
+PWSECRET="FAKE-root-pw-not-real"
+pwnoleak() { ! grep -rqF "$PWSECRET" "$WORK/out" "$WORK/log" "$WORK/argv.log" 2>/dev/null; }
 
 reset; run sunny-robin; rc=$?
 check "enrol succeeds" [ "$rc" = 0 ]
@@ -84,4 +87,14 @@ check "tailscale up failure -> rc 5" [ "$rc" = 5 ]
 check "key removed after failure" [ ! -e "$WORK/r/tskey" ]
 check "failure: key never leaked" noleak
 
+
+# idea#322: root password is a flash-time secret (file, stdin only)
+reset; printf '%s\n' "$PWSECRET" > "$WORK/rpw"; chmod 600 "$WORK/rpw"; RPWF="$WORK/rpw" run sunny-robin; rc=$?
+check "root pw: enrol succeeds" [ "$rc" = 0 ]
+check "root pw: set via stdin" [ "$(head -n1 "$WORK/r/rootpw")" = "$PWSECRET" ]
+check "root pw: never in output/log/argv" pwnoleak
+reset; printf '%s\n' "$PWSECRET" > "$WORK/rpw"; chmod 644 "$WORK/rpw"; RPWF="$WORK/rpw" run sunny-robin; rc=$?
+check "root pw: world-readable file -> rc 3" [ "$rc" = 3 ]
+reset; run sunny-robin; rc=$?
+check "root pw: missing file -> warn, still enrols" [ "$rc" = 0 ] && grep -q "WARN no root password" "$WORK/out"
 echo "$pass passed, $fail failed"; [ "$fail" = 0 ]

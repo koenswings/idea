@@ -18,10 +18,15 @@ for t in apt-daily.timer apt-daily-upgrade.timer snapd.refresh.timer; do
   s=$(systemctl is-enabled $t 2>/dev/null || true); [ "$s" = masked ] && ok "$t masked" || bad "$t is '$s'"; done
 grep -q 'Unattended-Upgrade "0"' /etc/apt/apt.conf.d/99idea-no-updates && ok "APT::Periodic 0" || bad "APT periodic"
 systemctl is-enabled idea-snap-hold.service >/dev/null 2>&1 && ok "snap hold on boot" || bad "snap hold service"
-[ "$(stat -c %a /etc/NetworkManager/system-connections/IDEA.nmconnection)" = 600 ] && ok "wifi profile root-only" || bad "wifi profile perms"
+[ ! -e /etc/NetworkManager/system-connections/IDEA.nmconnection ] && grep -qx 'psk=@WIFI_PSK@' /usr/share/idea/IDEA.nmconnection.template && [ -x /usr/local/sbin/idea-secrets-apply ] && ok "wifi key not in image (flash-time, idea#322)" || bad "wifi profile/template"
+[ ! -s /home/admin/.ssh/authorized_keys ] && ok "admin keys not in image (flash-time)" || bad "admin authorized_keys baked in"
 grep -q '^overlayroot=' /etc/overlayroot.conf && ok "overlayroot present: $(grep '^overlayroot=' /etc/overlayroot.conf)" || bad "overlayroot conf"
 [ ! -s /etc/machine-id ] && ok "machine-id blank" || bad "machine-id baked in"
 ls /etc/ssh/ssh_host_* >/dev/null 2>&1 && bad "ssh host keys baked in" || ok "no ssh host keys"
+# idea#208: no country time zone in the image; flash-time zone applied at boot
+[ "$TIMEZONE" = UTC ] && [ "$(cat /etc/timezone 2>/dev/null)" = UTC ] && [ "$(readlink -f /etc/localtime)" = "$(readlink -f /usr/share/zoneinfo/UTC)" ] && ok "time zone default UTC (no country zone)" || bad "image time zone is '$(cat /etc/timezone 2>/dev/null)', want UTC"
+[ ! -e /boot/firmware/idea-timezone.txt ] && ok "no idea-timezone.txt baked on boot partition" || bad "idea-timezone.txt baked into image"
+[ -x /usr/local/sbin/idea-timezone ] && systemctl is-enabled idea-timezone.service >/dev/null 2>&1 && ok "idea-timezone boot unit enabled" || bad "idea-timezone boot unit"
 # --- idea#202 fixes (2026-10-15) ---
 # 1 config.txt: KMS overlay per model, not in [all]
 # 1b idea#304: usb_max_current_enable=1 in [pi5] only, [pi4] byte-identical to s15 (files/check-config-txt.py)

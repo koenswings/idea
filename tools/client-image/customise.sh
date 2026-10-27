@@ -1,7 +1,7 @@
 #!/bin/bash
 # Runs INSIDE the arm64 chroot. Applies proposal idea#201 §4-§8 and idea#203 (browser, start page). Never prints secrets.
 set -euo pipefail
-B=/root/.idea-build; . $B/client-image.conf; . $B/version.env; . $B/browser.env; set +x; . $B/secrets.env
+B=/root/.idea-build; . $B/client-image.conf; . $B/version.env; . $B/browser.env   # no secrets at build time (idea#322)
 export DEBIAN_FRONTEND=noninteractive LC_ALL=C
 policy=/usr/sbin/policy-rc.d; printf '#!/bin/sh\nexit 101\n' > $policy; chmod +x $policy   # no daemons in chroot
 
@@ -17,12 +17,18 @@ ALL="$PACKAGES_OFFICE $PACKAGES_EDU $PACKAGES_GAMES $PACKAGES_SYSTEM"
 miss=$(apt-cache policy $ALL | awk '/^[^ ].*:$/{p=substr($1,1,length($1)-1)} /Candidate: \(none\)/{printf " %s",p}')
 for p in $ALL; do pol=$(apt-cache policy "$p" 2>/dev/null || true); grep -q Candidate <<<"$pol" || miss="$miss $p"; done
 [ -z "$miss" ] || { echo "MISSING arm64 packages:$miss" >&2; exit 1; }
-apt-get install -y -q --no-install-recommends $ALL
+# apt pinning (idea#322): with apt-pins.tsv staged, every requested package is installed at its pinned version, and
+# build.sh fails a release build unless the full installed list equals the pins (the Ubuntu ports mirror has no
+# dated snapshots, so the exact .debs are also archived per build: tools/repro/archive-debs.py).
+if [ -s $B/apt-pins.tsv ]; then
+  INST=""; for p in $ALL; do v=$(awk -F'\t' -v p="$p" '$1==p{print $2; exit}' $B/apt-pins.tsv); INST="$INST ${p}${v:+=$v}"; done
+  apt-get install -y -q --no-install-recommends --allow-downgrades $INST
+else apt-get install -y -q --no-install-recommends $ALL; fi
 apt-get autoremove -y -q; apt-get clean
 
 # --- locale, time zone, keyboard ---
 sed -i "s/^# *${LOCALE} /${LOCALE} /" /etc/locale.gen; locale-gen >/dev/null; update-locale LANG=$LOCALE
-ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime; echo $TIMEZONE > /etc/timezone
+ln -sf "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime; echo "$TIMEZONE" > /etc/timezone   # UTC; school zone at flash time (idea#208)
 printf 'XKBMODEL="pc105"\nXKBLAYOUT="%s"\nXKBVARIANT="%s"\nXKBOPTIONS=""\nBACKSPACE="guess"\n' "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT" > /etc/default/keyboard
 
 # --- accounts (§4) ---
@@ -36,7 +42,7 @@ id admin >/dev/null 2>&1 || useradd -m -s /bin/bash -c "IDEA support" -G sudo ad
 ADMIN_PW="${ADMIN_USER:-admin}911!"; SALT=$(head -c 12 /dev/urandom | base64 | tr -dc 'A-Za-z0-9./' | head -c 16)
 usermod -p "$(perl -e 'print crypt($ARGV[0], "\$6\$".$ARGV[1]."\$")' "$ADMIN_PW" "$SALT")" admin; unset ADMIN_PW
 install -d -m 700 -o admin -g admin /home/admin/.ssh
-install -m 600 -o admin -g admin $B/admin_authorized_keys /home/admin/.ssh/authorized_keys
+# admin authorized_keys: written at flash time (set-card-secrets.sh), installed by idea-secrets-apply at first boot (idea#322)
 # hide admin from the login screen
 printf '[User]\nSystemAccount=true\n' > /var/lib/AccountsService/users/admin
 # GDM autologin, no first-boot wizard
@@ -97,8 +103,8 @@ sed -i "s/@BROWSER_DESKTOP@/$BROWSER_DESKTOP/" /etc/dconf/db/local.d/00-idea; dc
 python3 - /boot/firmware/config.txt <<'P'
 import sys,re
 p=sys.argv[1]; s=open(p).read()
-s=re.sub(r'(?m)^dtoverlay=vc4-kms-v3d[ \t]*\n','',s)            # exact line only; cma-128 variants stay
-if '# IDEA: per-model KMS' not in s:
+if '# IDEA: per-model KMS' not in s:                              # once only: a re-run must not strip the [pi4] line
+    s=re.sub(r'(?m)^dtoverlay=vc4-kms-v3d[ \t]*\n','',s)        # exact line only; cma-128 variants stay
     i=s.rfind('\n[all]'); blk='\n# IDEA: per-model KMS overlay (Pi 400 = pi4, Pi 500 = pi5)\n[pi4]\ndtoverlay=vc4-kms-v3d\n\n[pi5]\ndtoverlay=vc4-kms-v3d-pi5\nusb_max_current_enable=1\n'
     s=s[:i]+blk+s[i:] if i>=0 else s+blk+'\n[all]\n'
 # idea#304: Pi 500 USB boot on a 3 A supply - lift the 600 mA USB current limit, [pi5] ONLY (never [all]; [pi4] untouched)
@@ -115,26 +121,10 @@ for h in /home/learner /etc/skel; do d=$h/.config/supertuxkart/config-0.10; inst
   cp $B/files/stk-config.xml $d/config.xml; cp $B/files/stk-players.xml $d/players.xml; done
 install -d /home/learner/.config/gcompris-qt; cp $B/files/gcompris-qt.conf /home/learner/.config/gcompris-qt/gcompris-qt.conf
 
-# --- Wi-Fi profile (root-only) ---
-f=/etc/NetworkManager/system-connections/IDEA.nmconnection
-umask 077; cat > $f <<C
-[connection]
-id=$WIFI_SSID
-type=wifi
-autoconnect=true
-permissions=
-[wifi]
-mode=infrastructure
-ssid=$WIFI_SSID
-[wifi-security]
-key-mgmt=wpa-psk
-psk=$WIFI_PSK
-[ipv4]
-method=auto
-[ipv6]
-method=ignore
-C
-chmod 600 $f; umask 022
+# --- Wi-Fi profile: template only; the key is written at flash time and applied at first boot (idea#322) ---
+install -d /usr/share/idea; sed "s/@WIFI_SSID@/$WIFI_SSID/g" $B/files/IDEA.nmconnection.template > /usr/share/idea/IDEA.nmconnection.template
+chmod 644 /usr/share/idea/IDEA.nmconnection.template; rm -f /etc/NetworkManager/system-connections/IDEA.nmconnection
+install -m 755 $B/files/idea-secrets-apply /usr/local/sbin/idea-secrets-apply
 
 # --- small-Pi tweaks ---
 printf 'ALGO=zstd\nPERCENT=50\n' > /etc/default/zramswap; systemctl enable zramswap 2>/dev/null || true
@@ -144,6 +134,9 @@ systemctl --global mask tracker-miner-fs-3.service 2>/dev/null || true
 install -m 755 $B/files/idea-firstboot /usr/local/sbin/idea-firstboot
 sed -i "s/@PREFIX@/$HOSTNAME_PREFIX/" /usr/local/sbin/idea-firstboot
 cp $B/files/idea-firstboot.service /etc/systemd/system/; systemctl enable idea-firstboot.service
+# time zone from the boot partition (idea-timezone.txt, written at flash time), every boot (idea#208)
+install -m 755 $B/files/idea-timezone /usr/local/sbin/idea-timezone
+cp $B/files/idea-timezone.service /etc/systemd/system/; systemctl enable idea-timezone.service
 rm -f /etc/ssh/ssh_host_*; : > /etc/machine-id; rm -f /var/lib/dbus/machine-id
 
 # --- reset level B (reset-on-reboot): tmpfs overlay over root, switched by kernel arg overlayroot=tmpfs ---
