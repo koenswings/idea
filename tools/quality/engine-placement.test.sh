@@ -11,7 +11,7 @@ T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
 
 mkdir -p "$T/root/agents/agent-engine-dev" "$T/bin"
 cat >"$T/root/agents/agent-engine-dev/package.json" <<'J'
-{"scripts":{"test:full":"echo engine-tests-ran; test -z \"${IDEA_TEST_ALLOW_LIVE:-}\""}}
+{"scripts":{"test:full":"echo engine-tests-ran; test -z \"${IDEA_TEST_ALLOW_LIVE:-}\" || exit 99; if [ -n \"${FAKE_OUT:-}\" ]; then cat \"$FAKE_OUT\"; fi; exit ${FAKE_TRC:-0}"}}
 J
 git -C "$T/root/agents/agent-engine-dev" init -q
 git -C "$T/root/agents/agent-engine-dev" -c user.email=t@t -c user.name=t add -A
@@ -29,7 +29,7 @@ host="$1"; shift
 echo "$host :: $*" >>"$FAKE_LOG"
 case "$*" in
   *"pm2 jlist"*) if [[ "${FAKE_ONLINE:-1}" == 1 ]]; then echo '[{"name":"engine","pm2_env":{"status":"online"}}]'; else echo '[]'; fi ;;
-  *"pnpm test:full"*) echo remote-tests-ran; exit "${FAKE_RC:-0}" ;;
+  *"pnpm test:full"*) echo remote-tests-ran; [[ -n "${FAKE_OUT:-}" ]] && cat "$FAKE_OUT"; exit "${FAKE_RC:-0}" ;;
 esac
 S
 # fake update-fleet-state.sh: log calls
@@ -102,6 +102,29 @@ loghas "pool failure still releases" "--null idea03 claim"
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=0)"
 check "pool engine offline passes" "$tst.status==\"passed\"" "$out"
 lognot "offline: no pm2 start" "pm2 start engine"
+
+# Known box exceptions (PR #343, Steve option c)
+K1='dist-test/test/automated/instance-lifecycle.test.js > Instance lifecycle (automated, real containers) > instance reaches Running and container responds to HTTP after dock'
+K2='dist-test/test/automated/app-versioning.test.js > App versioning (automated, real containers) > v1.0 dock: version is read from disk and stored in instanceOf'
+K3='dist-test/test/automated/app-versioning.test.js > App versioning (automated, real containers) > minor upgrade (v1.0→v1.1): instanceOf updated, lastStarted refreshed'
+O1='dist-test/test/automated/other.test.js > Other > breaks'
+printf ' FAIL  %s\n' "$K1" "$K2" "$K3" >"$T/known3.out"
+cp "$T/known3.out" "$T/known3plus.out"; printf ' FAIL  %s\n' "$O1" >>"$T/known3plus.out"
+printf ' ✓ %s 1ms\n' "$K1" "$K2" >"$T/known1.out"
+for _ in $(seq 3000); do echo " ✓ filler 1ms"; done >>"$T/known1.out"; printf ' FAIL  %s\n' "$K3" >>"$T/known1.out"
+
+out="$(scan env BOT_NAME=Atlas FAKE_OUT="$T/known3.out" FAKE_TRC=1)"
+check "box: only the 3 known failures → pass" "$tst.status==\"passed\" and ($tst.known_box_exceptions|length)==3 and .ok==true" "$out"
+out="$(scan env BOT_NAME=Atlas FAKE_OUT="$T/known3plus.out" FAKE_TRC=1)"
+check "box: 3 known + 1 other → fail" "$tst.status==\"failed\" and $tst.other_failures==[\"$O1\"] and ($tst.known_box_exceptions|length)==3 and .ok==false" "$out"
+out="$(scan env BOT_NAME=Atlas FAKE_OUT="$T/known1.out" FAKE_TRC=1)"
+check "box: listed tests passing is fine" "$tst.status==\"passed\" and ($tst.known_box_exceptions_missing|length)==0" "$out"
+out="$(scan env BOT_NAME=Atlas FAKE_TRC=1)"
+check "box: rc!=0 with no parsed failure → fail" "$tst.status==\"failed\"" "$out"
+out="$(scan env BOT_NAME=Atlas)"
+check "box: listed test missing/renamed → warning" "($tst.known_box_exceptions_missing|length)==3 and ([.findings[]|select(.rule==\"tests.known_box_exception_missing\" and .severity==\"warning\")]|length)==3 and .ok==true" "$out"
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_OUT="$T/known3.out" FAKE_RC=1)"
+check "pool: known test failing → fail" "$tst.status==\"failed\" and $tst.where==\"pool\" and .ok==false" "$out"
 
 # app-dev (idea#335, Kid): `sh script/ensure-deps.sh` runs before smokes; milkwise smoke never runs
 A="$T/root/agents/agent-app-dev"

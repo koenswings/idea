@@ -58,6 +58,11 @@ Engine tests (idea#335): run on the box by default (refused on a fleet Pi).
                                never idea01 while live, idea02, production or kits)
   QUALITY_SCAN_SOCKS=host:port SSH via SOCKS5 (box: 127.0.0.1:1055)
   QUALITY_SCAN_TEST_LOG=FILE   append raw Engine test output to FILE
+  Box runs only: failures listed in tools/quality/engine-box-exceptions.txt (the
+  Docker-only tests) are reported as tests.known_box_exceptions and do not fail
+  the scan; any other failure does. On a pool Pi every failure counts.
+  Before a release, run the Engine tests through the pool-Pi path
+  (QUALITY_SCAN_ENGINE_PI=<pi>), not on the box.
 EOF
 }
 
@@ -695,17 +700,59 @@ run_engine_tests_box() {
   engine_result "$repo" "box" "box (${me:-local})" "$rc" "$out"
 }
 
+QUALITY_SCAN_BOX_EXCEPTIONS="${QUALITY_SCAN_BOX_EXCEPTIONS:-${SCRIPT_DIR}/engine-box-exceptions.txt}"
+
+# Failed vitest tests, one "<file> > <suite> > <test>" per line (deduped).
+engine_failed_tests() {
+  printf '%s\n' "$1" | sed -n 's/^ *FAIL  \(.*[^ ]\) *$/\1/p' | sort -u
+}
+
 engine_result() {
   local repo="$1" where="$2" detail="$3" rc="$4" out="$5"
+  local known_json='[]' unknown_json='[]' missing_json='[]'
+  if [[ "$where" == "box" && -f "$QUALITY_SCAN_BOX_EXCEPTIONS" ]]; then
+    local failed known=() unknown=() missing=() line t
+    local entries=()
+    while IFS= read -r line; do
+      [[ -z "$line" || "$line" == \#* ]] && continue
+      entries+=("$line")
+    done <"$QUALITY_SCAN_BOX_EXCEPTIONS"
+    failed="$(engine_failed_tests "$out")"
+    while IFS= read -r t; do
+      [[ -z "$t" ]] && continue
+      local hit=0 e
+      for e in "${entries[@]}"; do [[ "$t" == "$e" ]] && hit=1 && break; done
+      if [[ $hit -eq 1 ]]; then known+=("$t"); else unknown+=("$t"); fi
+    done <<<"$failed"
+    # Listed test missing or renamed: its name appears nowhere in the output.
+    for e in "${entries[@]}"; do
+      # here-string, not a pipe: grep -q + pipefail would SIGPIPE printf on big output
+      if ! grep -qF -- "${e##* > }" <<<"$out"; then
+        missing+=("$e")
+        add_finding "$repo" "tests.known_box_exception_missing" "warning" "tools/quality/engine-box-exceptions.txt" \
+          "Known box exception not found in the test output (missing or renamed?): ${e}"
+      fi
+    done
+    [[ ${#known[@]} -gt 0 ]] && known_json="$(printf '%s\n' "${known[@]}" | jq -R . | jq -sc .)"
+    [[ ${#unknown[@]} -gt 0 ]] && unknown_json="$(printf '%s\n' "${unknown[@]}" | jq -R . | jq -sc .)"
+    [[ ${#missing[@]} -gt 0 ]] && missing_json="$(printf '%s\n' "${missing[@]}" | jq -R . | jq -sc .)"
+    # Non-zero exit with only listed failures (and at least one) → pass.
+    if [[ "$rc" -ne 0 && ${#known[@]} -gt 0 && ${#unknown[@]} -eq 0 ]]; then
+      jq -nc --arg w "$where" --arg d "$detail" --argjson rc "$rc" --argjson k "$known_json" --argjson m "$missing_json" \
+        '{status:"passed",where:$w,detail:$d,exit_code:$rc,known_box_exceptions:$k,known_box_exceptions_missing:$m}'
+      return
+    fi
+  fi
   if [[ "$rc" -ne 0 ]]; then
     local sev="error"
     [[ "$MODE" == "full" ]] && sev="critical"
     add_finding "$repo" "tests.failed" "$sev" "." \
       "Tests failed (rc=${rc}) via ${detail}: $(echo "$out" | tail -c 500)"
-    jq -nc --arg w "$where" --arg d "$detail" --argjson rc "$rc" \
-      '{status:"failed",where:$w,detail:$d,exit_code:$rc}'
+    jq -nc --arg w "$where" --arg d "$detail" --argjson rc "$rc" --argjson k "$known_json" --argjson u "$unknown_json" --argjson m "$missing_json" \
+      '{status:"failed",where:$w,detail:$d,exit_code:$rc,known_box_exceptions:$k,other_failures:$u,known_box_exceptions_missing:$m}'
   else
-    jq -nc --arg w "$where" --arg d "$detail" '{status:"passed",where:$w,detail:$d}'
+    jq -nc --arg w "$where" --arg d "$detail" --argjson m "$missing_json" \
+      '{status:"passed",where:$w,detail:$d,known_box_exceptions:[],known_box_exceptions_missing:$m}'
   fi
 }
 
