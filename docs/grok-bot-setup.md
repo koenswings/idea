@@ -462,7 +462,7 @@ These rules apply both at the PR gate and in the scheduled scan:
 
 **Staleness** (scan only — cannot be checked at PR time):
 
-- Any file in any `docs/` folder whose last-modified date is more than 30 days older than the most recent source commit that would logically affect it.
+- Any file in any `docs/` folder whose last-modified date is more than 30 days older than the most recent source commit that would logically affect it. Stylesheets (`*.css`) are static assets and are skipped (idea#308).
 - Any `AGENTS.md` whose last-modified date is more than 14 days older than the most recent build-related source commit in that repo.
 
 ### 5.2 The PR Gate
