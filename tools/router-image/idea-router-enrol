@@ -4,6 +4,8 @@
 #
 # Usage: idea-router-enrol [--password-stdin] <sticker-name>[-router] [router-ip]     (router-ip default 10.42.0.1)
 # Env:   IDEA_FLEET_KEY   key file (default ~/.config/idea-router/fleet-authkey, must be mode 600)
+#        IDEA_ROOT_PASSWORD_FILE  root password for the router (default ~/.config/idea-router/root-password, mode 600;
+#                 idea#322: no longer baked into the image). Missing file: warning, password left unset.
 #        IDEA_ROUTER_LOG  log file (default ~/.local/state/idea-router/enrol.log)
 #        IDEA_ROUTER_PASSWORD_FILE  password mode (idea#276): root password of a freshly flashed router, read from
 #                         this file (mode 600). --password-stdin reads it from stdin instead. Used only through
@@ -25,6 +27,7 @@ RUSER="${IDEA_ROUTER_USER:-root}"
 RPORT="${IDEA_ROUTER_PORT:-22}"
 PWFILE="${IDEA_ROUTER_PASSWORD_FILE:-}"
 KEY="${IDEA_FLEET_KEY:-$HOME/.config/idea-router/fleet-authkey}"
+RPW="${IDEA_ROOT_PASSWORD_FILE:-$HOME/.config/idea-router/root-password}"
 LOG="${IDEA_ROUTER_LOG:-$HOME/.local/state/idea-router/enrol.log}"
 TAG="tag:idea"
 RKEY=/tmp/tskey
@@ -84,6 +87,14 @@ rsh "mkdir -p /etc/idea && printf '%s\n' '$STICKER' > /etc/idea/sticker \
  && uci set system.@system[0].hostname='$STICKER' && uci commit system \
  && echo '$STICKER' > /proc/sys/kernel/hostname" || die 5 "could not write sticker/hostname"
 echo "OK   sticker + hostname = $STICKER"
+
+# --- 1b. root password from a local file (idea#322: flash-time secret, never in the image, never on a command line) ---
+if [ -f "$RPW" ]; then
+  [ "$(stat -c %a "$RPW")" = 600 ] || die 3 "root password file $RPW must be mode 600"
+  pw=$(head -n 1 "$RPW" | tr -d '\r\n'); [ -n "$pw" ] || die 3 "root password file $RPW is empty"
+  printf '%s\n%s\n' "$pw" "$pw" | rsh "passwd root >/dev/null 2>&1" || { unset pw; die 5 "could not set the root password"; }
+  unset pw; echo "OK   root password set (from $RPW)"
+else echo "WARN no root password file ($RPW): root password not set"; logline "WARN no-root-password-file"; fi
 
 # --- 2. status check: already enrolled with this name and tag? ---
 ts_json() { rsh "tailscale status --json 2>/dev/null" 2>/dev/null || true; }

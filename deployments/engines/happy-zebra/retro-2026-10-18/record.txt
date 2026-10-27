@@ -1,0 +1,47 @@
+# RETRO record (idea#322), written 2026-10-26 from git history (agent-engine-dev adfd9d3) and fleet-state.json (@4e515d4).
+# Not captured on the Engine. UNKNOWN = not recoverable from the box; fill in from agent-engine-dev
+# script/capture-engine-record.sh (read-only) when the Engine is next online. Sidecar: files.sha256 (tracked files at adfd9d3).
+schema=idea-deployment-record/1
+batch=zimbabwe-2026-10
+deviceType=engine
+hostname=happy-zebra
+stickerName=happy-zebra
+arch=aarch64
+model=Raspberry Pi 5 (Waveshare), USB SSD Intenso AA000000000000010473
+kernel=UNKNOWN
+osRelease=UNKNOWN
+imageCommit=adfd9d354ffd83c5ecc0a9eea64a474eae08de8f
+imageBranch=deploy/kit-229-232 (agent-engine-dev; merge of feat/engine-lan-address, not on main)
+imageTag=field/zimbabwe-2026-10/engine-adfd9d3
+imageVersion=1.0
+imageFile=n/a
+imageSha256=n/a
+imageManifest=n/a
+contentSha256=UNKNOWN
+engineDirtyFiles=UNKNOWN
+engineSkipWorktree=UNKNOWN (fleet-state: ~/.idea-local override, store-identity files skip-worktree)
+enginePrevious=main@07456c3
+consoleCommit=62bd2ba03544fd7b2ef490a07de2b8780f81105b (agent-console-dev#162, unmerged; dist-only swap)
+consoleCheckout=main@654224e
+consoleDistSha256=UNKNOWN
+lockfileSha256=37fd94bcc8c528652d898a8b2acd7eb02841fbd91b3c05ca247bfef6eba4b3c3
+nodeVersion=UNKNOWN (expected v22.20.0 from NODE_VERSION at adfd9d3)
+npmVersion=UNKNOWN
+pnpmVersion=UNKNOWN (expected 10.33.0 from PNPM_VERSION at adfd9d3)
+pm2Version=UNKNOWN (installed unpinned)
+dockerVersion=UNKNOWN
+tailscaleVersion=UNKNOWN (installed as the latest stable tarball)
+appKolibriCommit=UNKNOWN
+dockerPins=none at adfd9d3 (get.docker.com latest; archive holds today's pinned Docker debs, see debs/docker/NOTE.txt)
+aptPins=none at adfd9d3 (Debian unpinned; packages.tsv UNKNOWN until captured)
+postInstall.morango=2026-10-17: MORANGO_SYSTEM_ID=idea-${hostname}-${port} added by hand to /instances/<id>/compose.yaml of Kolibri and Kolibri Demo (app-kolibri#8; procedure: agent-engine-dev docs/REPRODUCIBLE_BUILDS.md §7)
+packageArchive=/workspace/idea322-archive/release-kit-adfd9d3/
+packageArchiveUrl=https://github.com/koenswings/agent-engine-dev/releases/tag/field/zimbabwe-2026-10/engine-adfd9d3
+packageArchiveSha256=3a2d0262f1108fd5c3e388a9b34470285631292633a259f771274dfac0b04f25
+packageArchiveParts=kit-adfd9d3-archive.tar.part-00:f5dabbb6e708f5d02bbfd6920a7d8935058301ed09e953dde9d4ee16f1d7dc2c,kit-adfd9d3-archive.tar.part-01:e2315dfca264b9cedc934be66acf98ddbceaeb7ab95d7557d27a82e000b27b1b,kit-adfd9d3-archive.tar.part-02:f04b5b1e297e6a34e4909a72fc3bde357f723316306dd00260f7856e117645f7,kit-adfd9d3-archive.tar.part-03:dd35cb4f70b9bfa9afb20d1f34aaedf8515a5401cd328e4947277a671d01d0a2,kit-adfd9d3-archive.tar.part-04:85ef6f0bd45b22cde1ea3cd5c2993abaf982eb99a7b71a35aec9e065af706b41,kit-adfd9d3-archive.tar.part-05:a9fa8f4322a916ab7d48354545c67db8b80544b4cd9869a7f59725163d434fd4
+packageArchiveTarSha256=b88af91cfab6f49405995f54c08d861a063a1efd76bd5ec07fd45637e189ec92 (kit-adfd9d3-archive.tar = the parts joined)
+secrets=Tailscale auth key at build time (name only; value never recorded)
+deployedAt=2026-10-18 10:42:36 CEST (Engine); Console dist 2026-10-17
+evidence=fleet-state.json @4e515d4 (version/deployed/note); agent-engine-dev git adfd9d3
+confidence=likely: fleet-state version line, Steve-confirmed deploy; not captured on the device
+open=capture with capture-engine-record.sh: packages.tsv, images.tsv, dist.sha256, tool versions, local overrides

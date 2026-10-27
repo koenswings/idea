@@ -1,0 +1,9 @@
+# OpenWrt 25.12.5 feed indexes used by the IB (idea#322). build.sh fetches each and fails on a sha256 mismatch.
+https://downloads.openwrt.org/releases/25.12.5/targets/mediatek/filogic/packages/packages.adb	92a21556949408177649e0030f303cbc2771d98386cfe1d5e11a6c200ebc1f72
+https://downloads.openwrt.org/releases/25.12.5/packages/aarch64_cortex-a53/base/packages.adb	9b23dc82cab31adc051185603d6d6ba22a136901255ed11339a657972908496c
+https://downloads.openwrt.org/releases/25.12.5/targets/mediatek/filogic/kmods/6.12.94-1-5a6c1f71be683ae9980b15d3ce73e24d/packages.adb	d9b1d14591cf0fc5b0a69ea1b618f3312c96e4ac87d013fe1e76aac34867022d
+https://downloads.openwrt.org/releases/25.12.5/packages/aarch64_cortex-a53/luci/packages.adb	bb4258e4aec5a100d37ad42b77828ed3eee295dc53bb9b816538f4503c3ea98a
+https://downloads.openwrt.org/releases/25.12.5/packages/aarch64_cortex-a53/packages/packages.adb	d6ebc31b95d4157aa01dcf132c2124fd3f252fc860e7d0f01c88e160e23ee9c7
+https://downloads.openwrt.org/releases/25.12.5/packages/aarch64_cortex-a53/routing/packages.adb	392a89dfa56eed5cfaa25d5c3381b3c7e801e5b68c78c9d6953f6c4d34d89064
+https://downloads.openwrt.org/releases/25.12.5/packages/aarch64_cortex-a53/telephony/packages.adb	5459a0b6d6162a95de60c08ac96dd1fec467b73014d1d86bf0f339057a5840cb
+https://downloads.openwrt.org/releases/25.12.5/packages/aarch64_cortex-a53/video/packages.adb	7a81064bc245a050cd05921c67231a832b616dd2935bcd95b004b97d76b228bb

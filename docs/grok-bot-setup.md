@@ -134,7 +134,6 @@ All deterministic fleet operations are implemented as scripts in `koenswings/ide
 
 | Script | Purpose |
 |--------|---------|
-| `idea-setup.sh` | Platform install: discover all `idea*` Pis via Tailscale, verify dependencies, initialise `fleet-state.json`. **Skips Grok Build install and GitHub Actions runner registration by default**; an opt-in flag installs them (parked path, §2.2). The opt-in flag is `--with-grok-build` (the install steps themselves are still a stub). |
 | `find-available-pi.sh <domain>` | Read `fleet-state.json`, apply domain affinity, return the first idle Pi. Returns empty if none available. |
 | `deploy.sh <pi> <component> <repo> <branch>` | Full deploy sequence for the given component type (engine/console/app-disk): checkout, build, start, health check |
 | `teardown.sh <pi>` | Reverse deploy: clean state, restore main, mark Pi idle in `fleet-state.json` |
@@ -285,7 +284,7 @@ Pis in this section are **review / golden / test** targets. Coding work does **n
 }
 ```
 
-`idea02` is the dedicated golden Pi and `idea03` the review Pi (idea#118); see §4.4. Every Pi records the mains or PR it runs in `version` / `pr`. New Pis are added by running `idea-setup.sh`; they appear in `fleet-state.json` automatically.
+`idea02` is the dedicated golden Pi and `idea03` the review Pi (idea#118); see §4.4. Every Pi records the mains or PR it runs in `version` / `pr`. New Pis are built with the Engine's `build-engine` (via `script/provision-fleet.sh` in agent-engine-dev) and added to `fleet-state.json` with `tools/fleet/update-fleet-state.sh --create` (the old `idea-setup.sh` stub was removed, idea#273).
 
 ### 4.2 Pi Allocation
 

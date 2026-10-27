@@ -13,7 +13,7 @@ out/idea-client-26.04-<YYYYMMDD>-<gitsha>.MANIFEST.txt   # every package + versi
 ## Run
 
 ```
-sudo tools/client-image/build.sh [--base ubuntu-26.04.1-...+raspi.img.xz] [--secrets FILE] [--out DIR] [--work DIR] [--no-xz]
+sudo tools/client-image/build.sh [--dev] [--base ubuntu-26.04.1-...+raspi.img.xz] [--out DIR] [--work DIR] [--no-xz] [--apt-pins FILE|none] [--manifest-out DIR]
 ```
 
 * Host: Linux amd64 with `qemu-user-static` (binfmt `aarch64` with the `F` flag) or a native arm64 Pi.
@@ -28,14 +28,32 @@ sudo tools/client-image/build.sh [--base ubuntu-26.04.1-...+raspi.img.xz] [--sec
   and PARTUUID are unchanged; cloud-init `growpart` + `resizefs` expand root to the full card on first boot.
 * ~25 GB free disk; 30-60 min under qemu on an 8-core box.
 
-## Secrets (never in git, never printed)
+## Reproducible builds (idea#322)
 
-* Release guard: `build.sh` refuses to build unless `WIFI_PSK` is the field key `idea911!`. A build with any other key
-  (e.g. `secrets-test.env`) needs `--test-secrets` and is named `...-TEST.img.xz`; never flash a -TEST image for a school.
+* **Release = clean tree, HEAD exactly at a tag, HEAD on `origin/main`.** Otherwise `build.sh` refuses; `--dev`
+  builds anything and names the image `...-dev` (never for the field). The version date is the commit date.
+* **apt pinned:** `apt-pins.tsv` (package, version; the s14/s15 kit list) - requested packages are installed at
+  their pinned versions and a release fails unless the full installed list equals the pins. Ubuntu ports has no dated
+  snapshots, so the exact `.deb`s are archived per build with `tools/repro/archive-debs.py` (see `deployments/README.md`).
+* **Inputs verified:** base image + Chrome `.deb` by sha256 (`client-image.conf`); mismatch = file kept as `.bad`, build fails.
+* **Manifest:** every build writes `manifests/client/<name>/` (build.env, inputs.tsv, packages.tsv, content.tsv.xz,
+  image.sha256). Commit it. `tools/repro/rebuild-check.sh --manifest-dir manifests/client/<name> --image <img>` (or
+  `--rebuild`) compares content; volatile paths are listed in `tools/repro/volatile.txt`.
 
-Copy `secrets.env.example` to `~/.config/idea-client-image/secrets.env` (chmod 600) or pass `--secrets`.
-It holds the support **authorized_keys** path (public keys only) and the per-school **Wi-Fi PSK**. `build.sh` refuses a secrets file inside the repo and a private key in the keys file;
-`scan-secrets.sh` fails the build if a secret value appears anywhere except the root-only NetworkManager profile (PSK).
+## Secrets: flash time only (never in the image, never in git, never printed)
+
+The image holds **no** Wi-Fi key and **no** SSH keys (idea#322). After writing a card, before its first boot:
+
+```
+tools/client-image/set-card-timezone.sh --timezone Africa/Harare --boot /media/$USER/system-boot   # idea#208 (PR #319)
+tools/client-image/set-card-secrets.sh --boot /media/$USER/system-boot    # files from ~/.config/idea-client-image/secrets.env
+```
+
+`set-card-secrets.sh` writes `idea-secrets/wifi-psk` and `idea-secrets/admin_authorized_keys` to the boot partition;
+on first boot `idea-firstboot` runs `idea-secrets-apply` (writes the root-only NetworkManager profile from
+`/usr/share/idea/IDEA.nmconnection.template`, installs admin's keys), then wipes the files from the boot partition.
+Copy `secrets.env.example` to `~/.config/idea-client-image/secrets.env` (chmod 600). `scan-secrets.sh` fails the build
+if a Wi-Fi profile, psk, admin authorized_keys, private key or Tailscale key is in the image.
 
 **Local admin password rule:** the hidden `admin` account's local (console / `su - admin`) password follows Koen's
 convention **`<accountname>911!`**, i.e. `admin911!` (`ADMIN_USER` in `client-image.conf`). It is a documented
@@ -51,6 +69,7 @@ convention, not a secret: `customise.sh` hashes it (SHA-512, random salt) at bui
 | §7 updates off | `unattended-upgrades`, `update-notifier`, Software, Pro client, fwupd removed; apt/fwupd/motd timers masked; `APT::Periodic::*=0`; snaps held forever at first boot; `snapd.refresh.timer` masked |
 | browser (idea#203 §1) | **Google Chrome stable**, official arm64 `.deb` pinned in `client-image.conf` (`CHROME_DEB`, `CHROME_DEB_SHA256`), fetched once into `work/` and sha-checked, installed offline; Google apt source + cron job removed, `apt-mark hold`. Fallback: `build.sh --browser chromium` (xtradeb PPA `.deb`, same hold + policies). Managed policy (`browser.sh`): home/startup = `file:///usr/share/idea/start.html`, `LocalNetworkAccessAllowedForUrls` = `file://*`, `http://*.local`, sign-in/sync/promos/default-browser prompt/component updates off |
 | Console shortcut + discovery (idea#203 §2) | **One** "IDEA" shortcut (`idea-console.desktop`, app menu + learner desktop) opens `start.html`: home Engine (`idea-home.txt` on the FAT boot partition → `/etc/idea/home-engine` by `idea-home-engine.service` at boot) → last Engine that opened → `http://idea.local`, 1.5 s per probe; sticker-name field (strict hostname validation) always shown, prominent on failure; friendly not-found text, never a browser error. No per-app icons, no `/go`, no Nextcloud links, no Engine name or IP in the image |
+| time zone (idea#208) | Image default **UTC** (`TIMEZONE="UTC"`), no country zone baked in. The school zone is set at flash time: a one-line `idea-timezone.txt` (`Area/City`, tz database name) on the FAT boot partition, written by `set-card-timezone.sh --timezone Africa/Harare --boot <mounted boot partition>` or by the Engine's Flash step (passes the Engine's own zone). `idea-timezone.service` applies it on **every** boot (`timedatectl set-timezone`, needed because reset-on-reboot discards `/etc` changes); a missing or invalid file leaves UTC |
 | §8 first boot | `idea-firstboot`: hostname `idea-pc-<last4 serial>`, new SSH host keys and machine-id (nothing model-specific) |
 | §5 reset B | Reset-on-reboot **ON by default** (`OVERLAY=on`, 2026-10-16): tmpfs overlay over root, every write erased at reboot. Armed once by `idea-overlay-arm.service` after first-boot setup, then one automatic reboot. Switch: `sudo idea-client-mode normal|overlay|status` (see *Reset on reboot*) |
 | idea#202 (2026-10-15) | `config.txt`: KMS overlay per model (`[pi4]` `vc4-kms-v3d` = Pi 400, `[pi5]` `vc4-kms-v3d-pi5` = Pi 500), none in `[all]`, `disable_fw_kms_setup=1` kept, stock cmdline - one image boots both. `curl`. Firefox snap removed from the seed (+ launchers); Chrome only. Chrome launchers + `google-chrome.desktop` override (`/usr/local/share/applications`) use `--password-store=basic`; policy `PasswordManagerEnabled=false`, Google as fixed default search (no choice screen), `PromotionsEnabled=false`, `initial_preferences` + `First Run` sentinel skip first-run. Desktop icon learner-owned 755, trusted by a one-shot learner autostart (`gio set … metadata::trusted true`, then `Hidden=true`). First-run off: LibreOffice `/etc/libreoffice/registry/idea.xcd`, GCompris `isFirstRun=false`, SuperTuxKart (`config-0.10`: `enable_internet=2`, seeded player Learner, `first-time=false`), gnome-initial-setup purged + done-file, GNOME welcome tour off (dconf). GeoGebra is not in the image (offline web app on the Engine). Icon: IDEA logo C (`files/idea-logo/`) as `idea-console` (hicolor scalable/256/48) for the shortcut and dock |
@@ -58,7 +77,7 @@ convention, not a secret: `customise.sh` hashes it (SHA-512, random salt) at bui
 | §12 CI | `verify-image.sh` (in chroot) + `scan-secrets.sh` run on every build; non-zero exit fails the build |
 
 
-Tests (no image build): `cd tests && npm i && npm test` (start.html in headless Chrome with mocked Engines); `tests/home-engine.test.sh`; `sudo tests/chroot-check.sh` (browser.sh + verify-browser.sh in a minimal arm64 Ubuntu rootfs; needs root network access for apt).
+Tests (no image build): `cd tests && npm i && npm test` (start.html in headless Chrome with mocked Engines); `tests/home-engine.test.sh`; `tests/timezone.test.sh`; `sudo tests/chroot-check.sh` (browser.sh + verify-browser.sh in a minimal arm64 Ubuntu rootfs; needs root network access for apt).
 The boot test and the Pi 400 ↔ Pi 500 swap test (§12) need hardware and are tracked separately.
 
 ## Reset on reboot (overlay) - on by default

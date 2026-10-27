@@ -1,0 +1,14 @@
+#!/bin/sh
+# Boot step (idea#208): apply the time zone written at flash time (idea-timezone.txt on the FAT boot partition).
+# Runs on EVERY boot: with reset-on-reboot (overlay) on, /etc changes vanish at reboot, so the zone is re-applied.
+# Only a name that exists in the tz database is accepted; otherwise the image default (UTC) stays.
+set -u
+SRC=${IDEA_TZ_SRC:-/boot/firmware/idea-timezone.txt}; ZI=${IDEA_ZONEINFO:-/usr/share/zoneinfo}; ETC=${IDEA_TZ_ETC:-/etc}
+[ -e "$SRC" ] || exit 0
+Z=$(head -c 128 "$SRC" 2>/dev/null | head -n 1 | tr -d '\r\t ')
+if ! printf '%s' "$Z" | grep -Eqx '[A-Za-z][A-Za-z0-9_+-]*(/[A-Za-z0-9_+-]+){0,2}' || [ ! -f "$ZI/$Z" ]; then
+  echo "idea-timezone: ignoring invalid time zone in $SRC" >&2; exit 0; fi
+if [ -z "${IDEA_TZ_ETC:-}" ] && command -v timedatectl >/dev/null 2>&1 && timedatectl set-timezone "$Z" 2>/dev/null; then :; else
+  ln -sfn "$ZI/$Z" "$ETC/localtime"; fi
+printf '%s\n' "$Z" > "$ETC/timezone"
+echo "idea-timezone: $Z"
