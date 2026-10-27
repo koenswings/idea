@@ -1,26 +1,21 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (kit: Wikipedia and Wikipedia (Demo))
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 27 October 2026 (Wikipedia (Demo) steps, idea#295)
 
 # 7. Wikipedia offline
 
-Every IDEA box of the kit has two Wikipedia apps. Both work without internet.
+This chapter shows you how to look up an article in Wikipedia and use it in your lesson. Everything works without internet.
 
-| Console card | What it has |
-|---|---|
-| **Wikipedia** | The full English Wikipedia. |
-| **Wikipedia (Demo)** | **Wikipedia in simple English**: shorter articles in easier English. The steps below use it. |
-
-> **Two cards called Wikipedia.** On a computer screen the Console's **Apps** page can show both cards with the title **Wikipedia**. Open one: the library page names the book, and **Wikipedia in simple English** is the Demo.
+The steps below use the **Wikipedia (Demo)** app, which holds **Wikipedia in simple English**: shorter articles in easier English. Your school's own **Wikipedia** app has the full English Wikipedia and works the same way.
 
 ## 7.1 Look something up and use it in class
 
-1. Open **Wikipedia (Demo)** from the Console (chapter 2). The library page shows the book.
+1. Open **Wikipedia (Demo)** from the Console (chapter 2). The library page shows one book, **Wikipedia in simple English**.
    ![The library page](../screenshots/W1-01.png)
-2. Click **Wikipedia in simple English**. Its welcome page opens.
+2. Click **Wikipedia in simple English**. The **Welcome to Wikipedia** page opens, with topics grouped by subject.
    ![Wikipedia home](../screenshots/W1-02.png)
-3. Type in the search box at the top, e.g. `Fraction`. Pick a result.
+3. Type in the search box at the top, e.g. `Fraction`, and press Enter. In the results, click **Fraction**.
    ![Search results](../screenshots/W1-03a.png)
    ![Fraction article](../screenshots/W1-03.png)
-4. Follow blue links to related articles.
+4. Follow blue links to related articles, e.g. **Real number**.
    ![Linked article](../screenshots/W1-04.png)
 
-> **Classroom idea.** Give learners 3 questions to answer from one article; they read on their own device.
+> **Classroom idea.** Give learners 3 questions to answer from one article; they read on their own device. If an article is long, point learners to one section.
