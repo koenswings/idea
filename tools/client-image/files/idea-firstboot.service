@@ -1,8 +1,9 @@
 [Unit]
 Description=IDEA client first boot (hostname, ssh host keys, machine-id)
 ConditionPathExists=!/var/lib/idea-firstboot.done
-Before=ssh.service gdm.service
-After=local-fs.target
+Before=ssh.service gdm.service NetworkManager.service
+After=local-fs.target boot-firmware.mount
+RequiresMountsFor=/boot/firmware
 [Service]
 Type=oneshot
 ExecStart=/usr/local/sbin/idea-firstboot
