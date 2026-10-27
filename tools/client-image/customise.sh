@@ -68,7 +68,7 @@ AllowUsers admin
 C
 systemctl enable ssh 2>/dev/null || true
 
-# polkit: learner cannot change network/software/users/power-management
+# polkit: learner cannot change software/users/power-management (Wi-Fi is open to learner: idea#285, Koen 2026-10-27)
 mkdir -p /etc/polkit-1/rules.d
 cp $B/files/50-idea-learner.rules /etc/polkit-1/rules.d/
 
