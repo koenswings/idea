@@ -27,7 +27,7 @@ S14 = dict(imageCommit="f00748eb (tag field/zimbabwe-2026-10/client-s14; branch 
   **{"postInstall.cardpatch":"2026-10-17 on wh: tools/client-image/field/patch-client-cards.sh (original sha256 82ada65ec84fef6cdb4882a80f36c9c9932b744251d9d0d38c3377e6525dbf57; committed copy is sanitised) PASS: keyboard us, Chrome NewTabPageLocation removed, Engine META.yaml removed, Wi-Fi PSK checked by hash"},
   confidence="high: card-log.md lists this card as PASS")
 S15 = dict(imageCommit="291b96253d407f21bf38091e92128bf2149fc974", imageBranch="main", imageTag="field/zimbabwe-2026-10/client-s15",
-  imageVersion="26.04-20261017-291b962", imageFile="idea-client-26.04-20261017-291b962-s15.img.xz (box only: contains the Wi-Fi PSK, not published)",
+  imageVersion="26.04-20261017-291b962", imageFile="idea-client-26.04-20261017-291b962-s15.img.xz (published: https://github.com/koenswings/idea/releases/tag/field/zimbabwe-2026-10/client-s15 as .part00-.part09 + IMAGE.SHA256SUMS; cat parts > .img.xz; default credentials only)",
   imageSha256="dd6f6d408a16cdb614d090b02bd771634eb4a74beaeb774a674dc332333ffa6c (xz)",
   readBackSha256="6cadd6b295ced889c96a894e6d3c5e7358037d2fd377a1c7a21ed695303fa353 (13999996928 bytes)",
   imageManifest=S15M, contentSha256="0746a2def620716adca0a9ec7213438945f73d7067700292b73c2f7866d56da8",
@@ -51,7 +51,7 @@ for r in ["sunny-robin", "happy-zebra", "kind-panda"]:
       imageCommit="b2f00bcf (tag field/zimbabwe-2026-10/router-b2f00bc; #271 head, squash-merged, not on main)",
       imageBranch="fix/router-image-dnsmasq-local-teachers-off", imageTag="field/zimbabwe-2026-10/router-b2f00bc", imageVersion="0.1.0-dev-b2f00bc",
       setupRef="7eedd03",
-      imageFile="idea-router-0.1.0-dev-b2f00bc-cudy_wr3000s-v1-squashfs-sysupgrade.bin (box only: /workspace/idea-archive/router/b2f00bc-openwrt-25.12.5/images/; contains the baked default root password; not published)",
+      imageFile="idea-router-0.1.0-dev-b2f00bc-cudy_wr3000s-v1-squashfs-sysupgrade.bin (published: https://github.com/koenswings/idea/releases/download/field/zimbabwe-2026-10/router-b2f00bc/idea-router-0.1.0-dev-b2f00bc-cudy_wr3000s-v1-squashfs-sysupgrade.bin, listed in release SHA256SUMS; default credentials only)",
       imageSha256="8e084dc0d891f8141277f0f152307a12c2cc6f13759e561a659232b9cc1ace61",
       imageManifest=B2M, contentSha256="dee4275a665ae4865dc326ba16ae0d427779aaf359e6101ad2425489875ebc4f",
       imageBuilder=f"{RA}/openwrt-imagebuilder-25.12.5-mediatek-filogic.Linux-x86_64.tar.zst sha256 7fb6cf626582ebcbfb46974da48c1eae577213f38879eaf6b1d982041e843461 (upstream https://downloads.openwrt.org/releases/25.12.5/targets/mediatek/filogic/)",

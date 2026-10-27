@@ -43,7 +43,7 @@ difference in a compare. `n/a` means the key does not apply. Unknown extra keys 
 | `hostname` / `stickerName` / `cardId` | at least one | device identity (client cards: the Engine disk id of the card) |
 | `arch`, `model`, `osRelease` | yes | hardware and OS |
 | `imageCommit`, `imageBranch`, `imageTag`, `imageVersion` | yes | source (`imageTag` empty = untagged; field builds use `field/<batch>/<id>`) |
-| `imageFile`, `imageSha256`, `readBackSha256` | yes (client/router) | the bytes that were flashed; for images holding secrets, state "box only, not published" |
+| `imageFile`, `imageSha256`, `readBackSha256` | yes (client/router) | the bytes that were flashed; link the release asset when published; for images not published, say so (e.g. "box only, not published") |
 | `imageManifest` | yes (client/router) | `manifests/<kind>/<name>/` (content manifest for `tools/repro/rebuild-check.sh`) |
 | `contentSha256` | yes | client/router: sha256 of the image's `content.tsv`. Engine: see below |
 | `baseImageSha256`, `chromeDebSha256`, `imageBuilder`, `cudyIntermediate`, `setupRef`, `aptPins` | per type | pinned build inputs (URL and sha256) |
