@@ -142,7 +142,8 @@ REMOTE
 }
 
 # fl_checkout_remote <host> <dir> <repo-url> <ref> [build]: fetch + detached checkout of <ref> in <dir> on the Pi.
-# Local edits are stashed (never discarded); build=console runs build-console-pi.sh (keeps hidden-instances.json).
+# Local edits are stashed (never discarded); build=console runs build-console-pi.sh (keeps hidden-instances.json),
+# then restarts the Engine under pi's pm2 (+ pm2 save) so it picks up the new Console build.
 fl_checkout_remote() {
   local host="$1" dir="$2" url="$3" ref="$4" build="${5:-}"
   [[ "$url" == */* && "$url" != *://* && "$url" != git@* ]] && url="https://github.com/$url"
@@ -163,6 +164,12 @@ echo \"CHECKED_OUT \$want\""
   if [ "$build" = console ] && ! grep -q '^ALREADY' <<<"$out"; then
     out="$(fl_ssh "$host" "cd '$dir' && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && bash -s -- --dir '$dir'" < "$FLEET_DIR/build-console-pi.sh" 2>&1)"; rc=$?
     fl_step "console build" "$([ $rc = 0 ] && echo true || echo false)" "$(tail -1 <<<"$out")"
+    [ $rc = 0 ] || return 1
+    # The Engine only looks for the Console UI at startup; if it restarted while dist/ was being rebuilt it
+    # serves 404 "Console UI not configured" until restarted (koenswings/agent-engine-dev#264). Restart it now
+    # that the build is in place: pi's pm2 only, never sudo.
+    out="$(fl_ssh "$host" "pm2 restart engine --update-env >/dev/null && pm2 save >/dev/null && echo ENGINE_RESTARTED" 2>&1)"; rc=$?
+    fl_step "engine restart after console build" "$([ $rc = 0 ] && echo true || echo false)" "$(tail -1 <<<"$out")"
     [ $rc = 0 ] || return 1
   fi
 }
