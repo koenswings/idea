@@ -40,6 +40,7 @@ case "$cmd" in
   PORT=*) cat >/dev/null; echo "ENGINE=${FAKE_ENGINE:-online pi}"; echo "CONSOLE=200"; echo "INSTANCE=milkwise:3333:${FAKE_INST:-200}" ;;
   *"--dir"*) cat >/dev/null; echo "Console built" ;;
   *"git fetch"*) echo "CHECKED_OUT abc" ;;
+  "pm2 restart engine"*) [ -z "${FAKE_RESTART_FAIL:-}" ] || { echo "restart failed"; exit 1; }; echo ENGINE_RESTARTED ;;
   *) echo "unexpected: $cmd" >&2; exit 9 ;;
 esac
 SH
@@ -80,6 +81,11 @@ check "deploy writes audit lines"         test -s "$WORK/audit/audit-$(date -u +
 run "$D/deploy.sh" idea01 console agent-console-dev feat-c --yes
 check "deploy console (own claim) ok"     test "$RC" = 0
 check "deploy console builds"             grep -q -- "--dir" "$WORK/ssh.log"
+check "console build: engine restarted after the build" bash -c 'b=$(grep -n -- "--dir" "$0" | tail -1 | cut -d: -f1); r=$(grep -n "pm2 restart engine" "$0" | tail -1 | cut -d: -f1); [ -n "$b" ] && [ -n "$r" ] && [ "$r" -gt "$b" ]' "$WORK/ssh.log"
+check "console build: restart step ok"   test "$(j '.steps[]|select(.step=="engine restart after console build").ok')" = true
+check "console build: pm2 save, no sudo" bash -c 'grep "pm2 restart engine" "$0" | grep -q "pm2 save" && ! grep -q "sudo pm2" "$0"' "$WORK/ssh.log"
+FAKE_RESTART_FAIL=1 run "$D/deploy.sh" idea01 console agent-console-dev feat-c --yes
+check "console build: failed restart fails the deploy" bash -c '[ "$0" != 0 ] && [ "$(jq -r .ok <<<"$1")" = false ]' "$RC" "$OUT"
 reset_state
 run "$D/deploy.sh" idea03 app-disk app-kolibri feat-a --yes
 check "deploy app-disk ok"                test "$RC" = 0
