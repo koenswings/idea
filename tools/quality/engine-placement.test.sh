@@ -29,7 +29,7 @@ host="$1"; shift
 [[ "${FAKE_UNREACHABLE:-0}" == 1 ]] && exit 255
 echo "$host :: $*" >>"$FAKE_LOG"
 case "$*" in
-  *"rev-parse HEAD"*) echo "${FAKE_SHA:-0123456789abcdef0123456789abcdef01234567}" ;;
+  *"ls-remote"*) echo "${FAKE_SHA:-0123456789abcdef0123456789abcdef01234567}	refs/heads/main" ;;
   *"pm2 jlist"*) if [[ "${FAKE_ONLINE:-1}" == 1 ]]; then echo '[{"name":"engine","pm2_env":{"status":"online"}}]'; else echo '[]'; fi ;;
   *"pnpm test:full"*) echo remote-tests-ran; [[ -n "${FAKE_OUT:-}" ]] && cat "$FAKE_OUT"; exit "${FAKE_RC:-0}" ;;
 esac
@@ -114,9 +114,11 @@ check "pool idea03 passes" "$tst.status==\"passed\" and $tst.where==\"pool\"" "$
 loghas "pool: claim as Atlas" "ufs BOT=Atlas idea03 claim"
 loghas "pool: pm2 stop engine" "pm2 stop engine"
 loghas "pool: allow-live unset remotely" "env -u IDEA_TEST_ALLOW_LIVE pnpm test:full"
-loghas "pool: reads deployed SHA" "git -C /home/pi/idea/agents/agent-engine-dev rev-parse HEAD"
+loghas "pool: reads origin/main SHA" "git ls-remote \$(git -C /home/pi/idea/agents/agent-engine-dev remote get-url origin) refs/heads/main"
+check "pool: scanned_sha recorded" "$tst.scanned_sha==\"0123456789abcdef0123456789abcdef01234567\" and $tst.scanned_ref==\"origin/main\"" "$out"
+loghas "pool: fetches origin/main SHA in scratch" "git fetch -q origin 0123456789abcdef0123456789abcdef01234567"
 loghas "pool: scratch clone of deployed tree" "git clone -q /home/pi/idea/agents/agent-engine-dev /home/pi/scratch/qs-agent-engine-dev-"
-loghas "pool: checkout of the deployed SHA" "git checkout -q 0123456789abcdef0123456789abcdef01234567"
+loghas "pool: checkout of the origin/main SHA" "git checkout -q 0123456789abcdef0123456789abcdef01234567"
 lognot "pool: never cd into the deployed tree" "cd /home/pi/idea/agents/agent-engine-dev &&"
 loghas "pool: scratch quarantined (moved)" "mkdir -p /home/pi/scratch/quarantine/"
 lognot "pool: scratch never deleted" "rm -rf"
@@ -132,7 +134,7 @@ loghas "pool failure still restores" "pm2 restart engine"
 loghas "pool failure still releases" "--null idea03 claim"
 loghas "pool failure still quarantines scratch" "mkdir -p /home/pi/scratch/quarantine/"
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_SHA=garbage)"
-check "pool: unreadable deployed SHA → skipped, not run" "$tst.reason==\"deployed_sha_unreadable\"" "$out"
+check "pool: unreadable main SHA → skipped, not run" "$tst.reason==\"main_sha_unreadable\"" "$out"
 lognot "unreadable SHA: no tests" "pnpm test:full"
 loghas "unreadable SHA: still restored" "pm2 restart engine"
 

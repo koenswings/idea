@@ -53,7 +53,7 @@ Paths (canonical Pi / local layout):
   remote tests    → same nesting under /home/pi/idea/
 
 Engine tests (idea#335, idea#332): run on pool Pi idea01 by default (claim, pm2 stop,
-  run in a scratch clone of the deployed tree at its HEAD SHA under /home/pi/scratch, then
+  run in a scratch clone under /home/pi/scratch checked out at origin/main HEAD (scanned_sha), then
   quarantine the clone (moved, never deleted), pm2 restart + online check, release;
   trap on failure/interrupt; needs BOT_NAME).
   Box fallback only when idea01 is claimed, held, unreachable or its pre-flight refuses
@@ -856,21 +856,22 @@ run_engine_tests_pool() {
       return
     fi
   fi
-  # idea#332: never run in the deployed tree. Clone it into a scratch dir at the SAME SHA as its
-  # HEAD, run there, then quarantine the clone (moved, never deleted). The deployed tree is read only.
+  # idea#332: never run in the deployed tree. Clone it into a scratch dir, fetch origin/main there
+  # and check out its HEAD SHA (recorded as scanned_sha), run, then quarantine the clone (moved,
+  # never deleted). The deployed tree is only read (cloned from), never changed.
   remote_path="/home/pi/idea/agents/${repo}"
   local stamp sha
   stamp="$(date -u +%Y%m%dT%H%M%SZ)"
   ENGINE_POOL_SCRATCH="${QUALITY_SCAN_PI_SCRATCH_ROOT}/qs-${repo}-${stamp}"
-  sha="$(engine_ssh "$host" "git -C ${remote_path} rev-parse HEAD" 2>/dev/null | tail -1)"
+  sha="$(engine_ssh "$host" "git ls-remote \$(git -C ${remote_path} remote get-url origin) refs/heads/main" 2>/dev/null | awk '{print $1}' | tail -1)"
   if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
     engine_pool_restore
-    jq -nc --arg pi "$pi" '{status:"skipped",reason:"deployed_sha_unreadable",pi:$pi}'
+    jq -nc --arg pi "$pi" '{status:"skipped",reason:"main_sha_unreadable",pi:$pi}'
     return
   fi
-  echo "quality-scan: ${pi}: scratch clone ${ENGINE_POOL_SCRATCH} at deployed SHA ${sha:0:12}" >&2
+  echo "quality-scan: ${pi}: scratch clone ${ENGINE_POOL_SCRATCH} at origin/main ${sha:0:12}" >&2
   set +e
-  out="$(engine_ssh "$host" "set -e; mkdir -p ${QUALITY_SCAN_PI_SCRATCH_ROOT} && git clone -q ${remote_path} ${ENGINE_POOL_SCRATCH} && cd ${ENGINE_POOL_SCRATCH} && git checkout -q ${sha} && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && env -u IDEA_TEST_ALLOW_LIVE ${cmd}" 2>&1)"
+  out="$(engine_ssh "$host" "set -e; mkdir -p ${QUALITY_SCAN_PI_SCRATCH_ROOT} && git clone -q ${remote_path} ${ENGINE_POOL_SCRATCH} && cd ${ENGINE_POOL_SCRATCH} && git fetch -q origin ${sha} && git checkout -q ${sha} && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && env -u IDEA_TEST_ALLOW_LIVE ${cmd}" 2>&1)"
   rc=$?
   set -e
   engine_pool_restore
@@ -880,7 +881,8 @@ run_engine_tests_pool() {
       '{status:"skipped",reason:"preflight_refused",pi:$pi,detail:$d}'
     return
   fi
-  engine_result "$repo" "pool" "claimed pool Pi ${pi} (pm2 engine stopped)" "$rc" "$out"
+  engine_result "$repo" "pool" "claimed pool Pi ${pi} (pm2 engine stopped)" "$rc" "$out" |
+    jq -c --arg sha "$sha" '. + {scanned_ref:"origin/main",scanned_sha:$sha}'
 }
 
 # Pool Pi first (default idea01); box fallback only when the Pi is claimed, held,
