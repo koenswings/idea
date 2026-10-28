@@ -160,6 +160,17 @@ else
   echo "FAIL engine-placement (idea#335): run tools/quality/engine-placement.test.sh"; fail=$((fail + 1))
 fi
 
+# idea#332: pool-Pi chain defaults (idea04 → box, trip 73 °C under the 75 °C limit), guard and worker defaults unchanged
+QS="${SCRIPT_DIR}/quality-scan.sh"
+for want in 'QUALITY_SCAN_ENGINE_PI="${QUALITY_SCAN_ENGINE_PI-idea04}"' \
+            'QUALITY_SCAN_ENGINE_PI_FALLBACK="${QUALITY_SCAN_ENGINE_PI_FALLBACK-}"' \
+            'QUALITY_SCAN_THERMAL_TRIP_C="${QUALITY_SCAN_THERMAL_TRIP_C:-$(( QUALITY_SCAN_THERMAL_LIMIT_C - 2 ))}"' \
+            'QUALITY_SCAN_THERMAL_LIMIT_C="${QUALITY_SCAN_THERMAL_LIMIT_C:-75}"' \
+            'QUALITY_SCAN_PI_MAX_WORKERS="${QUALITY_SCAN_PI_MAX_WORKERS:-1}"'; do
+  if grep -qF -- "$want" "$QS"; then echo "PASS default: $want"; pass=$((pass + 1))
+  else echo "FAIL default missing: $want"; fail=$((fail + 1)); fi
+done
+
 echo "---"
 echo "selftest: $pass passed, $fail failed"
 if [[ $fail -gt 0 ]]; then

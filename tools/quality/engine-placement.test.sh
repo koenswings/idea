@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # engine-placement.test.sh — idea#335: where quality-scan runs Engine tests.
 # Box by default; opt-in claimed idle pool Pi (claim, pm2 stop/start as pi, release);
-# idea01 default + stop-aware, box fallback (idea#332); refusals for idea02, production, kits, busy/claimed Pis.
+# idea04 default → box (optional second Pi) fallback chain (idea#332); refusals for idea02, production, kits, busy/claimed Pis.
 # SSH and update-fleet-state.sh are stubbed; no network, no real Pi.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,9 +31,11 @@ echo "$host :: $*" >>"$FAKE_LOG"
 case "$*" in
   *"ls-remote"*) echo "${FAKE_SHA:-0123456789abcdef0123456789abcdef01234567}	refs/heads/main" ;;
   *"pm2 jlist"*) if [[ "${FAKE_ONLINE:-1}" == 1 ]]; then echo '[{"name":"engine","pm2_env":{"status":"online"}}]'; else echo '[]'; fi ;;
-  *"thermal_zone0/temp"*) echo "${FAKE_TEMP:-50000}" ;;
+  *"thermal_zone0/temp"*) if [[ -n "${FAKE_HOT_HOST:-}" && "${host#pi@}" == "$FAKE_HOT_HOST" ]]; then echo "${FAKE_HOT_TEMP:-80000}"; else echo "${FAKE_TEMP:-50000}"; fi ;;
   *".qs-pgid); fi"*) : >"$FAKE_LOG.killed" ;;
   *"pnpm test:full"*) echo remote-tests-ran
+    if [[ -n "${FAKE_REFUSE_HOST:-}" && "${host#pi@}" == "$FAKE_REFUSE_HOST" ]]; then
+      printf 'Test pre-flight: REFUSING to run tests — this machine looks like it runs a live Engine:\n  - live (non-test) containers are running: kolibri-x\n'; exit 1; fi
     if [[ -n "${FAKE_TEST_SLEEP:-}" ]]; then
       echo " ✓ t1"; echo " ✓ t2"; echo " × t3"
       for _ in $(seq 1 $(( FAKE_TEST_SLEEP * 10 ))); do [[ -f "$FAKE_LOG.killed" ]] && exit 143; sleep 0.1; done
@@ -62,7 +64,7 @@ scan() {
   : >"$T/log"; rm -f "$T/log.killed"
   PATH="$T/bin:$PATH" FAKE_LOG="$T/log" QUALITY_SCAN_FLEET_STATE="$T/state.json" \
     QUALITY_SCAN_SSH="$T/bin/fakessh" QUALITY_SCAN_UFS="$T/bin/fakeufs" \
-    IDEA_TEST_ALLOW_LIVE=1 QUALITY_SCAN_DRY_RUN_TESTS=0 QUALITY_SCAN_ENGINE_PI= QUALITY_SCAN_THERMAL_INTERVAL=0.1 "$@" "$SCAN" --repo-root "$T/root" --repos agent-engine-dev 2>/dev/null || true
+    IDEA_TEST_ALLOW_LIVE=1 QUALITY_SCAN_DRY_RUN_TESTS=0 QUALITY_SCAN_ENGINE_PI= QUALITY_SCAN_ENGINE_PI_FALLBACK= QUALITY_SCAN_THERMAL_INTERVAL=0.1 "$@" "$SCAN" --repo-root "$T/root" --repos agent-engine-dev 2>/dev/null || true
 }
 check() { # name jq-expr json
   if echo "$3" | jq -e "$2" >/dev/null 2>&1; then echo "PASS $1"; pass=$((pass+1)); else echo "FAIL $1"; echo "$3" | jq -c '.results[0].checks.tests' 2>/dev/null || echo "$3" | tail -5; fail=$((fail+1)); fi
@@ -85,32 +87,75 @@ out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea04)"
 check "claimed idea04 → box fallback (pi_claimed)" "$tst.where==\"box\" and $tst.fallback_from==\"idea04\" and $tst.fallback_reason==\"pi_claimed\"" "$out"
 lognot "claimed idea04: no claim taken" "ufs"
 
-# idea#332 (Steve, option a): default target idea01, stop-aware like the other pool Pis
-out="$(scan env -u QUALITY_SCAN_ENGINE_PI BOT_NAME=Atlas FAKE_ONLINE=1)"
-check "default (unset) → pool idea01 passes" "$tst.status==\"passed\" and $tst.where==\"pool\"" "$out"
-loghas "idea01 default: claim" "ufs BOT=Atlas idea01 claim"
-loghas "idea01 live: pm2 stop engine" "10.0.0.1 :: pm2 stop engine"
+# idea#332: default chain idea04 → idea01 → box (idea04 default since 2026-10-28, Koen)
+D='-u QUALITY_SCAN_ENGINE_PI QUALITY_SCAN_ENGINE_PI_FALLBACK=idea01'   # chain with an explicit second Pi
+free04() { sed 's/"idea04":{"role":"spare","status":"idle","host":"10.0.0.4","claim":"Axle x"}/"idea04":{"role":"spare","status":"idle","host":"10.0.0.4","claim":null}/' "$T/state.json" >"$T/s2"; mv "$T/s2" "$T/state.json"; }
+mkstate   # idea04 claimed in the fixture
+out="$(scan env -u QUALITY_SCAN_ENGINE_PI -u QUALITY_SCAN_ENGINE_PI_FALLBACK BOT_NAME=Atlas FAKE_ONLINE=1)"
+check "true default: idea04 claimed → box, idea01 never used" "$tst.where==\"box\" and ($tst.fallback_chain|map(.pi))==[\"idea04\"]" "$out"
+lognot "true default: idea01 untouched" "idea01"
+lognot "true default: no ssh to idea01" "10.0.0.1"
+mkstate; free04
+out="$(scan env -u QUALITY_SCAN_ENGINE_PI -u QUALITY_SCAN_ENGINE_PI_FALLBACK BOT_NAME=Atlas FAKE_ONLINE=1 FAKE_REFUSE_HOST=10.0.0.4)"
+check "true default: idea04 pre-flight refuses → box" "$tst.where==\"box\" and $tst.fallback_reason==\"preflight_refused\" and ($tst.fallback_chain|length)==1" "$out"
+lognot "true default refusal: idea01 untouched" "10.0.0.1"
+out="$(scan env $D BOT_NAME=Atlas FAKE_ONLINE=1)"
+check "default (unset) → pool idea04 passes, no fallback" "$tst.status==\"passed\" and $tst.where==\"pool\" and (has(\"fallback_chain\")|not)" "$out"
+loghas "idea04 default: claim" "ufs BOT=Atlas idea04 claim"
+loghas "idea04: pm2 stop engine" "10.0.0.4 :: pm2 stop engine"
+loghas "idea04: missing ~/scratch is created" "mkdir -p /home/pi/scratch && git clone"
+loghas "idea04: scratch quarantined in ~/quarantine" "mkdir -p /home/pi/quarantine/"
+lognot "idea04: not in ~/scratch/quarantine" "/home/pi/scratch/quarantine/"
+loghas "idea04: pm2 restart engine" "10.0.0.4 :: pm2 restart engine"
+loghas "idea04: release" "ufs BOT=Atlas --null idea04 claim"
+lognot "idea04 passes: idea01 untouched" "idea01"
+order="$(grep -nE 'idea04 claim|10.0.0.4 :: pm2 stop' "$T/log" | head -2 | cut -d: -f1 | tr '\n' ' ')"
+if [[ "$(echo "$order" | wc -w)" -eq 2 && "$(echo $order | cut -d' ' -f1)" -lt "$(echo $order | cut -d' ' -f2)" ]]; then echo "PASS idea04: claim before stop"; pass=$((pass+1)); else echo "FAIL idea04 claim/stop order: $order"; fail=$((fail+1)); fi
+
+mkstate   # idea04 claimed in the fixture
+out="$(scan env $D BOT_NAME=Atlas FAKE_ONLINE=1)"
+check "idea04 claimed → pool idea01 passes, chain recorded" "$tst.status==\"passed\" and $tst.where==\"pool\" and $tst.fallback_from==\"idea04\" and $tst.fallback_reason==\"pi_claimed\" and ($tst.fallback_chain|map(.pi+\":\"+.reason))==[\"idea04:pi_claimed\"]" "$out"
+lognot "idea04 claimed: no ssh to idea04" "10.0.0.4 ::"
+loghas "idea01: claim" "ufs BOT=Atlas idea01 claim"
+loghas "idea01: pm2 stop engine" "10.0.0.1 :: pm2 stop engine"
+loghas "idea01: scratch quarantined in ~/scratch/quarantine" "mkdir -p /home/pi/scratch/quarantine/"
 loghas "idea01: pm2 restart engine" "10.0.0.1 :: pm2 restart engine"
 loghas "idea01: release" "ufs BOT=Atlas --null idea01 claim"
 loghas "idea01: idle" "ufs BOT=Atlas idea01 status idle"
 
 sed 's/"idea01":{"role":"spare","status":"idle"/"idea01":{"role":"spare","status":"hold"/' "$T/state.json" >"$T/s2"; mv "$T/s2" "$T/state.json"
-out="$(scan env -u QUALITY_SCAN_ENGINE_PI BOT_NAME=Atlas)"
-check "idea01 held → box fallback" "$tst.where==\"box\" and $tst.fallback_reason==\"never_live_production\"" "$out"
-lognot "idea01 held: no ssh" "::"
+out="$(scan env $D BOT_NAME=Atlas)"
+check "idea04 claimed, idea01 held → box, both hops" "$tst.where==\"box\" and ($tst.fallback_chain|map(.pi+\":\"+.reason))==[\"idea04:pi_claimed\",\"idea01:never_live_production\"]" "$out"
+lognot "both skipped: no ssh" "::"
 mkstate
 sed 's/"idea01":{"role":"spare","status":"idle","host":"10.0.0.1","claim":null}/"idea01":{"role":"spare","status":"idle","host":"10.0.0.1","claim":"Kid x"}/' "$T/state.json" >"$T/s2"; mv "$T/s2" "$T/state.json"
-out="$(scan env -u QUALITY_SCAN_ENGINE_PI BOT_NAME=Atlas)"
-check "idea01 claimed → box fallback" "$tst.where==\"box\" and $tst.fallback_reason==\"pi_claimed\"" "$out"
-mkstate
-out="$(scan env -u QUALITY_SCAN_ENGINE_PI BOT_NAME=Atlas FAKE_UNREACHABLE=1)"
-check "idea01 unreachable → box fallback" "$tst.where==\"box\" and $tst.fallback_reason==\"pi_unreachable\"" "$out"
+out="$(scan env $D BOT_NAME=Atlas)"
+check "idea04 + idea01 claimed → box" "$tst.where==\"box\" and $tst.fallback_chain[1].reason==\"pi_claimed\" and $tst.fallback_chain[1].pi==\"idea01\"" "$out"
+mkstate; free04
+out="$(scan env $D BOT_NAME=Atlas FAKE_UNREACHABLE=1)"
+check "idea04 + idea01 unreachable → box" "$tst.where==\"box\" and ($tst.fallback_chain|map(.pi+\":\"+.reason))==[\"idea04:pi_unreachable\",\"idea01:pi_unreachable\"]" "$out"
 lognot "unreachable: no claim" "ufs"
+out="$(scan env $D BOT_NAME=Atlas FAKE_ONLINE=1 FAKE_REFUSE_HOST=10.0.0.4)"
+check "idea04 pre-flight refuses → pool idea01 passes" "$tst.where==\"pool\" and $tst.status==\"passed\" and $tst.fallback_from==\"idea04\" and $tst.fallback_reason==\"preflight_refused\" and ($tst.fallback_chain[0].detail|test(\"kolibri-x\"))" "$out"
+loghas "pre-flight refusal: idea04 restored" "10.0.0.4 :: pm2 restart engine"
+loghas "pre-flight refusal: idea04 released" "ufs BOT=Atlas --null idea04 claim"
+loghas "pre-flight refusal: idea04 scratch quarantined" "10.0.0.4 :: if [ -d /home/pi/scratch/qs-agent-engine-dev-"
+loghas "then idea01 claimed" "ufs BOT=Atlas idea01 claim"
+order="$(grep -nE -- '--null idea04 claim|idea01 claim$|BOT=Atlas idea01 claim ' "$T/log" | cut -d: -f1 | tr '\n' ' ')"
+if [[ "$(echo $order | cut -d' ' -f1)" -lt "$(echo $order | cut -d' ' -f2)" ]]; then echo "PASS idea04 released before idea01 claimed"; pass=$((pass+1)); else echo "FAIL release/claim order: $order"; fail=$((fail+1)); fi
 printf 'Test pre-flight: REFUSING to run tests — this machine looks like it runs a live Engine:\n  - live (non-test) containers are running: x\n' >"$T/preflight.out"
-out="$(scan env -u QUALITY_SCAN_ENGINE_PI BOT_NAME=Atlas FAKE_ONLINE=1 FAKE_OUT="$T/preflight.out" FAKE_RC=1)"
-check "idea01 pre-flight refuses → box fallback" "$tst.where==\"box\" and $tst.fallback_reason==\"preflight_refused\" and $tst.status==\"passed\"" "$out"
-loghas "pre-flight refusal: Engine restored" "10.0.0.1 :: pm2 restart engine"
-loghas "pre-flight refusal: claim released" "ufs BOT=Atlas --null idea01 claim"
+out="$(scan env $D BOT_NAME=Atlas FAKE_ONLINE=1 FAKE_OUT="$T/preflight.out" FAKE_RC=1)"
+check "pre-flight refuses on idea04 and idea01 → box passes" "$tst.where==\"box\" and $tst.status==\"passed\" and ($tst.fallback_chain|map(.reason))==[\"preflight_refused\",\"preflight_refused\"]" "$out"
+out="$(scan env $D BOT_NAME=Atlas FAKE_ONLINE=1 FAKE_HOT_HOST=10.0.0.4 FAKE_TEST_SLEEP=20)"
+check "thermal abort on idea04 → pool idea01, peak per target" "$tst.where==\"pool\" and $tst.fallback_reason==\"thermal\" and $tst.fallback_chain[0].abort_temp_c==80 and $tst.fallback_chain[0].peak_temp_c==80 and $tst.peak_temp_c==50 and $tst.pool_attempt.pi==\"idea04\"" "$out"
+loghas "thermal idea04: group killed" "10.0.0.4 :: if [ -s /home/pi/scratch/qs-agent-engine-dev-"
+loghas "thermal idea04: released" "ufs BOT=Atlas --null idea04 claim"
+out="$(scan env $D BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI_FALLBACK= FAKE_UNREACHABLE=1)"
+check "empty fallback → idea04 then box" "$tst.where==\"box\" and ($tst.fallback_chain|length)==1" "$out"
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea02 QUALITY_SCAN_ENGINE_PI_FALLBACK=idea01)"
+check "refusal ends the chain (idea02 never falls through)" "$tst.status==\"skipped\" and $tst.reason==\"never_live_production\"" "$out"
+lognot "refused idea02: idea01 untouched" "ufs"
+mkstate
 
 out="$(scan env BOT_NAME=unknown QUALITY_SCAN_ENGINE_PI=idea03)"
 check "pool needs BOT_NAME" "$tst.reason==\"claim_needs_bot_name\"" "$out"
@@ -154,12 +199,12 @@ loghas "pool: suite in its own session, pgid recorded" "setsid -w sh -c 'echo \$
 loghas "pool: VITEST_MAX_WORKERS=2 passed" "VITEST_MAX_WORKERS=2 pnpm test:full"
 
 # thermal guard (idea#332): stubbed temperatures, a slow stubbed suite
-out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_TEMP=74999 FAKE_TEST_SLEEP=1)"
-check "thermal: 74.999 °C is below the limit → stays on the Pi" "$tst.where==\"pool\" and $tst.peak_temp_c==74.999 and (has(\"fallback_reason\")|not)" "$out"
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_TEMP=72999 FAKE_TEST_SLEEP=1)"
+check "thermal: 72.999 °C is below the 73 °C trip → stays on the Pi" "$tst.where==\"pool\" and $tst.peak_temp_c==72.999 and $tst.thermal_trip_c==73 and $tst.thermal_limit_c==75 and (has(\"fallback_reason\")|not)" "$out"
 lognot "thermal: below limit, no kill" "kill -TERM --"
-out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_TEMP=75000 FAKE_TEST_SLEEP=20)"
-check "thermal: 75 °C → box fallback, fallback_reason=thermal" "$tst.where==\"box\" and $tst.fallback_reason==\"thermal\" and $tst.fallback_from==\"idea03\" and $tst.status==\"passed\"" "$out"
-check "thermal: pool_attempt records abort temp, peak, workers, tests done" "$tst.pool_attempt.reason==\"thermal\" and $tst.pool_attempt.abort_temp_c==75 and $tst.pool_attempt.peak_temp_c==75 and $tst.pool_attempt.max_workers==1 and $tst.pool_attempt.pi_tests_passed_before_abort==2 and $tst.pool_attempt.pi_tests_failed_before_abort==1" "$out"
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_TEMP=73000 FAKE_TEST_SLEEP=20)"
+check "thermal: 73 °C trips (2 °C under the 75 °C limit) → box fallback, fallback_reason=thermal" "$tst.where==\"box\" and $tst.fallback_reason==\"thermal\" and $tst.fallback_from==\"idea03\" and $tst.status==\"passed\"" "$out"
+check "thermal: pool_attempt records abort temp, peak, workers, tests done" "$tst.pool_attempt.reason==\"thermal\" and $tst.pool_attempt.abort_temp_c==73 and $tst.pool_attempt.peak_temp_c==73 and $tst.pool_attempt.max_workers==1 and $tst.pool_attempt.pi_tests_passed_before_abort==2 and $tst.pool_attempt.pi_tests_failed_before_abort==1" "$out"
 loghas "thermal: whole process group killed" "then kill -TERM -- -\$(cat /home/pi/scratch/qs-agent-engine-dev-"
 loghas "thermal: Engine restored" "pm2 restart engine"
 loghas "thermal: claim released" "ufs BOT=Atlas --null idea03 claim"
@@ -167,7 +212,9 @@ loghas "thermal: scratch quarantined" "mkdir -p /home/pi/scratch/quarantine/"
 order="$( { grep -nE 'kill -TERM --' "$T/log" | head -1; grep -nE 'pm2 restart|--null idea03 claim' "$T/log"; } | cut -d: -f1 | tr '\n' ' ')"
 if [[ "$(echo "$order" | tr ' ' '\n' | grep -v '^$' | sort -n | tr '\n' ' ')" == "$order" ]] && [[ $(echo "$order" | wc -w) -eq 3 ]]; then echo "PASS thermal order kill→restore→release"; pass=$((pass+1)); else echo "FAIL thermal order: $order"; fail=$((fail+1)); fi
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_TEMP=60000 FAKE_TEST_SLEEP=20 QUALITY_SCAN_THERMAL_LIMIT_C=60)"
-check "thermal: limit configurable" "$tst.fallback_reason==\"thermal\" and $tst.pool_attempt.abort_temp_c==60" "$out"
+check "thermal: limit configurable (trip follows at limit-2)" "$tst.fallback_reason==\"thermal\" and $tst.pool_attempt.abort_temp_c==60 and $tst.pool_attempt.thermal_trip_c==58" "$out"
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_TEMP=74000 FAKE_TEST_SLEEP=1 QUALITY_SCAN_THERMAL_TRIP_C=75)"
+check "thermal: trip point configurable (75 → 74 °C stays)" "$tst.where==\"pool\" and $tst.thermal_trip_c==75" "$out"
 
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=0)"
 check "pool engine offline passes" "$tst.status==\"passed\"" "$out"
