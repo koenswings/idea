@@ -172,6 +172,37 @@ check "set-golden skips unreachable, never claimed/wh/kit" test "$(j .golden)" =
 reset_state
 run "$D/set-golden-pi.sh" --yes;          check "set-golden refuses 2 golden"      test "$RC" = 1
 
+# --- --ignore-fleet-hold (skips ONLY the fleet-wide HOLD/PAUSED) ---
+reset_state; touch "$HEALTH_DIR/HOLD"; echo "paused" > "$HEALTH_DIR/PAUSED"
+ERR="$("$D/deploy.sh" idea01 engine agent-engine-dev x --yes --ignore-fleet-hold 2>&1 >/dev/null)"
+run "$D/deploy.sh" idea01 engine agent-engine-dev x --yes --ignore-fleet-hold
+check "override: deploy proceeds under HOLD+PAUSED" test "$RC" = 0
+check "override: JSON fleet_hold_ignored true"  test "$(j .fleet_hold_ignored)" = true
+check "override: JSON lists both flags"         test "$(j '.fleet_hold_flags|join(",")')" = "HOLD,PAUSED"
+check "override: warning on stderr"             bash -c '[[ "$0" == *"WARNING: --ignore-fleet-hold"* ]]' "$ERR"
+check "override: HOLD/PAUSED files untouched"   test -e "$HEALTH_DIR/HOLD" -a -e "$HEALTH_DIR/PAUSED"
+run "$D/teardown.sh" idea01 --yes --ignore-fleet-hold
+check "override: teardown proceeds"             test "$RC" = 0
+run "$D/teardown.sh" idea01 --yes
+check "no override: teardown still refuses"     test "$RC" = 1
+for t in idea02 gold kit1 wh idea04; do
+  run "$D/deploy.sh" "$t" engine agent-engine-dev x --yes --ignore-fleet-hold
+  check "override: per-Pi refusal $t kept"      test "$RC" = 1
+done
+jq '.idea03.status="hold"' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+run "$D/deploy.sh" idea03 engine agent-engine-dev x --yes --ignore-fleet-hold
+check "override: per-Pi status hold kept"       test "$RC" = 1
+jq '.idea03.status="paused"' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+run "$D/deploy.sh" idea03 engine agent-engine-dev x --yes --ignore-fleet-hold
+check "override: per-Pi status paused kept"     test "$RC" = 1
+FAKE_TEMP=80.0 run "$D/deploy.sh" idea01 engine agent-engine-dev x --yes --ignore-fleet-hold
+check "override: temperature still refuses"     test "$RC" = 1
+run "$D/update-golden.sh" engine main --yes --ignore-fleet-hold
+check "override: update-golden still refuses 2 golden" test "$RC" = 1
+rm -f "$HEALTH_DIR/HOLD" "$HEALTH_DIR/PAUSED"
+run "$D/deploy.sh" idea01 engine agent-engine-dev x --ignore-fleet-hold
+check "override without hold: no field"         test "$(j '.fleet_hold_ignored // "absent"')" = absent
+
 check "real fleet-state and audit untouched" test "$(real_fp)" = "$REAL_BEFORE"
 echo "passed $pass, failed $fail"
 [ "$fail" = 0 ]

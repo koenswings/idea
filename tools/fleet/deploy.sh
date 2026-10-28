@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# deploy.sh <pi> <component> <repo> <branch> [--yes]   (idea#107)
+# deploy.sh <pi> <component> <repo> <branch> [--yes] [--ignore-fleet-hold]   (idea#107)
 # Full deploy of a review branch onto ONE review/spare Pi, from the box. JSON result on stdout.
 #   component engine   : repo agent-engine-dev; reuses deploy-engine-remote.sh (keeps config.yaml,
 #                        pm2.config.cjs and store-identity/, pi's pm2 restart + save, 75/65 C guard)
@@ -16,7 +16,7 @@
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/fleet-lib.sh"
 YES=0; ARGS=()
-for a in "$@"; do case "$a" in --yes) YES=1 ;; -h|--help) fl_usage 15 ;; *) ARGS+=("$a") ;; esac; done
+for a in "$@"; do case "$a" in --yes) YES=1 ;; --ignore-fleet-hold) IGNORE_FLEET_HOLD=1 ;; -h|--help) fl_usage 15 ;; *) ARGS+=("$a") ;; esac; done
 [ ${#ARGS[@]} -eq 4 ] || fl_usage 15
 PI="${ARGS[0]}"; COMP="${ARGS[1]}"; REPO="${ARGS[2]}"; BRANCH="${ARGS[3]}"
 SLUG="$REPO"; [[ "$SLUG" == */* ]] || SLUG="koenswings/$REPO"; NAME="${SLUG##*/}"
@@ -26,7 +26,7 @@ case "$COMP" in
   app-disk) [[ "$NAME" == app-* ]]          || fl_die "component app-disk needs an app-* repo, got $NAME" usage 2 ;;
   *) fl_die "component must be engine, console or app-disk" usage 2 ;;
 esac
-fl_paused && fl_die "fleet changes are paused ($HEALTH_DIR/PAUSED or HOLD exists)"
+fl_fleet_hold_check
 fl_guard_pi "$PI" review
 HOST="$(fl_host "$PI")"
 SHA="$(fl_remote_sha "$SLUG" "$BRANCH")"; [ -n "$SHA" ] || fl_die "branch $BRANCH not found on $SLUG" resolve

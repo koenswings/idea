@@ -38,7 +38,8 @@ fl_finish() {
   local rc="$1" ok="$2" msg="$3" extra="${4:-{\}}"
   jq -nc --arg script "$FL_SCRIPT" --argjson ok "$ok" --arg msg "$msg" --argjson steps "$FL_STEPS" \
      --argjson extra "$extra" --arg bot "$BOT_NAME" --arg at "$(date -u +%FT%TZ)" \
-     '{script:$script,ok:$ok,message:$msg,bot:$bot,at:$at,steps:$steps} + $extra'
+     --argjson hold "${FL_HOLD_JSON:-{\}}" \
+     '{script:$script,ok:$ok,message:$msg,bot:$bot,at:$at,steps:$steps} + $hold + $extra'
   exit "$rc"
 }
 fl_die() { fl_step "${2:-guard}" false "$1"; fl_finish "${3:-1}" false "$1"; }
@@ -61,6 +62,22 @@ fl_ssh() {  # fl_ssh <host> <remote command>
 
 # fl_paused: fleet changes are paused while check-fleet-health.sh keeps PAUSED or HOLD.
 fl_paused() { [ -e "$HEALTH_DIR/PAUSED" ] || [ -e "$HEALTH_DIR/HOLD" ]; }
+# fl_fleet_hold_check: refuse while the fleet-wide HOLD/PAUSED exists, unless IGNORE_FLEET_HOLD=1
+# (--ignore-fleet-hold). The override skips ONLY this fleet-wide check: per-Pi refusals and the
+# temperature check stay in force. When used it warns on stderr and records
+# "fleet_hold_ignored": true plus the flags present in the JSON result. The files are never touched.
+IGNORE_FLEET_HOLD="${IGNORE_FLEET_HOLD:-0}"
+fl_fleet_hold_check() {
+  fl_paused || return 0
+  local present; present="$(for f in HOLD PAUSED; do [ -e "$HEALTH_DIR/$f" ] && echo "$f"; done | jq -R . | jq -sc .)"
+  if [ "$IGNORE_FLEET_HOLD" = 1 ]; then
+    echo "WARNING: --ignore-fleet-hold: fleet-wide $(jq -r 'join("+")' <<<"$present") in $HEALTH_DIR ignored for this run; per-Pi refusals and the temperature check still apply" >&2
+    FL_HOLD_JSON="$(jq -nc --argjson p "$present" '{fleet_hold_ignored:true,fleet_hold_flags:$p}')"
+    fl_step fleet_hold true "ignored by --ignore-fleet-hold: $(jq -r 'join(",")' <<<"$present")"
+    return 0
+  fi
+  fl_die "fleet changes are paused ($HEALTH_DIR/PAUSED or HOLD exists; --ignore-fleet-hold skips only this check)"
+}
 
 # fl_guard_pi <pi> <mode>: refuse anything these scripts must never touch.
 #   mode review  : review/spare Pi for deploy/teardown (refuse golden, production, kit, pending)

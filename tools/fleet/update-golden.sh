@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# update-golden.sh <component> <version> [--yes]   (idea#107, dedicated golden model idea#118)
+# update-golden.sh <component> <version> [--yes] [--ignore-fleet-hold]   (idea#107, dedicated golden model idea#118)
 # Deploy merged main of engine|console onto the ONE Pi with role: golden, from the box.
 #   <version>  a commit SHA on main, or "main" for the current tip. A SHA that is not on main is refused.
 # Engine via deploy-engine-remote.sh, Console via checkout + build-console-pi.sh; then the post-check
@@ -12,7 +12,7 @@
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/fleet-lib.sh"
 YES=0; ARGS=()
-for a in "$@"; do case "$a" in --yes) YES=1 ;; -h|--help) fl_usage 12 ;; *) ARGS+=("$a") ;; esac; done
+for a in "$@"; do case "$a" in --yes) YES=1 ;; --ignore-fleet-hold) IGNORE_FLEET_HOLD=1 ;; -h|--help) fl_usage 12 ;; *) ARGS+=("$a") ;; esac; done
 [ ${#ARGS[@]} -eq 2 ] || fl_usage 12
 COMP="${ARGS[0]}"; VER="${ARGS[1]}"
 case "$COMP" in engine) SLUG=koenswings/agent-engine-dev ;; console) SLUG=koenswings/agent-console-dev ;;
@@ -20,7 +20,7 @@ case "$COMP" in engine) SLUG=koenswings/agent-engine-dev ;; console) SLUG=koensw
 mapfile -t GOLD < <(jq -r 'to_entries[] | select((.key|startswith("_")|not) and (.value|type=="object") and .value.role=="golden") | .key' "$STATE_FILE")
 [ ${#GOLD[@]} -eq 1 ] || fl_die "need exactly one Pi with role golden, found ${#GOLD[@]} (${GOLD[*]:-none}); see set-golden-pi.sh"
 PI="${GOLD[0]}"
-fl_paused && fl_die "fleet changes are paused ($HEALTH_DIR/PAUSED or HOLD exists)"
+fl_fleet_hold_check
 fl_guard_pi "$PI" golden
 HOST="$(fl_host "$PI")"
 TIP="$(fl_remote_sha "$SLUG" main)"; [ -n "$TIP" ] || fl_die "cannot resolve $SLUG main" resolve

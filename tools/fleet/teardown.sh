@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# teardown.sh <pi> [--yes]   (idea#107)
+# teardown.sh <pi> [--yes] [--ignore-fleet-hold]   (idea#107)
 # Reverse a deploy on ONE review/spare Pi, from the box. JSON result on stdout.
 # Restores merged main in the locked nested layout:
 #   Engine  /home/pi/idea/agents/agent-engine-dev   via deploy-engine-remote.sh (keeps config + store identity)
@@ -14,10 +14,10 @@
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/fleet-lib.sh"
 YES=0; ARGS=()
-for a in "$@"; do case "$a" in --yes) YES=1 ;; -h|--help) fl_usage 13 ;; *) ARGS+=("$a") ;; esac; done
+for a in "$@"; do case "$a" in --yes) YES=1 ;; --ignore-fleet-hold) IGNORE_FLEET_HOLD=1 ;; -h|--help) fl_usage 13 ;; *) ARGS+=("$a") ;; esac; done
 [ ${#ARGS[@]} -eq 1 ] || fl_usage 13
 PI="${ARGS[0]}"
-fl_paused && fl_die "fleet changes are paused ($HEALTH_DIR/PAUSED or HOLD exists)"
+fl_fleet_hold_check
 fl_guard_pi "$PI" review
 HOST="$(fl_host "$PI")"; REPO="$(fl_get "$PI" repo)"
 ESHA="$(fl_remote_sha koenswings/agent-engine-dev main)"; CSHA="$(fl_remote_sha koenswings/agent-console-dev main)"

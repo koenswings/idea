@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# set-golden-pi.sh [--yes]   (idea#107, dedicated golden model idea#118)
+# set-golden-pi.sh [--yes] [--ignore-fleet-hold]   (idea#107, dedicated golden model idea#118)
 # Keep exactly one golden Pi. If the current role: golden Pi answers ssh, nothing changes ("healthy").
 # If there is none, or it is unreachable, designate the most recently idle Pi as golden:
 #   candidates: role review|spare, status idle, no claim, not in FLEET_DENY, not the wh host, reachable;
@@ -12,8 +12,8 @@
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/fleet-lib.sh"
 YES=0
-for a in "$@"; do case "$a" in --yes) YES=1 ;; -h|--help) fl_usage 12 ;; *) fl_usage 12 ;; esac; done
-fl_paused && fl_die "fleet changes are paused ($HEALTH_DIR/PAUSED or HOLD exists)"
+for a in "$@"; do case "$a" in --yes) YES=1 ;; --ignore-fleet-hold) IGNORE_FLEET_HOLD=1 ;; -h|--help) fl_usage 12 ;; *) fl_usage 12 ;; esac; done
+fl_fleet_hold_check
 mapfile -t GOLD < <(jq -r 'to_entries[] | select((.key|startswith("_")|not) and (.value|type=="object") and .value.role=="golden") | .key' "$STATE_FILE")
 [ ${#GOLD[@]} -le 1 ] || fl_die "more than one Pi has role golden (${GOLD[*]}); fix fleet-state by hand"
 OLD="${GOLD[0]:-}"
