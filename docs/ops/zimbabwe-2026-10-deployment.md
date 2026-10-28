@@ -55,14 +55,30 @@ kind-panda is checked when it comes online.
 
 From the field (asked Justice, 28 Oct 2026): every TBC field in "The schools" above.
 
-From ops (Atlas), waiting for the devices to come online:
+From ops (Atlas). Status on 28 Oct 2026, 13:55 CET:
 
-- kind-panda: Kolibri ID check, disk space, on-device capture.
-- kind-panda-router: firmware version and MAC.
-- happy-zebra-router: WAN MAC and the IDEA router release file.
-- Full router captures for sunny-robin-router and happy-zebra-router (SSH doesn't get through over Tailscale yet).
-- happy-zebra: turn the 28 Oct capture into a full record.
-- The 10th classroom computer, and which card is in which machine.
+- **kind-panda: BLOCKED (offline).** The Kolibri ID check, `df -h /` and the on-device capture all wait for it.
+  It was last seen on Tailscale 9 days ago.
+- **kind-panda-router: BLOCKED (offline).** Firmware version and MAC still to read. Last seen 9 days ago.
+- **happy-zebra-router WAN MAC: DONE.** It's `d4:0d:ab:50:ca:c9`, read through ubus.
+- **happy-zebra-router release file: PARTLY DONE.** `/etc/idea-router-release` does not exist on these
+  routers, on either sunny-robin or happy-zebra. The release info is in `/etc/idea/version` (100 bytes), which only
+  root can read, and ubus refuses to read it. Its content is still open.
+- **Full router captures (sunny-robin-router, happy-zebra-router): BLOCKED, cause found.** Dropbear is configured
+  with `Interface=lan`, so SSH only listens on the LAN, not on `tailscale0`. The firewall's tailscale zone does
+  accept the traffic. That is why every SSH attempt over Tailscale is closed before the banner (exit 3).
+  There are two ways to capture: from a device on the kit LAN, or after a dropbear change in a window Koen
+  approves. We made no router changes.
+- **happy-zebra full record: DONE.** It's in `deployments/engines/happy-zebra/capture-2026-10-28/` (record,
+  packages, images, helpers, raw capture). Its packages and helpers are identical to sunny-robin's. Still missing:
+  `files.sha256` and `dist.sha256`.
+- **Router host keys (ed25519):** happy-zebra-router `SHA256:TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs`,
+  sunny-robin-router `SHA256:TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE`. Both were read on 28 Oct 2026 from the
+  Engine on the same LAN. happy-zebra's `known_hosts` (last written 18 Oct 2026, 19:10) holds a different key for
+  10.42.0.1. Either a router was swapped or reflashed after that date, or it saw another router at that address.
+- **The 10th classroom computer and the card-to-machine mapping: BLOCKED.** Our card log has no mapping. The
+  happy-zebra router's leases on 28 Oct showed only machines we already know (35f2, 5b4c, 671c, 841d, 58c3).
+  We need either `capture-device.sh` on each client, or a photo or list from the field.
 - Router install dates and the Cudy intermediate firmware source: only Koen knows these.
 
 ## Detailed records

@@ -29,7 +29,8 @@ evidence=router-fix-out/SHA256SUMS (box) lists only b2f00bc; #271
 confidence=likely: only kit-era build on the box; not captured on a device
 firmware=OpenWrt 25.12.5 r33051-f5dae5ece4 (mediatek/filogic, kernel 6.12.94)
 macLan=d4:0d:ab:50:ca:c8 (br-lan/eth0)
-macWan=UNKNOWN (not in the 2026-10-28 ubus read)
-routerRelease=UNKNOWN (/etc/idea-router-release not readable through ubus: permission denied)
+macWan=d4:0d:ab:50:ca:c9 (wan device, ubus luci-rpc getNetworkDevices 2026-10-28 13:50 CET)
+routerRelease=UNKNOWN (/etc/idea-router-release does not exist on this image; the release info is /etc/idea/version, 100 bytes, root-only, not readable through ubus; /etc/idea/sticker written 2026-10-17 08:53 CEST)
 observedAt=2026-10-28 ~11:17 CET, read-only through ubus over Tailscale (Atlas, idea#288 comment 2026-10-28); no changes made
-open=full capture with tools/repro/capture-device.sh (blocked: SSH closed through the box's Tailscale proxy, same as sunny-robin-router; firmware + LAN MAC closed by the ubus read); WAN MAC
+open=full capture with tools/repro/capture-device.sh (blocked: dropbear is bound to Interface=lan, so port 22 is not reachable on tailscale0; same on sunny-robin-router; needs a LAN path or a dropbear change in an approved window); /etc/idea/version content
+hostKeyEd25519=SHA256:TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs (ssh-keyscan from happy-zebra over the LAN, 2026-10-28)
