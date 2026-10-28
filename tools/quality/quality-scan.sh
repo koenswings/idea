@@ -52,10 +52,12 @@ Paths (canonical Pi / local layout):
   --repo-root DIR → override parent of agents/ (fixtures: DIR/agents/<name>)
   remote tests    → same nesting under /home/pi/idea/
 
-Engine tests (idea#335): run on the box by default (refused on a fleet Pi).
-  QUALITY_SCAN_ENGINE_PI=<pi>  use a claimed idle pool Pi instead (pm2 engine
-                               stopped, restored and released afterwards; needs BOT_NAME;
-                               never idea01 while live, idea02, production or kits)
+Engine tests (idea#335, idea#332): run on pool Pi idea01 by default (claim, pm2 stop,
+  run, pm2 restart + online check, release; trap on failure/interrupt; needs BOT_NAME).
+  Box fallback only when idea01 is claimed, held, unreachable or its pre-flight refuses
+  (logged on stderr as "Engine tests target=box (fallback from …)").
+  QUALITY_SCAN_ENGINE_PI=<pi>  use another claimed idle pool Pi; empty forces the box
+                               (never idea02, production or kits)
   QUALITY_SCAN_SOCKS=host:port SSH via SOCKS5 (box: 127.0.0.1:1055)
   QUALITY_SCAN_TEST_LOG=FILE   append raw Engine test output to FILE
   Box runs only: failures listed in tools/quality/engine-box-exceptions.txt (the
@@ -104,6 +106,7 @@ fi
 # --- Finding accumulators (temp files for jq assembly) ---
 TMPDIR_SCAN="$(mktemp -d)"
 trap 'engine_pool_restore 2>/dev/null || true; rm -rf "$TMPDIR_SCAN"' EXIT
+trap 'exit 130' INT; trap 'exit 143' TERM  # interrupt → EXIT trap restores the Engine and releases the claim
 FINDINGS_FILE="$TMPDIR_SCAN/findings.jsonl"
 RESULTS_FILE="$TMPDIR_SCAN/results.jsonl"
 : >"$FINDINGS_FILE"
@@ -629,7 +632,10 @@ check_bakeins() {
 # production Engine (idea01 while live, idea02, 'idea'/production, kit Engines).
 # The idea#105 pre-flight in the Engine suite is NOT touched: IDEA_TEST_ALLOW_LIVE is
 # always unset for the test command.
-QUALITY_SCAN_ENGINE_PI="${QUALITY_SCAN_ENGINE_PI:-}"
+# idea#332 (Steve, option a): default target is pool Pi idea01. Set QUALITY_SCAN_ENGINE_PI=""
+# (empty) to force the box. Falls back to the box when idea01 is claimed, held or
+# unreachable, or when the Engine test pre-flight refuses there.
+QUALITY_SCAN_ENGINE_PI="${QUALITY_SCAN_ENGINE_PI-idea01}"
 QUALITY_SCAN_SOCKS="${QUALITY_SCAN_SOCKS:-}"
 QUALITY_SCAN_UFS="${QUALITY_SCAN_UFS:-${IDEA_ROOT}/tools/fleet/update-fleet-state.sh}"
 QUALITY_SCAN_SSH="${QUALITY_SCAN_SSH:-ssh}"
@@ -777,8 +783,16 @@ ENGINE_POOL_PI=""; ENGINE_POOL_HOST=""; ENGINE_POOL_WAS_ONLINE=0; ENGINE_POOL_CL
 engine_pool_restore() {
   [[ -n "$ENGINE_POOL_PI" ]] || return 0
   if [[ $ENGINE_POOL_WAS_ONLINE -eq 1 ]]; then
-    engine_ssh "$ENGINE_POOL_HOST" "pm2 start engine >/dev/null" >/dev/null 2>&1 \
-      || echo "WARN: pm2 start engine failed on ${ENGINE_POOL_PI}; restore by hand" >&2
+    local back
+    engine_ssh "$ENGINE_POOL_HOST" "pm2 restart engine >/dev/null" >/dev/null 2>&1 \
+      || echo "WARN: pm2 restart engine failed on ${ENGINE_POOL_PI}; restore by hand" >&2
+    back="$(engine_ssh "$ENGINE_POOL_HOST" "pm2 jlist 2>/dev/null" 2>/dev/null \
+      | jq -r '[.[] | select(.name=="engine" and .pm2_env.status=="online")] | length' 2>/dev/null || echo 0)"
+    if [[ "${back:-0}" == "0" ]]; then
+      echo "WARN: Engine on ${ENGINE_POOL_PI} is not online after pm2 restart; restore by hand" >&2
+    else
+      echo "quality-scan: Engine on ${ENGINE_POOL_PI} restored (pm2 online)" >&2
+    fi
     ENGINE_POOL_WAS_ONLINE=0
   fi
   if [[ $ENGINE_POOL_CLAIMED -eq 1 ]]; then
@@ -812,16 +826,17 @@ run_engine_tests_pool() {
   fi
   online="$(engine_ssh "$host" "pm2 jlist 2>/dev/null" 2>/dev/null \
     | jq -r '[.[] | select(.name=="engine" and .pm2_env.status=="online")] | length' 2>/dev/null || echo 0)"
-  if [[ "$pi" == "idea01" && "${online:-0}" != "0" ]]; then
-    jq -nc '{status:"skipped",reason:"never_live_production",detail:"idea01 Engine is live"}'
-    return
-  fi
+  # idea01 is stop-aware like the other pool Pis (idea#332): claim, pm2 stop, run, restore, release.
   # Claim (update-fleet-state.sh holds the flock).
   if ! STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" "$pi" claim "${BOT_NAME} quality-scan engine tests" >/dev/null 2>&1; then
     jq -nc --arg pi "$pi" '{status:"skipped",reason:"claim_failed",pi:$pi}'
     return
   fi
   ENGINE_POOL_PI="$pi"; ENGINE_POOL_HOST="$host"; ENGINE_POOL_CLAIMED=1
+  # This function runs inside $(…), which does not inherit the top-level traps: set them here
+  # so a failure or interrupt still restores the Engine and releases the claim (idea#332).
+  trap 'engine_pool_restore 2>/dev/null || true' EXIT
+  trap 'exit 130' INT; trap 'exit 143' TERM
   STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" "$pi" status testing >/dev/null 2>&1 || true
   if [[ "${online:-0}" != "0" ]]; then
     ENGINE_POOL_WAS_ONLINE=1
@@ -838,7 +853,38 @@ run_engine_tests_pool() {
   set -e
   engine_pool_restore
   if [[ -n "${QUALITY_SCAN_TEST_LOG:-}" ]]; then printf '%s\n' "$out" >>"$QUALITY_SCAN_TEST_LOG"; fi
+  if printf '%s\n' "$out" | grep -q 'Test pre-flight: REFUSING'; then
+    jq -nc --arg pi "$pi" --arg d "$(printf '%s\n' "$out" | grep -A3 'Test pre-flight: REFUSING' | tr '\n' ' ')" \
+      '{status:"skipped",reason:"preflight_refused",pi:$pi,detail:$d}'
+    return
+  fi
   engine_result "$repo" "pool" "claimed pool Pi ${pi} (pm2 engine stopped)" "$rc" "$out"
+}
+
+# Pool Pi first (default idea01); box fallback only when the Pi is claimed, held,
+# unreachable, or its pre-flight refuses. Other refusals (idea02, production, kits, …) stand.
+run_engine_tests_placed() {
+  local repo="$1" root="$2" pi="$QUALITY_SCAN_ENGINE_PI" pool reason detail
+  if [[ -z "$pi" ]]; then
+    echo "quality-scan: Engine tests target=box (QUALITY_SCAN_ENGINE_PI empty)" >&2
+    run_engine_tests_box "$repo" "$root"
+    return
+  fi
+  pool="$(run_engine_tests_pool "$repo" "$root")"
+  reason="$(jq -r '.reason // ""' <<<"$pool")"
+  detail="$(jq -r '.detail // ""' <<<"$pool")"
+  case "$reason" in
+    pi_claimed|pi_not_idle|pi_unreachable|preflight_refused) ;;
+    never_live_production) [[ "$detail" == *":status=hold" ]] || reason="" ;;
+    *) reason="" ;;
+  esac
+  if [[ -z "$reason" ]]; then
+    echo "quality-scan: Engine tests target=pool ${pi} ($(jq -r '.status + (if .reason then " " + .reason else "" end)' <<<"$pool"))" >&2
+    printf '%s\n' "$pool"
+    return
+  fi
+  echo "quality-scan: Engine tests target=box (fallback from ${pi}: ${reason}${detail:+ — $detail})" >&2
+  run_engine_tests_box "$repo" "$root" | jq -c --arg pi "$pi" --arg r "$reason" '. + {fallback_from:$pi, fallback_reason:$r}'
 }
 
 # --- Tests ---
@@ -874,11 +920,7 @@ run_tests_for_repo() {
   fi
 
   if [[ "$domain" == "engine" ]]; then
-    if [[ -n "$QUALITY_SCAN_ENGINE_PI" ]]; then
-      run_engine_tests_pool "$repo" "$root"
-    else
-      run_engine_tests_box "$repo" "$root"
-    fi
+    run_engine_tests_placed "$repo" "$root"
     return
   fi
 

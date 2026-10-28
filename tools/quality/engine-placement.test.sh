@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # engine-placement.test.sh — idea#335: where quality-scan runs Engine tests.
 # Box by default; opt-in claimed idle pool Pi (claim, pm2 stop/start as pi, release);
-# refusals for idea01-live, idea02, production, kits, busy/claimed Pis.
+# idea01 default + stop-aware, box fallback (idea#332); refusals for idea02, production, kits, busy/claimed Pis.
 # SSH and update-fleet-state.sh are stubbed; no network, no real Pi.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -26,6 +26,7 @@ cat >"$T/bin/fakessh" <<'S'
 #!/usr/bin/env bash
 while [[ "$1" == -o ]]; do shift 2; done
 host="$1"; shift
+[[ "${FAKE_UNREACHABLE:-0}" == 1 ]] && exit 255
 echo "$host :: $*" >>"$FAKE_LOG"
 case "$*" in
   *"pm2 jlist"*) if [[ "${FAKE_ONLINE:-1}" == 1 ]]; then echo '[{"name":"engine","pm2_env":{"status":"online"}}]'; else echo '[]'; fi ;;
@@ -54,7 +55,7 @@ scan() {
   : >"$T/log"
   PATH="$T/bin:$PATH" FAKE_LOG="$T/log" QUALITY_SCAN_FLEET_STATE="$T/state.json" \
     QUALITY_SCAN_SSH="$T/bin/fakessh" QUALITY_SCAN_UFS="$T/bin/fakeufs" \
-    IDEA_TEST_ALLOW_LIVE=1 QUALITY_SCAN_DRY_RUN_TESTS=0 "$@" "$SCAN" --repo-root "$T/root" --repos agent-engine-dev 2>/dev/null || true
+    IDEA_TEST_ALLOW_LIVE=1 QUALITY_SCAN_DRY_RUN_TESTS=0 QUALITY_SCAN_ENGINE_PI= "$@" "$SCAN" --repo-root "$T/root" --repos agent-engine-dev 2>/dev/null || true
 }
 check() { # name jq-expr json
   if echo "$3" | jq -e "$2" >/dev/null 2>&1; then echo "PASS $1"; pass=$((pass+1)); else echo "FAIL $1"; echo "$3" | jq -c '.results[0].checks.tests' 2>/dev/null || echo "$3" | tail -5; fail=$((fail+1)); fi
@@ -74,11 +75,35 @@ for pi in idea02 wizardly-hugle idea sunny-robin; do
   lognot "refuse $pi: no claim" "ufs"
 done
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea04)"
-check "refuse claimed idea04" "$tst.reason==\"pi_claimed\"" "$out"
+check "claimed idea04 → box fallback (pi_claimed)" "$tst.where==\"box\" and $tst.fallback_from==\"idea04\" and $tst.fallback_reason==\"pi_claimed\"" "$out"
+lognot "claimed idea04: no claim taken" "ufs"
 
-out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea01 FAKE_ONLINE=1)"
-check "refuse idea01 while Engine live" "$tst.reason==\"never_live_production\"" "$out"
-lognot "idea01 live: no claim, no stop" "ufs"
+# idea#332 (Steve, option a): default target idea01, stop-aware like the other pool Pis
+out="$(scan env -u QUALITY_SCAN_ENGINE_PI BOT_NAME=Atlas FAKE_ONLINE=1)"
+check "default (unset) → pool idea01 passes" "$tst.status==\"passed\" and $tst.where==\"pool\"" "$out"
+loghas "idea01 default: claim" "ufs BOT=Atlas idea01 claim"
+loghas "idea01 live: pm2 stop engine" "10.0.0.1 :: pm2 stop engine"
+loghas "idea01: pm2 restart engine" "10.0.0.1 :: pm2 restart engine"
+loghas "idea01: release" "ufs BOT=Atlas --null idea01 claim"
+loghas "idea01: idle" "ufs BOT=Atlas idea01 status idle"
+
+sed 's/"idea01":{"role":"spare","status":"idle"/"idea01":{"role":"spare","status":"hold"/' "$T/state.json" >"$T/s2"; mv "$T/s2" "$T/state.json"
+out="$(scan env -u QUALITY_SCAN_ENGINE_PI BOT_NAME=Atlas)"
+check "idea01 held → box fallback" "$tst.where==\"box\" and $tst.fallback_reason==\"never_live_production\"" "$out"
+lognot "idea01 held: no ssh" "::"
+mkstate
+sed 's/"idea01":{"role":"spare","status":"idle","host":"10.0.0.1","claim":null}/"idea01":{"role":"spare","status":"idle","host":"10.0.0.1","claim":"Kid x"}/' "$T/state.json" >"$T/s2"; mv "$T/s2" "$T/state.json"
+out="$(scan env -u QUALITY_SCAN_ENGINE_PI BOT_NAME=Atlas)"
+check "idea01 claimed → box fallback" "$tst.where==\"box\" and $tst.fallback_reason==\"pi_claimed\"" "$out"
+mkstate
+out="$(scan env -u QUALITY_SCAN_ENGINE_PI BOT_NAME=Atlas FAKE_UNREACHABLE=1)"
+check "idea01 unreachable → box fallback" "$tst.where==\"box\" and $tst.fallback_reason==\"pi_unreachable\"" "$out"
+lognot "unreachable: no claim" "ufs"
+printf 'Test pre-flight: REFUSING to run tests — this machine looks like it runs a live Engine:\n  - live (non-test) containers are running: x\n' >"$T/preflight.out"
+out="$(scan env -u QUALITY_SCAN_ENGINE_PI BOT_NAME=Atlas FAKE_ONLINE=1 FAKE_OUT="$T/preflight.out" FAKE_RC=1)"
+check "idea01 pre-flight refuses → box fallback" "$tst.where==\"box\" and $tst.fallback_reason==\"preflight_refused\" and $tst.status==\"passed\"" "$out"
+loghas "pre-flight refusal: Engine restored" "10.0.0.1 :: pm2 restart engine"
+loghas "pre-flight refusal: claim released" "ufs BOT=Atlas --null idea01 claim"
 
 out="$(scan env BOT_NAME=unknown QUALITY_SCAN_ENGINE_PI=idea03)"
 check "pool needs BOT_NAME" "$tst.reason==\"claim_needs_bot_name\"" "$out"
@@ -88,20 +113,20 @@ check "pool idea03 passes" "$tst.status==\"passed\" and $tst.where==\"pool\"" "$
 loghas "pool: claim as Atlas" "ufs BOT=Atlas idea03 claim"
 loghas "pool: pm2 stop engine" "pm2 stop engine"
 loghas "pool: allow-live unset remotely" "env -u IDEA_TEST_ALLOW_LIVE pnpm test:full"
-loghas "pool: pm2 start engine" "pm2 start engine"
+loghas "pool: pm2 restart engine" "pm2 restart engine"
 loghas "pool: release claim" "ufs BOT=Atlas --null idea03 claim"
 loghas "pool: status idle" "ufs BOT=Atlas idea03 status idle"
-order="$(grep -nE 'pm2 stop|pnpm test:full|pm2 start|--null idea03 claim' "$T/log" | cut -d: -f1 | tr '\n' ' ')"
-if [[ "$(echo "$order" | tr ' ' '\n' | grep -v '^$' | sort -n | tr '\n' ' ')" == "$order" ]] && [[ $(echo "$order" | wc -w) -eq 4 ]]; then echo "PASS pool order stop→test→start→release"; pass=$((pass+1)); else echo "FAIL pool order: $order"; fail=$((fail+1)); fi
+order="$(grep -nE 'pm2 stop|pnpm test:full|pm2 restart|--null idea03 claim' "$T/log" | cut -d: -f1 | tr '\n' ' ')"
+if [[ "$(echo "$order" | tr ' ' '\n' | grep -v '^$' | sort -n | tr '\n' ' ')" == "$order" ]] && [[ $(echo "$order" | wc -w) -eq 4 ]]; then echo "PASS pool order stop→test→restart→release"; pass=$((pass+1)); else echo "FAIL pool order: $order"; fail=$((fail+1)); fi
 
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_RC=1)"
 check "pool failure reported" "$tst.status==\"failed\"" "$out"
-loghas "pool failure still restores" "pm2 start engine"
+loghas "pool failure still restores" "pm2 restart engine"
 loghas "pool failure still releases" "--null idea03 claim"
 
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=0)"
 check "pool engine offline passes" "$tst.status==\"passed\"" "$out"
-lognot "offline: no pm2 start" "pm2 start engine"
+lognot "offline: no pm2 restart" "pm2 restart engine"
 
 # Known box exceptions (PR #343, Steve option c)
 K1='dist-test/test/automated/instance-lifecycle.test.js > Instance lifecycle (automated, real containers) > instance reaches Running and container responds to HTTP after dock'
