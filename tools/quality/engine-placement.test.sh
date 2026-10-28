@@ -66,6 +66,13 @@ scan() {
     QUALITY_SCAN_SSH="$T/bin/fakessh" QUALITY_SCAN_UFS="$T/bin/fakeufs" \
     IDEA_TEST_ALLOW_LIVE=1 QUALITY_SCAN_DRY_RUN_TESTS=0 QUALITY_SCAN_ENGINE_PI= QUALITY_SCAN_ENGINE_PI_FALLBACK= QUALITY_SCAN_THERMAL_INTERVAL=0.1 "$@" "$SCAN" --repo-root "$T/root" --repos agent-engine-dev 2>/dev/null || true
 }
+scanpr() { # PR mode: --pr --repo agent-engine-dev --base B --head H
+  local head="$1"; shift
+  : >"$T/log"; rm -f "$T/log.killed"
+  PATH="$T/bin:$PATH" FAKE_LOG="$T/log" QUALITY_SCAN_FLEET_STATE="$T/state.json" \
+    QUALITY_SCAN_SSH="$T/bin/fakessh" QUALITY_SCAN_UFS="$T/bin/fakeufs" \
+    IDEA_TEST_ALLOW_LIVE=1 QUALITY_SCAN_DRY_RUN_TESTS=0 QUALITY_SCAN_ENGINE_PI= QUALITY_SCAN_ENGINE_PI_FALLBACK= QUALITY_SCAN_THERMAL_INTERVAL=0.1 "$@" "$SCAN" --repo-root "$T/root" --pr --repo agent-engine-dev --base HEAD --head "$head" 2>/dev/null || true
+}
 check() { # name jq-expr json
   if echo "$3" | jq -e "$2" >/dev/null 2>&1; then echo "PASS $1"; pass=$((pass+1)); else echo "FAIL $1"; echo "$3" | jq -c '.results[0].checks.tests' 2>/dev/null || echo "$3" | tail -5; fail=$((fail+1)); fi
 }
@@ -197,6 +204,24 @@ out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 QUALI
 check "pool: worker setting configurable" "$tst.max_workers==2" "$out"
 loghas "pool: suite in its own session, pgid recorded" "setsid -w sh -c 'echo \$\$ > .qs-pgid;"
 loghas "pool: VITEST_MAX_WORKERS=2 passed" "VITEST_MAX_WORKERS=2 pnpm test:full"
+
+# --pr mode tests the --head SHA, not origin/main HEAD.
+PRH=fedcba9876543210fedcba9876543210fedcba98
+out="$(scanpr "$PRH" env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1)"
+check "pr: passes on pool" "$tst.status==\"passed\" and $tst.where==\"pool\"" "$out"
+check "pr: scanned_sha is --head, ref pr-head" "$tst.scanned_sha==\"$PRH\" and $tst.scanned_ref==\"pr-head\"" "$out"
+lognot "pr: does not read origin/main SHA" "refs/heads/main"
+loghas "pr: fetches the head SHA" "git fetch -q \$(git -C /home/pi/idea/agents/agent-engine-dev remote get-url origin) $PRH"
+loghas "pr: falls back to refs/pull/*/head" "'+refs/pull/*/head:refs/remotes/origin/pr/*'"
+loghas "pr: checks out the head SHA" "git checkout -q $PRH"
+lognot "pr: never checks out origin/main SHA" "git checkout -q 0123456789abcdef0123456789abcdef01234567"
+loghas "pr: max_workers=1" "VITEST_MAX_WORKERS=1 pnpm test:full"
+loghas "pr: scratch quarantined" "mkdir -p /home/pi/scratch/quarantine/"
+loghas "pr: claim released" "ufs BOT=Atlas --null idea03 claim"
+out="$(scanpr abc123 env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1)"
+check "pr: short --head → skipped, not run" "$tst.reason==\"pr_head_not_full_sha\"" "$out"
+lognot "pr short head: no tests" "pnpm test:full"
+loghas "pr short head: still released" "--null idea03 claim"
 
 # thermal guard (idea#332): stubbed temperatures, a slow stubbed suite
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_TEMP=72999 FAKE_TEST_SLEEP=1)"
