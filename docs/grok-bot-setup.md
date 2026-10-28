@@ -340,7 +340,7 @@ ssh: docker compose ps                (verify running)
 
 One Pi is the dedicated golden instance (idea#118, Koen 2026-09-27; this replaces the temporary single-Pi rule from idea PR #112). Today that is `idea02`: `role: golden`, `status: idle`, `pr: null`, and a `version` such as `engine main@b233ccb, console main@af473f1`. It always runs the latest merged `main` of all components, keeps MilkWise running as a real workload, and is never used for PR review. `role: golden` (not `status`) is what excludes it from `find-available-pi.sh`.
 
-PR review deploys go to an idle Pi from the shared pool (`idea01`, `idea03`, or `idea04`; `role: spare` or `review`), for example `http://idea03.tail2d60.ts.net:8080/`. After a merge, `update-golden.sh` moves the golden Pi to `main` and updates its `version` (until idea#107 implements it, Ops does this by hand with `update-fleet-state.sh`); if the golden Pi becomes unavailable, `set-golden-pi.sh` designates the most recently idle Pi.
+PR review deploys go to an idle Pi from the shared pool (`idea01`, `idea03`, or `idea04`; `role: spare` or `review`), for example `http://idea03.tail2d60.ts.net:8080/`. After a merge, `update-golden.sh` moves the golden Pi to `main` and updates its `version` (`update-golden.sh <component> main --yes`; it refuses when no Pi or more than one Pi has `role: golden`); if the golden Pi becomes unavailable, `set-golden-pi.sh` designates the most recently idle Pi.
 
 ### 4.5 Health Monitoring
 
