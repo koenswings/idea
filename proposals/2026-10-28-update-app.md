@@ -2,7 +2,7 @@
 
 **Author:** Steve · IDEA Lead Bot
 **Date:** 2026-10-28
-**Status:** Draft (design review: Console, Engine and App done; Ops pending)
+**Status:** Draft (design review done: Console, Engine, App and Ops)
 
 Covers [agent-engine-dev#230](https://github.com/koenswings/agent-engine-dev/issues/230) (approved to build by Koen, 2026-10-28) and the `upgradeApp` half of [idea#76](https://github.com/koenswings/idea/issues/76). Touches [idea#74](https://github.com/koenswings/idea/issues/74) (Upgrade Disk) and [idea#77](https://github.com/koenswings/idea/issues/77) (Engine self-upgrade). Code read at Engine main `2583608`.
 
@@ -34,7 +34,7 @@ Constraints from these: offline sources first; one tap; never lose data; failure
 | **Engine** (Axle) | `updateApp` command and `upgradeApp` operation; pre-update snapshot; health gate; rollback; dock-time "update available" detection (#76). |
 | **Console** (Pixel) | "Update available" badge from `updateAvailable`, shown only when the Engine has the `updateApp` capability; confirm, progress and result dialogs (§7.3). |
 | **App Disks / Kid** | `x-app` fields (`healthCheck`, `healthTimeout`, `updatesFrom`, `migrationNote`, `snapshotExclude`) in app-kolibri, app-nextcloud, app-kiwix and app-milkwise; a harness test "update from previous release with real data"; measured first-start times after migrations on a pool Pi to set the defaults. |
-| **Ops** (Atlas) | Review pending: disk space, backups, reboot safety, fleet rollout. |
+| **Ops** (Atlas) | Reviewed: disk space, backups, reboot safety, fleet rollout (§9). |
 
 ## 4. Approach options
 
@@ -117,7 +117,7 @@ updateApp <instanceIdOrName> <newAppId> [--source <diskId>] [--allow-major]
 
 - **Unit**: argument parsing; every refusal code; minor/major rule; free-space measurement incl. named volumes and `snapshotExclude`; health gate (Docker healthy, body string, crash-loop early fail); `.env` and Engine-adjustment merge; rollback on every failing step (mocked docker).
 - **Engine integration (box, test mode)**: sample App 1.0 → 1.1 with data kept; 1.1 with a broken health URL rolls back to 1.0 with the same data; refusal when busy, when the disk is missing, for a major version without opt-in.
-- **Pi (pool Pi, claimed)**: real Kolibri and Nextcloud (DB volume) updates with real data; pull the disk during Swap and re-dock on **another** Engine, check it rolls back before starting; reboot during Start, check rollback on boot; `updateAvailable` cleared on undock and boot.
+- **Pi (pool Pi, claimed)**: real Kolibri and Nextcloud (DB volume) updates with real data; pull the disk during Swap and re-dock on **another** Engine, check it rolls back before starting; reboot during Start, check rollback on boot; Engine restarted during the health gate; `updateAvailable` cleared on undock and boot.
 - **Console**: "Update available" badge, confirm, progress and the rolled-back message (mock store + Playwright).
 - **App (Kid)**: harness test "update from previous release with real data" for app-kolibri, app-nextcloud, app-kiwix, app-milkwise; measured first-start times after migration set each App's `healthTimeout`.
 
@@ -126,11 +126,17 @@ updateApp <instanceIdOrName> <newAppId> [--source <diskId>] [--allow-major]
 - **Console (Pixel):** badge gated on the capability, local-only "Not now", confirm/progress/result wording, migration note and the backup gate for majors (§7.3).
 - **Engine (Axle):** named volumes in the snapshot and the space check, the on-disk journal with rollback by whichever Engine docks next, `updateAvailable` scoping and fields, Docker-healthy plus body-string health gate with crash-loop early fail, rollback of data (not just images), reuse of the install compose code, refusal codes and the `updateApp` capability.
 - **App Disks (Kid):** Nextcloud `updatesFrom` limited to the previous major, `snapshotExclude` for Kolibri `content/`, the `x-app` fields in four App repos, the harness update test and measured timings.
-- **Ops (Atlas):** pending.
+- **Ops (Atlas):**
+  - *Space:* the free-space check covers both disks: the App Disk (copy of `data/` and the named volumes minus `x-app.snapshotExclude`, plus the new image tars, plus about 10% margin) and the system disk's `/var/lib/docker`, because old and new images sit side by side. No hardlink (`cp -al`) snapshots, since SQLite and MariaDB change files in place. Old images are cleaned up only when the snapshot is deleted (moved to quarantine), not before.
+  - *Backups:* the `NEEDS_BACKUP` refusal text says "Dock a Backup Disk and make a backup first". In the field this effectively means no major updates without a Backup Disk, which is accepted.
+  - *Reboot safety:* add an integration test "Engine restarted during the health gate" next to the disk-pull test (pool Pis and the `idea` Pi reboot daily at 05:00). The Engine logs the CPU temperature during the swap. Fleet runs keep the 75 °C pause rule.
+  - *Rollout:* no new sudoers or root helpers (`docker load` and compose already run as pi). Order: Engine PR tested on claimed pool Pi idea04, then merge, then deploy to idea01, then golden. Kits only in an overnight window Koen opens.
+  - *Open questions:* Atlas's answers agree with the decisions below (per-App `healthTimeout` default 10 min; Borg backup required for majors; refuse without a copy; GitHub update is ops/dev-only; one instance at a time, later Pi by Pi stopping at the first rollback; keep the old bundle until the snapshot is deleted).
 
 Decided in review (former open questions): health timeout per App with a 10 min default; a major update needs a Borg backup under 1 h old; no space means refuse (`NO_SPACE`); GitHub updates only as a dev/ops command for tagged releases; one instance at a time; the old bundle stays on the disk.
 
 ## 10. Open questions
 
-1. **Ops review (Atlas):** disk space on real school disks, interplay with scheduled backups, reboot safety, and how a fleet-wide rollout is sequenced.
-2. **Measured timings (Kid):** first-start times after migrations on a pool Pi, to set each App's `healthTimeout` and the `estimatedMinutes` copy rate.
+All four reviews are done. Only one item remains:
+
+1. **Measured timings (Kid):** Kolibri 0.15.5 to main with real data and Nextcloud one major step, measured on idea04: first-start times after migration, to set each App's `healthTimeout` and the `estimatedMinutes` copy rate.
