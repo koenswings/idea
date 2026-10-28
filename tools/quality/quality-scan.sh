@@ -815,7 +815,10 @@ engine_thermal_watch() {
     if [[ "$t" =~ ^[0-9]+$ ]]; then
       if (( t > peak )); then peak=$t; echo "$peak" >"$d/peak"; fi
       if (( t >= limit )); then
-        [[ -f "$d/abort" ]] || echo "$t" >"$d/abort"
+        if [[ ! -f "$d/abort" ]]; then
+          echo "$t" >"$d/abort"
+          echo "quality-scan: ${ENGINE_POOL_PI:-pi}: THERMAL ABORT at $(( t / 1000 )) °C ($(date -u +%Y-%m-%dT%H:%M:%SZ)); stopping the suite's process group" >&2
+        fi
         # Keep stopping until the parent kills this watcher: the run may not have started yet.
         engine_ssh "$host" "if [ -s ${ENGINE_POOL_SCRATCH}/.qs-pgid ]; then kill -TERM -- -\$(cat ${ENGINE_POOL_SCRATCH}/.qs-pgid); fi" >/dev/null 2>&1 || true
       fi
