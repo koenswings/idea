@@ -662,3 +662,5 @@
 {"ts":"2026-10-27T17:52:10Z","bot":"selftest","action":"quality_scan","mode":"full","repos":["fixture-console-fail"],"ok":false,"violation_count":4}
 {"ts":"2026-10-28T08:53:10Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-28T08:53:10Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid","previous":null}
+{"ts":"2026-10-28T09:07:22Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas","previous":null}
+{"ts":"2026-10-28T09:07:22Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
