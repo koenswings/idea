@@ -53,7 +53,9 @@ Paths (canonical Pi / local layout):
   remote tests    → same nesting under /home/pi/idea/
 
 Engine tests (idea#335, idea#332): run on pool Pi idea01 by default (claim, pm2 stop,
-  run, pm2 restart + online check, release; trap on failure/interrupt; needs BOT_NAME).
+  run in a scratch clone of the deployed tree at its HEAD SHA under /home/pi/scratch, then
+  quarantine the clone (moved, never deleted), pm2 restart + online check, release;
+  trap on failure/interrupt; needs BOT_NAME).
   Box fallback only when idea01 is claimed, held, unreachable or its pre-flight refuses
   (logged on stderr as "Engine tests target=box (fallback from …)").
   QUALITY_SCAN_ENGINE_PI=<pi>  use another claimed idle pool Pi; empty forces the box
@@ -779,9 +781,17 @@ engine_result() {
 }
 
 # Pool-Pi path (opt-in). Claims, stops pm2 engine as pi, runs, restores, releases.
-ENGINE_POOL_PI=""; ENGINE_POOL_HOST=""; ENGINE_POOL_WAS_ONLINE=0; ENGINE_POOL_CLAIMED=0
+ENGINE_POOL_PI=""; ENGINE_POOL_HOST=""; ENGINE_POOL_WAS_ONLINE=0; ENGINE_POOL_CLAIMED=0; ENGINE_POOL_SCRATCH=""
+QUALITY_SCAN_PI_SCRATCH_ROOT="${QUALITY_SCAN_PI_SCRATCH_ROOT:-/home/pi/scratch}"
 engine_pool_restore() {
   [[ -n "$ENGINE_POOL_PI" ]] || return 0
+  if [[ -n "$ENGINE_POOL_SCRATCH" ]]; then
+    local q="${QUALITY_SCAN_PI_SCRATCH_ROOT}/quarantine/$(date -u +%Y%m%d)"
+    engine_ssh "$ENGINE_POOL_HOST" "if [ -d ${ENGINE_POOL_SCRATCH} ]; then mkdir -p ${q} && mv ${ENGINE_POOL_SCRATCH} ${q}/; fi" >/dev/null 2>&1 \
+      && echo "quality-scan: ${ENGINE_POOL_PI}: scratch quarantined under ${q}" >&2 \
+      || echo "WARN: could not quarantine ${ENGINE_POOL_SCRATCH} on ${ENGINE_POOL_PI}" >&2
+    ENGINE_POOL_SCRATCH=""
+  fi
   if [[ $ENGINE_POOL_WAS_ONLINE -eq 1 ]]; then
     local back
     engine_ssh "$ENGINE_POOL_HOST" "pm2 restart engine >/dev/null" >/dev/null 2>&1 \
@@ -846,9 +856,21 @@ run_engine_tests_pool() {
       return
     fi
   fi
+  # idea#332: never run in the deployed tree. Clone it into a scratch dir at the SAME SHA as its
+  # HEAD, run there, then quarantine the clone (moved, never deleted). The deployed tree is read only.
   remote_path="/home/pi/idea/agents/${repo}"
+  local stamp sha
+  stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+  ENGINE_POOL_SCRATCH="${QUALITY_SCAN_PI_SCRATCH_ROOT}/qs-${repo}-${stamp}"
+  sha="$(engine_ssh "$host" "git -C ${remote_path} rev-parse HEAD" 2>/dev/null | tail -1)"
+  if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+    engine_pool_restore
+    jq -nc --arg pi "$pi" '{status:"skipped",reason:"deployed_sha_unreadable",pi:$pi}'
+    return
+  fi
+  echo "quality-scan: ${pi}: scratch clone ${ENGINE_POOL_SCRATCH} at deployed SHA ${sha:0:12}" >&2
   set +e
-  out="$(engine_ssh "$host" "cd ${remote_path} && env -u IDEA_TEST_ALLOW_LIVE ${cmd}" 2>&1)"
+  out="$(engine_ssh "$host" "set -e; mkdir -p ${QUALITY_SCAN_PI_SCRATCH_ROOT} && git clone -q ${remote_path} ${ENGINE_POOL_SCRATCH} && cd ${ENGINE_POOL_SCRATCH} && git checkout -q ${sha} && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && env -u IDEA_TEST_ALLOW_LIVE ${cmd}" 2>&1)"
   rc=$?
   set -e
   engine_pool_restore

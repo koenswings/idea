@@ -29,6 +29,7 @@ host="$1"; shift
 [[ "${FAKE_UNREACHABLE:-0}" == 1 ]] && exit 255
 echo "$host :: $*" >>"$FAKE_LOG"
 case "$*" in
+  *"rev-parse HEAD"*) echo "${FAKE_SHA:-0123456789abcdef0123456789abcdef01234567}" ;;
   *"pm2 jlist"*) if [[ "${FAKE_ONLINE:-1}" == 1 ]]; then echo '[{"name":"engine","pm2_env":{"status":"online"}}]'; else echo '[]'; fi ;;
   *"pnpm test:full"*) echo remote-tests-ran; [[ -n "${FAKE_OUT:-}" ]] && cat "$FAKE_OUT"; exit "${FAKE_RC:-0}" ;;
 esac
@@ -113,6 +114,12 @@ check "pool idea03 passes" "$tst.status==\"passed\" and $tst.where==\"pool\"" "$
 loghas "pool: claim as Atlas" "ufs BOT=Atlas idea03 claim"
 loghas "pool: pm2 stop engine" "pm2 stop engine"
 loghas "pool: allow-live unset remotely" "env -u IDEA_TEST_ALLOW_LIVE pnpm test:full"
+loghas "pool: reads deployed SHA" "git -C /home/pi/idea/agents/agent-engine-dev rev-parse HEAD"
+loghas "pool: scratch clone of deployed tree" "git clone -q /home/pi/idea/agents/agent-engine-dev /home/pi/scratch/qs-agent-engine-dev-"
+loghas "pool: checkout of the deployed SHA" "git checkout -q 0123456789abcdef0123456789abcdef01234567"
+lognot "pool: never cd into the deployed tree" "cd /home/pi/idea/agents/agent-engine-dev &&"
+loghas "pool: scratch quarantined (moved)" "mkdir -p /home/pi/scratch/quarantine/"
+lognot "pool: scratch never deleted" "rm -rf"
 loghas "pool: pm2 restart engine" "pm2 restart engine"
 loghas "pool: release claim" "ufs BOT=Atlas --null idea03 claim"
 loghas "pool: status idle" "ufs BOT=Atlas idea03 status idle"
@@ -123,6 +130,11 @@ out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_
 check "pool failure reported" "$tst.status==\"failed\"" "$out"
 loghas "pool failure still restores" "pm2 restart engine"
 loghas "pool failure still releases" "--null idea03 claim"
+loghas "pool failure still quarantines scratch" "mkdir -p /home/pi/scratch/quarantine/"
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_SHA=garbage)"
+check "pool: unreadable deployed SHA → skipped, not run" "$tst.reason==\"deployed_sha_unreadable\"" "$out"
+lognot "unreadable SHA: no tests" "pnpm test:full"
+loghas "unreadable SHA: still restored" "pm2 restart engine"
 
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=0)"
 check "pool engine offline passes" "$tst.status==\"passed\"" "$out"
