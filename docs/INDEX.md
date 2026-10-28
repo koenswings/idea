@@ -19,6 +19,11 @@ control (§5), routines, team structure, and Bot descriptions.
 Ops view of IDEA security: Tailscale tag:idea/ACL, school network zones, the <account>911! default-password convention, SSH key-only, pm2 as pi, sudoers, secrets handling, backups and open risks. Contains no secret values.
 → [docs/ops/security-overview.md](ops/security-overview.md)
 
+## ops/zimbabwe-2026-10-deployment.md
+**Status:** Draft (idea#288)  ·  **Maintained by:** Marco / Atlas
+The 20 Oct 2026 Zimbabwe kit (Chigonda and Nharira): schools (most fields TBC with Justice), kit devices with sticker names, hardware and versions, Kolibri ID status, open gaps, and links to the deployments/ records. Contains no secret values.
+→ [docs/ops/zimbabwe-2026-10-deployment.md](ops/zimbabwe-2026-10-deployment.md)
+
 ## README.md
 **Status:** Authoritative  ·  **Maintained by:** Koen / Steve
 Short orientation for the `docs/` folder.
