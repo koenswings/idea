@@ -84,12 +84,13 @@ Each Pi runs:
 
 **Roles:** Pis are **test / review / golden** hardware. They are **not** coding agents while the Grok Build runner path is parked (§2.2).
 
-- **Shared test and review pool:** `idea01`, `idea03`, `idea04` (`role: spare` or `review`). Dev Bots claim a pool Pi for testing (§4.6); Ops deploys PRs for review to an idle pool Pi.
-- **Golden:** `idea02` (`role: golden`) — never used for testing or review.
+- **Shared test and review pool:** `idea01`, `idea04` (`role: spare` or `review`). Dev Bots claim a pool Pi for testing (§4.6); Ops deploys PRs for review to an idle pool Pi.
+- **Golden:** `idea03` (`role: golden`, since 2026-10-28) — never used for testing or review.
+- **`idea02`:** a LAN client and test-walk host, not a pool Pi (`role: fleet-pending`, `status: hold`); never claimed or deployed to.
 
 **Parked on idea02 only:** Grok Build stays installed; the self-hosted runner service is stopped after idea#147 merges (`runner: parked`). Neither is used for coding.
 
-**Roles are assigned dynamically at runtime** by the fleet scripts (see Section 2.4). By convention, the first available Pi for a given domain is used. One Pi is the dedicated golden Pi (`role: golden`, currently `idea02`); `idea01`, `idea03`, and `idea04` form the shared non-golden test/review pool (`role: spare` or `review`). These assignments are recorded in `fleet-state.json` and update as Pis come and go.
+**Roles are assigned dynamically at runtime** by the fleet scripts (see Section 2.4). By convention, the first available Pi for a given domain is used. One Pi is the dedicated golden Pi (`role: golden`, currently `idea03`); `idea01` and `idea04` form the shared non-golden test/review pool (`role: spare` or `review`). These assignments are recorded in `fleet-state.json` and update as Pis come and go.
 
 ### 2.3.1 Pi filesystem layout (canonical — test, dev, production)
 
@@ -181,7 +182,7 @@ Lead Bot discusses until approach agreed
   ▼
 Dev Bot reads issue + agreed approach comment
   → implements with own tools (clone / GitHub); reads AGENTS.md
-  → claims an idle pool Pi (idea01 / idea03 / idea04; never golden idea02)
+  → claims an idle pool Pi (idea01 / idea04; never golden idea03, never idea02)
     and runs domain tests over SSH — claim protocol §4.6
   → releases the Pi (main restored, pm2 restarted, status idle)
   │
@@ -284,7 +285,7 @@ Pis in this section are **review / golden / test** targets. Coding work does **n
 }
 ```
 
-`idea02` is the dedicated golden Pi and `idea03` the review Pi (idea#118); see §4.4. Every Pi records the mains or PR it runs in `version` / `pr`. New Pis are built with the Engine's `build-engine` (via `script/provision-fleet.sh` in agent-engine-dev) and added to `fleet-state.json` with `tools/fleet/update-fleet-state.sh --create` (the old `idea-setup.sh` stub was removed, idea#273).
+`idea03` is the dedicated golden Pi (since 2026-10-28) and `idea01` / `idea04` are the pool (idea#118); `idea02` is a LAN client and test-walk host, not a pool Pi; see §4.4. Every Pi records the mains or PR it runs in `version` / `pr`. New Pis are built with the Engine's `build-engine` (via `script/provision-fleet.sh` in agent-engine-dev) and added to `fleet-state.json` with `tools/fleet/update-fleet-state.sh --create` (the old `idea-setup.sh` stub was removed, idea#273).
 
 ### 4.2 Pi Allocation
 
@@ -338,9 +339,9 @@ ssh: docker compose ps                (verify running)
 
 ### 4.4 Golden Instance
 
-One Pi is the dedicated golden instance (idea#118, Koen 2026-09-27; this replaces the temporary single-Pi rule from idea PR #112). Today that is `idea02`: `role: golden`, `status: idle`, `pr: null`, and a `version` such as `engine main@b233ccb, console main@af473f1`. It always runs the latest merged `main` of all components, keeps MilkWise running as a real workload, and is never used for PR review. `role: golden` (not `status`) is what excludes it from `find-available-pi.sh`.
+One Pi is the dedicated golden instance (idea#118, Koen 2026-09-27; this replaces the temporary single-Pi rule from idea PR #112). Today that is `idea03` (Koen, 2026-10-28; `idea02` until 2026-10-07): `role: golden`, `status: idle`, `pr: null`, and a `version` such as `engine main@2583608, console main@7da3045`. It always runs the latest merged `main` of all components and is never used for PR review (MilkWise moved to wizardly-hugle on 2026-10-08). `role: golden` (not `status`) is what excludes it from `find-available-pi.sh`.
 
-PR review deploys go to an idle Pi from the shared pool (`idea01`, `idea03`, or `idea04`; `role: spare` or `review`), for example `http://idea03.tail2d60.ts.net:8080/`. After a merge, `update-golden.sh` moves the golden Pi to `main` and updates its `version` (`update-golden.sh <component> main --yes`; it refuses when no Pi or more than one Pi has `role: golden`). The idea#107 scripts refuse while the box health check holds `HOLD`/`PAUSED`; `--ignore-fleet-hold` skips only that fleet-wide check for one run and is recorded in the JSON result; if the golden Pi becomes unavailable, `set-golden-pi.sh` designates the most recently idle Pi.
+PR review deploys go to an idle Pi from the shared pool (`idea01` or `idea04`; `role: spare` or `review`), for example `http://idea04.tail2d60.ts.net:8080/`. After a merge, `update-golden.sh` moves the golden Pi to `main` and updates its `version` (`update-golden.sh <component> main --yes`; it refuses when no Pi or more than one Pi has `role: golden`). The idea#107 scripts refuse while the box health check holds `HOLD`/`PAUSED`; `--ignore-fleet-hold` skips only that fleet-wide check for one run and is recorded in the JSON result; if the golden Pi becomes unavailable, `set-golden-pi.sh` designates the most recently idle Pi.
 
 ### 4.5 Health Monitoring
 
@@ -356,7 +357,7 @@ After each teardown, `check-fleet-health.sh --pi <pi>` is run to verify the free
 
 Applies to **all Dev Bots** (Engine, Console, App) whenever they use a fleet Pi for testing, a dev Console, or image builds. Decided in Design Review for idea#147 (Axle, Pixel, Kid, Atlas, 2026-09-28).
 
-**Pool:** `idea01`, `idea03`, `idea04` (`role: spare` or `review`) are the shared test and review pool. **`idea02` (golden) is never used.**
+**Pool:** `idea01`, `idea04` (`role: spare` or `review`) are the shared test and review pool. **`idea03` (golden) is never used.** `idea02` is a LAN client and test-walk host, not a pool Pi; never claim it.
 
 **Claim:**
 ```bash
@@ -374,7 +375,7 @@ BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> status idle
 `find-available-pi.sh` returns only `idle` Pis, so Ops review deploys skip claimed Pis automatically.
 
 **Rules (everyone):**
-- Never use golden `idea02`.
+- Never use golden `idea03`, and never claim `idea02` (LAN client / test-walk host).
 - Leave each Pi's isolated store, `mdns: false` and local `config.yaml` untouched.
 - Never take more than one Pi down at a time.
 
@@ -385,7 +386,7 @@ BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> status idle
 - `IDEA_NETWORK_TESTS` stays off unless an issue asks for it.
 - `store-template.json` is never touched.
 
-**Sudoers:** a Dev Bot may install its PR's version of `11-engine-files` via `installEngineSudoers` on a Pi it has claimed, and must restore `main`'s version before release. Golden `idea02` sudoers stays with Atlas.
+**Sudoers:** a Dev Bot may install its PR's version of `11-engine-files` via `installEngineSudoers` on a Pi it has claimed, and must restore `main`'s version before release. Golden `idea03` sudoers stays with Atlas.
 
 **App (Kid):**
 - Builds can run on any claimed ARM64 pool Pi (not idea02); check each image with `docker manifest inspect`.
@@ -684,7 +685,7 @@ Be direct. Your review is an input to the decision, not a veto.
 EXECUTION DUTY:
 1. READ — GitHub issue + agreed approach comment. No comment = ask Lead Bot.
 2. RUN — implement with your own tools (clone / GitHub). Claim an idle
-   pool Pi (idea01/03/04, never idea02) and run tests over SSH; release
+   pool Pi (idea01/04, never golden idea03 or idea02) and run tests over SSH; release
    it when done (claim protocol, §4.6). Do not trigger Grok Build or Pi
    runners — that path is parked (idea#147 / §2.2).
 3. QC GATE:
@@ -747,7 +748,7 @@ rendering implications? Conflicts with offline-first or Solid.js patterns?
 EXECUTION DUTY:
 1. READ — GitHub issue + agreed approach comment. No comment = ask Lead Bot.
 2. RUN — implement with your own tools (clone / GitHub). Claim an idle
-   pool Pi (idea01/03/04, never idea02) and run tests over SSH; release
+   pool Pi (idea01/04, never golden idea03 or idea02) and run tests over SSH; release
    it when done (claim protocol, §4.6). Do not trigger Grok Build or Pi
    runners — that path is parked (idea#147 / §2.2).
 3. QC GATE:
@@ -829,7 +830,7 @@ schema, or Engine dock detection? ARM64 compatibility concerns?
 EXECUTION DUTY:
 1. READ — GitHub issue + agreed approach comment. No comment = ask Lead Bot.
 2. RUN — implement with your own tools (clone / GitHub). Claim an idle
-   ARM64 pool Pi (idea01/03/04, never idea02) and run harness tests / image
+   ARM64 pool Pi (idea01/04, never golden idea03 or idea02) and run harness tests / image
    builds over SSH; release it when done (claim protocol, §4.6). Do not
    trigger Grok Build or Pi runners — that path is parked (idea#147 / §2.2).
 3. QC GATE:
@@ -892,11 +893,11 @@ Lead Bot with the unhealthy Pis and their problems. While ~/.cache/idea-fleet-he
 exists, make no fleet changes except fixing the reported problem.
 
 GOLDEN INSTANCE:
-One Pi carries role: golden (today idea02; status stays idle). Its version
+One Pi carries role: golden (today idea03; status stays idle). Its version
 records the mains it runs (engine main@<sha>, console main@<sha>). It always
-runs latest merged main, keeps MilkWise running, and is never used for PR
-review: find-available-pi.sh skips role golden. Review deploys go to review
-Pis (today idea03). If the golden Pi goes down, call set-golden-pi.sh to
+runs latest merged main and is never used for PR
+review: find-available-pi.sh skips role golden. Review deploys go to pool
+Pis (today idea01, idea04; idea02 is not a pool Pi). If the golden Pi goes down, call set-golden-pi.sh to
 designate a new one.
 
 DESIGN REVIEW DUTY:
