@@ -697,6 +697,17 @@ engine_cmd_string() {
   fi
 }
 
+# True when the Engine checkout needs `pnpm install`: no node_modules, or the
+# lockfile is newer than pnpm's install marker (node_modules/.modules.yaml).
+engine_box_deps_needed() {
+  local root="$1"
+  [[ -f "$root/package.json" ]] || return 1
+  [[ -d "$root/node_modules" ]] || return 0
+  [[ -f "$root/node_modules/.modules.yaml" ]] || return 0
+  [[ -f "$root/pnpm-lock.yaml" && "$root/pnpm-lock.yaml" -nt "$root/node_modules/.modules.yaml" ]] && return 0
+  return 1
+}
+
 # Box path (default). Prints the checks.tests JSON.
 run_engine_tests_box() {
   local repo="$1" root="$2" me out rc=0 cmd
@@ -713,6 +724,20 @@ run_engine_tests_box() {
   if [[ "$QUALITY_SCAN_DRY_RUN_TESTS" == "1" ]]; then
     jq -nc --arg c "$cmd" '{status:"skipped",reason:"dry_run_tests",where:"box",cmd:$c}'
     return
+  fi
+  # idea#361: a fresh box checkout has no node_modules, so the suite failed before it started.
+  # Install the Engine deps first when they are missing or older than the lockfile.
+  if engine_box_deps_needed "$root"; then
+    echo "quality-scan: Engine deps missing or stale on the box; running pnpm install --frozen-lockfile" >&2
+    set +e
+    out="$(cd "$root" && pnpm install --frozen-lockfile --prefer-offline 2>&1)"
+    rc=$?
+    set -e
+    if [[ -n "${QUALITY_SCAN_TEST_LOG:-}" ]]; then printf '%s\n' "$out" >>"$QUALITY_SCAN_TEST_LOG"; fi
+    if [[ $rc -ne 0 ]]; then
+      engine_result "$repo" "box" "box (${me:-local}) deps install (pnpm install --frozen-lockfile)" "$rc" "$out"
+      return
+    fi
   fi
   set +e
   out="$(cd "$root" && env -u IDEA_TEST_ALLOW_LIVE bash -c "$cmd" 2>&1)"
