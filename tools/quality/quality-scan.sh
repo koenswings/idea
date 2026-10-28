@@ -871,7 +871,7 @@ run_engine_tests_pool() {
   fi
   echo "quality-scan: ${pi}: scratch clone ${ENGINE_POOL_SCRATCH} at origin/main ${sha:0:12}" >&2
   set +e
-  out="$(engine_ssh "$host" "set -e; mkdir -p ${QUALITY_SCAN_PI_SCRATCH_ROOT} && git clone -q ${remote_path} ${ENGINE_POOL_SCRATCH} && cd ${ENGINE_POOL_SCRATCH} && git fetch -q origin ${sha} && git checkout -q ${sha} && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && env -u IDEA_TEST_ALLOW_LIVE ${cmd}" 2>&1)"
+  out="$(engine_ssh "$host" "set -e; mkdir -p ${QUALITY_SCAN_PI_SCRATCH_ROOT} && git clone -q ${remote_path} ${ENGINE_POOL_SCRATCH} && cd ${ENGINE_POOL_SCRATCH} && git fetch -q \$(git -C ${remote_path} remote get-url origin) ${sha} && git checkout -q ${sha} && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && env -u IDEA_TEST_ALLOW_LIVE ${cmd}" 2>&1)"
   rc=$?
   set -e
   engine_pool_restore
