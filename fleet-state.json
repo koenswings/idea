@@ -207,6 +207,11 @@
       "mac_lan": "d4:0d:ab:50:ca:c8",
       "mac_wan": "d4:0d:ab:50:ca:c9",
       "read": "2026-10-28 ~11:17 and 13:50 CET, read-only through ubus over Tailscale (Atlas, idea#288). /etc/idea-router-release does not exist (stat NOT_FOUND); the release info is /etc/idea/version (100 bytes, root-only, ubus read denied). SSH capture blocked: dropbear Interface=lan, so port 22 is not open on tailscale0. ed25519 host key SHA256:TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs (ssh-keyscan from happy-zebra on the LAN). No changes made"
+    },
+    "switch": {
+      "model": "TP-Link TL-SG105PE",
+      "mac": "58:d8:12:34:a9:ef",
+      "source": "Steve's review of PR #359 (2026-10-28); not read from the device"
     }
   }
 }

@@ -10,11 +10,31 @@ Batch name in the records: `zimbabwe-2026-10`.
 
 ## The schools
 
-The two schools are Chigonda and Nharira. We don't yet know which kit went to which school.
+The two schools are Chigonda and Nharira. We know which kit is at each site, but not yet which school is which
+site: that is TBC (asked Justice, 28 Oct 2026).
 
-| | First school | Second school |
+| | Site 1 | Site 2 |
 |---|---|---|
-| Name | Chigonda or Nharira: TBC (asked Justice, 28 Oct 2026) | TBC (asked Justice, 28 Oct 2026) |
+| School server and router | sunny-robin, sunny-robin-router | happy-zebra, happy-zebra-router |
+| Switch | none recorded | TP-Link TL-SG105PE, MAC 58:d8:12:34:a9:ef |
+| Classroom computers | idea-pc-fc95, idea-pc-7d02, idea-pc-9f95 (3) | idea-pc-35f2, idea-pc-58c3, idea-pc-5b4c, idea-pc-671c, idea-pc-841d (5) |
+
+Not yet placed at a site: the kind-panda school server and its router (site TBC), and idea-pc-f63a (site TBC).
+
+Sources for the mapping: Steve's review of this page (28 Oct 2026, site mapping and switch); the happy-zebra-router
+DHCP leases of 28 Oct 2026 (Atlas, "Still open" below), which show exactly the five Site 2 computers;
+`deployments/clients/kit-hosts-zimbabwe-2026-10.tsv` and `fleet-state.json` `sunny-robin.clients` for the hostnames,
+models and MACs. The switch is not yet in any device record.
+
+> **Note on the 27 Oct sighting.** `kit-hosts-zimbabwe-2026-10.tsv` and `fleet-state.json` (`sunny-robin.clients`)
+> list all 9 machines as seen on the sunny-robin kit network on 27 Oct 2026. Those 9 included the five Site 2
+> computers, so that list is not a per-site list: use the site table above for where each computer is.
+
+The school details below are per school, and the columns follow the sites above.
+
+| | Site 1 | Site 2 |
+|---|---|---|
+| Name (Chigonda or Nharira) | TBC (asked Justice, 28 Oct 2026) | TBC (asked Justice, 28 Oct 2026) |
 | Level | Primary | TBC (asked Justice, 28 Oct 2026) |
 | Number of students | TBC (asked Justice, 28 Oct 2026) | TBC (asked Justice, 28 Oct 2026) |
 | Number of teachers | TBC (asked Justice, 28 Oct 2026) | TBC (asked Justice, 28 Oct 2026) |
@@ -22,23 +42,28 @@ The two schools are Chigonda and Nharira. We don't yet know which kit went to wh
 | Days and hours the kit is on | TBC (asked Justice, 28 Oct 2026) | TBC (asked Justice, 28 Oct 2026) |
 | Power (mains, solar, generator) | TBC (asked Justice, 28 Oct 2026) | TBC (asked Justice, 28 Oct 2026) |
 | Language of lessons | TBC (asked Justice, 28 Oct 2026) | TBC (asked Justice, 28 Oct 2026) |
-| School server sticker names | TBC (asked Justice, 28 Oct 2026) | TBC (asked Justice, 28 Oct 2026) |
-| Classroom computers at the school | TBC (asked Justice, 28 Oct 2026) | TBC (asked Justice, 28 Oct 2026) |
+| Where kind-panda and idea-pc-f63a are | TBC (asked Justice, 28 Oct 2026) | TBC (asked Justice, 28 Oct 2026) |
 | Pain points and wishes | TBC (asked Justice, 28 Oct 2026) | TBC (asked Justice, 28 Oct 2026) |
 
 ## What was in the kit
 
 Sources: `fleet-state.json`, `deployments/` records, [idea#288](https://github.com/koenswings/idea/issues/288).
 
-| Device | Sticker name | Hardware | Software | Last seen read-only |
-|---|---|---|---|---|
-| School server (Engine) | sunny-robin | Raspberry Pi 5 (Waveshare D case), USB SSD Intenso AA000000000000003120 | Engine `adfd9d3`, Console checkout `654224e` (dist from agent-console-dev#162) | 26 Oct 2026 capture |
-| School server (Engine) | happy-zebra | Raspberry Pi 5 (Waveshare case), USB SSD Intenso AA000000000000010473 | Engine `adfd9d3`, Console checkout `654224e` | 28 Oct 2026 capture |
-| School server (Engine) | kind-panda | Raspberry Pi 5, NVMe (cloned from the FIT stick) | Engine `adfd9d3` (fleet-state) | Not seen yet (offline about 9 days as of 28 Oct 2026, idea#288) |
-| Router | sunny-robin-router | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ce:7e | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (likely, retro record) | 26 Oct 2026 |
-| Router | happy-zebra-router | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ca:c8 | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (likely, retro record) | 28 Oct 2026 |
-| Router | kind-panda-router | Cudy WR3000S v1 | IDEA router image `b2f00bc` (likely, retro record) | Not seen yet |
-| Classroom computers | n/a | 10 cards; 9 machines seen on the sunny-robin network (7 Raspberry Pi 500, 2 Raspberry Pi 400) | Client image f00748e (patched) or s15 | 27 Oct 2026 |
+| Device | Sticker name | Site | Hardware | Software | Last seen read-only |
+|---|---|---|---|---|---|
+| School server (Engine) | sunny-robin | 1 | Raspberry Pi 5 (Waveshare D case), USB SSD Intenso AA000000000000003120 | Engine `adfd9d3`, Console checkout `654224e` (dist from agent-console-dev#162) | 26 Oct 2026 capture |
+| School server (Engine) | happy-zebra | 2 | Raspberry Pi 5 (Waveshare case), USB SSD Intenso AA000000000000010473 | Engine `adfd9d3`, Console checkout `654224e` | 28 Oct 2026 capture |
+| School server (Engine) | kind-panda | TBC | Raspberry Pi 5, NVMe (cloned from the FIT stick) | Engine `adfd9d3` (fleet-state) | Not seen yet (offline about 9 days as of 28 Oct 2026, idea#288) |
+| Router | sunny-robin-router | 1 | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ce:7e | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (likely, retro record) | 26 Oct 2026 |
+| Router | happy-zebra-router | 2 | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ca:c8 | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (likely, retro record) | 28 Oct 2026 |
+| Router | kind-panda-router | TBC | Cudy WR3000S v1 | IDEA router image `b2f00bc` (likely, retro record) | Not seen yet |
+| Switch | n/a | 2 | TP-Link TL-SG105PE, MAC 58:d8:12:34:a9:ef | n/a | Not read remotely |
+| Classroom computers | n/a | 1 | 3: idea-pc-fc95 (Raspberry Pi 500), idea-pc-7d02 and idea-pc-9f95 (Raspberry Pi 400) | Client image f00748e (patched) or s15 | 27 Oct 2026 |
+| Classroom computers | n/a | 2 | 5 Raspberry Pi 500: idea-pc-35f2, idea-pc-58c3, idea-pc-5b4c, idea-pc-671c, idea-pc-841d | Client image f00748e (patched) or s15 | 28 Oct 2026 (happy-zebra-router leases) |
+| Classroom computer | n/a | TBC | idea-pc-f63a (Raspberry Pi 500) | Client image f00748e (patched) or s15 | 27 Oct 2026 |
+
+In total there are 10 classroom computer cards; 9 machines are known (3 at Site 1, 5 at Site 2, 1 site TBC) and the
+10th is not seen yet.
 
 All three Engines share one kit store, so every school server lists the others when they meet. Teachers open the
 Console at `http://idea.local`, or reach one specific school server at `http://<sticker>.local`.
@@ -79,6 +104,9 @@ From ops (Atlas). Status on 28 Oct 2026, 13:55 CET:
 - **The 10th classroom computer and the card-to-machine mapping: BLOCKED.** Our card log has no mapping. The
   happy-zebra router's leases on 28 Oct showed only machines we already know (35f2, 5b4c, 671c, 841d, 58c3).
   We need either `capture-device.sh` on each client, or a photo or list from the field.
+- **Sites of kind-panda (with kind-panda-router) and idea-pc-f63a: TBC.** Neither has been seen on a site's network
+  since the sites were mapped; ask Justice, or read them when they come online.
+- **TP-Link switch at happy-zebra:** not in any device record yet (MAC from Steve's review).
 - Router install dates and the Cudy intermediate firmware source: only Koen knows these.
 
 ## Detailed records
