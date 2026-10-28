@@ -61,6 +61,9 @@ Engine tests (idea#335, idea#332): run on pool Pi idea01 by default (claim, pm2 
   QUALITY_SCAN_ENGINE_PI=<pi>  use another claimed idle pool Pi; empty forces the box
                                (never idea02, production or kits)
   QUALITY_SCAN_SOCKS=host:port SSH via SOCKS5 (box: 127.0.0.1:1055)
+  QUALITY_SCAN_PI_MAX_WORKERS=N    vitest workers on a pool Pi (default 2; recorded as max_workers)
+  QUALITY_SCAN_THERMAL_LIMIT_C=C   abort a Pi run at/above C (default 75) → box fallback, fallback_reason=thermal
+  QUALITY_SCAN_THERMAL_INTERVAL=S  Pi temperature sample interval (default 10; peak recorded as peak_temp_c)
   QUALITY_SCAN_TEST_LOG=FILE   append raw Engine test output to FILE
   Box runs only: failures listed in tools/quality/engine-box-exceptions.txt (the
   Docker-only tests) are reported as tests.known_box_exceptions and do not fail
@@ -783,6 +786,41 @@ engine_result() {
 # Pool-Pi path (opt-in). Claims, stops pm2 engine as pi, runs, restores, releases.
 ENGINE_POOL_PI=""; ENGINE_POOL_HOST=""; ENGINE_POOL_WAS_ONLINE=0; ENGINE_POOL_CLAIMED=0; ENGINE_POOL_SCRATCH=""
 QUALITY_SCAN_PI_SCRATCH_ROOT="${QUALITY_SCAN_PI_SCRATCH_ROOT:-/home/pi/scratch}"
+# idea#332 (Steve 05:38): Pi runs use fewer vitest workers and a thermal guard. The Engine's
+# vitest config already has fileParallelism:false, so this caps forks rather than adding any.
+QUALITY_SCAN_PI_MAX_WORKERS="${QUALITY_SCAN_PI_MAX_WORKERS:-2}"
+QUALITY_SCAN_THERMAL_LIMIT_C="${QUALITY_SCAN_THERMAL_LIMIT_C:-75}"
+QUALITY_SCAN_THERMAL_INTERVAL="${QUALITY_SCAN_THERMAL_INTERVAL:-10}"
+
+# engine_thermal_watch <host> <dir>: sample the Pi's SoC temperature every
+# QUALITY_SCAN_THERMAL_INTERVAL s; keep the peak (millidegrees) in <dir>/peak. At or above
+# QUALITY_SCAN_THERMAL_LIMIT_C write <dir>/abort and stop the remote test run (TERM to every
+# process whose command line holds the scratch path; the [x] pattern never matches pkill's own shell).
+# engine_thermal_sample <host>: SoC temperature in millidegrees, 0 when unreadable.
+engine_thermal_sample() {
+  local t
+  t="$(engine_ssh "$1" "cat /sys/class/thermal/thermal_zone0/temp" 2>/dev/null | tail -1)"
+  [[ "$t" =~ ^[0-9]+$ ]] && echo "$t" || echo 0
+}
+
+engine_thermal_watch() {
+  trap - EXIT INT TERM
+  local host="$1" d="$2" t peak limit=$(( QUALITY_SCAN_THERMAL_LIMIT_C * 1000 )) pat
+  pat="[${ENGINE_POOL_SCRATCH:0:1}]${ENGINE_POOL_SCRATCH:1}"
+  peak="$(cat "$d/peak" 2>/dev/null || echo 0)"
+  while :; do
+    t="$(engine_ssh "$host" "cat /sys/class/thermal/thermal_zone0/temp" 2>/dev/null | tail -1)"
+    if [[ "$t" =~ ^[0-9]+$ ]]; then
+      if (( t > peak )); then peak=$t; echo "$peak" >"$d/peak"; fi
+      if (( t >= limit )); then
+        [[ -f "$d/abort" ]] || echo "$t" >"$d/abort"
+        # Keep stopping until the parent kills this watcher: the run may not have started yet.
+        engine_ssh "$host" "pkill -TERM -f '${pat}'" >/dev/null 2>&1 || true
+      fi
+    fi
+    sleep "$QUALITY_SCAN_THERMAL_INTERVAL"
+  done
+}
 engine_pool_restore() {
   [[ -n "$ENGINE_POOL_PI" ]] || return 0
   if [[ -n "$ENGINE_POOL_SCRATCH" ]]; then
@@ -870,19 +908,42 @@ run_engine_tests_pool() {
     return
   fi
   echo "quality-scan: ${pi}: scratch clone ${ENGINE_POOL_SCRATCH} at origin/main ${sha:0:12}" >&2
+  local tdir wpid peak_mc abort_mc=""
+  tdir="$(mktemp -d)"
+  # One sample before the run (and one after), so even a short run records a peak.
+  engine_thermal_sample "$host" >"$tdir/peak"
+  engine_thermal_watch "$host" "$tdir" &
+  wpid=$!
   set +e
-  out="$(engine_ssh "$host" "set -e; mkdir -p ${QUALITY_SCAN_PI_SCRATCH_ROOT} && git clone -q ${remote_path} ${ENGINE_POOL_SCRATCH} && cd ${ENGINE_POOL_SCRATCH} && git fetch -q \$(git -C ${remote_path} remote get-url origin) ${sha} && git checkout -q ${sha} && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && env -u IDEA_TEST_ALLOW_LIVE ${cmd}" 2>&1)"
+  out="$(engine_ssh "$host" "set -e; mkdir -p ${QUALITY_SCAN_PI_SCRATCH_ROOT} && git clone -q ${remote_path} ${ENGINE_POOL_SCRATCH} && cd ${ENGINE_POOL_SCRATCH} && git fetch -q \$(git -C ${remote_path} remote get-url origin) ${sha} && git checkout -q ${sha} && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && env -u IDEA_TEST_ALLOW_LIVE VITEST_MAX_WORKERS=${QUALITY_SCAN_PI_MAX_WORKERS} ${cmd}" 2>&1)"
   rc=$?
+  kill "$wpid" 2>/dev/null; wait "$wpid" 2>/dev/null
   set -e
+  peak_mc="$(cat "$tdir/peak" 2>/dev/null || echo 0)"
+  local t_end; t_end="$(engine_thermal_sample "$host")"
+  (( t_end > peak_mc )) && peak_mc="$t_end"
+  [[ -f "$tdir/abort" ]] && abort_mc="$(cat "$tdir/abort")"
+  rm -rf "$tdir"
+  echo "quality-scan: ${pi}: peak SoC temperature $(( peak_mc / 1000 )) °C (limit ${QUALITY_SCAN_THERMAL_LIMIT_C} °C, every ${QUALITY_SCAN_THERMAL_INTERVAL}s)${abort_mc:+ — ABORTED at $(( abort_mc / 1000 )) °C}" >&2
   engine_pool_restore
   if [[ -n "${QUALITY_SCAN_TEST_LOG:-}" ]]; then printf '%s\n' "$out" >>"$QUALITY_SCAN_TEST_LOG"; fi
+  local extra
+  extra="$(jq -nc --arg sha "$sha" --argjson w "$QUALITY_SCAN_PI_MAX_WORKERS" --argjson p "$peak_mc" --argjson l "$QUALITY_SCAN_THERMAL_LIMIT_C" \
+    '{scanned_ref:"origin/main",scanned_sha:$sha,max_workers:$w,peak_temp_c:($p/1000),thermal_limit_c:$l}')"
+  if [[ -n "$abort_mc" ]]; then
+    jq -nc --arg pi "$pi" --argjson a "$abort_mc" --argjson x "$extra" \
+      --argjson done "$(printf '%s\n' "$out" | grep -c ' ✓ ' || true)" \
+      --argjson failed "$(printf '%s\n' "$out" | grep -c ' × ' || true)" \
+      '{status:"skipped",reason:"thermal",pi:$pi,abort_temp_c:($a/1000),pi_tests_passed_before_abort:$done,pi_tests_failed_before_abort:$failed} + $x'
+    return
+  fi
   if printf '%s\n' "$out" | grep -q 'Test pre-flight: REFUSING'; then
     jq -nc --arg pi "$pi" --arg d "$(printf '%s\n' "$out" | grep -A3 'Test pre-flight: REFUSING' | tr '\n' ' ')" \
       '{status:"skipped",reason:"preflight_refused",pi:$pi,detail:$d}'
     return
   fi
   engine_result "$repo" "pool" "claimed pool Pi ${pi} (pm2 engine stopped)" "$rc" "$out" |
-    jq -c --arg sha "$sha" '. + {scanned_ref:"origin/main",scanned_sha:$sha}'
+    jq -c --argjson x "$extra" '. + $x'
 }
 
 # Pool Pi first (default idea01); box fallback only when the Pi is claimed, held,
@@ -898,7 +959,7 @@ run_engine_tests_placed() {
   reason="$(jq -r '.reason // ""' <<<"$pool")"
   detail="$(jq -r '.detail // ""' <<<"$pool")"
   case "$reason" in
-    pi_claimed|pi_not_idle|pi_unreachable|preflight_refused) ;;
+    pi_claimed|pi_not_idle|pi_unreachable|preflight_refused|thermal) ;;
     never_live_production) [[ "$detail" == *":status=hold" ]] || reason="" ;;
     *) reason="" ;;
   esac
@@ -908,7 +969,10 @@ run_engine_tests_placed() {
     return
   fi
   echo "quality-scan: Engine tests target=box (fallback from ${pi}: ${reason}${detail:+ — $detail})" >&2
-  run_engine_tests_box "$repo" "$root" | jq -c --arg pi "$pi" --arg r "$reason" '. + {fallback_from:$pi, fallback_reason:$r}'
+  # idea#332: the box reruns the whole suite (with engine-box-exceptions.txt); the Pi attempt
+  # (thermal peak, tests done before an abort) is kept as pool_attempt.
+  run_engine_tests_box "$repo" "$root" | jq -c --arg pi "$pi" --arg r "$reason" --argjson pa "$pool" \
+    '. + {fallback_from:$pi, fallback_reason:$r, pool_attempt:$pa}'
 }
 
 # --- Tests ---

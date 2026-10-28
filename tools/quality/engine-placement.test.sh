@@ -31,7 +31,13 @@ echo "$host :: $*" >>"$FAKE_LOG"
 case "$*" in
   *"ls-remote"*) echo "${FAKE_SHA:-0123456789abcdef0123456789abcdef01234567}	refs/heads/main" ;;
   *"pm2 jlist"*) if [[ "${FAKE_ONLINE:-1}" == 1 ]]; then echo '[{"name":"engine","pm2_env":{"status":"online"}}]'; else echo '[]'; fi ;;
-  *"pnpm test:full"*) echo remote-tests-ran; [[ -n "${FAKE_OUT:-}" ]] && cat "$FAKE_OUT"; exit "${FAKE_RC:-0}" ;;
+  *"thermal_zone0/temp"*) echo "${FAKE_TEMP:-50000}" ;;
+  *"pkill -TERM -f"*) : >"$FAKE_LOG.killed" ;;
+  *"pnpm test:full"*) echo remote-tests-ran
+    if [[ -n "${FAKE_TEST_SLEEP:-}" ]]; then
+      echo " ✓ t1"; echo " ✓ t2"; echo " × t3"
+      for _ in $(seq 1 $(( FAKE_TEST_SLEEP * 10 ))); do [[ -f "$FAKE_LOG.killed" ]] && exit 143; sleep 0.1; done
+    fi; [[ -n "${FAKE_OUT:-}" ]] && cat "$FAKE_OUT"; exit "${FAKE_RC:-0}" ;;
 esac
 S
 # fake update-fleet-state.sh: log calls
@@ -53,10 +59,10 @@ J
 }
 
 scan() {
-  : >"$T/log"
+  : >"$T/log"; rm -f "$T/log.killed"
   PATH="$T/bin:$PATH" FAKE_LOG="$T/log" QUALITY_SCAN_FLEET_STATE="$T/state.json" \
     QUALITY_SCAN_SSH="$T/bin/fakessh" QUALITY_SCAN_UFS="$T/bin/fakeufs" \
-    IDEA_TEST_ALLOW_LIVE=1 QUALITY_SCAN_DRY_RUN_TESTS=0 QUALITY_SCAN_ENGINE_PI= "$@" "$SCAN" --repo-root "$T/root" --repos agent-engine-dev 2>/dev/null || true
+    IDEA_TEST_ALLOW_LIVE=1 QUALITY_SCAN_DRY_RUN_TESTS=0 QUALITY_SCAN_ENGINE_PI= QUALITY_SCAN_THERMAL_INTERVAL=0.1 "$@" "$SCAN" --repo-root "$T/root" --repos agent-engine-dev 2>/dev/null || true
 }
 check() { # name jq-expr json
   if echo "$3" | jq -e "$2" >/dev/null 2>&1; then echo "PASS $1"; pass=$((pass+1)); else echo "FAIL $1"; echo "$3" | jq -c '.results[0].checks.tests' 2>/dev/null || echo "$3" | tail -5; fail=$((fail+1)); fi
@@ -113,8 +119,12 @@ out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1)"
 check "pool idea03 passes" "$tst.status==\"passed\" and $tst.where==\"pool\"" "$out"
 loghas "pool: claim as Atlas" "ufs BOT=Atlas idea03 claim"
 loghas "pool: pm2 stop engine" "pm2 stop engine"
-loghas "pool: allow-live unset remotely" "env -u IDEA_TEST_ALLOW_LIVE pnpm test:full"
+loghas "pool: allow-live unset remotely" "env -u IDEA_TEST_ALLOW_LIVE VITEST_MAX_WORKERS=2 pnpm test:full"
 loghas "pool: reads origin/main SHA" "git ls-remote \$(git -C /home/pi/idea/agents/agent-engine-dev remote get-url origin) refs/heads/main"
+check "pool: max_workers=2 default recorded" "$tst.max_workers==2" "$out"
+check "pool: peak temperature recorded" "$tst.peak_temp_c==50 and $tst.thermal_limit_c==75" "$out"
+loghas "pool: temperature sampled" "cat /sys/class/thermal/thermal_zone0/temp"
+lognot "pool: no thermal kill below limit" "pkill -TERM -f"
 check "pool: scanned_sha recorded" "$tst.scanned_sha==\"0123456789abcdef0123456789abcdef01234567\" and $tst.scanned_ref==\"origin/main\"" "$out"
 loghas "pool: fetches origin/main SHA in scratch" "git fetch -q \$(git -C /home/pi/idea/agents/agent-engine-dev remote get-url origin) 0123456789abcdef0123456789abcdef01234567"
 loghas "pool: scratch clone of deployed tree" "git clone -q /home/pi/idea/agents/agent-engine-dev /home/pi/scratch/qs-agent-engine-dev-"
@@ -137,6 +147,26 @@ out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_
 check "pool: unreadable main SHA → skipped, not run" "$tst.reason==\"main_sha_unreadable\"" "$out"
 lognot "unreadable SHA: no tests" "pnpm test:full"
 loghas "unreadable SHA: still restored" "pm2 restart engine"
+
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 QUALITY_SCAN_PI_MAX_WORKERS=1)"
+check "pool: worker setting configurable" "$tst.max_workers==1" "$out"
+loghas "pool: VITEST_MAX_WORKERS=1 passed" "VITEST_MAX_WORKERS=1 pnpm test:full"
+
+# thermal guard (idea#332): stubbed temperatures, a slow stubbed suite
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_TEMP=74999 FAKE_TEST_SLEEP=1)"
+check "thermal: 74.999 °C is below the limit → stays on the Pi" "$tst.where==\"pool\" and $tst.peak_temp_c==74.999 and (has(\"fallback_reason\")|not)" "$out"
+lognot "thermal: below limit, no kill" "pkill -TERM -f"
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_TEMP=75000 FAKE_TEST_SLEEP=20)"
+check "thermal: 75 °C → box fallback, fallback_reason=thermal" "$tst.where==\"box\" and $tst.fallback_reason==\"thermal\" and $tst.fallback_from==\"idea03\" and $tst.status==\"passed\"" "$out"
+check "thermal: pool_attempt records abort temp, peak, workers, tests done" "$tst.pool_attempt.reason==\"thermal\" and $tst.pool_attempt.abort_temp_c==75 and $tst.pool_attempt.peak_temp_c==75 and $tst.pool_attempt.max_workers==2 and $tst.pool_attempt.pi_tests_passed_before_abort==2 and $tst.pool_attempt.pi_tests_failed_before_abort==1" "$out"
+loghas "thermal: remote run killed by scratch-path pattern" "pkill -TERM -f '[/]home/pi/scratch/qs-agent-engine-dev-"
+loghas "thermal: Engine restored" "pm2 restart engine"
+loghas "thermal: claim released" "ufs BOT=Atlas --null idea03 claim"
+loghas "thermal: scratch quarantined" "mkdir -p /home/pi/scratch/quarantine/"
+order="$(grep -nE 'pkill -TERM|pm2 restart|--null idea03 claim' "$T/log" | cut -d: -f1 | tr '\n' ' ')"
+if [[ "$(echo "$order" | tr ' ' '\n' | grep -v '^$' | sort -n | tr '\n' ' ')" == "$order" ]] && [[ $(echo "$order" | wc -w) -eq 3 ]]; then echo "PASS thermal order kill→restore→release"; pass=$((pass+1)); else echo "FAIL thermal order: $order"; fail=$((fail+1)); fi
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_TEMP=60000 FAKE_TEST_SLEEP=20 QUALITY_SCAN_THERMAL_LIMIT_C=60)"
+check "thermal: limit configurable" "$tst.fallback_reason==\"thermal\" and $tst.pool_attempt.abort_temp_c==60" "$out"
 
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=0)"
 check "pool engine offline passes" "$tst.status==\"passed\"" "$out"
