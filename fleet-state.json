@@ -198,6 +198,15 @@
     "grok_build": null,
     "note": "Kit Engine (Pi 5, Waveshare, no NVMe, boots from USB SSD INTENSO 512 GB serial AA000000000000010473; usb_max_current_enable=1, EEPROM PSU_MAX_CURRENT=5000), sticker happy-zebra, provisioned 2026-10-17. Shared KIT store 3Vvv (one store for kind-panda, happy-zebra, sunny-robin; Koen's correction 2026-10-17; never 4GQm/22WU/2VroE). Previous own store 31JN quarantined in ~/quarantine/per-engine-store-20261017-113945. Command log is per-Engine (2fMCeontC8dP5Ymq4jssYcbaVkUB, rotates daily). mDNS on, no static peers. Local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea. Router happy-zebra-router (100.110.73.52).",
     "version": "engine deploy/kit-229-232@adfd9d354ffd83c5ecc0a9eea64a474eae08de8f, console pr162@62bd2ba03544fd7b2ef490a07de2b8780f81105b (koenswings/agent-console-dev#162, unmerged; dist-only swap, checkout stays main@654224e)",
-    "deployed": "engine 2026-10-18 10:42:36 CEST (prev main@07456c3, backup ~/quarantine/engine-deploy-20261018-104214); console dist 2026-10-17 15:06:21 CEST (prev 7bf4772 in ~/quarantine/console-dist-7bf4772-20261017-150621). Steve-confirmed."
+    "deployed": "engine 2026-10-18 10:42:36 CEST (prev main@07456c3, backup ~/quarantine/engine-deploy-20261018-104214); console dist 2026-10-17 15:06:21 CEST (prev 7bf4772 in ~/quarantine/console-dist-7bf4772-20261017-150621). Steve-confirmed.",
+    "router": {
+      "name": "happy-zebra-router",
+      "model": "Cudy WR3000S v1",
+      "tailscale": "100.110.73.52",
+      "firmware": "OpenWrt 25.12.5 r33051-f5dae5ece4 (mediatek/filogic, kernel 6.12.94)",
+      "mac_lan": "d4:0d:ab:50:ca:c8",
+      "mac_wan": "UNKNOWN",
+      "read": "2026-10-28 ~11:17 CET, read-only through ubus over Tailscale (Atlas, idea#288); /etc/idea-router-release permission denied; SSH capture failed; no changes made"
+    }
   }
 }

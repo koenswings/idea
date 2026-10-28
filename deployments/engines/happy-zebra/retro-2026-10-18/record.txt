@@ -35,6 +35,9 @@ appKolibriCommit=UNKNOWN
 dockerPins=none at adfd9d3 (get.docker.com latest; archive holds today's pinned Docker debs, see debs/docker/NOTE.txt)
 aptPins=none at adfd9d3 (Debian unpinned; packages.tsv UNKNOWN until captured)
 postInstall.morango=2026-10-17: MORANGO_SYSTEM_ID=idea-${hostname}-${port} added by hand to /instances/<id>/compose.yaml of Kolibri and Kolibri Demo (app-kolibri#8; procedure: agent-engine-dev docs/REPRODUCIBLE_BUILDS.md §7)
+kolibriInstances=:65439 Engine Kolibri_Demo MORANGO_SYSTEM_ID=idea-happy-zebra-65439 instance_id cd9feeb7dbef09b9ac22896394c45ddb; :62561 container (not Engine-listed, left alone) MORANGO_SYSTEM_ID=idea-happy-zebra-62561 instance_id ed370fd83b528743e8b58e6c16287f65; unique across the kit incl. sunny-robin
+postInstall.morangoCheck=2026-10-28 ~11:17 CET app-kolibri#8 kit step: dry run found values already set, nothing changed, no restart (box log /workspace/idea288/logs/kolibri-morango-happy-zebra-20261028-111756-dry.log)
+captureRaw=/workspace/idea-archive/captures/happy-zebra-20261028T102133Z.txt (box, 16710 lines, sha256 alongside; idea#322 capture 2026-10-28, Engine adfd9d3, Console checkout 654224e; not yet turned into a capture-* record)
 packageArchive=/workspace/idea322-archive/release-kit-adfd9d3/
 packageArchiveUrl=https://github.com/koenswings/agent-engine-dev/releases/tag/field/zimbabwe-2026-10/engine-adfd9d3
 packageArchiveSha256=3a2d0262f1108fd5c3e388a9b34470285631292633a259f771274dfac0b04f25
@@ -44,4 +47,4 @@ secrets=Tailscale auth key at build time (name only; value never recorded)
 deployedAt=2026-10-18 10:42:36 CEST (Engine); Console dist 2026-10-17
 evidence=fleet-state.json @4e515d4 (version/deployed/note); agent-engine-dev git adfd9d3
 confidence=likely: fleet-state version line, Steve-confirmed deploy; not captured on the device
-open=capture with capture-engine-record.sh: packages.tsv, images.tsv, dist.sha256, tool versions, local overrides
+open=turn the 2026-10-28 raw capture into a capture-2026-10-28 record (packages.tsv, images.tsv, dist.sha256, tool versions); until then: capture with capture-engine-record.sh: packages.tsv, images.tsv, dist.sha256, tool versions, local overrides
