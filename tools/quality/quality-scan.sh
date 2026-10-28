@@ -57,17 +57,19 @@ Engine tests (idea#335, idea#332): run on pool Pi idea04 by default (claim, pm2 
   HEAD (scanned_sha), then quarantine the clone (moved, never deleted: idea04 → ~/quarantine/<date>,
   other Pis → ~/scratch/quarantine/<date>), pm2 restart + online check, release;
   trap on failure/interrupt; needs BOT_NAME).
-  Fallback chain idea04 → idea01 → box: a Pi is skipped when it is claimed, held, not idle,
+  Fallback chain idea04 → box (optional second Pi via QUALITY_SCAN_ENGINE_PI_FALLBACK): a Pi is skipped when it is claimed, held, not idle,
   unreachable, its pre-flight refuses, or the thermal guard aborts; every hop is recorded in
   checks.tests.fallback_chain (first hop also as fallback_from/fallback_reason/pool_attempt) and
   logged on stderr ("Engine tests target=…").
   QUALITY_SCAN_ENGINE_PI=<pi>  first pool Pi (default idea04); empty forces the box
                                (never idea02, idea/production, kits or unknown Pis: refusals end the chain)
-  QUALITY_SCAN_ENGINE_PI_FALLBACK=<pi>  next pool Pi (default idea01); empty → straight to the box
+  QUALITY_SCAN_ENGINE_PI_FALLBACK=<pi>  optional next pool Pi (default empty → straight to the box)
   QUALITY_SCAN_PI_QUARANTINE_ROOT=DIR   override the per-Pi quarantine root
   QUALITY_SCAN_SOCKS=host:port SSH via SOCKS5 (box: 127.0.0.1:1055)
   QUALITY_SCAN_PI_MAX_WORKERS=N    vitest workers on a pool Pi (default 1; >1 runs files in parallel; recorded as max_workers)
-  QUALITY_SCAN_THERMAL_LIMIT_C=C   abort a Pi run at/above C (default 75) → box fallback, fallback_reason=thermal
+  QUALITY_SCAN_THERMAL_LIMIT_C=C   alert line the Pi must stay under (default 75; recorded as thermal_limit_c)
+  QUALITY_SCAN_THERMAL_TRIP_C=C    abort a Pi run at/above C (default LIMIT_C-2 = 73, so the 10 s sampling
+                                   overshoot stays under the limit) → next target, fallback_reason=thermal
   QUALITY_SCAN_THERMAL_INTERVAL=S  Pi temperature sample interval (default 10; peak recorded as peak_temp_c)
   QUALITY_SCAN_TEST_LOG=FILE   append raw Engine test output to FILE
   Box runs only: failures listed in tools/quality/engine-box-exceptions.txt (the
@@ -642,13 +644,14 @@ check_bakeins() {
 # production Engine (idea01 while live, idea02, 'idea'/production, kit Engines).
 # The idea#105 pre-flight in the Engine suite is NOT touched: IDEA_TEST_ALLOW_LIVE is
 # always unset for the test command.
-# idea#332: default target is pool Pi idea04 (Koen, 2026-10-28), then idea01
-# (QUALITY_SCAN_ENGINE_PI_FALLBACK), then the box. Each hop happens when the current Pi is claimed,
+# idea#332: default target is pool Pi idea04 (Koen, 2026-10-28), then the box. An optional second
+# pool Pi (QUALITY_SCAN_ENGINE_PI_FALLBACK, default empty since Steve 08:20: idea01 has no cooling
+# and overheats on the full suite) can be put between them. Each hop happens when the current Pi is claimed,
 # held or unreachable, its Engine test pre-flight refuses, or the thermal guard aborts; every hop is
 # recorded in fallback_chain. Set QUALITY_SCAN_ENGINE_PI="" (empty) to force the box, and
 # QUALITY_SCAN_ENGINE_PI_FALLBACK="" to go straight from the first Pi to the box.
 QUALITY_SCAN_ENGINE_PI="${QUALITY_SCAN_ENGINE_PI-idea04}"
-QUALITY_SCAN_ENGINE_PI_FALLBACK="${QUALITY_SCAN_ENGINE_PI_FALLBACK-idea01}"
+QUALITY_SCAN_ENGINE_PI_FALLBACK="${QUALITY_SCAN_ENGINE_PI_FALLBACK-}"
 QUALITY_SCAN_SOCKS="${QUALITY_SCAN_SOCKS:-}"
 QUALITY_SCAN_UFS="${QUALITY_SCAN_UFS:-${IDEA_ROOT}/tools/fleet/update-fleet-state.sh}"
 QUALITY_SCAN_SSH="${QUALITY_SCAN_SSH:-ssh}"
@@ -810,11 +813,15 @@ pi_quarantine_root() {
 # unknown-disk-readonly failed). 1 equals the Engine's own sequential setting.
 QUALITY_SCAN_PI_MAX_WORKERS="${QUALITY_SCAN_PI_MAX_WORKERS:-1}"
 QUALITY_SCAN_THERMAL_LIMIT_C="${QUALITY_SCAN_THERMAL_LIMIT_C:-75}"
+# idea#332 (Steve 08:20): the guard samples every QUALITY_SCAN_THERMAL_INTERVAL s, and idea01 overshot
+# 75 °C to 77 °C before the abort landed. It therefore trips 2 °C below the alert line: at
+# QUALITY_SCAN_THERMAL_TRIP_C (default LIMIT_C - 2 = 73 °C), so the overshoot stays under 75 °C.
+QUALITY_SCAN_THERMAL_TRIP_C="${QUALITY_SCAN_THERMAL_TRIP_C:-$(( QUALITY_SCAN_THERMAL_LIMIT_C - 2 ))}"
 QUALITY_SCAN_THERMAL_INTERVAL="${QUALITY_SCAN_THERMAL_INTERVAL:-10}"
 
 # engine_thermal_watch <host> <dir>: sample the Pi's SoC temperature every
 # QUALITY_SCAN_THERMAL_INTERVAL s; keep the peak (millidegrees) in <dir>/peak. At or above
-# QUALITY_SCAN_THERMAL_LIMIT_C write <dir>/abort and stop the remote test run (TERM to every
+# QUALITY_SCAN_THERMAL_TRIP_C write <dir>/abort and stop the remote test run (TERM to every
 # process group the suite runs in: it starts under setsid and writes its pgid to <scratch>/.qs-pgid,
 # so vitest and every fork it spawns stop, not just the ssh shell).
 # engine_thermal_sample <host>: SoC temperature in millidegrees, 0 when unreadable.
@@ -826,7 +833,7 @@ engine_thermal_sample() {
 
 engine_thermal_watch() {
   trap - EXIT INT TERM
-  local host="$1" d="$2" t peak limit=$(( QUALITY_SCAN_THERMAL_LIMIT_C * 1000 ))
+  local host="$1" d="$2" t peak limit=$(( QUALITY_SCAN_THERMAL_TRIP_C * 1000 ))
   peak="$(cat "$d/peak" 2>/dev/null || echo 0)"
   while :; do
     t="$(engine_ssh "$host" "cat /sys/class/thermal/thermal_zone0/temp" 2>/dev/null | tail -1)"
@@ -948,12 +955,13 @@ run_engine_tests_pool() {
   (( t_end > peak_mc )) && peak_mc="$t_end"
   [[ -f "$tdir/abort" ]] && abort_mc="$(cat "$tdir/abort")"
   rm -rf "$tdir"
-  echo "quality-scan: ${pi}: peak SoC temperature $(( peak_mc / 1000 )) °C (limit ${QUALITY_SCAN_THERMAL_LIMIT_C} °C, every ${QUALITY_SCAN_THERMAL_INTERVAL}s)${abort_mc:+ — ABORTED at $(( abort_mc / 1000 )) °C}" >&2
+  echo "quality-scan: ${pi}: peak SoC temperature $(( peak_mc / 1000 )) °C (trip ${QUALITY_SCAN_THERMAL_TRIP_C} °C, limit ${QUALITY_SCAN_THERMAL_LIMIT_C} °C, every ${QUALITY_SCAN_THERMAL_INTERVAL}s)${abort_mc:+ — ABORTED at $(( abort_mc / 1000 )) °C}" >&2
   engine_pool_restore
   if [[ -n "${QUALITY_SCAN_TEST_LOG:-}" ]]; then printf '%s\n' "$out" >>"$QUALITY_SCAN_TEST_LOG"; fi
   local extra
   extra="$(jq -nc --arg sha "$sha" --argjson w "$QUALITY_SCAN_PI_MAX_WORKERS" --argjson p "$peak_mc" --argjson l "$QUALITY_SCAN_THERMAL_LIMIT_C" \
-    '{scanned_ref:"origin/main",scanned_sha:$sha,max_workers:$w,peak_temp_c:($p/1000),thermal_limit_c:$l}')"
+    --argjson tr "$QUALITY_SCAN_THERMAL_TRIP_C" \
+    '{scanned_ref:"origin/main",scanned_sha:$sha,max_workers:$w,peak_temp_c:($p/1000),thermal_limit_c:$l,thermal_trip_c:$tr}')"
   if [[ -n "$abort_mc" ]]; then
     jq -nc --arg pi "$pi" --argjson a "$abort_mc" --argjson x "$extra" \
       --argjson done "$(printf '%s\n' "$out" | grep -c ' ✓ ' || true)" \
