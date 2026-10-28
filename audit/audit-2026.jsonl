@@ -698,3 +698,7 @@
 {"ts":"2026-10-28T12:25:25Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-10-28T12:30:55Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-28T12:30:55Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid","previous":null}
+{"ts":"2026-10-28T12:37:46Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"version","value":"engine main@11196685d29d3d68d39bf719f63f19f2c0d39ed9, console main@f97ec158d769b9402a62a203f3266c56c98f9cf6","previous":"engine main@2583608600fe8f364b73b328c00b191df237831c, console main@7da304524279cf626b6ea93ada50cf312ab45a15"}
+{"ts":"2026-10-28T12:37:46Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"lan","value":"192.168.0.228","previous":"10.99.0.13"}
+{"ts":"2026-10-28T12:37:46Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"lan","value":"192.168.0.113","previous":"10.99.0.14"}
+{"ts":"2026-10-28T12:38:10Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"lan","value":"192.168.0.138","previous":"10.99.0.11"}
