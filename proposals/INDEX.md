@@ -118,3 +118,7 @@ Teacher USB sticks: any FAT/exFAT stick is mounted read-only (`ro,nosuid,nodev,n
 ## 2026-10-16-console-demo-setup.md
 **Status:** Draft · **Author:** Steve (Lead Bot)
 Console "Set up demo" button (Koen 2026-10-16, replaces the IDEA-DEMO disk idea): an Engine `setupDemo` command installs separate `Kolibri (Demo)` and `Nextcloud (Demo)` instances alongside any real ones, marked `demo: true`, runs app-provided demo hooks (content download from a versioned demo pack, or a local pack offline; IDEA Demo School; learners username-only, `<name>911!` for others), and `removeDemo` removes only `demo: true` instances. Issue #233. PDF in `proposals/2026-10-16-console-demo-setup/`.
+
+## 2026-10-28-update-app.md
+**Status:** Draft · **Author:** Steve · IDEA Lead Bot
+Engine `updateApp` command (Koen approved 2026-10-28): update an installed App instance in place to a newer version from a docked App Disk, with an on-disk snapshot of data and named volumes, a health gate, and automatic rollback; dock-time "Update available" hint for #76. Issues agent-engine-dev#230, idea#76. PDF in `proposals/2026-10-28-update-app/`.
