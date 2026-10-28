@@ -847,3 +847,5 @@
 {"ts":"2026-10-28T13:18:11Z","bot":"Atlas","action":"quality_scan","mode":"full","repos":["agent-engine-dev"],"ok":true,"violation_count":0}
 {"ts":"2026-10-28T13:18:11Z","bot":"Atlas","action":"quality_scan","mode":"full","repos":["agent-engine-dev"],"ok":true,"violation_count":0}
 {"ts":"2026-10-28T13:18:11Z","bot":"Atlas","action":"quality_scan","mode":"full","repos":["agent-engine-dev"],"ok":false,"violation_count":1}
+{"ts":"2026-10-28T13:54:03Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"offline","previous":"idle"}
+{"ts":"2026-10-28T13:54:03Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"offline_note","value":"adapter lent to Koen 2026-10-28","previous":null}
