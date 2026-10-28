@@ -171,6 +171,30 @@ FAKE_UNREACH=10.0.0.3 run "$D/set-golden-pi.sh" --yes
 check "set-golden skips unreachable, never claimed/wh/kit" test "$(j .golden)" = idea01
 reset_state
 run "$D/set-golden-pi.sh" --yes;          check "set-golden refuses 2 golden"      test "$RC" = 1
+# --pi <name>: explicit target (idea02 removed so only "gold" is golden)
+reset_state; jq 'del(.idea02)' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+run "$D/set-golden-pi.sh" --pi idea01
+check "set-golden --pi dry run targets idea01"   test "$(j .golden)" = idea01
+check "set-golden --pi dry run changes nothing"  test "$(st idea01 role)" = spare
+run "$D/set-golden-pi.sh" --yes --pi idea01
+check "set-golden --pi promotes idea01"          test "$(st idea01 role)" = golden
+check "set-golden --pi reachable old -> spare"   test "$(st gold role)" = spare
+check "set-golden --pi old golden idle"          test "$(st gold status)" = idle
+run "$D/set-golden-pi.sh" --yes --pi idea01
+check "set-golden --pi same Pi is no change"     test "$(j .changed)" = false
+reset_state; jq 'del(.idea02)' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+FAKE_UNREACH=10.0.0.7 run "$D/set-golden-pi.sh" --yes --pi idea01
+check "set-golden --pi unreachable old -> golden-unavailable" test "$(st gold role)" = golden-unavailable
+reset_state; jq 'del(.idea02)' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+FAKE_UNREACH=10.0.0.1 run "$D/set-golden-pi.sh" --yes --pi idea01
+check "set-golden --pi refuses unreachable"      test "$RC" = 1
+check "set-golden --pi unreachable keeps state"  test "$(st idea01 role)/$(st gold role)" = spare/golden
+run "$D/set-golden-pi.sh" --yes --pi idea04;     check "set-golden --pi refuses claimed"  test "$RC" = 1
+run "$D/set-golden-pi.sh" --yes --pi kit1;       check "set-golden --pi refuses non-pool" test "$RC" = 1
+run "$D/set-golden-pi.sh" --yes --pi wh;         check "set-golden --pi refuses wh host"  test "$RC" = 1
+run "$D/set-golden-pi.sh" --yes --pi nope;       check "set-golden --pi refuses unknown"  test "$RC" = 1
+run "$D/set-golden-pi.sh" --yes --pi;            check "set-golden --pi needs a name = 2" test "$RC" = 2
+check "set-golden --pi refusals change nothing"  test "$(st gold role)" = golden
 
 # --- --ignore-fleet-hold (skips ONLY the fleet-wide HOLD/PAUSED) ---
 reset_state; touch "$HEALTH_DIR/HOLD"; echo "paused" > "$HEALTH_DIR/PAUSED"

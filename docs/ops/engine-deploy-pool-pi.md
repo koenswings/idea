@@ -4,7 +4,7 @@
 Script: [`tools/fleet/deploy-engine-pi.sh`](../../tools/fleet/deploy-engine-pi.sh), tests: `tools/fleet/deploy-engine-pi.test.sh`.
 
 ## 1. What option 2 is
-A pool Pi (idea01, idea04; golden idea03 runs the same way and stays on the shared store) runs the Engine from a git checkout in
+A pool Pi (idea03, idea04; golden idea01 runs the same way and stays on the shared store) runs the Engine from a git checkout in
 `/home/pi/idea/agents/agent-engine-dev` with **local, uncommitted edits** to tracked files:
 `config.yaml`, `pm2.config.cjs` and the files in `store-identity/`. Option 2 (Axle, 2026-10-13)
 keeps those edits across a checkout of a new Engine commit: save, discard, check out, restore.
