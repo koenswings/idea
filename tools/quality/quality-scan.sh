@@ -52,14 +52,19 @@ Paths (canonical Pi / local layout):
   --repo-root DIR → override parent of agents/ (fixtures: DIR/agents/<name>)
   remote tests    → same nesting under /home/pi/idea/
 
-Engine tests (idea#335, idea#332): run on pool Pi idea01 by default (claim, pm2 stop,
-  run in a scratch clone under /home/pi/scratch checked out at origin/main HEAD (scanned_sha), then
-  quarantine the clone (moved, never deleted), pm2 restart + online check, release;
+Engine tests (idea#335, idea#332): run on pool Pi idea04 by default (claim, pm2 stop,
+  run in a scratch clone under /home/pi/scratch (created when missing) checked out at origin/main
+  HEAD (scanned_sha), then quarantine the clone (moved, never deleted: idea04 → ~/quarantine/<date>,
+  other Pis → ~/scratch/quarantine/<date>), pm2 restart + online check, release;
   trap on failure/interrupt; needs BOT_NAME).
-  Box fallback only when idea01 is claimed, held, unreachable or its pre-flight refuses
-  (logged on stderr as "Engine tests target=box (fallback from …)").
-  QUALITY_SCAN_ENGINE_PI=<pi>  use another claimed idle pool Pi; empty forces the box
-                               (never idea02, production or kits)
+  Fallback chain idea04 → idea01 → box: a Pi is skipped when it is claimed, held, not idle,
+  unreachable, its pre-flight refuses, or the thermal guard aborts; every hop is recorded in
+  checks.tests.fallback_chain (first hop also as fallback_from/fallback_reason/pool_attempt) and
+  logged on stderr ("Engine tests target=…").
+  QUALITY_SCAN_ENGINE_PI=<pi>  first pool Pi (default idea04); empty forces the box
+                               (never idea02, idea/production, kits or unknown Pis: refusals end the chain)
+  QUALITY_SCAN_ENGINE_PI_FALLBACK=<pi>  next pool Pi (default idea01); empty → straight to the box
+  QUALITY_SCAN_PI_QUARANTINE_ROOT=DIR   override the per-Pi quarantine root
   QUALITY_SCAN_SOCKS=host:port SSH via SOCKS5 (box: 127.0.0.1:1055)
   QUALITY_SCAN_PI_MAX_WORKERS=N    vitest workers on a pool Pi (default 1; >1 runs files in parallel; recorded as max_workers)
   QUALITY_SCAN_THERMAL_LIMIT_C=C   abort a Pi run at/above C (default 75) → box fallback, fallback_reason=thermal
@@ -637,10 +642,13 @@ check_bakeins() {
 # production Engine (idea01 while live, idea02, 'idea'/production, kit Engines).
 # The idea#105 pre-flight in the Engine suite is NOT touched: IDEA_TEST_ALLOW_LIVE is
 # always unset for the test command.
-# idea#332 (Steve, option a): default target is pool Pi idea01. Set QUALITY_SCAN_ENGINE_PI=""
-# (empty) to force the box. Falls back to the box when idea01 is claimed, held or
-# unreachable, or when the Engine test pre-flight refuses there.
-QUALITY_SCAN_ENGINE_PI="${QUALITY_SCAN_ENGINE_PI-idea01}"
+# idea#332: default target is pool Pi idea04 (Koen, 2026-10-28), then idea01
+# (QUALITY_SCAN_ENGINE_PI_FALLBACK), then the box. Each hop happens when the current Pi is claimed,
+# held or unreachable, its Engine test pre-flight refuses, or the thermal guard aborts; every hop is
+# recorded in fallback_chain. Set QUALITY_SCAN_ENGINE_PI="" (empty) to force the box, and
+# QUALITY_SCAN_ENGINE_PI_FALLBACK="" to go straight from the first Pi to the box.
+QUALITY_SCAN_ENGINE_PI="${QUALITY_SCAN_ENGINE_PI-idea04}"
+QUALITY_SCAN_ENGINE_PI_FALLBACK="${QUALITY_SCAN_ENGINE_PI_FALLBACK-idea01}"
 QUALITY_SCAN_SOCKS="${QUALITY_SCAN_SOCKS:-}"
 QUALITY_SCAN_UFS="${QUALITY_SCAN_UFS:-${IDEA_ROOT}/tools/fleet/update-fleet-state.sh}"
 QUALITY_SCAN_SSH="${QUALITY_SCAN_SSH:-ssh}"
@@ -786,6 +794,16 @@ engine_result() {
 # Pool-Pi path (opt-in). Claims, stops pm2 engine as pi, runs, restores, releases.
 ENGINE_POOL_PI=""; ENGINE_POOL_HOST=""; ENGINE_POOL_WAS_ONLINE=0; ENGINE_POOL_CLAIMED=0; ENGINE_POOL_SCRATCH=""
 QUALITY_SCAN_PI_SCRATCH_ROOT="${QUALITY_SCAN_PI_SCRATCH_ROOT:-/home/pi/scratch}"
+# Where a used scratch clone is moved (never deleted). idea04 keeps its quarantine in
+# ~/quarantine; the other pool Pis use <scratch root>/quarantine. QUALITY_SCAN_PI_QUARANTINE_ROOT
+# overrides it for every Pi.
+pi_quarantine_root() {
+  if [[ -n "${QUALITY_SCAN_PI_QUARANTINE_ROOT:-}" ]]; then echo "$QUALITY_SCAN_PI_QUARANTINE_ROOT"; return; fi
+  case "$1" in
+    idea04) echo "/home/pi/quarantine" ;;
+    *) echo "${QUALITY_SCAN_PI_SCRATCH_ROOT}/quarantine" ;;
+  esac
+}
 # idea#332 (Steve 05:38): Pi runs set vitest's worker count and a thermal guard. Default 1: vitest 4
 # applies VITEST_MAX_WORKERS AFTER fileParallelism:false has forced maxWorkers=1, so any N>1 runs N
 # test files in parallel on shared Docker / disk-sim state (seen on idea01 with 2: adopt-only-idea-disks,
@@ -829,7 +847,8 @@ engine_thermal_watch() {
 engine_pool_restore() {
   [[ -n "$ENGINE_POOL_PI" ]] || return 0
   if [[ -n "$ENGINE_POOL_SCRATCH" ]]; then
-    local q="${QUALITY_SCAN_PI_SCRATCH_ROOT}/quarantine/$(date -u +%Y%m%d)"
+    local q
+    q="$(pi_quarantine_root "$ENGINE_POOL_PI")/$(date -u +%Y%m%d)"
     engine_ssh "$ENGINE_POOL_HOST" "if [ -d ${ENGINE_POOL_SCRATCH} ]; then mkdir -p ${q} && mv ${ENGINE_POOL_SCRATCH} ${q}/; fi" >/dev/null 2>&1 \
       && echo "quality-scan: ${ENGINE_POOL_PI}: scratch quarantined under ${q}" >&2 \
       || echo "WARN: could not quarantine ${ENGINE_POOL_SCRATCH} on ${ENGINE_POOL_PI}" >&2
@@ -857,7 +876,7 @@ engine_pool_restore() {
 }
 
 run_engine_tests_pool() {
-  local repo="$1" root="$2" pi="$QUALITY_SCAN_ENGINE_PI" host why online out rc=0 cmd remote_path
+  local repo="$1" root="$2" pi="${3:-$QUALITY_SCAN_ENGINE_PI}" host why online out rc=0 cmd remote_path
   if why="$(engine_pi_forbidden "$pi")"; then
     jq -nc --arg r "${why%%:*}" --arg d "$why" '{status:"skipped",reason:$r,detail:$d}'
     return
@@ -951,33 +970,65 @@ run_engine_tests_pool() {
     jq -c --argjson x "$extra" '. + $x'
 }
 
-# Pool Pi first (default idea01); box fallback only when the Pi is claimed, held,
-# unreachable, or its pre-flight refuses. Other refusals (idea02, production, kits, …) stand.
+# Pool Pis in order (default idea04, then idea01), then the box. A hop to the next target only
+# when the current Pi is claimed, held, not idle, unreachable, its pre-flight refuses, or the
+# thermal guard aborts. Other refusals (idea02, production, kits, unknown Pis, BOT_NAME, …) stand
+# and end the chain. Each hop is recorded in fallback_chain ({pi, reason, detail?, peak_temp_c?});
+# fallback_from/fallback_reason/pool_attempt keep the first hop (as before, idea#332).
+engine_chain() {
+  local p seen=" " out=()
+  for p in $QUALITY_SCAN_ENGINE_PI ${QUALITY_SCAN_ENGINE_PI:+$QUALITY_SCAN_ENGINE_PI_FALLBACK}; do
+    p="${p//,/}"
+    [[ -z "$p" || "$seen" == *" $p "* ]] && continue
+    seen+="$p "; out+=("$p")
+  done
+  echo "${out[@]}"
+}
+
+engine_hop_reason() {
+  # engine_hop_reason <pool json>: the reason when the chain may move on, empty otherwise.
+  local reason detail
+  reason="$(jq -r '.reason // ""' <<<"$1")"
+  detail="$(jq -r '.detail // ""' <<<"$1")"
+  case "$reason" in
+    pi_claimed|pi_not_idle|pi_unreachable|preflight_refused|thermal) echo "$reason" ;;
+    never_live_production) [[ "$detail" == *":status=hold" ]] && echo "$reason" ;;
+  esac
+  return 0
+}
+
 run_engine_tests_placed() {
-  local repo="$1" root="$2" pi="$QUALITY_SCAN_ENGINE_PI" pool reason detail
-  if [[ -z "$pi" ]]; then
+  local repo="$1" root="$2" pi pool reason chain='[]' first_pi="" first_reason="" first_pool="" hop pis
+  pis="$(engine_chain)"
+  if [[ -z "$pis" ]]; then
     echo "quality-scan: Engine tests target=box (QUALITY_SCAN_ENGINE_PI empty)" >&2
     run_engine_tests_box "$repo" "$root"
     return
   fi
-  pool="$(run_engine_tests_pool "$repo" "$root")"
-  reason="$(jq -r '.reason // ""' <<<"$pool")"
-  detail="$(jq -r '.detail // ""' <<<"$pool")"
-  case "$reason" in
-    pi_claimed|pi_not_idle|pi_unreachable|preflight_refused|thermal) ;;
-    never_live_production) [[ "$detail" == *":status=hold" ]] || reason="" ;;
-    *) reason="" ;;
-  esac
-  if [[ -z "$reason" ]]; then
-    echo "quality-scan: Engine tests target=pool ${pi} ($(jq -r '.status + (if .reason then " " + .reason else "" end)' <<<"$pool"))" >&2
-    printf '%s\n' "$pool"
-    return
-  fi
-  echo "quality-scan: Engine tests target=box (fallback from ${pi}: ${reason}${detail:+ — $detail})" >&2
-  # idea#332: the box reruns the whole suite (with engine-box-exceptions.txt); the Pi attempt
-  # (thermal peak, tests done before an abort) is kept as pool_attempt.
-  run_engine_tests_box "$repo" "$root" | jq -c --arg pi "$pi" --arg r "$reason" --argjson pa "$pool" \
-    '. + {fallback_from:$pi, fallback_reason:$r, pool_attempt:$pa}'
+  for pi in $pis; do
+    pool="$(run_engine_tests_pool "$repo" "$root" "$pi")"
+    reason="$(engine_hop_reason "$pool")"
+    if [[ -z "$reason" ]]; then
+      echo "quality-scan: Engine tests target=pool ${pi} ($(jq -r '.status + (if .reason then " " + .reason else "" end)' <<<"$pool"))" >&2
+      if [[ -n "$first_pi" ]]; then
+        jq -c --arg f "$first_pi" --arg r "$first_reason" --argjson c "$chain" --argjson pa "$first_pool" \
+          '. + {fallback_from:$f, fallback_reason:$r, fallback_chain:$c, pool_attempt:$pa}' <<<"$pool"
+      else
+        printf '%s\n' "$pool"
+      fi
+      return
+    fi
+    hop="$(jq -c --arg pi "$pi" --arg r "$reason" \
+      '{pi:$pi, reason:$r} + (if .detail then {detail} else {} end) + (if .peak_temp_c then {peak_temp_c} else {} end) + (if .abort_temp_c then {abort_temp_c} else {} end)' <<<"$pool")"
+    chain="$(jq -c --argjson h "$hop" '. + [$h]' <<<"$chain")"
+    if [[ -z "$first_pi" ]]; then first_pi="$pi"; first_reason="$reason"; first_pool="$pool"; fi
+    echo "quality-scan: Engine tests: ${pi} skipped (${reason}$(jq -r 'if .detail then " — " + .detail else "" end' <<<"$pool")), next target" >&2
+  done
+  echo "quality-scan: Engine tests target=box (fallback chain: $(jq -r 'map(.pi + ":" + .reason) | join(" → ")' <<<"$chain") → box)" >&2
+  # idea#332: the box reruns the whole suite (with engine-box-exceptions.txt); each Pi attempt
+  # (thermal peak, tests done before an abort) is kept: the first as pool_attempt, all in fallback_chain.
+  run_engine_tests_box "$repo" "$root" | jq -c --arg f "$first_pi" --arg r "$first_reason" --argjson c "$chain" --argjson pa "$first_pool" \
+    '. + {fallback_from:$f, fallback_reason:$r, fallback_chain:$c, pool_attempt:$pa}'
 }
 
 # --- Tests ---
