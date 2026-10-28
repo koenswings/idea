@@ -61,7 +61,7 @@ Engine tests (idea#335, idea#332): run on pool Pi idea01 by default (claim, pm2 
   QUALITY_SCAN_ENGINE_PI=<pi>  use another claimed idle pool Pi; empty forces the box
                                (never idea02, production or kits)
   QUALITY_SCAN_SOCKS=host:port SSH via SOCKS5 (box: 127.0.0.1:1055)
-  QUALITY_SCAN_PI_MAX_WORKERS=N    vitest workers on a pool Pi (default 2; recorded as max_workers)
+  QUALITY_SCAN_PI_MAX_WORKERS=N    vitest workers on a pool Pi (default 1; >1 runs files in parallel; recorded as max_workers)
   QUALITY_SCAN_THERMAL_LIMIT_C=C   abort a Pi run at/above C (default 75) → box fallback, fallback_reason=thermal
   QUALITY_SCAN_THERMAL_INTERVAL=S  Pi temperature sample interval (default 10; peak recorded as peak_temp_c)
   QUALITY_SCAN_TEST_LOG=FILE   append raw Engine test output to FILE
@@ -786,16 +786,19 @@ engine_result() {
 # Pool-Pi path (opt-in). Claims, stops pm2 engine as pi, runs, restores, releases.
 ENGINE_POOL_PI=""; ENGINE_POOL_HOST=""; ENGINE_POOL_WAS_ONLINE=0; ENGINE_POOL_CLAIMED=0; ENGINE_POOL_SCRATCH=""
 QUALITY_SCAN_PI_SCRATCH_ROOT="${QUALITY_SCAN_PI_SCRATCH_ROOT:-/home/pi/scratch}"
-# idea#332 (Steve 05:38): Pi runs use fewer vitest workers and a thermal guard. The Engine's
-# vitest config already has fileParallelism:false, so this caps forks rather than adding any.
-QUALITY_SCAN_PI_MAX_WORKERS="${QUALITY_SCAN_PI_MAX_WORKERS:-2}"
+# idea#332 (Steve 05:38): Pi runs set vitest's worker count and a thermal guard. Default 1: vitest 4
+# applies VITEST_MAX_WORKERS AFTER fileParallelism:false has forced maxWorkers=1, so any N>1 runs N
+# test files in parallel on shared Docker / disk-sim state (seen on idea01 with 2: adopt-only-idea-disks,
+# unknown-disk-readonly failed). 1 equals the Engine's own sequential setting.
+QUALITY_SCAN_PI_MAX_WORKERS="${QUALITY_SCAN_PI_MAX_WORKERS:-1}"
 QUALITY_SCAN_THERMAL_LIMIT_C="${QUALITY_SCAN_THERMAL_LIMIT_C:-75}"
 QUALITY_SCAN_THERMAL_INTERVAL="${QUALITY_SCAN_THERMAL_INTERVAL:-10}"
 
 # engine_thermal_watch <host> <dir>: sample the Pi's SoC temperature every
 # QUALITY_SCAN_THERMAL_INTERVAL s; keep the peak (millidegrees) in <dir>/peak. At or above
 # QUALITY_SCAN_THERMAL_LIMIT_C write <dir>/abort and stop the remote test run (TERM to every
-# process whose command line holds the scratch path; the [x] pattern never matches pkill's own shell).
+# process group the suite runs in: it starts under setsid and writes its pgid to <scratch>/.qs-pgid,
+# so vitest and every fork it spawns stop, not just the ssh shell).
 # engine_thermal_sample <host>: SoC temperature in millidegrees, 0 when unreadable.
 engine_thermal_sample() {
   local t
@@ -805,8 +808,7 @@ engine_thermal_sample() {
 
 engine_thermal_watch() {
   trap - EXIT INT TERM
-  local host="$1" d="$2" t peak limit=$(( QUALITY_SCAN_THERMAL_LIMIT_C * 1000 )) pat
-  pat="[${ENGINE_POOL_SCRATCH:0:1}]${ENGINE_POOL_SCRATCH:1}"
+  local host="$1" d="$2" t peak limit=$(( QUALITY_SCAN_THERMAL_LIMIT_C * 1000 ))
   peak="$(cat "$d/peak" 2>/dev/null || echo 0)"
   while :; do
     t="$(engine_ssh "$host" "cat /sys/class/thermal/thermal_zone0/temp" 2>/dev/null | tail -1)"
@@ -815,7 +817,7 @@ engine_thermal_watch() {
       if (( t >= limit )); then
         [[ -f "$d/abort" ]] || echo "$t" >"$d/abort"
         # Keep stopping until the parent kills this watcher: the run may not have started yet.
-        engine_ssh "$host" "pkill -TERM -f '${pat}'" >/dev/null 2>&1 || true
+        engine_ssh "$host" "if [ -s ${ENGINE_POOL_SCRATCH}/.qs-pgid ]; then kill -TERM -- -\$(cat ${ENGINE_POOL_SCRATCH}/.qs-pgid); fi" >/dev/null 2>&1 || true
       fi
     fi
     sleep "$QUALITY_SCAN_THERMAL_INTERVAL"
@@ -915,7 +917,7 @@ run_engine_tests_pool() {
   engine_thermal_watch "$host" "$tdir" &
   wpid=$!
   set +e
-  out="$(engine_ssh "$host" "set -e; mkdir -p ${QUALITY_SCAN_PI_SCRATCH_ROOT} && git clone -q ${remote_path} ${ENGINE_POOL_SCRATCH} && cd ${ENGINE_POOL_SCRATCH} && git fetch -q \$(git -C ${remote_path} remote get-url origin) ${sha} && git checkout -q ${sha} && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && env -u IDEA_TEST_ALLOW_LIVE VITEST_MAX_WORKERS=${QUALITY_SCAN_PI_MAX_WORKERS} ${cmd}" 2>&1)"
+  out="$(engine_ssh "$host" "set -e; mkdir -p ${QUALITY_SCAN_PI_SCRATCH_ROOT} && git clone -q ${remote_path} ${ENGINE_POOL_SCRATCH} && cd ${ENGINE_POOL_SCRATCH} && git fetch -q \$(git -C ${remote_path} remote get-url origin) ${sha} && git checkout -q ${sha} && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && setsid -w sh -c 'echo \$\$ > .qs-pgid; exec env -u IDEA_TEST_ALLOW_LIVE VITEST_MAX_WORKERS=${QUALITY_SCAN_PI_MAX_WORKERS} ${cmd}'" 2>&1)"
   rc=$?
   kill "$wpid" 2>/dev/null; wait "$wpid" 2>/dev/null
   set -e
