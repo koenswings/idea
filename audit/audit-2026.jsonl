@@ -690,3 +690,5 @@
 {"ts":"2026-10-28T10:41:39Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-10-28T10:43:54Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-28T10:43:54Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle: agent-engine-dev#261,#265 Pi scan","previous":null}
+{"ts":"2026-10-28T11:32:59Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle: agent-engine-dev#261,#265 Pi scan"}
+{"ts":"2026-10-28T11:32:59Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
