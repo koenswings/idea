@@ -71,9 +71,6 @@ Engine tests (idea#335, idea#332): run on pool Pi idea04 by default (claim, pm2 
                                    test's own default). idea#332 profile (main 2583608): ws-post-burst beforeAll 11 s on the
                                    box, 76 s on idea04 alone, >360 s under the full suite on idea04 → ~12x alone, 2.5x the
                                    observed full-suite lower bound. Recorded as post_burst_setup_ms.
-  QUALITY_SCAN_PI_ENGINE_REF=BRANCH  branch of the Engine repo to scan on a Pi (default main; e.g. a PR branch to
-                                   validate it on the Pi). Full mode only: --pr mode tests --head (idea#357)
-                                   and ignores this. Recorded as scanned_ref origin/<BRANCH>.
   QUALITY_SCAN_THERMAL_LIMIT_C=C   alert line the Pi must stay under (default 75; recorded as thermal_limit_c)
   QUALITY_SCAN_THERMAL_TRIP_C=C    abort a Pi run at/above C (default LIMIT_C-2 = 73, so the 10 s sampling
                                    overshoot stays under the limit) → next target, fallback_reason=thermal
@@ -821,8 +818,9 @@ pi_quarantine_root() {
 QUALITY_SCAN_PI_MAX_WORKERS="${QUALITY_SCAN_PI_MAX_WORKERS:-1}"
 QUALITY_SCAN_PI_POST_BURST_SETUP_MS="${QUALITY_SCAN_PI_POST_BURST_SETUP_MS:-900000}"
 [[ "$QUALITY_SCAN_PI_POST_BURST_SETUP_MS" =~ ^[1-9][0-9]*$ ]] || { echo "quality-scan: QUALITY_SCAN_PI_POST_BURST_SETUP_MS must be a positive integer" >&2; exit 2; }
-QUALITY_SCAN_PI_ENGINE_REF="${QUALITY_SCAN_PI_ENGINE_REF:-main}"
-[[ "$QUALITY_SCAN_PI_ENGINE_REF" =~ ^[A-Za-z0-9._/-]+$ && "$QUALITY_SCAN_PI_ENGINE_REF" != *..* ]] || { echo "quality-scan: QUALITY_SCAN_PI_ENGINE_REF has unsafe characters" >&2; exit 2; }
+# QUALITY_SCAN_PI_ENGINE_REF was dropped (idea#348, Steve 2026-10-28): nothing set it, and a PR
+# is scanned on the Pi with --pr --head <sha> (idea#357). Full mode always tests origin/main.
+[[ -z "${QUALITY_SCAN_PI_ENGINE_REF:-}" ]] || echo "quality-scan: QUALITY_SCAN_PI_ENGINE_REF is no longer supported and is ignored; use --pr --head <sha>" >&2
 QUALITY_SCAN_THERMAL_LIMIT_C="${QUALITY_SCAN_THERMAL_LIMIT_C:-75}"
 # idea#332 (Steve 08:20): the guard samples every QUALITY_SCAN_THERMAL_INTERVAL s, and idea01 overshot
 # 75 °C to 77 °C before the abort landed. It therefore trips 2 °C below the alert line: at
@@ -943,7 +941,7 @@ run_engine_tests_pool() {
   local stamp sha
   stamp="$(date -u +%Y%m%dT%H%M%SZ)"
   ENGINE_POOL_SCRATCH="${QUALITY_SCAN_PI_SCRATCH_ROOT}/qs-${repo}-${stamp}"
-  # Full mode tests origin/$QUALITY_SCAN_PI_ENGINE_REF HEAD (default main); --pr mode tests the --head SHA (idea#357).
+  # Full mode tests origin/main HEAD; --pr mode tests the --head SHA (idea#357).
   local scanned_ref fetch_extra=""
   if [[ "$MODE" == "pr" ]]; then
     scanned_ref="pr-head"
@@ -956,8 +954,8 @@ run_engine_tests_pool() {
     # A PR head from a fork or an unmerged branch may only be reachable via refs/pull/*/head.
     fetch_extra=" || git fetch -q \$(git -C ${remote_path} remote get-url origin) '+refs/pull/*/head:refs/remotes/origin/pr/*'"
   else
-    scanned_ref="origin/${QUALITY_SCAN_PI_ENGINE_REF}"
-    sha="$(engine_ssh "$host" "git ls-remote \$(git -C ${remote_path} remote get-url origin) refs/heads/${QUALITY_SCAN_PI_ENGINE_REF}" 2>/dev/null | awk '{print $1}' | tail -1)"
+    scanned_ref="origin/main"
+    sha="$(engine_ssh "$host" "git ls-remote \$(git -C ${remote_path} remote get-url origin) refs/heads/main" 2>/dev/null | awk '{print $1}' | tail -1)"
     if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
       engine_pool_restore
       jq -nc --arg pi "$pi" '{status:"skipped",reason:"main_sha_unreadable",pi:$pi}'

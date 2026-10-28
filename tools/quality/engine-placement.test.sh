@@ -192,11 +192,10 @@ if [[ "$(echo "$order" | tr ' ' '\n' | grep -v '^$' | sort -n | tr '\n' ' ')" ==
 
 check "pool: post-burst setup budget recorded (idea#332)" "$tst.post_burst_setup_ms==900000" "$out"
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 QUALITY_SCAN_PI_POST_BURST_SETUP_MS=1200000 QUALITY_SCAN_PI_ENGINE_REF=axle/some-pr)"
-check "pool: post-burst budget + engine ref configurable" "$tst.post_burst_setup_ms==1200000 and $tst.scanned_ref==\"origin/axle/some-pr\"" "$out"
+check "pool: post-burst budget configurable; dropped ENGINE_REF ignored, full mode scans origin/main (idea#348)" "$tst.post_burst_setup_ms==1200000 and $tst.scanned_ref==\"origin/main\"" "$out"
 loghas "pool: Pi gets the budget" "IDEA_TEST_POST_BURST_SETUP_MS=1200000 pnpm test:full"
-loghas "pool: reads the PR branch SHA" "remote get-url origin) refs/heads/axle/some-pr"
-out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 'QUALITY_SCAN_PI_ENGINE_REF=x;rm')"
-lognot "pool: unsafe engine ref refused before any ssh" "pm2 stop engine"
+loghas "pool: reads the main SHA" "remote get-url origin) refs/heads/main"
+lognot "pool: ENGINE_REF branch never read" "refs/heads/axle/some-pr"
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI= )"
 lognot "box: no Pi post-burst budget" "IDEA_TEST_POST_BURST_SETUP_MS"
 
@@ -230,7 +229,7 @@ check "pr: post_burst_setup_ms recorded" "$tst.post_burst_setup_ms==900000" "$ou
 loghas "pr: scratch quarantined" "mkdir -p /home/pi/scratch/quarantine/"
 loghas "pr: claim released" "ufs BOT=Atlas --null idea03 claim"
 out="$(scanpr "$PRH" env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 QUALITY_SCAN_PI_ENGINE_REF=axle/some-pr)"
-check "pr: --head wins over QUALITY_SCAN_PI_ENGINE_REF" "$tst.scanned_sha==\"$PRH\" and $tst.scanned_ref==\"pr-head\"" "$out"
+check "pr: --head is scanned (dropped ENGINE_REF ignored)" "$tst.scanned_sha==\"$PRH\" and $tst.scanned_ref==\"pr-head\"" "$out"
 lognot "pr: ENGINE_REF branch not read in --pr mode" "refs/heads/axle/some-pr"
 out="$(scanpr abc123 env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1)"
 check "pr: short --head → skipped, not run" "$tst.reason==\"pr_head_not_full_sha\"" "$out"
