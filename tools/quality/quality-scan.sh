@@ -15,8 +15,8 @@ if [[ -z "${IDEA_ROOT}" ]]; then
   exit 2
 fi
 
-FLEET_FIND="${IDEA_ROOT}/tools/fleet/find-available-pi.sh"
-FLEET_STATE="${IDEA_ROOT}/fleet-state.json"
+FLEET_FIND="${QUALITY_SCAN_FLEET_FIND:-${IDEA_ROOT}/tools/fleet/find-available-pi.sh}"
+FLEET_STATE="${QUALITY_SCAN_FLEET_STATE:-${IDEA_ROOT}/fleet-state.json}"
 BOT_NAME="${BOT_NAME:-unknown}"
 
 DEFAULT_REPOS=(
@@ -51,6 +51,32 @@ Paths (canonical Pi / local layout):
   app-*           → <IDEA_ROOT>/agents/agent-app-dev/<name>
   --repo-root DIR → override parent of agents/ (fixtures: DIR/agents/<name>)
   remote tests    → same nesting under /home/pi/idea/
+
+Engine tests (idea#335, idea#332): run on pool Pi idea04 by default (claim, pm2 stop,
+  run in a scratch clone under /home/pi/scratch (created when missing) checked out at origin/main
+  HEAD, or at the --head SHA in --pr mode (scanned_sha/scanned_ref), then quarantine the clone (moved, never deleted: idea04 → ~/quarantine/<date>,
+  other Pis → ~/scratch/quarantine/<date>), pm2 restart + online check, release;
+  trap on failure/interrupt; needs BOT_NAME).
+  Fallback chain idea04 → box (optional second Pi via QUALITY_SCAN_ENGINE_PI_FALLBACK): a Pi is skipped when it is claimed, held, not idle,
+  unreachable, its pre-flight refuses, or the thermal guard aborts; every hop is recorded in
+  checks.tests.fallback_chain (first hop also as fallback_from/fallback_reason/pool_attempt) and
+  logged on stderr ("Engine tests target=…").
+  QUALITY_SCAN_ENGINE_PI=<pi>  first pool Pi (default idea04); empty forces the box
+                               (never idea02, idea/production, kits or unknown Pis: refusals end the chain)
+  QUALITY_SCAN_ENGINE_PI_FALLBACK=<pi>  optional next pool Pi (default empty → straight to the box)
+  QUALITY_SCAN_PI_QUARANTINE_ROOT=DIR   override the per-Pi quarantine root
+  QUALITY_SCAN_SOCKS=host:port SSH via SOCKS5 (box: 127.0.0.1:1055)
+  QUALITY_SCAN_PI_MAX_WORKERS=N    vitest workers on a pool Pi (default 1; >1 runs files in parallel; recorded as max_workers)
+  QUALITY_SCAN_THERMAL_LIMIT_C=C   alert line the Pi must stay under (default 75; recorded as thermal_limit_c)
+  QUALITY_SCAN_THERMAL_TRIP_C=C    abort a Pi run at/above C (default LIMIT_C-2 = 73, so the 10 s sampling
+                                   overshoot stays under the limit) → next target, fallback_reason=thermal
+  QUALITY_SCAN_THERMAL_INTERVAL=S  Pi temperature sample interval (default 10; peak recorded as peak_temp_c)
+  QUALITY_SCAN_TEST_LOG=FILE   append raw Engine test output to FILE
+  Box runs only: failures listed in tools/quality/engine-box-exceptions.txt (the
+  Docker-only tests) are reported as tests.known_box_exceptions and do not fail
+  the scan; any other failure does. On a pool Pi every failure counts.
+  Before a release, run the Engine tests through the pool-Pi path
+  (QUALITY_SCAN_ENGINE_PI=<pi>), not on the box.
 EOF
 }
 
@@ -91,7 +117,8 @@ fi
 
 # --- Finding accumulators (temp files for jq assembly) ---
 TMPDIR_SCAN="$(mktemp -d)"
-trap 'rm -rf "$TMPDIR_SCAN"' EXIT
+trap 'engine_pool_restore 2>/dev/null || true; rm -rf "$TMPDIR_SCAN"' EXIT
+trap 'exit 130' INT; trap 'exit 143' TERM  # interrupt → EXIT trap restores the Engine and releases the claim
 FINDINGS_FILE="$TMPDIR_SCAN/findings.jsonl"
 RESULTS_FILE="$TMPDIR_SCAN/results.jsonl"
 : >"$FINDINGS_FILE"
@@ -611,6 +638,447 @@ check_bakeins() {
   esac
 }
 
+# --- Engine test placement (idea#335; agent-engine-dev AGENTS.md "Where Engine tests run") ---
+# Default: run Engine tests on the box (no live Engine). Optional: a claimed idle
+# pool Pi with `pm2 stop engine` (QUALITY_SCAN_ENGINE_PI=<pi>). Never next to a live
+# production Engine (idea01 while live, idea02, 'idea'/production, kit Engines).
+# The idea#105 pre-flight in the Engine suite is NOT touched: IDEA_TEST_ALLOW_LIVE is
+# always unset for the test command.
+# idea#332: default target is pool Pi idea04 (Koen, 2026-10-28), then the box. An optional second
+# pool Pi (QUALITY_SCAN_ENGINE_PI_FALLBACK, default empty since Steve 08:20: idea01 has no cooling
+# and overheats on the full suite) can be put between them. Each hop happens when the current Pi is claimed,
+# held or unreachable, its Engine test pre-flight refuses, or the thermal guard aborts; every hop is
+# recorded in fallback_chain. Set QUALITY_SCAN_ENGINE_PI="" (empty) to force the box, and
+# QUALITY_SCAN_ENGINE_PI_FALLBACK="" to go straight from the first Pi to the box.
+QUALITY_SCAN_ENGINE_PI="${QUALITY_SCAN_ENGINE_PI-idea04}"
+QUALITY_SCAN_ENGINE_PI_FALLBACK="${QUALITY_SCAN_ENGINE_PI_FALLBACK-}"
+QUALITY_SCAN_SOCKS="${QUALITY_SCAN_SOCKS:-}"
+QUALITY_SCAN_UFS="${QUALITY_SCAN_UFS:-${IDEA_ROOT}/tools/fleet/update-fleet-state.sh}"
+QUALITY_SCAN_SSH="${QUALITY_SCAN_SSH:-ssh}"
+export BOT_NAME
+
+engine_ssh() {
+  # engine_ssh <host> <remote command...>
+  local host="$1"; shift
+  local opts=(-o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new)
+  if [[ -n "$QUALITY_SCAN_SOCKS" ]]; then
+    opts+=(-o "ProxyCommand=nc -X 5 -x ${QUALITY_SCAN_SOCKS} %h %p")
+  fi
+  "$QUALITY_SCAN_SSH" "${opts[@]}" "pi@${host}" "$@"
+}
+
+# Prints a refusal reason (and returns 1) when <pi> may never host Engine tests.
+engine_pi_forbidden() {
+  local pi="$1" role status claim
+  case "$pi" in
+    idea02|idea|wizardly-hugle) echo "never_live_production:${pi}"; return 0 ;;
+  esac
+  role="$(jq -r --arg p "$pi" '.[$p].role // ""' "$FLEET_STATE" 2>/dev/null || true)"
+  status="$(jq -r --arg p "$pi" '.[$p].status // ""' "$FLEET_STATE" 2>/dev/null || true)"
+  claim="$(jq -r --arg p "$pi" '.[$p].claim // empty' "$FLEET_STATE" 2>/dev/null || true)"
+  if [[ -z "$role" ]]; then echo "unknown_pi:${pi}"; return 0; fi
+  case "$role" in
+    production|golden|kit-engine|kit*) echo "never_live_production:${pi}:role=${role}"; return 0 ;;
+  esac
+  case "$status" in
+    production|kit|hold|paused) echo "never_live_production:${pi}:status=${status}"; return 0 ;;
+  esac
+  if [[ "$status" != "idle" ]]; then echo "pi_not_idle:${pi}:status=${status}"; return 0; fi
+  if [[ -n "$claim" ]]; then echo "pi_claimed:${pi}"; return 0; fi
+  return 1
+}
+
+engine_cmd_string() {
+  local root="$1"
+  if grep -q '"test:full"' "$root/package.json" 2>/dev/null; then
+    echo "pnpm test:full"
+  else
+    echo "pnpm test"
+  fi
+}
+
+# True when the Engine checkout needs `pnpm install`: no node_modules, or the
+# lockfile is newer than pnpm's install marker (node_modules/.modules.yaml).
+engine_box_deps_needed() {
+  local root="$1"
+  [[ -f "$root/package.json" ]] || return 1
+  [[ -d "$root/node_modules" ]] || return 0
+  [[ -f "$root/node_modules/.modules.yaml" ]] || return 0
+  [[ -f "$root/pnpm-lock.yaml" && "$root/pnpm-lock.yaml" -nt "$root/node_modules/.modules.yaml" ]] && return 0
+  return 1
+}
+
+# Box path (default). Prints the checks.tests JSON.
+run_engine_tests_box() {
+  local repo="$1" root="$2" me out rc=0 cmd
+  me="$(this_hostname)"
+  if [[ -f "$FLEET_STATE" ]] && jq -e --arg h "$me" 'has($h)' "$FLEET_STATE" >/dev/null 2>&1; then
+    jq -nc --arg h "$me" '{status:"skipped",reason:"engine_tests_not_on_fleet_pi",host:$h,note:"run on the box, or set QUALITY_SCAN_ENGINE_PI to a claimed idle pool Pi"}'
+    return
+  fi
+  if [[ "$me" == idea0[0-9]* || "$me" == "idea" || "$me" == wizardly-hugle ]]; then
+    jq -nc --arg h "$me" '{status:"skipped",reason:"engine_tests_not_on_fleet_pi",host:$h}'
+    return
+  fi
+  cmd="$(engine_cmd_string "$root")"
+  if [[ "$QUALITY_SCAN_DRY_RUN_TESTS" == "1" ]]; then
+    jq -nc --arg c "$cmd" '{status:"skipped",reason:"dry_run_tests",where:"box",cmd:$c}'
+    return
+  fi
+  # idea#361: a fresh box checkout has no node_modules, so the suite failed before it started.
+  # Install the Engine deps first when they are missing or older than the lockfile.
+  if engine_box_deps_needed "$root"; then
+    echo "quality-scan: Engine deps missing or stale on the box; running pnpm install --frozen-lockfile" >&2
+    set +e
+    out="$(cd "$root" && pnpm install --frozen-lockfile --prefer-offline 2>&1)"
+    rc=$?
+    set -e
+    if [[ -n "${QUALITY_SCAN_TEST_LOG:-}" ]]; then printf '%s\n' "$out" >>"$QUALITY_SCAN_TEST_LOG"; fi
+    if [[ $rc -ne 0 ]]; then
+      engine_result "$repo" "box" "box (${me:-local}) deps install (pnpm install --frozen-lockfile)" "$rc" "$out"
+      return
+    fi
+  fi
+  set +e
+  out="$(cd "$root" && env -u IDEA_TEST_ALLOW_LIVE bash -c "$cmd" 2>&1)"
+  rc=$?
+  set -e
+  if [[ -n "${QUALITY_SCAN_TEST_LOG:-}" ]]; then printf '%s\n' "$out" >>"$QUALITY_SCAN_TEST_LOG"; fi
+  engine_result "$repo" "box" "box (${me:-local})" "$rc" "$out"
+}
+
+QUALITY_SCAN_BOX_EXCEPTIONS="${QUALITY_SCAN_BOX_EXCEPTIONS:-${SCRIPT_DIR}/engine-box-exceptions.txt}"
+
+# Failed vitest tests: "<file> > <suite> > <test><TAB><docker>" per line (deduped),
+# <docker>=1 when that failure's first Error line is "docker: command not found".
+engine_failed_tests() {
+  printf '%s\n' "$1" | awk '
+    function flush() { if (name != "") print name "\t" dock; name = ""; dock = 0; seen = 0 }
+    /^ *FAIL  / { flush(); n = $0; sub(/^ *FAIL  /, "", n); sub(/ +$/, "", n); name = n; next }
+    name != "" && !seen && /^[A-Za-z]*Error:/ { seen = 1; if ($0 ~ /^Error: .*line [0-9]+: docker: command not found *$/) dock = 1; next }
+    /⎯\[[0-9]+\/[0-9]+\]⎯/ { flush() }
+    END { flush() }' | sort -u
+}
+
+engine_result() {
+  local repo="$1" where="$2" detail="$3" rc="$4" out="$5"
+  local known_json='[]' unknown_json='[]' missing_json='[]'
+  if [[ "$where" == "box" && -f "$QUALITY_SCAN_BOX_EXCEPTIONS" ]]; then
+    local failed known=() unknown=() missing=() line t dock
+    local entries=() names=()
+    while IFS= read -r line; do
+      [[ -z "$line" || "$line" == \#* ]] && continue
+      line="${line%% ## *}"
+      entries+=("$line")
+      names+=("${line#\[docker-setup\] }")
+    done <"$QUALITY_SCAN_BOX_EXCEPTIONS"
+    failed="$(engine_failed_tests "$out")"
+    while IFS=$'\t' read -r t dock; do
+      [[ -z "$t" ]] && continue
+      local hit=0 e
+      for e in "${entries[@]}"; do
+        if [[ "$e" == "[docker-setup] $t" ]]; then
+          [[ "$dock" == 1 ]] && hit=1
+          break
+        elif [[ "$e" == "$t" ]]; then
+          hit=1; break
+        fi
+      done
+      if [[ $hit -eq 1 ]]; then known+=("$t"); else unknown+=("$t"); fi
+    done <<<"$failed"
+    entries=("${names[@]}")
+    # Listed test missing or renamed: its name appears nowhere in the output.
+    for e in "${entries[@]}"; do
+      # here-string, not a pipe: grep -q + pipefail would SIGPIPE printf on big output
+      if ! grep -qF -- "${e##* > }" <<<"$out"; then
+        missing+=("$e")
+        add_finding "$repo" "tests.known_box_exception_missing" "warning" "tools/quality/engine-box-exceptions.txt" \
+          "Known box exception not found in the test output (missing or renamed?): ${e}"
+      fi
+    done
+    [[ ${#known[@]} -gt 0 ]] && known_json="$(printf '%s\n' "${known[@]}" | jq -R . | jq -sc .)"
+    [[ ${#unknown[@]} -gt 0 ]] && unknown_json="$(printf '%s\n' "${unknown[@]}" | jq -R . | jq -sc .)"
+    [[ ${#missing[@]} -gt 0 ]] && missing_json="$(printf '%s\n' "${missing[@]}" | jq -R . | jq -sc .)"
+    # Non-zero exit with only listed failures (and at least one) → pass.
+    if [[ "$rc" -ne 0 && ${#known[@]} -gt 0 && ${#unknown[@]} -eq 0 ]]; then
+      jq -nc --arg w "$where" --arg d "$detail" --argjson rc "$rc" --argjson k "$known_json" --argjson m "$missing_json" \
+        '{status:"passed",where:$w,detail:$d,exit_code:$rc,known_box_exceptions:$k,known_box_exceptions_missing:$m}'
+      return
+    fi
+  fi
+  if [[ "$rc" -ne 0 ]]; then
+    local sev="error"
+    [[ "$MODE" == "full" ]] && sev="critical"
+    add_finding "$repo" "tests.failed" "$sev" "." \
+      "Tests failed (rc=${rc}) via ${detail}: $(echo "$out" | tail -c 500)"
+    jq -nc --arg w "$where" --arg d "$detail" --argjson rc "$rc" --argjson k "$known_json" --argjson u "$unknown_json" --argjson m "$missing_json" \
+      '{status:"failed",where:$w,detail:$d,exit_code:$rc,known_box_exceptions:$k,other_failures:$u,known_box_exceptions_missing:$m}'
+  else
+    jq -nc --arg w "$where" --arg d "$detail" --argjson m "$missing_json" \
+      '{status:"passed",where:$w,detail:$d,known_box_exceptions:[],known_box_exceptions_missing:$m}'
+  fi
+}
+
+# Pool-Pi path (opt-in). Claims, stops pm2 engine as pi, runs, restores, releases.
+ENGINE_POOL_PI=""; ENGINE_POOL_HOST=""; ENGINE_POOL_WAS_ONLINE=0; ENGINE_POOL_CLAIMED=0; ENGINE_POOL_SCRATCH=""
+QUALITY_SCAN_PI_SCRATCH_ROOT="${QUALITY_SCAN_PI_SCRATCH_ROOT:-/home/pi/scratch}"
+# Where a used scratch clone is moved (never deleted). idea04 keeps its quarantine in
+# ~/quarantine; the other pool Pis use <scratch root>/quarantine. QUALITY_SCAN_PI_QUARANTINE_ROOT
+# overrides it for every Pi.
+pi_quarantine_root() {
+  if [[ -n "${QUALITY_SCAN_PI_QUARANTINE_ROOT:-}" ]]; then echo "$QUALITY_SCAN_PI_QUARANTINE_ROOT"; return; fi
+  case "$1" in
+    idea04) echo "/home/pi/quarantine" ;;
+    *) echo "${QUALITY_SCAN_PI_SCRATCH_ROOT}/quarantine" ;;
+  esac
+}
+# idea#332 (Steve 05:38): Pi runs set vitest's worker count and a thermal guard. Default 1: vitest 4
+# applies VITEST_MAX_WORKERS AFTER fileParallelism:false has forced maxWorkers=1, so any N>1 runs N
+# test files in parallel on shared Docker / disk-sim state (seen on idea01 with 2: adopt-only-idea-disks,
+# unknown-disk-readonly failed). 1 equals the Engine's own sequential setting.
+QUALITY_SCAN_PI_MAX_WORKERS="${QUALITY_SCAN_PI_MAX_WORKERS:-1}"
+QUALITY_SCAN_THERMAL_LIMIT_C="${QUALITY_SCAN_THERMAL_LIMIT_C:-75}"
+# idea#332 (Steve 08:20): the guard samples every QUALITY_SCAN_THERMAL_INTERVAL s, and idea01 overshot
+# 75 °C to 77 °C before the abort landed. It therefore trips 2 °C below the alert line: at
+# QUALITY_SCAN_THERMAL_TRIP_C (default LIMIT_C - 2 = 73 °C), so the overshoot stays under 75 °C.
+QUALITY_SCAN_THERMAL_TRIP_C="${QUALITY_SCAN_THERMAL_TRIP_C:-$(( QUALITY_SCAN_THERMAL_LIMIT_C - 2 ))}"
+QUALITY_SCAN_THERMAL_INTERVAL="${QUALITY_SCAN_THERMAL_INTERVAL:-10}"
+
+# engine_thermal_watch <host> <dir>: sample the Pi's SoC temperature every
+# QUALITY_SCAN_THERMAL_INTERVAL s; keep the peak (millidegrees) in <dir>/peak. At or above
+# QUALITY_SCAN_THERMAL_TRIP_C write <dir>/abort and stop the remote test run (TERM to every
+# process group the suite runs in: it starts under setsid and writes its pgid to <scratch>/.qs-pgid,
+# so vitest and every fork it spawns stop, not just the ssh shell).
+# engine_thermal_sample <host>: SoC temperature in millidegrees, 0 when unreadable.
+engine_thermal_sample() {
+  local t
+  t="$(engine_ssh "$1" "cat /sys/class/thermal/thermal_zone0/temp" 2>/dev/null | tail -1)"
+  [[ "$t" =~ ^[0-9]+$ ]] && echo "$t" || echo 0
+}
+
+engine_thermal_watch() {
+  trap - EXIT INT TERM
+  local host="$1" d="$2" t peak limit=$(( QUALITY_SCAN_THERMAL_TRIP_C * 1000 ))
+  peak="$(cat "$d/peak" 2>/dev/null || echo 0)"
+  while :; do
+    t="$(engine_ssh "$host" "cat /sys/class/thermal/thermal_zone0/temp" 2>/dev/null | tail -1)"
+    if [[ "$t" =~ ^[0-9]+$ ]]; then
+      if (( t > peak )); then peak=$t; echo "$peak" >"$d/peak"; fi
+      if (( t >= limit )); then
+        if [[ ! -f "$d/abort" ]]; then
+          echo "$t" >"$d/abort"
+          echo "quality-scan: ${ENGINE_POOL_PI:-pi}: THERMAL ABORT at $(( t / 1000 )) °C ($(date -u +%Y-%m-%dT%H:%M:%SZ)); stopping the suite's process group" >&2
+        fi
+        # Keep stopping until the parent kills this watcher: the run may not have started yet.
+        engine_ssh "$host" "if [ -s ${ENGINE_POOL_SCRATCH}/.qs-pgid ]; then kill -TERM -- -\$(cat ${ENGINE_POOL_SCRATCH}/.qs-pgid); fi" >/dev/null 2>&1 || true
+      fi
+    fi
+    sleep "$QUALITY_SCAN_THERMAL_INTERVAL"
+  done
+}
+engine_pool_restore() {
+  [[ -n "$ENGINE_POOL_PI" ]] || return 0
+  if [[ -n "$ENGINE_POOL_SCRATCH" ]]; then
+    local q
+    q="$(pi_quarantine_root "$ENGINE_POOL_PI")/$(date -u +%Y%m%d)"
+    engine_ssh "$ENGINE_POOL_HOST" "if [ -d ${ENGINE_POOL_SCRATCH} ]; then mkdir -p ${q} && mv ${ENGINE_POOL_SCRATCH} ${q}/; fi" >/dev/null 2>&1 \
+      && echo "quality-scan: ${ENGINE_POOL_PI}: scratch quarantined under ${q}" >&2 \
+      || echo "WARN: could not quarantine ${ENGINE_POOL_SCRATCH} on ${ENGINE_POOL_PI}" >&2
+    ENGINE_POOL_SCRATCH=""
+  fi
+  if [[ $ENGINE_POOL_WAS_ONLINE -eq 1 ]]; then
+    local back
+    engine_ssh "$ENGINE_POOL_HOST" "pm2 restart engine >/dev/null" >/dev/null 2>&1 \
+      || echo "WARN: pm2 restart engine failed on ${ENGINE_POOL_PI}; restore by hand" >&2
+    back="$(engine_ssh "$ENGINE_POOL_HOST" "pm2 jlist 2>/dev/null" 2>/dev/null \
+      | jq -r '[.[] | select(.name=="engine" and .pm2_env.status=="online")] | length' 2>/dev/null || echo 0)"
+    if [[ "${back:-0}" == "0" ]]; then
+      echo "WARN: Engine on ${ENGINE_POOL_PI} is not online after pm2 restart; restore by hand" >&2
+    else
+      echo "quality-scan: Engine on ${ENGINE_POOL_PI} restored (pm2 online)" >&2
+    fi
+    ENGINE_POOL_WAS_ONLINE=0
+  fi
+  if [[ $ENGINE_POOL_CLAIMED -eq 1 ]]; then
+    STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" --null "$ENGINE_POOL_PI" claim >/dev/null 2>&1 || true
+    STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" "$ENGINE_POOL_PI" status idle >/dev/null 2>&1 || true
+    ENGINE_POOL_CLAIMED=0
+  fi
+  ENGINE_POOL_PI=""
+}
+
+run_engine_tests_pool() {
+  local repo="$1" root="$2" pi="${3:-$QUALITY_SCAN_ENGINE_PI}" host why online out rc=0 cmd remote_path
+  if why="$(engine_pi_forbidden "$pi")"; then
+    jq -nc --arg r "${why%%:*}" --arg d "$why" '{status:"skipped",reason:$r,detail:$d}'
+    return
+  fi
+  if [[ "$BOT_NAME" == "unknown" || -z "$BOT_NAME" ]]; then
+    jq -nc '{status:"skipped",reason:"claim_needs_bot_name"}'
+    return
+  fi
+  host="$(pi_host_for "$pi")"
+  [[ -n "$host" ]] || { jq -nc --arg pi "$pi" '{status:"skipped",reason:"pi_unreachable",pi:$pi}'; return; }
+  cmd="$(engine_cmd_string "$root")"
+  if [[ "$QUALITY_SCAN_DRY_RUN_TESTS" == "1" ]]; then
+    jq -nc --arg pi "$pi" --arg c "$cmd" '{status:"skipped",reason:"dry_run_tests",where:"pool",pi:$pi,cmd:$c}'
+    return
+  fi
+  if ! engine_ssh "$host" true >/dev/null 2>&1; then
+    jq -nc --arg pi "$pi" '{status:"skipped",reason:"pi_unreachable",pi:$pi}'
+    return
+  fi
+  online="$(engine_ssh "$host" "pm2 jlist 2>/dev/null" 2>/dev/null \
+    | jq -r '[.[] | select(.name=="engine" and .pm2_env.status=="online")] | length' 2>/dev/null || echo 0)"
+  # idea01 is stop-aware like the other pool Pis (idea#332): claim, pm2 stop, run, restore, release.
+  # Claim (update-fleet-state.sh holds the flock).
+  if ! STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" "$pi" claim "${BOT_NAME} quality-scan engine tests" >/dev/null 2>&1; then
+    jq -nc --arg pi "$pi" '{status:"skipped",reason:"claim_failed",pi:$pi}'
+    return
+  fi
+  ENGINE_POOL_PI="$pi"; ENGINE_POOL_HOST="$host"; ENGINE_POOL_CLAIMED=1
+  # This function runs inside $(…), which does not inherit the top-level traps: set them here
+  # so a failure or interrupt still restores the Engine and releases the claim (idea#332).
+  trap 'engine_pool_restore 2>/dev/null || true' EXIT
+  trap 'exit 130' INT; trap 'exit 143' TERM
+  STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" "$pi" status testing >/dev/null 2>&1 || true
+  if [[ "${online:-0}" != "0" ]]; then
+    ENGINE_POOL_WAS_ONLINE=1
+    if ! engine_ssh "$host" "pm2 stop engine >/dev/null" >/dev/null 2>&1; then
+      engine_pool_restore
+      jq -nc --arg pi "$pi" '{status:"skipped",reason:"pm2_stop_failed",pi:$pi}'
+      return
+    fi
+  fi
+  # idea#332: never run in the deployed tree. Clone it into a scratch dir, fetch origin/main there
+  # and check out its HEAD SHA (recorded as scanned_sha), run, then quarantine the clone (moved,
+  # never deleted). The deployed tree is only read (cloned from), never changed.
+  remote_path="/home/pi/idea/agents/${repo}"
+  local stamp sha
+  stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+  ENGINE_POOL_SCRATCH="${QUALITY_SCAN_PI_SCRATCH_ROOT}/qs-${repo}-${stamp}"
+  # Full mode tests origin/main HEAD; --pr mode tests the --head SHA (idea#357).
+  local scanned_ref fetch_extra=""
+  if [[ "$MODE" == "pr" ]]; then
+    scanned_ref="pr-head"
+    sha="$PR_HEAD"
+    if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+      engine_pool_restore
+      jq -nc --arg pi "$pi" --arg h "$PR_HEAD" '{status:"skipped",reason:"pr_head_not_full_sha",pi:$pi,head:$h}'
+      return
+    fi
+    # A PR head from a fork or an unmerged branch may only be reachable via refs/pull/*/head.
+    fetch_extra=" || git fetch -q \$(git -C ${remote_path} remote get-url origin) '+refs/pull/*/head:refs/remotes/origin/pr/*'"
+  else
+    scanned_ref="origin/main"
+    sha="$(engine_ssh "$host" "git ls-remote \$(git -C ${remote_path} remote get-url origin) refs/heads/main" 2>/dev/null | awk '{print $1}' | tail -1)"
+    if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+      engine_pool_restore
+      jq -nc --arg pi "$pi" '{status:"skipped",reason:"main_sha_unreadable",pi:$pi}'
+      return
+    fi
+  fi
+  echo "quality-scan: ${pi}: scratch clone ${ENGINE_POOL_SCRATCH} at ${scanned_ref} ${sha:0:12}" >&2
+  local tdir wpid peak_mc abort_mc=""
+  tdir="$(mktemp -d)"
+  # One sample before the run (and one after), so even a short run records a peak.
+  engine_thermal_sample "$host" >"$tdir/peak"
+  engine_thermal_watch "$host" "$tdir" &
+  wpid=$!
+  set +e
+  out="$(engine_ssh "$host" "set -e; mkdir -p ${QUALITY_SCAN_PI_SCRATCH_ROOT} && git clone -q ${remote_path} ${ENGINE_POOL_SCRATCH} && cd ${ENGINE_POOL_SCRATCH} && { git fetch -q \$(git -C ${remote_path} remote get-url origin) ${sha}${fetch_extra}; } && git checkout -q ${sha} && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && setsid -w sh -c 'echo \$\$ > .qs-pgid; exec env -u IDEA_TEST_ALLOW_LIVE VITEST_MAX_WORKERS=${QUALITY_SCAN_PI_MAX_WORKERS} ${cmd}'" 2>&1)"
+  rc=$?
+  kill "$wpid" 2>/dev/null; wait "$wpid" 2>/dev/null
+  set -e
+  peak_mc="$(cat "$tdir/peak" 2>/dev/null || echo 0)"
+  local t_end; t_end="$(engine_thermal_sample "$host")"
+  (( t_end > peak_mc )) && peak_mc="$t_end"
+  [[ -f "$tdir/abort" ]] && abort_mc="$(cat "$tdir/abort")"
+  rm -rf "$tdir"
+  echo "quality-scan: ${pi}: peak SoC temperature $(( peak_mc / 1000 )) °C (trip ${QUALITY_SCAN_THERMAL_TRIP_C} °C, limit ${QUALITY_SCAN_THERMAL_LIMIT_C} °C, every ${QUALITY_SCAN_THERMAL_INTERVAL}s)${abort_mc:+ — ABORTED at $(( abort_mc / 1000 )) °C}" >&2
+  engine_pool_restore
+  if [[ -n "${QUALITY_SCAN_TEST_LOG:-}" ]]; then printf '%s\n' "$out" >>"$QUALITY_SCAN_TEST_LOG"; fi
+  local extra
+  extra="$(jq -nc --arg sha "$sha" --arg ref "$scanned_ref" --argjson w "$QUALITY_SCAN_PI_MAX_WORKERS" --argjson p "$peak_mc" --argjson l "$QUALITY_SCAN_THERMAL_LIMIT_C" \
+    --argjson tr "$QUALITY_SCAN_THERMAL_TRIP_C" \
+    '{scanned_ref:$ref,scanned_sha:$sha,max_workers:$w,peak_temp_c:($p/1000),thermal_limit_c:$l,thermal_trip_c:$tr}')"
+  if [[ -n "$abort_mc" ]]; then
+    jq -nc --arg pi "$pi" --argjson a "$abort_mc" --argjson x "$extra" \
+      --argjson done "$(printf '%s\n' "$out" | grep -c ' ✓ ' || true)" \
+      --argjson failed "$(printf '%s\n' "$out" | grep -c ' × ' || true)" \
+      '{status:"skipped",reason:"thermal",pi:$pi,abort_temp_c:($a/1000),pi_tests_passed_before_abort:$done,pi_tests_failed_before_abort:$failed} + $x'
+    return
+  fi
+  if printf '%s\n' "$out" | grep -q 'Test pre-flight: REFUSING'; then
+    jq -nc --arg pi "$pi" --arg d "$(printf '%s\n' "$out" | grep -A3 'Test pre-flight: REFUSING' | tr '\n' ' ')" \
+      '{status:"skipped",reason:"preflight_refused",pi:$pi,detail:$d}'
+    return
+  fi
+  engine_result "$repo" "pool" "claimed pool Pi ${pi} (pm2 engine stopped)" "$rc" "$out" |
+    jq -c --argjson x "$extra" '. + $x'
+}
+
+# Pool Pis in order (default idea04, then idea01), then the box. A hop to the next target only
+# when the current Pi is claimed, held, not idle, unreachable, its pre-flight refuses, or the
+# thermal guard aborts. Other refusals (idea02, production, kits, unknown Pis, BOT_NAME, …) stand
+# and end the chain. Each hop is recorded in fallback_chain ({pi, reason, detail?, peak_temp_c?});
+# fallback_from/fallback_reason/pool_attempt keep the first hop (as before, idea#332).
+engine_chain() {
+  local p seen=" " out=()
+  for p in $QUALITY_SCAN_ENGINE_PI ${QUALITY_SCAN_ENGINE_PI:+$QUALITY_SCAN_ENGINE_PI_FALLBACK}; do
+    p="${p//,/}"
+    [[ -z "$p" || "$seen" == *" $p "* ]] && continue
+    seen+="$p "; out+=("$p")
+  done
+  echo "${out[@]}"
+}
+
+engine_hop_reason() {
+  # engine_hop_reason <pool json>: the reason when the chain may move on, empty otherwise.
+  local reason detail
+  reason="$(jq -r '.reason // ""' <<<"$1")"
+  detail="$(jq -r '.detail // ""' <<<"$1")"
+  case "$reason" in
+    pi_claimed|pi_not_idle|pi_unreachable|preflight_refused|thermal) echo "$reason" ;;
+    never_live_production) [[ "$detail" == *":status=hold" ]] && echo "$reason" ;;
+  esac
+  return 0
+}
+
+run_engine_tests_placed() {
+  local repo="$1" root="$2" pi pool reason chain='[]' first_pi="" first_reason="" first_pool="" hop pis
+  pis="$(engine_chain)"
+  if [[ -z "$pis" ]]; then
+    echo "quality-scan: Engine tests target=box (QUALITY_SCAN_ENGINE_PI empty)" >&2
+    run_engine_tests_box "$repo" "$root"
+    return
+  fi
+  for pi in $pis; do
+    pool="$(run_engine_tests_pool "$repo" "$root" "$pi")"
+    reason="$(engine_hop_reason "$pool")"
+    if [[ -z "$reason" ]]; then
+      echo "quality-scan: Engine tests target=pool ${pi} ($(jq -r '.status + (if .reason then " " + .reason else "" end)' <<<"$pool"))" >&2
+      if [[ -n "$first_pi" ]]; then
+        jq -c --arg f "$first_pi" --arg r "$first_reason" --argjson c "$chain" --argjson pa "$first_pool" \
+          '. + {fallback_from:$f, fallback_reason:$r, fallback_chain:$c, pool_attempt:$pa}' <<<"$pool"
+      else
+        printf '%s\n' "$pool"
+      fi
+      return
+    fi
+    hop="$(jq -c --arg pi "$pi" --arg r "$reason" \
+      '{pi:$pi, reason:$r} + (if .detail then {detail} else {} end) + (if .peak_temp_c then {peak_temp_c} else {} end) + (if .abort_temp_c then {abort_temp_c} else {} end)' <<<"$pool")"
+    chain="$(jq -c --argjson h "$hop" '. + [$h]' <<<"$chain")"
+    if [[ -z "$first_pi" ]]; then first_pi="$pi"; first_reason="$reason"; first_pool="$pool"; fi
+    echo "quality-scan: Engine tests: ${pi} skipped (${reason}$(jq -r 'if .detail then " — " + .detail else "" end' <<<"$pool")), next target" >&2
+  done
+  echo "quality-scan: Engine tests target=box (fallback chain: $(jq -r 'map(.pi + ":" + .reason) | join(" → ")' <<<"$chain") → box)" >&2
+  # idea#332: the box reruns the whole suite (with engine-box-exceptions.txt); each Pi attempt
+  # (thermal peak, tests done before an abort) is kept: the first as pool_attempt, all in fallback_chain.
+  run_engine_tests_box "$repo" "$root" | jq -c --arg f "$first_pi" --arg r "$first_reason" --argjson c "$chain" --argjson pa "$first_pool" \
+    '. + {fallback_from:$f, fallback_reason:$r, fallback_chain:$c, pool_attempt:$pa}'
+}
+
 # --- Tests ---
 run_tests_for_repo() {
   local repo="$1" root="$2"
@@ -641,6 +1109,11 @@ run_tests_for_repo() {
       jq -nc '{status:"skipped",reason:"no-harness"}'
       return
     fi
+  fi
+
+  if [[ "$domain" == "engine" ]]; then
+    run_engine_tests_placed "$repo" "$root"
+    return
   fi
 
   IFS='|' read -r status pi reason < <(resolve_pi "$domain")
@@ -679,11 +1152,11 @@ run_tests_for_repo() {
       cmd=(bash -c 'pnpm test && pnpm typecheck')
       ;;
     app-dev)
-      # idea#335: install deps first via agent-app-dev#22's script/ensure-deps.sh
-      # (`npm run setup`), then run every smoke.mjs.
+      # idea#335: install deps first: `sh script/ensure-deps.sh` in the checkout
+      # (agent-app-dev#22; fallback `npm run setup`), then run every smoke.mjs.
       # tests/app-milkwise/smoke.mjs is ALWAYS skipped: it starts Milkwise
       # containers, and the scan must never start (or touch) Milkwise.
-      cmd=(bash -c 'set -e; if grep -q "\"setup\"" package.json 2>/dev/null; then npm run setup; fi; for f in tests/*/smoke.mjs tests/smoke.mjs; do [ -f "$f" ] || continue; case "$f" in tests/app-milkwise/*) echo "skip $f (starts Milkwise containers; never allowed)"; continue ;; esac; node "$f"; done')
+      cmd=(bash -c 'set -e; if [ -f script/ensure-deps.sh ]; then sh script/ensure-deps.sh; elif grep -q "\"setup\"" package.json 2>/dev/null; then npm run setup; fi; for f in tests/*/smoke.mjs tests/smoke.mjs; do [ -f "$f" ] || continue; case "$f" in tests/app-milkwise/*) echo "skip $f (starts Milkwise containers; never allowed)"; continue ;; esac; node "$f"; done')
       ;;
   esac
 

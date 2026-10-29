@@ -131,5 +131,25 @@ REAL_AFTER="$(real_fp)"
 check "real fleet-state + audit untouched" test "$REAL_AFTER" = "$REAL_BEFORE"
 
 echo
+# Golden pool Pi (idea#107 / idea03 becoming golden): refused by role, not only idea02 by name.
+cat > "$STATE_FILE" <<'JSON'
+{
+  "idea01": {"role":"spare","status":"idle","claim":null,"mdns":false},
+  "idea03": {"role":"golden","status":"idle","claim":null,"mdns":false},
+  "idea04": {"role":"spare","status":"idle","claim":null,"mdns":false}
+}
+JSON
+"$CLAIM" --pis idea03 walk-g >/dev/null 2>&1; rc=$?
+check "claim refuses role:golden idea03 via --pis (exit 1)" test "$rc" = 1
+check "golden idea03 untouched" test "$(status_val idea03):$(claim_val idea03)" = "idle:"
+"$CLAIM" --pis idea01,idea03 walk-g >/dev/null 2>&1; rc=$?
+check "mixed list with golden fails closed" test "$rc" = 1
+check "mixed list wrote nothing" test "$(claim_val idea01)" = ""
+"$CLAIM" --count 2 walk-g >/dev/null 2>&1
+check "--count skips golden idea03" test "$(claim_val idea03)" = ""
+check "--count claims idea01+idea04" test -n "$(claim_val idea01)" -a -n "$(claim_val idea04)"
+"$CLAIM" --count 3 walk-g2 >/dev/null 2>&1; rc=$?
+check "--count 3 with one golden refuses" test "$rc" = 1
+
 echo "$pass passed, $fail failed"
 [ "$fail" -eq 0 ]

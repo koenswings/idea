@@ -15,7 +15,7 @@ Atlas Ops gates for unified Markov duration walks (Design Review; proposal
 4. **Health around intentional reboots** — push claims, then
    `check-fleet-health.sh --origin` (and optional PAUSED) before/after reboot churn.
 
-Pool Pis: `idea01`, `idea03`, `idea04`. Scripts wrap `update-fleet-state.sh` and
+Pool Pis: `idea03`, `idea04` (`idea01` is golden since 2026-10-28 and is refused by role; `idea02` is not a pool Pi). Scripts wrap `update-fleet-state.sh` and
 `check-fleet-health.sh`; they do not reimplement fleet-state I/O.
 
 ## Scripts

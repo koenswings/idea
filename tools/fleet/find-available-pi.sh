@@ -4,7 +4,7 @@
 # Returns the hostname of the first idle Pi matching the domain.
 # Domain affinity: engine→idea01, console→idea02, app-dev→idea03
 # Falls back to any idle non-golden Pi if domain Pi is busy.
-# The golden Pi (role: golden, today idea02) is never returned, whatever its status:
+# The golden Pi (role: golden, today idea01) is never returned, whatever its status:
 # it always runs merged main and is not used for review deploys (idea#118).
 # Keys starting with "_" (_comment, _note) are metadata, not Pis.
 # Exits 0 with hostname on stdout; exits 1 if none available.

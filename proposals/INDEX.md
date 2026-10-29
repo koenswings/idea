@@ -20,7 +20,7 @@ Repeatable Ubuntu Desktop 26.04 LTS image for shared student client Pis (one car
 
 ## dev-bot-workflow.md
 **Status:** Approved (Design Review complete — Axle, Pixel, Kid, Atlas, 2026-09-28) · **Author:** Steve (Lead Bot)
-Officialise the real workflow (idea#147): Dev Bots implement with their own tools, test over SSH on a claimed pool Pi (idea01/03/04, never golden idea02), open PRs; Ops deploys review Pis via fleet scripts; Koen squash-merges; Ops updates golden. Grok Build + GitHub Actions self-hosted runner coding path **parked** (runner stopped on idea02, Grok Build 1.0.40 stays installed). Adds the fleet-Pi test claim protocol (`docs/grok-bot-setup.md` §4.6). Follow-ups: AGENTS.md rewrites per repo, Bot descriptions, `idea-setup.sh` opt-in flag, health-check scheduler.
+Officialise the real workflow (idea#147): Dev Bots implement with their own tools, test over SSH on a claimed pool Pi (idea03/04, never golden idea01; before 2026-10-28: idea01/03/04, golden idea02; idea03 golden briefly on 2026-10-28), open PRs; Ops deploys review Pis via fleet scripts; Koen squash-merges; Ops updates golden. Grok Build + GitHub Actions self-hosted runner coding path **parked** (runner stopped on idea02, Grok Build 1.0.40 stays installed). Adds the fleet-Pi test claim protocol (`docs/grok-bot-setup.md` §4.6). Follow-ups: AGENTS.md rewrites per repo, Bot descriptions, `idea-setup.sh` opt-in flag, health-check scheduler.
 
 ## files-disk.md
 **Status:** Approved (merged 2026-09-28, #124; implementation #126–#141) · **Author:** Steve (Lead Bot)
@@ -118,3 +118,7 @@ Teacher USB sticks: any FAT/exFAT stick is mounted read-only (`ro,nosuid,nodev,n
 ## 2026-10-16-console-demo-setup.md
 **Status:** Draft · **Author:** Steve (Lead Bot)
 Console "Set up demo" button (Koen 2026-10-16, replaces the IDEA-DEMO disk idea): an Engine `setupDemo` command installs separate `Kolibri (Demo)` and `Nextcloud (Demo)` instances alongside any real ones, marked `demo: true`, runs app-provided demo hooks (content download from a versioned demo pack, or a local pack offline; IDEA Demo School; learners username-only, `<name>911!` for others), and `removeDemo` removes only `demo: true` instances. Issue #233. PDF in `proposals/2026-10-16-console-demo-setup/`.
+
+## 2026-10-28-update-app.md
+**Status:** Draft · **Author:** Steve · IDEA Lead Bot
+Engine `updateApp` command (Koen approved 2026-10-28): update an installed App instance in place to a newer version from a docked App Disk, with an on-disk snapshot of data and named volumes, a health gate, and automatic rollback; dock-time "Update available" hint for #76. Issues agent-engine-dev#230, idea#76. PDF in `proposals/2026-10-28-update-app/`.

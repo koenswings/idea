@@ -55,12 +55,22 @@ for r in ["sunny-robin", "happy-zebra", "kind-panda"]:
       imageSha256="8e084dc0d891f8141277f0f152307a12c2cc6f13759e561a659232b9cc1ace61",
       imageManifest=B2M, contentSha256="dee4275a665ae4865dc326ba16ae0d427779aaf359e6101ad2425489875ebc4f",
       imageBuilder=f"{RA}/openwrt-imagebuilder-25.12.5-mediatek-filogic.Linux-x86_64.tar.zst sha256 7fb6cf626582ebcbfb46974da48c1eae577213f38879eaf6b1d982041e843461 (upstream https://downloads.openwrt.org/releases/25.12.5/targets/mediatek/filogic/)",
-      cudyIntermediate=f"{RA}/cudy_wr3000s-v1-sysupgrade_20251119.bin sha256 463e6e31e7361ec8177d2c3a136674297fd179eafaa166fe459731cdf1b35773 (Cudy source URL UNKNOWN)",
+      cudyIntermediate=f"{RA}/cudy_wr3000s-v1-sysupgrade_20251119.bin sha256 463e6e31e7361ec8177d2c3a136674297fd179eafaa166fe459731cdf1b35773 (Cudy source: Google Drive folder https://drive.google.com/drive/folders/1BKVarlwlNxf7uJUtRhuMGUqeCa5KpMnj, WR3000S 1.0.zip, per OpenWrt wiki; md5 403e276f74fd29917fd4260294d1a137 and size 14945872 match; actual download step not logged)",
       packageArchive="/workspace/idea-archive/router/b2f00bc-openwrt-25.12.5/apk (box, SHA256SUMS); release asset router-b2f00bc-apk.tar",
       packageArchiveSha256="4da39be3d91056250862e5c68184b21b129adc783f52f95bad7112fa01b52ffe (router-b2f00bc-apk.tar); box SHA256SUMS 8b0056776b9ddc8e2a16faa621c67dedc979076c07951d82aa37a58f8e0a8f86",
       packageArchiveUrl=f"{RA}/router-b2f00bc-apk.tar (release SHA256SUMS: {RA}/SHA256SUMS)",
       rebuildCheck="2026-10-26: offline rebuild from the archived apks is byte-identical (8e084dc0...)",
       secrets="baked default root password in this image (value not recorded); Tailscale key at enrol time",
-      deployedAt="UNKNOWN (#271, before 2026-10-18)", evidence="router-fix-out/SHA256SUMS (box) lists only b2f00bc; #271",
+      deployedAt="2026-10-16 (flashed Fri 2026-10-16; Koen 2026-10-29 09:44 CET, idea#288)", evidence="router-fix-out/SHA256SUMS (box) lists only b2f00bc; #271",
       confidence="likely: only kit-era build on the box; not captured on a device", open="confirm with tools/repro/capture-device.sh")
+    if r == "kind-panda":  # Koen 2026-10-29 09:47 CET (idea#288): record only what we observe; this router is not installed yet
+        for k in ("cudyIntermediate", "deployedAt"): kv.pop(k)
+        kv.update(status="not yet installed", confidence="planned kit image only; device not installed, nothing observed",
+                  open="capture with tools/repro/capture-device.sh when the router is installed and online")
+    else:  # observed on the device 2026-10-29 by Atlas via LAN jump (Engine -> 10.42.0.1), read-only
+        cap = {"sunny-robin": ("sunny-robin-router-20261029T084928Z.txt", "ce:7e", "ce:7f", "TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE"),
+               "happy-zebra": ("happy-zebra-router-20261029T084956Z.txt", "ca:c8", "ca:c9", "TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs")}[r]
+        kv.update(confidence="confirmed on the device 2026-10-29: /etc/idea/version GIT=b2f00bc SETUP_REF=7eedd03 OPENWRT=25.12.5 PROFILE=cudy_wr3000s-v1",
+                  observed=f"2026-10-29 Atlas, read-only via LAN jump {r} -> root@10.42.0.1; OpenWrt 25.12.5 r33051-f5dae5ece4; LAN MAC d4:0d:ab:50:{cap[1]}, WAN MAC d4:0d:ab:50:{cap[2]}; ed25519 SHA256:{cap[3]} (matches the 2026-10-28 record); capture /workspace/idea-archive/captures/{cap[0]} (box, secrets redacted)",
+                  open="none for the router image")
     write(f"routers/{r}/retro-2026-10-18", kv, f"{B2M}/packages.tsv")
