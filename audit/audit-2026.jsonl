@@ -902,3 +902,5 @@
 {"ts":"2026-10-29T16:02:50Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"idle_since","value":"2026-10-29T16:02:50Z","previous":"2026-10-29T09:54:40Z"}
 {"ts":"2026-10-29T18:22:06Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-29T18:22:06Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle","previous":null}
+{"ts":"2026-10-29T18:52:24Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle"}
+{"ts":"2026-10-29T18:52:24Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
