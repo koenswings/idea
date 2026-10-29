@@ -39,6 +39,17 @@ lines() { [ -f "$AUDIT" ] && wc -l < "$AUDIT" || echo 0; }
 "$UFS" idea02 status idle >/dev/null; rc=$?
 check "successful update exits 0" test "$rc" = 0
 check "string value stored as string" test "$(val idea02 status)" = '"idle"'
+since0=$(jq -r '.idea02.idle_since' "$STATE_FILE")
+check "status deployed -> idle sets idle_since (UTC)" grep -Eqx '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z' <<<"$since0"
+since1=$(val idea02 idle_since); sleep 1
+"$UFS" idea02 status idle >/dev/null
+check "idle -> idle keeps idle_since" test "$(val idea02 idle_since)" = "$since1"
+"$UFS" idea02 status testing >/dev/null
+check "non-idle status leaves idle_since alone" test "$(val idea02 idle_since)" = "$since1"
+"$UFS" idea02 status idle >/dev/null
+check "testing -> idle refreshes idle_since" test "$(val idea02 idle_since)" != "$since1"
+"$UFS" idea02 claim idle >/dev/null
+check "other field with value idle does not touch idle_since" test "$(val idea02 claim)" = '"idle"'
 
 # 2. clear to null (--null)
 "$UFS" --null idea02 pr >/dev/null
