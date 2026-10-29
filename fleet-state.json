@@ -119,13 +119,15 @@
       "name": "sunny-robin-router",
       "model": "Cudy WR3000S v1 (cudy,wr3000s-v1)",
       "tailscale": "100.96.34.29",
-      "firmware": "OpenWrt 25.12.5 r33051-f5dae5ece4 (mediatek/filogic, kernel 6.12.94, squashfs, upstream builddate 2026-06-29)",
+      "firmware": "OpenWrt 25.12.5 r33051-f5dae5ece4 (mediatek/filogic, kernel 6.12.94)",
       "mac_lan": "d4:0d:ab:50:ce:7e",
       "mac_wan": "d4:0d:ab:50:ce:7f",
       "read": "2026-10-26 19:42 CET, read-only over Tailscale via LuCI ubus (port 22 not open on Tailscale), router uptime 114 s at read; no changes made (idea#288 first contact)",
       "host_key_ed25519": "SHA256:TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE (ssh-keyscan from sunny-robin on the LAN, 2026-10-28)",
-      "flashed": "2026-10-16 (Fri), all three kit routers; Koen 2026-10-29 09:44 CET via Steve (idea#288)",
-      "intermediate_firmware": "cudy_wr3000s-v1-sysupgrade_20251119.bin sha256 463e6e31e7361ec8177d2c3a136674297fd179eafaa166fe459731cdf1b35773 md5 403e276f74fd29917fd4260294d1a137; source: Cudy Google Drive folder https://drive.google.com/drive/folders/1BKVarlwlNxf7uJUtRhuMGUqeCa5KpMnj (WR3000S 1.0.zip), per OpenWrt wiki; download step itself not logged (idea#288)"
+      "status": "installed, online",
+      "idea_version": "IDEA_ROUTER_VERSION=0.1.0-dev GIT=b2f00bc SETUP_REF=7eedd03 OPENWRT=25.12.5 PROFILE=cudy_wr3000s-v1 (/etc/idea/version)",
+      "dropbear": "Interface=lan, Port 22, PasswordAuth on (SSH on LAN only)",
+      "observed": "2026-10-29 ~09:49 CET by Atlas via LAN jump (box -> pi@sunny-robin over Tailscale -> root@10.42.0.1), read-only, no changes; ed25519 host key SHA256:TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE matches the 2026-10-28 record; capture /workspace/idea-archive/captures/sunny-robin-router-20261029T084928Z.txt (box, secrets redacted)"
     },
     "clients": {
       "source": "deployments/clients/kit-hosts-zimbabwe-2026-10.tsv (read-only, 2026-10-27 CET)",
@@ -220,15 +222,11 @@
     },
     "router": {
       "name": "kind-panda-router",
-      "model": "Cudy WR3000S v1",
+      "model": "Cudy WR3000S v1 (planned)",
+      "status": "not yet installed",
       "firmware": null,
-      "image": "IDEA router b2f00bc (likely, retro record; not read from the device)",
-      "mac_lan_likely": "d4:0d:ab:50:a6:60",
-      "mac_source": "idea#288 build records: D4:0D:AB:50:A6:60 flashed with b2f00bc. sunny-robin-router (ce:7e) and happy-zebra-router (ca:c8) were read on the devices, so a6:60 is kind-panda-router by elimination. NOT confirmed on the device; see the router host-key mismatch on happy-zebra",
       "read": null,
-      "open": "firmware + MAC read when online over Tailscale; otherwise label photo from Justice (Koen approves the draft)",
-      "flashed": "2026-10-16 (Fri), all three kit routers; Koen 2026-10-29 09:44 CET via Steve (idea#288)",
-      "intermediate_firmware": "cudy_wr3000s-v1-sysupgrade_20251119.bin sha256 463e6e31e7361ec8177d2c3a136674297fd179eafaa166fe459731cdf1b35773 md5 403e276f74fd29917fd4260294d1a137; source: Cudy Google Drive folder https://drive.google.com/drive/folders/1BKVarlwlNxf7uJUtRhuMGUqeCa5KpMnj (WR3000S 1.0.zip), per OpenWrt wiki; download step itself not logged (idea#288)"
+      "open": "record firmware, MACs, /etc/idea/version and host key read-only when the router is installed and seen online (Koen 2026-10-29 09:47 CET: record only what we observe)"
     }
   },
   "happy-zebra": {
@@ -251,13 +249,17 @@
       "mac_lan": "d4:0d:ab:50:ca:c8",
       "mac_wan": "d4:0d:ab:50:ca:c9",
       "read": "2026-10-28 ~11:17 and 13:50 CET, read-only through ubus over Tailscale (Atlas, idea#288). /etc/idea-router-release does not exist (stat NOT_FOUND); the release info is /etc/idea/version (100 bytes, root-only, ubus read denied). SSH capture blocked: dropbear Interface=lan, so port 22 is not open on tailscale0. ed25519 host key SHA256:TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs (ssh-keyscan from happy-zebra on the LAN). No changes made",
-      "flashed": "2026-10-16 (Fri), all three kit routers; Koen 2026-10-29 09:44 CET via Steve (idea#288)",
-      "intermediate_firmware": "cudy_wr3000s-v1-sysupgrade_20251119.bin sha256 463e6e31e7361ec8177d2c3a136674297fd179eafaa166fe459731cdf1b35773 md5 403e276f74fd29917fd4260294d1a137; source: Cudy Google Drive folder https://drive.google.com/drive/folders/1BKVarlwlNxf7uJUtRhuMGUqeCa5KpMnj (WR3000S 1.0.zip), per OpenWrt wiki; download step itself not logged (idea#288)"
+      "host_key_ed25519": "SHA256:TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs",
+      "status": "installed, online",
+      "idea_version": "IDEA_ROUTER_VERSION=0.1.0-dev GIT=b2f00bc SETUP_REF=7eedd03 OPENWRT=25.12.5 PROFILE=cudy_wr3000s-v1 (/etc/idea/version)",
+      "dropbear": "Interface=lan, Port 22, PasswordAuth on (SSH on LAN only)",
+      "observed": "2026-10-29 ~09:50 CET by Atlas via LAN jump (box -> pi@happy-zebra over Tailscale -> root@10.42.0.1), read-only, no changes; firmware, /etc/idea/version, LAN MAC d4:0d:ab:50:ca:c8 and WAN MAC d4:0d:ab:50:ca:c9 read on the device; ed25519 host key SHA256:TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs matches the 2026-10-28 record; capture /workspace/idea-archive/captures/happy-zebra-router-20261029T084956Z.txt (box, secrets redacted)"
     },
     "switch": {
       "model": "TP-Link TL-SG105PE",
       "mac": "58:d8:12:34:a9:ef",
-      "source": "Steve's review of PR #359 (2026-10-28); not read from the device"
+      "source": "observed in happy-zebra-router ARP/leases 2026-10-29 by Atlas (read-only, LAN jump): ip neigh 10.42.0.136 dev br-lan lladdr 58:d8:12:34:a9:ef STALE; /tmp/dhcp.leases \"1793290547 58:d8:12:34:a9:ef 10.42.0.136 TL-SG105PE 01:58:d8:12:34:a9:ef\" (luci-rpc: hostname TL-SG105PE, expires 26556 s); capture /workspace/idea-archive/captures/happy-zebra-router-arp-leases-20261029T085304Z.txt",
+      "lan_ip": "10.42.0.136 (DHCP lease)"
     },
     "kolibri": {
       "instances": [
@@ -288,16 +290,20 @@
       "size": "120 GB (111.8G in lsblk)",
       "disk_serial": "20070Q450002",
       "usb_bridge_serial": "26A1EE8301CE",
-      "partition": "sdb1 holds an IDEA Disk since an eraseDisk test 2026-10-29 09:17 CET; label: pending, diskId: pending (from Axle at his idea04 release). Previous ext4 label atlas-307 (UUID 01ae10fb-8fdc-4508-a9bb-849bbe1f0fd6) was erased 2026-10-29 09:17 CET by that eraseDisk test",
+      "partition": "sdb1: ext4 label IDEA Disk, fs UUID b3fbdec1-a67e-40e0-aa99-d457e3a1d3f8, Engine diskId 9bgojj2asocyf7gxtci (created by Axle eraseDisk test 2026-10-29 09:17 CET). Previous ext4 label atlas-307 (UUID 01ae10fb-8fdc-4508-a9bb-849bbe1f0fd6) was erased",
       "owner": "Ops (Atlas). Koen 2026-10-28: \"You can do with it whatever you want.\"",
       "purpose": "test fixture for the kit Kolibri MORANGO restart hw test (idea#288 / app-kolibri#8) and other Ops hw tests",
       "history": "docked on idea03 2026-10-28 09:50 CET for idea#110; removed by Koen 2026-10-28, gone from lsblk 10:25 CET",
-      "location": "docked on idea04 (Axle confirmed 2026-10-29 09:20 CET), used for engine#278/#279 hw round-trip",
+      "location": "docked on idea04 at /disks/sdb1 (Axle reported 2026-10-29 10:20 CET at idea04 release)",
       "docked_on": "idea04",
       "match_rule": "match by disk_serial, never by device name",
-      "device": "/dev/sdb (match by disk_serial, never by device name)",
-      "label": "pending",
-      "diskId": "pending"
+      "device": "/dev/sdb (USB 2-1; match by disk_serial, never by device name)",
+      "label": "IDEA Disk",
+      "diskId": "9bgojj2asocyf7gxtci",
+      "fs_uuid": "b3fbdec1-a67e-40e0-aa99-d457e3a1d3f8",
+      "mount": "/disks/sdb1",
+      "state": "[empty]",
+      "note": "No longer atlas-307 or axle-235-data (Axle 2026-10-29 10:20 CET)."
     }
   }
 }
