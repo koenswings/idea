@@ -1,0 +1,28 @@
+name: repro tools (idea#322)
+on:
+  pull_request:
+    paths: ["tools/repro/**", "manifests/**", ".github/workflows/repro-tools.yml"]
+  push:
+    branches: [main]
+    paths: ["tools/repro/**", "manifests/**"]
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: deps
+        run: sudo apt-get update -q && sudo apt-get install -y -q dosfstools mtools shellcheck xz-utils fdisk
+      - name: shellcheck
+        run: shellcheck tools/repro/*.sh tools/repro/tests/*.sh
+      - name: repro tests (existing, no root)
+        run: tools/repro/tests/run.sh
+      - name: image manifest tests (fixture trees + tiny FAT/ext4 image)
+        run: tools/repro/tests/image-manifest.sh
+      - name: committed v2 manifests parse and carry no secrets
+        run: |
+          for f in manifests/*/*/image-manifest.tsv.xz; do
+            [ -e "$f" ] || continue
+            python3 tools/repro/compare-image-manifest.py "$f" "$f"
+            if xz -dc "$f" | grep -E -q 'psk=|PRIVATE KEY|[$]6[$]|[$]y[$]'; then echo "secret-like text in $f"; exit 1; fi
+          done
