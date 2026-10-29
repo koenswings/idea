@@ -32,7 +32,7 @@
     "grok_build": null,
     "version": "engine main@2583608600fe8f364b73b328c00b191df237831c, console main@7da304524279cf626b6ea93ada50cf312ab45a15",
     "mdns": true,
-    "note": "Duration pool (idea#168, 2026-10-06): Engine config mdns:true, shared store automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH, no static peers. SSH is key-only (password auth off 2026-09-27). Hardware test disk (idea#139 limited Files Disk run 2026-09-29): Intenso SSD 111.8G, USB bridge serial 26A1EE83197F (ID_USB_SERIAL_SHORT), disk serial 3813430-532011020 (ID_SERIAL_SHORT), single ext4 partition UUID a0bf8374-274e-4bef-b32e-cfbfd09d2884 label IDEA Disk (Disk B nextcloud image files-disk-b-nextcloud-20260929085050-4f38fe; partition grown to full disk). PRIOR dual-partition hw-roundtrip fixture SACRIFICED this run (was vfat 3E50-902A + ext4 378383c9-0612-4c82-9c07-8c34d15253ba). Match by serials/UUID, never by device name (currently sdc). idea03 root SSD serial AA202000000000004820 (sda) is never a test target. Claim: Atlas idea#139 limited Intenso-only completed 2026-09-29. Spare test disk (Koen, docked 2026-10-28 09:50 for idea#110): WDC WDS120G2G0A 111.8G, disk serial 20070Q450002 (ID_SERIAL_SHORT), USB bridge serial 26A1EE8301CE, single ext4 partition label atlas-307 UUID 01ae10fb-8fdc-4508-a9bb-849bbe1f0fd6. Match by serial, never by device name. Was GOLDEN Pi 2026-10-28 10:12-10:31 CET; back in the pool (role spare) since 2026-10-28 10:31 CET when idea01 became golden (Koen 10:26 via Steve; set-golden-pi.sh --yes --pi idea01). Spare 120 GB disk (WDC WDS120G2G0A, serial 20070Q450002; quarantined META.yaml) was REMOVED by Koen on 2026-10-28; confirmed gone from lsblk 10:25 CET. No App Disk is docked.",
+    "note": "Duration pool (idea#168, 2026-10-06): Engine config mdns:true, shared store automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH, no static peers. SSH is key-only (password auth off 2026-09-27). Hardware test disk (idea#139 limited Files Disk run 2026-09-29): Intenso SSD 111.8G, USB bridge serial 26A1EE83197F (ID_USB_SERIAL_SHORT), disk serial 3813430-532011020 (ID_SERIAL_SHORT), single ext4 partition UUID a0bf8374-274e-4bef-b32e-cfbfd09d2884 label IDEA Disk (Disk B nextcloud image files-disk-b-nextcloud-20260929085050-4f38fe; partition grown to full disk). PRIOR dual-partition hw-roundtrip fixture SACRIFICED this run (was vfat 3E50-902A + ext4 378383c9-0612-4c82-9c07-8c34d15253ba). Match by serials/UUID, never by device name (currently sdc). idea03 root SSD serial AA202000000000004820 (sda) is never a test target. Claim: Atlas idea#139 limited Intenso-only completed 2026-09-29. Spare test disk (Koen, docked 2026-10-28 09:50 for idea#110): WDC WDS120G2G0A 111.8G, disk serial 20070Q450002 (ID_SERIAL_SHORT), USB bridge serial 26A1EE8301CE, single ext4 partition label atlas-307 UUID 01ae10fb-8fdc-4508-a9bb-849bbe1f0fd6. Match by serial, never by device name. Was GOLDEN Pi 2026-10-28 10:12-10:31 CET; back in the pool (role spare) since 2026-10-28 10:31 CET when idea01 became golden (Koen 10:26 via Steve; set-golden-pi.sh --yes --pi idea01). Spare 120 GB disk (WDC WDS120G2G0A, serial 20070Q450002; quarantined META.yaml) was REMOVED by Koen on 2026-10-28; confirmed gone from lsblk 10:25 CET. UPDATE 2026-10-29: that disk is now docked on idea04 (sdb; wiped by Axle's eraseDisk test 09:17 CET, now an IDEA Disk) - see _test_disks.wds120-20070Q450002; it is no longer associated with idea03. No App Disk is docked.",
     "branch": null,
     "review_url": null,
     "claim": null,
@@ -121,7 +121,8 @@
       "firmware": "OpenWrt 25.12.5 r33051-f5dae5ece4 (mediatek/filogic, kernel 6.12.94, squashfs, upstream builddate 2026-06-29)",
       "mac_lan": "d4:0d:ab:50:ce:7e",
       "mac_wan": "d4:0d:ab:50:ce:7f",
-      "read": "2026-10-26 19:42 CET, read-only over Tailscale via LuCI ubus (port 22 not open on Tailscale), router uptime 114 s at read; no changes made (idea#288 first contact)"
+      "read": "2026-10-26 19:42 CET, read-only over Tailscale via LuCI ubus (port 22 not open on Tailscale), router uptime 114 s at read; no changes made (idea#288 first contact)",
+      "host_key_ed25519": "SHA256:TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE (ssh-keyscan from sunny-robin on the LAN, 2026-10-28)"
     },
     "clients": {
       "source": "deployments/clients/kit-hosts-zimbabwe-2026-10.tsv (read-only, 2026-10-27 CET)",
@@ -173,6 +174,28 @@
         }
       },
       "pending": "idea-pc-35f2 (serial ..35f2, MAC 2c:cf:67:df:1c:5f) was a duplicate idea-pc-5b4c; rename agreed by Koen 2026-10-27 and observed on the client 18:43 CET; confirm it survives the next reboot"
+    },
+    "kolibri": {
+      "instances": [
+        {
+          "port": 62650,
+          "engine_listed": true,
+          "name": "Kolibri",
+          "engine_instance": "kolibri-a8txfkezob16swfh4tq",
+          "morango_system_id": "idea-sunny-robin-62650",
+          "instance_id": "65fb422ad074f056c6c34b4e0c0b2973"
+        },
+        {
+          "port": 64439,
+          "engine_listed": false,
+          "container": "x8g6piyvdc5m80uljoc-kolibri-1",
+          "morango_system_id": "idea-sunny-robin-64439",
+          "instance_id": "0eb293613aad2ebb5f204d186b8a5d1c"
+        }
+      ],
+      "app_kolibri": "2cab08c + MORANGO hand edit 2026-10-17 (app-kolibri#8)",
+      "checked": "2026-10-26 12:32 CET, app-kolibri#8 kit step: all SKIP (already set), nothing changed, no restart (Atlas, idea#288)",
+      "unique": true
     }
   },
   "kind-panda": {
@@ -186,7 +209,22 @@
     "grok_build": null,
     "note": "Kit Engine (Pi 5, NVMe, cloned from FIT stick), sticker kind-panda, provisioned 2026-10-17. Shared KIT store 3Vvv (one store for kind-panda, happy-zebra, sunny-robin; Koen's correction 2026-10-17; never 4GQm/22WU/2VroE). Previous own store 4BNW quarantined in ~/quarantine/per-engine-store-20261017-113856. Command log is per-Engine (2yvcASaDPU5nnLaLx8CjuwsCP1CK, rotates daily). mDNS on, no static peers. Local override in ~/.idea-local (store-identity files skip-worktree). Tailscale tag:idea. Disk station torn down 2026-10-17 11:31 CEST.",
     "version": "engine deploy/kit-229-232@adfd9d354ffd83c5ecc0a9eea64a474eae08de8f, console pr162@62bd2ba03544fd7b2ef490a07de2b8780f81105b (koenswings/agent-console-dev#162, unmerged; dist-only swap, checkout stays main@654224e)",
-    "deployed": "engine 2026-10-18 10:43:40 CEST (prev 209b796 PR #229 tip, backup ~/quarantine/engine-deploy-20261018-104319); console dist 2026-10-17 15:06:38 CEST (prev 7bf4772 in ~/quarantine/console-dist-7bf4772-20261017-150638). Steve-confirmed."
+    "deployed": "engine 2026-10-18 10:43:40 CEST (prev 209b796 PR #229 tip, backup ~/quarantine/engine-deploy-20261018-104319); console dist 2026-10-17 15:06:38 CEST (prev 7bf4772 in ~/quarantine/console-dist-7bf4772-20261017-150638). Steve-confirmed.",
+    "kolibri": {
+      "instances": null,
+      "checked": null,
+      "open": "Kolibri ID check, df -h / and on-device capture wait for kind-panda to come online (offline since ~2026-10-19)"
+    },
+    "router": {
+      "name": "kind-panda-router",
+      "model": "Cudy WR3000S v1",
+      "firmware": null,
+      "image": "IDEA router b2f00bc (likely, retro record; not read from the device)",
+      "mac_lan_likely": "d4:0d:ab:50:a6:60",
+      "mac_source": "idea#288 build records: D4:0D:AB:50:A6:60 flashed with b2f00bc. sunny-robin-router (ce:7e) and happy-zebra-router (ca:c8) were read on the devices, so a6:60 is kind-panda-router by elimination. NOT confirmed on the device; see the router host-key mismatch on happy-zebra",
+      "read": null,
+      "open": "firmware + MAC read when online over Tailscale; otherwise label photo from Justice (Koen approves the draft)"
+    }
   },
   "happy-zebra": {
     "role": "kit-engine",
@@ -213,6 +251,46 @@
       "model": "TP-Link TL-SG105PE",
       "mac": "58:d8:12:34:a9:ef",
       "source": "Steve's review of PR #359 (2026-10-28); not read from the device"
+    },
+    "kolibri": {
+      "instances": [
+        {
+          "port": 65439,
+          "engine_listed": true,
+          "name": "Kolibri_Demo",
+          "engine_instance": "3js6a2f0kxyj9ci8u5i",
+          "morango_system_id": "idea-happy-zebra-65439",
+          "instance_id": "cd9feeb7dbef09b9ac22896394c45ddb"
+        },
+        {
+          "port": 62561,
+          "engine_listed": false,
+          "container": "kolibri-1utddqcko2ljgoemdh6-kolibri-1",
+          "morango_system_id": "idea-happy-zebra-62561",
+          "instance_id": "ed370fd83b528743e8b58e6c16287f65"
+        }
+      ],
+      "app_kolibri": "MORANGO hand edit 2026-10-17 (app-kolibri#8)",
+      "checked": "2026-10-28 11:17:56-11:18:47 CET, app-kolibri#8 kit step (dry run): all SKIP, nothing changed, no restart (Atlas, idea#288)",
+      "unique": true
+    }
+  },
+  "_test_disks": {
+    "wds120-20070Q450002": {
+      "model": "WDC WDS120G2G0A",
+      "size": "120 GB (111.8G in lsblk)",
+      "disk_serial": "20070Q450002",
+      "usb_bridge_serial": "26A1EE8301CE",
+      "partition": "sdb1 holds an IDEA Disk since an eraseDisk test 2026-10-29 09:17 CET; label: pending, diskId: pending (from Axle at his idea04 release). Previous ext4 label atlas-307 (UUID 01ae10fb-8fdc-4508-a9bb-849bbe1f0fd6) was erased 2026-10-29 09:17 CET by that eraseDisk test",
+      "owner": "Ops (Atlas). Koen 2026-10-28: \"You can do with it whatever you want.\"",
+      "purpose": "test fixture for the kit Kolibri MORANGO restart hw test (idea#288 / app-kolibri#8) and other Ops hw tests",
+      "history": "docked on idea03 2026-10-28 09:50 CET for idea#110; removed by Koen 2026-10-28, gone from lsblk 10:25 CET",
+      "location": "docked on idea04 (Axle confirmed 2026-10-29 09:20 CET), used for engine#278/#279 hw round-trip",
+      "docked_on": "idea04",
+      "match_rule": "match by disk_serial, never by device name",
+      "device": "/dev/sdb (match by disk_serial, never by device name)",
+      "label": "pending",
+      "diskId": "pending"
     }
   }
 }

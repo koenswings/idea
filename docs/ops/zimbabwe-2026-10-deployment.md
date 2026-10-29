@@ -56,7 +56,7 @@ Sources: `fleet-state.json`, `deployments/` records, [idea#288](https://github.c
 | School server (Engine) | kind-panda | TBC | Raspberry Pi 5, NVMe (cloned from the FIT stick) | Engine `adfd9d3` (fleet-state) | Not seen yet (offline about 9 days as of 28 Oct 2026, idea#288) |
 | Router | sunny-robin-router | 1 | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ce:7e | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (likely, retro record) | 26 Oct 2026 |
 | Router | happy-zebra-router | 2 | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ca:c8 | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (likely, retro record) | 28 Oct 2026 |
-| Router | kind-panda-router | TBC | Cudy WR3000S v1 | IDEA router image `b2f00bc` (likely, retro record) | Not seen yet |
+| Router | kind-panda-router | TBC | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:a6:60 (likely, by elimination from the build records; not read) | IDEA router image `b2f00bc` (likely, retro record) | Not seen yet |
 | Switch | n/a | 2 | TP-Link TL-SG105PE, MAC 58:d8:12:34:a9:ef | n/a | Not read remotely |
 | Classroom computers | n/a | 1 | 3: idea-pc-fc95 (Raspberry Pi 500), idea-pc-7d02 and idea-pc-9f95 (Raspberry Pi 400) | Client image f00748e (patched) or s15 | 27 Oct 2026 |
 | Classroom computers | n/a | 2 | 5 Raspberry Pi 500: idea-pc-35f2, idea-pc-58c3, idea-pc-5b4c, idea-pc-671c, idea-pc-841d | Client image f00748e (patched) or s15 | 28 Oct 2026 (happy-zebra-router leases) |
@@ -74,17 +74,27 @@ Engines were installed on 18 October 2026 (Console dist 17 October). The routers
 
 Each Kolibri has its own `MORANGO_SYSTEM_ID` (app-kolibri#8), so the schools' Kolibris can sync without clashing.
 Checked so far: sunny-robin (26 Oct) and happy-zebra (28 Oct); all ids are unique and nothing needed changing.
-kind-panda is checked when it comes online.
+kind-panda is checked when it comes online. The same values are in `fleet-state.json` (`kolibri` on each Engine).
+
+| School server | Port | Kolibri | `MORANGO_SYSTEM_ID` | Kolibri instance_id | Checked |
+| --- | --- | --- | --- | --- | --- |
+| sunny-robin | 62650 | Kolibri (Engine) | `idea-sunny-robin-62650` | `65fb422ad074f056c6c34b4e0c0b2973` | 26 Oct 2026 |
+| sunny-robin | 64439 | container, not Engine-listed | `idea-sunny-robin-64439` | `0eb293613aad2ebb5f204d186b8a5d1c` | 26 Oct 2026 |
+| happy-zebra | 65439 | Kolibri_Demo (Engine) | `idea-happy-zebra-65439` | `cd9feeb7dbef09b9ac22896394c45ddb` | 28 Oct 2026 |
+| happy-zebra | 62561 | container, not Engine-listed | `idea-happy-zebra-62561` | `ed370fd83b528743e8b58e6c16287f65` | 28 Oct 2026 |
+| kind-panda | n/a | not read yet (offline) | n/a | n/a | open |
 
 ## Still open
 
 From the field (asked Justice, 28 Oct 2026): every TBC field in "The schools" above.
 
-From ops (Atlas). Status on 28 Oct 2026, 13:55 CET:
+From ops (Atlas). Status on 29 Oct 2026, 09:20 CET:
 
 - **kind-panda: BLOCKED (offline).** The Kolibri ID check, `df -h /` and the on-device capture all wait for it.
   It was last seen on Tailscale 9 days ago.
-- **kind-panda-router: BLOCKED (offline).** Firmware version and MAC still to read. Last seen 9 days ago.
+- **kind-panda-router: BLOCKED (offline).** Firmware version and MAC still to read. Last seen about 10 days ago.
+  The build records list a router `D4:0D:AB:50:A6:60` flashed with `b2f00bc`. The other two routers were read on the
+  device (ce:7e and ca:c8), so a6:60 is most likely kind-panda-router. This is not confirmed on the device.
 - **happy-zebra-router WAN MAC: DONE.** It's `d4:0d:ab:50:ca:c9`, read through ubus.
 - **happy-zebra-router release file: PARTLY DONE.** `/etc/idea-router-release` does not exist on these
   routers, on either sunny-robin or happy-zebra. The release info is in `/etc/idea/version` (100 bytes), which only
