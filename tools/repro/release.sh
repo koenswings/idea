@@ -21,14 +21,14 @@ while [ $# -gt 0 ]; do case "$1" in
   --keep-worktree) KEEP=1; shift;; --proof) PROOF=1; shift;; *) echo "unknown arg $1" >&2; exit 2;; esac; done
 case "$TYPE" in client|router) ;; *) echo "--type client|router required" >&2; exit 2;; esac
 [ -n "$TAG" ] || { echo "--tag required" >&2; exit 2; }
-[[ "$TAG" =~ ^[A-Za-z0-9._/-]+$ ]] && [[ "$TAG" != *..* ]] || { echo "bad tag name: $TAG" >&2; exit 2; }
+if ! { [[ "$TAG" =~ ^[A-Za-z0-9._/-]+$ ]] && [[ "$TAG" != *..* ]]; }; then echo "bad tag name: $TAG" >&2; exit 2; fi
 COMMIT=$(git -C "$REPO" rev-parse -q --verify "refs/tags/$TAG^{commit}") || { echo "no such tag: $TAG" >&2; exit 1; }
 SAFE=${TAG//\//_}; DEST="$ROOT/$TYPE/$SAFE"; KIND=release
 [ "$SAFE" != proof ] || { echo "tag name 'proof' is reserved" >&2; exit 2; }
 if [ "$PROOF" = 1 ]; then KIND=proof; DEST="$ROOT/$TYPE/proof/$SAFE"; fi
 [ ! -e "$DEST" ] || { echo "release exists, not overwriting: $DEST" >&2; exit 1; }
 [ -n "$PREV" ] || PREV=$(cat "$ROOT/$TYPE/LATEST" 2>/dev/null || echo none)
-if [ "$PREV" != none ]; then PREV=${PREV//\//_}; [ "$PREV" != proof ] && [[ "$PREV" != proof_* ]] || { echo "a proof build cannot be --prev" >&2; exit 2; }; [ -f "$ROOT/$TYPE/$PREV/RELEASE.txt" ] || { echo "previous release not found: $ROOT/$TYPE/$PREV" >&2; exit 1; }; fi
+if [ "$PREV" != none ]; then PREV=${PREV//\//_}; if [ "$PREV" = proof ] || [[ "$PREV" == proof_* ]]; then echo "a proof build cannot be --prev" >&2; exit 2; fi; [ -f "$ROOT/$TYPE/$PREV/RELEASE.txt" ] || { echo "previous release not found: $ROOT/$TYPE/$PREV" >&2; exit 1; }; fi
 mkdir -p "$ROOT/$TYPE" "$(dirname "$DEST")"; chmod 700 "$ROOT" 2>/dev/null || true
 STAGE=$(mktemp -d "$ROOT/$TYPE/.stage-$SAFE.XXXXXX"); WT="$STAGE/src"
 cleanup(){ rc=$?; set +e; [ "$KEEP" = 1 ] || git -C "$REPO" worktree remove --force "$WT" >/dev/null 2>&1
@@ -45,7 +45,7 @@ else "${MAINREF[@]}" MANIFEST_OUT="$MAN" WORK="${ROUTER_WORK:-$HOME/.cache/idea-
 shopt -s nullglob
 if [ "$TYPE" = client ]; then imgs=("$OUT"/idea-client-*.img.xz "$OUT"/idea-client-*.img); else imgs=("$OUT"/idea-router-*-squashfs-sysupgrade.bin); fi
 shopt -u nullglob; IMG="${imgs[0]:-}"
-[ -n "$IMG" ] && [ -f "$IMG" ] || { echo "build produced no $TYPE image in $OUT" >&2; exit 1; }
+if ! { [ -n "$IMG" ] && [ -f "$IMG" ]; }; then echo "build produced no $TYPE image in $OUT" >&2; exit 1; fi
 case "$(basename "$IMG")" in *-dev*) echo "refusing: dev-stamped image $(basename "$IMG") (tag must be a release build)" >&2; exit 1;; esac
 if [ "$PROOF" = 1 ]; then b=$(basename "$IMG"); case "$b" in *-squashfs-*) nb="${b/-squashfs-/-proof-squashfs-}";; *.img.xz) nb="${b%.img.xz}-proof.img.xz";; *) nb="${b%.img}-proof.img";; esac
   mv "$IMG" "$(dirname "$IMG")/$nb"; IMG="$(dirname "$IMG")/$nb"; fi
