@@ -21,6 +21,8 @@
 #   - The whole read-modify-write runs under flock on "<STATE_FILE>.lock".
 #   - The file is replaced atomically (temp file in the same directory + mv),
 #     and its file mode is preserved.
+#   - Setting status to "idle" from any other status also sets idle_since to the current UTC time
+#     (same write, same lock), so set-golden-pi.sh can rank idle Pis. Re-setting idle keeps it.
 #   - The audit line is built with jq, so any value is escaped correctly, and it is
 #     appended to <dir of STATE_FILE>/audit/audit-<UTC year>.jsonl. A test run against
 #     a copy never writes to the real audit log.
@@ -29,7 +31,7 @@
 # Checkout layout: /home/pi/idea/agents/<repo> (see proposals/pi-checkout-layout.md)
 set -euo pipefail
 
-usage() { sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,31p' "$0" | sed 's/^# \{0,1\}//'; }
 die() { echo "ERROR: $*" >&2; exit 1; }
 usage_error() { echo "ERROR: $*" >&2; echo "Run with --help for usage." >&2; exit 2; }
 
@@ -108,8 +110,10 @@ esac
 PREVIOUS_JSON=$(jq -c --arg pi "$PI" --arg f "$FIELD" '.[$pi][$f] // null' "$STATE_FILE")
 
 TMP=$(mktemp "${STATE_DIR}/.fleet-state.XXXXXX")
-jq --arg pi "$PI" --arg field "$FIELD" --argjson value "$VALUE_JSON" \
-    '.[$pi] = ((.[$pi] // {}) | .[$field] = $value)' "$STATE_FILE" > "$TMP"
+NOW_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+jq --arg pi "$PI" --arg field "$FIELD" --argjson value "$VALUE_JSON" --argjson prev "$PREVIOUS_JSON" --arg now "$NOW_UTC" \
+    '.[$pi] = ((.[$pi] // {}) | .[$field] = $value
+      | if $field == "status" and $value == "idle" and $prev != "idle" then .idle_since = $now else . end)' "$STATE_FILE" > "$TMP"
 # Preserve the original file mode (mktemp creates 0600).
 chmod "$(stat -c '%a' "$STATE_FILE")" "$TMP"
 mv -f "$TMP" "$STATE_FILE"
