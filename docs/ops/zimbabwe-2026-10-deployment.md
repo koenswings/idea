@@ -84,6 +84,20 @@ kind-panda is checked when it comes online. The same values are in `fleet-state.
 | happy-zebra | 62561 | container, not Engine-listed | `idea-happy-zebra-62561` | `ed370fd83b528743e8b58e6c16287f65` | 28 Oct 2026 |
 | kind-panda | n/a | not read yet (offline) | n/a | n/a | open |
 
+## Routers observed on 29 Oct 2026
+
+Read by Atlas on 29 Oct 2026 around 09:50 CET, read-only, over a LAN jump: box to the kit Engine over Tailscale, then
+SSH to the router at `10.42.0.1` (dropbear listens on the LAN only). Nothing was changed on the routers or Engines.
+Full captures (secrets redacted) are on the box under `/workspace/idea-archive/captures/`.
+
+| Router | Firmware | `/etc/idea/version` | LAN MAC | WAN MAC | ed25519 host key | Capture |
+|---|---|---|---|---|---|---|
+| sunny-robin-router | OpenWrt 25.12.5 r33051-f5dae5ece4 (kernel 6.12.94) | 0.1.0-dev, GIT b2f00bc, SETUP_REF 7eedd03, cudy_wr3000s-v1 | d4:0d:ab:50:ce:7e | d4:0d:ab:50:ce:7f | `SHA256:TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE` (matches 28 Oct) | `sunny-robin-router-20261029T084928Z.txt` |
+| happy-zebra-router | OpenWrt 25.12.5 r33051-f5dae5ece4 (kernel 6.12.94) | 0.1.0-dev, GIT b2f00bc, SETUP_REF 7eedd03, cudy_wr3000s-v1 | d4:0d:ab:50:ca:c8 | d4:0d:ab:50:ca:c9 | `SHA256:TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs` (matches 28 Oct) | `happy-zebra-router-20261029T084956Z.txt` |
+
+Both routers run the IDEA router image `b2f00bc`, now confirmed on the device. Dropbear: `Interface=lan`, port 22.
+kind-panda-router is not yet installed.
+
 ## Still open
 
 From the field (asked Justice, 28 Oct 2026): every TBC field in "The schools" above.
@@ -92,18 +106,11 @@ From ops (Atlas). Status on 29 Oct 2026, 09:20 CET:
 
 - **kind-panda: BLOCKED (offline).** The Kolibri ID check, `df -h /` and the on-device capture all wait for it.
   It was last seen on Tailscale 9 days ago.
-- **kind-panda-router: BLOCKED (offline).** Firmware version and MAC still to read. Last seen about 10 days ago.
-  The build records list a router `D4:0D:AB:50:A6:60` flashed with `b2f00bc`. The other two routers were read on the
-  device (ce:7e and ca:c8), so a6:60 is most likely kind-panda-router. This is not confirmed on the device.
+- **kind-panda-router: not yet installed.** Nothing about it is recorded until our watcher sees it online and we
+  read it ourselves.
 - **happy-zebra-router WAN MAC: DONE.** It's `d4:0d:ab:50:ca:c9`, read through ubus.
-- **happy-zebra-router release file: PARTLY DONE.** `/etc/idea-router-release` does not exist on these
-  routers, on either sunny-robin or happy-zebra. The release info is in `/etc/idea/version` (100 bytes), which only
-  root can read, and ubus refuses to read it. Its content is still open.
-- **Full router captures (sunny-robin-router, happy-zebra-router): BLOCKED, cause found.** Dropbear is configured
-  with `Interface=lan`, so SSH only listens on the LAN, not on `tailscale0`. The firewall's tailscale zone does
-  accept the traffic. That is why every SSH attempt over Tailscale is closed before the banner (exit 3).
-  There are two ways to capture: from a device on the kit LAN, or after a dropbear change in a window Koen
-  approves. We made no router changes.
+- **Router release file and full captures (sunny-robin-router, happy-zebra-router): DONE 29 Oct 2026.** See
+  "Routers observed on 29 Oct 2026" above. We made no router changes.
 - **happy-zebra full record: DONE.** It's in `deployments/engines/happy-zebra/capture-2026-10-28/` (record,
   packages, images, helpers, raw capture). Its packages and helpers are identical to sunny-robin's. Still missing:
   `files.sha256` and `dist.sha256`.

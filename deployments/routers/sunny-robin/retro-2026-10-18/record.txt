@@ -26,9 +26,10 @@ rebuildCheck=2026-10-26: offline rebuild from the archived apks is byte-identica
 secrets=baked default root password in this image (value not recorded); Tailscale key at enrol time
 deployedAt=2026-10-16 (flashed Fri 2026-10-16; Koen 2026-10-29 09:44 CET, idea#288)
 evidence=router-fix-out/SHA256SUMS (box) lists only b2f00bc; #271
-confidence=likely: only kit-era build on the box; not captured on a device
 observedFirmware=OpenWrt 25.12.5 r33051-f5dae5ece4 (read 2026-10-26 19:42 CET, read-only via LuCI ubus over Tailscale; matches osRelease)
 macLan=d4:0d:ab:50:ce:7e
 macWan=d4:0d:ab:50:ce:7f
 observedAt=2026-10-26 19:42 CET (fleet-state.json sunny-robin.router, PR #325); LAN MAC seen again 2026-10-27 from sunny-robin (ip neigh 10.42.0.1)
-open=full capture with tools/repro/capture-device.sh (blocked: SSH port 22 not reachable over Tailscale; firmware + MAC closed by the ubus read)
+confidence=confirmed on the device 2026-10-29: /etc/idea/version GIT=b2f00bc SETUP_REF=7eedd03 OPENWRT=25.12.5 PROFILE=cudy_wr3000s-v1
+observed=2026-10-29 Atlas, read-only via LAN jump sunny-robin -> root@10.42.0.1; OpenWrt 25.12.5 r33051-f5dae5ece4; LAN MAC d4:0d:ab:50:ce:7e, WAN MAC d4:0d:ab:50:ce:7f; ed25519 SHA256:TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE (matches the 2026-10-28 record); capture /workspace/idea-archive/captures/sunny-robin-router-20261029T084928Z.txt (box, secrets redacted)
+open=none for the router image

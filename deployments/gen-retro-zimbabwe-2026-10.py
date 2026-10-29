@@ -63,4 +63,14 @@ for r in ["sunny-robin", "happy-zebra", "kind-panda"]:
       secrets="baked default root password in this image (value not recorded); Tailscale key at enrol time",
       deployedAt="2026-10-16 (flashed Fri 2026-10-16; Koen 2026-10-29 09:44 CET, idea#288)", evidence="router-fix-out/SHA256SUMS (box) lists only b2f00bc; #271",
       confidence="likely: only kit-era build on the box; not captured on a device", open="confirm with tools/repro/capture-device.sh")
+    if r == "kind-panda":  # Koen 2026-10-29 09:47 CET (idea#288): record only what we observe; this router is not installed yet
+        for k in ("cudyIntermediate", "deployedAt"): kv.pop(k)
+        kv.update(status="not yet installed", confidence="planned kit image only; device not installed, nothing observed",
+                  open="capture with tools/repro/capture-device.sh when the router is installed and online")
+    else:  # observed on the device 2026-10-29 by Atlas via LAN jump (Engine -> 10.42.0.1), read-only
+        cap = {"sunny-robin": ("sunny-robin-router-20261029T084928Z.txt", "ce:7e", "ce:7f", "TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE"),
+               "happy-zebra": ("happy-zebra-router-20261029T084956Z.txt", "ca:c8", "ca:c9", "TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs")}[r]
+        kv.update(confidence="confirmed on the device 2026-10-29: /etc/idea/version GIT=b2f00bc SETUP_REF=7eedd03 OPENWRT=25.12.5 PROFILE=cudy_wr3000s-v1",
+                  observed=f"2026-10-29 Atlas, read-only via LAN jump {r} -> root@10.42.0.1; OpenWrt 25.12.5 r33051-f5dae5ece4; LAN MAC d4:0d:ab:50:{cap[1]}, WAN MAC d4:0d:ab:50:{cap[2]}; ed25519 SHA256:{cap[3]} (matches the 2026-10-28 record); capture /workspace/idea-archive/captures/{cap[0]} (box, secrets redacted)",
+                  open="none for the router image")
     write(f"routers/{r}/retro-2026-10-18", kv, f"{B2M}/packages.tsv")
