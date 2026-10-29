@@ -102,3 +102,5 @@ tmpfs overlay, so anything a learner (or admin) changes is gone after the next r
   and reboot. `idea-client-mode status` shows the next-boot and running mode.
 * **Making a lasting change while the overlay is on:** switch it off, reboot, change, switch it on, reboot.
 * Build with `OVERLAY=off` in `client-image.conf` to ship cards that never arm the overlay.
+
+* **Shrink (idea#322):** `shrink-image.sh` (called by `build.sh`) cuts the root to used + `ROOT_FREE_MB`; if that exceeds `MAX_IMAGE_BYTES` it cuts to the cap while at least `ROOT_FREE_MIN_MB` stays free. This is the step s16 needed by hand (s16 = 13,999,996,928 bytes, reproduced by the plan test). Tests: `tests/shrink.test.sh`.
