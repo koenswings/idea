@@ -1,15 +1,50 @@
 ---
 title: "Image Releases, Flash-Time Identity and Reproducibility"
 subtitle: "What we need from IDEA's device images, and the simplest way to get it"
-audience: "Proposal · Status: Backlog, awaiting Koen's decision"
+audience: "Proposal · Status: Accepted, active (Koen, 29 Oct 2026)"
 ---
 
 **Author:** Steve (Lead Bot)
 **Date:** 2026-10-27 (restructured after Koen's review, 23:07)
-**Status:** Backlog, awaiting Koen's decision
+**Status:** Accepted by Koen on 2026-10-29 at 12:38; #322 is active work. See section 7.
 **Related:** [idea#322](https://github.com/koenswings/idea/issues/322) (reproducible images), [idea#341](https://github.com/koenswings/idea/pull/341) (stage 1, merged as `d927e39`), [idea#319](https://github.com/koenswings/idea/pull/319) and [idea#208](https://github.com/koenswings/idea/issues/208) (time zone set at flash time, the pattern Option B extends)
 
-This proposal builds the argument step by step: first the problem, then what we need, then the simplest answers and where they fall short, and only then the choices. Nothing in it is decided yet. Section 7 lists the questions for Koen.
+This proposal builds the argument step by step: first the problem, then what we need, then the simplest answers and where they fall short, and only then the choices. Koen accepted the recommendation (section 6) on 29 Oct 2026. His answers to the open questions are in section 7.
+
+# How a release is made: two stages
+
+Koen approved this way of presenting the release process on 29 Oct 2026.
+
+```mermaid
+flowchart TD
+  A[Recipe in git tag + pinned inputs] -->|Stage 1: BUILD| B[Generic image]
+  B -->|Check: compare with previous release| C[Published release]
+  C -->|Stage 2: FLASH + PERSONALISE| D[Card + identity file]
+  D -->|First boot applies identity| E[Working device]
+  F[New identity] --> D
+  G[Saved identity] --> D
+```
+
+**Stage 1: BUILD** (slow; only when the code or the updates change)
+
+1. Check out the recipe at a git tag, with all inputs pinned to exact versions.
+2. Build one **generic image** per device type (client, router, Engine). It holds no names, keys or other device identity.
+3. **Compare its manifest with the previous release** and review the differences.
+4. Publish it as a **release**.
+
+**Stage 2: FLASH + PERSONALISE** (fast; once per device)
+
+1. The flash tool writes the published release image to the card, plus a private **identity file** on the boot partition (name, time zone, home mode, Tailscale key).
+2. On first boot the device applies the identity file and then deletes it.
+
+**Two entry points**
+
+- **Full route** (from the top): something changed, so build a new release first, then flash.
+- **Fast route** (start at the published release): nothing changed. A **new identity** gives a new device; a **saved identity** gives an exact twin or replacement of an existing device.
+
+**Yearly check.** Once a year, or before a handover, rebuild Stage 1 from the old tag on a clean computer and check that it reproduces the content of the published image.
+
+The plain-English version for field staff is in [docs/RELEASES.md](../docs/RELEASES.md).
 
 # 1. The problem
 
@@ -180,15 +215,21 @@ The **patch step doesn't need to be reproducible itself**: it is small, scripted
 4. **A manifest diff against the previous release for every new image**, as a standard release step. Confidence: high; the tool already exists.
 5. **The full clean rebuild is optional**: yearly, or before a handover. Confidence: medium.
 
-# 7. Open questions for Koen
+# 7. Koen's decision (29 Oct 2026, 12:38)
 
-1. Is **"latest release" as the default fix** acceptable, and which cases need something else?
-2. **Option A, Option B, or both?**
-3. **How far to pin inputs:** versions only, or a full archive of every package (about 2 GB for the client)?
-4. **The clean rebuild:** never, yearly, or now (resume stage 2)?
-5. **Where identity files live:** the bot computer or the admin tool?
-6. **Engine images:** split them for the 2 GB limit, or make a leaner image?
-7. **Tailscale key:** added at flash time through the private identity file, or not at all?
+Koen accepted the recommendation in section 6 in full and made #322 active work. In his words: "No, this is exactly how I want it to be presented. So make, you can consider this an item that we are currently doing. So it has to be on the list of items that are currently being worked on. make sure that your diagramming explanation is somehow, somewhere in some document. maybe it should also be explained on the release page of the project."
+
+Answers to the open questions:
+
+1. **Default fix:** the latest release, except in the cases listed in 3a.
+2. **Option A or B:** both. One generic release image per device type, plus a private identity file written at flash time.
+3. **Pinning inputs:** pin versions now. The full archive (about 2 GB for the client) comes later.
+4. **Clean rebuild:** yearly, and before a handover.
+5. **Identity files:** kept on the bot computer, never on GitHub.
+6. **Engine images:** whether to split them or make a leaner image is decided at the first Engine release.
+7. **Tailscale key:** only through the private identity file.
+
+Every new image also gets a manifest comparison with the previous release.
 
 # 8. State of the paused #322 work (Atlas, 27 Oct, around 19:20)
 

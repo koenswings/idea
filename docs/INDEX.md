@@ -24,6 +24,11 @@ Ops view of IDEA security: Tailscale tag:idea/ACL, school network zones, the <ac
 The 20 Oct 2026 Zimbabwe kit (Chigonda and Nharira): schools (most fields TBC with Justice), kit devices with sticker names, hardware and versions, Kolibri ID status, open gaps, and links to the deployments/ records. Contains no secret values.
 → [docs/ops/zimbabwe-2026-10-deployment.md](ops/zimbabwe-2026-10-deployment.md)
 
+## RELEASES.md
+**Status:** Approved approach (idea#322)  ·  **Maintained by:** Atlas / Steve
+How device images are released in two stages (build a generic image, then flash and personalise it with an identity file), with the diagram, for Koen and field staff.
+→ [docs/RELEASES.md](RELEASES.md)
+
 ## README.md
 **Status:** Authoritative  ·  **Maintained by:** Koen / Steve
 Short orientation for the `docs/` folder.
