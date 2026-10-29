@@ -280,13 +280,16 @@
       "size": "120 GB (111.8G in lsblk)",
       "disk_serial": "20070Q450002",
       "usb_bridge_serial": "26A1EE8301CE",
-      "partition": "single ext4, label atlas-307, UUID 01ae10fb-8fdc-4508-a9bb-849bbe1f0fd6 (as of 2026-10-28; may be reformatted by tests)",
+      "partition": "sdb1 holds an IDEA Disk since an eraseDisk test 2026-10-29 09:17 CET; label: pending, diskId: pending (from Axle at his idea04 release). Previous ext4 label atlas-307 (UUID 01ae10fb-8fdc-4508-a9bb-849bbe1f0fd6) was erased 2026-10-29 09:17 CET by that eraseDisk test",
       "owner": "Ops (Atlas). Koen 2026-10-28: \"You can do with it whatever you want.\"",
       "purpose": "test fixture for the kit Kolibri MORANGO restart hw test (idea#288 / app-kolibri#8) and other Ops hw tests",
       "history": "docked on idea03 2026-10-28 09:50 CET for idea#110; removed by Koen 2026-10-28, gone from lsblk 10:25 CET",
-      "location": "not docked on any pool Pi per Ops records (with Koen). Axle claimed idea04 2026-10-29 09:10 CET for engine#278/#279 hw round-trip naming a 120 GB test disk; whether that is this disk is not confirmed",
-      "docked_on": null,
-      "match_rule": "match by disk_serial, never by device name"
+      "location": "docked on idea04 (Axle confirmed 2026-10-29 09:20 CET), used for engine#278/#279 hw round-trip",
+      "docked_on": "idea04",
+      "match_rule": "match by disk_serial, never by device name",
+      "device": "/dev/sdb (match by disk_serial, never by device name)",
+      "label": "pending",
+      "diskId": "pending"
     }
   }
 }
