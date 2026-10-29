@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# write-manifest.sh --out DIR --kind client|router --name NAME --rootfs ROOT --packages FILE [--inputs FILE] [--image FILE]
+# write-manifest.sh --out DIR --kind client|router|engine --name NAME --rootfs ROOT --packages FILE [--inputs FILE] [--image FILE]
 # Writes the per-build manifest directory (idea#322), to be committed under manifests/<kind>/<name>/:
 #   build.env        BUILD_KIND/BUILD_SHA/BUILD_TAG/BUILD_STAMP/NAME/KIND (from the environment set by repro_release_guard)
 #   inputs.tsv       name, url, sha256, bytes of every downloaded input

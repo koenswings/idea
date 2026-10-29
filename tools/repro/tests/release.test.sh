@@ -63,6 +63,23 @@ mk_router='n=$(git -C "$RELEASE_SRC" rev-parse --short HEAD); echo r > "$RELEASE
 check "router first release" env RELEASE_BUILD_CMD="$mk_router" "$RS" --type router --tag t-rel1 --root "$ROOT" --prev none
 check "router second release differs" bash -c "RELEASE_BUILD_CMD='$mk_router' '$RS' --type router --tag t-rel2 --root '$ROOT' && grep -q '^diff=differs from t-rel1' '$ROOT/router/t-rel2/RELEASE.txt' && test -s '$ROOT/router/t-rel2/diff-vs-t-rel1.txt'"
 check "client and router LATEST separate" bash -c "[ \"\$(cat '$ROOT/router/LATEST')\" = t-rel2 ] && [ \"\$(cat '$ROOT/client/LATEST')\" = t-rel3 ]"
+# engine (idea#322 stage 5): fake agent-engine-dev repo; mock build names idea-engine-*, checks the engine source reached it
+E="$W/engine"; git init -q "$E"; echo e1 > "$E/f"; git -C "$E" add f; git -C "$E" -c user.name=t -c user.email=t@t commit -qm e1
+git -C "$E" -c user.name=t -c user.email=t@t tag -a engine-v2026.10.29 -m e; echo e2 >> "$E/f"; git -C "$E" -c user.name=t -c user.email=t@t commit -qam e2
+EH=$(git -C "$E" rev-parse HEAD); export ENGINE_REPO="$E"
+mk_engine='n=$(git -C "$RELEASE_SRC" rev-parse --short HEAD); e=$(git -C "$RELEASE_ENGINE_SRC" rev-parse --short HEAD); printf "eng-%s\n" "$e" > "$RELEASE_OUT/idea-engine-trixie-x-$n-e$e.img.xz"; mkdir -p "$RELEASE_MANIFEST"; echo m > "$RELEASE_MANIFEST/build.env"'
+nope "engine: --engine-ref required" env RELEASE_BUILD_CMD="$mk_engine" "$RS" --type engine --tag t-rel1 --root "$W/re" --prev none
+nope "engine release: untagged engine ref refused" env RELEASE_BUILD_CMD="$mk_engine" "$RS" --type engine --tag t-rel1 --root "$W/re" --prev none --engine-ref "$EH"
+nope "engine: unknown engine ref refused" env RELEASE_BUILD_CMD="$mk_engine" "$RS" --type engine --tag t-proof --root "$W/re" --proof --engine-ref deadbeef
+check "engine proof from an untagged engine commit" env RELEASE_BUILD_CMD="$mk_engine" "$RS" --type engine --tag t-proof --root "$W/re" --proof --engine-ref "$EH"
+DE="$W/re/engine/proof/t-proof"
+check "engine proof: idea-engine-*-proof.img.xz, no -dev, sha256 ok" bash -c "ls '$DE'/idea-engine-*-proof.img.xz && ! ls '$DE' | grep -q -- -dev && cd '$DE' && sha256sum -c --quiet idea-engine-*.sha256"
+check "engine proof: NOT-FOR-FIELD, kind=proof, engine_commit, size check ok" bash -c "test -s '$DE/NOT-FOR-FIELD.txt' && grep -q '^kind=proof$' '$DE/RELEASE.txt' && grep -q '^engine_commit=$EH$' '$DE/RELEASE.txt' && grep -q '^release_file_limit=ok' '$DE/RELEASE.txt'"
+check "engine proof: no LATEST, image manifest made" bash -c "[ ! -e '$W/re/engine/LATEST' ] && test -s '$DE/image-manifest.tsv.xz'"
+check "engine release from an engine-v tag sets LATEST" bash -c "RELEASE_BUILD_CMD='$mk_engine' '$RS' --type engine --tag t-rel1 --root '$W/re' --prev none --engine-ref engine-v2026.10.29 && [ \"\$(cat '$W/re/engine/LATEST')\" = t-rel1 ]"
+nope "engine release over the release-file limit refused" env RELEASE_FILE_LIMIT_BYTES=3 RELEASE_BUILD_CMD="$mk_engine" "$RS" --type engine --tag t-rel2 --root "$W/re" --engine-ref engine-v2026.10.29
+check "engine proof over the limit only records OVER" bash -c "RELEASE_FILE_LIMIT_BYTES=3 RELEASE_BUILD_CMD='$mk_engine' '$RS' --type engine --tag t-rel2 --root '$W/re' --proof --engine-ref '$EH' && grep -q '^release_file_limit=OVER' '$W/re/engine/proof/t-rel2/RELEASE.txt'"
+nope "engine: dev-stamped image refused" env RELEASE_BUILD_CMD='echo x > "$RELEASE_OUT/idea-engine-x-dev.img.xz"' "$RS" --type engine --tag t-rel3 --root "$W/re" --proof --engine-ref "$EH"
 check "image manifest temp space defaults to the stage dir (not /tmp)" grep -q 'REPRO_TMP="${REPRO_TMP:-$STAGE}"' "$R/release.sh"
 check "release.sh has no GitHub release / upload" bash -c "! grep -qE 'gh release|gh api|curl .*upload' '$R/release.sh'"
 echo "release tests: $pass passed, $fail failed"; [ "$fail" = 0 ]

@@ -1,10 +1,10 @@
 name: repro tools (idea#322)
 on:
   pull_request:
-    paths: ["tools/repro/**", "manifests/**", ".github/workflows/repro-tools.yml"]
+    paths: ["tools/repro/**", "tools/engine-image/**", "manifests/**", ".github/workflows/repro-tools.yml"]
   push:
     branches: [main]
-    paths: ["tools/repro/**", "manifests/**"]
+    paths: ["tools/repro/**", "tools/engine-image/**", "manifests/**"]
   workflow_dispatch:
 jobs:
   test:
@@ -14,11 +14,13 @@ jobs:
       - name: deps
         run: sudo apt-get update -q && sudo apt-get install -y -q dosfstools mtools shellcheck xz-utils fdisk
       - name: shellcheck
-        run: shellcheck tools/repro/*.sh tools/repro/tests/*.sh
+        run: shellcheck tools/repro/*.sh tools/repro/tests/*.sh tools/engine-image/*.sh
       - name: lock file tests
         run: tools/repro/tests/lock.test.sh
       - name: release script tests
         run: tools/repro/tests/release.test.sh
+      - name: engine image tests (sanitise/verify fixture, pins)
+        run: tools/repro/tests/engine-image.test.sh
       - name: repro tests (existing, no root)
         run: tools/repro/tests/run.sh
       - name: image manifest tests (fixture trees + tiny FAT/ext4 image)
