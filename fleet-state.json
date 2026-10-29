@@ -24,7 +24,7 @@
     "role": "spare",
     "domain": "any",
     "pr": null,
-    "status": "idle",
+    "status": "offline",
     "host": "100.126.117.80",
     "tailscale": "100.126.117.80",
     "lan": "192.168.0.228",
@@ -37,7 +37,8 @@
     "review_url": null,
     "claim": null,
     "repo": null,
-    "idle_since": "2026-10-28T09:00:12Z"
+    "idle_since": "2026-10-28T09:00:12Z",
+    "offline_note": "adapter lent to Koen 2026-10-28"
   },
   "idea01": {
     "role": "golden",
