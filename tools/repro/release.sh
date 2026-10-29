@@ -51,6 +51,8 @@ if [ "$PROOF" = 1 ]; then b=$(basename "$IMG"); case "$b" in *-squashfs-*) nb="$
   mv "$IMG" "$(dirname "$IMG")/$nb"; IMG="$(dirname "$IMG")/$nb"; fi
 (cd "$OUT" && sha256sum "$(basename "$IMG")" > "$(basename "$IMG").sha256"); SHA=$(cut -d' ' -f1 "$IMG.sha256")
 # manifest of the new image + diff against the previous release
+# image-manifest.sh decompresses the ~14 GB image into REPRO_TMP; /tmp is often a small tmpfs, so use the stage dir
+export REPRO_TMP="${REPRO_TMP:-$STAGE}"
 if [ "$TYPE" = client ]; then NEWM="$STAGE/image-manifest.tsv"; ${RELEASE_IMAGE_MANIFEST_CMD:-"$WT/tools/repro/image-manifest.sh"} "$IMG" "$NEWM"; xz -T0 -f "$NEWM"; NEWM="$NEWM.xz"
 else NEWM="$MAN/content.tsv.xz"; [ -f "$NEWM" ] || { echo "router build wrote no $NEWM" >&2; exit 1; }; fi
 DIFFRES="first release (no previous)"
