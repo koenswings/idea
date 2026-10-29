@@ -28,4 +28,18 @@ set +e; "$EI/build.sh" --out "$W/o" >/dev/null 2>&1; rc=$?; set -e
 check "build.sh without --engine-src: usage error (2)" test "$rc" = 2
 check "build.sh names images idea-engine-*, -dev only for --dev" bash -c "grep -q 'NAME=\"idea-engine-\$VER\"' '$EI/build.sh' && grep -q 'VER=\"\$VER-dev\"' '$EI/build.sh'"
 check "build.sh runs our sanitise, verify and secret scan after the Engine step" bash -c "awk '/ENGINE_BUILD_CMD:-/{e=NR} /sanitise.sh\" \"\\\$MNT\"/{s=NR} /verify-sanitised.sh\" \"\\\$MNT\"/{v=NR} /scan-secrets.sh\" \"\\\$MNT\"/{c=NR} END{exit !(e && e<s && s<v && v<c)}' '$EI/build.sh'"
+# engine-build.json parsing (Axle's shape: passed = 9 or 0, failed = list of strings)
+H=$(git -C "$REPO" rev-parse HEAD); LS=$(printf '%064d' 0)
+printf '{"engine_commit":"%s","engine_version":"v","lock_sha256":"%s","verify":{"passed":9,"failed":[]}}' "$H" "$LS" > "$W/ok.json"
+printf '{"engine_commit":"%s","engine_version":"v","lock_sha256":"%s","verify":{"passed":0,"failed":["/META.yaml present","pm2 runs as root"]}}' "$H" "$LS" > "$W/bad.json"
+printf '{"engine_commit":"%s","verify":{"passed":0,"failed":["build did not finish"]}}' "$H" > "$W/unfinished.json"
+check "engine report 9/9 accepted" "$EI/engine-report.sh" "$W/ok.json" "$REPO"
+check "engine report failures printed one per line" bash -c "[ \"\$('$EI/engine-report.sh' '$W/bad.json' | grep -c '^engine verify FAIL:')\" = 2 ]"
+nope "engine report with failures refused" "$EI/engine-report.sh" "$W/bad.json"
+nope "'build did not finish' report refused" "$EI/engine-report.sh" "$W/unfinished.json"
+nope "missing report refused" "$EI/engine-report.sh" "$W/none.json"
+nope "report for another commit refused" "$EI/engine-report.sh" "$W/ok.json" "$W/engine-other"
+git init -q "$W/engine-other"; git -C "$W/engine-other" -c user.name=t -c user.email=t@t commit -q --allow-empty -m x
+nope "report commit must match the engine source" "$EI/engine-report.sh" "$W/ok.json" "$W/engine-other"
+check "first-boot units recorded; identity unit absent is not an error" bash -c "'$EI/firstboot-units.sh' '$F' | grep -q 'idea-engine-identity: absent' && '$EI/firstboot-units.sh' '$F' | grep -q 'regenerate_ssh_host_keys.service *enabled'"
 echo "engine-image tests: $pass passed, $fail failed"; [ "$fail" = 0 ]

@@ -51,10 +51,14 @@ mv "$MNT/etc/resolv.conf" "$MNT/etc/resolv.conf.idea-orig" 2>/dev/null || true; 
 
 # --- Engine offline build (agent-engine-dev; interface: INTERFACE.md) ---
 export MNT ENGINE_SRC OUT
-DEFAULT_ENGINE_CMD='"$ENGINE_SRC/script/build-engine-offline" --root "$MNT" --boot "$MNT/boot/firmware" --report "$OUT/engine-build.json"'
+# ENGINE_BUILD_ARGS: extra optional flags for build-engine-offline (--cache DIR, --lock FILE, --image REF, --pm2-env ENV).
+export ENGINE_BUILD_ARGS="${ENGINE_BUILD_ARGS:-}"
+DEFAULT_ENGINE_CMD='"$ENGINE_SRC/script/build-engine-offline" --root "$MNT" --boot "$MNT/boot/firmware" --report "$OUT/engine-build.json" $ENGINE_BUILD_ARGS'
 set +e; bash -c "${ENGINE_BUILD_CMD:-$DEFAULT_ENGINE_CMD}"; erc=$?; set -e
 case $erc in 0) ;; 2) echo "engine offline build: usage error (interface mismatch, see INTERFACE.md)" >&2; exit 1;;
-  *) echo "engine offline build failed (rc $erc)" >&2; exit 1;; esac
+  *) echo "engine offline build failed (rc $erc)" >&2; [ ! -f "$OUT/engine-build.json" ] || cat "$OUT/engine-build.json" >&2; exit 1;; esac
+"$HERE/engine-report.sh" "$OUT/engine-build.json" "$ENGINE_SRC" | tee "$OUT/$NAME.engine-verify.txt"
+"$HERE/firstboot-units.sh" "$MNT" | tee "$OUT/$NAME.firstboot.txt"
 chroot "$MNT" dpkg-query -W -f='${Package}\t${Version}\t${Architecture}\n' | LC_ALL=C sort -u > "$OUT/$NAME.MANIFEST.txt"
 
 rm -f "$MNT/usr/bin/qemu-aarch64-static" "$MNT/etc/resolv.conf"; mv "$MNT/etc/resolv.conf.idea-orig" "$MNT/etc/resolv.conf" 2>/dev/null || true

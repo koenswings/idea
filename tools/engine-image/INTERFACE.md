@@ -1,7 +1,7 @@
 # Engine offline build: interface between `release.sh --type engine` and agent-engine-dev (idea#322 stage 5)
 
-Status: **draft stub** on our side, written before Axle's PR (engine#291 follow-up) is up. Our build.sh calls exactly
-this; when Axle's interface lands, only `ENGINE_BUILD_CMD`'s default in build.sh changes.
+Status: implemented on the Engine side by agent-engine-dev#292 (`script/build-engine-offline`, docs/ENGINE_IMAGE.md).
+`ENGINE_BUILD_CMD` still overrides the whole step (tests); `ENGINE_BUILD_ARGS` adds the optional flags below.
 
 ## Invocation (on the build host, as root, after we mounted the image)
     <engine-src>/script/build-engine-offline --root <MNT> --boot <MNT>/boot/firmware --report <OUT>/engine-build.json
@@ -14,10 +14,20 @@ this; when Axle's interface lands, only `ENGINE_BUILD_CMD`'s default in build.sh
 - No device identity: no /META.yaml diskId, hostname = image default, empty machine-id, no SSH host keys,
   no Tailscale state. The Engine side verifies this and fails the build if anything is left.
 
+## Optional flags (agent-engine-dev#292)
+`--cache DIR` (archive-engine-inputs.sh output; without it the pinned inputs are downloaded first: network needed),
+`--lock FILE` (without it the lock is generated from the clean checkout), `--image name[:tag]@sha256:<d>` (repeatable),
+`--pm2-env production|development`, `--dry-run` (runs nothing). Host: node 22 + pnpm; the wrapper runs
+`pnpm install --frozen-lockfile` in the Engine checkout (local node_modules only) when its build tools are missing.
+
 ## Outputs
-- `<OUT>/engine-build.json`: `{engine_commit, engine_version, lock_sha256, verify:{passed,failed}}` (we copy it into the release).
+- `<OUT>/engine-build.json`: `{engine_commit, engine_version, lock_sha256, verify:{passed: 9|0, failed: [strings]}}`.
+  A "build did not finish" report is written before the build starts. `engine-report.sh` accepts it only with
+  `failed == []`, `passed > 0`, a 64-hex `lock_sha256` and `engine_commit` = the engine source HEAD.
 - In the image: the Engine lock file at `/etc/idea/engine.lock` and the version at `/etc/idea/engine-version`.
-- First-boot units expected: `idea-engine-identity` (from boot.sh @reboot, engine#291), ssh host-key regeneration.
+- First-boot units: Raspberry Pi OS `regenerate_ssh_host_keys.service` (the Engine build fails if the base lacks it),
+  `idea-engine-firstboot.service`, `pm2-pi.service`; tailscaled installed, **not** enabled. `idea-engine-identity`
+  arrives with engine#291: `firstboot-units.sh` records the units (absent identity unit is recorded, not an error).
 
 ## Exit codes
 0 ok - 1 build or verify failed - 2 usage error. Anything else is treated as a failure.
