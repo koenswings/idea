@@ -26,8 +26,10 @@ Status: implemented on the Engine side by agent-engine-dev#292 (`script/build-en
   `failed == []`, `passed > 0`, a 64-hex `lock_sha256` and `engine_commit` = the engine source HEAD.
 - In the image: the Engine lock file at `/etc/idea/engine.lock` and the version at `/etc/idea/engine-version`.
 - First-boot units: Raspberry Pi OS `regenerate_ssh_host_keys.service` (the Engine build fails if the base lacks it),
-  `idea-engine-firstboot.service`, `pm2-pi.service`; tailscaled installed, **not** enabled. `idea-engine-identity`
-  arrives with engine#291: `firstboot-units.sh` records the units (absent identity unit is recorded, not an error).
+  `idea-engine-firstboot.service`, `pm2-pi.service`, `cron.service` (enabled in the pinned 2026-10-06 trixie lite base);
+  tailscaled installed, **not** enabled (engine#291 enables it at first boot only when the card carries a key).
+  Identity (engine#291): `/usr/local/sbin/idea-engine-identity` (0755 root), run every boot by `boot.sh` from a root
+  `@reboot` crontab line, not a systemd unit. The Engine's verify fails if it is missing; `firstboot-units.sh` records it.
 
 ## Exit codes
 0 ok - 1 build or verify failed - 2 usage error. Anything else is treated as a failure.

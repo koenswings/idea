@@ -41,5 +41,8 @@ nope "missing report refused" "$EI/engine-report.sh" "$W/none.json"
 nope "report for another commit refused" "$EI/engine-report.sh" "$W/ok.json" "$W/engine-other"
 git init -q "$W/engine-other"; git -C "$W/engine-other" -c user.name=t -c user.email=t@t commit -q --allow-empty -m x
 nope "report commit must match the engine source" "$EI/engine-report.sh" "$W/ok.json" "$W/engine-other"
-check "first-boot units recorded; identity unit absent is not an error" bash -c "'$EI/firstboot-units.sh' '$F' | grep -q 'idea-engine-identity: absent' && '$EI/firstboot-units.sh' '$F' | grep -q 'regenerate_ssh_host_keys.service *enabled'"
+mkdir -p "$F/usr/local/sbin" "$F/var/spool/cron/crontabs"; check "identity hook absent is recorded, not an error" bash -c "'$EI/firstboot-units.sh' '$F' | grep -q 'root @reboot boot.sh: absent'"
+install -m 755 /dev/null "$F/usr/local/sbin/idea-engine-identity"; echo '@reboot /home/pi/boot.sh > /home/pi/boot.out 2>&1' > "$F/var/spool/cron/crontabs/root"
+check "identity via root @reboot boot.sh recorded" bash -c "o=\$('$EI/firstboot-units.sh' '$F'); grep -q 'idea-engine-identity: present 755' <<<\"\$o\" && grep -q 'root @reboot boot.sh: present' <<<\"\$o\""
+check "first-boot units recorded; ssh key regeneration enabled" bash -c "'$EI/firstboot-units.sh' '$F' | grep -q 'regenerate_ssh_host_keys.service *enabled'"
 echo "engine-image tests: $pass passed, $fail failed"; [ "$fail" = 0 ]
