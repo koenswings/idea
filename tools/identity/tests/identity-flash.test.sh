@@ -53,6 +53,12 @@ nope "router identity refused by client flash" "$FL" --boot "$B" --identity idea
 "$ID" new --name idea-pc-new1 --timezone Africa/Lusaka >/dev/null
 B2="$W/boot2"; mkdir -p "$B2"; : > "$B2/config.txt"
 check "home none -> empty idea-home.txt, no secrets dir" bash -c "'$FL' --boot '$B2' --identity idea-pc-new1 && [ ! -s '$B2/idea-home.txt' ] && [ ! -e '$B2/idea-secrets' ]"
+# --- engine identities
+check "engine identity valid" "$ID" new --name idea-eng-7 --type engine --timezone UTC --tailscale-key-ref "$KEY"
+check "engine check/show" bash -c "'$ID' check idea-eng-7 && '$ID' show idea-eng-7 | grep -q '^type=engine$'"
+nope "engine with HOME_MODE not none refused" "$ID" new --name idea-eng-8 --type engine --timezone UTC --home idea01
+BE="$W/boote"; mkdir -p "$BE"; : > "$BE/config.txt"
+check "engine --boot: empty home, type=engine, hostname, key" bash -c "'$FL' --boot '$BE' --identity idea-eng-7 && [ -f '$BE/idea-home.txt' ] && [ ! -s '$BE/idea-home.txt' ] && grep -q '^type=engine$' '$BE/idea-identity.txt' && [ \"\$(cat '$BE/idea-hostname.txt')\" = idea-eng-7 ] && cmp -s '$KEY' '$BE/idea-secrets/tailscale-authkey' && [ \"\$(cat '$BE/idea-timezone.txt')\" = UTC ]"
 # --- full flash onto a file "device"
 IMG="$W/idea-client-26.04-20261029-abc1234.img"; head -c 65536 /dev/urandom > "$IMG"; xz -k "$IMG"; (cd "$W" && sha256sum "$(basename "$IMG").xz" > "$(basename "$IMG").xz.sha256")
 DEV="$W/card.bin"; : > "$DEV"; B3="$W/boot3"; mkdir -p "$B3"; : > "$B3/config.txt"
@@ -63,6 +69,10 @@ check "device holds the image bytes" cmp <(head -c 65536 "$DEV") "$IMG"
 check "boot record has image sha256" grep -q "^image_sha256=$(sha256sum "$IMG.xz" | cut -d' ' -f1)$" "$B3/idea-identity.txt"
 echo corrupt >> "$IMG.xz"; nope "image sha256 mismatch refused" "$FL" --image "$IMG.xz" --device "$DEV" --identity idea-pc-5b4c --yes
 cp "$IMG" "$W/idea-client-26.04-x-dev.img"; nope "dev image refused" "$FL" --image "$W/idea-client-26.04-x-dev.img" --device "$DEV" --identity idea-pc-5b4c --yes
+EIMG="$W/idea-engine-26.04-20261029-abc1234.img"; cp "$IMG" "$EIMG"; CIMG="$W/idea-client-26.04-20261029-def5678.img"; cp "$IMG" "$CIMG"
+nope "client identity with engine image refused" "$FL" --image "$EIMG" --device "$DEV" --identity idea-pc-5b4c --yes
+nope "engine identity with client image refused" "$FL" --image "$CIMG" --device "$DEV" --identity idea-eng-7 --yes
+check "engine identity with engine image flashes" bash -c "'$FL' --image '$EIMG' --device '$DEV' --identity idea-eng-7 --yes && grep -q '^type=engine$' '$B3/idea-identity.txt' && [ ! -s '$B3/idea-home.txt' ]"
 unset IDEA_FLASH_ALLOW_FILE; nope "regular file refused as device without test hook" "$FL" --image "$IMG" --device "$DEV" --identity idea-pc-5b4c --yes
 nope "usage: --boot with --device" "$FL" --boot "$B" --device "$DEV" --identity idea-pc-5b4c
 # --- first boot applies the flash-time name

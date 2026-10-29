@@ -2,10 +2,10 @@
 # identity-lib.sh - shared parser/validator for IDEA identity files (idea#322). Sourced, never executed.
 # Identity file (one per device; on the bot computer only, ~/.config/idea-identities/<name>.identity, mode 0600):
 #   IDEA_IDENTITY=1
-#   TYPE=client                      client | router
+#   TYPE=client                      client | router | engine
 #   NAME=idea-pc-5b4c                hostname label: [a-z0-9-], 1-63, no leading/trailing '-'
 #   TIMEZONE=Africa/Harare           tz database zone (same rule as set-card-timezone.sh, idea#208)
-#   HOME_MODE=idea01                 client: home Engine name (idea-home.txt, idea#203) or "none"
+#   HOME_MODE=idea01                 client: home Engine name (idea-home.txt, idea#203) or "none"; engine: must be "none" (an Engine has no home Engine)
 #   TAILSCALE_KEY_REF=/home/.../key  PATH of a 0600 file holding the key, or "none". The key itself is never here.
 # The file is parsed as plain KEY=VALUE text (never sourced). Unknown keys, a raw tskey-* value, or a bad mode fail.
 IDENTITY_DIR="${IDEA_IDENTITY_DIR:-$HOME/.config/idea-identities}"
@@ -35,9 +35,10 @@ id_load(){
   id_check_fields
 }
 id_check_fields(){
-  case "$ID_TYPE" in client|router) ;; *) id_err "TYPE must be client or router"; return 1;; esac
+  case "$ID_TYPE" in client|router|engine) ;; *) id_err "TYPE must be client, router or engine"; return 1;; esac
   id_valid_name "$ID_NAME" || { id_err "NAME is not a hostname label: '$ID_NAME'"; return 1; }
   id_valid_tz "$ID_TIMEZONE" || { id_err "TIMEZONE is not a tz database zone: '$ID_TIMEZONE'"; return 1; }
+  if [ "$ID_TYPE" = engine ] && [ "$ID_HOME" != none ]; then id_err "TYPE=engine needs HOME_MODE=none (an Engine has no home Engine), got '$ID_HOME'"; return 1; fi
   [ "$ID_HOME" = none ] || id_valid_name "${ID_HOME%.local}" || { id_err "HOME_MODE must be an Engine name or none"; return 1; }
   if [ "$ID_KEYREF" != none ]; then
     case "$ID_KEYREF" in /*) ;; *) id_err "TAILSCALE_KEY_REF must be an absolute path or none"; return 1;; esac

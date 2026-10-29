@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # idea-identity.sh - manage IDEA device identity files on the bot computer (idea#322). Format: identity-lib.sh.
-#   idea-identity.sh new --name N --timezone Area/City [--type client|router] [--home ENGINE|none] [--tailscale-key-ref PATH|none]
+#   idea-identity.sh new --name N --timezone Area/City [--type client|router|engine] [--home ENGINE|none] [--tailscale-key-ref PATH|none]
 #   idea-identity.sh check NAME|FILE      validate (exit 0 = ok)
 #   idea-identity.sh show NAME|FILE       print the fields; the key is shown only as its reference ("set"/"none")
 #   idea-identity.sh list
+#   (--type engine needs --home none, the default)
 # Files: ${IDEA_IDENTITY_DIR:-~/.config/idea-identities}/<name>.identity, dir 0700, file 0600, never overwritten.
 # Never prints a Tailscale key. Exit: 0 ok, 1 invalid, 2 usage.
 set -euo pipefail
@@ -27,5 +28,5 @@ case "$cmd" in
     k=none; [ "$ID_KEYREF" = none ] || k="set ($ID_KEYREF)"
     printf 'type=%s\nname=%s\ntimezone=%s\nhome=%s\ntailscale_key=%s\n' "$ID_TYPE" "$ID_NAME" "$ID_TIMEZONE" "$ID_HOME" "$k";;
   list) [ -d "$IDENTITY_DIR" ] || exit 0; for f in "$IDENTITY_DIR"/*.identity; do [ -e "$f" ] && basename "$f" .identity; done; true;;
-  *) sed -n 2,8p "$0"; exit 2;;
+  *) sed -n 2,9p "$0"; exit 2;;
 esac
