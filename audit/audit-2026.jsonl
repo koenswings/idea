@@ -847,6 +847,8 @@
 {"ts":"2026-10-28T13:18:11Z","bot":"Atlas","action":"quality_scan","mode":"full","repos":["agent-engine-dev"],"ok":true,"violation_count":0}
 {"ts":"2026-10-28T13:18:11Z","bot":"Atlas","action":"quality_scan","mode":"full","repos":["agent-engine-dev"],"ok":true,"violation_count":0}
 {"ts":"2026-10-28T13:18:11Z","bot":"Atlas","action":"quality_scan","mode":"full","repos":["agent-engine-dev"],"ok":false,"violation_count":1}
+{"ts":"2026-10-28T13:54:03Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"offline","previous":"idle"}
+{"ts":"2026-10-28T13:54:03Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"offline_note","value":"adapter lent to Koen 2026-10-28","previous":null}
 {"ts":"2026-10-29T00:29:54Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle"}
 {"ts":"2026-10-29T00:29:54Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-10-29T00:36:02Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"version","value":"engine main@1344a71fb0f8f634d14559f9cd08f29e1f157cc2, console main@f97ec158d769b9402a62a203f3266c56c98f9cf6","previous":"engine main@11196685d29d3d68d39bf719f63f19f2c0d39ed9, console main@f97ec158d769b9402a62a203f3266c56c98f9cf6"}
