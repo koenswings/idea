@@ -15,7 +15,7 @@ MD=""; ROOT=""; PKGS=""; IMG=""; REBUILD=0
 while [ $# -gt 0 ]; do case "$1" in
   --manifest-dir) MD="$2"; shift 2;; --rootfs) ROOT="$2"; shift 2;; --packages) PKGS="$2"; shift 2;;
   --image) IMG="$2"; shift 2;; --rebuild) REBUILD=1; shift;; *) echo "unknown arg $1" >&2; exit 2;; esac; done
-[ -d "$MD" ] && [ -f "$MD/build.env" ] || { echo "--manifest-dir with build.env required" >&2; exit 2; }
+if ! { [ -d "$MD" ] && [ -f "$MD/build.env" ]; }; then echo "--manifest-dir with build.env required" >&2; exit 2; fi
 KIND=$(sed -n 's/^KIND=//p' "$MD/build.env"); SHA=$(sed -n 's/^BUILD_SHA=//p' "$MD/build.env")
 T=$(mktemp -d); trap 'rm -rf "$T"; [ -n "${WT:-}" ] && git -C "$REPO" worktree remove --force "$WT" 2>/dev/null; true' EXIT
 if [ $REBUILD = 1 ]; then

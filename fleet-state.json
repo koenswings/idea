@@ -62,12 +62,12 @@
   "idea04": {
     "role": "spare",
     "domain": "any",
-    "pr": "QUEUE batch #283,#290,#274,#284,#285,#286,#266,qs348",
+    "pr": null,
     "status": "testing",
     "host": "100.108.39.45",
     "tailscale": "100.108.39.45",
     "lan": "192.168.0.113",
-    "version": "engine main@77d961b68254879184f97a9a454484bbbe02aac6, console main@eafee356dda3ef024a2136e41e1f53d997314c81",
+    "version": "engine main@a0343e45920e5e1fe9809b1414f775f5c669fd88, console main@eafee356dda3ef024a2136e41e1f53d997314c81",
     "mdns": true,
     "runner": "none",
     "grok_build": null,
@@ -75,7 +75,7 @@
     "claim": "Axle",
     "branch": null,
     "review_url": null,
-    "idle_since": "2026-10-29T09:54:40Z"
+    "idle_since": "2026-10-29T16:02:50Z"
   },
   "wizardly-hugle": {
     "role": "production",

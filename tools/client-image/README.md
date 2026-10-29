@@ -32,7 +32,7 @@ sudo tools/client-image/build.sh [--dev] [--base ubuntu-26.04.1-...+raspi.img.xz
 
 * **Release = clean tree, HEAD exactly at a tag, HEAD on `origin/main`.** Otherwise `build.sh` refuses; `--dev`
   builds anything and names the image `...-dev` (never for the field). The version date is the commit date.
-* **apt pinned:** `apt-pins.tsv` (package, version; the s14/s15 kit list) - requested packages are installed at
+* **apt pinned:** `client.lock` (package, version; generated from `pins/s16-pins.tsv` by `tools/repro/make-lock.sh`, 1,815 entries; every package incl. dependencies pinned via apt preferences, any mismatch fails the build) - requested packages are installed at
   their pinned versions and a release fails unless the full installed list equals the pins. Ubuntu ports has no dated
   snapshots, so the exact `.deb`s are archived per build with `tools/repro/archive-debs.py` (see `deployments/README.md`).
 * **Inputs verified:** base image + Chrome `.deb` by sha256 (`client-image.conf`); mismatch = file kept as `.bad`, build fails.
@@ -102,3 +102,5 @@ tmpfs overlay, so anything a learner (or admin) changes is gone after the next r
   and reboot. `idea-client-mode status` shows the next-boot and running mode.
 * **Making a lasting change while the overlay is on:** switch it off, reboot, change, switch it on, reboot.
 * Build with `OVERLAY=off` in `client-image.conf` to ship cards that never arm the overlay.
+
+* **Shrink (idea#322):** `shrink-image.sh` (called by `build.sh`) cuts the root to used + `ROOT_FREE_MB`; if that exceeds `MAX_IMAGE_BYTES` it cuts to the cap while at least `ROOT_FREE_MIN_MB` stays free. This is the step s16 needed by hand (s16 = 13,999,996,928 bytes, reproduced by the plan test). Tests: `tests/shrink.test.sh`.
