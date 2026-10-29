@@ -11,7 +11,7 @@
 set -euo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 NAME="${1:-}"; TGT="${2:-}"; OUT="${3:-/workspace/idea-archive/captures}"
-[[ "$NAME" =~ ^[a-z0-9][a-z0-9-]*$ ]] && [ -n "$TGT" ] || { echo "usage: capture-device.sh <device-name> <user@ip> [OUTDIR]" >&2; exit 2; }
+if ! { [[ "$NAME" =~ ^[a-z0-9][a-z0-9-]*$ ]] && [ -n "$TGT" ]; }; then echo "usage: capture-device.sh <device-name> <user@ip> [OUTDIR]" >&2; exit 2; fi
 mkdir -p "$OUT"; F="$OUT/$NAME-$(date -u +%Y%m%dT%H%M%SZ).txt"
 PROXY="${CAPTURE_PROXY:-127.0.0.1:1055}"
 if [ -n "${CAPTURE_SSH:-}" ]; then read -r -a SSHC <<< "$CAPTURE_SSH"

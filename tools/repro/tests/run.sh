@@ -149,6 +149,11 @@ t "volatile.txt holds record keys" grep -qx 'key:capturedUtc' "$R/volatile.txt"
 for d in "$R"/../../deployments/*/*/*/; do [ -f "$d/record.txt" ] || continue
   python3 "$R/compare-record.py" --check "$d" >/dev/null || no "committed record valid: $d"; done; ok "committed records valid"
 
+NY="$T/ny"; mkdir -p "$NY"; grep -v '^deployedAt=' "$R/../../deployments/routers/kind-panda/retro-2026-10-18/record.txt" > "$NY/record.txt"
+t "not-yet-installed record valid without deployedAt" python3 "$R/compare-record.py" --check "$NY"
+sed 's/^status=.*/status=installed/' "$NY/record.txt" > "$NY/r2"; mv "$NY/r2" "$NY/record.txt"
+tf "installed record without deployedAt is invalid" python3 "$R/compare-record.py" --check "$NY"
+
 # --- router-packages 3 columns
 RR="$T/rr"; mkdir -p "$RR/lib/apk/db"; printf 'P:busybox\nV:1.37.0-r6\nA:aarch64_cortex-a53\n\nP:base-files\nV:1711\nA:aarch64_cortex-a53\n' > "$RR/lib/apk/db/installed"
 t "router-packages prints package, version, arch" bash -c "[ \"\$('$R/router-packages.sh' '$RR' | head -1)\" = \"\$(printf 'base-files\t1711\taarch64_cortex-a53')\" ]"

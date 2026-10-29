@@ -73,7 +73,9 @@ def content_sha256(d):
 
 def check(d):
     errs = []; r = kv(os.path.join(d, "record.txt"))
-    errs += [f"missing {k}" for k in REQUIRED if k not in r]
+    # A record for a device that is not yet installed (#288) has no deployedAt yet.
+    planned = r.get("status") == "not yet installed"
+    errs += [f"missing {k}" for k in REQUIRED if k not in r and not (planned and k == "deployedAt")]
     if r.get("schema") != SCHEMA: errs.append(f"schema is {r.get('schema')}")
     if r.get("deviceType") not in DEVICE_TYPES: errs.append(f"deviceType {r.get('deviceType')} not in {sorted(DEVICE_TYPES)}")
     if not (r.get("hostname") or r.get("stickerName") or r.get("cardId")): errs.append("missing hostname/stickerName/cardId")
