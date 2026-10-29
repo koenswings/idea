@@ -122,7 +122,9 @@
       "mac_lan": "d4:0d:ab:50:ce:7e",
       "mac_wan": "d4:0d:ab:50:ce:7f",
       "read": "2026-10-26 19:42 CET, read-only over Tailscale via LuCI ubus (port 22 not open on Tailscale), router uptime 114 s at read; no changes made (idea#288 first contact)",
-      "host_key_ed25519": "SHA256:TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE (ssh-keyscan from sunny-robin on the LAN, 2026-10-28)"
+      "host_key_ed25519": "SHA256:TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE (ssh-keyscan from sunny-robin on the LAN, 2026-10-28)",
+      "flashed": "2026-10-16 (Fri), all three kit routers; Koen 2026-10-29 09:44 CET via Steve (idea#288)",
+      "intermediate_firmware": "cudy_wr3000s-v1-sysupgrade_20251119.bin sha256 463e6e31e7361ec8177d2c3a136674297fd179eafaa166fe459731cdf1b35773 md5 403e276f74fd29917fd4260294d1a137; source: Cudy Google Drive folder https://drive.google.com/drive/folders/1BKVarlwlNxf7uJUtRhuMGUqeCa5KpMnj (WR3000S 1.0.zip), per OpenWrt wiki; download step itself not logged (idea#288)"
     },
     "clients": {
       "source": "deployments/clients/kit-hosts-zimbabwe-2026-10.tsv (read-only, 2026-10-27 CET)",
@@ -223,7 +225,9 @@
       "mac_lan_likely": "d4:0d:ab:50:a6:60",
       "mac_source": "idea#288 build records: D4:0D:AB:50:A6:60 flashed with b2f00bc. sunny-robin-router (ce:7e) and happy-zebra-router (ca:c8) were read on the devices, so a6:60 is kind-panda-router by elimination. NOT confirmed on the device; see the router host-key mismatch on happy-zebra",
       "read": null,
-      "open": "firmware + MAC read when online over Tailscale; otherwise label photo from Justice (Koen approves the draft)"
+      "open": "firmware + MAC read when online over Tailscale; otherwise label photo from Justice (Koen approves the draft)",
+      "flashed": "2026-10-16 (Fri), all three kit routers; Koen 2026-10-29 09:44 CET via Steve (idea#288)",
+      "intermediate_firmware": "cudy_wr3000s-v1-sysupgrade_20251119.bin sha256 463e6e31e7361ec8177d2c3a136674297fd179eafaa166fe459731cdf1b35773 md5 403e276f74fd29917fd4260294d1a137; source: Cudy Google Drive folder https://drive.google.com/drive/folders/1BKVarlwlNxf7uJUtRhuMGUqeCa5KpMnj (WR3000S 1.0.zip), per OpenWrt wiki; download step itself not logged (idea#288)"
     }
   },
   "happy-zebra": {
@@ -245,7 +249,9 @@
       "firmware": "OpenWrt 25.12.5 r33051-f5dae5ece4 (mediatek/filogic, kernel 6.12.94)",
       "mac_lan": "d4:0d:ab:50:ca:c8",
       "mac_wan": "d4:0d:ab:50:ca:c9",
-      "read": "2026-10-28 ~11:17 and 13:50 CET, read-only through ubus over Tailscale (Atlas, idea#288). /etc/idea-router-release does not exist (stat NOT_FOUND); the release info is /etc/idea/version (100 bytes, root-only, ubus read denied). SSH capture blocked: dropbear Interface=lan, so port 22 is not open on tailscale0. ed25519 host key SHA256:TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs (ssh-keyscan from happy-zebra on the LAN). No changes made"
+      "read": "2026-10-28 ~11:17 and 13:50 CET, read-only through ubus over Tailscale (Atlas, idea#288). /etc/idea-router-release does not exist (stat NOT_FOUND); the release info is /etc/idea/version (100 bytes, root-only, ubus read denied). SSH capture blocked: dropbear Interface=lan, so port 22 is not open on tailscale0. ed25519 host key SHA256:TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs (ssh-keyscan from happy-zebra on the LAN). No changes made",
+      "flashed": "2026-10-16 (Fri), all three kit routers; Koen 2026-10-29 09:44 CET via Steve (idea#288)",
+      "intermediate_firmware": "cudy_wr3000s-v1-sysupgrade_20251119.bin sha256 463e6e31e7361ec8177d2c3a136674297fd179eafaa166fe459731cdf1b35773 md5 403e276f74fd29917fd4260294d1a137; source: Cudy Google Drive folder https://drive.google.com/drive/folders/1BKVarlwlNxf7uJUtRhuMGUqeCa5KpMnj (WR3000S 1.0.zip), per OpenWrt wiki; download step itself not logged (idea#288)"
     },
     "switch": {
       "model": "TP-Link TL-SG105PE",

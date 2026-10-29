@@ -68,7 +68,7 @@ In total there are 10 classroom computer cards; 9 machines are known (3 at Site 
 All three Engines share one kit store, so every school server lists the others when they meet. Teachers open the
 Console at `http://idea.local`, or reach one specific school server at `http://<sticker>.local`.
 
-Engines were installed on 18 October 2026 (Console dist 17 October). The routers' install dates are not known yet.
+Engines were installed on 18 October 2026 (Console dist 17 October). The three kit routers were flashed on Friday 16 October 2026 (Koen, 29 Oct 2026).
 
 ## Kolibri IDs
 
@@ -117,7 +117,15 @@ From ops (Atlas). Status on 29 Oct 2026, 09:20 CET:
 - **Sites of kind-panda (with kind-panda-router) and idea-pc-f63a: TBC.** Neither has been seen on a site's network
   since the sites were mapped; ask Justice, or read them when they come online.
 - **TP-Link switch at happy-zebra:** not in any device record yet (MAC from Steve's review).
-- Router install dates and the Cudy intermediate firmware source: only Koen knows these.
+- **Router flash date: DONE.** All three routers were flashed on Friday 16 October 2026 (Koen, 29 Oct 2026).
+- **Cudy intermediate firmware source: DONE (file), download step not logged.** `cudy_wr3000s-v1-sysupgrade_20251119.bin`,
+  14,945,872 bytes, sha256 `463e6e31e7361ec8177d2c3a136674297fd179eafaa166fe459731cdf1b35773`, MD5
+  `403e276f74fd29917fd4260294d1a137`. Its MD5 and size match the file the OpenWrt wiki names in Cudy's Google Drive folder
+  (`https://drive.google.com/drive/folders/1BKVarlwlNxf7uJUtRhuMGUqeCa5KpMnj`, `WR3000S 1.0.zip`), linked from Cudy's
+  *OpenWrt Software Download* page. The box's build report of 16 Oct 2026 shows it staged on wh with that MD5. No bot
+  record of the actual download (URL, time) was found. Mirror: the `field/zimbabwe-2026-10` release asset.
+- **120 GB test disk (`_test_disks.wds120-20070Q450002`):** label and diskId are still pending; they will be pushed to
+  this record once Axle releases idea04.
 
 ## Detailed records
 
