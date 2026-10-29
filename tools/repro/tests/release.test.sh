@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016  # mock build commands are single-quoted on purpose: release.sh runs them with bash -c
 # release.test.sh - offline tests for release.sh (idea#322). A throwaway clone of this repo with test tags, a mock build
 # (RELEASE_BUILD_CMD) and a mock image manifest (RELEASE_IMAGE_MANIFEST_CMD). No root, no network, no real image.
 set -uo pipefail
