@@ -27,7 +27,7 @@ which secrets were given, and nothing more.
 System file hashes from a probe capture get their own sidecar: `helpers.sha256` for `/usr/local/sbin/idea-*`;
 any other system file hash stays in the raw `capture.txt` and is not copied into `files.sha256`.
 
-`tools/client-image/apt-pins.tsv` and `tools/router-image/package-pins.tsv` are **build inputs** (two columns).
+`tools/client-image/client.lock` and `tools/router-image/router.lock` are **build inputs** (lock files made by `tools/repro/make-lock.sh`; older records name the earlier `apt-pins.tsv`).
 Records always use `packages.tsv`.
 
 ## record.txt schema `idea-deployment-record/1`

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Build idea-client-<ver>.img.xz from the official Ubuntu raspi desktop image (proposal idea#201 §9).
 # Usage: sudo tools/client-image/build.sh [--dev] [--browser chrome|chromium] [--chrome-deb FILE] [--base /path/to/base.img.xz]
-#        [--out DIR] [--work DIR] [--no-xz] [--apt-pins FILE|none] [--manifest-out DIR]
+#        [--out DIR] [--work DIR] [--no-xz] [--lock FILE|none] [--manifest-out DIR]
 # Reproducible (idea#322): a release build needs a clean tree at a tag on origin/main (--dev: any tree, image stamped
-# "dev", never for the field); apt versions pinned by apt-pins.tsv; every download sha256-verified; the image holds
+# "dev", never for the field); every apt package locked by client.lock (exact versions, build fails on a mismatch); every download sha256-verified; the image holds
 # NO secrets (Wi-Fi key + admin SSH keys are written at flash time by set-card-secrets.sh); a manifest
 # (build.env, inputs.tsv, packages.tsv, content.tsv.xz, image.sha256) goes to manifests/client/<name>/ - commit it.
 # Host: amd64 or arm64 Linux with losetup, qemu-user-static (binfmt for aarch64 on amd64), xz, parted, e2fsprogs.
@@ -12,11 +12,11 @@ export PATH="$PATH:/usr/sbin:/sbin"
 HERE="$(cd "$(dirname "$0")" && pwd)"; REPO="$(git -C "$HERE" rev-parse --show-toplevel)"
 . "$HERE/client-image.conf"
 . "$REPO/tools/repro/lib.sh"
-BASE=""; CHROME_FILE=""; DEV=0; PINS="$HERE/apt-pins.tsv"; MOUT=""
+BASE=""; CHROME_FILE=""; DEV=0; PINS="$HERE/client.lock"; MOUT=""
 OUT="$HERE/out"; WORK="$HERE/work"; XZ=1; EXTRA_MB=6144
 while [ $# -gt 0 ]; do case "$1" in
   --base) BASE="$2"; shift 2;; --browser) BROWSER="$2"; shift 2;; --chrome-deb) CHROME_FILE="$2"; shift 2;;
-  --dev) DEV=1; shift;; --apt-pins) PINS="$2"; shift 2;; --manifest-out) MOUT="$2"; shift 2;;
+  --dev) DEV=1; shift;; --lock|--apt-pins) PINS="$2"; shift 2;; --manifest-out) MOUT="$2"; shift 2;;
   --secrets|--test-secrets) echo "$1 is gone (idea#322): images carry no secrets; use set-card-secrets.sh at flash time" >&2; exit 2;;
   --out) OUT="$2"; shift 2;; --work) WORK="$2"; shift 2;; --no-xz) XZ=0; shift;;
   *) echo "unknown arg $1" >&2; exit 2;; esac; done
@@ -30,8 +30,9 @@ missing=""; for t in $need; do command -v "$t" >/dev/null 2>&1 || [ -x "/usr/bin
 
 # --- release guard (idea#322): clean tree, tagged, on origin/main; --dev stamps a non-release image ---
 repro_release_guard "$REPO" "$DEV"
-[ "$PINS" = none ] && PINS=""; [ -z "$PINS" ] || [ -s "$PINS" ] || { echo "apt pins file missing: $PINS" >&2; exit 1; }
-[ "$DEV" = 1 ] || [ -n "$PINS" ] || { echo "refusing release build without apt pins" >&2; exit 1; }
+[ "$PINS" = none ] && PINS=""; [ -z "$PINS" ] || [ -s "$PINS" ] || { echo "lock file missing: $PINS" >&2; exit 1; }
+[ "$DEV" = 1 ] || [ -n "$PINS" ] || { echo "refusing release build without a lock file" >&2; exit 1; }
+[ -z "$PINS" ] || head -1 "$PINS" | grep -q '^# idea-lock v1 .*type=client ' || { echo "not a client lock file: $PINS (make it with tools/repro/make-lock.sh)" >&2; exit 1; }
 # version date = commit date (not build date), so a rebuild of the same commit gets the same name
 CDATE=$(git -C "$REPO" log -1 --format=%cd --date=format:%Y%m%d HEAD)
 VER="26.04-$CDATE-$BUILD_SHORT"; [ "$BUILD_KIND" = release ] || VER="$VER-dev"; NAME="idea-client-$VER"
@@ -76,16 +77,16 @@ S="$MNT/root/.idea-build"; install -d -m 700 "$S"
 cp "$HERE/client-image.conf" "$HERE/customise.sh" "$HERE/browser.sh" "$HERE/verify-image.sh" "$HERE/verify-browser.sh" "$S/"; cp -r "$HERE/files" "$S/files"
 printf 'BROWSER=%q\nCHROME_DEB=%q\n' "$BROWSER" "$CHROME_DEB" > "$S/browser.env"
 [ "$BROWSER" = chrome ] && cp "$CHROME_FILE" "$S/$CHROME_DEB"
-[ -z "$PINS" ] || cp "$PINS" "$S/apt-pins.tsv"
+[ -z "$PINS" ] || { cp "$PINS" "$S/apt-pins.tsv"; "$REPO/tools/repro/lock-apt-prefs.sh" "$PINS" > "$S/idea-lock.pref"; }
 echo "IDEA_CLIENT_VERSION=$VER" > "$S/version.env"
 
 chroot "$MNT" /bin/bash /root/.idea-build/customise.sh
 chroot "$MNT" dpkg-query -W -f='${Package}\t${Version}\t${Architecture}\n' | LC_ALL=C sort -u > "$OUT/$NAME.MANIFEST.txt"
 chroot "$MNT" /bin/bash /root/.idea-build/verify-image.sh
 if [ -n "$PINS" ]; then
-  if "$REPO/tools/repro/compare-manifest.sh" "$PINS" <(cut -f1,2 "$OUT/$NAME.MANIFEST.txt"); then echo "apt pins: installed list = pins"
-  elif [ "$BUILD_KIND" = release ]; then echo "refusing release: installed packages differ from $PINS" >&2; exit 1
-  else echo "WARNING (dev build): installed packages differ from pins" >&2; fi; fi
+  # lock (idea#322): installed list must equal the lock exactly, dev or release; --lock none (dev only) skips it
+  "$REPO/tools/repro/check-lock.sh" client "$PINS" "$OUT/$NAME.MANIFEST.txt" || { echo "refusing image: lock mismatch" >&2; exit 1; }
+  echo "lock: installed list = $(basename "$PINS")"; fi
 
 rm -rf "$S"; rm -f "$MNT/usr/bin/qemu-aarch64-static"
 rm -f "$MNT/etc/resolv.conf"; mv "$MNT/etc/resolv.conf.idea-orig" "$MNT/etc/resolv.conf" 2>/dev/null || true
