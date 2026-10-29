@@ -92,9 +92,9 @@ From ops (Atlas). Status on 29 Oct 2026, 09:20 CET:
   sunny-robin-router `SHA256:TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE`. Both were read on 28 Oct 2026 from the
   Engine on the same LAN. happy-zebra's `known_hosts` (last written 18 Oct 2026, 19:10) holds a different key for
   10.42.0.1. Either a router was swapped or reflashed after that date, or it saw another router at that address.
-- **The 10th classroom computer and the card-to-machine mapping: BLOCKED.** Our card log has no mapping. The
-  happy-zebra router's leases on 28 Oct showed only machines we already know (35f2, 5b4c, 671c, 841d, 58c3).
-  We need either `capture-device.sh` on each client, or a photo or list from the field.
+- **Further classroom computers and the card-to-machine mapping: not yet observed.** Our card log has no mapping.
+  The happy-zebra router's leases on 28 Oct showed only machines we already know (35f2, 5b4c, 671c, 841d, 58c3).
+  We record any other computer, and its card, when a bot sees it online (for example with `capture-device.sh`).
 - **Sites of kind-panda (with kind-panda-router) and idea-pc-f63a: not yet observed.** We record them when they come
   online on a site's network.
 - **TP-Link switch at happy-zebra:** not in any device record yet (MAC from Steve's review).
