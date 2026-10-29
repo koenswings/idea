@@ -100,19 +100,8 @@ comm -13 "$WORK/fw.before" "$WORK/fw.after" | awk '{print $2}' | while read -r f
 fstrim "$MNT" 2>/dev/null || true
 cleanup; trap - EXIT
 
-# Shrink (idea#202): fit the smallest "16 GB" cards (some hold only 15,931,539,456 bytes). Root fs -> used + ROOT_FREE_MB
-# headroom, partition 2 and the file cut to match. Labels/UUIDs/PARTUUID unchanged; cloud-init growpart+resizefs
-# (enabled in the base image, no /var/lib/cloud state) grows root to the full card on first boot.
-L2=$(losetup -f --show -o "$O2" --sizelimit "$S2" "$IMG"); e2fsck -fy "$L2" >/dev/null || true
-BS=$(dumpe2fs -h "$L2" 2>/dev/null | awk -F: '/^Block size/{gsub(/ /,"",$2);print $2}')
-MINB=$(resize2fs -P "$L2" 2>/dev/null | awk -F': ' '/minimum/{print $2}')
-WANT=$(( MINB + ROOT_FREE_MB*1024*1024/BS )); CAPB=$(( (MAX_IMAGE_BYTES - O2) / BS ))
-[ "$WANT" -le "$CAPB" ] || { losetup -d "$L2"; echo "rootfs needs $WANT blocks (+${ROOT_FREE_MB}M free) > cap $CAPB for MAX_IMAGE_BYTES=$MAX_IMAGE_BYTES" >&2; exit 1; }
-resize2fs "$L2" "$WANT" >/dev/null; e2fsck -fn "$L2" >/dev/null; losetup -d "$L2"
-echo ", $(( WANT*BS/512 ))" | sfdisk --no-reread -N 2 "$IMG" >/dev/null
-truncate -s $(( O2 + WANT*BS )) "$IMG"
-SZ=$(stat -c %s "$IMG"); [ "$SZ" -le "$MAX_IMAGE_BYTES" ] || { echo "image $SZ > MAX_IMAGE_BYTES $MAX_IMAGE_BYTES" >&2; exit 1; }
-echo "image shrunk to $SZ bytes (root free ~${ROOT_FREE_MB}M, max $MAX_IMAGE_BYTES)"
+# Shrink (idea#202, idea#322): fit the smallest "16 GB" cards; scripted fallback to the cap replaces s16's hand shrink.
+"$HERE/shrink-image.sh" "$IMG"
 
 if [ $XZ = 1 ]; then xz -T0 -6 -f "$IMG"; F="$IMG.xz"; else F="$IMG"; fi
 mv "$F" "$OUT/"; ( cd "$OUT" && sha256sum "$(basename "$F")" > "$(basename "$F").sha256" )
