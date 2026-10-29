@@ -21,10 +21,13 @@ Status: implemented on the Engine side by agent-engine-dev#292 (`script/build-en
 `pnpm install --frozen-lockfile` in the Engine checkout (local node_modules only) when its build tools are missing.
 
 ## Outputs
-- `<OUT>/engine-build.json`: `{engine_commit, engine_version, lock_sha256, verify:{passed: 9|0, failed: [strings]}}`.
+- `<OUT>/engine-build.json`: `{engine_commit, engine_version, lock_sha256, verify:{passed: N, failed: [strings], total?: M}}`.
+  `passed` counts the Engine's named verify checks that had no problems (13 on the combined branch; never hardcoded here); the log prints `verify: N/M checks passed`.
   A "build did not finish" report is written before the build starts. `engine-report.sh` accepts it only with
-  `failed == []`, `passed > 0`, a 64-hex `lock_sha256` and `engine_commit` = the engine source HEAD.
+  `failed == []`, `passed > 0` (and `passed == total` when the report has `total`), a 64-hex `lock_sha256` and `engine_commit` = the engine source HEAD.
 - In the image: the Engine lock file at `/etc/idea/engine.lock` and the version at `/etc/idea/engine-version`.
+- First-boot units count as enabled when linked from any `etc/systemd/system/*.wants/` or `*.requires/` (the base enables
+  `regenerate_ssh_host_keys.service` via `sysinit.target.wants`; sanitise only adds a link if none exists).
 - First-boot units: Raspberry Pi OS `regenerate_ssh_host_keys.service` (the Engine build fails if the base lacks it),
   `idea-engine-firstboot.service`, `pm2-pi.service`, `cron.service` (enabled in the pinned 2026-10-06 trixie lite base);
   tailscaled installed, **not** enabled (engine#291 enables it at first boot only when the card carries a key).
