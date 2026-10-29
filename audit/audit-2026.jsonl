@@ -895,3 +895,8 @@
 {"ts":"2026-10-29T10:43:41Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas: idea#79 Move window (Koen 11:14 one-time)","previous":null}
 {"ts":"2026-10-29T10:55:00Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-10-29T10:55:00Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Atlas: idea#79 Move window (Koen 11:14 one-time)"}
+{"ts":"2026-10-29T16:02:49Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle"}
+{"ts":"2026-10-29T16:02:49Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"pr","value":null,"previous":"QUEUE batch #283,#290,#274,#284,#285,#286,#266,qs348"}
+{"ts":"2026-10-29T16:02:49Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-10-29T16:02:49Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@a0343e45920e5e1fe9809b1414f775f5c669fd88, console main@eafee356dda3ef024a2136e41e1f53d997314c81","previous":"engine main@77d961b68254879184f97a9a454484bbbe02aac6, console main@eafee356dda3ef024a2136e41e1f53d997314c81"}
+{"ts":"2026-10-29T16:02:50Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"idle_since","value":"2026-10-29T16:02:50Z","previous":"2026-10-29T09:54:40Z"}
