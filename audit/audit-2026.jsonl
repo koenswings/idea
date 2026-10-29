@@ -870,3 +870,5 @@
 {"ts":"2026-10-25T09:22:10Z","bot":"unknown","action":"quality_scan","mode":"pr","repos":["idea"],"ok":true,"violation_count":0}
 {"ts":"2026-10-25T09:24:03Z","bot":"unknown","action":"quality_scan","mode":"pr","repos":["idea"],"ok":true,"violation_count":0}
 {"ts":"2026-10-29T08:50:00Z","bot":"Marco","action":"doc_update","file":"docs/ops/zimbabwe-2026-10-deployment.md","summary":"idea#288: record only what bots observed; removed Justice TBC fields and kind-panda-router MAC guess (Koen 2026-10-29 09:47 CET via Steve)"}
+{"ts":"2026-10-29T09:20:07Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle"}
+{"ts":"2026-10-29T09:20:07Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
