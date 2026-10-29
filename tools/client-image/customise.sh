@@ -28,7 +28,9 @@ if [ -s $B/apt-pins.tsv ]; then
   apt-get dist-upgrade -y -q --allow-downgrades
   rm -f /etc/apt/preferences.d/00-idea-lock.pref
 else apt-get install -y -q --no-install-recommends $ALL; fi
-apt-get autoremove -y -q; apt-get clean
+# --purge: plain autoremove leaves conffile packages (gdb, screen, ubuntu-release-upgrader-core) in dpkg state "rc",
+# and dpkg-query -W (the image MANIFEST) still lists them, so the lock check fails (idea#322 proof build)
+apt-get autoremove --purge -y -q; apt-get clean
 
 # --- locale, time zone, keyboard ---
 sed -i "s/^# *${LOCALE} /${LOCALE} /" /etc/locale.gen; locale-gen >/dev/null; update-locale LANG=$LOCALE
