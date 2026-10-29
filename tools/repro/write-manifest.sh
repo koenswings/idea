@@ -17,7 +17,7 @@ while [ $# -gt 0 ]; do case "$1" in
 [ -n "$OUT" ] || { echo "--out required" >&2; exit 2; }
 mkdir -p "$OUT"
 if [ -n "$ROOT" ]; then
-  [ -n "$KIND" ] && [ -n "$NAME" ] && [ -n "$PKGS" ] || { echo "--kind, --name and --packages are required with --rootfs" >&2; exit 2; }
+  if ! { [ -n "$KIND" ] && [ -n "$NAME" ] && [ -n "$PKGS" ]; }; then echo "--kind, --name and --packages are required with --rootfs" >&2; exit 2; fi
   OWN=1; { [ "$KIND" = router ] || [ "${REPRO_NO_OWNER:-0}" = 1 ]; } && OWN=0   # router trees are unpacked without root: no uid:gid column
   { printf 'KIND=%s\nNAME=%s\nCONTENT_OWNERS=%s\n' "$KIND" "$NAME" "$OWN"
     for v in BUILD_KIND BUILD_SHA BUILD_TAG BUILD_STAMP; do printf '%s=%s\n' "$v" "${!v:-}"; done; } > "$OUT/build.env"
