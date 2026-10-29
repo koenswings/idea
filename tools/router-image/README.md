@@ -23,7 +23,7 @@ by sha256 in `config.env`) for profile `cudy_wr3000s-v1`. No compiling, ~1-4 min
 ## Reproducible builds (idea#322)
 * `build.sh` refuses a release unless the tree is clean and HEAD is a tag on `origin/main` (`--dev` for dev builds).
 * Pinned: Image Builder (version + sha256), feed indexes (`feeds.lock`, sha256 per `packages.adb`), packages
-  (`package-pins.tsv`; a release fails on drift). Cudy intermediate firmware recorded in `config.env` (sha256 + MD5 + size).
+  (`router.lock`, made from `package-pins.tsv` by `tools/repro/make-lock.sh`; any mismatch fails the build). Cudy intermediate firmware recorded in `config.env` (sha256 + MD5 + size).
 * Manifest per build in `manifests/router/<name>/`; `tools/repro/rebuild-check.sh` compares a rebuild.
 
 ## Not in it
