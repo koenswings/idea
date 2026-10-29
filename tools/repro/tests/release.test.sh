@@ -63,5 +63,6 @@ mk_router='n=$(git -C "$RELEASE_SRC" rev-parse --short HEAD); echo r > "$RELEASE
 check "router first release" env RELEASE_BUILD_CMD="$mk_router" "$RS" --type router --tag t-rel1 --root "$ROOT" --prev none
 check "router second release differs" bash -c "RELEASE_BUILD_CMD='$mk_router' '$RS' --type router --tag t-rel2 --root '$ROOT' && grep -q '^diff=differs from t-rel1' '$ROOT/router/t-rel2/RELEASE.txt' && test -s '$ROOT/router/t-rel2/diff-vs-t-rel1.txt'"
 check "client and router LATEST separate" bash -c "[ \"\$(cat '$ROOT/router/LATEST')\" = t-rel2 ] && [ \"\$(cat '$ROOT/client/LATEST')\" = t-rel3 ]"
+check "image manifest temp space defaults to the stage dir (not /tmp)" grep -q 'REPRO_TMP="${REPRO_TMP:-$STAGE}"' "$R/release.sh"
 check "release.sh has no GitHub release / upload" bash -c "! grep -qE 'gh release|gh api|curl .*upload' '$R/release.sh'"
 echo "release tests: $pass passed, $fail failed"; [ "$fail" = 0 ]
