@@ -849,3 +849,5 @@
 {"ts":"2026-10-28T13:18:11Z","bot":"Atlas","action":"quality_scan","mode":"full","repos":["agent-engine-dev"],"ok":false,"violation_count":1}
 {"ts":"2026-10-29T00:29:54Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle"}
 {"ts":"2026-10-29T00:29:54Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-10-29T00:36:02Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"version","value":"engine main@1344a71fb0f8f634d14559f9cd08f29e1f157cc2, console main@f97ec158d769b9402a62a203f3266c56c98f9cf6","previous":"engine main@11196685d29d3d68d39bf719f63f19f2c0d39ed9, console main@f97ec158d769b9402a62a203f3266c56c98f9cf6"}
+{"ts":"2026-10-29T00:36:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@1344a71fb0f8f634d14559f9cd08f29e1f157cc2, console main@eafee356dda3ef024a2136e41e1f53d997314c81","previous":"engine main@f5f9d680a5a4c9c7c1b6c468c94bf66726d1e653, console main@eafee356dda3ef024a2136e41e1f53d997314c81"}
