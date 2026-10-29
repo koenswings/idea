@@ -544,3 +544,5 @@
 {"ts":"2026-10-29T10:04:16Z","bot":"Pixel","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-10-29T16:04:21Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-29T16:04:21Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid","previous":null}
+{"ts":"2026-10-29T16:25:47Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"claim","value":"null","previous":"Kid"}
+{"ts":"2026-10-29T16:25:47Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
