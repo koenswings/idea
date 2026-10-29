@@ -257,7 +257,8 @@
     "switch": {
       "model": "TP-Link TL-SG105PE",
       "mac": "58:d8:12:34:a9:ef",
-      "source": "Steve's review of PR #359 (2026-10-28); not read from the device"
+      "source": "observed in happy-zebra-router ARP/leases 2026-10-29 by Atlas (read-only, LAN jump): ip neigh 10.42.0.136 dev br-lan lladdr 58:d8:12:34:a9:ef STALE; /tmp/dhcp.leases \"1793290547 58:d8:12:34:a9:ef 10.42.0.136 TL-SG105PE 01:58:d8:12:34:a9:ef\" (luci-rpc: hostname TL-SG105PE, expires 26556 s); capture /workspace/idea-archive/captures/happy-zebra-router-arp-leases-20261029T085304Z.txt",
+      "lan_ip": "10.42.0.136 (DHCP lease)"
     },
     "kolibri": {
       "instances": [
