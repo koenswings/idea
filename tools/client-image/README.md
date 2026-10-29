@@ -32,7 +32,7 @@ sudo tools/client-image/build.sh [--dev] [--base ubuntu-26.04.1-...+raspi.img.xz
 
 * **Release = clean tree, HEAD exactly at a tag, HEAD on `origin/main`.** Otherwise `build.sh` refuses; `--dev`
   builds anything and names the image `...-dev` (never for the field). The version date is the commit date.
-* **apt pinned:** `apt-pins.tsv` (package, version; the s14/s15 kit list) - requested packages are installed at
+* **apt pinned:** `client.lock` (package, version; generated from `pins/s16-pins.tsv` by `tools/repro/make-lock.sh`, 1,815 entries; every package incl. dependencies pinned via apt preferences, any mismatch fails the build) - requested packages are installed at
   their pinned versions and a release fails unless the full installed list equals the pins. Ubuntu ports has no dated
   snapshots, so the exact `.deb`s are archived per build with `tools/repro/archive-debs.py` (see `deployments/README.md`).
 * **Inputs verified:** base image + Chrome `.deb` by sha256 (`client-image.conf`); mismatch = file kept as `.bad`, build fails.

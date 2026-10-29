@@ -4,7 +4,7 @@
 # Usage: tools/router-image/build.sh [--dev] [OUTDIR]   (env: WORK=/path/cache, ALLOW_LABEL_TODO=1, MANIFEST_OUT=DIR,
 #        PKG_ARCHIVE=DIR of archived .apk + SHA256SUMS for an offline rebuild of exact package versions)
 # Reproducible (idea#322): release = clean tree at a tag on origin/main (--dev: stamped dev, never for the field);
-# IB pinned by version + sha256, feed indexes by feeds.lock, packages by package-pins.tsv (release fails on drift);
+# IB pinned by version + sha256, feed indexes by feeds.lock, packages by router.lock (build fails on any mismatch);
 # NO secrets in the image (root password + Tailscale key are set by idea-router-enrol at flash time);
 # manifest (build.env, inputs.tsv, packages.tsv, content.tsv.xz, image.sha256) -> manifests/router/<name>/.
 set -euo pipefail
@@ -38,7 +38,7 @@ else
 diff <(grep -v '^#' "$HERE/feeds.lock" | cut -f1 | sort) <(grep -v '^\s*#' "$IB/repositories" | grep . | sort) >/dev/null \
   || { echo "IB repositories differ from feeds.lock" >&2; exit 1; }
 n=0; while IFS=$'\t' read -r u h; do n=$((n+1))
-  repro_fetch "$u" "$h" "$WORK/feed-$n.adb" || { echo "feed index changed upstream: rebuild with PKG_ARCHIVE=<archived apks> or refresh feeds.lock + package-pins.tsv deliberately" >&2; exit 1; }
+  repro_fetch "$u" "$h" "$WORK/feed-$n.adb" || { echo "feed index changed upstream: rebuild with PKG_ARCHIVE=<archived apks> or refresh feeds.lock + router.lock (tools/repro/make-lock.sh) deliberately" >&2; exit 1; }
   repro_inputs_row "feed-$n" "$u" "$WORK/feed-$n.adb" >> "$INPUTS"; rm -f "$WORK/feed-$n.adb"
   done < <(grep -v '^#' "$HERE/feeds.lock")
 fi
@@ -69,9 +69,10 @@ cp "$SRC" "$OUT/$NAME"; (cd "$OUT" && sha256sum "$NAME" > SHA256SUMS && cat SHA2
 cp "$OUT"/bin/*.manifest "$OUT/" 2>/dev/null || true
 # --- package pins + manifest (idea#322) ---
 sed 's/ - /\t/' "$OUT"/bin/*.manifest | LC_ALL=C sort > "$OUT/packages.tsv"
-if "$REPO/tools/repro/compare-manifest.sh" "$HERE/package-pins.tsv" <(cut -f1,2 "$OUT/packages.tsv"); then echo "package pins: match"
-elif [ "$BUILD_KIND" = release ]; then echo "refusing release: packages differ from package-pins.tsv" >&2; exit 1
-else echo "WARNING (dev build): packages differ from package-pins.tsv" >&2; fi
+LOCK=${ROUTER_LOCK:-$HERE/router.lock}
+if [ "$LOCK" = none ] && [ "$DEV" = 1 ]; then echo "WARNING (dev build): lock check skipped (ROUTER_LOCK=none)" >&2
+else "$REPO/tools/repro/check-lock.sh" router "$LOCK" "$OUT/packages.tsv" || { echo "refusing image: lock mismatch" >&2; exit 1; }
+  echo "lock: packages = $(basename "$LOCK")"; fi
 RT="$WORK/rootfs"; rm -rf "$RT"; "$REPO/tools/repro/extract-rootfs.sh" "$OUT/$NAME" "$RT" >/dev/null
 "$REPO/tools/repro/router-packages.sh" "$RT" > "$OUT/packages.tsv"   # 3 columns: package, version, arch
 MOUT="${MANIFEST_OUT:-$REPO/manifests/router/${NAME%-squashfs-sysupgrade.bin}}"

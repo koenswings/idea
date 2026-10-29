@@ -17,14 +17,20 @@ ALL="$PACKAGES_OFFICE $PACKAGES_EDU $PACKAGES_GAMES $PACKAGES_SYSTEM"
 miss=$(apt-cache policy $ALL | awk '/^[^ ].*:$/{p=substr($1,1,length($1)-1)} /Candidate: \(none\)/{printf " %s",p}')
 for p in $ALL; do pol=$(apt-cache policy "$p" 2>/dev/null || true); grep -q Candidate <<<"$pol" || miss="$miss $p"; done
 [ -z "$miss" ] || { echo "MISSING arm64 packages:$miss" >&2; exit 1; }
-# apt pinning (idea#322): with apt-pins.tsv staged, every requested package is installed at its pinned version, and
-# build.sh fails a release build unless the full installed list equals the pins (the Ubuntu ports mirror has no
-# dated snapshots, so the exact .debs are also archived per build: tools/repro/archive-debs.py).
+# apt lock (idea#322): with the lock staged, apt preferences pin EVERY package (dependencies too) to its locked version
+# at priority 1001, requested packages are installed at their locked version, and build.sh fails unless the full
+# installed list equals the lock (the ports mirror has no dated snapshots; exact .debs: tools/repro/archive-debs.py).
 if [ -s $B/apt-pins.tsv ]; then
+  cp $B/idea-lock.pref /etc/apt/preferences.d/00-idea-lock.pref
   INST=""; for p in $ALL; do v=$(awk -F'\t' -v p="$p" '$1==p{print $2; exit}' $B/apt-pins.tsv); INST="$INST ${p}${v:+=$v}"; done
   apt-get install -y -q --no-install-recommends --allow-downgrades $INST
+  # bring already-installed base packages to their locked versions as well
+  apt-get dist-upgrade -y -q --allow-downgrades
+  rm -f /etc/apt/preferences.d/00-idea-lock.pref
 else apt-get install -y -q --no-install-recommends $ALL; fi
-apt-get autoremove -y -q; apt-get clean
+# --purge: plain autoremove leaves conffile packages (gdb, screen, ubuntu-release-upgrader-core) in dpkg state "rc",
+# and dpkg-query -W (the image MANIFEST) still lists them, so the lock check fails (idea#322 proof build)
+apt-get autoremove --purge -y -q; apt-get clean
 
 # --- locale, time zone, keyboard ---
 sed -i "s/^# *${LOCALE} /${LOCALE} /" /etc/locale.gen; locale-gen >/dev/null; update-locale LANG=$LOCALE
