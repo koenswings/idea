@@ -45,6 +45,18 @@ check "failed build leaves no release folder, LATEST unchanged" bash -c "[ ! -e 
 git -C "$C" -c user.name=t -c user.email=t@t tag -a t-dev -m d "t-rel2^{commit}"
 RELEASE_BUILD_CMD='echo x > "$RELEASE_OUT/idea-client-26.04-x-abc-dev.img.xz"' "$RS" --type client --tag t-dev --root "$ROOT" --prev none >/dev/null 2>&1; rc=$?
 check "dev-stamped image refused" bash -c "[ $rc != 0 ] && [ ! -e '$ROOT/client/t-dev' ]"
+# --proof (non-main ref): separate folder, stamped, never LATEST, never --prev, REPRO_MAIN_REF reaches the build
+git -C "$C" -c user.name=t -c user.email=t@t tag -a t-proof -m p "t-rel2^{commit}"
+PROOFCMD=$RELEASE_BUILD_CMD'; [ "${REPRO_MAIN_REF:-}" = "$(git -C "$RELEASE_SRC" rev-parse HEAD)" ] && [ "$RELEASE_KIND" = proof ]'
+check "proof build succeeds, REPRO_MAIN_REF=commit + RELEASE_KIND=proof reach the build" env RELEASE_BUILD_CMD="$PROOFCMD" "$RS" --type client --tag t-proof --root "$ROOT" --proof
+DP="$ROOT/client/proof/t-proof"
+check "proof stored under <type>/proof/, not as a release" bash -c "test -d '$DP' && [ ! -e '$ROOT/client/t-proof' ]"
+check "proof stamped: kind=proof, NOT-FOR-FIELD.txt, image *-proof*, sha256 ok" bash -c "grep -q '^kind=proof$' '$DP/RELEASE.txt' && test -s '$DP/NOT-FOR-FIELD.txt' && ls '$DP'/idea-client-*-proof.img.xz && cd '$DP' && sha256sum -c --quiet idea-client-*-proof.img.xz.sha256"
+check "proof does not move LATEST" bash -c "[ \"\$(cat '$ROOT/client/LATEST')\" = t-rel3 ]"
+check "normal release is stamped kind=release" grep -q '^kind=release$' "$ROOT/client/t-rel3/RELEASE.txt"
+nope "proof cannot be used as --prev" "$RS" --type client --tag t-rel2 --root "$W/r3" --prev proof/t-proof
+nope "tag name 'proof' reserved" "$RS" --type client --tag proof --root "$ROOT" --prev none
+check "without --proof the build gets no REPRO_MAIN_REF (even if the caller sets one)" env REPRO_MAIN_REF=HEAD bash -c "git -C '$C' -c user.name=t -c user.email=t@t tag -a t-np -m n 't-rel2^{commit}' && RELEASE_BUILD_CMD='$RELEASE_BUILD_CMD; [ -z \"\${REPRO_MAIN_REF:-}\" ] && [ \"\$RELEASE_KIND\" = release ]' '$RS' --type client --tag t-np --root '$W/r4' --prev none"
 # router: content.tsv.xz from the build manifest, compare-manifest.sh
 mk_router='n=$(git -C "$RELEASE_SRC" rev-parse --short HEAD); echo r > "$RELEASE_OUT/idea-router-1-$n-cudy-squashfs-sysupgrade.bin"; mkdir -p "$RELEASE_MANIFEST"; printf "%s\t/etc/r\n" "$(sha256sum < "$RELEASE_SRC/README.md" | cut -c1-64)" | xz > "$RELEASE_MANIFEST/content.tsv.xz"'
 check "router first release" env RELEASE_BUILD_CMD="$mk_router" "$RS" --type router --tag t-rel1 --root "$ROOT" --prev none

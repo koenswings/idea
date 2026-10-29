@@ -23,3 +23,11 @@ Rules: a release folder is never overwritten; a failed build leaves only `<type>
 a `-dev` image is refused. Order: client first, then router. The client build needs root (sudo), qemu-user-static
 and network (or the later input archive); the tag must pass `repro_release_guard` (clean, on origin/main).
 Tests: `tools/repro/tests/release.test.sh` (mock build, no root/network).
+
+**Proof builds (`--proof`).** To prove a build of open PRs before they merge, tag a throwaway branch locally and run
+`release.sh --type client --tag TAG --proof`. The release guard then accepts the tag's own commit instead of origin/main
+(`REPRO_MAIN_REF=<commit>`, passed through `sudo env`, because sudo drops the caller's environment). A proof is never a
+release: it is stored in `<type>/proof/<tag>/`, the image is renamed `*-proof*`, `RELEASE.txt` says `kind=proof` and
+`NOT-FOR-FIELD.txt` is written, `LATEST` is not changed, and a proof can't be used as `--prev`. Normal releases say
+`kind=release` and never inherit a `REPRO_MAIN_REF` from the caller. The commit stamped inside the image is still the
+tag; flash only images from `<type>/<tag>/` with `kind=release`.
