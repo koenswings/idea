@@ -17,6 +17,8 @@ jobs:
         run: shellcheck tools/repro/*.sh tools/repro/tests/*.sh
       - name: lock file tests
         run: tools/repro/tests/lock.test.sh
+      - name: release script tests
+        run: tools/repro/tests/release.test.sh
       - name: repro tests (existing, no root)
         run: tools/repro/tests/run.sh
       - name: image manifest tests (fixture trees + tiny FAT/ext4 image)
