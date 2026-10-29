@@ -15,6 +15,8 @@ jobs:
         run: sudo apt-get update -q && sudo apt-get install -y -q dosfstools mtools shellcheck xz-utils fdisk
       - name: shellcheck
         run: shellcheck tools/repro/*.sh tools/repro/tests/*.sh
+      - name: release script tests
+        run: tools/repro/tests/release.test.sh
       - name: repro tests (existing, no root)
         run: tools/repro/tests/run.sh
       - name: image manifest tests (fixture trees + tiny FAT/ext4 image)
