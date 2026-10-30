@@ -3,7 +3,7 @@
 **Author:** Steve (Lead Bot)
 **Date:** 2026-10-30
 **Revised:** 2026-10-30 (Kid's App review, Pixel's Console review and Atlas's rollout review applied, accepted by Steve); 2026-10-30 (Axle's Engine review: 05:00 reboot wrapper, ENGINE_CAPABILITIES, minimum helper version; design review complete)
-**Status:** Draft for Koen. Koen chose Option A on 2026-10-29 11:45 CET. Design Review input from Axle (idea#78 comment 6518163224) and the review chat (Axle, Atlas, Kid, Pixel) is folded in.
+**Status:** Accepted by Koen on 2026-10-30 18:17 CET. Previously: Draft for Koen. Koen chose Option A on 2026-10-29 11:45 CET. Design Review input from Axle (idea#78 comment 6518163224) and the review chat (Axle, Atlas, Kid, Pixel) is folded in.
 **Refs:** idea#78. Related: idea#235/#236 (erase guards), #279/#282 (adopt, system-disk refusal), #347 (helper rollout order), `proposals/files-disk.md` (eraseDisk).
 **Affects:** `agent-engine-dev` (main work), `agent-console-dev`, the App repos (`app-kolibri`, `app-nextcloud`, `app-kiwix`, `app-milkwise`) and `agent-app-dev` conventions, Ops (root helper v6 rollout, hardware tests).
 
@@ -203,8 +203,13 @@ MilkWise on wh: when Koen agrees, a Backup Disk is made for it and the live path
 
 Default time 02:30; cleanup thresholds 15 % / 25 %; keep newest 3; daily only; history of 7 in the store; hook timeout 300 s; retry once after an interrupted run; per-App methods in §3.5; rollout order in §7.
 
-## 10. Open questions for Koen
+## 10. Open questions for Koen (answers)
+
+Koen accepted this proposal on 30 Oct 2026, 18:17 CET.
 
 1. **Nextcloud:** is a short maintenance-mode window (around a minute at 02:30) acceptable, or must Nextcloud never pause?
+   **Answer (30 Oct 18:17 CET):** Yes. Koen accepts a short Nextcloud maintenance-mode window of about a minute at 02:30.
 2. **MilkWise on wh:** may we make a proper Backup Disk for it (new stick or reuse the interim `MILKWISE-BAK` stick, which would be erased) and then remove the interim cron job?
+   **Answer (30 Oct 18:17 CET):** Koen agrees to turn the interim `MILKWISE-BAK` flash stick into a proper Backup Disk (it gets erased). This is a physical step for Koen on idea#375. How MilkWise itself is backed up (hooks or method, and removing the interim cron job) is being asked of the MilkWise Dev bot and is **still pending**. Nothing on wh changes before that answer and Koen's own go-ahead for wh.
 3. **Kits and wh on helper v5:** OK that they back up without automatic cleanup until a helper update is rolled out there?
+   **Still open:** Koen asked for an explanation (sent 30 Oct) and hasn't answered yet.
