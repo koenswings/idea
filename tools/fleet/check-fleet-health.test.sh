@@ -154,6 +154,17 @@ check "claimed Pi with problems: still exit 0" test "$RC" = 0
 check "claimed Pi problems reported" has_problem p2 "console HTTP 502"
 check "claimed Pi listed in claimed_with_problems" test "$(j '.claimed_with_problems|join(",")')" = p2
 check "claimed Pi not in unhealthy" test "$(j '.unhealthy|length')" = 0
+healthy | sed 's/=online/=stopped/' > "$FAKE/10.0.0.2.ssh"; NOW=100 run --alert
+check "claimed reachable with known exception: exit 0, not flagged" test "$RC:$(j '.unhealthy|length'):$(j '.alert.send')" = "0:0:false"
+check "claimed reachable with known exception: still in claimed_with_problems" test "$(j '.claimed_with_problems|join(",")')" = p2
+echo 255 > "$FAKE/10.0.0.2.ssh_rc"; echo 000 > "$FAKE/10.0.0.2.http"; NOW=200 run --alert
+check "claimed Pi offline: exit 1" test "$RC" = 1
+check "claimed Pi offline: listed in .unhealthy" test "$(j '.unhealthy|join(",")')" = p2
+check "claimed Pi offline: not in claimed_with_problems" test "$(j '.claimed_with_problems|length')" = 0
+check "claimed Pi offline: alert sent (new)" test "$(j .alert.send):$(j .alert.reason)" = "true:new"
+check "claimed Pi offline: signature holds only the unreachable line" test "$(jq -c '.signature' "$HEALTH_DIR/alert.json")" = '[{"pi":"p2","problems":["unreachable over Tailscale ssh (10.0.0.2)"]}]'
+rm -f "$FAKE/10.0.0.2.ssh_rc" "$FAKE/10.0.0.2.http"; NOW=300 run --alert
+check "claimed Pi back online: resolved, exit 0" test "$RC:$(j .alert.reason)" = "0:resolved"
 
 # 9. multiple failures on one Pi all listed
 reset; echo 503 > "$FAKE/10.0.0.1.http"; healthy 0 $E $C 97 | sed 's/=online/=errored/' > "$FAKE/10.0.0.1.ssh"; run

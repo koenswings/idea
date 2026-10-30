@@ -16,7 +16,10 @@
 #              has "vendorclassid idea-engine". And every IPv4 address the Pi holds on a kit
 #              LAN (10.42.0.0/24) is in 10.42.0.2-.9 (the router's Engine range).
 # A Pi with a claim (or status other than idle) is still checked and reported, but it
-# is marked "claimed" and never counts as a failure; its versions are not compared.
+# is marked "claimed" and its known exceptions (Engine stopped, Console down, problems
+# under test) never count as a failure; its versions are not compared. Exception: a
+# claimed Pi or known-notes host that is unreachable over Tailscale ssh is a problem
+# (listed in .unhealthy and in the --alert signature with just its unreachable line).
 #
 # Usage: tools/fleet/check-fleet-health.sh [--origin] [--pi NAME]... [--alert] [--dhcp]
 #   --origin   git fetch, then read fleet-state.json from origin/main instead of the
@@ -246,8 +249,8 @@ echo "$new_restarts" > "$RESTARTS_FILE.tmp" && mv "$RESTARTS_FILE.tmp" "$RESTART
 
 report="$(printf '%s\n' "${results[@]}" | jq -sc --argjson now "$NOW" '
   {checked_at: ($now|todate), pis: .,
-   unhealthy: [.[] | select(.ok|not) | select(.claimed|not) | .pi],
-   claimed_with_problems: [.[] | select(.ok|not) | select(.claimed) | .pi],
+   unhealthy: [.[] | select(.ok|not) | select((.claimed|not) or (.checks.reachable.ok == false)) | .pi],
+   claimed_with_problems: [.[] | select(.ok|not) | select(.claimed) | select(.checks.reachable.ok != false) | .pi],
    dhcp_unhealthy: [.[] | select(.checks.dhcp.ok == false) | .pi]}
   | .ok = (.unhealthy|length==0)')"
 
@@ -256,8 +259,10 @@ if [ $ALERT -eq 1 ]; then
   last='{}'; [ -s "$ALERT_FILE" ] && last="$(jq -c . "$ALERT_FILE" 2>/dev/null || echo '{}')"
   # Signature: unhealthy Pis and their problems, with restart counts stripped so a
   # still-climbing counter is "the same problem", not a new one.
-  sig="$(jq -c '[.pis[] | select(.ok|not) | select(.claimed|not)
-                 | {pi, problems: [.problems[] | sub(" [0-9]+x since last check.*"; " restarting")]}]' <<<"$report")"
+  # Claimed Pis enter it only when offline, with just their unreachable line.
+  sig="$(jq -c '[.pis[] | select(.ok|not)
+                 | if .claimed then select(.checks.reachable.ok == false) | {pi, problems: [.problems[] | select(startswith("unreachable"))]}
+                   else {pi, problems: [.problems[] | sub(" [0-9]+x since last check.*"; " restarting")]} end]' <<<"$report")"
   decision="$(jq -nc --argjson last "$last" --argjson sig "$sig" --argjson now "$NOW" --argjson rep "$ALERT_REPEAT_SECS" '
     ($last.signature // []) as $ls | ($last.alerted_at // 0) as $at |
     if ($sig|length)==0 then

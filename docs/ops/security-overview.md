@@ -16,6 +16,10 @@ This page explains how IDEA is secured and which risks are still open. It is wri
 - Tagged devices don't expire and don't belong to a person.
 - **The auth key is never written into a document, repo, image or log.** It is entered at install or flash time. Ops boxes keep their copy in a 0600 file outside any repo.
 - Ops reaches Pis directly on their Tailscale IP, never through a jump host.
+- **Current state differs from this design (read-only audit 29 Oct 2026, [idea#117](https://github.com/koenswings/idea/issues/117)):**
+  - The kit Pis and kit routers (sunny-robin, happy-zebra, kind-panda) carry `tag:idea` and have no node-key expiry.
+  - The five fleet Pis (idea01–04 and `idea`) are **untagged** and their node keys expire; idea02 and idea03 expire on 2 December 2026 14:36 CET unless Koen tags them or disables key expiry in the admin console (idea#375).
+  - Not yet confirmed in the admin console: whether the fleet auth key itself is tagged, reusable or ephemeral, its expiry, and whether the ACL already makes `tag:idea` reach nothing.
 
 ## 2. School network
 

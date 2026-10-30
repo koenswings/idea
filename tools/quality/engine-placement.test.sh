@@ -13,12 +13,16 @@ mkdir -p "$T/root/agents/agent-engine-dev" "$T/bin"
 cat >"$T/root/agents/agent-engine-dev/package.json" <<'J'
 {"scripts":{"test:full":"echo engine-tests-ran; test -z \"${IDEA_TEST_ALLOW_LIVE:-}\" || exit 99; if [ -n \"${FAKE_OUT:-}\" ]; then cat \"$FAKE_OUT\"; fi; exit ${FAKE_TRC:-0}"}}
 J
+mkdir -p "$T/root/agents/agent-engine-dev/node_modules" && touch "$T/root/agents/agent-engine-dev/node_modules/.modules.yaml"
+printf 'node_modules/\n' >"$T/root/agents/agent-engine-dev/.gitignore"
 git -C "$T/root/agents/agent-engine-dev" init -q
 git -C "$T/root/agents/agent-engine-dev" -c user.email=t@t -c user.name=t add -A
 git -C "$T/root/agents/agent-engine-dev" -c user.email=t@t -c user.name=t commit -qm init
 # fake pnpm: run the script body from package.json
 cat >"$T/bin/pnpm" <<'S'
 #!/usr/bin/env bash
+if [[ "$1" == install ]]; then echo "pnpm-install $*" >>"$FAKE_LOG"; [[ "${FAKE_INSTALL_RC:-0}" == 0 ]] || { echo "ERR_PNPM_FAKE install failed"; exit "$FAKE_INSTALL_RC"; }
+  mkdir -p node_modules && touch node_modules/.modules.yaml; exit 0; fi
 body="$(jq -r --arg k "$1" '.scripts[$k]' package.json)"; exec bash -c "$body"
 S
 # fake ssh: log argv after the host; answer pm2 jlist from $FAKE_ONLINE
@@ -308,6 +312,24 @@ first="$(head -1 "$T/log")"
 if [[ "$first" == ensure-deps ]]; then echo "PASS app-dev: ensure-deps.sh runs first"; pass=$((pass+1)); else echo "FAIL app-dev: first log line '$first'"; fail=$((fail+1)); fi
 loghas "app-dev: app-x smoke ran" "smoke app-x"
 lognot "app-dev: milkwise smoke never runs" "smoke milkwise"
+
+# idea#361: box path installs Engine deps when node_modules is missing or stale
+E="$T/root/agents/agent-engine-dev"
+mkstate
+out="$(scan env BOT_NAME=Atlas)"
+lognot "box deps present: no pnpm install" "pnpm-install"
+mv "$E/node_modules" "$E/node_modules.quarantine-test"
+out="$(scan env BOT_NAME=Atlas)"
+check "box deps missing: install then tests pass" "$tst.status==\"passed\" and $tst.where==\"box\"" "$out"
+loghas "box deps missing: pnpm install --frozen-lockfile ran" "pnpm-install install --frozen-lockfile"
+[[ -f "$E/node_modules/.modules.yaml" ]] && { echo "PASS box deps installed"; pass=$((pass+1)); } || { echo "FAIL box deps installed"; fail=$((fail+1)); }
+touch "$E/pnpm-lock.yaml"; touch -d '2000-01-01' "$E/node_modules/.modules.yaml"
+out="$(scan env BOT_NAME=Atlas)"
+loghas "box deps stale (lockfile newer): reinstall" "pnpm-install"
+mv "$E/node_modules" "$E/node_modules.quarantine-test2"
+out="$(scan env BOT_NAME=Atlas FAKE_INSTALL_RC=1)"
+check "box deps install fails → tests.failed, suite not run" "$tst.status==\"failed\" and ($tst.detail|test(\"deps install\")) and ([.findings[]|select(.rule==\"tests.failed\")]|length)==1" "$out"
+mkdir -p "$E/node_modules" && touch "$E/node_modules/.modules.yaml"; rm -f "$E/pnpm-lock.yaml"
 
 echo "---"
 echo "engine-placement: ${pass} passed, ${fail} failed"
