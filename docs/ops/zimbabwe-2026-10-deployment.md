@@ -83,6 +83,20 @@ Full captures (secrets redacted) are on the box under `/workspace/idea-archive/c
 Both routers run the IDEA router image `b2f00bc`, now confirmed on the device. Dropbear: `Interface=lan`, port 22.
 kind-panda-router is not yet installed.
 
+## Kit check on 30 Oct 2026
+
+Read by Atlas on 30 Oct 2026, read-only, over Tailscale. Nothing was changed on any kit device.
+Source: [idea#288 update, 30 Oct 2026 09:30 CET](https://github.com/koenswings/idea/issues/288#issuecomment-6518338810)
+and the #288 watcher log (`/workspace/idea288/state.md` on the box, 30 Oct runs to 12:48 CET).
+
+| Engine (sticker) | Engine Tailscale IP | Router Tailscale IP | Site | Classroom computers in today's leases | Status 30 Oct |
+|---|---|---|---|---|---|
+| sunny-robin | 100.96.98.10 | 100.96.34.29 | 1 | idea-pc-fc95, idea-pc-7d02, idea-pc-9f95 (plus a phone) | Engine and router online |
+| happy-zebra | 100.102.94.100 | 100.110.73.52 | 2 | idea-pc-5b4c | Engine and router online |
+| kind-panda | 100.80.238.59 | n/a | not yet observed | n/a | Engine offline (11 days); router not yet installed |
+
+No new classroom computers were seen. Which school is at which site is still not observed (see "The schools").
+
 ## Still open
 
 From ops (Atlas). Status on 29 Oct 2026, 09:20 CET:
