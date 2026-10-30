@@ -955,3 +955,5 @@
 {"ts":"2026-10-30T11:14:17Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid","previous":null}
 {"ts":"2026-10-30T11:36:19Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid"}
 {"ts":"2026-10-30T11:36:19Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-10-30T11:39:09Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-10-30T11:39:09Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas","previous":null}
