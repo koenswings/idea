@@ -166,7 +166,8 @@ for want in 'QUALITY_SCAN_ENGINE_PI="${QUALITY_SCAN_ENGINE_PI-idea04}"' \
             'QUALITY_SCAN_ENGINE_PI_FALLBACK="${QUALITY_SCAN_ENGINE_PI_FALLBACK-}"' \
             'QUALITY_SCAN_THERMAL_TRIP_C="${QUALITY_SCAN_THERMAL_TRIP_C:-$(( QUALITY_SCAN_THERMAL_LIMIT_C - 2 ))}"' \
             'QUALITY_SCAN_THERMAL_LIMIT_C="${QUALITY_SCAN_THERMAL_LIMIT_C:-75}"' \
-            'QUALITY_SCAN_PI_MAX_WORKERS="${QUALITY_SCAN_PI_MAX_WORKERS:-1}"'; do
+            'QUALITY_SCAN_PI_MAX_WORKERS="${QUALITY_SCAN_PI_MAX_WORKERS:-1}"' \
+            'QUALITY_SCAN_PI_POST_BURST_SETUP_MS="${QUALITY_SCAN_PI_POST_BURST_SETUP_MS:-900000}"'; do
   if grep -qF -- "$want" "$QS"; then echo "PASS default: $want"; pass=$((pass + 1))
   else echo "FAIL default missing: $want"; fail=$((fail + 1)); fi
 done

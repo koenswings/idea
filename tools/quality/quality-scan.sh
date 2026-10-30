@@ -67,6 +67,10 @@ Engine tests (idea#335, idea#332): run on pool Pi idea04 by default (claim, pm2 
   QUALITY_SCAN_PI_QUARANTINE_ROOT=DIR   override the per-Pi quarantine root
   QUALITY_SCAN_SOCKS=host:port SSH via SOCKS5 (box: 127.0.0.1:1055)
   QUALITY_SCAN_PI_MAX_WORKERS=N    vitest workers on a pool Pi (default 1; >1 runs files in parallel; recorded as max_workers)
+  QUALITY_SCAN_PI_POST_BURST_SETUP_MS=MS  IDEA_TEST_POST_BURST_SETUP_MS on Pi targets only (default 900000; box keeps the
+                                   test's own default). idea#332 profile (main 2583608): ws-post-burst beforeAll 11 s on the
+                                   box, 76 s on idea04 alone, >360 s under the full suite on idea04 → ~12x alone, 2.5x the
+                                   observed full-suite lower bound. Recorded as post_burst_setup_ms.
   QUALITY_SCAN_THERMAL_LIMIT_C=C   alert line the Pi must stay under (default 75; recorded as thermal_limit_c)
   QUALITY_SCAN_THERMAL_TRIP_C=C    abort a Pi run at/above C (default LIMIT_C-2 = 73, so the 10 s sampling
                                    overshoot stays under the limit) → next target, fallback_reason=thermal
@@ -837,6 +841,11 @@ pi_quarantine_root() {
 # test files in parallel on shared Docker / disk-sim state (seen on idea01 with 2: adopt-only-idea-disks,
 # unknown-disk-readonly failed). 1 equals the Engine's own sequential setting.
 QUALITY_SCAN_PI_MAX_WORKERS="${QUALITY_SCAN_PI_MAX_WORKERS:-1}"
+QUALITY_SCAN_PI_POST_BURST_SETUP_MS="${QUALITY_SCAN_PI_POST_BURST_SETUP_MS:-900000}"
+[[ "$QUALITY_SCAN_PI_POST_BURST_SETUP_MS" =~ ^[1-9][0-9]*$ ]] || { echo "quality-scan: QUALITY_SCAN_PI_POST_BURST_SETUP_MS must be a positive integer" >&2; exit 2; }
+# QUALITY_SCAN_PI_ENGINE_REF was dropped (idea#348, Steve 2026-10-28): nothing set it, and a PR
+# is scanned on the Pi with --pr --head <sha> (idea#357). Full mode always tests origin/main.
+[[ -z "${QUALITY_SCAN_PI_ENGINE_REF:-}" ]] || echo "quality-scan: QUALITY_SCAN_PI_ENGINE_REF is no longer supported and is ignored; use --pr --head <sha>" >&2
 QUALITY_SCAN_THERMAL_LIMIT_C="${QUALITY_SCAN_THERMAL_LIMIT_C:-75}"
 # idea#332 (Steve 08:20): the guard samples every QUALITY_SCAN_THERMAL_INTERVAL s, and idea01 overshot
 # 75 °C to 77 °C before the abort landed. It therefore trips 2 °C below the alert line: at
@@ -986,7 +995,7 @@ run_engine_tests_pool() {
   engine_thermal_watch "$host" "$tdir" &
   wpid=$!
   set +e
-  out="$(engine_ssh "$host" "set -e; mkdir -p ${QUALITY_SCAN_PI_SCRATCH_ROOT} && git clone -q ${remote_path} ${ENGINE_POOL_SCRATCH} && cd ${ENGINE_POOL_SCRATCH} && { git fetch -q \$(git -C ${remote_path} remote get-url origin) ${sha}${fetch_extra}; } && git checkout -q ${sha} && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && setsid -w sh -c 'echo \$\$ > .qs-pgid; exec env -u IDEA_TEST_ALLOW_LIVE VITEST_MAX_WORKERS=${QUALITY_SCAN_PI_MAX_WORKERS} ${cmd}'" 2>&1)"
+  out="$(engine_ssh "$host" "set -e; mkdir -p ${QUALITY_SCAN_PI_SCRATCH_ROOT} && git clone -q ${remote_path} ${ENGINE_POOL_SCRATCH} && cd ${ENGINE_POOL_SCRATCH} && { git fetch -q \$(git -C ${remote_path} remote get-url origin) ${sha}${fetch_extra}; } && git checkout -q ${sha} && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && setsid -w sh -c 'echo \$\$ > .qs-pgid; exec env -u IDEA_TEST_ALLOW_LIVE VITEST_MAX_WORKERS=${QUALITY_SCAN_PI_MAX_WORKERS} IDEA_TEST_POST_BURST_SETUP_MS=${QUALITY_SCAN_PI_POST_BURST_SETUP_MS} ${cmd}'" 2>&1)"
   rc=$?
   kill "$wpid" 2>/dev/null; wait "$wpid" 2>/dev/null
   set -e
@@ -1000,8 +1009,8 @@ run_engine_tests_pool() {
   if [[ -n "${QUALITY_SCAN_TEST_LOG:-}" ]]; then printf '%s\n' "$out" >>"$QUALITY_SCAN_TEST_LOG"; fi
   local extra
   extra="$(jq -nc --arg sha "$sha" --arg ref "$scanned_ref" --argjson w "$QUALITY_SCAN_PI_MAX_WORKERS" --argjson p "$peak_mc" --argjson l "$QUALITY_SCAN_THERMAL_LIMIT_C" \
-    --argjson tr "$QUALITY_SCAN_THERMAL_TRIP_C" \
-    '{scanned_ref:$ref,scanned_sha:$sha,max_workers:$w,peak_temp_c:($p/1000),thermal_limit_c:$l,thermal_trip_c:$tr}')"
+    --argjson tr "$QUALITY_SCAN_THERMAL_TRIP_C" --argjson pb "$QUALITY_SCAN_PI_POST_BURST_SETUP_MS" \
+    '{scanned_ref:$ref,post_burst_setup_ms:$pb,scanned_sha:$sha,max_workers:$w,peak_temp_c:($p/1000),thermal_limit_c:$l,thermal_trip_c:$tr}')"
   if [[ -n "$abort_mc" ]]; then
     jq -nc --arg pi "$pi" --argjson a "$abort_mc" --argjson x "$extra" \
       --argjson done "$(printf '%s\n' "$out" | grep -c ' ✓ ' || true)" \
