@@ -51,4 +51,4 @@ secrets=Tailscale auth key at build time (name only; value never recorded). Capt
 deployedAt=2026-10-18 10:42:36 CEST (Engine); Console dist 2026-10-17 15:06:21 CEST (fleet-state)
 evidence=read-only capture /workspace/idea-archive/captures/happy-zebra-20261028T102133Z.txt (Atlas box, sha256 3bda8fc9...a3c1)
 confidence=captured on device
-open=files.sha256 + dist.sha256 (run capture-engine-record.sh read-only at next contact); tool versions
+open=none: files.sha256, dist.sha256, consoleDistSha256 and tool versions captured in capture-2026-10-30 (idea#288)

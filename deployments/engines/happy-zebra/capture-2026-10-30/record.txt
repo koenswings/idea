@@ -1,0 +1,41 @@
+# Engine record (idea#288/#322): capture-engine-record.sh run read-only on happy-zebra, 2026-10-30 09:16 CET.
+# Closes the 2026-10-28 gaps: files.sha256, dist.sha256, consoleDistSha256, tool versions.
+# files.sha256 and dist.sha256 are identical to sunny-robin capture-2026-10-26; packages and helpers identical to happy-zebra capture-2026-10-28.
+schema=idea-deployment-record/1
+batch=zimbabwe-2026-10
+deviceType=engine
+recordLabel=capture-2026-10-30
+capturedUtc=2026-10-30T08:16:14Z
+hostname=happy-zebra
+stickerName=happy-zebra
+arch=aarch64
+model=Raspberry Pi 5 Model B Rev 1.1 (Waveshare case, no NVMe), USB SSD Intenso 512 GB AA000000000000010473 (fleet-state)
+kernel=6.18.50+rpt-rpi-2712
+osRelease=Debian GNU/Linux 13 (trixie) (Raspberry Pi OS Lite)
+imageCommit=adfd9d354ffd83c5ecc0a9eea64a474eae08de8f
+imageBranch=deploy/kit-229-232 (agent-engine-dev; detached HEAD on the device, same commit as capture-2026-10-28)
+imageTag=field/zimbabwe-2026-10/engine-adfd9d3
+imageVersion=1.0
+imageFile=n/a
+imageSha256=n/a
+imageManifest=n/a
+packageArchive=/workspace/idea322-archive/release-kit-adfd9d3/ (same as capture-2026-10-28)
+packageArchiveSha256=3a2d0262f1108fd5c3e388a9b34470285631292633a259f771274dfac0b04f25
+packageArchiveUrl=https://github.com/koenswings/agent-engine-dev/releases/tag/field/zimbabwe-2026-10/engine-adfd9d3
+secrets=Tailscale auth key and node key (names only; never read or recorded)
+deployedAt=2026-10-18 10:42:36 CEST (Engine); Console dist 2026-10-17 15:06:21 CEST (fleet-state)
+evidence=agent-engine-dev script/capture-engine-record.sh @a0343e4 run read-only by Atlas over Tailscale (pi@happy-zebra, bash -s; output only under /tmp/idea-record-happy-zebra-capture-2026-10-30 on the device), copied to the box at /workspace/idea-archive/captures/happy-zebra-engine-record-20261030/. Temp 63.1 C before and after. No changes, no restarts.
+confidence=captured on device
+open=none
+engineDirtyFiles=0
+engineSkipWorktree=2
+consoleCommit=654224e3b9ecd12ee3513595a44316c612268257
+consoleDistSha256=3570acfd61489e83ebcf54a6d6d33debf3a55caf2878167d339ffffecf90cf11
+lockfileSha256=37fd94bcc8c528652d898a8b2acd7eb02841fbd91b3c05ca247bfef6eba4b3c3
+nodeVersion=v22.20.0
+npmVersion=10.9.3
+pnpmVersion=10.33.0
+pm2Version=7.0.4
+dockerVersion=29.9.1
+tailscaleVersion=1.104.1
+contentSha256=dd7216fd541e4e4993d83732ebd4bea0980ad98584fe7d8c6dd4439a4a5115d5
