@@ -992,3 +992,6 @@
 {"ts":"2026-10-30T16:39:11Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle","previous":null}
 {"ts":"2026-10-30T16:39:11Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-30T16:39:11Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"pr","value":"engine#302 test:full (idea#332 close-before-connect) + stallcap","previous":"engine#295 QC, idea#332 main test:full, engine#296 digest check"}
+{"ts":"2026-10-30T16:39:22Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid"}
+{"ts":"2026-10-30T16:39:22Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"pr","value":null,"previous":"idea#76 update fixtures: docker pull+save busybox only (no dock, Disk B untouched)"}
+{"ts":"2026-10-30T16:39:22Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
