@@ -183,9 +183,9 @@ Engine PRs in this order:
 4. On each Pi the helper is installed **before** the new Engine.
 5. Golden only ever gets merged main.
 6. **05:00 reboot wrapper:** Atlas rolls out the image/`boot.sh` change with engine#292, on the same Pis in the same order. Pis without it (kits, wh) still reboot at 05:00 even mid-run and rely on INTERRUPTED plus a `borg check` on the next run.
-7. The kits stay on adfd9d3 with helper v5, and wh stays unchanged. Both report HELPER_OUTDATED: backups still run, cleanup is skipped.
+7. **Deployed Engines (Koen, 30 Oct 18:19 CET):** the kits and wh don't get the new backup feature (Engine or helper v6) until their planned update (see idea#374). They then get both together, so the "helper v5, no cleanup" (HELPER_OUTDATED) case doesn't happen on deployed Engines. HELPER_OUTDATED stays only as a safety check.
 
-MilkWise on wh: when Koen agrees, a Backup Disk is made for it and the live path takes over (only after the scratch-instance test confirms it); the interim cron job is then removed by Atlas per the list in idea#78, without restarting the container.
+MilkWise on wh is part of wh's planned update (idea#374): the `MILKWISE-BAK` conversion happens then, using the plain file copy method in §10 Q2. The interim cron job is removed only after the automated restore check passes, without restarting the container.
 
 ## 8. Options considered
 
@@ -203,13 +203,14 @@ MilkWise on wh: when Koen agrees, a Backup Disk is made for it and the live path
 
 Default time 02:30; cleanup thresholds 15 % / 25 %; keep newest 3; daily only; history of 7 in the store; hook timeout 300 s; retry once after an interrupted run; per-App methods in §3.5; rollout order in §7.
 
-## 10. Open questions for Koen (answers)
+## 10. Questions for Koen (all answered)
 
 Koen accepted this proposal on 30 Oct 2026, 18:17 CET.
 
 1. **Nextcloud:** is a short maintenance-mode window (around a minute at 02:30) acceptable, or must Nextcloud never pause?
    **Answer (30 Oct 18:17 CET):** Yes. Koen accepts a short Nextcloud maintenance-mode window of about a minute at 02:30.
 2. **MilkWise on wh:** may we make a proper Backup Disk for it (new stick or reuse the interim `MILKWISE-BAK` stick, which would be erased) and then remove the interim cron job?
-   **Answer (30 Oct 18:17 CET):** Koen agrees to turn the interim `MILKWISE-BAK` flash stick into a proper Backup Disk (it gets erased). This is a physical step for Koen on idea#375. How MilkWise itself is backed up (hooks or method, and removing the interim cron job) is being asked of the MilkWise Dev bot and is **still pending**. Nothing on wh changes before that answer and Koen's own go-ahead for wh.
+   **Answer (30 Oct 18:17 CET):** Koen agrees to turn the interim `MILKWISE-BAK` flash stick into a proper Backup Disk (it gets erased). This is a physical step for Koen on idea#375.
+   **MilkWise method (MilkWise Dev bot, 30 Oct):** a plain file copy of the whole MilkWise data folder (`/app/data` in the container): no database, no dump hook, no pause. The JSON files are written via temp file and rename, the JSONL history is append-only, and readers skip a partial last line; temp files may be skipped. Never stop, remove or recreate the MilkWise container or its volume. The interim cron job is removed only after an automated restore of the data folder to a scratch location passes and the restored JSON parses. `MILKWISE-BAK`'s last copy is kept until then, and the stick is erased only after that. Kid still confirms the exact host path mounted at `/app/data` from `app-milkwise`. Nothing changes on wh without Koen's own go-ahead.
 3. **Kits and wh on helper v5:** OK that they back up without automatic cleanup until a helper update is rolled out there?
-   **Still open:** Koen asked for an explanation (sent 30 Oct) and hasn't answered yet.
+   **Answer (Koen, 30 Oct 18:19 CET):** "Current deployed engines only get the new backup as part of a scheduled update procedure." The kits and wh get the Engine change and helper v6 together in their planned update (idea#374), so the no-cleanup case doesn't happen on deployed Engines. See §7 step 7.
