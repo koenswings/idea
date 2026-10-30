@@ -1026,3 +1026,7 @@
 {"ts":"2026-10-30T17:10:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-30T17:10:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"pr","value":"idea#76 WD fixture write","previous":"engine#302 test:full (idea#332 close-before-connect) + stallcap"}
 {"ts":"2026-10-30T17:10:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"idle_since","value":null,"previous":"2026-10-30T17:08:43Z"}
+{"ts":"2026-10-30T17:17:05Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas"}
+{"ts":"2026-10-30T17:17:05Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-10-30T17:17:05Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"pr","value":"idea#76 WD fixtures written (sdb1-4); sdb3/sdb4 not docked: 90-docking.rules only matches sd?1|sd?2","previous":"idea#76 WD fixture write"}
+{"ts":"2026-10-30T17:17:05Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"idle_since","value":"2026-10-30T17:17:05Z","previous":"2026-10-30T17:17:05Z"}
