@@ -915,3 +915,5 @@
 {"ts":"2026-10-30T08:52:30Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-30T08:52:30Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle","previous":null}
 {"ts":"2026-10-30T08:52:30Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"pr","value":"engine#295 QC, idea#332 main test:full, engine#296 digest check","previous":null}
+{"ts":"2026-10-30T09:50:43Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"offline"}
+{"ts":"2026-10-30T09:50:43Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: idea03 return to main (#139 watch, 2026-10-30)","previous":null}
