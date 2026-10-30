@@ -1022,3 +1022,7 @@
 {"ts":"2026-10-30T16:50:33Z","bot":"Atlas","action":"audit_backfill_note","file":"audit/audit-2026.jsonl","summary":"Backfill of 17 lines above (ts 2026-10-01 to 2026-10-16) from idea03 old /home/pi/idea checkout (idea03 tidy 6dc8fbd; evidence /workspace/idea03-tidy-20261030-173926/old-audit-added.jsonl). The idea#219 claim on idea03 at 2026-10-16T09:21:48Z (bot Ops Bot, claim Pixel) was recorded on idea03 local checkout only; no release was logged; it was superseded by later claims/releases. No release fabricated. Backfilled 2026-10-30 by Atlas from the idea03 tidy evidence (Steve approval 2026-10-30 17:49 CET)."}
 {"ts":"2026-10-30T17:08:43Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle"}
 {"ts":"2026-10-30T17:08:43Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-10-30T17:10:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas","previous":null}
+{"ts":"2026-10-30T17:10:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-10-30T17:10:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"pr","value":"idea#76 WD fixture write","previous":"engine#302 test:full (idea#332 close-before-connect) + stallcap"}
+{"ts":"2026-10-30T17:10:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"idle_since","value":null,"previous":"2026-10-30T17:08:43Z"}
