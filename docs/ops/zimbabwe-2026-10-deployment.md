@@ -85,17 +85,24 @@ kind-panda-router is not yet installed.
 
 ## Kit check on 30 Oct 2026
 
-Read by Atlas on 30 Oct 2026, read-only, over Tailscale. Nothing was changed on any kit device.
-Source: [idea#288 update, 30 Oct 2026 09:30 CET](https://github.com/koenswings/idea/issues/288#issuecomment-6518338810)
-and the #288 watcher log (`/workspace/idea288/state.md` on the box, 30 Oct runs to 12:48 CET).
+**Record: sunny-robin-router read by Atlas on 30 Oct 2026 at 13:00 CET**, read-only, from the box over Tailscale to
+sunny-robin, then SSH to the router at `10.42.0.1` (`/tmp/dhcp.leases`, `iw dev <iface> station dump`, `uci show wireless`).
+Nothing was written on the Engine or router. happy-zebra and happy-zebra-router dropped off Tailscale at about 12:50 CET
+and couldn't be read at 12:58–13:01 CET.
 
-| Engine (sticker) | Engine Tailscale IP | Router Tailscale IP | Site | Classroom computers in today's leases | Status 30 Oct |
-|---|---|---|---|---|---|
-| sunny-robin | 100.96.98.10 | 100.96.34.29 | 1 | idea-pc-fc95, idea-pc-7d02, idea-pc-9f95 (plus a phone) | Engine and router online |
-| happy-zebra | 100.102.94.100 | 100.110.73.52 | 2 | idea-pc-5b4c | Engine and router online |
-| kind-panda | 100.80.238.59 | n/a | not yet observed | n/a | Engine offline (11 days); router not yet installed |
+| Engine (sticker) | Engine Tailscale IP | Router Tailscale IP | Site | School | Client Wi-Fi seen 30 Oct | Status 30 Oct |
+|---|---|---|---|---|---|---|
+| sunny-robin | 100.96.98.10 | 100.96.34.29 | 1 | Chigonda: INFERRED by Steve from Koen's 30 Oct 12:11 CET message ("the system at Qigong is up"), not observed | Leases (13:00 CET): idea-pc-841d (10.42.1.153), idea-pc-9f95, idea-pc-7d02, a phone, the switch and the Engine. 3 Wi-Fi stations: idea-pc-841d on `IDEA` (-47 dBm), idea-pc-7d02 and the phone on `IDEA-Teachers` | Engine and router online |
+| happy-zebra | 100.102.94.100 | 100.110.73.52 | 2 | Nharira: client Wi-Fi network name `NHARIRA HIGH` seen in capture `/workspace/state/client-wifi-unlock/happy-zebra/10.42.1.184.log` (line 13; idea-pc-35f2 saved Wi-Fi profiles, 28 Oct 2026 via happy-zebra) | Not read (offline at 12:58 CET) | Offline from ~12:50 CET |
+| kind-panda | 100.80.238.59 | n/a | not yet observed | not yet observed | n/a | Engine offline (11 days); router not yet installed |
 
-No new classroom computers were seen. Which school is at which site is still not observed (see "The schools").
+SSIDs on sunny-robin-router: `IDEA` and `IDEA-Teachers` on both radios.
+
+**idea-pc-841d** was seen at Site 2 on 28 Oct 2026 (Wi-Fi unlock via happy-zebra at 11:32 CET) and at Site 1 on
+30 Oct 2026 at 13:00 CET (sunny-robin-router lease and station). It wasn't in sunny-robin-router's 09:18 CET lease read
+today (`sunny-robin-router-leases-hints-20261030T0818Z.json`), so it joined later. A ping from sunny-robin to 10.42.1.153
+fails, as expected: the kit firewall doesn't let the Engine reach the student network. Its site column in the tables
+above reflects 28 Oct.
 
 ## Still open
 
