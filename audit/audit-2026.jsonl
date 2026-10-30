@@ -904,3 +904,5 @@
 {"ts":"2026-10-29T18:22:06Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle","previous":null}
 {"ts":"2026-10-29T18:52:24Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle"}
 {"ts":"2026-10-29T18:52:24Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-10-30T08:08:12Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle: engine#288 test:full + hw-roundtrip, idea#332 main test:full (2026-10-30)","previous":null}
+{"ts":"2026-10-30T08:08:12Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
