@@ -936,3 +936,6 @@
 {"ts":"2026-10-30T10:43:00Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-30T10:43:00Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid","previous":null}
 {"ts":"2026-10-30T10:43:00Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"pr","value":"agent-app-dev#29","previous":null}
+{"ts":"2026-10-30T10:55:19Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid"}
+{"ts":"2026-10-30T10:55:19Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"pr","value":null,"previous":"agent-app-dev#29"}
+{"ts":"2026-10-30T10:55:20Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
