@@ -2,6 +2,7 @@
 
 **Author:** Steve (Lead Bot)
 **Date:** 2026-10-30
+**Revised:** 2026-10-30 (Kid's App review, Pixel's Console review and Atlas's rollout review applied, accepted by Steve)
 **Status:** Draft for Koen. Koen chose Option A on 2026-10-29 11:45 CET. Design Review input from Axle (idea#78 comment 6518163224) and the review chat (Axle, Atlas, Kid, Pixel) is folded in.
 **Refs:** idea#78. Related: idea#235/#236 (erase guards), #279/#282 (adopt, system-disk refusal), #347 (helper rollout order), `proposals/files-disk.md` (eraseDisk).
 **Affects:** `agent-engine-dev` (main work), `agent-console-dev`, the App repos (`app-kolibri`, `app-nextcloud`, `app-kiwix`, `app-milkwise`) and `agent-app-dev` conventions, Ops (root helper v6 rollout, hardware tests).
@@ -28,7 +29,7 @@ The first user is MilkWise production on `idea` (wh), which today runs an interi
 | Engine | Scheduler tick, schedule in `BACKUP.yaml`, clock trust, fullness cleanup, per-App live backup with hooks, `makeBackupDisk` op, store summary, capability flag. |
 | Root helper (Ops) | v6 adds `borg-prune`, `borg-delete`, `borg-compact`. Atlas signs off and rolls out before the Engine build. |
 | Console | Schedule settings on the disk, status per App, grey "time unknown" state, disk-full warning, "Make Backup Disk" action. |
-| App repos | `backup:` block in App metadata (live flag, pre/post hooks). Kolibri, Nextcloud, Kiwix, MilkWise each get theirs. |
+| App repos | `x-app.backup` in each `compose.yaml` (one method, pre/post hooks naming their service). Kolibri, Nextcloud, Kiwix, MilkWise each get theirs. |
 | Ops | Hardware tests on idea04, rollout order, removal of the MilkWise interim job later. |
 
 ## 3. Design
@@ -82,39 +83,48 @@ Koen's direction: when the disk fills up, old backups are cleared automatically.
 
 Koen's concern: copying files while an App writes its database gives a broken copy. The rule is: **a live copy is only taken when the App declares how it is safe; otherwise the App is stopped.**
 
-Each App's metadata gets a `backup:` block:
+Each App declares this in its `compose.yaml` as **`x-app.backup`**, next to the other `x-app` fields. The schema allows **one method per App**:
 
 ```yaml
-backup:
-  method: hook      # none | live | hook | stop (default: stop)
-  preHook: "<command run in the App container>"
-  postHook: "<command>"   # optional, e.g. delete the dump
-  hookTimeout: 300  # seconds
+x-app:
+  backup:
+    method: hook        # none | live | hook | stop (default: stop)
+    preHook:
+      service: db       # the compose service the command runs in
+      command: "<command>"
+      user: "<uid>"     # optional
+    postHook:           # optional; always runs, even after a failed preHook
+      service: app
+      command: "<command>"
+    hookTimeout: 300    # seconds
+    exclude: ["<path>"] # optional, never copied
 ```
 
 - `stop` (default): today's behaviour: stop, borg create, start.
-- `live`: copy while running. Only allowed for Apps that write every file via temp file + rename and have no database.
-- `hook`: the preHook writes a consistent dump (e.g. SQLite `.backup`, `mysqldump --single-transaction`) into the data folder, borg copies the folder including the dump; restore uses the dump. The live database files are excluded or treated as not authoritative.
-- `none`: nothing worth backing up (content that can be re-downloaded).
-- Hooks run with `docker exec` **in the App's own container**, as the App's user, with a timeout, while **holding the instance lock throughout**, and the dump is cleaned up afterwards. No root helper change.
-- **If a hook fails or times out, the Engine falls back to stop-the-App**, never to a plain live copy. This is recorded as **HOOK_FALLBACK** in the per-App result. `method: none` is also recorded.
+- `live`: copy while running. Only for Apps that write every file via temp file + rename and have no database.
+- `hook`: the preHook writes a consistent dump into the App's data folder (under `./data/`), borg copies the folder including the dump, and restore uses the dump.
+- `none`: nothing on the Backup Disk for this App, because its content is on the App Disk and can be rebuilt.
+- Hooks run with `docker exec` in the **named service's container**, with a timeout, while **holding the instance lock throughout**. The dump is cleaned up afterwards. No root helper change.
+- **The postHook always runs**, even when the preHook failed or timed out, so anything the preHook switched on (for example maintenance mode) is always switched off again.
+- **If a preHook fails or times out, the Engine falls back to stop-the-App** for that run, never to a plain live copy. This is recorded as **HOOK_FALLBACK** in the per-App result. `method: none` is also recorded.
 - No filesystem snapshots in v1: ext4 on USB has none, and LVM/btrfs would change the disk format and identity paths.
 - A night stop/start is safe: all Apps use `pull_policy: never`, so a restart can't pull images.
+- **A restore keeps the instance's `.env`** (`port_zip`, `MORANGO_SYSTEM_ID`), so a restored Kolibri keeps its kit ID and every App keeps its port.
 
 **Per App:**
 
 | App | Method | How |
 |---|---|---|
-| MilkWise | `live` | Writes every file via temp file + rename, no database. No downtime, which is what production needs. |
-| Kolibri (0.19.5) | `hook` | Python3 is in the image, so the hook runs SQLite's online backup API inside the container to a dump file. Content channels are copied as files (they don't change while serving). |
-| Nextcloud + MariaDB | `hook` | `mysqldump --single-transaction` in the DB container, with Nextcloud maintenance mode on/off around it. User files are copied live; a file being uploaded at 02:30 may be missed and is picked up the next night. If the dump fails: stop. |
-| Kiwix | `none` for ZIM content (re-loaded from the kit disks), `live` for the small library file. |
+| MilkWise | `live` | Believed to write every file via temp file + rename with no database. **This is not verified yet.** It is checked by a hook/live test on a scratch MilkWise instance on a pool Pi, never on wh. If it doesn't hold, MilkWise gets a hook instead. Any change to `app-milkwise` needs Koen's approval. |
+| Kolibri (0.19.5) | `hook` | python3 inside the container uses SQLite's online backup API to snapshot **every** Kolibri SQLite database (`db.sqlite3`, `job_storage` and the notification databases, all in WAL mode) into `./data/backup/`. Channel content can change during an import, so while a channel import job is active the run falls back to `stop` for that night. The import temp folders are always excluded. |
+| Nextcloud + MariaDB | `hook` | preHook: `occ maintenance:mode --on` in the `app` service as uid 33, then `mariadb-dump --single-transaction` in the `db` service into `./data/backup/` so borg includes it (MariaDB 11.7 no longer ships the `mysql*` command names). postHook: `occ maintenance:mode --off` in `app` as uid 33, which always runs. User files are copied live; a file being uploaded at 02:30 may be missed and is picked up the next night. |
+| Kiwix | `none` | The ZIMs are on the App Disk and the library file is rebuilt from them, so nothing is backed up. |
 
-Kid defines the metadata contract in `agent-app-dev` and adds the blocks to each App repo, with a Pi test of each hook.
+Kid defines the `x-app.backup` contract in `agent-app-dev` (and the x-app checker) and adds the blocks to each App repo, with a Pi test of each hook.
 
 ### 3.6 What the store holds
 
-- Only a **summary**: per App instance the latest result (time, method, result code such as OK, SKIPPED_LOCKED, HOOK_FALLBACK, INTERRUPTED, BACKUP_DISK_FULL, HELPER_OUTDATED) and a short history (last 7), plus disk `freePct`, `clockTrusted`, `clockReason`, `missedRuns`.
+- Only a **summary**: per App instance the latest result (time, method, result code such as OK, SKIPPED_LOCKED, HOOK_FALLBACK, INTERRUPTED, BACKUP_DISK_FULL, HELPER_OUTDATED) and a short history (last 7), plus disk `freePct`, `clockTrusted`, `clockReason`, `missedRuns`, and `cleaning` (boolean, with its start time) while cleanup runs.
 - Written **once per run**, never per tick, so the store doesn't grow.
 - The full list of backups stays on the disk (borg).
 
@@ -134,7 +144,8 @@ An empty IDEA disk or an existing App/Files Disk skips step 2 (combined disks ar
 - Disk card: **Make Backup Disk** (with erase summary and typed confirmation when needed).
 - Backup Disk settings: mode (immediate / on-demand / scheduled) and time.
 - Status per App: last good backup, method, result. Green when fine, red when overdue or failed, **grey "Backup time unknown: this Pi's clock may be wrong"** when `clockTrusted` is false (instead of a red overdue warning).
-- Disk: free space; amber "Cleaning up old backups", red "Backup Disk full".
+- Per App, from the result codes in §3.3–3.5: **HOOK_FALLBACK** shows amber "Backed up, but the App was briefly stopped". **`method: none`** shows neutral, never red: "Not backed up: its content is on the App Disk".
+- Disk: free space; amber "Cleaning up old backups" (from `cleaning` in the store), red "Backup Disk full".
 - "Cleanup paused: Pi needs an update" for HELPER_OUTDATED.
 
 ## 6. Tests
@@ -143,19 +154,31 @@ An empty IDEA disk or an existing App/Files Disk skips step 2 (combined disks ar
 - Wrong-clock tests on a Pi use a **test-only Engine time-offset setting** (used by the scheduler and the clock-trust check), never the system clock, because idea04 is on the shared pool store.
 - On idea04 with real borg: prune/delete/compact through helper v6; cleanup at 15 % free; USB pull mid-create, mid-prune and mid-compact, then `borg check`; eject during a run before and after the App stop; two instances on one disk; the 04:55 hold on the pm2 restart.
 - `makeBackupDisk` on a Pi with an **unplug/replug round trip**; re-dock after formatting happens exactly once; system-disk refusal.
-- Per-App hooks: Kolibri, Nextcloud, MilkWise backup while in use, then restore and check the data.
+- Per-App hooks: Kolibri (including a run during a channel import, which must fall back to `stop`), Nextcloud (including a failed dump, after which maintenance mode must still be off) and MilkWise backup while in use, then restore and check the data. The MilkWise test runs only on a scratch instance on a pool Pi, never on wh.
+- **Every App's restore test checks that `.env` is kept** (`port_zip`, `MORANGO_SYSTEM_ID`); for Kolibri, the restored instance keeps its kit ID.
 - Pool rules apply (75/65 °C).
 
 ## 7. Rollout
 
+**Precondition:** borg 1.2 or later on the image (needed for `compact`). Atlas checks this on idea04 during the proof run.
+
 Engine PRs in this order:
 
 1. Schedule, tick, clock trust, missed runs, store summary, capability (no helper change).
-2. Helper v6 and fullness cleanup. Helper rollout first: **idea04, then golden idea01, then the pool.** The kits and wh stay on helper v5 and report HELPER_OUTDATED (backups still run, cleanup is skipped).
-3. Live backup with App hooks, together with Kid's metadata contract and the App PRs.
+2. Helper v6 and fullness cleanup.
+3. Live backup with App hooks, together with Kid's `x-app.backup` contract and the App PRs.
 4. `makeBackupDisk` and the Console work (Pixel).
 
-MilkWise on wh: when Koen agrees, a Backup Disk is made for it and the live path takes over; the interim cron job is then removed by Atlas per the list in idea#78, without restarting the container.
+**Helper v6 rollout (Atlas):**
+
+1. Test helper v6 from the PR branch on a claimed idea04 (proof run, including the borg version check).
+2. Koen merges.
+3. Install helper v6 on golden idea01, then on idea03, **one Pi at a time**.
+4. On each Pi the helper is installed **before** the new Engine.
+5. Golden only ever gets merged main.
+6. The kits stay on adfd9d3 with helper v5, and wh stays unchanged. Both report HELPER_OUTDATED: backups still run, cleanup is skipped.
+
+MilkWise on wh: when Koen agrees, a Backup Disk is made for it and the live path takes over (only after the scratch-instance test confirms it); the interim cron job is then removed by Atlas per the list in idea#78, without restarting the container.
 
 ## 8. Options considered
 
