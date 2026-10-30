@@ -47,4 +47,4 @@ secrets=Tailscale auth key at build time (name only; value never recorded)
 deployedAt=2026-10-18 10:42:36 CEST (Engine); Console dist 2026-10-17
 evidence=fleet-state.json @4e515d4 (version/deployed/note); agent-engine-dev git adfd9d3
 confidence=likely: fleet-state version line, Steve-confirmed deploy; not captured on the device
-open=turn the 2026-10-28 raw capture into a capture-2026-10-28 record (packages.tsv, images.tsv, dist.sha256, tool versions); until then: capture with capture-engine-record.sh: packages.tsv, images.tsv, dist.sha256, tool versions, local overrides
+open=none: superseded by the on-device captures deployments/engines/happy-zebra/capture-2026-10-28 and capture-2026-10-30 (idea#288)

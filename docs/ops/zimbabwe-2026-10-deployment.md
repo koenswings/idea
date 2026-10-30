@@ -16,7 +16,7 @@ school is which site has not been observed, so this page doesn't name it.
 | | Site 1 | Site 2 |
 |---|---|---|
 | School server and router | sunny-robin, sunny-robin-router | happy-zebra, happy-zebra-router |
-| Switch | none recorded | TP-Link TL-SG105PE, MAC 58:d8:12:34:a9:ef |
+| Switch | TP-Link TL-SG105PE, MAC 58:d8:12:34:aa:81 (router leases, 30 Oct 2026) | TP-Link TL-SG105PE, MAC 58:d8:12:34:a9:ef |
 | Classroom computers | idea-pc-fc95, idea-pc-7d02, idea-pc-9f95 (3) | idea-pc-35f2, idea-pc-58c3, idea-pc-5b4c, idea-pc-671c, idea-pc-841d (5) |
 
 Not yet placed at a site: the kind-panda school server (not yet observed at a site), its router (not installed yet; recorded when it comes online), and idea-pc-f63a (not yet observed at a site).
@@ -24,7 +24,7 @@ Not yet placed at a site: the kind-panda school server (not yet observed at a si
 Sources for the mapping: Steve's review of this page (28 Oct 2026, site mapping and switch); the happy-zebra-router
 DHCP leases of 28 Oct 2026 (Atlas, "Still open" below), which show exactly the five Site 2 computers;
 `deployments/clients/kit-hosts-zimbabwe-2026-10.tsv` and `fleet-state.json` `sunny-robin.clients` for the hostnames,
-models and MACs. The switch is not yet in any device record.
+models and MACs. Switches: from each router's DHCP leases (happy-zebra 29 Oct, sunny-robin 30 Oct 2026), in `fleet-state.json`.
 
 > **Note on the 27 Oct sighting.** `kit-hosts-zimbabwe-2026-10.tsv` and `fleet-state.json` (`sunny-robin.clients`)
 > list all 9 machines as seen on the sunny-robin kit network on 27 Oct 2026. Those 9 included the five Site 2
@@ -37,12 +37,13 @@ Sources: `fleet-state.json`, `deployments/` records, [idea#288](https://github.c
 | Device | Sticker name | Site | Hardware | Software | Last seen read-only |
 |---|---|---|---|---|---|
 | School server (Engine) | sunny-robin | 1 | Raspberry Pi 5 (Waveshare D case), USB SSD Intenso AA000000000000003120 | Engine `adfd9d3`, Console checkout `654224e` (dist from agent-console-dev#162) | 26 Oct 2026 capture |
-| School server (Engine) | happy-zebra | 2 | Raspberry Pi 5 (Waveshare case), USB SSD Intenso AA000000000000010473 | Engine `adfd9d3`, Console checkout `654224e` | 28 Oct 2026 capture |
+| School server (Engine) | happy-zebra | 2 | Raspberry Pi 5 (Waveshare case), USB SSD Intenso AA000000000000010473 | Engine `adfd9d3`, Console checkout `654224e` | 28 Oct 2026 capture; 30 Oct 2026 capture-engine-record |
 | School server (Engine) | kind-panda | not yet observed | Raspberry Pi 5, NVMe (cloned from the FIT stick) | Engine `adfd9d3` (fleet-state) | Not seen yet (offline about 9 days as of 28 Oct 2026, idea#288) |
 | Router | sunny-robin-router | 1 | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ce:7e | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (likely, retro record) | 26 Oct 2026 |
 | Router | happy-zebra-router | 2 | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ca:c8 | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (likely, retro record) | 28 Oct 2026 |
 | Router | kind-panda-router | not yet observed | Cudy WR3000S v1 | Not installed yet; recorded when it comes online | Not yet observed |
-| Switch | n/a | 2 | TP-Link TL-SG105PE, MAC 58:d8:12:34:a9:ef | n/a | Not read remotely |
+| Switch | n/a | 1 | TP-Link TL-SG105PE, MAC 58:d8:12:34:aa:81 | n/a | 30 Oct 2026 (sunny-robin-router DHCP lease) |
+| Switch | n/a | 2 | TP-Link TL-SG105PE, MAC 58:d8:12:34:a9:ef | n/a | 29 Oct 2026 (happy-zebra-router DHCP lease) |
 | Classroom computers | n/a | 1 | 3: idea-pc-fc95 (Raspberry Pi 500), idea-pc-7d02 and idea-pc-9f95 (Raspberry Pi 400) | Client image f00748e (patched) or s15 | 27 Oct 2026 |
 | Classroom computers | n/a | 2 | 5 Raspberry Pi 500: idea-pc-35f2, idea-pc-58c3, idea-pc-5b4c, idea-pc-671c, idea-pc-841d | Client image f00748e (patched) or s15 | 28 Oct 2026 (happy-zebra-router leases) |
 | Classroom computer | n/a | not yet observed | idea-pc-f63a (Raspberry Pi 500) | Client image f00748e (patched) or s15 | 27 Oct 2026 |
@@ -106,7 +107,7 @@ above reflects 28 Oct.
 
 ## Still open
 
-From ops (Atlas). Status on 29 Oct 2026, 09:20 CET:
+From ops (Atlas). Status on 30 Oct 2026, 09:25 CET:
 
 - **kind-panda: BLOCKED (offline).** The Kolibri ID check, `df -h /` and the on-device capture all wait for it.
   It was last seen on Tailscale 9 days ago.
@@ -115,9 +116,9 @@ From ops (Atlas). Status on 29 Oct 2026, 09:20 CET:
 - **happy-zebra-router WAN MAC: DONE.** It's `d4:0d:ab:50:ca:c9`, read through ubus.
 - **Router release file and full captures (sunny-robin-router, happy-zebra-router): DONE 29 Oct 2026.** See
   "Routers observed on 29 Oct 2026" above. We made no router changes.
-- **happy-zebra full record: DONE.** It's in `deployments/engines/happy-zebra/capture-2026-10-28/` (record,
-  packages, images, helpers, raw capture). Its packages and helpers are identical to sunny-robin's. Still missing:
-  `files.sha256` and `dist.sha256`.
+- **happy-zebra full record: DONE.** `deployments/engines/happy-zebra/capture-2026-10-28/` (record, packages,
+  images, helpers, raw capture) plus `capture-2026-10-30/` (capture-engine-record.sh, read-only, 30 Oct 2026):
+  `files.sha256` and `dist.sha256` (identical to sunny-robin's), Console dist sha256 and tool versions.
 - **Router host keys (ed25519):** happy-zebra-router `SHA256:TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs`,
   sunny-robin-router `SHA256:TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE`. Both were read on 28 Oct 2026 from the
   Engine on the same LAN. happy-zebra's `known_hosts` (last written 18 Oct 2026, 19:10) holds a different key for
@@ -127,7 +128,8 @@ From ops (Atlas). Status on 29 Oct 2026, 09:20 CET:
   We record any other computer, and its card, when a bot sees it online (for example with `capture-device.sh`).
 - **Sites of kind-panda (with kind-panda-router) and idea-pc-f63a: not yet observed.** We record them when they come
   online on a site's network.
-- **TP-Link switch at happy-zebra:** not in any device record yet (MAC from Steve's review).
+- **TP-Link switches: DONE.** Both observed in their router's DHCP leases (happy-zebra 58:d8:12:34:a9:ef on 29 Oct,
+  sunny-robin 58:d8:12:34:aa:81 on 30 Oct 2026) and recorded in `fleet-state.json`.
 - **Router flash date: DONE.** All three routers were flashed on Friday 16 October 2026 (Koen, 29 Oct 2026).
 - **Cudy intermediate firmware source: DONE (file), download step not logged.** `cudy_wr3000s-v1-sysupgrade_20251119.bin`,
   14,945,872 bytes, sha256 `463e6e31e7361ec8177d2c3a136674297fd179eafaa166fe459731cdf1b35773`, MD5
