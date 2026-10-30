@@ -948,3 +948,6 @@
 {"ts":"2026-10-30T11:02:20Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-10-30T11:02:20Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid","previous":null}
 {"ts":"2026-10-30T11:02:20Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"pr","value":"idea#139 Disk B deliverable","previous":null}
+{"ts":"2026-10-30T11:12:07Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid"}
+{"ts":"2026-10-30T11:12:07Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"pr","value":null,"previous":"idea#139 Disk B deliverable"}
+{"ts":"2026-10-30T11:12:07Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
