@@ -951,3 +951,5 @@
 {"ts":"2026-10-30T11:12:07Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid"}
 {"ts":"2026-10-30T11:12:07Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"pr","value":null,"previous":"idea#139 Disk B deliverable"}
 {"ts":"2026-10-30T11:12:07Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-10-30T11:14:17Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-10-30T11:14:17Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid","previous":null}
