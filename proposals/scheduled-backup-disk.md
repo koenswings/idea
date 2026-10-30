@@ -2,7 +2,7 @@
 
 **Author:** Steve (Lead Bot)
 **Date:** 2026-10-30
-**Revised:** 2026-10-30 (Kid's App review, Pixel's Console review and Atlas's rollout review applied, accepted by Steve)
+**Revised:** 2026-10-30 (Kid's App review, Pixel's Console review and Atlas's rollout review applied, accepted by Steve); 2026-10-30 (Axle's Engine review: 05:00 reboot wrapper, ENGINE_CAPABILITIES, minimum helper version; design review complete)
 **Status:** Draft for Koen. Koen chose Option A on 2026-10-29 11:45 CET. Design Review input from Axle (idea#78 comment 6518163224) and the review chat (Axle, Atlas, Kid, Pixel) is folded in.
 **Refs:** idea#78. Related: idea#235/#236 (erase guards), #279/#282 (adopt, system-disk refusal), #347 (helper rollout order), `proposals/files-disk.md` (eraseDisk).
 **Affects:** `agent-engine-dev` (main work), `agent-console-dev`, the App repos (`app-kolibri`, `app-nextcloud`, `app-kiwix`, `app-milkwise`) and `agent-app-dev` conventions, Ops (root helper v6 rollout, hardware tests).
@@ -40,9 +40,11 @@ The first user is MilkWise production on `idea` (wh), which today runs an interi
 - Times are **local to the Pi**. A disk moved to another Pi runs at 02:30 on its new Pi.
 - Only "daily at HH:MM" in v1. No cron syntax.
 - **Only the Engine the disk is docked to runs it** (`dockedTo === localEngine`). No coordination across Engines, so no double runs.
-- The scheduler runs **inside the Engine under pm2**, as a one-minute tick next to `timeMonitor`. Never a host cron.
+- The scheduler runs **inside the Engine under pm2**, as a one-minute tick next to `src/monitors/timeMonitor.ts`. Never a host cron.
 - A scheduled run backs up only instances whose App Disk is docked on the same Engine. Otherwise it records "App Disk not docked" for that instance. No backups over the network in v1.
-- New capability `scheduledBackups`, set with the same boot check as `moveAppCrossEngine`. The Console only offers scheduling to Engines that report it.
+- Two new capabilities go into `ENGINE_CAPABILITIES` in `src/data/Engine.ts` (the idea#128 list, rewritten at every boot with `capabilitiesBootedAt`):
+  - `scheduledBackups`: this Engine runs the schedule. The Console only offers scheduling to Engines that report it.
+  - `backupCleanup`: advertised **only when root helper v6 or newer is present**, the same pattern as `flashCard` and its helper. The Console reads it to show the HELPER_OUTDATED state.
 
 ### 3.2 When a run is due, and the clock
 
@@ -61,9 +63,13 @@ The Pi has no real-time clock, so after an offline boot the time can be wrong.
 
 ### 3.3 Locks and interruptions
 
-- Reuse today's locks: the instance lock plus the Backup Disk lock (`backupLockKeysFor`) and `runningBackupOnDisk`. A scheduled run that finds a lock held **skips and records the skip**. It never queues or waits.
+- Reuse today's locks: the instance lock plus the Backup Disk lock (`backupLockKeysFor`) and `runningBackupOnDisk` (both in `src/monitors/backupMonitor.ts`). A scheduled run that finds a lock held **skips and records the skip**. It never queues or waits.
 - **Eject and unplug always win.** Eject keeps today's in-flight rules. A USB pull leaves `.backup-in-progress`; on the next dock the Engine retries **once**, then waits for the next slot.
-- **The 05:00 pm2 restart:** a run still in progress at 04:55 holds the restart until it ends.
+- **The 05:00 reboot.** The Pis do a full host reboot at 05:00 from root's crontab (`0 5 * * * /sbin/shutdown -r now` in `script/build_image_assets/crondefs`). It is not a pm2 restart, and the Engine can't hold it. The fix:
+  - Replace that cron line with a small **reboot wrapper script** that waits while `/run/idea/backup-running` exists, up to a **90-minute cap**, then reboots anyway. Steve chose 90 minutes: a daily run with a hook normally takes well under an hour, and the cap still gets the reboot done before school starts.
+  - The Engine writes the marker when a run starts and removes it when the run ends (including on failure). `/run` is cleared at boot, so a stale marker can't block the next day.
+  - This is an image/`boot.sh` change that Atlas rolls out, carried with engine#292.
+  - Kits and any Engine still on the old crontab will still reboot in the middle of a run. They rely on INTERRUPTED plus a `borg check` at the start of the next run.
 - Anything interrupted is recorded as **INTERRUPTED** and never counts as the newest good backup (its partial borg checkpoint is not used for the "keep newest N" rule).
 - An App that was Running before the backup is always Running afterwards, whatever happens.
 
@@ -77,7 +83,7 @@ Koen's direction: when the disk fills up, old backups are cleared automatically.
 - Before a backup, estimate the needed space from the last backup's added size. If it doesn't fit even after cleanup, refuse that backup with **BACKUP_DISK_FULL**. The Console shows "Backup Disk full: add a bigger disk". Nothing is ever deleted down to zero.
 - Cleanup uses **fullness and backup count only**, never age, so a wrong clock can't delete good backups.
 - Cleanup must work at 15 % free (borg needs some working space; tested explicitly).
-- **Root helper v6** adds `borg-prune`, `borg-delete` and `borg-compact` to `idea-app-data` (helper v5 today). Engines with an older helper **skip cleanup with HELPER_OUTDATED** and don't fail the backup. Check the borg version on the image (compact needs 1.2+).
+- **Root helper v6** adds `borg-prune`, `borg-delete` and `borg-compact` to `idea-app-data` (helper v5 today). Today the Engine checks for exactly `idea-app-data 5` (`APP_DATA_HELPER_VERSION` in `src/utils/appDataHelper.ts`). That becomes a **minimum-version check**: v5 or newer for backups, v6 or newer for cleanup. A v5 helper then gives **HELPER_OUTDATED** (cleanup skipped, backup still runs) instead of a failed helper check. Check the borg version on the image (compact needs 1.2+).
 
 ### 3.5 Consistency: back up without stopping, or stop briefly
 
@@ -133,7 +139,7 @@ Kid defines the `x-app.backup` contract in `agent-app-dev` (and the x-app checke
 One Engine op, **`makeBackupDisk`**, with steps and result codes like `moveApp`:
 
 1. **Check:** refuse the system disk and any disk the existing erase guards refuse (idea#235/#236, #282 fix). Show the content summary.
-2. **Erase:** reuses the `eraseDisk` path (GPT, one ext4 partition, `META.yaml`, label "IDEA Disk"). Typed confirmation in the Console, as for Erase.
+2. **Erase:** reuses the `eraseDisk` path and its `isSystemDiskRecord` refusal (`src/data/Commands.ts:475`) (GPT, one ext4 partition, `META.yaml`, label "IDEA Disk"). Typed confirmation in the Console, as for Erase.
 3. **Re-dock:** the Engine waits for the disk to re-appear after formatting and adopts it **exactly once**.
 4. **Create:** writes `BACKUP.yaml` with mode `scheduled`, the time (default 02:30), and initialises the borg repo.
 
@@ -150,9 +156,9 @@ An empty IDEA disk or an existing App/Files Disk skips step 2 (combined disks ar
 
 ## 6. Tests
 
-- Unit tests with a fake clock and `skipBorg`: due logic, missed run runs once, uptime fallback, future `lastRun`, backwards jump, lock skip, retry-once, cleanup choice, round-robin, keep-newest-3, disk-full.
+- Unit tests with a fake clock and `skipBorg` (existing test switch): due logic, missed run runs once, uptime fallback, future `lastRun`, backwards jump, lock skip, retry-once, cleanup choice, round-robin, keep-newest-3, disk-full.
 - Wrong-clock tests on a Pi use a **test-only Engine time-offset setting** (used by the scheduler and the clock-trust check), never the system clock, because idea04 is on the shared pool store.
-- On idea04 with real borg: prune/delete/compact through helper v6; cleanup at 15 % free; USB pull mid-create, mid-prune and mid-compact, then `borg check`; eject during a run before and after the App stop; two instances on one disk; the 04:55 hold on the pm2 restart.
+- On idea04 with real borg: prune/delete/compact through helper v6; cleanup at 15 % free; USB pull mid-create, mid-prune and mid-compact, then `borg check`; eject during a run before and after the App stop; two instances on one disk; the reboot wrapper waits while `/run/idea/backup-running` exists, reboots at the 90-minute cap, and is not blocked by a stale marker after boot; on an Engine with the old crontab, a run cut by the 05:00 reboot is marked INTERRUPTED and the next run starts with a `borg check`.
 - `makeBackupDisk` on a Pi with an **unplug/replug round trip**; re-dock after formatting happens exactly once; system-disk refusal.
 - Per-App hooks: Kolibri (including a run during a channel import, which must fall back to `stop`), Nextcloud (including a failed dump, after which maintenance mode must still be off) and MilkWise backup while in use, then restore and check the data. The MilkWise test runs only on a scratch instance on a pool Pi, never on wh.
 - **Every App's restore test checks that `.env` is kept** (`port_zip`, `MORANGO_SYSTEM_ID`); for Kolibri, the restored instance keeps its kit ID.
@@ -176,7 +182,8 @@ Engine PRs in this order:
 3. Install helper v6 on golden idea01, then on idea03, **one Pi at a time**.
 4. On each Pi the helper is installed **before** the new Engine.
 5. Golden only ever gets merged main.
-6. The kits stay on adfd9d3 with helper v5, and wh stays unchanged. Both report HELPER_OUTDATED: backups still run, cleanup is skipped.
+6. **05:00 reboot wrapper:** Atlas rolls out the image/`boot.sh` change with engine#292, on the same Pis in the same order. Pis without it (kits, wh) still reboot at 05:00 even mid-run and rely on INTERRUPTED plus a `borg check` on the next run.
+7. The kits stay on adfd9d3 with helper v5, and wh stays unchanged. Both report HELPER_OUTDATED: backups still run, cleanup is skipped.
 
 MilkWise on wh: when Koen agrees, a Backup Disk is made for it and the live path takes over (only after the scratch-instance test confirms it); the interim cron job is then removed by Atlas per the list in idea#78, without restarting the container.
 
