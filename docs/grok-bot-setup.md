@@ -405,22 +405,36 @@ BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> status idle
 - `tools/quality/quality-scan.sh` runs Engine tests on pool Pi **idea04 by default, then the box** (idea#332; idea04 default since 2026-10-28, Koen; idea01 is no longer in the default chain (Steve, 2026-10-28: no cooling, it overheats on the full suite); `BOT_NAME` must be set). It claims the Pi through `update-fleet-state.sh`, stops the pm2 Engine as pi, and runs the tests in a scratch clone under `/home/pi/scratch` (created when missing), cloned from the deployed tree and checked out at **origin/main HEAD**, recorded in the result as `scanned_sha` (the deployed tree itself is only cloned from, never changed). Afterwards it moves the clone to the Pi's quarantine (never deleted): `/home/pi/quarantine/<date>/` on idea04, `/home/pi/scratch/quarantine/<date>/` on the other pool Pis (`QUALITY_SCAN_PI_QUARANTINE_ROOT` overrides), restarts the Engine and confirms it is online, then releases the claim (claim null, status idle). A trap does the restore and release on failure or interrupt too. On the Pi the suite runs with `VITEST_MAX_WORKERS=${QUALITY_SCAN_PI_MAX_WORKERS:-1}` (recorded as `max_workers`). Keep it at 1: vitest 4 applies the env var after the Engine's `fileParallelism: false`, so N>1 runs N test files in parallel on shared Docker/disk-sim state. It runs under `setsid` and writes its process group to `<scratch>/.qs-pgid` so a thermal abort stops vitest and all its forks. A thermal guard samples `/sys/class/thermal/thermal_zone0/temp` before, every `QUALITY_SCAN_THERMAL_INTERVAL` s (default 10) during, and after the run, recording `peak_temp_c`. `QUALITY_SCAN_THERMAL_LIMIT_C` (default 75) is the alert line the Pi must stay under. Because the guard samples every 10 s and a Pi can climb about 2 °C in that time (idea01 went from below 75 °C to 77 °C), it trips at `QUALITY_SCAN_THERMAL_TRIP_C` (default limit − 2 = 73 °C; both recorded as `thermal_limit_c`/`thermal_trip_c`). At or above the trip point it stops the remote run, restores and releases as above, and the scan moves on to the next target with `fallback_reason: thermal`, keeping the Pi attempt as `pool_attempt` (`abort_temp_c`, `peak_temp_c`, `pi_tests_passed_before_abort`/`pi_tests_failed_before_abort`). It **moves along the chain idea04 → box** (or idea04 → `QUALITY_SCAN_ENGINE_PI_FALLBACK` → box when a second Pi is set) (the box with `engine-box-exceptions.txt`, whole suite) when a Pi is claimed, held, not idle or unreachable, when the Engine test pre-flight refuses there, or on a thermal abort. Every hop is recorded in `fallback_chain` (`pi`, `reason`, `detail`, `peak_temp_c`/`abort_temp_c` when the Pi ran); the first hop is also `fallback_from`/`fallback_reason`/`pool_attempt`. stderr logs `quality-scan: Engine tests target=… (…)`. `QUALITY_SCAN_ENGINE_PI=<pi>` picks the first pool Pi, `QUALITY_SCAN_ENGINE_PI_FALLBACK=<pi>` an optional next one (default empty: straight to the box), and `QUALITY_SCAN_ENGINE_PI=` (empty) forces the box. Refusals end the chain. idea02, `idea`/wizardly-hugle and kit Engines are always refused, and the box path refuses when run on a fleet Pi. On the box, the scan first runs `pnpm install --frozen-lockfile --prefer-offline` in the Engine checkout when `node_modules` is missing or older than `pnpm-lock.yaml` (idea#361); a failed install is reported as `tests.failed` and the suite is not run. `QUALITY_SCAN_SOCKS=127.0.0.1:1055` routes SSH from the box. Covered by `tools/quality/engine-placement.test.sh`.
 - On the box, the Docker-only Engine tests listed in `tools/quality/engine-box-exceptions.txt` (instance-lifecycle and the two app-versioning tests) are reported as `tests.known_box_exceptions` and do not fail the scan. Any other failure still fails it, and a listed test that is missing or renamed gives a warning. On the pool-Pi path every failure counts. **Before a release, the Engine tests run through the pool-Pi path** (`QUALITY_SCAN_ENGINE_PI=<pi>`), not on the box.
 
-**idea03 hardware test disk.** Identify it only by these IDs, never by a device name such as `sdb`:
+**idea03 test disks.** Identify each disk only by its serials, never by a device name such as `sdb`.
+
+**(a) idea#139 dd test disk (docked on idea03).** Koen gave this disk to the bots for idea#139 testing; it has been the #139 Files-Disk `dd` target since 2026-09-29 (the old idea#152 fixture on it was sacrificed then, see `audit/audit-2026.jsonl`).
 
 | Field | Value |
 |---|---|
-| Model | Intenso SSD, 119.2G (re-verified on idea03 2026-10-16) |
+| Model | Intenso SSD, 111.8G |
+| Disk serial (`ID_SERIAL_SHORT`, lsblk `SERIAL`) | `3813430-532011020` (by-id `ata-Intenso_SSD_3813430-532011020`) |
+| USB bridge serial (`ID_USB_SERIAL_SHORT`) | `26A1EE83197F` per idea#152; idea03 showed `usb-Intenso_SSD_26A1EE830E37-0:0` on 2026-10-30, so match on the disk serial |
+| Contents | Disk B image `diskb202610301203` (2026-10-30, agent-app-dev#31 main `483e2a4`): one ext4 partition, UUID `b3e90dc7-d00a-4465-9ccf-d8e8d9993bbb`, grown to the full disk |
+
+- Only Atlas's idea#139 `dd` writes and the #139 test steps write this disk. It is **not** on the refuse list for #139 `dd`.
+- It stays docked on idea03 while #139 runs.
+
+**(b) Protected hardware-test fixture (not docked on idea03).** Observed 2026-10-30: this disk is not on idea03.
+
+| Field | Value |
+|---|---|
+| Model | Intenso SSD, 119.2G (verified on idea03 2026-10-16) |
 | USB bridge serial (`ID_USB_SERIAL_SHORT`) | `26A1EE830C13` (by-id `usb-Intenso_SSD_Sata_III_26A1EE830C13-0:0`) |
 | Disk serial (`ID_SERIAL_SHORT`, lsblk `SERIAL`) | `AA000000000000005638` |
 | Partition 1 | ext4, UUID `91a9d40d-631c-4a20-88f5-e65f528f3a67`, label `DUR-NEXTCLOUD` |
 | Partition 2 | ext4, UUID `15bd4687-5df4-4206-b7ae-4e5ac30a1872`, label `DUR-EMPTY001` |
 
-The idea#152 IDs (`26A1EE83197F`, `3813430-532011020`, `3E50-902A`, `378383c9-…`) and the later `a0bf8374`/`sdc` report are stale and no longer present on idea03.
+The idea#152 partition IDs (`3E50-902A`, `378383c9-…`) and the `a0bf8374` UUID are stale; the disk serial `3813430-532011020` is now disk (a).
 
-- Hardware tests touch only this disk.
+- Hardware tests touch only this fixture.
 - `dd` writes (idea#139), erase, the App Harness and erase tests (idea#138) must refuse it, and each has an automated check that proves the refusal.
-- Never undock or wipe it. idea03's root SSD (serial `AA202000000000004820`; vfat `EACA-13DA`, ext4 `21724cc6-e5a3-48a1-8643-7917dba3a9fb`) is never a test target.
-- The same IDs are recorded in idea03's `note` in `fleet-state.json`.
+- Never wipe it. idea03's root SSD (serial `AA202000000000004820`; vfat `EACA-13DA`, ext4 `21724cc6-e5a3-48a1-8643-7917dba3a9fb`) is never a test target.
+- Both disks' IDs are recorded in idea03's `note` in `fleet-state.json`.
 
 **Handoffs to Koen (standing rule, 2026-09-28):** never ask Koen to run a specific test. Any test that is needed is coded as an automated test (unit, integration or on-Pi hardware) and passes before handoff. A handoff contains the PR URL, the review URL and the test evidence, never manual test steps. This applies to Ops review-deploy reports as well: Atlas reports the PR, the review URL and automated evidence (HTTP health, pm2 state, store and `mdns` checks, test results).
 

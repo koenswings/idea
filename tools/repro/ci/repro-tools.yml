@@ -21,6 +21,8 @@ jobs:
         run: tools/repro/tests/release.test.sh
       - name: engine image tests (sanitise/verify fixture, pins)
         run: tools/repro/tests/engine-image.test.sh
+      - name: input archive tests
+        run: tools/repro/tests/archive-inputs.test.sh
       - name: repro tests (existing, no root)
         run: tools/repro/tests/run.sh
       - name: image manifest tests (fixture trees + tiny FAT/ext4 image)

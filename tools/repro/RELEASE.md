@@ -21,7 +21,7 @@ previous release and stores the result on the bot computer. **No GitHub Releases
 
 Rules: a release folder is never overwritten; a failed build leaves only `<type>/.stage-<tag>.*.failed-*`;
 a `-dev` image is refused. Order: client first, then router. The client build needs root (sudo), qemu-user-static
-and network (or the later input archive); the tag must pass `repro_release_guard` (clean, on origin/main).
+and network (or the input archive, see [INPUT-ARCHIVE-AND-YEARLY-REBUILD.md](INPUT-ARCHIVE-AND-YEARLY-REBUILD.md)); the tag must pass `repro_release_guard` (clean, on origin/main).
 Tests: `tools/repro/tests/release.test.sh` (mock build, no root/network).
 
 **Proof builds (`--proof`).** To prove a build of open PRs before they merge, tag a throwaway branch locally and run
