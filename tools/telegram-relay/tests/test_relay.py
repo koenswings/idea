@@ -88,6 +88,14 @@ class RelayTest(unittest.TestCase):
         self.r.handle_update(cb(f"no:{JUST}"))
         st = self.r.read_state(); self.assertNotIn(str(JUST), st["users"]); self.assertEqual(st["pending"], {})
 
+    def test_admin_private_message_enrolled_as_field_person(self):
+        self.r.handle_update(priv(KOEN, "Field report: kit offline", mid=21, first="Koen"))
+        st = self.r.read_state()
+        self.assertIn(str(KOEN), st["users"]); self.assertEqual(st["users"][str(KOEN)]["topic_id"], 77)
+        self.assertEqual(self.f.sent("createForumTopic")[0]["chat_id"], GROUP)
+        self.assertEqual(self.f.hooks[-1][1]["from_id"], KOEN)
+        self.assertEqual(self.f.hooks[-1][1]["text"], "Field report: kit offline")
+
     def test_unknown_sender_ignored(self):
         self.r.handle_update(priv(STRANGER, "hello"))
         self.assertEqual(self.f.calls, []); self.assertEqual(self.f.hooks, [])
