@@ -207,7 +207,8 @@
       "app_kolibri": "2cab08c + MORANGO hand edit 2026-10-17 (app-kolibri#8)",
       "checked": "2026-10-26 12:32 CET, app-kolibri#8 kit step: all SKIP (already set), nothing changed, no restart (Atlas, idea#288)",
       "unique": true
-    }
+    },
+    "console_port": 80
   },
   "kind-panda": {
     "role": "kit-engine",
