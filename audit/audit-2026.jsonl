@@ -1084,3 +1084,5 @@
 {"ts":"2026-11-10T23:34:06Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: idea#416 / engine#310 pm2 idea-usage proof"}
 {"ts":"2026-11-10T23:36:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-10T23:36:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: idea#415 usageMonitoring ON + IDEA_USAGE_AS_MAIN=1 for Pixel real-data check","previous":null}
+{"ts":"2026-11-10T23:41:18Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-10T23:41:18Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: idea#416 dashboard installApp proof (Pixel #415 real-data endpoint)","previous":null}
