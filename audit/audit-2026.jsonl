@@ -1041,3 +1041,5 @@
 {"ts":"2026-11-10T20:39:57Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-10T20:45:44Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-10T20:45:44Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas idea#416 ACL probe + export proof","previous":null}
+{"ts":"2026-11-10T20:50:50Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas idea#416 ACL probe + export proof"}
+{"ts":"2026-11-10T20:50:50Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
