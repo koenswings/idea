@@ -26,17 +26,22 @@ Recorded so the next run does not rediscover it:
 
 - idea#375 U-1 to U-9 are Koen's. Atlas does not ask him; Steve presents
   them when Koen is ready.
-- No agent-engine-dev helper v8 / `idea-usage-export` branch yet (open
-  engine PRs are unrelated; referenced helper v7 `#401` does not exist).
-  The proof script uses [`idea-usage-export.stub.sh`](idea-usage-export.stub.sh)
-  until Axle's binary exists.
+- No agent-engine-dev usage-export helper branch yet. Main and the pool
+  Pis are `idea-app-data` v5; open engine PR #307 claims v6; idea#401
+  was moved to v7 in that PR's text (no PR yet). The next free helper
+  version for idea#412 is **v7**. The proof script uses
+  [`idea-usage-export.stub.sh`](idea-usage-export.stub.sh) until Axle's
+  binary exists.
 - No `app-usage-dashboard` repo or agent-app-dev branch yet (idea#414).
   Sidecar registration waits on Kid's App and on U-3. Do not run sidecar
   install steps until those U-steps exist.
 - `usageMonitoring` toggle script waits on Axle's idea#411 interface.
-- Fleet Pis were untagged as of the 2026-10-29 idea#117 audit (T-c still
-  open). A probe from idea03/idea04 records actual reachability; it is
-  not by itself a `tag:idea` ACL proof until T-c.
+- Fleet Pis were still untagged as of 2026-11-10 21:56 Europe/Brussels
+  (`tailscale status --json`: idea01–04 and idea user-owned; kits already
+  `tag:idea`). T-c runbook and check-only script:
+  [`tag-fleet-idea-tc.md`](tag-fleet-idea-tc.md),
+  [`tag-fleet-idea.sh`](tag-fleet-idea.sh). Not applied. idea03 and idea02
+  expire 2026-12-02 14:36 Europe/Brussels.
 - Live ACL text is not in git (T-b). The paste in `field-usage-acl.md`
   is a merge-in block; substitute the live admin source if it is not
   `group:admins`.
@@ -123,9 +128,10 @@ Separately, later, on idea#374 (not #375): approve the field update that
 moves kits off `adfd9d3`.
 
 Related, not part of U-1–U-9: T-b (read the live ACL so the paste matches
-the admin source) and T-c (tag idea01–04 and `idea` with `tag:idea`, or
-at least disable expiry on idea02 and idea03 before 2026-12-02 14:36
-Europe/Brussels).
+the admin source) and T-c (tag idea01, idea03, idea04 and idea02 with
+`tag:idea` via console Edit tags, then disable key expiry; idea02 and
+idea03 before 2026-12-02 14:36 Europe/Brussels). Defer tagging `idea`
+until Koen's OK / idea#374. See [`tag-fleet-idea-tc.md`](tag-fleet-idea-tc.md).
 
 ## 2. Sidecar registration
 
