@@ -1,6 +1,6 @@
 #!/bin/sh
 # STUB: idea-usage-export (idea#416 / idea#412 pool-Pi proof only).
-# This is NOT Axle's helper v8 command. Do not install it on kits,
+# This is NOT Axle's helper v7 command. Do not install it on kits,
 # idea, golden idea01, or any host that is not a claimed proof Pi.
 # It never reads or writes /var/lib/idea/usage/ and never prints secrets.
 #
