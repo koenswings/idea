@@ -1067,3 +1067,5 @@
 {"ts":"2026-11-10T22:43:40Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"idea#416 lasting deploy of engine main f10e522 on idea04","previous":null}
 {"ts":"2026-11-10T22:46:18Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"idea#416 lasting deploy of engine main f10e522 on idea04"}
 {"ts":"2026-11-10T22:46:18Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-10T22:46:32Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-10T22:46:32Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: idea#416 usage hook/dashboard proofs (#413/#414)","previous":null}
