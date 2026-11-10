@@ -1059,3 +1059,5 @@
 {"ts":"2026-11-10T22:33:55Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"idea#416 repair: restore idea04 engine 631475e + drop-in after a8dcd3a proof rollback truncation","previous":null}
 {"ts":"2026-11-10T22:35:45Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"idea#416 repair: restore idea04 engine 631475e + drop-in after a8dcd3a proof rollback truncation"}
 {"ts":"2026-11-10T22:35:45Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-10T22:39:44Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-10T22:39:44Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"idea#416 lasting deploy of engine main f10e522 on idea03","previous":null}
