@@ -1,0 +1,71 @@
+// Field-usage ACL — Final (after idea#375 U-4, idea#416).
+//
+// Merge these blocks into the live tailnet policy. Do not replace the
+// whole file. Apply only after Step A (U-1, U-2), sidecar registration
+// (U-3 + Atlas), and Koen's U-5 Console/MilkWise check.
+//
+// Before pasting, match the live admin source from T-b: if it is not
+// group:admins, replace every group:admins below with that exact source.
+//
+// This adds ONE new grant: tag:idea-hub may reach tag:idea on tcp/22
+// only (plain OpenSSH, not Tailscale SSH). tag:idea still initiates
+// nothing. Tests cannot use "*" wildcards.
+
+{
+  "tagOwners": {
+    "tag:idea": ["group:admins"],
+    "tag:idea-hub": ["group:admins"],
+  },
+  "acls": [
+    { "action": "accept", "src": ["group:admins"], "dst": ["tag:idea:*"] },
+    { "action": "accept", "src": ["group:admins"], "dst": ["tag:idea-hub:*"] },
+    { "action": "accept", "src": ["tag:idea-hub"], "proto": "tcp", "dst": ["tag:idea:22"] },
+  ],
+  "tests": [
+    {
+      "src": "group:admins",
+      "proto": "tcp",
+      "accept": [
+        "tag:idea:22",
+        "tag:idea:80",
+        "tag:idea:3333",
+        "tag:idea:3334",
+        "tag:idea:8080",
+        "tag:idea:8081",
+        "tag:idea-hub:22",
+        "tag:idea-hub:80",
+      ],
+    },
+    {
+      "src": "tag:idea",
+      "proto": "tcp",
+      "deny": [
+        "tag:idea:22",
+        "tag:idea:80",
+        "tag:idea:443",
+        "tag:idea:3333",
+        "tag:idea:3334",
+        "tag:idea:8080",
+        "tag:idea:8081",
+        "tag:idea-hub:22",
+        "tag:idea-hub:80",
+        "tag:idea-hub:443",
+      ],
+    },
+    {
+      "src": "tag:idea-hub",
+      "proto": "tcp",
+      "accept": ["tag:idea:22"],
+      "deny": [
+        "tag:idea:80",
+        "tag:idea:443",
+        "tag:idea:3333",
+        "tag:idea:3334",
+        "tag:idea:8080",
+        "tag:idea:8081",
+        "tag:idea-hub:22",
+        "tag:idea-hub:80",
+      ],
+    },
+  ],
+}

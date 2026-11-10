@@ -1,0 +1,79 @@
+// Field-usage ACL — Step A (idea#375 U-1 and U-2, idea#416).
+//
+// Merge these blocks into the live tailnet policy. Do not replace the
+// whole file: keep every unrelated rule (hosts, ssh, nodeAttrs, grants
+// that are not about these tags, …) unchanged.
+//
+// Before pasting, open Access controls (idea#375 T-b). If the live admin
+// source is autogroup:admin (or another existing group) instead of
+// group:admins, replace every group:admins below with that exact source.
+// Do not invent a group that is not already defined.
+//
+// Diffed against the approved sketch in
+// proposals/2026-10-13-tailscale-single-fleet-tag.md:
+//   tagOwners.tag:idea = ["group:admins"]
+//   acls: admins -> tag:idea:*
+//   no rule with src tag:idea
+// There is no checked-in copy of the live console policy (T-b is still open).
+//
+// Do NOT add tag:idea-hub -> tag:idea:22 yet (that is Step B / U-4,
+// after the sidecar node is registered and U-5 has been confirmed).
+// Do NOT add Tailscale SSH rules. Use plain OpenSSH.
+// Tests cannot use "*" wildcards (Tailscale policy-file syntax).
+
+{
+  "tagOwners": {
+    "tag:idea": ["group:admins"],
+    "tag:idea-hub": ["group:admins"],
+  },
+  "acls": [
+    { "action": "accept", "src": ["group:admins"], "dst": ["tag:idea:*"] },
+    { "action": "accept", "src": ["group:admins"], "dst": ["tag:idea-hub:*"] },
+  ],
+  "tests": [
+    {
+      "src": "group:admins",
+      "proto": "tcp",
+      "accept": [
+        "tag:idea:22",
+        "tag:idea:80",
+        "tag:idea:3333",
+        "tag:idea:3334",
+        "tag:idea:8080",
+        "tag:idea:8081",
+        "tag:idea-hub:22",
+        "tag:idea-hub:80",
+      ],
+    },
+    {
+      "src": "tag:idea",
+      "proto": "tcp",
+      "deny": [
+        "tag:idea:22",
+        "tag:idea:80",
+        "tag:idea:443",
+        "tag:idea:3333",
+        "tag:idea:3334",
+        "tag:idea:8080",
+        "tag:idea:8081",
+        "tag:idea-hub:22",
+        "tag:idea-hub:80",
+        "tag:idea-hub:443",
+      ],
+    },
+    {
+      "src": "tag:idea-hub",
+      "proto": "tcp",
+      "deny": [
+        "tag:idea:22",
+        "tag:idea:80",
+        "tag:idea:443",
+        "tag:idea:3333",
+        "tag:idea:3334",
+        "tag:idea:8080",
+        "tag:idea:8081",
+        "tag:idea-hub:22",
+      ],
+    },
+  ],
+}
