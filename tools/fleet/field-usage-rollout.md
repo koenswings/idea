@@ -175,12 +175,12 @@ Once the node exists:
 
 ## 4. Scratch App on idea03 or idea04
 
-Same claim rules as §2. This is also where helper v8 and the restricted
+Same claim rules as §2. This is also where helper v7 and the restricted
 export key are proved (`prove-usage-export-key.sh`, idea#412):
 
 - Throwaway key generated on the box, `from=` pinned to the **box**
   Tailscale IPv4 (stand-in for the sidecar IP).
-- Use Axle's helper v8 and `/usr/local/sbin/idea-usage-export` if a
+- Use Axle's helper v7 and `/usr/local/sbin/idea-usage-export` if a
   branch exists; otherwise the marked stub in
   `idea-usage-export.stub.sh`.
 - Prove three things: an allowed verb works; any other command or a
@@ -199,7 +199,7 @@ in agent-engine-dev) is:
 AuthorizedKeysFile .ssh/authorized_keys .ssh/authorized_keys2 /etc/ssh/idea_authorized_keys/%u
 ```
 
-Helper v8 must extend **that same line** (Debian reads `sshd_config.d`
+Helper v7 must extend **that same line** (Debian reads `sshd_config.d`
 first and the first `AuthorizedKeysFile` wins; a later drop-in would
 replace the peer file and lock operators or peers out):
 
@@ -221,9 +221,9 @@ AuthorizedKeysFile .ssh/authorized_keys .ssh/authorized_keys2 /etc/ssh/idea_auth
 - Stopping the dashboard App (off-switch level 3) must leave Engine
   and MilkWise running.
 
-## 6. Helper v8 pool rollout
+## 6. Helper v7 pool rollout
 
-After Axle's helper v8 has merged and the pool-Pi proof in §4 passed.
+After Axle's helper v7 has merged and the pool-Pi proof in §4 passed.
 One Pi at a time. Never two down. Pause above 75 °C, resume below 65 °C.
 pm2 always as `pi`. No `pkill` / `pgrep -f`.
 
@@ -231,10 +231,10 @@ Order:
 
 1. An idle, unclaimed spare: idea03 or idea04 (whichever the proof did
    not leave dirty; prefer a fresh idle Pi). Claim as Atlas, install
-   helper v8 (including the drop-in and `idea-usage-export`), health
+   helper v7 (including the drop-in and `idea-usage-export`), health
    check, release.
 2. The other spare, same way.
-3. **idea01 (golden) only from merged main**, after the helper v8 PR
+3. **idea01 (golden) only from merged main**, after the helper v7 PR
    is on main. Never a review branch. Claim, install, health check,
    release.
 4. Do not do idea02 (hold), kits, or idea here.
@@ -253,7 +253,7 @@ online only a few hours a day over the Johannesburg relay):
 
 - Engine `idea-usage` sampler and hook runner (idea#411), switch left
   **off**
-- helper v8, `/etc/ssh/idea_usage_keys/%u`, the updated
+- helper v7, `/etc/ssh/idea_usage_keys/%u`, the updated
   `10-idea-peer.conf` line, `/usr/local/sbin/idea-usage-export`
 - the usage-pull public key with
   `restrict,from="<sidecar 100.x IPv4>",command="/usr/local/sbin/idea-usage-export"`
