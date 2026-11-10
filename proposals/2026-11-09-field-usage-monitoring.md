@@ -2,11 +2,11 @@
 
 **Author:** Steve · IDEA Lead Bot
 **Date:** 2026-11-09, revised 2026-11-10
-**Status:** Design Review complete (2026-11-10, Pixel, Kid, Axle, Atlas). Incorporates Koen's decisions of 2026-11-10 and the Design Review outcome in §13. Waiting for Koen's review of the proposals PR. Nothing in this proposal touches a running kit. The field Engines stay pinned at Engine commit `adfd9d3` until Koen approves a field update (idea#374). Implementation starts only after this proposal is merged.
+**Status:** Design Review complete (2026-11-10, Pixel, Kid, Axle, Atlas). Incorporates Koen's decisions of 2026-11-10 and the Design Review outcome in §14. A dependencies, reliability and off-switch section (§10) was added the same evening after Koen's questions. Waiting for Koen's review of the proposals PR. Nothing in this proposal touches a running kit. The field Engines stay pinned at Engine commit `adfd9d3` until Koen approves a field update (idea#374). Implementation starts only after this proposal is merged.
 
 Koen asked for this on 2026-11-09 (spoken request to Steve) and revised the scope on 2026-11-10. Related: idea#288 (kit record gaps), idea#374 (field update), idea#375 (Tailscale ACL action items), idea#389 (App backup), `proposals/2026-10-13-store-growth.md`, `proposals/2026-10-13-tailscale-single-fleet-tag.md`, `proposals/ssh-key-management.md`, `docs/manuals/teachers/teacher-tutorial/` (v1.9), `koenswings/app-kolibri`, `koenswings/app-nextcloud`, `koenswings/app-kiwix`.
 
-**Decisions already taken (Koen, 2026-11-10):** Option B (Engine-side collector with per-App usage hooks); E1 (pull over Tailscale); D1 amended (programme dashboard as an IDEA App on the idea computer, with a designed visualisation); D2 (school-local Console panel) later, tracked as a follow-up issue; privacy recommendation accepted (role-level aggregates only). Wikipedia offline is in scope. The programme collector and its data store run solely on idea, with no LLM in the loop: Tailscale is the trigger. How the new modules sit next to the existing Engine, Apps, Tailscale tailnet and the idea computer is shown in the architecture diagram in §7.
+**Decisions already taken (Koen, 2026-11-10):** Option B (Engine-side collector with per-App usage hooks); E1 (pull over Tailscale); D1 amended (programme dashboard as an IDEA App on the idea computer, with a designed visualisation); D2 (school-local Console panel) later, tracked as a follow-up issue; privacy recommendation accepted (role-level aggregates only). Wikipedia offline is in scope. The programme collector and its data store run solely on idea, with no LLM in the loop: Tailscale is the trigger. How the new modules sit next to the existing Engine, Apps, Tailscale tailnet and the idea computer is shown in the architecture diagram in §7. After Design Review, Koen asked how dependent the existing system is on the new modules, whether monitoring can ship switched off, what residual risk it adds to kit reliability, and how it can be turned off if there is a problem. That is answered in §10, including a persistent per-Engine off switch that ships off.
 
 ---
 
@@ -267,7 +267,7 @@ The diagram below shows how the new modules sit next to the existing Engine, App
 
 **Figure 1.** Architecture of field-usage monitoring: existing components (navy), new modules in this proposal (amber), and the deferred school-local Console Usage panel (dashed).
 
-Each field kit keeps working as it does today: the Engine (pm2, Automerge store, Console on port 80), the App instances (Kolibri, Nextcloud with MariaDB and Collabora, Kiwix), the router and classroom clients on the school LAN, and the Tailscale client tagged `tag:idea`. The new usage module on the kit — a presence sampler every five minutes and a hook runner — calls each App's usage hook (including the Kiwix access-log proxy sidecar) and writes one JSON day summary per instance as `/var/lib/idea/usage/<day>/<instanceId>.json` (the folder is created at install and owned by `pi`); those files hold role-level counts only, usernames never leave the kit, and nothing usage-related is written to the shared Automerge store. The kit does not store a deployment id: idea maps each engine and day to a deployment when it pulls the file.
+Each field kit keeps working as it does today: the Engine (pm2, Automerge store, Console on port 80), the App instances (Kolibri, Nextcloud with MariaDB and Collabora, Kiwix), the router and classroom clients on the school LAN, and the Tailscale client tagged `tag:idea`. The new usage module on the kit — a presence sampler every five minutes and a hook runner — ships behind a persistent per-Engine off switch (`usageMonitoring`, default off; §10). When the switch is on, it calls each App's usage hook (including the Kiwix access-log proxy sidecar) and writes one JSON day summary per instance as `/var/lib/idea/usage/<day>/<instanceId>.json` (the folder is created at install and owned by `pi`); those files hold role-level counts only, usernames never leave the kit, and nothing usage-related is written to the shared Automerge store. The kit does not store a deployment id: idea maps each engine and day to a deployment when it pulls the file.
 
 On idea, the new `app-usage-dashboard` IDEA App runs a collector with no LLM: it watches Tailscale's LocalAPI for uplink events (`Online` / `LastSeen`) and, when a kit is reachable, pulls waiting summaries over SSH through a restricted forced command. That pull is allowed only after the idea#375 ACL gives the dashboard sidecar `tag:idea-hub` (idea itself stays plain `tag:idea`) and permission to reach `tag:idea` kits on port 22, with no kit-to-kit traffic.
 
@@ -277,7 +277,7 @@ The summaries and uplink history then sit in a SQLite file on idea. A consistent
 
 1. **One shared Automerge store for all Engines** (Koen, 2026-10-18, recorded by Axle: Engines meet and separate in the field). Anything written there reaches every Engine, at every school. **Per-school learner activity, names and content-watched data never go into that store**, not even aggregated. This is enforced: the `idea-usage` process never opens the Automerge Repo; a unit test fails if anything under `src/usage/` imports Automerge or store modules; and nothing usage-related is added to the ephemeral heartbeat or metrics messages, which stay as they are.
 2. **Offline first.** Collection on the kit runs with no internet. Export happens only when a path exists (Tailscale, or a docked disk).
-3. **Pinned field Engines.** "Field Engines are on `adfd9d3`" means: the three field kits (happy-zebra, sunny-robin, kind-panda) run a specific build of the Engine, identified by git commit `adfd9d3` (`adfd9d354ffd83c5ecc0a9eea64a474eae08de8f` of `koenswings/agent-engine-dev`, merged 2026-10-17, branch `deploy/kit-229-232`). It is not a product version number and not a setting the school can see. Koen decided on 2026-10-25 that those kits stay on that build, read-only, until he approves a field update (idea#374). Any new Engine code in this proposal — the presence sampler, the hook runner, the restricted export command — ships only in that approved update. idea itself runs current Engine `main` and can host the dashboard App without waiting for the field update.
+3. **Pinned field Engines.** "Field Engines are on `adfd9d3`" means: the three field kits (happy-zebra, sunny-robin, kind-panda) run a specific build of the Engine, identified by git commit `adfd9d3` (`adfd9d354ffd83c5ecc0a9eea64a474eae08de8f` of `koenswings/agent-engine-dev`, merged 2026-10-17, branch `deploy/kit-229-232`). It is not a product version number and not a setting the school can see. Koen decided on 2026-10-25 that those kits stay on that build, read-only, until he approves a field update (idea#374). Any new Engine code in this proposal — the presence sampler, the hook runner, the restricted export command, the `usageMonitoring` off switch — ships only in that approved update. idea itself runs current Engine `main` and can host the dashboard App without waiting for the field update.
 4. **Data minimisation.** Usernames stay on the kit. What leaves the kit is counts by role, content and channel titles, article titles, and app names.
 5. **Engines move between schools.** A summary is tied to a **deployment** (Engine + school + date range from `fleet-state.json`). idea sends a second forced-command verb, `archive-and-clear --before <day>`, only after it has confirmed its copy, so one school's data never travels to the next school. The kit does not look up schools or fleet-state.
 6. **Programme data lives on idea**, not on a laptop and not in git. MilkWise on idea (ports 3333 and 3334) is out of scope and is never touched.
@@ -294,8 +294,9 @@ The summaries and uplink history then sit in a SQLite file on idea. A consistent
   - a hook runner that calls each running App instance's usage hook, one at a time, under `timeout`, `nice` and `ionice`; output is capped and checked against the schema on the kit; hooks are skipped while `/run/idea/backup-running` exists, while an update or move is running, or above 75 °C, and the runner fails open; `day` runs at night by default, apart from the 15-minute Office `sample`;
   - a school-local summary folder at `/var/lib/idea/usage/<day>/<instanceId>.json` (created at install, owned by `pi`, outside the store and outside App data); idea, not the kit, maps engine and day to a deployment;
   - the restricted export command used by E1 (`/usr/local/sbin/idea-usage-export`, helper v8);
-  - the capability `usageSummaries` in `ENGINE_CAPABILITIES`, a boolean only (the string is on the list or it is not; no version and no extra fields).
-- **Apps** (Kid) ship the hook on the App Disk as `x-app.usage: { service, command, timeoutS }`, the same shape as the agreed `x-app.backup` hook. For instances the Engine lists, it runs `docker compose exec -T <service>` inside the instance's compose project. The hook has two modes, both printing to stdout: `day <date>` prints the day summary (a past date is allowed, so after a power-off the Engine can catch up from Kolibri and Nextcloud logs), and `sample` is the 15-minute Office token snapshot. The Engine stores that output in the usage folder, never in App data. The hook runs read-only queries inside the container (Kolibri SQLite; Nextcloud via `occ` or the database; Kiwix via its access log) and prints **one JSON day summary in a fixed IDEA schema** (§7.6), with no usernames. App knowledge stays in the App repos; the Engine stays generic.
+  - the capability `usageSummaries` in `ENGINE_CAPABILITIES`, a boolean only (the string is on the list or it is not; no version and no extra fields);
+  - a persistent per-Engine setting `usageMonitoring: off | on` in Engine settings, default **off**, that survives a reboot and an Engine update. When off, `idea-usage` exits or idles immediately: no sampler, no hooks, no files written; the export command returns `disabled` (empty) and existing data is left untouched. An operator command over SSH (a helper or Ops script in `tools/fleet`; later optionally from the Console) toggles it. Toggling never restarts the Engine or the Apps. See §10.
+- **Apps** (Kid) ship the hook on the App Disk as `x-app.usage: { service, command, timeoutS }`, the same shape as the agreed `x-app.backup` hook. For instances the Engine lists, it runs `docker compose exec -T <service>` inside the instance's compose project. The hook has two modes, both printing to stdout: `day <date>` prints the day summary (a past date is allowed, so after a power-off the Engine can catch up from Kolibri and Nextcloud logs), and `sample` is the 15-minute Office token snapshot. The Engine stores that output in the usage folder, never in App data. The hook runs short, read-only queries inside the container (Kolibri SQLite; Nextcloud via `occ` or the database; Kiwix via its access log) and prints **one JSON day summary in a fixed IDEA schema** (§7.6), with no usernames. That short, read-only rule is a review requirement for Kid's hooks (§10). App knowledge stays in the App repos; the Engine stays generic.
 - + Works fully offline. Presence history across offline weeks. Office tokens are sampled in time. One schema for every App, including Kiwix. Fits the domain split.
 - − Needs an approved field update (Engine + App versions). The hooks must be tested on Kolibri 0.15.5 and 0.19.5, Nextcloud 31, and Kiwix 3.8.2.
 
@@ -415,7 +416,7 @@ The command accepts only `since YYYY-MM-DD` (print the JSON day summaries and pr
 
 Without that change, E1 from idea cannot run. (A Tailscale admin API poll from idea could record Online/LastSeen via the internet without an ACL change, but it could not pull summaries, and it would add a cloud credential. It is a fallback for uplink history only, not the design.)
 
-**What has to wait for the field update (idea#374):** the Engine sampler, the hook runner, helper v8 with the usage key file and `/usr/local/sbin/idea-usage-export`, the updated Apps with hooks, the idea#389 reboot wrapper, and installing the usage-pull public key on each kit. Until then idea can still record uplink history *after* the ACL change, but the usage panels stay grey ("no data").
+**What has to wait for the field update (idea#374):** the Engine sampler, the hook runner, the `usageMonitoring` off switch (ships **off**), helper v8 with the usage key file and `/usr/local/sbin/idea-usage-export`, the updated Apps with hooks, the idea#389 reboot wrapper, and installing the usage-pull public key on each kit. The Engine update can go to kits with monitoring off and be switched on later, one kit at a time. Until then idea can still record uplink history *after* the ACL change, but the usage panels stay grey ("no data").
 
 ### 7.6 Summary schema (sketch for Design Review)
 
@@ -444,7 +445,7 @@ Field names are a proposal for Kid and Axle to refine. The numbers above are pla
 
 Yes: the visualisation is an IDEA App, and yes: it runs on idea.
 
-idea already runs the Engine, so the dashboard is installed through the Engine, not by hand-placing compose files. The preferred path is that the Engine runs the App from idea's system disk (open question for Axle, §12). The fallback is a small App Disk that stays docked on idea and survives the daily 05:00 reboot. The web port is pinned in the instance environment file and kept off 80 (the Console), 3333 and 3334 (MilkWise; never touched) and 8081 (already served on idea).
+idea already runs the Engine, so the dashboard is installed through the Engine, not by hand-placing compose files. The preferred path is that the Engine runs the App from idea's system disk (open question for Axle, §13). The fallback is a small App Disk that stays docked on idea and survives the daily 05:00 reboot. The web port is pinned in the instance environment file and kept off 80 (the Console), 3333 and 3334 (MilkWise; never touched) and 8081 (already served on idea).
 
 Ownership: Pixel builds the `web` UI; Kid owns the collector, the packaging and the read-only API. Kid and Axle settle the API field names in §7.6 before any UI work starts.
 
@@ -479,7 +480,7 @@ The image below is a static design of pages 1, 2, 3, 4 and 5 together. The numbe
 
 Visual language: navy programme header, one card per school, green / amber / grey scorecard lines, a presence strip with school-day grouping, and separate Kolibri / Nextcloud / Wikipedia panels so an amber line names the tutorial chapter to retrain. The blue border marks the school selected for the detail panels below. Scorecard colours: green is on track, amber needs help, grey means no data.
 
-Pixel's six accepted UI changes (words on every line, a last-pulled date and "old data" marker on each card, a presence-strip legend in the kit's local time, hourly charts hidden below a minimum count, a week picker with links through to each school, and a login) apply to the built App. They are written out in §8.1 and §13. The mockup image above is unchanged.
+Pixel's six accepted UI changes (words on every line, a last-pulled date and "old data" marker on each card, a presence-strip legend in the kit's local time, hourly charts hidden below a minimum count, a week picker with links through to each school, and a login) apply to the built App. They are written out in §8.1 and §14. The mockup image above is unchanged.
 
 ---
 
@@ -497,28 +498,103 @@ Koen accepted this recommendation on 2026-11-10.
 
 ---
 
-## 10. Affected domains
+<div style="page-break-before: always;"></div>
+
+## 10. Dependencies, reliability and the off switch
+
+This section answers four questions Koen asked after Design Review (2026-11-10): how dependent the existing system has become on the new modules; whether monitoring can be deployed switched off; what residual risk the new work adds to kit reliability; and how it can be turned off if there is a problem. None of this is built yet. The design below is part of this proposal. It was added after the Design Review meeting and has not been back through the review room.
+
+### Dependency direction
+
+The existing system does not depend on monitoring. The Engine, the Console, Automerge sync and the App Disks keep working exactly as they do today if monitoring is absent, switched off, or broken. The dependency only goes the other way: monitoring reads from the Engine and the Apps, and nothing in the Engine, the Console or sync waits for it.
+
+What the existing system gains are small additions that nothing old relies on:
+
+- **A separate process.** Monitoring runs as its own pm2 process (`idea-usage`), separate from the Engine. If it crashes or hangs, the Engine keeps running.
+- **Usage hooks in App files.** Apps can declare a usage hook (`x-app.usage`) in their App compose file. Engines without monitoring ignore that field.
+- **A capability flag.** The Engine reports `usageSummaries` in `ENGINE_CAPABILITIES`. It only says "this Engine can export usage". Nothing in the Engine, Console or sync requires the flag to be present. (The later school-local Console panel, D2, will use it to decide whether to show the panel; that panel is not in v1.)
+- **A restricted export command.** It is added to the root helper (v8) and accepts only two fixed commands (`since YYYY-MM-DD` and `archive-and-clear --before YYYY-MM-DD`). It is reached through one locked-down SSH key.
+- **No database link.** Monitoring never touches the shared Automerge store, and a unit test fails if `src/usage/` ever imports Automerge or the store modules. So it cannot bloat the store or disturb sync.
+- **On idea itself,** the dashboard is an ordinary App with its own Tailscale sidecar and its own SQLite database. It does not touch MilkWise (ports 3333 and 3334) or idea's Engine.
+
+### Deploying without monitoring
+
+Yes. The Engine changes are inert until the off switch below is on and the usage-pull key is installed. The Engine update can ship to kits with monitoring off, and be switched on later, one kit at a time.
+
+### Risks to reliability
+
+| Risk | Mitigation | Residual |
+|---|---|---|
+| Load on the Pi from hooks running inside App containers | `day` hooks run at night by default, under `timeout`, `nice` and `ionice`. They are skipped during a backup, an update or a disk move, and when the Pi is above 75 °C. The daytime `sample` hook (every 15 minutes, for Office tokens) is small. | A heavy or slow hook could still briefly slow Kolibri or Nextcloud if the time limit is set too high, or if a hook is not actually cheap. |
+| Disk space on the system disk | The presence log is a 90-day ring and the daily files are capped in size, so growth is bounded. | It is still a new writer on the system disk. |
+| Locks on App databases | Hooks must use short, read-only queries. This is a review requirement for Kid's hooks, checked on a pool Pi before any kit sees them. | A hook that takes a lock on Kolibri's or Nextcloud's database is the main thing to watch. |
+| New SSH path from idea's dashboard node | The path is limited by `from=<sidecar IP>`, the Tailscale ACL on tcp/22 only, `restrict`, and a forced command that accepts only two verbs. If idea were compromised, the pull can only read usage data, or archive and clear usage files older than a given date. | A new way in still exists. The port 22 ACL also reaches the pool Pis and idea's own SSH; the restricted key is the real control. |
+| Shared root helper v8 | Proved first on idea03 or idea04, then kits one at a time, only in the idea#374 window, with rollback to `adfd9d3`. | A bug in that rollout could affect other helper commands until the rollback lands. |
+
+### The off switch
+
+A persistent per-Engine setting, `usageMonitoring: off | on`, lives in Engine settings. It survives a reboot and an Engine update. It ships **off**, and it is enabled per kit deliberately. The Engine update can therefore go out with monitoring present but not running.
+
+When the switch is off:
+
+- the `idea-usage` process checks the setting at start and exits or idles immediately, so the sampler and the hook runner do not run;
+- no hooks are executed and no usage files are written;
+- the export command returns `disabled` and an empty body, so a pull records no new data; existing data on the kit is left untouched unless it is explicitly cleared.
+
+The switch is toggled by an operator command over SSH (a helper or Ops script in `tools/fleet`). A Console control can be added later. Toggling never restarts the Engine or the Apps.
+
+There are three documented levels of turning monitoring off, plus an emergency step:
+
+1. **Fleet-wide, in one step.** Remove the `tag:idea-hub → tag:idea` tcp/22 ACL rule in the Tailscale admin console. No kit can be pulled from any more.
+2. **Per kit (persistent).** Set `usageMonitoring` to `off`. The sampler and hooks stop, and the setting survives a reboot and an Engine update.
+3. **On idea.** Stop the dashboard App.
+4. **Emergency.** Remove the key file `/etc/ssh/idea_usage_keys/%u`. The pull key can no longer authenticate, even if the ACL is still in place.
+
+Stopping the `idea-usage` process by hand is not enough on its own: without the persistent switch, a reboot or an Engine update would start it again.
+
+### Acceptance tests
+
+These tests are part of Axle's Engine test plan and the pool Pi proof:
+
+- With the switch off, Engine behaviour and the cover-all run are identical to the baseline (no monitoring).
+- Toggling the switch on or off does not restart the Engine or any App.
+- The switch survives a reboot and an Engine update (it stays off if it was off, on if it was on).
+- Killing the `idea-usage` process does not affect the Engine.
+
+### Implementation issues
+
+After this proposal is merged, the off switch is part of the Engine and Ops implementation work (not filed until then):
+
+- Engine (Axle, about 0.5–1 day): the persistent `usageMonitoring` setting, default off; the start-of-process check; export `disabled` behaviour; the SSH or helper toggle; the acceptance tests above.
+- Ops (Atlas): a script in `tools/fleet` that toggles the switch over SSH, one kit at a time.
+- App hooks (Kid): the review requirement that every hook uses short, read-only queries, proved on a pool Pi.
+- Console (Pixel, optional, not in v1): a later control for the same switch. Toggling from the Console must also leave the Engine and the Apps running.
+
+---
+
+## 11. Affected domains
+
 
 | Domain | Work |
 |---|---|
-| **Engine** (Axle) | Separate `idea-usage` process; presence sampler; `x-app.usage: { service, command, timeoutS }` runner (`day` / `sample`, timeouts, nice/ionice, skip during backup/update/move or above 75 °C, fail open); borrowed hooks for Engine-unlisted containers; local folder `/var/lib/idea/usage/<day>/<instanceId>.json` (created at install, owned by `pi`) and ring buffer; `archive-and-clear --before <day>` (idea maps engine and day to a deployment); `usageSummaries` in `ENGINE_CAPABILITIES` (boolean only); `idea-usage` never opens the Repo (unit test on `src/usage/` imports); helper v8, root-owned `/etc/ssh/idea_usage_keys/%u` and `/usr/local/sbin/idea-usage-export`; disk export. **No store schema change** |
-| **App Dev: Kolibri** (Kid) | Usage hook on 0.15.5 and 0.19.5: setup census (classes, registered, enrolled, teachers, admins), role join, content titles, lessons/quizzes, guest, Demo-seed exclusion by the seed's IDs (not by username), shared-account flag. Optional plugin for Reports views |
-| **App Dev: Nextcloud** (Kid) | Usage hook: group census and logins, Office `sample` from WOPI rows every 15 min (background jobs run in Nextcloud's default AJAX mode today, so expired WOPI rows stay around longer; token lifetime still to confirm on a Pi). Next App version: `admin_audit` on with a `log_rotate_size` cap; optional tiny IDEA app for `(day, group, appId)` counts. Confirm on a Pi that Docker port forwarding keeps the real client address |
-| **App Dev: Kiwix** (Kid) | `./logs` bind mount (idea#141); nginx access-log sidecar on `${port}`; usage hook for Q8 aggregates; log rolled daily and cleared after 14 days; backup stays `none`. No identity |
+| **Engine** (Axle) | Separate `idea-usage` process; persistent `usageMonitoring` setting (default **off**, survives reboot and Engine update; toggle over SSH never restarts the Engine or Apps; §10); presence sampler; `x-app.usage: { service, command, timeoutS }` runner (`day` / `sample`, timeouts, nice/ionice, skip during backup/update/move or above 75 °C, fail open); borrowed hooks for Engine-unlisted containers; local folder `/var/lib/idea/usage/<day>/<instanceId>.json` (created at install, owned by `pi`) and ring buffer; `archive-and-clear --before <day>` (idea maps engine and day to a deployment); `usageSummaries` in `ENGINE_CAPABILITIES` (boolean only); `idea-usage` never opens the Repo (unit test on `src/usage/` imports); helper v8, root-owned `/etc/ssh/idea_usage_keys/%u` and `/usr/local/sbin/idea-usage-export` (returns `disabled` when the switch is off); disk export. **No store schema change** |
+| **App Dev: Kolibri** (Kid) | Usage hook on 0.15.5 and 0.19.5 (short, read-only queries; review requirement, §10): setup census (classes, registered, enrolled, teachers, admins), role join, content titles, lessons/quizzes, guest, Demo-seed exclusion by the seed's IDs (not by username), shared-account flag. Optional plugin for Reports views |
+| **App Dev: Nextcloud** (Kid) | Usage hook (short, read-only queries; review requirement, §10): group census and logins, Office `sample` from WOPI rows every 15 min (background jobs run in Nextcloud's default AJAX mode today, so expired WOPI rows stay around longer; token lifetime still to confirm on a Pi). Next App version: `admin_audit` on with a `log_rotate_size` cap; optional tiny IDEA app for `(day, group, appId)` counts. Confirm on a Pi that Docker port forwarding keeps the real client address |
+| **App Dev: Kiwix** (Kid) | `./logs` bind mount (idea#141); nginx access-log sidecar on `${port}`; usage hook for Q8 aggregates (short, read-only; review requirement, §10); log rolled daily and cleared after 14 days; backup stays `none`. No identity |
 | **App Dev: dashboard** (Kid) | Collector, packaging and read-only API of `app-usage-dashboard`; Tailscale sidecar, SQLite (`.backup` / `VACUUM INTO`, 14 copies), E1 pull client. Installed only on idea |
-| **Console** (Pixel) | Programme dashboard UI (Solid/Vite, eight pages, login). Later (D2 issue): operator-only Usage panel that appears when the Engine reports `usageSummaries`, reading a local HTTP endpoint; shared scorecard and presence-strip components |
-| **Ops** (Atlas) | After Koen approves: apply the `tag:idea-hub` ACL in the agreed order, with tests, and register the sidecar (idea itself is not retagged; idea#375); scratch-install the dashboard App on idea03 or idea04 (never golden idea01, never idea first) and put it on idea only with Koen's OK; after the field update, install helper v8 and the usage-pull public key on each kit with `from=` set to the sidecar's own Tailscale IPv4 (filled in during the idea#374 window). Exclude `./data/keys` and the sidecar Tailscale state from normal App backups (`x-app.backup` `exclude:`, idea#389); back those secrets up only to idea's encrypted Borg repo. Retire the kit part of the fleet-health watcher only after Phase 1 has run next to it for a week |
+| **Console** (Pixel) | Programme dashboard UI (Solid/Vite, eight pages, login). Later (D2 issue): operator-only Usage panel that appears when the Engine reports `usageSummaries`, reading a local HTTP endpoint; shared scorecard and presence-strip components. Optional later: a Console control for the `usageMonitoring` switch (toggling must not restart the Engine or Apps; §10) |
+| **Ops** (Atlas) | After Koen approves: apply the `tag:idea-hub` ACL in the agreed order, with tests, and register the sidecar (idea itself is not retagged; idea#375); scratch-install the dashboard App on idea03 or idea04 (never golden idea01, never idea first) and put it on idea only with Koen's OK; after the field update, install helper v8 and the usage-pull public key on each kit with `from=` set to the sidecar's own Tailscale IPv4 (filled in during the idea#374 window), leaving `usageMonitoring` off until the kit is deliberately enabled; a `tools/fleet` script toggles the switch over SSH (§10). Exclude `./data/keys` and the sidecar Tailscale state from normal App backups (`x-app.backup` `exclude:`, idea#389); back those secrets up only to idea's encrypted Borg repo. Retire the kit part of the fleet-health watcher only after Phase 1 has run next to it for a week |
 | **Programme** (Marco) | Map tutorial chapters to scorecard lines (§4); school notice text; help playbook per amber line; enter help events on the dashboard |
 
 ---
 
-## 11. Phased delivery
+## 12. Phased delivery
 
 | Phase | What | Kit change? | Who | What Koen sees |
 |---|---|---|---|---|
 | **0 Definition** (now) | Agree on the scorecard lines (done, pending thresholds) and the privacy default (accepted); Marco maps the help playbook | None | Steve, Marco, Koen | This revised proposal |
 | **1 idea uplink history** | Dashboard App on idea (Pixel UI, Kid collector); Tailscale-triggered uplink log stored on idea. Usage panels grey until Phase 2 | No kit change. **Needs the ACL change** so the sidecar can see the peers. Scratch install on idea03 or idea04 first; idea only with Koen's OK | Pixel, Kid, Atlas | A real history of which kits are reachable, from idea, with no LLM |
-| **2 Kit collector + first usage** | Option B: Engine sampler + hooks (Kolibri, Nextcloud, Kiwix) + local summaries + E1 pull into the idea dashboard | Yes: in the approved field update (idea#374), after a scratch install and the helper v8 proof on idea03 or idea04 (whichever is idle; never on golden idea01). One kit at a time; pause above 75 °C and resume below 65 °C; Steve pinged at START and FINISH; only when the school has agreed to keep the kit on. Rollback puts `adfd9d3` back | Axle, Kid, Atlas | Daily summaries, presence strip across offline weeks, setup census (classes, learners, teachers), Office and Wikipedia counts |
+| **2 Kit collector + first usage** | Option B: Engine sampler + hooks (Kolibri, Nextcloud, Kiwix) + local summaries + E1 pull into the idea dashboard. The Engine update ships with `usageMonitoring` **off**; each kit is switched on deliberately after the update is confirmed (§10) | Yes: in the approved field update (idea#374), after a scratch install and the helper v8 proof on idea03 or idea04 (whichever is idle; never on golden idea01). One kit at a time; pause above 75 °C and resume below 65 °C; Steve pinged at START and FINISH; only when the school has agreed to keep the kit on. Rollback puts `adfd9d3` back | Axle, Kid, Atlas | Daily summaries, presence strip across offline weeks, setup census (classes, learners, teachers), Office and Wikipedia counts, once the kit's switch is on |
 | **3 App instrumentation** | Nextcloud audit log, IDEA app-open counter, optional Kolibri Reports-view counter | Yes: new App versions via `updateApp` | Kid | Logins with history, which apps by group, Reports views |
 | **4 School panel** | D2 Console Usage panel (follow-up issue); optional router and client presence | D2 and router: yes | Pixel, Atlas | The school sees its own numbers |
 
@@ -530,7 +606,7 @@ A one-off read-only baseline of Kolibri/Nextcloud on the pinned kits (the old "P
 
 ---
 
-## 12. Open questions
+## 13. Open questions
 
 **For Koen**
 
@@ -556,13 +632,13 @@ Settled on 2026-11-10 and removed from this list: privacy default (accepted); Wi
 
 ---
 
-## 13. Design Review outcome (2026-11-10)
+## 14. Design Review outcome (2026-11-10)
 
-Pixel, Kid, Axle and Atlas reviewed this proposal in the IDEA Design Review room on 2026-11-10. Every point below is folded into the design above; this section is the record of who said what, the effort figures, and the items that stay with Koen on idea#375.
+Pixel, Kid, Axle and Atlas reviewed this proposal in the IDEA Design Review room on 2026-11-10. Every point below is folded into the design above; this section is the record of who said what, the effort figures, and the items that stay with Koen on idea#375. The dependencies, reliability and off-switch section (§10) was added after that meeting, at Koen's request the same evening, and has not been back through the review room.
 
 ### Ownership
 
-Pixel builds the programme dashboard UI. Kid owns the collector, the packaging and the read-only API, and the Kolibri, Nextcloud and Kiwix hooks. Kid and Axle settle the §7.6 API field names before any UI work starts. Atlas owns the ACL, the sidecar registration, the scratch install, helper v8 and the kit-side key rollout. Axle owns `idea-usage`, the hook runner, the export command and the helper verb.
+Pixel builds the programme dashboard UI. Kid owns the collector, the packaging and the read-only API, and the Kolibri, Nextcloud and Kiwix hooks. Kid and Axle settle the §7.6 API field names before any UI work starts. Atlas owns the ACL, the sidecar registration, the scratch install, helper v8 and the kit-side key rollout. Axle owns `idea-usage`, the hook runner, the export command, the helper verb and the persistent `usageMonitoring` off switch (§10).
 
 ### Pixel — dashboard UI
 
@@ -591,7 +667,7 @@ All of it is doable. The five changes:
 4. **Nextcloud (Q9 and Q10).** `app-nextcloud` never sets the background-job mode, so it runs in Nextcloud's default AJAX mode: jobs only run when someone has a page open. Expired WOPI rows therefore stay around longer, which helps the Office sample. Token lifetime is still checked on a Pi. If `admin_audit` is turned on, it needs a `log_rotate_size` cap. Docker's normal port forwarding usually keeps the real client address; that too is confirmed on a Pi.
 5. **Dashboard App.** The collector must not mount `/var/run/tailscale/tailscaled.sock`. It runs its own Tailscale sidecar as a separate node tagged `tag:idea-hub`, so idea itself stays plain `tag:idea`. That needs one tagged, non-ephemeral auth key (an idea#375 item). The pull key lives in `./data/keys` at mode 0600. Daily SQLite copies use the backup API, not `cp`.
 
-**Risks.** The Kolibri hook only exists on kits after an App update; on the pinned kits that ties it to the 1.0-0.15.5 to 1.1-0.19.5 upgrade, unless Koen wants a hook-only 1.0.x release. The Kolibri on port 62561 that the Engine doesn't list has no hook of its own, so the runner borrows one from a disk with the same App version (or reports "unlisted, no hook"). Demo seed records are excluded by the seed's IDs, not by username. Kolibri timestamps from before NTP sync cannot be corrected inside the hook.
+**Risks.** Hooks must use short, read-only queries so they do not hold a lock on Kolibri's or Nextcloud's database (review requirement, §10). The Kolibri hook only exists on kits after an App update; on the pinned kits that ties it to the 1.0-0.15.5 to 1.1-0.19.5 upgrade, unless Koen wants a hook-only 1.0.x release. The Kolibri on port 62561 that the Engine doesn't list has no hook of its own, so the runner borrows one from a disk with the same App version (or reports "unlisted, no hook"). Demo seed records are excluded by the seed's IDs, not by username. Kolibri timestamps from before NTP sync cannot be corrected inside the hook.
 
 **Effort.** Kolibri hook on 0.15.5 and 0.19.5 with tests: 3 to 4 days. Nextcloud hook: 3 days, plus 1 for audit logging. Kiwix proxy and hook: 2 days. Collector, packaging and read-only API of `app-usage-dashboard`: 6 to 8 days (this figure was given for the App; after the ownership split the UI is Pixel's, above). Optional Reports counter and app-open counter: 2 to 3 days each. All of it is tested on a scratch instance on a pool Pi.
 
@@ -600,16 +676,16 @@ All of it is doable. The five changes:
 Feasible; Option B fits how the Engine already works. Checked against `main` at `dc0cda2`.
 
 1. **Restricted pull key (the most important change).** The usage key does not go in `authorized_keys` or the peer file (`sync-peers` would wipe it) and does not go through `idea-peer-gate` (that would let any kit pull another school's summaries). It lives in a root-owned `/etc/ssh/idea_usage_keys/%u`, added to the `10-idea-peer.conf` drop-in. The forced command is the root-owned `/usr/local/sbin/idea-usage-export`. Installation is a new helper verb, which makes it helper v8. The ACL is port 22 from `tag:idea-hub` to `tag:idea`, not Tailscale SSH.
-2. **Collector process.** Separate pm2 process `idea-usage`, as `pi`, from the same repo and build. Each hook runs alone under `timeout`, `nice` and `ionice`; output is capped and schema-checked on the kit; hooks are skipped while `/run/idea/backup-running` exists, during an update or move, or above 75 °C; fail open.
+2. **Collector process.** Separate pm2 process `idea-usage`, as `pi`, from the same repo and build. Each hook runs alone under `timeout`, `nice` and `ionice`; output is capped and schema-checked on the kit; hooks are skipped while `/run/idea/backup-running` exists, during an update or move, or above 75 °C; fail open. A persistent `usageMonitoring` setting in Engine settings (default **off**, added after Design Review at Koen's request; §10) is checked at start: when off, the process exits or idles immediately, no hooks run and no files are written, and the export command returns `disabled`. An operator command over SSH toggles it; toggling never restarts the Engine or the Apps.
 3. **Hook delivery and unlisted containers.** Listed instances use Kid's `x-app.usage` through `docker compose exec -T`. Containers the Engine doesn't list (happy-zebra's Kolibri on :62561) get the matching App version's hook piped over stdin, or a row saying "unlisted, no hook". They are never dropped and never merged. The Engine picks the hook for 0.15.5 vs 0.19.5.
 4. **Deployment id.** The Engine does not know schools. Summaries are stored by engine and day only; idea maps `(engine, day)` to a deployment. "Clear on reassign" is the forced-command verb `archive-and-clear --before <day>`, sent only after idea has confirmed its copy.
 5. **Clock honesty.** After a power cut with no uplink, the Pi restarts from the last saved time, so an off-gap can look like zero. `boot_id` plus uptime gives reliable on-durations. An off-duration is only known once a synced sample arrives, which is why the dashboard uses `gapUnknown` rather than guessing a length.
 
 Smaller points, accepted: the sampler is one append every 5 minutes to the pi-owned folder (about 26k lines over a 90-day ring); it reads `boot_id` from `/proc`, `timedatectl NTPSynchronized` and `vcgencmd get_throttled`; "distinct IPs per hour" may be computed on the kit but only the counts leave; no store schema change; `day` hooks run at night by default, apart from the 15-minute Office sample.
 
-**Risks.** The key-install path and the helper version chain getting longer. Hooks add CPU load on a fanless Pi during school hours. All of it reaches the field only through idea#374.
+**Risks.** The key-install path and the helper version chain getting longer. Hooks add CPU load on a fanless Pi during school hours; the mitigations and residual risks, and the off switch, are in §10. All of it reaches the field only through idea#374, and it ships with the switch off.
 
-**Effort.** Sampler 1–2 days; hook runner and discovery 3–4 days; export command, helper verb and key install 2–3 days; local store, retention and clear 1–2 days; tests plus a pool Pi proof 3–4 days. Roughly 2–3 weeks before the duration test.
+**Effort.** Sampler 1–2 days; hook runner and discovery 3–4 days; export command, helper verb and key install 2–3 days; local store, retention and clear 1–2 days; persistent off switch, toggle command and its acceptance tests 0.5–1 day; tests plus a pool Pi proof 3–4 days. Roughly 2–3 weeks before the duration test.
 
 ### Atlas — Ops
 
@@ -618,7 +694,7 @@ Feasible, and moving uplink history off Atlas's computer onto idea is the right 
 1. **Sidecar and watchdog.** Kid's sidecar design (supported). The node's state lives under `./data` so it keeps its identity across the 05:00 reboot. It uses one tagged, non-ephemeral auth key for this node only (idea#375). A watchdog checks that the sidecar sees itself online before the collector records anything; if not, it restarts the sidecar and records a `collectorGap`, not kits going offline.
 2. **ACL order and tests.** Grant admins access to `tag:idea-hub` first, then register the node, then confirm Koen can still reach idea's Console and MilkWise on 3333 and 3334, then add `tag:idea-hub → tag:idea:22`. Plain OpenSSH, not Tailscale SSH. ACL `tests` prove that `tag:idea` still cannot reach `tag:idea` and that idea-hub gets nothing except port 22.
 3. **Export restrictions.** Axle's root-owned key file and `/usr/local/sbin/idea-usage-export`, with `restrict,from="<sidecar IP>"`. The command accepts only `since YYYY-MM-DD` and `archive-and-clear --before YYYY-MM-DD`. Residual risk: the port 22 rule also reaches the pool Pis and idea's own SSH; the restricted key is the real control.
-4. **Kit rollout.** Nothing reaches the kits until Koen approves idea#374; they stay on `adfd9d3`, read-only. The kit-side pieces travel together in that overnight window: `idea-usage` and the sampler, helper v8 with the usage key file and the drop-in, the export command, the updated Kolibri, Nextcloud and Kiwix Apps (through `updateApp`), and the idea#389 reboot wrapper. Usual kit rules: one kit at a time; pause above 75 °C and resume below 65 °C; Steve pinged at START and FINISH; only when the school has agreed to keep the kit on. Everything is proved first on a pool Pi (idea03 or idea04). Before #374 the dashboard still records uplink history and the usage panels show "no data". Risk: the kits are online only a few hours a day over the Johannesburg relay, so plan for one kit per window, with a rollback that puts `adfd9d3` back.
+4. **Kit rollout.** Nothing reaches the kits until Koen approves idea#374; they stay on `adfd9d3`, read-only. The kit-side pieces travel together in that overnight window: `idea-usage` and the sampler, the `usageMonitoring` switch (left **off**), helper v8 with the usage key file and the drop-in, the export command, the updated Kolibri, Nextcloud and Kiwix Apps (through `updateApp`), and the idea#389 reboot wrapper. Usual kit rules: one kit at a time; pause above 75 °C and resume below 65 °C; Steve pinged at START and FINISH; only when the school has agreed to keep the kit on. Everything is proved first on a pool Pi (idea03 or idea04). After the update is confirmed, the kit is switched on deliberately with the `tools/fleet` toggle (§10). Before #374 the dashboard still records uplink history and the usage panels show "no data". Risk: the kits are online only a few hours a day over the Johannesburg relay, so plan for one kit per window, with a rollback that puts `adfd9d3` back.
 5. **SQLite backup.** `.backup` or `VACUUM INTO`, 14 daily copies, plus Borg through idea#389's `x-app.backup`, scheduled away from 05:00. Secrets under `./data/keys` and the sidecar state are excluded from that normal backup (`exclude:`) and go only to idea's encrypted Borg repo, restored on idea only.
 6. **System disk and pinned port.** Preferred: run the App from idea's system disk (Axle's open question). Fallback: a small App Disk that stays docked and survives 05:00. The web port is pinned and kept off 80, 3333, 3334 and 8081.
 7. **Never test on idea first.** The scratch install of the dashboard App and the helper v8 key proof run on idea03 or idea04, whichever is idle, never on golden idea01 (idea01 only runs merged main). The App goes on idea only with Koen's OK. idea02 is not golden and is not a scratch or proof host.
@@ -634,6 +710,7 @@ Feasible, and moving uplink history off Atlas's computer onto idea is the right 
 | Hook runner and discovery | Axle | 3–4 days |
 | Export command, helper v8 and key install | Axle | 2–3 days |
 | Local store, retention and `archive-and-clear` | Axle | 1–2 days |
+| Persistent off switch (`usageMonitoring`), toggle command and acceptance tests | Axle | 0.5–1 day |
 | Engine tests and pool Pi proof | Axle | 3–4 days |
 | Engine total | Axle | about 2–3 weeks before the duration test |
 | Kolibri hook on 0.15.5 and 0.19.5, with tests | Kid | 3–4 days |
@@ -652,7 +729,7 @@ Feasible, and moving uplink history off Atlas's computer onto idea is the right 
 | Retiring the kit watchers | Atlas | under an hour |
 | Ops total | Atlas | about 3 days spread over the rollout |
 
-The Engine work is the long pole on the kit side. The dashboard UI can start once Kid and Axle have settled the API field names, and can run in parallel with the hooks. Ops work is spread across the ACL change, the scratch install and the #374 window.
+The Engine work is the long pole on the kit side. The off switch is a small add (0.5–1 day) and does not change that total. The dashboard UI can start once Kid and Axle have settled the API field names, and can run in parallel with the hooks. Ops work is spread across the ACL change, the scratch install and the #374 window.
 
 ### Koen's idea#375 items
 
@@ -669,21 +746,21 @@ Separately, and not on idea#375: later approve the field update that moves kits 
 
 ---
 
-## 14. Recommendation
+## 15. Recommendation
 
-**Build Option B (Engine collector + per-App usage hooks, including Kiwix) with E1 pull into a programme dashboard App that runs on idea, stores SQLite there, and is triggered by Tailscale with no LLM. Privacy default: role-level aggregates. Ship kit-side pieces in the approved field update. Record D2 as a later issue.**
+**Build Option B (Engine collector + per-App usage hooks, including Kiwix) with E1 pull into a programme dashboard App that runs on idea, stores SQLite there, and is triggered by Tailscale with no LLM. Privacy default: role-level aggregates. Ship kit-side pieces in the approved field update, with `usageMonitoring` off by default, and enable it per kit deliberately. Record D2 as a later issue.**
 
-The architecture diagram in §7 shows how these new modules interact with the ones already in place. The Design Review outcome is in §13.
+The architecture diagram in §7 shows how these new modules interact with the ones already in place. Dependencies, reliability and the off switch are in §10. The Design Review outcome is in §14.
 
 Why:
 
 - Every question in §2 now has a matching metric in §3, including classes, learners registered and enrolled, teachers and admins, Wikipedia, and the before/after-help comparison. Where something cannot be measured, the audit says so rather than implying it.
 - Q1 while the kit is offline needs the Engine sampler; Q1 from IDEA's point of view needs a Tailscale history on idea. Neither is an LLM job.
-- Learner data stays at the school. Only counts by role, content and article titles travel, and nothing touches the shared Automerge store.
+- Learner data stays at the school. Only counts by role, content and article titles travel, and nothing touches the shared Automerge store. The existing Engine, Console and sync do not depend on monitoring; it ships switched off and can be turned off at fleet, kit or idea level if it ever threatens reliability (§10).
 - App knowledge stays with App Dev (Kid owns the hooks, the collector, the packaging and the read-only API; Pixel builds the dashboard UI); the Engine stays generic, reusing the hook pattern it already has. A standalone measurement App on the kits is possible but would need host privileges the Engine already has, which we should not give an App.
 - Per-instance reporting is supported by how the Engine already isolates instances (separate id, directory, compose project, ports and databases), including a Kolibri created for one class.
 - Measuring against the tutorial (§4) makes the result actionable: an amber line names the chapter to retrain, which is the help step Koen wants before any retraction.
 
 Ruled out: always-on remote scraping of school LANs; a usage document in Automerge; a programme view in the Console; exporting Kolibri's CSV (usernames, no roles); any silent change to the running kits; putting an unrestricted SSH key inside the dashboard App; allowing general kit-to-kit Tailscale traffic; extending an LLM-driven watcher instead of running a deterministic service on idea.
 
-What Koen needs to do, when he is ready, and not before this proposal is merged: the idea#375 items listed in §13 (create `tag:idea-hub`, the admin grant, the sidecar's tagged non-ephemeral auth key, the `tag:idea-hub → tag:idea:22` rule, confirm Console and MilkWise still work, and the sidecar-IP recovery note); later approve the field update that moves kits off `adfd9d3` (idea#374); set the scorecard thresholds; decide who tells the schools.
+What Koen needs to do, when he is ready, and not before this proposal is merged: the idea#375 items listed in §14 (create `tag:idea-hub`, the admin grant, the sidecar's tagged non-ephemeral auth key, the `tag:idea-hub → tag:idea:22` rule, confirm Console and MilkWise still work, and the sidecar-IP recovery note); later approve the field update that moves kits off `adfd9d3` (idea#374); set the scorecard thresholds; decide who tells the schools.
