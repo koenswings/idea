@@ -1282,3 +1282,5 @@
 {"ts":"2026-11-11T14:06:22Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle","previous":null}
 {"ts":"2026-11-11T14:20:08Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid"}
 {"ts":"2026-11-11T14:20:08Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-11T14:23:51Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-11T14:23:51Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid","previous":null}
