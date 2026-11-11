@@ -20,7 +20,9 @@
 # Environment: STATE_FILE, BOT_NAME, SSH_CMD, PROXY (fleet-lib.sh);
 #   TS_SOCK (default /home/box/.local/share/tailscale/tailscaled.sock);
 #   TAILSCALE_STATUS_JSON  test hook: read status --json from this file;
-#   SKIP_SSH=1             test hook: do not SSH (postcheck records skipped).
+#   SKIP_SSH=1             test hook: do not SSH (postcheck records skipped);
+#   TCP_PROBE_CMD          test hook: command invoked with the IPv4 to probe
+#                          TCP 22 (exit 0 = open). Used by the preflight canary.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -35,7 +37,7 @@ WAIT_TIMEOUT=600
 PI=""
 MODE=""
 
-usage() { sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; }
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -123,30 +125,52 @@ PY
 scan_tags() {
   python3 - 3<&0 <<'PY'
 import json, sys
-data = json.load(open('/dev/fd/3'))
+
+def first_label(dns):
+    return (dns or "").split(".")[0]
+
+def is_router(n, host):
+    dns = first_label(n.get("DNSName") or "")
+    return host.endswith("-router") or dns.endswith("-router")
+
+data = json.load(open("/dev/fd/3"))
 nodes = [data.get("Self") or {}]
 nodes.extend((data.get("Peer") or {}).values())
-idea, hub, online_tagged = [], [], []
+idea, hub, online_tagged, online_engines, skipped_routers = [], [], [], [], []
 for n in nodes:
-    host = n.get("HostName") or (n.get("DNSName") or "").split(".")[0] or "?"
+    host = n.get("HostName") or first_label(n.get("DNSName") or "") or "?"
     tags = n.get("Tags") or []
     ips = n.get("TailscaleIPs") or []
     ip4 = next((i for i in ips if ":" not in i), "")
     rec = {"name": host, "ip": ip4, "online": bool(n.get("Online")), "tags": tags,
-           "key_expiry": n.get("KeyExpiry") or ""}
+           "key_expiry": n.get("KeyExpiry") or "", "router": is_router(n, host)}
     if "tag:idea" in tags:
         idea.append(rec)
         if rec["online"]:
             online_tagged.append(rec)
+            if rec["router"]:
+                skipped_routers.append({"name": rec["name"], "ip": rec["ip"]})
+            else:
+                online_engines.append(rec)
     if "tag:idea-hub" in tags:
         hub.append(rec)
-print(json.dumps({"tag_idea": idea, "tag_idea_hub": hub, "online_tagged": online_tagged},
+print(json.dumps({"tag_idea": idea, "tag_idea_hub": hub,
+                  "online_tagged": online_tagged,
+                  "online_engines": online_engines,
+                  "skipped_routers": skipped_routers},
                  separators=(",", ":")))
 PY
 }
 
+# Max online tagged Engines to probe as the SSH canary (short timeout each).
+CANARY_PROBE_LIMIT="${CANARY_PROBE_LIMIT:-3}"
+
 tcp_22() {
   local host="$1"
+  if [ -n "${TCP_PROBE_CMD:-}" ]; then
+    "$TCP_PROBE_CMD" "$host"
+    return $?
+  fi
   python3 - "$host" <<'PY'
 import socket, sys
 host = sys.argv[1]
@@ -167,12 +191,19 @@ NOTES='[]'
 add_note() { NOTES="$(jq -c --arg n "$1" '. + [$n]' <<<"$NOTES")"; }
 
 do_preflight() {
-  local raw scan n_idea n_hub n_online canary="" canary_ok=false
+  local raw scan n_idea n_hub n_online n_engines
+  local canary_ip="" canary_name="" canary_ok=false canary_reason="" tried='[]'
+  local skipped_txt canary_obj ok
   raw="$(status_json)"
   scan="$(scan_tags <<<"$raw")"
   n_idea="$(jq '.tag_idea | length' <<<"$scan")"
   n_hub="$(jq '.tag_idea_hub | length' <<<"$scan")"
   n_online="$(jq '.online_tagged | length' <<<"$scan")"
+  n_engines="$(jq '.online_engines | length' <<<"$scan")"
+  skipped_txt="$(jq -r '
+    if (.skipped_routers | length) == 0 then "none"
+    else [.skipped_routers[] | "\(.name) (\(.ip))"] | join(", ")
+    end' <<<"$scan")"
   if [ "$n_idea" -gt 0 ]; then
     add_note "tag:idea is already on $n_idea node(s) (kits/routers). The tag exists in the tailnet."
   else
@@ -183,28 +214,68 @@ do_preflight() {
   else
     add_note "tag:idea-hub is not visible on any node. Step A (U-1/U-2) may still be live as a tagOwners entry with no sidecar yet (U-3). status --json cannot see unused tags; T-b is the console confirmation."
   fi
-  if [ "$n_online" -gt 0 ]; then
-    canary="$(jq -r '.online_tagged[0].ip' <<<"$scan")"
-    if [ -n "$canary" ] && tcp_22 "$canary" >/dev/null; then
-      canary_ok=true
-      add_note "Admin device can open TCP 22 to online tagged node $canary. admins → tag:idea:22 appears to work, so tagging a fleet Pi should not lock out SSH from this box."
+  if [ "$n_engines" -eq 0 ]; then
+    # Routers (or an empty online set) cannot prove admins → tag:idea:22.
+    # This is not a lock-out claim: kit routers have no sshd on Tailscale.
+    canary_reason="no_online_tagged_engine"
+    if [ "$n_online" -gt 0 ]; then
+      add_note "No online tagged Engine is available as an SSH canary (canary: null). Skipped *-router node(s): $skipped_txt. Kit routers have no sshd on Tailscale, so a failed probe to them is not a lock-out. T-b plus an online tagged Engine should confirm admins → tag:idea:22 before the first fleet tag."
     else
-      add_note "An online tagged node exists ($canary) but TCP 22 from this box failed. Do not tag a fleet Pi: tagging could lock out SSH."
+      add_note "No non-router tagged node is online (canary: null), so admin reachability to tag:idea cannot be proved from here. This is not a lock-out claim. T-b plus a later online tagged Engine canary should confirm admins → tag:idea before the first fleet tag."
     fi
   else
-    add_note "No tagged node is online, so admin reachability to tag:idea cannot be proved from here (kits were offline at preflight). T-b plus a later online kit canary should confirm admins → tag:idea before the first fleet tag."
+    local i=0 limit="$CANARY_PROBE_LIMIT" cip cname
+    if [ "$n_engines" -lt "$limit" ]; then
+      limit="$n_engines"
+    fi
+    while [ "$i" -lt "$limit" ]; do
+      cip="$(jq -r --argjson i "$i" '.online_engines[$i].ip' <<<"$scan")"
+      cname="$(jq -r --argjson i "$i" '.online_engines[$i].name' <<<"$scan")"
+      if [ -n "$cip" ] && tcp_22 "$cip" >/dev/null; then
+        canary_ok=true
+        canary_ip="$cip"
+        canary_name="$cname"
+        tried="$(jq -c --arg ip "$cip" --arg name "$cname" '. + [{name:$name,ip:$ip,tcp22:true}]' <<<"$tried")"
+        add_note "SSH canary is tagged Engine $cname ($cip); skipped *-router node(s): $skipped_txt. Admin device can open TCP 22. admins → tag:idea:22 appears to work, so tagging a fleet Pi should not lock out SSH from this box."
+        break
+      fi
+      tried="$(jq -c --arg ip "$cip" --arg name "$cname" '. + [{name:$name,ip:$ip,tcp22:false}]' <<<"$tried")"
+      canary_ip="$cip"
+      canary_name="$cname"
+      i=$((i + 1))
+    done
+    if [ "$canary_ok" != true ]; then
+      canary_reason="tcp22_failed"
+      add_note "Tried $limit online tagged Engine(s) as SSH canary (last: $canary_name $canary_ip) but TCP 22 from this box failed. Skipped *-router node(s): $skipped_txt. Do not tag a fleet Pi: tagging could lock out SSH."
+    fi
   fi
-  local ok=true
+  ok=true
   [ "$n_idea" -gt 0 ] || ok=false
   # Do not fail only because the hub tag is unseen (expected until U-3).
-  # Fail if we had an online tagged canary and could not reach it.
-  if [ "$n_online" -gt 0 ] && [ "$canary_ok" != true ]; then ok=false; fi
+  # Fail when no Engine canary is online, or when probed Engines did not answer TCP 22.
+  if [ "$canary_ok" != true ]; then ok=false; fi
+  if [ -z "$canary_ip" ] && [ "$canary_reason" = "no_online_tagged_engine" ]; then
+    canary_obj="null"
+  else
+    canary_obj="$(jq -nc --arg ip "$canary_ip" --arg name "$canary_name" \
+      --argjson tcp "$canary_ok" --arg reason "$canary_reason" --argjson tried "$tried" \
+      --argjson skipped "$(jq -c '.skipped_routers' <<<"$scan")" \
+      '{ip:(if $ip=="" then null else $ip end),
+        name:(if $name=="" then null else $name end),
+        tcp22:$tcp,
+        reason:(if $reason=="" then null else $reason end),
+        skipped_routers:$skipped,
+        tried:$tried}')"
+  fi
   jq -nc --argjson ok "$ok" --argjson scan "$scan" --argjson notes "$NOTES" \
-    --arg canary "$canary" --argjson canary_ok "$canary_ok" \
+    --argjson canary "$canary_obj" --arg reason "$canary_reason" \
+    --argjson skipped_routers "$(jq -c '.skipped_routers' <<<"$scan")" \
     '{script:"tag-fleet-idea.sh",mode:"preflight",ok:$ok,
       tag_idea_count:($scan.tag_idea|length),
       tag_idea_hub_count:($scan.tag_idea_hub|length),
-      observed:$scan, canary:{ip:$canary, tcp22:$canary_ok}, notes:$notes}'
+      observed:$scan, canary:$canary,
+      canary_reason:(if $reason=="" then null else $reason end),
+      skipped_routers:$skipped_routers, notes:$notes}'
 }
 
 claim_ok() {
