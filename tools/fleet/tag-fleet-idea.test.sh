@@ -49,7 +49,38 @@ JSON
 export TAILSCALE_STATUS_JSON="$WORK/status.json"
 
 OUT="$("$D/tag-fleet-idea.sh" preflight)"
-check "preflight ok when kits tagged but offline" bash -c 'jq -e ".ok==true and .tag_idea_count==1 and .tag_idea_hub_count==0 and .canary.tcp22==false" >/dev/null <<<"$0"' "$OUT"
+check "preflight canary null when kits tagged but offline" bash -c 'jq -e ".ok==false and .tag_idea_count==1 and .tag_idea_hub_count==0 and .canary==null and .canary_reason==\"no_online_tagged_engine\"" >/dev/null <<<"$0"' "$OUT"
+check "offline preflight note is not a lockout claim" bash -c 'jq -e "[.notes[] | select(test(\"lock out\")) ] | length == 0" >/dev/null <<<"$0"' "$OUT"
+check "offline preflight note mentions canary null" bash -c 'jq -e "[.notes[] | select(test(\"canary: null\"))] | length > 0" >/dev/null <<<"$0"' "$OUT"
+
+# Remaining precheck/wait/postcheck cases need preflight ok, so add an
+# online tagged Engine and a TCP_PROBE_CMD hook (never open a real socket).
+cat > "$WORK/tcp-open.sh" <<'SH'
+#!/usr/bin/env bash
+exit 0
+SH
+cat > "$WORK/tcp-fail.sh" <<'SH'
+#!/usr/bin/env bash
+exit 1
+SH
+cat > "$WORK/tcp-second-ok.sh" <<'SH'
+#!/usr/bin/env bash
+# Fail the first Engine (happy-zebra), succeed on the second (sunny-robin).
+case "$1" in
+  100.96.98.10) exit 0 ;;
+  *) exit 1 ;;
+esac
+SH
+chmod +x "$WORK/tcp-open.sh" "$WORK/tcp-fail.sh" "$WORK/tcp-second-ok.sh"
+
+python3 - "$WORK/status.json" <<'PY'
+import json, sys
+p = sys.argv[1]
+d = json.load(open(p))
+d["Peer"]["c"]["Online"] = True
+json.dump(d, open(p, "w"))
+PY
+export TCP_PROBE_CMD="$WORK/tcp-open.sh"
 
 "$D/tag-fleet-idea.sh" precheck --pi wizardly-hugle >/dev/null 2>&1
 check "refuses wizardly-hugle" test $? = 2
@@ -102,6 +133,49 @@ d=json.load(open(p)); d["Peer"]["a"]["TailscaleIPs"]=["100.64.0.1"]; json.dump(d
 PY
 OUT="$(SKIP_SSH=1 "$D/tag-fleet-idea.sh" postcheck --pi idea03 || true)"
 check "postcheck fails on IP change" bash -c 'jq -e ".ok==false" >/dev/null <<<"$0"' "$OUT"
+
+# --- SSH canary selection (skip *-router, prefer tagged Engines) ---
+
+# Router listed first, then two online Engines. Canary must be the Engine.
+cat > "$WORK/status-router-first.json" <<'JSON'
+{
+  "Self": {"HostName":"box-2-1","Online":true,"TailscaleIPs":["100.64.66.119"],"Tags":null,"KeyExpiry":"2027-04-15T09:29:40Z"},
+  "Peer": {
+    "r": {"HostName":"happy-zebra-router","DNSName":"happy-zebra-router.tailnet.","Online":true,"TailscaleIPs":["100.110.73.52"],"Tags":["tag:idea"],"KeyExpiry":""},
+    "e1": {"HostName":"happy-zebra","DNSName":"happy-zebra.tailnet.","Online":true,"TailscaleIPs":["100.102.94.100"],"Tags":["tag:idea"],"KeyExpiry":""},
+    "e2": {"HostName":"sunny-robin","Online":true,"TailscaleIPs":["100.96.98.10"],"Tags":["tag:idea"],"KeyExpiry":""},
+    "a": {"HostName":"idea03","Online":true,"TailscaleIPs":["100.126.117.80"],"Tags":null,"KeyExpiry":"2026-12-02T13:36:43Z"}
+  }
+}
+JSON
+OUT="$(TAILSCALE_STATUS_JSON="$WORK/status-router-first.json" TCP_PROBE_CMD="$WORK/tcp-open.sh" "$D/tag-fleet-idea.sh" preflight)"
+check "router-first list chooses tagged Engine" bash -c 'jq -e ".ok==true and .canary.ip==\"100.102.94.100\" and .canary.name==\"happy-zebra\" and .canary.tcp22==true and .canary_reason==null and (.skipped_routers|length)==1 and .skipped_routers[0].name==\"happy-zebra-router\" and .skipped_routers[0].ip==\"100.110.73.52\" and .canary.tried[0].ip==\"100.102.94.100\"" >/dev/null <<<"$0"' "$OUT"
+check "router-first notes report canary and skipped router" bash -c 'jq -e "[.notes[] | select(test(\"happy-zebra \\\\(100.102.94.100\\\\)\"))] | length > 0" >/dev/null <<<"$0" && jq -e "[.notes[] | select(test(\"happy-zebra-router \\\\(100.110.73.52\\\\)\"))] | length > 0" >/dev/null <<<"$0"' "$OUT"
+
+# Only routers online: canary null, distinct reason, not a lockout claim.
+cat > "$WORK/status-routers-only.json" <<'JSON'
+{
+  "Self": {"HostName":"box-2-1","Online":true,"TailscaleIPs":["100.64.66.119"],"Tags":null,"KeyExpiry":"2027-04-15T09:29:40Z"},
+  "Peer": {
+    "r": {"HostName":"happy-zebra-router","Online":true,"TailscaleIPs":["100.110.73.52"],"Tags":["tag:idea"],"KeyExpiry":""},
+    "r2": {"HostName":"sunny-robin-router","DNSName":"sunny-robin-router.tailnet.","Online":true,"TailscaleIPs":["100.64.1.2"],"Tags":["tag:idea"],"KeyExpiry":""},
+    "e_off": {"HostName":"sunny-robin","Online":false,"TailscaleIPs":["100.96.98.10"],"Tags":["tag:idea"],"KeyExpiry":""}
+  }
+}
+JSON
+OUT="$(TAILSCALE_STATUS_JSON="$WORK/status-routers-only.json" TCP_PROBE_CMD="$WORK/tcp-fail.sh" "$D/tag-fleet-idea.sh" preflight)"
+check "only-routers online reports canary null" bash -c 'jq -e ".ok==false and .canary==null and .canary_reason==\"no_online_tagged_engine\" and (.skipped_routers|length)==2 and (.skipped_routers|map(.name)|index(\"happy-zebra-router\"))!=null" >/dev/null <<<"$0"' "$OUT"
+check "only-routers note is not a lockout claim" bash -c 'jq -e "[.notes[] | select(test(\"lock out\"))] | length == 0" >/dev/null <<<"$0"' "$OUT"
+check "only-routers note explains routers skipped" bash -c 'jq -e "[.notes[] | select(test(\"canary: null\") and test(\"happy-zebra-router\") and test(\"no sshd\"))] | length > 0" >/dev/null <<<"$0"' "$OUT"
+
+# First Engine probe fails, second Engine succeeds.
+OUT="$(TAILSCALE_STATUS_JSON="$WORK/status-router-first.json" TCP_PROBE_CMD="$WORK/tcp-second-ok.sh" "$D/tag-fleet-idea.sh" preflight)"
+check "second Engine used after first probe fails" bash -c 'jq -e ".ok==true and .canary.ip==\"100.96.98.10\" and .canary.name==\"sunny-robin\" and .canary.tcp22==true and (.canary.tried|length)==2 and .canary.tried[0].ip==\"100.102.94.100\" and .canary.tried[0].tcp22==false and .canary.tried[1].ip==\"100.96.98.10\" and .canary.tried[1].tcp22==true and .skipped_routers[0].name==\"happy-zebra-router\"" >/dev/null <<<"$0"' "$OUT"
+
+# All Engine probes fail: tcp22_failed is a lock-out warning (routers still skipped).
+OUT="$(TAILSCALE_STATUS_JSON="$WORK/status-router-first.json" TCP_PROBE_CMD="$WORK/tcp-fail.sh" "$D/tag-fleet-idea.sh" preflight)"
+check "all Engine probes failing is tcp22_failed" bash -c 'jq -e ".ok==false and .canary.tcp22==false and .canary_reason==\"tcp22_failed\" and .canary.ip==\"100.96.98.10\" and (.canary.tried|length)==2 and .skipped_routers[0].name==\"happy-zebra-router\"" >/dev/null <<<"$0"' "$OUT"
+check "tcp22_failed note warns about lockout" bash -c 'jq -e "[.notes[] | select(test(\"lock out\"))] | length > 0" >/dev/null <<<"$0"' "$OUT"
 
 echo "tag-fleet-idea.test.sh: $pass passed, $fail failed"
 [ "$fail" = 0 ]

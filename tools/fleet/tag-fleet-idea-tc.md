@@ -120,17 +120,28 @@ can drop SSH, and we would rather learn that on a spare.
 sidecar exists.** Step A (U-1 + U-2) can be live without any node showing
 that tag. The safety property we can prove from the box is:
 
-- at least one peer (a kit or kit router) already shows `Tags: ["tag:idea"]`
-  — the tag exists;
-- if any such peer is online, TCP 22 from this box (an admin/user device)
-  to that peer succeeds — `admins → tag:idea:22` works, so tagging a
-  fleet Pi should not lock us out.
+- at least one peer already shows `Tags: ["tag:idea"]` — the tag exists;
+- the SSH canary is an **online tagged Engine**, not a `*-router`. Kit
+  routers have no sshd on Tailscale, so a TCP 22 probe to them always
+  fails and must not be treated as a lock-out. The script skips those
+  names (hostname or DNS label ending in `-router`), tries up to three
+  online tagged Engines (3s timeout each) until one answers TCP 22, and
+  reports the canary used plus the routers skipped. A successful probe
+  means `admins → tag:idea:22` works, so tagging a fleet Pi should not
+  lock us out of SSH from this box.
+- if no non-router tagged node is online, preflight reports `canary:
+  null` with a distinct `no_online_tagged_engine` reason. That is **not**
+  a lock-out claim. `ok` is false until an Engine canary is available.
+  If a canary Engine is online but TCP 22 fails, that *is* a possible
+  lock-out and is reported separately as `tcp22_failed`.
 
-Kits were offline at the 21:56 Europe/Brussels snapshot, so the script
-will record the tags and warn that the live canary could not run. T-b
-(read the live ACL) remains the console confirmation that `tagOwners`
-includes `tag:idea` and that admins may reach it. Do not tag the first
-fleet Pi if T-b shows no `admins → tag:idea` rule.
+Kits were offline at the 21:56 Europe/Brussels snapshot; later the first
+online `tag:idea` peer from the box's `tailscale status --json` was
+happy-zebra-router, which produced a false `ok:false` lock-out warning.
+T-b (read the live ACL) remains the console confirmation that
+`tagOwners` includes `tag:idea` and that admins may reach it. Do not
+tag the first fleet Pi if T-b shows no `admins → tag:idea` rule, or if
+preflight reports `tcp22_failed` against a tagged Engine.
 
 ```
 tools/fleet/tag-fleet-idea.sh preflight
