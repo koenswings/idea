@@ -1268,6 +1268,7 @@
 {"ts":"2026-11-11T12:46:11Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-11T13:34:55Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-11T13:34:55Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle"}
+{"ts":"2026-11-11T13:35:52Z","bot":"Atlas","action":"fleet_state_update","pi":"kind-panda","field":"known_offline","value":{"issue":"koenswings/idea#288","since":"2026-10-19"},"previous":null}
 {"ts":"2026-11-11T13:37:29Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-11T13:37:29Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: idea#430 Pi-to-Pi L-1 probe + post-Axle #431 re-check","previous":null}
 {"ts":"2026-11-11T13:42:57Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: idea#430 Pi-to-Pi L-1 probe + post-Axle #431 re-check"}
