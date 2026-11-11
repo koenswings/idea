@@ -36,7 +36,7 @@ Recorded so the next run does not rediscover it:
 - No `app-usage-dashboard` repo or agent-app-dev branch yet (idea#414).
   Sidecar registration waits on Kid's App and on U-3. Do not run sidecar
   install steps until those U-steps exist.
-- `usageMonitoring` toggle script waits on Axle's idea#411 interface.
+- `usageMonitoring` toggle: `tools/fleet/usage-monitoring.sh` (idea#411; waits on the Engine helper `idea-usage-settings` being installed on the Pi).
 - Fleet Pis were still untagged as of 2026-11-10 21:56 Europe/Brussels
   (`tailscale status --json`: idea01–04 and idea user-owned; kits already
   `tag:idea`). T-c runbook and check-only script:
@@ -271,7 +271,7 @@ Rules for each kit:
 5. After the update is confirmed, run `check-fleet-health.sh --pi <kit>`
    (and `--dhcp` when checking vendor class).
 6. Leave `usageMonitoring` **off** until it is switched on deliberately
-   with the `tools/fleet` toggle (once idea#411 defines the verb).
+   with `tools/fleet/usage-monitoring.sh` (idea#411).
    Toggling must not restart the Engine or the Apps.
 7. Rollback puts Engine `adfd9d3` back (and the matching helper /
    drop-in / key file by quarantining the new files and restoring the
@@ -293,16 +293,24 @@ another field-update window.
 
 ## 9. `tools/fleet` usageMonitoring toggle
 
-Not written yet. It waits on Axle (idea#411) for the persistent
-`usageMonitoring: off | on` setting and the SSH or helper verb that
-flips it without restarting the Engine or the Apps. When that verb
-exists, the script will:
+Implemented as [`usage-monitoring.sh`](usage-monitoring.sh) (idea#411).
+It calls `/usr/local/sbin/idea-usage-settings` (`on` / `off` / `status`)
+over SSH as `pi`. That helper writes only `/var/lib/idea/usage/settings.json`
+and never restarts the Engine or any App; `idea-usage` re-reads the file
+within a minute. The helper ships in agent-engine-dev (`installRootHelpers`).
 
-- take one kit (or pool Pi) at a time
-- refuse kits outside an approved window, golden-as-test, idea, and
-  claimed Pis
-- print JSON (`ok`, previous value, new value)
-- be covered by an offline test with fake ssh
+```
+tools/fleet/usage-monitoring.sh <pi> on|off|status
+tools/fleet/usage-monitoring.sh <pi> on|off|status --approve-kit-window
+```
+
+- one kit or pool Pi at a time
+- refuses kits unless `--approve-kit-window` (approved idea#374 window)
+- refuses golden (`role: golden`, including idea01 as a test target), idea /
+  wizardly-hugle (`DENY_HOSTS`), idea02 (`FLEET_DENY`), hold/paused/production,
+  and Pis claimed by someone else
+- prints JSON (`ok`, `previous`, `value`, `unchanged`, `pi`)
+- offline tests: [`usage-monitoring.test.sh`](usage-monitoring.test.sh) (fake ssh)
 
 ## 10. Health-check checklist (copy per Pi)
 
