@@ -203,20 +203,17 @@ it matches this table). Re-probe hub-to-idea at lockdown (§5.4).
    `probe-field-usage-acl.sh hub-to-idea` from the sidecar; `:22` open,
    `80,443,3333,3334,8080,8081` not open.
 
-## 6. Proposed grants and tests (HuJSON)
+## 6. Saved grants and tests (HuJSON)
 
-Merge these blocks into the live file; do not replace unrelated `hosts`,
-`ssh`, or `nodeAttrs`. Admin source is `autogroup:admin` (Koen's devices
-and box-2-1). This matches the already-saved U-1/U-2/U-4 grants and adds
-the deny tests that cannot be saved while allow-all is present.
-
-The live file uses `grants`. Equivalent classic `acls` are in
-[`field-usage-acl-final.hujson`](field-usage-acl-final.hujson).
+The blocks below match [`field-usage-acl-final.hujson`](field-usage-acl-final.hujson),
+which is the policy Koen saved for L-1, minus the first `tests` entry.
+The live file uses `grants` (not classic `acls`). Admin source is
+`autogroup:admin` (Koen's devices and box-2-1). The existing `ssh` check
+rule is kept; do not add Tailscale SSH access rules. There is no policy
+test with `src: autogroup:admin` — see §7.
 
 ```hujson
-// Lockdown paste — AFTER T-c, after idea is tagged, and after
-// Disable key expiry on idea (§5.2). Remove the allow-all
-// {src:"*", dst:"*", ip:"*"} grant. Keep the existing ssh check rule.
+// Saved L-1 policy (idea#430), without the rejected autogroup:admin test.
 {
   "tagOwners": {
     "tag:idea": ["autogroup:admin"],
@@ -230,22 +227,15 @@ The live file uses `grants`. Equivalent classic `acls` are in
     // F7: usage pull only.
     { "src": ["tag:idea-hub"], "dst": ["tag:idea"], "ip": ["tcp:22"] },
   ],
-  "tests": [
+  "ssh": [
     {
-      "src": "autogroup:admin",
-      "proto": "tcp",
-      "accept": [
-        "tag:idea:22",
-        "tag:idea:80",
-        "tag:idea:443",
-        "tag:idea:3333",
-        "tag:idea:3334",
-        "tag:idea:8080",
-        "tag:idea:8081",
-        "tag:idea-hub:22",
-        "tag:idea-hub:80",
-      ],
+      "action": "check",
+      "src": ["autogroup:member"],
+      "dst": ["autogroup:self"],
+      "users": ["autogroup:nonroot", "root"],
     },
+  ],
+  "tests": [
     {
       "src": "tag:idea",
       "proto": "tcp",
@@ -283,9 +273,9 @@ The live file uses `grants`. Equivalent classic `acls` are in
 
 Notes:
 
-- Admin destinations stay `ip: ["*"]`, matching the grants Koen already
-  saved. That covers Console, MilkWise, LuCI, SSH, and any Engine-side
-  port (idea03's `config.yaml` also mentions `port: 4321` — **inferred**,
+- Admin destinations stay `ip: ["*"]`, matching the grants Koen saved.
+  That covers Console, MilkWise, LuCI, SSH, and any Engine-side port
+  (idea03's `config.yaml` also mentions `port: 4321` — **inferred**,
   not probed). Narrowing admins to an explicit port list can wait; the
   important lock is “`tag:idea` initiates nothing” and “idea-hub gets
   only `:22`”.
@@ -295,7 +285,16 @@ Notes:
 - There is still **no** grant whose `src` is `tag:idea` (F8).
 - Do not add Tailscale SSH access rules.
 
-## 7. Rollback of lockdown
+## 7. Admin reach is checked by the probe, not by policy tests
+
+Tailscale rejected a policy test with `src: autogroup:admin` ("unknown
+user or host"). Admin reach (`autogroup:admin` → `tag:idea` /
+`tag:idea-hub`) is therefore checked by the probe script (the box
+re-probe, `probe-field-usage-acl.sh`), not by policy tests. The
+checked-in [`field-usage-acl-final.hujson`](field-usage-acl-final.hujson)
+matches the saved L-1 policy without that test.
+
+## 8. Rollback of lockdown
 
 Put the allow-all grant back (`{src: ["*"], dst: ["*"], ip: ["*"]}`) if
 someone loses SSH. That is broader than restoring only

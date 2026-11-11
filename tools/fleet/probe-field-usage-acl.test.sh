@@ -106,18 +106,25 @@ for f in field-usage-acl-step-a.hujson field-usage-acl-final.hujson; do
     JSON="{}"
   fi
   check "$f has tag:idea-hub owner" bash -c 'jq -e ".tagOwners[\"tag:idea-hub\"]" >/dev/null <<<"$0"' "$JSON"
-  check "$f has admin->idea" bash -c 'jq -e "[.acls[] | select(.src==[\"autogroup:admin\"] and (.dst|index(\"tag:idea:*\")))] | length > 0" >/dev/null <<<"$0"' "$JSON"
   check "$f has idea-cannot-reach-idea test" bash -c 'jq -e "[.tests[] | select(.src==\"tag:idea\" and (.deny|index(\"tag:idea:22\")))] | length > 0" >/dev/null <<<"$0"' "$JSON"
 done
 
 STEP="$(load_hujson "$D/field-usage-acl-step-a.hujson")"
 FINAL="$(load_hujson "$D/field-usage-acl-final.hujson")"
+# Step A is still the classic-acls snippet (U-1 / U-2).
+check "step-a has admin->idea acl" bash -c 'jq -e "[.acls[] | select(.src==[\"autogroup:admin\"] and (.dst|index(\"tag:idea:*\")))] | length > 0" >/dev/null <<<"$0"' "$STEP"
 check "step-a has no hub->idea:22 acl" bash -c 'jq -e "[.acls[] | select((.src==[\"tag:idea-hub\"]) and (.dst|index(\"tag:idea:22\")))] | length == 0" >/dev/null <<<"$0"' "$STEP"
 check "step-a denies hub->idea:22" bash -c 'jq -e "[.tests[] | select(.src==\"tag:idea-hub\" and (.deny|index(\"tag:idea:22\")))] | length > 0" >/dev/null <<<"$0"' "$STEP"
-check "final has hub->idea:22 acl" bash -c 'jq -e "[.acls[] | select((.src==[\"tag:idea-hub\"]) and (.dst|index(\"tag:idea:22\")))] | length > 0" >/dev/null <<<"$0"' "$FINAL"
+# Final is the saved L-1 policy: grants, not acls; no autogroup:admin test.
+check "final uses grants, not acls" bash -c 'jq -e "(.grants|type)==\"array\" and (.acls==null)" >/dev/null <<<"$0"' "$FINAL"
+check "final has admin->idea grant" bash -c 'jq -e "[.grants[] | select(.src==[\"autogroup:admin\"] and .dst==[\"tag:idea\"] and (.ip|index(\"*\")))] | length > 0" >/dev/null <<<"$0"' "$FINAL"
+check "final has admin->idea-hub grant" bash -c 'jq -e "[.grants[] | select(.src==[\"autogroup:admin\"] and .dst==[\"tag:idea-hub\"] and (.ip|index(\"*\")))] | length > 0" >/dev/null <<<"$0"' "$FINAL"
+check "final has hub->idea:22 grant" bash -c 'jq -e "[.grants[] | select(.src==[\"tag:idea-hub\"] and .dst==[\"tag:idea\"] and (.ip|index(\"tcp:22\")))] | length > 0" >/dev/null <<<"$0"' "$FINAL"
+check "final has no autogroup:admin test" bash -c 'jq -e "[.tests[] | select(.src==\"autogroup:admin\")] | length == 0" >/dev/null <<<"$0"' "$FINAL"
 check "final accepts hub->idea:22" bash -c 'jq -e "[.tests[] | select(.src==\"tag:idea-hub\" and (.accept|index(\"tag:idea:22\")))] | length > 0" >/dev/null <<<"$0"' "$FINAL"
 check "final denies hub->idea:80" bash -c 'jq -e "[.tests[] | select(.src==\"tag:idea-hub\" and (.deny|index(\"tag:idea:80\")))] | length > 0" >/dev/null <<<"$0"' "$FINAL"
 check "final denies hub->idea:3333" bash -c 'jq -e "[.tests[] | select(.src==\"tag:idea-hub\" and (.deny|index(\"tag:idea:3333\")))] | length > 0" >/dev/null <<<"$0"' "$FINAL"
+check "final keeps ssh check rule" bash -c 'jq -e "[.ssh[] | select(.action==\"check\" and .src==[\"autogroup:member\"] and .dst==[\"autogroup:self\"])] | length > 0" >/dev/null <<<"$0"' "$FINAL"
 check "neither snippet uses wildcard dest in tests" bash -c 'jq -e "[.tests[].accept[]?, .tests[].deny[]?] | map(select(endswith(\":*\") or .==\"*\")) | length == 0" >/dev/null <<<"$0"' "$FINAL"
 
 # --- stub ---
