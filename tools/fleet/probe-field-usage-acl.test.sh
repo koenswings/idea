@@ -106,7 +106,7 @@ for f in field-usage-acl-step-a.hujson field-usage-acl-final.hujson; do
     JSON="{}"
   fi
   check "$f has tag:idea-hub owner" bash -c 'jq -e ".tagOwners[\"tag:idea-hub\"]" >/dev/null <<<"$0"' "$JSON"
-  check "$f has admin->idea" bash -c 'jq -e "[.acls[] | select(.src==[\"group:admins\"] and (.dst|index(\"tag:idea:*\")))] | length > 0" >/dev/null <<<"$0"' "$JSON"
+  check "$f has admin->idea" bash -c 'jq -e "[.acls[] | select(.src==[\"autogroup:admin\"] and (.dst|index(\"tag:idea:*\")))] | length > 0" >/dev/null <<<"$0"' "$JSON"
   check "$f has idea-cannot-reach-idea test" bash -c 'jq -e "[.tests[] | select(.src==\"tag:idea\" and (.deny|index(\"tag:idea:22\")))] | length > 0" >/dev/null <<<"$0"' "$JSON"
 done
 
