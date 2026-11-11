@@ -80,7 +80,22 @@ json.dump(d, open(p,"w"))
 PY
 
 OUT="$("$S" --dry-run tag --pi idea03)"
-check "dry-run tag does not apply and stays ok" bash -c 'jq -e ".ok==true and .dry_run==true and .applied==false" >/dev/null <<<"$0"' "$OUT"
+# Fixture has only offline sunny-robin tagged, so tag-fleet-idea precheck is
+# ok:false (canary_reason=no_online_tagged_engine) after #434. Dry-run still
+# applies nothing.
+check "dry-run tag does not apply when canary is missing" bash -c 'jq -e ".ok==false and .dry_run==true and .applied==false and .precheck.ok==true and .tag_fleet_precheck.ok==false and .tag_fleet_precheck.preflight.canary_reason==\"no_online_tagged_engine\"" >/dev/null <<<"$0"' "$OUT"
+
+# Green path: an online tagged Engine plus TCP_PROBE_CMD (no real socket),
+# same hook as tag-fleet-idea.test.sh. Dry-run tag should then stay ok and
+# still not apply.
+cat > "$WORK/tcp-open.sh" <<'SH'
+#!/usr/bin/env bash
+exit 0
+SH
+chmod +x "$WORK/tcp-open.sh"
+jq '.Peer.e.Online=true' "$WORK/status.json" > "$WORK/status-online-kit.json"
+OUT="$(TAILSCALE_STATUS_JSON="$WORK/status-online-kit.json" TCP_PROBE_CMD="$WORK/tcp-open.sh" "$S" --dry-run tag --pi idea03)"
+check "dry-run tag does not apply and stays ok when canary is green" bash -c 'jq -e ".ok==true and .dry_run==true and .applied==false and .tag_fleet_precheck.ok==true and .tag_fleet_precheck.preflight.canary.tcp22==true" >/dev/null <<<"$0"' "$OUT"
 
 OUT="$("$S" --dry-run probe-acl --from-pi idea03)"
 check "dry-run probe-acl does not SSH" bash -c 'jq -e ".ok==true and .dry_run==true and .applied==false" >/dev/null <<<"$0"' "$OUT"
