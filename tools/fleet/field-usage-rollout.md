@@ -12,6 +12,7 @@ a Pi another bot has claimed. Kits stay pinned at Engine `adfd9d3` and
 read-only until Koen approves idea#374.
 
 ACL paste and tests: [`field-usage-acl.md`](field-usage-acl.md).
+Post-U-step checklist and dry-run script: [`field-usage-u-steps.md`](field-usage-u-steps.md), [`field-usage-after-u-steps.sh`](field-usage-after-u-steps.sh).
 Runtime probe: [`probe-field-usage-acl.sh`](probe-field-usage-acl.sh).
 Restricted-key proof (pool Pi): [`prove-usage-export-key.sh`](prove-usage-export-key.sh).
 
