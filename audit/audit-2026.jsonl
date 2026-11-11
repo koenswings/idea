@@ -1354,3 +1354,5 @@
 {"ts":"2026-11-11T20:14:38Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-11T20:27:24Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-11T20:27:24Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: idea#414 sidecar SIGKILL scratch proof (app-usage-dashboard#13)","previous":null}
+{"ts":"2026-11-11T20:30:50Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: idea#414 sidecar SIGKILL scratch proof (app-usage-dashboard#13)"}
+{"ts":"2026-11-11T20:30:50Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
