@@ -39,8 +39,22 @@ setup() {  # repo with defaults committed, then the Pi's local edits on top
   echo "$DEFAULT" > store-identity/store-url.txt; echo "automerge:cmdlogDefault" > store-identity/command-log-url.txt
   git add -A; git commit -qm base; echo v2 > engine.txt
   if [ -n "${WITH_VC:-}" ]; then mkdir -p script/build_image_assets; echo '#!/bin/bash' > script/build_image_assets/idea-dhcp-vendor-class; fi
-  if [ -n "${WITH_HELPERS:-}" ]; then mkdir -p script/build_image_assets; echo flash-v2 > script/build_image_assets/idea-flash-card
-    printf '#!/bin/sh\n[ -n "$FAKE_HELPER_BAD" ] && { echo old > "$SBIN/idea-flash-card"; exit 0; }\ncp script/build_image_assets/idea-flash-card "$SBIN/"\n' > install-root-helpers; chmod +x install-root-helpers; fi
+  if [ -n "${WITH_HELPERS:-}" ]; then mkdir -p script/build_image_assets
+    echo flash-v2 > script/build_image_assets/idea-flash-card
+    echo appdata-v2 > script/build_image_assets/idea-app-data
+    echo erase-v2 > script/build_image_assets/idea-erase-disk
+    echo settings-v2 > script/build_image_assets/idea-usage-settings
+    echo export-v2 > script/build_image_assets/idea-usage-export
+    cat > install-root-helpers <<'IRH'
+#!/bin/sh
+for a in script/build_image_assets/idea-flash-card script/build_image_assets/idea-app-data script/build_image_assets/idea-erase-disk script/build_image_assets/idea-usage-settings script/build_image_assets/idea-usage-export; do
+  [ -f "$a" ] || continue
+  b=$(basename "$a")
+  if [ -n "$FAKE_HELPER_BAD" ] && [ "$b" = idea-flash-card ]; then echo old > "$SBIN/$b"; continue; fi
+  cp "$a" "$SBIN/$b"
+done
+IRH
+    chmod +x install-root-helpers; fi
   git add -A; git commit -qm tip
   TIP=$(git rev-parse HEAD); git checkout -q HEAD~1
   echo "mdns: true # local" > config.yaml; echo "module.exports={local:1}" > pm2.config.cjs
@@ -105,7 +119,7 @@ setup dry2; run dry2 --dry-run; rc=$?
 check "--dry-run lists kept sha256 and changes nothing" [ "$rc" = 0 ] && grep -q "store-identity/store-url.txt" "$WORK/out" && [ ! -e "$WORK/pm2.log" ] && [ ! -d "$WORK/bk-dry2" ]
 # Root helpers
 WITH_HELPERS=1 setup rh; run rh --yes; rc=$?
-check "helpers: installed and verified" [ "$rc" = 0 ] && grep -q "helper idea-flash-card sha" "$WORK/out" && grep -q -- "-n visudo -c" "$WORK/sudo.log"
+check "helpers: installed and verified" [ "$rc" = 0 ] && grep -q "helper idea-flash-card sha" "$WORK/out" && grep -q "helper idea-usage-settings sha" "$WORK/out" && grep -q "helper idea-usage-export sha" "$WORK/out" && grep -q -- "-n visudo -c" "$WORK/sudo.log"
 WITH_HELPERS=1 setup rhbad; FAKE_HELPER_BAD=1 run rhbad --yes; rc=$?
 check "helpers: sha mismatch aborts before restart" [ "$rc" = 3 ] && [ ! -e "$WORK/pm2.log" ]
 setup norh; run norh --yes; rc=$?
@@ -145,15 +159,32 @@ echo "$*" >> "$WORK/pm2.log"
 exit 0
 SH
 chmod +x "$WORK/bin/pm2"
-WITH_HELPERS=1 setup on; git -C "$R" checkout -q "$TIP"; mkdir -p "$WORK/sbin-on"; cp "$R/script/build_image_assets/idea-flash-card" "$WORK/sbin-on/"
+install_repo_helpers() {  # copy every HELPERS asset from $1 (repo) into $2 (sbin)
+  local src="$1/script/build_image_assets" dest="$2"
+  mkdir -p "$dest"
+  for h in idea-flash-card idea-app-data idea-erase-disk idea-usage-settings idea-usage-export; do
+    [ -f "$src/$h" ] && cp "$src/$h" "$dest/$h"
+  done
+}
+WITH_HELPERS=1 setup on; git -C "$R" checkout -q "$TIP"; install_repo_helpers "$R" "$WORK/sbin-on"
 FAKE_PM2_PID=4242 run on --yes; rc=$?
 check "already on target skips" [ "$rc" = 0 ] && grep -q "already on .*, skipping" "$WORK/out" && ! grep -q "restart" "$WORK/pm2.log" && [ ! -d "$WORK/bk-on" ]
-WITH_HELPERS=1 setup onh; git -C "$R" checkout -q "$TIP"; mkdir -p "$WORK/sbin-onh"; echo old > "$WORK/sbin-onh/idea-flash-card"
+WITH_HELPERS=1 setup onh; git -C "$R" checkout -q "$TIP"; install_repo_helpers "$R" "$WORK/sbin-onh"; echo old > "$WORK/sbin-onh/idea-flash-card"
 FAKE_PM2_PID=4242 run onh --yes; rc=$?
 check "on target but old helper: deploys" [ "$rc" = 0 ] && grep -q "differs from the repo: not skipping" "$WORK/out" && grep -q "restart engine" "$WORK/pm2.log"
-WITH_HELPERS=1 setup onp; git -C "$R" checkout -q "$TIP"; mkdir -p "$WORK/sbin-onp"; cp "$R/script/build_image_assets/idea-flash-card" "$WORK/sbin-onp/"
+WITH_HELPERS=1 setup onp; git -C "$R" checkout -q "$TIP"; install_repo_helpers "$R" "$WORK/sbin-onp"
 FAKE_PM2_PID=0 run onp --yes; rc=$?
 check "on target but engine offline: deploys" [ "$rc" = 0 ] && grep -q "not online: not skipping" "$WORK/out"
+# idea#412: already-on-tip must not skip when usage helpers are missing or stale
+WITH_HELPERS=1 setup onmiss; git -C "$R" checkout -q "$TIP"; install_repo_helpers "$R" "$WORK/sbin-onmiss"; rm -f "$WORK/sbin-onmiss/idea-usage-settings"
+FAKE_PM2_PID=4242 run onmiss --yes; rc=$?
+check "on target but idea-usage-settings missing: not skip, install-root-helpers runs" [ "$rc" = 0 ] && grep -q "idea-usage-settings differs from the repo: not skipping" "$WORK/out" && grep -q "helper idea-usage-settings sha" "$WORK/out" && [ -f "$WORK/sbin-onmiss/idea-usage-settings" ] && grep -q "restart engine" "$WORK/pm2.log"
+WITH_HELPERS=1 setup onexp; git -C "$R" checkout -q "$TIP"; install_repo_helpers "$R" "$WORK/sbin-onexp"; echo stale-export > "$WORK/sbin-onexp/idea-usage-export"
+FAKE_PM2_PID=4242 run onexp --yes; rc=$?
+check "on target but idea-usage-export differs: not skip, helper refreshed" [ "$rc" = 0 ] && grep -q "idea-usage-export differs from the repo: not skipping" "$WORK/out" && grep -q "helper idea-usage-export sha" "$WORK/out" && [ "$(cat "$WORK/sbin-onexp/idea-usage-export")" = export-v2 ]
+WITH_HELPERS=1 setup dryusage; git -C "$R" checkout -q "$TIP"; install_repo_helpers "$R" "$WORK/sbin-dryusage"; rm -f "$WORK/sbin-dryusage/idea-usage-settings"
+FAKE_PM2_PID=4242 run dryusage --dry-run; rc=$?
+check "dry-run lists idea-usage-settings WOULD CHANGE and does not install" [ "$rc" = 0 ] && grep -q "idea-usage-settings" "$WORK/out" && grep -q "WOULD CHANGE" "$WORK/out" && [ ! -f "$WORK/sbin-dryusage/idea-usage-settings" ] && [ ! -e "$WORK/pm2.log" ] && [ ! -d "$WORK/bk-dryusage" ]
 
 # Temperature guard (mocked vcgencmd reads a queue of temps; last value repeats)
 cat > "$WORK/bin/vcgencmd" <<'SH'

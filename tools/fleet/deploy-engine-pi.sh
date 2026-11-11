@@ -8,7 +8,7 @@
 # -> discard those local edits -> git checkout --detach <tip> -> restore the saved files
 # -> verify they are byte-identical and store-url.txt is still the expected store
 # -> pnpm install + build -> DHCP vendor class (idea#284) -> ./install-root-helpers (flash/app-data/
-# erase helpers + sudoers, then sha256 vs the repo and visudo -c) -> verify again -> pm2 restart engine + pm2 save.
+# erase/usage-settings/usage-export helpers + sudoers, then sha256 vs the repo and visudo -c) -> verify again -> pm2 restart engine + pm2 save.
 # Any failed check aborts BEFORE pm2 restart (exit 3); the running Engine keeps its old store.
 # ALWAYS kept, whatever git status says (skip-worktree files included): config.yaml, pm2.config.cjs,
 # the whole store-identity/ dir and ~/.idea-local; backed up first, restored byte-for-byte, sha256-checked.
@@ -20,7 +20,8 @@
 #
 # Lock: one deploy per Pi at a time (flock on $LOCK_FILE, default /tmp/idea-deploy.lock, non-blocking;
 # busy -> exit 75). Box side: tools/fleet/deploy-engine-remote.sh also locks per host on the box.
-# Already on target (HEAD = tip, helpers = repo, pm2 engine online): "already on <sha>, skipping", exit 0.
+# Already on target (HEAD = tip, helpers in HELPERS = repo assets, pm2 engine online): "already on <sha>, skipping", exit 0.
+# If idea-usage-settings or idea-usage-export (or any other HELPERS entry present in the tip) is missing or differs, do not skip: run install-root-helpers.
 # Temperature guard: before each build/install step, above TEMP_PAUSE (75 C) it pauses and polls every
 # TEMP_POLL s (30) until below TEMP_RESUME (65 C); the peak per step is logged and summarised at the end.
 # This script does not deploy the Console (see docs/ops/engine-deploy-pool-pi.md).
@@ -36,7 +37,7 @@ BACKUP_ROOT="${BACKUP_ROOT:-/home/pi/quarantine}"
 KEEP="config.yaml pm2.config.cjs"                    # plus every file in store-identity/
 IDEA_LOCAL="${IDEA_LOCAL:-$HOME/.idea-local}"        # kit local override, outside the repo; kept too
 DEFAULT_STORE_PREFIX="automerge:4GQm"                # repo default (idea02 production): never restored to
-HELPERS="idea-flash-card idea-app-data idea-erase-disk"  # script/build_image_assets -> $SBIN
+HELPERS="idea-flash-card idea-app-data idea-erase-disk idea-usage-settings idea-usage-export"  # script/build_image_assets -> $SBIN
 SBIN="${SBIN:-/usr/local/sbin}"
 
 die() { echo "ABORT: $*" >&2; exit 3; }
@@ -193,7 +194,7 @@ if [ -f "$VC_ASSET" ]; then
 else
   echo "DHCP vendor class: $VC_ASSET not in this Engine commit, skipped"
 fi
-# Root helpers (flash helper, app-data, erase-disk, sudoers): no Engine runs new code with an old helper.
+# Root helpers (flash, app-data, erase-disk, usage-settings, usage-export, sudoers): no Engine runs new code with an old helper.
 # install-root-helpers calls sudo itself (passwordless sudo, as pi) and runs visudo -cf on the sudoers files.
 temp_guard root-helpers
 if [ -x ./install-root-helpers ]; then
