@@ -19,16 +19,18 @@ Related: [idea#375 T-c](https://github.com/koenswings/idea/issues/375),
 `installTailscale` (`build-engine` / `provision-fleet.sh`), which stores the
 fleet key at `/etc/tailscale/debug-authkey` (0600, root, via stdin) and
 installs `tailscale-debug-activate.sh`. That activate script still uses the
-old latent-debug model:
+latent-debug start/stop model, but it no longer passes `--ephemeral` (an
+ephemeral node vanishes after it has been offline, and the D-2 key is
+non-ephemeral):
 
 ```
 tailscale up --auth-key=file:/etc/tailscale/debug-authkey \
-  --ephemeral --advertise-tags=tag:idea --hostname="$(hostname)"
+  --advertise-tags=tag:idea --hostname="$(hostname)"
 ```
 
 The 2026-10-13 design (always-on, one `tag:idea`, one fleet auth key) is
-decided (idea#117 D-2 option 3) but the Engine code has not moved yet. Whether
-the fleet key itself is tagged is T-a (unread).
+decided (idea#117 D-2 option 3). Always-on first-boot join is engine#291.
+Whether the fleet key itself is tagged is T-a.
 
 How nodes on this tailnet actually look (box `tailscale status --json`,
 2026-11-10 21:56 Europe/Brussels):
