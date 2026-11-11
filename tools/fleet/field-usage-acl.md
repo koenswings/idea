@@ -190,7 +190,7 @@ Do not remove `tag:idea` or the admin → `tag:idea` rule.
 
 ### Other off-switch levels (not ACL)
 
-2. Per kit: `usageMonitoring` off (idea#411; `tools/fleet` toggle once Axle defines the verb).
+2. Per kit: `usageMonitoring` off (idea#411; `tools/fleet/usage-monitoring.sh`).
 3. On idea: stop the dashboard App.
 4. Emergency: quarantine `/etc/ssh/idea_usage_keys/%u` on the kit (never `rm -rf`).
 
