@@ -233,6 +233,10 @@
       "firmware": null,
       "read": null,
       "open": "record firmware, MACs, /etc/idea/version and host key read-only when the router is installed and seen online (Koen 2026-10-29 09:47 CET: record only what we observe)"
+    },
+    "known_offline": {
+      "issue": "koenswings/idea#288",
+      "since": "2026-10-19"
     }
   },
   "happy-zebra": {
