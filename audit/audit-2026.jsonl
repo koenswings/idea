@@ -1337,3 +1337,5 @@
 {"ts":"2026-11-11T19:12:45Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-11T19:19:59Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-11T19:19:59Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: idea#414 identity-guard + hung-sidecar proof (app-usage-dashboard#11)","previous":null}
+{"ts":"2026-11-11T19:47:00Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: idea#414 identity-guard + hung-sidecar proof (app-usage-dashboard#11)"}
+{"ts":"2026-11-11T19:47:00Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
