@@ -1,7 +1,10 @@
 # Field-usage Tailscale ACL (idea#416)
 
-**Status:** Ready to paste, not yet applied · **Maintained by:** Atlas · 2026-11-10
-**Waits on:** Koen's idea#375 U-1 to U-5 (admin console). Nobody else edits the live ACL.
+**Status:** L-1 policy saved (2026-11-11); checked-in copy in
+[`field-usage-acl-final.hujson`](field-usage-acl-final.hujson) · **Maintained by:** Atlas · 2026-11-11
+**Nobody else edits the live ACL.** The final file uses `grants`, not classic
+`acls`. There is no policy test with `src: autogroup:admin` (Tailscale
+rejects that src); admin reach is checked by the probe script.
 
 This is the paste-ready ACL change for field-usage monitoring
 ([proposal](../../proposals/2026-11-09-field-usage-monitoring.md) §7.5 and §14 Atlas,
@@ -10,7 +13,7 @@ This is the paste-ready ACL change for field-usage monitoring
 HuJSON snippets sit next to this file:
 
 - [`field-usage-acl-step-a.hujson`](field-usage-acl-step-a.hujson) — U-1 and U-2
-- [`field-usage-acl-final.hujson`](field-usage-acl-final.hujson) — after U-4
+- [`field-usage-acl-final.hujson`](field-usage-acl-final.hujson) — saved L-1 policy (`grants`; no `autogroup:admin` test)
 
 The live runtime probe is [`probe-field-usage-acl.sh`](probe-field-usage-acl.sh).
 The ordered rollout is [`field-usage-rollout.md`](field-usage-rollout.md).
@@ -20,8 +23,11 @@ anywhere in these files or in GitHub.
 
 ## What is known of the current policy
 
-There is **no checked-in copy** of the live tailnet policy. idea#375 item T-b
-(read the ACL) is still open.
+The saved L-1 policy is checked in as
+[`field-usage-acl-final.hujson`](field-usage-acl-final.hujson) (`grants`
+syntax; the `autogroup:admin` policy test was dropped because Tailscale
+rejected it with "unknown user or host"). The notes below are the
+picture as of the U-steps, kept for history.
 
 The last approved sketch
 ([`proposals/2026-10-13-tailscale-single-fleet-tag.md`](../../proposals/2026-10-13-tailscale-single-fleet-tag.md))
@@ -74,7 +80,11 @@ second, conflicting `acls` section.
     ports that matter (SSH, Console, MilkWise, common HTTP).
   - `tag:idea-hub` accepts only `tag:idea:22` and is denied on the other
     listed ports.
-  - Admins can still reach both tags.
+  - Admin reach (`autogroup:admin` → `tag:idea` / `tag:idea-hub`) is
+    **not** a policy test: Tailscale rejects `autogroup:admin` as a test
+    `src` ("unknown user or host"). It is checked by
+    [`probe-field-usage-acl.sh`](probe-field-usage-acl.sh) (the box
+    re-probe).
 
 idea itself stays `tag:idea`. Only the dashboard sidecar is `tag:idea-hub`.
 Do not retag idea (100.115.60.6).
@@ -138,11 +148,13 @@ Equivalent grant if the live file uses `grants`:
 ```
 
 2. Replace the Step A `tag:idea-hub` test (all-deny, including port 22)
-   with the Final test in `field-usage-acl-final.hujson`: accept
-   `tag:idea:22`, deny the other listed ports.
+   with the Final `tag:idea-hub` and `tag:idea` tests in
+   `field-usage-acl-final.hujson`: accept `tag:idea:22`, deny the other
+   listed ports. Do **not** add a test with `src: autogroup:admin`
+   (Tailscale rejects it).
 3. Save. The tests now refuse a save that accidentally grants
    `tag:idea-hub` anything except tcp/22, or that lets `tag:idea` dial
-   `tag:idea`.
+   `tag:idea`. Admin reach is checked by the probe, not by a policy test.
 4. Atlas runs `probe-field-usage-acl.sh hub-to-idea` from the sidecar
    (port 22 must open; 80, 3333, 3334, 8080, 8081 must not) and
    `probe-field-usage-acl.sh idea-to-idea` from a pool Pi. The
@@ -164,6 +176,10 @@ Equivalent grant if the live file uses `grants`:
    ]
 +  // plus the tests in field-usage-acl-final.hujson
 ```
+
+The saved L-1 policy uses the equivalent `grants` form (not classic
+`acls`) and omits an `autogroup:admin` test; see
+`field-usage-acl-final.hujson`.
 
 No other sources gain new destinations. In particular there is still no
 rule with `src` `tag:idea`.
@@ -190,7 +206,7 @@ Do not remove `tag:idea` or the admin → `tag:idea` rule.
 
 ### Other off-switch levels (not ACL)
 
-2. Per kit: `usageMonitoring` off (idea#411; `tools/fleet` toggle once Axle defines the verb).
+2. Per kit: `usageMonitoring` off (idea#411; `tools/fleet/usage-monitoring.sh`).
 3. On idea: stop the dashboard App.
 4. Emergency: quarantine `/etc/ssh/idea_usage_keys/%u` on the kit (never `rm -rf`).
 
@@ -215,6 +231,8 @@ tools/fleet/probe-field-usage-acl.test.sh
 ```
 
 That parses both HuJSON files (comments and trailing commas stripped)
-and checks that the required `tagOwners`, `acls` and `tests` blocks are
-present. Tailscale itself will also run the `tests` when the file is
-saved in the admin console.
+and checks that the required `tagOwners` and `tests` blocks are present,
+that Step A still uses classic `acls`, and that the Final file uses
+`grants` and has no `autogroup:admin` test. Tailscale itself will also
+run the `tests` when the file is saved in the admin console. Admin reach
+is checked by the probe script, not by those tests.
