@@ -177,5 +177,85 @@ OUT="$(TAILSCALE_STATUS_JSON="$WORK/status-router-first.json" TCP_PROBE_CMD="$WO
 check "all Engine probes failing is tcp22_failed" bash -c 'jq -e ".ok==false and .canary.tcp22==false and .canary_reason==\"tcp22_failed\" and .canary.ip==\"100.96.98.10\" and (.canary.tried|length)==2 and .skipped_routers[0].name==\"happy-zebra-router\"" >/dev/null <<<"$0"' "$OUT"
 check "tcp22_failed note warns about lockout" bash -c 'jq -e "[.notes[] | select(test(\"lock out\"))] | length > 0" >/dev/null <<<"$0"' "$OUT"
 
+# --- SOCKS / plain-socket canary probe (userspace Tailscale) ---
+
+cat > "$WORK/socks-banner.sh" <<'SH'
+#!/usr/bin/env bash
+# Fake socks-connect <ip> <port>: print an SSH banner, then idle.
+printf 'SSH-2.0-OpenSSH_9.2p1_test\r\n'
+sleep 8
+SH
+cat > "$WORK/socks-silent.sh" <<'SH'
+#!/usr/bin/env bash
+exit 0
+SH
+cat > "$WORK/socks-fail.sh" <<'SH'
+#!/usr/bin/env bash
+echo "socks fail" >&2
+exit 1
+SH
+cat > "$WORK/socks-log.sh" <<'SH'
+#!/usr/bin/env bash
+echo "called $*" >> "$WORK/socks-called.log"
+printf 'SSH-2.0-should-not-be-used\r\n'
+SH
+chmod +x "$WORK/socks-banner.sh" "$WORK/socks-silent.sh" "$WORK/socks-fail.sh" "$WORK/socks-log.sh"
+
+OUT="$(env -u TCP_PROBE_CMD SOCKS_CONNECT_BIN="$WORK/socks-banner.sh" TAILSCALE_STATUS_JSON="$WORK/status-router-first.json" "$D/tag-fleet-idea.sh" preflight)"
+check "socks-connect banner is treated as opened" bash -c 'jq -e ".ok==true and .canary.tcp22==true and .canary.ip==\"100.102.94.100\" and .canary.name==\"happy-zebra\"" >/dev/null <<<"$0"' "$OUT"
+
+OUT="$(env -u TCP_PROBE_CMD SOCKS_CONNECT_BIN="$WORK/socks-silent.sh" TAILSCALE_STATUS_JSON="$WORK/status-router-first.json" "$D/tag-fleet-idea.sh" preflight)"
+check "socks-connect with no banner fails" bash -c 'jq -e ".ok==false and .canary_reason==\"tcp22_failed\" and .canary.tcp22==false" >/dev/null <<<"$0"' "$OUT"
+
+OUT="$(env -u TCP_PROBE_CMD SOCKS_CONNECT_BIN="$WORK/socks-fail.sh" TAILSCALE_STATUS_JSON="$WORK/status-router-first.json" "$D/tag-fleet-idea.sh" preflight)"
+check "socks-connect non-zero exit fails" bash -c 'jq -e ".ok==false and .canary_reason==\"tcp22_failed\" and .canary.tcp22==false" >/dev/null <<<"$0"' "$OUT"
+
+rm -f "$WORK/socks-called.log"
+OUT="$(TCP_PROBE_CMD="$WORK/tcp-open.sh" SOCKS_CONNECT_BIN="$WORK/socks-log.sh" TAILSCALE_STATUS_JSON="$WORK/status-router-first.json" "$D/tag-fleet-idea.sh" preflight)"
+check "TCP_PROBE_CMD takes precedence over socks-connect" bash -c 'jq -e ".ok==true and .canary.tcp22==true and .canary.ip==\"100.102.94.100\"" >/dev/null <<<"$0"' "$OUT"
+check "TCP_PROBE_CMD precedence does not invoke socks-connect" test ! -e "$WORK/socks-called.log"
+
+# socks-connect absent: fall back to a plain socket (local listener, not a Pi).
+cat > "$WORK/plain-listen.py" <<'PY'
+import socket, sys, time
+s = socket.socket()
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.bind(("127.0.0.1", 0))
+port = s.getsockname()[1]
+sys.stdout.write(str(port) + "\n")
+sys.stdout.flush()
+s.listen(5)
+s.settimeout(15)
+end = time.time() + 15
+while time.time() < end:
+    try:
+        c, _ = s.accept()
+    except socket.timeout:
+        break
+    try:
+        c.settimeout(1)
+        c.recv(1)
+    except Exception:
+        pass
+    c.close()
+s.close()
+PY
+PLAIN_PORT="$(python3 "$WORK/plain-listen.py" >"$WORK/plain-port.txt" & echo $! >"$WORK/plain-listen.pid"; sleep 0.2; cat "$WORK/plain-port.txt")"
+cat > "$WORK/status-local-engine.json" <<JSON
+{
+  "Self": {"HostName":"box-2-1","Online":true,"TailscaleIPs":["100.64.66.119"],"Tags":null,"KeyExpiry":""},
+  "Peer": {
+    "e1": {"HostName":"happy-zebra","Online":true,"TailscaleIPs":["127.0.0.1"],"Tags":["tag:idea"],"KeyExpiry":""}
+  }
+}
+JSON
+OUT="$(env -u TCP_PROBE_CMD SOCKS_CONNECT_BIN="$WORK/no-such-socks-connect" TCP_PROBE_PORT="$PLAIN_PORT" TAILSCALE_STATUS_JSON="$WORK/status-local-engine.json" "$D/tag-fleet-idea.sh" preflight)"
+check "absent socks-connect falls back to plain socket" bash -c 'jq -e ".ok==true and .canary.tcp22==true and .canary.ip==\"127.0.0.1\" and .canary.name==\"happy-zebra\"" >/dev/null <<<"$0"' "$OUT"
+if [ -f "$WORK/plain-listen.pid" ]; then
+  kill "$(cat "$WORK/plain-listen.pid")" 2>/dev/null || true
+  wait "$(cat "$WORK/plain-listen.pid")" 2>/dev/null || true
+fi
+
+
 echo "tag-fleet-idea.test.sh: $pass passed, $fail failed"
 [ "$fail" = 0 ]

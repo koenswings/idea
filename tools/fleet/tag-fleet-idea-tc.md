@@ -125,10 +125,19 @@ that tag. The safety property we can prove from the box is:
   routers have no sshd on Tailscale, so a TCP 22 probe to them always
   fails and must not be treated as a lock-out. The script skips those
   names (hostname or DNS label ending in `-router`), tries up to three
-  online tagged Engines (3s timeout each) until one answers TCP 22, and
+  online tagged Engines (short timeout each) until one answers TCP 22, and
   reports the canary used plus the routers skipped. A successful probe
   means `admins → tag:idea:22` works, so tagging a fleet Pi should not
   lock us out of SSH from this box.
+- On the box, Tailscale is userspace, so a plain socket connect to a
+  tailnet IP fails. When `~/.local/bin/socks-connect` is executable, the
+  canary probes through it (`timeout 6 socks-connect <ip> 22 </dev/null`,
+  SOCKS port 1055) and treats an `SSH-2.0-` banner as opened — banner
+  only, no SSH login. Override the helper with `SOCKS_CONNECT_BIN` (for
+  tests). If that path is not executable, the probe falls back to a
+  plain socket connect. `TCP_PROBE_CMD`, when set, still takes
+  precedence over both. `TCP_PROBE_PORT` (default 22) is a test hook
+  for the socks and plain paths.
 - if no non-router tagged node is online, preflight reports `canary:
   null` with a distinct `no_online_tagged_engine` reason. That is **not**
   a lock-out claim. `ok` is false until an Engine canary is available.
