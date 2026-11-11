@@ -1094,3 +1094,5 @@
 {"ts":"2026-11-10T23:53:15Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid: idea#416 dashboard pull-key + disabled poll","previous":null}
 {"ts":"2026-11-10T23:54:53Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Kid: idea#416 dashboard pull-key + disabled poll"}
 {"ts":"2026-11-10T23:54:53Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-11T00:04:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-11T00:04:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: idea#415 usageMonitoring ON for Pixel real-data check","previous":null}
