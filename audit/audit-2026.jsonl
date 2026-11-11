@@ -1346,3 +1346,5 @@
 {"ts":"2026-11-11T20:06:23Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Axle: idea#443 / engine#324"}
 {"ts":"2026-11-11T20:06:23Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"--null","value":null,"previous":"claim"}
 {"ts":"2026-11-11T20:06:51Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Axle: idea#443 / engine#324"}
+{"ts":"2026-11-11T20:10:04Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-11T20:10:04Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: roll to engine 49a32b0 + helper v8 (Steve 21:08)","previous":null}
