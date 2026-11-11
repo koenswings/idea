@@ -1366,3 +1366,5 @@
 {"ts":"2026-11-11T21:13:57Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-11T21:17:55Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-11T21:17:56Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: read-only verify-service-tar check (Steve 22:16)","previous":null}
+{"ts":"2026-11-11T21:21:07Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: read-only verify-service-tar check (Steve 22:16)"}
+{"ts":"2026-11-11T21:21:07Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
