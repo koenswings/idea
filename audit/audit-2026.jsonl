@@ -1292,3 +1292,5 @@
 {"ts":"2026-11-11T14:32:12Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-11T14:35:09Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas"}
 {"ts":"2026-11-11T14:35:09Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-11T14:45:07Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-11T14:45:07Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle: agent-engine-dev#323","previous":null}
