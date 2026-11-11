@@ -27,8 +27,9 @@ Run from the ops box, one Pi at a time:
 `--dry-run` (same as leaving out `--yes`) is read-only and lists the sha256 of every file it would keep and the
 helper changes it would make. Kept always, whatever `git status` shows (skip-worktree included): `config.yaml`,
 `pm2.config.cjs`, all of `store-identity/` and `~/.idea-local`, restored byte-for-byte and sha256-checked; a repo
-default store (`4GQm…`) aborts. After the build it runs `./install-root-helpers` (flash/app-data/erase helpers and
-sudoers), checks each helper's sha256 against `script/build_image_assets/` and `visudo -c`, then `pm2 restart engine`
+default store (`4GQm…`) aborts. After the build it runs `./install-root-helpers` (flash/app-data/erase,
+`idea-usage-settings` and `idea-usage-export` helpers and sudoers), checks each helper's sha256
+against `script/build_image_assets/` and `visudo -c`, then `pm2 restart engine`
 and `pm2 save`, and re-checks the store after the restart. An Engine commit without `install-root-helpers` only warns.
 
 Hosts: pool Pis idea01/03/04 expect `automerge:2VroE…`; kit Engines sunny-robin, happy-zebra, kind-panda expect the one
@@ -38,7 +39,10 @@ host is refused; a store mismatch aborts before anything changes.
 From the box, prefer `tools/fleet/deploy-engine-remote.sh <ts-ip> <tip-sha> [--fetch main] [--dry-run|--yes]`: it holds a
 per-host box lock (`/tmp/idea-deploy-<host>.lock`) and the script holds `/tmp/idea-deploy.lock` on the Pi; either busy
 exits 75 without changing anything (two routines or two bots can no longer deploy the same Pi at once). If HEAD already
-equals the tip, the helpers match the repo and pm2 `engine` is online, it prints `already on <sha>, skipping` and exits 0.
+equals the tip, the helpers (including `idea-usage-settings` and `idea-usage-export`) match the
+repo assets and pm2 `engine` is online, it prints `already on <sha>, skipping` and exits 0.
+A missing or stale usage helper (the idea03 idea#412 case) is not skipped: `install-root-helpers`
+runs and each helper is sha256-checked against the tip.
 Temperature guard: before each step (install, build, root helpers, restart) above 75 C it pauses, polling every 30 s
 until below 65 C, and prints the peak per step at the end. The Console is not deployed by this script (build it
 separately with `tools/fleet/build-console-pi.sh`, which keeps `dist/hidden-instances.json`, with the same 75/65 C rule).
