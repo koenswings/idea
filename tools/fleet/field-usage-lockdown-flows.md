@@ -2,8 +2,9 @@
 
 **Status:** Draft for review · **Author:** Atlas · **Date:** 2026-11-11
 **Does not edit the live ACL.** Removing allow-all is a later idea#375
-item. T-c has tagged the four pool Pis; production `idea` is also tagged
-(see §5 for what is still pending).
+item. T-c has tagged the four pool Pis; production `idea` is tagged
+and its key expiry is disabled. The Pi-to-Pi baseline is recorded
+(see §5.2 and §5.3). Allow-all has not been removed (L-1 is Koen's).
 
 Related: [`field-usage-acl.md`](field-usage-acl.md),
 [`field-usage-acl-final.hujson`](field-usage-acl-final.hujson),
@@ -36,9 +37,9 @@ plus:
 Lockdown means **removing allow-all** and adding the deny `tests` so a later
 edit cannot silently re-open Pi-to-Pi paths. The surviving grants are
 tag-based. T-c (pool Pis) and the `tag:idea` tag on production `idea`
-are done; **do not remove allow-all until the remaining §5 items are
-met** (Disable key expiry on `idea`, the Pi-to-Pi baseline, and the
-post-lockdown re-probes).
+are done; key expiry on `idea` is disabled and the Pi-to-Pi baseline
+is recorded (§5.2, §5.3). **Do not remove allow-all until the
+post-lockdown re-probes (§5.4) are done.** L-1 itself is Koen's.
 
 ## 2. Observed tailnet snapshot (updated 2026-11-11 14:13 Europe/Brussels)
 
@@ -65,7 +66,7 @@ postchecks ran 13:08–13:35 Europe/Brussels: idea01–idea04 each show
 | idea02 | 100.85.108.118 | yes | hold / fleet-pending; T-c postcheck; key expiry disabled |
 | idea03 | 100.126.117.80 | yes | spare (sidecar host); T-c postcheck; key expiry disabled |
 | idea04 | 100.108.39.45 | yes | spare; T-c postcheck; key expiry disabled |
-| openclaw-pi | 100.115.60.6 | yes | production `idea` (OS hostname idea) / wizardly-hugle. Koen tagged it 14:12 (decision 14:11). Postcheck 14:13: Console :8081 and MilkWise :3333/:3334 return 200 from the box, pm2 unchanged. Key expiry still 2027-04-06 10:20 CET — Disable key expiry pending. MagicDNS: `idea.tail2d60.ts.net`. |
+| openclaw-pi | 100.115.60.6 | yes | production `idea` (OS hostname idea) / wizardly-hugle. Koen tagged it 14:12 (decision 14:11). Postcheck 14:13: Console :8081 and MilkWise :3333/:3334 return 200 from the box, pm2 unchanged. Key expiry disabled: the node's own `tailscale status` shows `KeyExpiry` None as of 14:26 Europe/Brussels on 2026-11-11; the box view was stale. MagicDNS: `idea.tail2d60.ts.net`. |
 
 ### 2.2 `tag:idea-hub`
 
@@ -77,9 +78,8 @@ postchecks ran 13:08–13:35 Europe/Brussels: idea01–idea04 each show
 
 idea01–idea04 and production `idea` (`openclaw-pi`, `100.115.60.6`)
 moved to §2.1 when they received `tag:idea`. No pool Pi remains
-untagged. On the four pool Pis, key expiry is disabled. On production
-`idea`, the tag is in place but Disable key expiry is still pending
-(see §5.2).
+untagged. On the four pool Pis and on production `idea`, key expiry
+is disabled (see §5.2).
 
 ### 2.4 Bot computers (untagged, linux)
 
@@ -126,7 +126,7 @@ No stale nodes left.
 | F5 | `autogroup:admin` (Koen's devices and box-2-1) | kit routers on Tailscale | tcp/80 and tcp/443 (LuCI / ubus) | Remote router reads when LAN jump is inconvenient | **observed** in `docs/ops/security-overview.md`. Covered by admin `→ tag:idea:*` because routers already carry `tag:idea`. |
 | F6 | `autogroup:admin` (Koen's devices and box-2-1) | `tag:idea-hub` (`idea-hub` `100.75.102.57`) | at least tcp/22 and the dashboard web port (whatever `${port}` Engine assigns; never 80, 3333, 3334 or 8081) | Koen and ops must still reach the sidecar / future dashboard App | **inferred** from U-2 (“grant admins access to `tag:idea-hub` first”) and `app-usage-dashboard` runbook. Live grant is already `autogroup:admin → tag:idea-hub`. |
 | F7 | `tag:idea-hub` | `tag:idea` | tcp/22 only, plain OpenSSH | Usage pull (`restrict,from=<sidecar IPv4>`, forced command `idea-usage-export`). After T-c this is every tagged Engine, including kits | **observed:** U-4 grant saved 09:31; 09:33 connect-only from `idea-hub` opened `:22` on the then-tagged kit Engines. Pre-lockdown baseline (comment on idea#430, allow-all still on) opened `:22` on all `tag:idea` Engines; see §4.1. Under allow-all that proves reachability, **not** that the U-4 grant is what allowed it. After lockdown, only `:22` must stay open from the hub. |
-| F8 | `tag:idea` | anything on the tailnet | **none** | Koen's rule: no Pi-to-Pi (and no school-to-school) over Tailscale. Engines talk over the school LAN websocket and mDNS only | **observed** as design in `proposals/2026-10-13-tailscale-single-fleet-tag.md` and `docs/ops/security-overview.md`. Today allow-all still lets pool Pis reach each other (Step 5 idea-to-idea saw idea03→idea01 `:22`/`:80`/`:8080` open). After lockdown those must fail. The fresh Pi-to-Pi baseline is still to come, from the first free pool Pi. |
+| F8 | `tag:idea` | anything on the tailnet | **none** | Koen's rule: no Pi-to-Pi (and no school-to-school) over Tailscale. Engines talk over the school LAN websocket and mDNS only | **observed** as design in `proposals/2026-10-13-tailscale-single-fleet-tag.md` and `docs/ops/security-overview.md`. Today allow-all still lets pool Pis reach each other (Step 5 idea-to-idea saw idea03→idea01 `:22`/`:80`/`:8080` open). After lockdown those must fail. The pre-lockdown Pi-to-Pi baseline is in §5.3 (idea04 at 14:40 Europe/Brussels; matches the box / hub baseline). |
 | F9 | Bot computers | their own Tailscale userspace stack (SOCKS on localhost:1055 on this box) | not an ACL grant | How the box reaches 100.x addresses | **observed:** `docs/grok-bot-setup.md` (`QUALITY_SCAN_SOCKS=127.0.0.1:1055`); this box uses `socks-connect`. |
 
 No flow requires `tag:idea` to initiate anything, or `tag:idea-hub` to open
@@ -172,8 +172,8 @@ Expected after lockdown:
 - admin (Koen's devices plus box-2-1) → `tag:idea` and `tag:idea-hub`
   stays open, including `idea` :8081, :3333 and :3334
 
-The Pi-to-Pi baseline is still to come, from the first free pool Pi.
-Re-probe hub-to-idea at lockdown (§5.4).
+The Pi-to-Pi baseline is recorded in §5.3 (idea04 at 14:40 Europe/Brussels;
+it matches this table). Re-probe hub-to-idea at lockdown (§5.4).
 
 ## 5. Prerequisites before allow-all can go
 
@@ -182,13 +182,22 @@ Re-probe hub-to-idea at lockdown (§5.4).
    **MET** (postchecks 13:08–13:35 Europe/Brussels).
 2. **Tagging `idea` / wizardly-hugle / `openclaw-pi` (`100.115.60.6`)**
    (idea#374, Koen's OK at 14:11, saved 14:12). **Tag: MET.**
-   **Disable key expiry: pending** (still 2027-04-06 10:20 CET).
+   **Disable key expiry: MET.** The node's own `tailscale status`
+   shows `KeyExpiry` None as of 14:26 Europe/Brussels on 2026-11-11;
+   the box view was stale (it still showed 2027-04-06 10:20 CET).
    Postcheck 14:13: tag present, Console :8081 and MilkWise :3333/:3334
    return 200 from the box, pm2 unchanged. F2/F3 are now covered by
    admin → `tag:idea`.
-3. **Pi-to-Pi probe: pending.** Run `probe-field-usage-acl.sh idea-to-idea`
-   from the first free pool Pi (baseline still to come; after lockdown
-   Pi-to-Pi over Tailscale must be denied).
+3. **Pi-to-Pi probe: MET.** Run from idea04 (`tag:idea`,
+   `100.108.39.45`) at 14:40 Europe/Brussels on 2026-11-11,
+   connect-only; every cell matches the earlier box / hub baseline.
+   Evidence: `/workspace/p2p-probe-idea04-20261111-144013` and
+   [PR #430 comment](https://github.com/koenswings/idea/pull/430#issuecomment-6797429527).
+   Allow-all is still on, so openings are the pre-lockdown baseline;
+   after lockdown, Pi-to-Pi over Tailscale must be denied. The probe
+   also confirmed that `100.69.148.49` is the removed old idea-hub
+   node (timed out on all ports); the live idea-hub is `100.75.102.57`
+   (`tag:idea-hub`).
 4. **Hub-to-idea baseline: done** (PR #430 comment, allow-all still on).
    **Post-lockdown re-probe at lockdown:** repeat
    `probe-field-usage-acl.sh hub-to-idea` from the sidecar; `:22` open,
@@ -205,8 +214,8 @@ The live file uses `grants`. Equivalent classic `acls` are in
 [`field-usage-acl-final.hujson`](field-usage-acl-final.hujson).
 
 ```hujson
-// Lockdown paste — AFTER T-c and after idea is tagged (Disable key
-// expiry on idea still pending; see §5). Remove the allow-all
+// Lockdown paste — AFTER T-c, after idea is tagged, and after
+// Disable key expiry on idea (§5.2). Remove the allow-all
 // {src:"*", dst:"*", ip:"*"} grant. Keep the existing ssh check rule.
 {
   "tagOwners": {
