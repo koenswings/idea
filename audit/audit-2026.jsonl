@@ -1323,3 +1323,5 @@
 {"ts":"2026-11-11T17:17:31Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Axle: idea03 usage-settings helper (#412)","previous":null}
 {"ts":"2026-11-11T17:25:09Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Axle: idea03 usage-settings helper (#412)"}
 {"ts":"2026-11-11T17:25:10Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-11T18:01:00Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-11T18:01:00Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: idea#416 backup dry-run","previous":null}
