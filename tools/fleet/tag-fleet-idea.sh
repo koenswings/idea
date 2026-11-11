@@ -22,7 +22,14 @@
 #   TAILSCALE_STATUS_JSON  test hook: read status --json from this file;
 #   SKIP_SSH=1             test hook: do not SSH (postcheck records skipped);
 #   TCP_PROBE_CMD          test hook: command invoked with the IPv4 to probe
-#                          TCP 22 (exit 0 = open). Used by the preflight canary.
+#                          TCP 22 (exit 0 = open). Used by the preflight canary;
+#                          takes precedence over socks-connect and a plain socket.
+#   SOCKS_CONNECT_BIN      path to socks-connect (default ~/.local/bin/socks-connect).
+#                          If executable, the canary probes TCP 22 through it
+#                          (userspace Tailscale, SOCKS 1055): timeout 6
+#                          socks-connect <ip> 22, SSH-2.0- banner means opened.
+#                          If it is not executable, fall back to a plain socket.
+#   TCP_PROBE_PORT         test hook: port for the socks/plain probe (default 22).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -37,7 +44,7 @@ WAIT_TIMEOUT=600
 PI=""
 MODE=""
 
-usage() { sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,32p' "$0" | sed 's/^# \{0,1\}//'; }
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -167,17 +174,94 @@ CANARY_PROBE_LIMIT="${CANARY_PROBE_LIMIT:-3}"
 
 tcp_22() {
   local host="$1"
+  local port="${TCP_PROBE_PORT:-22}"
+  local socks="${SOCKS_CONNECT_BIN:-${HOME}/.local/bin/socks-connect}"
   if [ -n "${TCP_PROBE_CMD:-}" ]; then
     "$TCP_PROBE_CMD" "$host"
     return $?
   fi
-  python3 - "$host" <<'PY'
+  if [ -x "$socks" ]; then
+    # Userspace Tailscale: a plain connect to a 100.x IP fails. Probe through
+    # socks-connect the same way do_health wraps SSH, and treat an SSH-2.0-
+    # banner as opened. timeout 6; stdin is /dev/null (banner only, no login).
+    python3 - "$socks" "$host" "$port" <<'PY'
+import os, select, signal, subprocess, sys, time
+
+socks, host, port = sys.argv[1], sys.argv[2], sys.argv[3]
+
+def fail(msg):
+    print(msg)
+    sys.exit(1)
+
+try:
+    p = subprocess.Popen(
+        ["timeout", "6", socks, host, port],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+except FileNotFoundError:
+    # timeout(1) missing: still bound the probe to 6s in-process.
+    try:
+        p = subprocess.Popen(
+            [socks, host, port],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except OSError as e:
+        fail(type(e).__name__)
+except OSError as e:
+    fail(type(e).__name__)
+
+data = b""
+deadline = time.monotonic() + 6
+try:
+    while time.monotonic() < deadline and not data.startswith(b"SSH-2.0-"):
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        ready, _, _ = select.select([p.stdout], [], [], remaining)
+        if not ready:
+            break
+        chunk = os.read(p.stdout.fileno(), 64)
+        if not chunk:
+            break
+        data += chunk
+finally:
+    if p.poll() is None:
+        try:
+            os.killpg(p.pid, signal.SIGTERM)
+        except OSError:
+            p.kill()
+        try:
+            p.wait(timeout=1)
+        except Exception:
+            try:
+                os.killpg(p.pid, signal.SIGKILL)
+            except OSError:
+                pass
+            try:
+                p.wait(timeout=1)
+            except Exception:
+                pass
+
+if data.startswith(b"SSH-2.0-"):
+    print("opened")
+    sys.exit(0)
+fail("no-banner")
+PY
+    return $?
+  fi
+  python3 - "$host" "$port" <<'PY'
 import socket, sys
-host = sys.argv[1]
+host, port = sys.argv[1], int(sys.argv[2])
 s = socket.socket()
 s.settimeout(3)
 try:
-    s.connect((host, 22))
+    s.connect((host, port))
     s.close()
     print("opened")
     sys.exit(0)
