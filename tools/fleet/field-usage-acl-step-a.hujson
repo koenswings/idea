@@ -4,10 +4,8 @@
 // whole file: keep every unrelated rule (hosts, ssh, nodeAttrs, grants
 // that are not about these tags, …) unchanged.
 //
-// Before pasting, open Access controls (idea#375 T-b). If the live admin
-// source is autogroup:admin (or another existing group) instead of
-// group:admins, replace every group:admins below with that exact source.
-// Do not invent a group that is not already defined.
+// Live admin source (idea#375 T-b, confirmed 2026-11-11): autogroup:admin,
+// not group:admins. Do not invent a group that is not already defined.
 //
 // Diffed against the approved sketch in
 // proposals/2026-10-13-tailscale-single-fleet-tag.md:
@@ -23,16 +21,16 @@
 
 {
   "tagOwners": {
-    "tag:idea": ["group:admins"],
-    "tag:idea-hub": ["group:admins"],
+    "tag:idea": ["autogroup:admin"],
+    "tag:idea-hub": ["autogroup:admin"],
   },
   "acls": [
-    { "action": "accept", "src": ["group:admins"], "dst": ["tag:idea:*"] },
-    { "action": "accept", "src": ["group:admins"], "dst": ["tag:idea-hub:*"] },
+    { "action": "accept", "src": ["autogroup:admin"], "dst": ["tag:idea:*"] },
+    { "action": "accept", "src": ["autogroup:admin"], "dst": ["tag:idea-hub:*"] },
   ],
   "tests": [
     {
-      "src": "group:admins",
+      "src": "autogroup:admin",
       "proto": "tcp",
       "accept": [
         "tag:idea:22",
