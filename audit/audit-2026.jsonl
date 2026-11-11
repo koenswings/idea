@@ -1319,3 +1319,5 @@
 {"ts":"2026-11-11T17:08:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: idea#416 hub re-check","previous":null}
 {"ts":"2026-11-11T17:12:55Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: idea#416 hub re-check"}
 {"ts":"2026-11-11T17:12:55Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-11T17:17:31Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-11T17:17:31Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Axle: idea03 usage-settings helper (#412)","previous":null}
