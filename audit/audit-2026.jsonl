@@ -1601,3 +1601,5 @@
 {"ts":"2026-11-12T14:01:32Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: SHORT app-kolibri#21 50be7cd 1.2 check (idea#462), throwaway compose project kidk21; hub and Disk B untouched","previous":null}
 {"ts":"2026-11-12T14:08:44Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: SHORT app-kolibri#21 50be7cd 1.2 check (idea#462), throwaway compose project kidk21; hub and Disk B untouched"}
 {"ts":"2026-11-12T14:08:44Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T14:14:27Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T14:14:27Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: idea03 stale Docker network cleanup (IDEA test leftovers with no containers) + net.ipv4.igmp_max_memberships=1024 via /etc/sysctl.d (Steve); hub and Disk B untouched","previous":null}
