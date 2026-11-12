@@ -79,7 +79,7 @@
   },
   "wizardly-hugle": {
     "role": "production",
-    "status": "testing",
+    "status": "production",
     "pr": null,
     "host": "192.168.0.231",
     "tailscale": "100.115.60.6",
@@ -97,7 +97,7 @@
       "instance": "milkwise-wizardly-hugle-001",
       "since": "2026-10-08"
     },
-    "claim": "Atlas: idea#461 W1-gate read-only systemDiskSkip check"
+    "claim": null
   },
   "sunny-robin": {
     "role": "kit-engine",
