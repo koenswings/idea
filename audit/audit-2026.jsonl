@@ -1615,3 +1615,5 @@
 {"ts":"2026-11-12T14:39:21Z","bot":"Ops Bot","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":"Atlas idea#461 M-6 (erase + createBackupDisk Intenso 532609003NA000324 for hub vsd0acgun2mmeg573zw)","previous":null}
 {"ts":"2026-11-12T14:44:40Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: SHORT app-kolibri#21 47fea44 1.2 rerun, zeroconf on, no override (idea#462), throwaway project kidk21; stopped old hub, idea and Disk B untouched"}
 {"ts":"2026-11-12T14:44:40Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T14:47:25Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T14:47:25Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: idea03 orphan test containers/networks cleanup (10 compose projects + stopped Kolibri analysis; store-row check; quarantine volumes first) (Steve); Disk B, nextcloud-files-b-001 and stopped old hub untouched","previous":null}
