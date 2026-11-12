@@ -1610,3 +1610,5 @@
 {"ts":"2026-11-12T14:35:08Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas idea#461 hub move (W2 retry, 1.4)"}
 {"ts":"2026-11-12T14:35:08Z","bot":"Ops Bot","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":null,"previous":"Atlas idea#461 hub move (W2 retry, 1.4)"}
 {"ts":"2026-11-12T14:35:48Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@23b04f68ebc30a3a1c3de15facd93586295d6ddd, console main@eafee356dda3ef024a2136e41e1f53d997314c81","previous":"engine main@24e56b5224ac09167450af381e9a007cf89cde2b, console main@eafee356dda3ef024a2136e41e1f53d997314c81"}
+{"ts":"2026-11-12T14:38:10Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T14:38:10Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: SHORT app-kolibri#21 47fea44 1.2 rerun, zeroconf on, no override (idea#462), throwaway project kidk21; stopped old hub, idea and Disk B untouched","previous":null}
