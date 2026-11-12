@@ -1548,3 +1548,5 @@
 {"ts":"2026-11-12T12:04:53Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-12T12:04:53Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: usage-dashboard 1.3 web image build (idea#462) with a throwaway buildx builder; hub, /services and Disk B untouched","previous":null}
 {"ts":"2026-11-12T12:06:37Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":null,"previous":"Atlas: idea#461 read-only preflight (Steve 13:02)"}
+{"ts":"2026-11-12T12:07:51Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: usage-dashboard 1.3 web image build (idea#462) with a throwaway buildx builder; hub, /services and Disk B untouched"}
+{"ts":"2026-11-12T12:07:52Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
