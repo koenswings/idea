@@ -1428,3 +1428,5 @@
 {"ts":"2026-11-12T07:13:47Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: idea#76 fixture rebuild"}
 {"ts":"2026-11-12T07:15:02Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-12T07:15:02Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle: idea#445 / #323 read-only service-tar audit of App Disks","previous":null}
+{"ts":"2026-11-12T07:18:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T07:18:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: #448/#328 scratch rerun v10 (helper+kit prep)","previous":null}
