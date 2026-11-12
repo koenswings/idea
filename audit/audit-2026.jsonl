@@ -1607,3 +1607,5 @@
 {"ts":"2026-11-12T14:18:00Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-12T14:19:45Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas idea#461 hub move (W2 retry, 1.4)","previous":null}
 {"ts":"2026-11-12T14:19:45Z","bot":"Ops Bot","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":"Atlas idea#461 hub move (W2 retry, 1.4)","previous":null}
+{"ts":"2026-11-12T14:35:08Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas idea#461 hub move (W2 retry, 1.4)"}
+{"ts":"2026-11-12T14:35:08Z","bot":"Ops Bot","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":null,"previous":"Atlas idea#461 hub move (W2 retry, 1.4)"}
