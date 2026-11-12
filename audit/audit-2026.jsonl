@@ -1462,3 +1462,5 @@
 {"ts":"2026-11-12T08:26:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas: read-only operator key list (#453)","previous":null}
 {"ts":"2026-11-12T08:27:41Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-12T08:27:41Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Atlas: read-only operator key list (#453)"}
+{"ts":"2026-11-12T08:30:18Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T08:30:19Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: read-only store dump (stray disk cd8787b3)","previous":null}
