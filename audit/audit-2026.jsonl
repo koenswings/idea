@@ -1579,3 +1579,6 @@
 {"ts":"2026-11-12T12:54:28Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":"Atlas: idea#461 W1","previous":null}
 {"ts":"2026-11-12T12:55:30Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-12T12:55:30Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: SHORT app-nextcloud#23 tip 3fa97b1 pre-install skeleton check (idea#464), throwaway compose projects; hub and Disk B untouched","previous":null}
+{"ts":"2026-11-12T12:58:24Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"version","value":"engine main@f1c7c0e9657e9b09f4ff93da60b7f4253f66fcbf, console main@8e82cd108951f7f040f30cc37c6ce84bb887ef85","previous":"engine main@745f2c3bcefa58c92ca7c6eafa340471e8674520, console main@cda87d20606a270eab896a4f9b0350ecebcbfb5b"}
+{"ts":"2026-11-12T12:58:24Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":null,"previous":"Atlas: idea#461 W1"}
+{"ts":"2026-11-12T12:58:24Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"status","value":"production","previous":"testing"}

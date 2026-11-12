@@ -79,14 +79,14 @@
   },
   "wizardly-hugle": {
     "role": "production",
-    "status": "testing",
+    "status": "production",
     "pr": null,
     "host": "192.168.0.231",
     "tailscale": "100.115.60.6",
     "lan": "192.168.0.231",
     "runner": "none",
     "grok_build": null,
-    "version": "engine main@745f2c3bcefa58c92ca7c6eafa340471e8674520, console main@cda87d20606a270eab896a4f9b0350ecebcbfb5b",
+    "version": "engine main@f1c7c0e9657e9b09f4ff93da60b7f4253f66fcbf, console main@8e82cd108951f7f040f30cc37c6ce84bb887ef85",
     "mdns": false,
     "store": "automerge:6f8m5KxzARv9xwv4Lw18LgVUJzu",
     "console_port": 8081,
@@ -97,7 +97,7 @@
       "instance": "milkwise-wizardly-hugle-001",
       "since": "2026-10-08"
     },
-    "claim": "Atlas: idea#461 W1"
+    "claim": null
   },
   "sunny-robin": {
     "role": "kit-engine",
