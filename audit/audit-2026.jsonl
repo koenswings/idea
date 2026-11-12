@@ -1497,3 +1497,5 @@
 {"ts":"2026-11-12T09:45:57Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-12T09:49:05Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-12T09:49:05Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: read-only lsblk check for WD (Steve 10:48)","previous":null}
+{"ts":"2026-11-12T09:49:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T09:49:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: read-only lsblk check for WD (Steve 10:48)"}
