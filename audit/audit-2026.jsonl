@@ -1595,3 +1595,5 @@
 {"ts":"2026-11-12T13:44:21Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@24e56b5224ac09167450af381e9a007cf89cde2b, console main@eafee356dda3ef024a2136e41e1f53d997314c81","previous":"engine main@aec3930cd9fe4abb5a74f0c4facb933eb42adcfe, console main@eafee356dda3ef024a2136e41e1f53d997314c81"}
 {"ts":"2026-11-12T13:44:58Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: idea#461 usage-dashboard 1.4 collector image build and no-internet first-boot proof; live hub untouched","previous":null}
 {"ts":"2026-11-12T13:44:58Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T13:58:29Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: idea#461 usage-dashboard 1.4 collector image build and no-internet first-boot proof; live hub untouched"}
+{"ts":"2026-11-12T13:58:29Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
