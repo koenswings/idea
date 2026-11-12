@@ -1556,3 +1556,5 @@
 {"ts":"2026-11-12T12:17:31Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-12T12:20:09Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-12T12:20:09Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: remove leftover moby/buildkit:buildx-stable-1 image (sha256:c5f8862f52499773af85bc07695b2379ef08e8002352b0df2c4864c91d78dabe) from idea03 (Kid 1.3 throwaway-builder leftover, Steve approved); hub and Disk B untouched","previous":null}
+{"ts":"2026-11-12T12:21:24Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: remove leftover moby/buildkit:buildx-stable-1 image (sha256:c5f8862f52499773af85bc07695b2379ef08e8002352b0df2c4864c91d78dabe) from idea03 (Kid 1.3 throwaway-builder leftover, Steve approved); hub and Disk B untouched"}
+{"ts":"2026-11-12T12:21:24Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
