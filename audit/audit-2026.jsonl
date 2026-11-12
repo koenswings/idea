@@ -1613,3 +1613,5 @@
 {"ts":"2026-11-12T14:38:10Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-12T14:38:10Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: SHORT app-kolibri#21 47fea44 1.2 rerun, zeroconf on, no override (idea#462), throwaway project kidk21; stopped old hub, idea and Disk B untouched","previous":null}
 {"ts":"2026-11-12T14:39:21Z","bot":"Ops Bot","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":"Atlas idea#461 M-6 (erase + createBackupDisk Intenso 532609003NA000324 for hub vsd0acgun2mmeg573zw)","previous":null}
+{"ts":"2026-11-12T14:44:40Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: SHORT app-kolibri#21 47fea44 1.2 rerun, zeroconf on, no override (idea#462), throwaway project kidk21; stopped old hub, idea and Disk B untouched"}
+{"ts":"2026-11-12T14:44:40Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
