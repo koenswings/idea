@@ -12,11 +12,13 @@ Never on idea02, wizardly-hugle or Milkwise; the script refuses other hosts.
 
 ## 2. Why store-identity must be saved too
 The repo's tracked `store-identity/store-url.txt` and `store-identity/command-log-url.txt`
-hold the defaults, which are **idea02's production store (4GQm…)**. Discarding local edits
+hold the image defaults, which are the **kit store (`3Vvv…`, idea#452)**. Discarding local edits
 (or `git checkout -f`) before a checkout puts those defaults back. A restarted pool Engine
-then joins idea02's store. This happened on idea04 on 2026-10-14 (about one minute, fixed by
-restoring the files and restarting; idea02's Engine was stopped).
-The pool store is `automerge:2VroE…` (see `fleet-state.json`) for idea01/03/04.
+would then join the kit store. (When the default was still 4GQm, this happened on idea04 on
+2026-10-14, joining idea02's store for about one minute; fixed by restoring the files and
+restarting; idea02's Engine was stopped.)
+The pool store is `automerge:2VroE…` (see `fleet-state.json`) for idea01/03/04. A pool deploy
+requires that store and refuses anything else, including 3Vvv.
 
 ## 3. Procedure
 Run from the ops box, one Pi at a time:
@@ -27,7 +29,7 @@ Run from the ops box, one Pi at a time:
 `--dry-run` (same as leaving out `--yes`) is read-only and lists the sha256 of every file it would keep and the
 helper changes it would make. Kept always, whatever `git status` shows (skip-worktree included): `config.yaml`,
 `pm2.config.cjs`, all of `store-identity/` and `~/.idea-local`, restored byte-for-byte and sha256-checked; a repo
-default store (`4GQm…`) aborts. After the build it runs `./install-root-helpers` (flash/app-data/erase,
+default store (`3Vvv…`) on a pool Pi aborts (kits are expected to be on that default). After the build it runs `./install-root-helpers` (flash/app-data/erase,
 `idea-usage-settings` and `idea-usage-export` helpers and sudoers), checks each helper's sha256
 against `script/build_image_assets/` and `visudo -c`, then `pm2 restart engine`
 and `pm2 save`, and re-checks the store after the restart. An Engine commit without `install-root-helpers` only warns.

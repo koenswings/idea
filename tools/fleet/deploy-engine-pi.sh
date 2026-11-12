@@ -14,9 +14,10 @@
 # the whole store-identity/ dir and ~/.idea-local; backed up first, restored byte-for-byte, sha256-checked.
 # --dry-run (or no --yes): read-only; prints exactly what it would save, restore and install.
 #
-# Why: the repo's tracked store-identity/ files hold the defaults (idea02's production store).
-# A plain discard + checkout puts those back, and a restarted pool Engine then joins idea02's
-# store (idea04, 2026-10-14). See docs/ops/engine-deploy-pool-pi.md.
+# Why: the repo's tracked store-identity/ files hold the image default (the kit store
+# 3Vvv…, idea#452). A plain discard + checkout puts that default back, and a restarted
+# pool Engine would then join the kit store. (When the default was 4GQm this happened
+# on idea04, 2026-10-14, joining idea02's store.) See docs/ops/engine-deploy-pool-pi.md.
 #
 # Lock: one deploy per Pi at a time (flock on $LOCK_FILE, default /tmp/idea-deploy.lock, non-blocking;
 # busy -> exit 75). Box side: tools/fleet/deploy-engine-remote.sh also locks per host on the box.
@@ -36,7 +37,7 @@ KIT_STORE="automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk"   # ONE shared kit store (sun
 BACKUP_ROOT="${BACKUP_ROOT:-/home/pi/quarantine}"
 KEEP="config.yaml pm2.config.cjs"                    # plus every file in store-identity/
 IDEA_LOCAL="${IDEA_LOCAL:-$HOME/.idea-local}"        # kit local override, outside the repo; kept too
-DEFAULT_STORE_PREFIX="automerge:4GQm"                # repo default (idea02 production): never restored to
+DEFAULT_STORE_PREFIX="$KIT_STORE"                    # repo/image default (kit store 3Vvv): pool Pis must never be restored to this
 HELPERS="idea-flash-card idea-app-data idea-erase-disk idea-usage-settings idea-usage-export"  # script/build_image_assets -> $SBIN
 SBIN="${SBIN:-/usr/local/sbin}"
 
@@ -87,7 +88,11 @@ done
 [ -n "$DRY" ] && YES=""
 
 case "$HOST_NAME" in
-  idea01|idea03|idea04) EXPECT_STORE="${EXPECT_STORE:-$POOL_STORE}" ;;
+  idea01|idea03|idea04)
+    EXPECT_STORE="${EXPECT_STORE:-$POOL_STORE}"
+    # Pool deploys always require 2VroE, including when EXPECT_STORE is overridden (tests/env).
+    [ "$EXPECT_STORE" = "$POOL_STORE" ] || die "pool deploy requires $POOL_STORE, not $EXPECT_STORE"
+    ;;
   sunny-robin|happy-zebra|kind-panda) EXPECT_STORE="${EXPECT_STORE:-$KIT_STORE}" ;;  # only after Steve's GO naming the Engine
   *) die "not a pool Pi or kit Engine ($HOST_NAME); never idea02, wizardly-hugle or Milkwise" ;;
 esac
@@ -106,7 +111,14 @@ for f in $mods; do
   case "$f" in store-identity/*) continue ;; esac
   die "unexpected tracked local modification: $f"
 done
-case "$(store_now)" in "$DEFAULT_STORE_PREFIX"*) die "store-url.txt is the repo default ($(store_now)); refusing";; esac
+# Pool only: refuse the tracked/image default (kit store 3Vvv). Kits are meant to be
+# on that default, so they are not checked here. check_store already requires 2VroE
+# for pool hosts; this is belt-and-suspenders if that check is ever skipped.
+case "$HOST_NAME" in
+  idea01|idea03|idea04)
+    case "$(store_now)" in "$DEFAULT_STORE_PREFIX"*) die "store-url.txt is the repo default ($(store_now)); refusing";; esac
+    ;;
+esac
 echo "HOST $HOST_NAME HEAD $(git rev-parse --short HEAD) STORE $(store_now) local mods: $(echo $mods)"
 # Already on target: same commit, helpers equal to the repo assets, Engine online -> nothing to do.
 if git cat-file -e "$TIP^{commit}" 2>/dev/null && [ "$(git rev-parse HEAD)" = "$(git rev-parse "$TIP^{commit}")" ]; then
