@@ -1521,3 +1521,5 @@
 {"ts":"2026-11-12T10:32:39Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":null,"previous":"Atlas: P-k read-only serial+SMART check (Steve 11:30)"}
 {"ts":"2026-11-12T10:33:14Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-12T10:33:14Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Axle: idea#444 case B (hub restart + hook backup)","previous":null}
+{"ts":"2026-11-12T10:38:11Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Axle: idea#444 case B (hub restart + hook backup)"}
+{"ts":"2026-11-12T10:38:11Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
