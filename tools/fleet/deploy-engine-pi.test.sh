@@ -6,8 +6,11 @@ SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/deploy-engine-pi.sh"
 pass=0; fail=0
 check() { local n="$1"; shift; if "$@"; then echo "PASS $n"; pass=$((pass+1)); else echo "FAIL $n"; fail=$((fail+1)); fi; }
 WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
-DEFAULT=automerge:4GQmDefaultIdea02Production
+# Committed/image default in the fixture repo: the kit store (idea#452).
+DEFAULT=automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk
 POOL=automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH
+# idea02's actual store; no longer the repo default. Used as a wrong-store fixture.
+IDEA02=automerge:4GQmEZehPDfryGDxkFo9XixbvmAC
 mkdir -p "$WORK/bin"
 cat > "$WORK/bin/pm2" <<'SH'
 #!/usr/bin/env bash
@@ -81,8 +84,17 @@ check "abort names the store" grep -q "before pm2 restart: store-identity/store-
 check "no pm2 restart after abort" [ ! -e "$WORK/pm2.log" ]
 
 setup wrong; echo "$DEFAULT" > "$R/store-identity/store-url.txt"; run wrong --yes; rc=$?
-check "wrong store before deploy aborts" [ "$rc" = 3 ]
-check "nothing checked out" [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ]
+check "pool: kit/default store 3Vvv aborts before any change" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
+check "pool: 3Vvv abort names the expected 2VroE store" grep -q "expected $POOL" "$WORK/out"
+setup wrong4; echo "$IDEA02" > "$R/store-identity/store-url.txt"; run wrong4 --yes; rc=$?
+check "pool: idea02 4GQm store aborts before any change" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
+setup wrong01; echo "$DEFAULT" > "$R/store-identity/store-url.txt"; H=idea01 run wrong01 --yes; rc=$?
+check "idea01: kit/default store 3Vvv aborts before any change" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
+setup over; EXPECT_STORE="$DEFAULT" run over --yes; rc=$?
+check "pool: EXPECT_STORE override to 3Vvv still refused" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
+check "pool: override abort names the required 2VroE store" grep -q "pool deploy requires $POOL" "$WORK/out"
+# After the prefix assignment on a function, leave EXPECT_STORE unset for later cases.
+unset EXPECT_STORE || true
 
 setup host; H=idea02 run host --yes; rc=$?
 check "idea02 refused" [ "$rc" = 3 ]
@@ -125,14 +137,15 @@ check "helpers: sha mismatch aborts before restart" [ "$rc" = 3 ] && [ ! -e "$WO
 setup norh; run norh --yes; rc=$?
 check "helpers: missing install-root-helpers only warns" [ "$rc" = 0 ] && grep -q "WARN: ./install-root-helpers not in" "$WORK/out"
 
-# Kit Engines: shared kit store 3Vvvig, never the pool store or the repo default
-KIT=automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk
+# Kit Engines: shared kit store 3Vvvig, which is also the repo/image default.
+# Never the pool store or idea02's 4GQm store.
+KIT=$DEFAULT
 setup kit; echo "$KIT" > "$R/store-identity/store-url.txt"; H=sunny-robin run kit --yes; rc=$?
 check "kit: matching kit store deploys" [ "$rc" = 0 ] && [ "$(git -C "$R" rev-parse HEAD)" = "$TIP" ] && [ "$(cat "$R/store-identity/store-url.txt")" = "$KIT" ] && grep -q "store $KIT" "$WORK/out"
 setup kitpool; H=kind-panda run kitpool --yes; rc=$?
 check "kit: pool store on a kit aborts before any change" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ] && [ ! -d "$WORK/bk-kitpool" ]
-setup kitdef; echo "$DEFAULT" > "$R/store-identity/store-url.txt"; H=happy-zebra run kitdef --yes; rc=$?
-check "kit: 4GQm default store aborts before any change" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
+setup kitdef; echo "$IDEA02" > "$R/store-identity/store-url.txt"; H=happy-zebra run kitdef --yes; rc=$?
+check "kit: idea02 4GQm store aborts before any change" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
 setup unk; H=wizardly-hugle run unk --yes; rc=$?
 check "unknown host refused" [ "$rc" = 3 ] && grep -q "not a pool Pi or kit Engine" "$WORK/out"
 

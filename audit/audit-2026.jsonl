@@ -1392,3 +1392,94 @@
 {"ts":"2026-11-11T23:26:03Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: quarantine zz-atlas443-read.ts (idea#443)","previous":null}
 {"ts":"2026-11-11T23:26:18Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-11T23:26:18Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: quarantine zz-atlas443-read.ts (idea#443)"}
+{"ts":"2026-11-12T00:27:29Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T00:27:29Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: read-only #443 1.1 route prep","previous":null}
+{"ts":"2026-11-12T00:28:32Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T00:28:32Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: read-only #443 1.1 route prep"}
+{"ts":"2026-11-12T01:05:39Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T01:05:39Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Axle: engine#326 (aa81ea4) + #329/idea#448 (b48b52a) Docker-dependent test rerun (Steve-authorized; pm2 engine stopped)","previous":null}
+{"ts":"2026-11-12T01:14:23Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Axle: engine#326 (aa81ea4) + #329/idea#448 (b48b52a) Docker-dependent test rerun (Steve-authorized; pm2 engine stopped)"}
+{"ts":"2026-11-12T01:14:23Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T01:18:37Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T01:18:37Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: agent-engine-dev#326 rollout (helper v9 + Engine 5f58f8c)","previous":null}
+{"ts":"2026-11-12T01:21:59Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T01:21:59Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: agent-engine-dev#326 rollout (helper v9 + Engine 5f58f8c)"}
+{"ts":"2026-11-12T01:35:10Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T01:35:10Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: agent-engine-dev#329 proof phase 1 (deploy bb3b751, #449 Running check)","previous":null}
+{"ts":"2026-11-12T01:38:00Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T01:38:00Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: agent-engine-dev#329 proof phase 1 (deploy bb3b751, #449 Running check)"}
+{"ts":"2026-11-12T02:05:10Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T02:05:10Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: agent-engine-dev#329/#328 scratch proof (Engine proof/448-446-combined 15c1b37, idea-updtest)","previous":null}
+{"ts":"2026-11-12T02:09:45Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T02:09:45Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: agent-engine-dev#329/#328 scratch proof (Engine proof/448-446-combined 15c1b37, idea-updtest)"}
+{"ts":"2026-11-12T02:12:38Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T02:12:38Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: agent-engine-dev#329/#328 scratch proof RERUN (Engine 15c1b37, fixed kit 9613bb2c)","previous":null}
+{"ts":"2026-11-12T02:24:07Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T02:24:07Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: agent-engine-dev#329/#328 scratch proof RERUN (Engine 15c1b37, fixed kit 9613bb2c)"}
+{"ts":"2026-11-12T06:42:07Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T06:42:07Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: idea04 build7 LAN probe (read-only)","previous":null}
+{"ts":"2026-11-12T06:43:07Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T06:43:07Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: idea04 build7 LAN probe (read-only)"}
+{"ts":"2026-11-12T07:10:44Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T07:10:44Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: idea#322 item 5"}
+{"ts":"2026-11-12T07:13:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T07:13:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: idea#76 fixture rebuild","previous":null}
+{"ts":"2026-11-12T07:13:47Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T07:13:47Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: idea#76 fixture rebuild"}
+{"ts":"2026-11-12T07:15:02Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T07:15:02Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle: idea#445 / #323 read-only service-tar audit of App Disks","previous":null}
+{"ts":"2026-11-12T07:18:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T07:18:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: #448/#328 scratch rerun v10 (helper+kit prep)","previous":null}
+{"ts":"2026-11-12T07:19:44Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle: idea#445 / #323 read-only service-tar audit of App Disks"}
+{"ts":"2026-11-12T07:19:44Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T07:34:45Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T07:34:45Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: #448/#328 scratch rerun v10 (helper+kit prep)"}
+{"ts":"2026-11-12T07:56:38Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T07:56:38Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: #443 1.1 stick build (WD 20070Q450002)","previous":null}
+{"ts":"2026-11-12T08:01:00Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T08:01:00Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: idea#416/#447 deploy engine main cc21947","previous":null}
+{"ts":"2026-11-12T08:06:27Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T08:06:27Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: idea#416/#447 deploy engine main cc21947"}
+{"ts":"2026-11-12T08:08:45Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T08:08:45Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: read-only argononed check (Steve)","previous":null}
+{"ts":"2026-11-12T08:09:10Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T08:09:10Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: read-only argononed check (Steve)"}
+{"ts":"2026-11-12T08:16:42Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T08:16:42Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: read-only argononed survey (Steve)","previous":null}
+{"ts":"2026-11-12T08:16:42Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T08:16:42Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas: read-only argononed survey (Steve)","previous":null}
+{"ts":"2026-11-12T08:17:18Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T08:17:18Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: read-only argononed survey (Steve)"}
+{"ts":"2026-11-12T08:17:18Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T08:17:19Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Atlas: read-only argononed survey (Steve)"}
+{"ts":"2026-11-12T08:21:21Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T08:21:21Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: #443 1.1 stick build (WD 20070Q450002)"}
+{"ts":"2026-11-12T08:21:37Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T08:21:37Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: #443 copy 1.1 bundle to Disk B","previous":null}
+{"ts":"2026-11-12T08:25:58Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T08:25:58Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: #443 copy 1.1 bundle to Disk B"}
+{"ts":"2026-11-12T08:26:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T08:26:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas: read-only operator key list (#453)","previous":null}
+{"ts":"2026-11-12T08:27:41Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T08:27:41Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Atlas: read-only operator key list (#453)"}
+{"ts":"2026-11-12T08:30:18Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T08:30:19Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: read-only store dump (stray disk cd8787b3)","previous":null}
+{"ts":"2026-11-12T08:31:10Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T08:31:10Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: read-only store dump (stray disk cd8787b3)"}
+{"ts":"2026-11-12T08:32:01Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T08:32:01Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas: read-only lsblk for stray disk cd8787b3","previous":null}
+{"ts":"2026-11-12T08:32:16Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T08:32:16Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Atlas: read-only lsblk for stray disk cd8787b3"}
+{"ts":"2026-11-12T08:36:27Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T08:36:27Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: #443 land 1.1 app on Disk B","previous":null}
+{"ts":"2026-11-12T08:38:25Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T08:38:25Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"null","previous":"Atlas: #443 land 1.1 app on Disk B"}
+{"ts":"2026-11-12T08:38:40Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"null"}
+{"ts":"2026-11-12T08:42:50Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T08:42:50Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: idea#443 land usage-dashboard 1.1","previous":null}
+{"ts":"2026-11-12T08:47:58Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: idea#443 land usage-dashboard 1.1"}
+{"ts":"2026-11-12T08:47:58Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T09:09:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T09:09:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: idea#416/#447 deploy engine main 537b16d","previous":null}
+{"ts":"2026-11-12T09:13:55Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T09:13:55Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: idea#416/#447 deploy engine main 537b16d"}
