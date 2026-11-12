@@ -1552,3 +1552,5 @@
 {"ts":"2026-11-12T12:07:52Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-12T12:12:56Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-12T12:12:56Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: land usage-dashboard 1.3 (tag 1.3 513e4be) on idea03 hub via Engine updateApp (idea#462); bundle staged on System Disk /apps, not Disk B","previous":null}
+{"ts":"2026-11-12T12:17:31Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: land usage-dashboard 1.3 (tag 1.3 513e4be) on idea03 hub via Engine updateApp (idea#462); bundle staged on System Disk /apps, not Disk B"}
+{"ts":"2026-11-12T12:17:31Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
