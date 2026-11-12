@@ -13,6 +13,8 @@
 # ALWAYS kept, whatever git status says (skip-worktree files included): config.yaml, pm2.config.cjs,
 # the whole store-identity/ dir and ~/.idea-local; backed up first, restored byte-for-byte, sha256-checked.
 # --dry-run (or no --yes): read-only; prints exactly what it would save, restore and install.
+# --production: required for production idea (hostname idea / wizardly-hugle), store fixed to 6f8m,
+#   DHCP vendor class skipped; refused on every other host (idea#416 W1).
 #
 # Why: the repo's tracked store-identity/ files hold the image default (the kit store
 # 3Vvv…, idea#452). A plain discard + checkout puts that default back, and a restarted
@@ -34,6 +36,7 @@ ENGINE_DIR="${ENGINE_DIR:-/home/pi/idea/agents/agent-engine-dev}"
 HOST_NAME="${HOST_NAME:-$(hostname)}"
 POOL_STORE="automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH"   # idea01/03/04 since 2026-10-13 (fleet-state.json)
 KIT_STORE="automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk"   # ONE shared kit store (sunny-robin, happy-zebra, kind-panda; reset 2026-10-18)
+PROD_STORE="automerge:6f8m5KxzARv9xwv4Lw18LgVUJzu"  # production idea (fleet-state wizardly-hugle) OWN store; never 2VroE/3Vvv/4GQm
 BACKUP_ROOT="${BACKUP_ROOT:-/home/pi/quarantine}"
 KEEP="config.yaml pm2.config.cjs"                    # plus every file in store-identity/
 IDEA_LOCAL="${IDEA_LOCAL:-$HOME/.idea-local}"        # kit local override, outside the repo; kept too
@@ -74,12 +77,13 @@ peak_summary() {
   echo "TEMP PEAKS per step (C):"
   for kv in $PEAKS; do echo "$kv"; done | awk -F= '{ if(!($1 in m)){o[++n]=$1; m[$1]=$2} else if($2+0>m[$1]+0) m[$1]=$2 } END{for(i=1;i<=n;i++) printf "  %s %s\n", o[i], m[o[i]]}'
 }
-TIP=""; BRANCH=""; YES=""; DRY=""
+TIP=""; BRANCH=""; YES=""; DRY=""; PROD=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --yes) YES=1 ;;
     --dry-run|-n) YES="" ; DRY=1 ;;
     --fetch) BRANCH="${2:?--fetch needs a branch}"; shift ;;
+    --production) PROD=1 ;;
     -*) die "unknown option $1" ;;
     *) TIP="$1" ;;
   esac; shift
@@ -94,8 +98,16 @@ case "$HOST_NAME" in
     [ "$EXPECT_STORE" = "$POOL_STORE" ] || die "pool deploy requires $POOL_STORE, not $EXPECT_STORE"
     ;;
   sunny-robin|happy-zebra|kind-panda) EXPECT_STORE="${EXPECT_STORE:-$KIT_STORE}" ;;  # only after Steve's GO naming the Engine
+  idea|wizardly-hugle)
+    # Production idea (idea#416 W1): only with --production, and only after Koen's GO via Steve.
+    # The store is fixed to 6f8m; an EXPECT_STORE override to anything else is refused.
+    [ -n "$PROD" ] || die "production idea ($HOST_NAME) needs --production (Koen's GO via Steve); MilkWise is never touched"
+    EXPECT_STORE="${EXPECT_STORE:-$PROD_STORE}"
+    [ "$EXPECT_STORE" = "$PROD_STORE" ] || die "production deploy requires $PROD_STORE, not $EXPECT_STORE"
+    ;;
   *) die "not a pool Pi or kit Engine ($HOST_NAME); never idea02, wizardly-hugle or Milkwise" ;;
 esac
+case "$HOST_NAME" in idea|wizardly-hugle) ;; *) [ -z "$PROD" ] || die "--production is only for production idea, not $HOST_NAME" ;; esac
 cd "$ENGINE_DIR"
 store_now() { tr -d '[:space:]' < store-identity/store-url.txt; }
 # Every kept file, relative to ENGINE_DIR (store-identity/ listed from disk, not from git).
@@ -137,7 +149,7 @@ if [ -z "$YES" ]; then
   echo "  would save to $BACKUP_ROOT/engine-deploy-<ts>/ and restore byte-for-byte (sha256):"
   sums | sed 's/^/    /'
   [ -f "$IDEA_LOCAL" ] || echo "    ($IDEA_LOCAL not present: nothing to keep)"
-  echo "  would run: git checkout --detach $TIP; pnpm install --frozen-lockfile; pnpm build; DHCP vendor class"
+  echo "  would run: git checkout --detach $TIP; pnpm install --frozen-lockfile; pnpm build; $([ -n "$PROD" ] && echo 'DHCP vendor class SKIPPED (production)' || echo 'DHCP vendor class')"
   if git cat-file -e "$TIP:install-root-helpers" 2>/dev/null; then
     echo "  would run ./install-root-helpers, then expect in /usr/local/sbin (repo sha256 at $TIP vs installed now):"
     for h in $HELPERS; do
@@ -197,7 +209,9 @@ temp_mark engine-build
 # A failure only warns: check-fleet-health.sh reports a missing drop-in.
 VC_ASSET=script/build_image_assets/idea-dhcp-vendor-class
 VC_HELPER=/usr/local/sbin/idea-dhcp-vendor-class
-if [ -f "$VC_ASSET" ]; then
+if [ -n "$PROD" ]; then
+  echo "DHCP vendor class: skipped on production idea (home LAN, not a kit router; idea#284)"
+elif [ -f "$VC_ASSET" ]; then
   if sudo -n install -o root -g root -m 0755 "$VC_ASSET" "$VC_HELPER" && sudo -n "$VC_HELPER"; then
     if systemctl is-active --quiet NetworkManager; then sudo -n nmcli general reload conf || echo "WARN: nmcli general reload conf failed" >&2; fi
   else

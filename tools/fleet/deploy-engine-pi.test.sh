@@ -146,8 +146,20 @@ setup kitpool; H=kind-panda run kitpool --yes; rc=$?
 check "kit: pool store on a kit aborts before any change" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ] && [ ! -d "$WORK/bk-kitpool" ]
 setup kitdef; echo "$IDEA02" > "$R/store-identity/store-url.txt"; H=happy-zebra run kitdef --yes; rc=$?
 check "kit: idea02 4GQm store aborts before any change" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
-setup unk; H=wizardly-hugle run unk --yes; rc=$?
+setup unk; H=idea02 run unk --yes; rc=$?
 check "unknown host refused" [ "$rc" = 3 ] && grep -q "not a pool Pi or kit Engine" "$WORK/out"
+# Production idea (idea#416 W1): --production required, store fixed to 6f8m
+PROD=automerge:6f8m5KxzARv9xwv4Lw18LgVUJzu
+setup pnf; echo "$PROD" > "$R/store-identity/store-url.txt"; H=wizardly-hugle run pnf --yes; rc=$?
+check "prod: without --production refused, nothing changed" [ "$rc" = 3 ] && grep -q "needs --production" "$WORK/out" && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
+setup pok; echo "$PROD" > "$R/store-identity/store-url.txt"; H=idea run pok --yes --production; rc=$?
+check "prod: 6f8m with --production deploys and keeps the store" [ "$rc" = 0 ] && [ "$(git -C "$R" rev-parse HEAD)" = "$TIP" ] && [ "$(cat "$R/store-identity/store-url.txt")" = "$PROD" ] && grep -q "DHCP vendor class: skipped on production" "$WORK/out"
+setup ppool; H=idea run ppool --yes --production; rc=$?
+check "prod: pool store on idea aborts before any change" [ "$rc" = 3 ] && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ]
+setup povr; echo "$PROD" > "$R/store-identity/store-url.txt"; EXPECT_STORE=$POOL H=idea run povr --yes --production; rc=$?
+check "prod: EXPECT_STORE override refused" [ "$rc" = 3 ] && grep -q "production deploy requires" "$WORK/out"
+setup pother; run pother --yes --production; rc=$?
+check "prod: --production on a pool Pi refused" [ "$rc" = 3 ] && grep -q "only for production idea" "$WORK/out" && [ ! -e "$WORK/pm2.log" ]
 
 # Pi-side lock: busy -> exit 75, nothing changed
 setup lk; ( flock -x 9; sleep 5 ) 9>>"$WORK/lock-lk" & LKPID=$!; sleep 0.5
