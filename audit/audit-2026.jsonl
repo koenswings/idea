@@ -1531,3 +1531,5 @@
 {"ts":"2026-11-12T10:47:06Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: app-usage-dashboard 1.2 web image buildx (PR #23); hub + Disk B + /services untouched","previous":null}
 {"ts":"2026-11-12T10:56:26Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: app-usage-dashboard 1.2 web image buildx (PR #23); hub + Disk B + /services untouched"}
 {"ts":"2026-11-12T10:56:26Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T11:04:49Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T11:04:49Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: land usage-dashboard 1.2 (tag 1.2 069c737) on idea03 hub via Engine updateApp (idea#462); bundle staged on System Disk /apps, not Disk B","previous":null}
