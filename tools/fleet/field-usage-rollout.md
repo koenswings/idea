@@ -324,7 +324,8 @@ Pi's `console_port`. On idea, also confirm MilkWise was not touched.
 
 ## 11. Move plan: usage-dashboard hub idea03 → production `idea` (PLAN ONLY)
 
-**Status:** revision 3, 2026-11-12 ~11:30 CET, by Atlas. It follows Steve's 11:04
+**Status:** revision 4, 2026-11-12 ~11:40 CET, by Atlas, with Axle's review
+(11:20) folded in. It follows Steve's 11:04
 change (made on Koen's question) and replaces the Disk B carrier plan from
 revision 2. Nothing here has been run.
 
@@ -389,9 +390,11 @@ system disk**. idea is `wizardly-hugle` in fleet-state, 100.115.60.6, store
      refuses 80, 3333, 3334 and 8081.
    - Listening ports at the inventory: 22, 3333, 3334, 8081, 9980, 50065,
      53503, 53677, 54189, 54225, 60758, 61312.
-   - 58546 was free, but the new port can be any free one. Koen's dashboard
-     URL becomes `http://idea.tail2d60.ts.net:<new port>/`. The admin →
-     `tag:idea` grant (flow F2/F3) covers any port.
+   - 58546 was free at the inventory. Step 4 writes `port=58546` into the
+     new `.env` before the first real start (S-5), and the Engine keeps it
+     because it is free. Koen's dashboard URL becomes
+     `http://idea.tail2d60.ts.net:58546/`. The admin → `tag:idea` grant (flow
+     F2/F3) covers it.
    - The collector shares the sidecar's network namespace, and the sidecar does
      not mount the host `tailscaled.sock`, so there is no clash with idea's
      tailscaled.
@@ -485,149 +488,158 @@ every `from=` pin.
 **Gates:**
 - W1 is done;
 - #462 and the #444 case B pass on idea03;
-- S-4 is decided;
-- the Axle points in §11.5 are answered.
+- Steve has decided S-4 (copy route), S-5 (`.env` hand edit), S-6 (root
+  copy), S-7 (service tars onto idea) and S-8 (version route).
+
+**Version route (S-8):**
+
+| Route | Steps | Status |
+|---|---|---|
+| **V1** (Steve's flow) | Install **1.2** fresh on idea, then copy the 1.1 (or 1.2) `data/`. | Needs the 1.2 tag; there is none yet (Axle: the only tag is `1.1`, app main `88944fd`). The 1.2 compose and wrapper must keep the empty-state guard. |
+| **V2** (Axle's alternative) | Install **1.1** on idea, copy, verify, then `updateApp` to 1.2 on idea. | The 1.1 → 1.2 move goes through the Engine's normal pre-update backup and snapshot. Needs a Backup Disk on idea for the pre-update backup (M-6). |
+
+Whether `data/` from 1.1 has schema changes under 1.2 is **pending Kid**.
+Choose V1 only if Kid confirms there are none, or that 1.2 migrates on start.
 
 **Pre-checks (read-only; the output goes to Steve first):**
 
 | # | Check | Owner |
 |---|---|---|
-| M-P1 | fleet-state: idea03 and wizardly-hugle `claim: null`. Kid's #159 run 3 is finished. Note idea's system-disk id (store record with `diskTypes: ['system']`). | Atlas |
-| M-P2 | idea: W1-P2 to W1-P6 again. Engine on main, helper v10. | Atlas |
-| M-P3 | idea03 hub: nodekey `1382c2eab7500ea4`, IP `100.75.102.57`, Running, no AuthURL (`script/check-idea-hub-nodekey.py`, public prefixes only), health 200. Record the version, container IDs and inode. | Kid |
+| M-P1 | fleet-state: idea03 and wizardly-hugle have `claim: null`. Kid's #159 run 3 is finished. Note idea's system-disk id and idea03's (the store record with `diskTypes: ['system']`). | Atlas |
+| M-P2 | idea: repeat W1-P2 to W1-P6. Engine on main, helper v10. `id pi` shows uid 1000 on idea and on idea03. Port 58546 is not listening. | Atlas |
+| M-P3 | idea03 hub: nodekey `1382c2eab7500ea4`, IP `100.75.102.57`, Running, no AuthURL (`script/check-idea-hub-nodekey.py`, public prefixes only), health 200. Record the version, container IDs and inode. `data/tailscale/authkey-join-blocked` is **absent**. | Kid |
 | M-P4 | Last backup on idea03: `backupApp usage-dashboard-8fhwrslsrq78xtswed4 diskb202610301247`, then `listBackup` and `verifyBackup`. Record the archive. | Atlas |
-| M-P5 | Names only, never values: the keys in idea03's instance `.env`, for example whether `IDEA_USAGE_SESSION_SECRET` is set. They have to be matched on idea (§11.5 Q1). | Atlas |
+| M-P5 | idea03 instance `.env`, **key names only, never values**: `port`, `port_zip` (if present), `IDEA_USAGE_KOEN_PASSWORD`, `IDEA_USAGE_MARCO_PASSWORD`, `IDEA_USAGE_SESSION_SECRET`. Also confirm there is no `TS_AUTHKEY` line. | Atlas |
+| M-P6 | Service tars on idea (`pull_policy: never`; no install route copies `services/`): idea's `/services` holds the three tars for the chosen version. They match the release sha256 values and `verify-service-tar.sh` says `MATCH` against the compose pins (§12). If they are missing, the copy from the box's verified release dir is S-7. | Atlas |
 
 **Steps (about 60 min; T = start; never two hubs running):**
 
 | Step | T+ | Owner | Action | Pass |
 |---|---|---|---|---|
-| 1 | 0 | Atlas | Claim idea03 and wizardly-hugle (`claim "Atlas idea#416 hub move"`; statuses unchanged). Re-run M-P1 to M-P5. | green |
-| 2 | 5 | Atlas | On idea, from Console :8081 or `engine-ctl.mjs send`: `installApp usage-dashboard-1.2 <idea-sys-disk-id> --name usage-dashboard`. Online, this takes the GitHub route and pulls the digest-pinned images. It **does start** the instance (§11.5 Q2). With an empty `./data/tailscale` and no `TS_AUTHKEY`, `sidecar-wrap.sh` refuses to start ("no persisted node key … and TS_AUTHKEY is empty"), so no tailscaled runs and **no node registers**. Record the new instance id `<new>` and the port. | install Done; `docker logs` of the new sidecar shows the refusal; the tailnet has no new node |
-| 3 | 10 | Atlas | `stopInstance <new> <idea-sys-disk-id>` (operator stop). | all `<new>` containers Exited |
-| 4 | 12 | Kid | Snapshot of the idea03 hub (M-P3). No pull in flight. | same as M-P3 |
-| 5 | 14 | Atlas | On idea03: `stopInstance usage-dashboard-8fhwrslsrq78xtswed4 <idea03-sys-disk-id>` (operator stop, so it stays stopped across reboots; §11.5 Q3). | no hub container Up on idea03; idea-hub offline on the tailnet |
-| 6 | 16 | Atlas | **Manifest before:** on idea03, `sudo find data -path data/tailscale-run -prune -o -printf '%m %U:%G %s %p\n'` and the matching `sudo sha256sum` of every file, run from `/instances/usage-dashboard-8fhwrslsrq78xtswed4`. The files stay on the Pi; Atlas reads the hashes only. | manifest saved |
-| 7 | 18 | Atlas | On idea, under `/instances/<new>`, quarantine the fresh install's `data/` with `sudo mv data data.fresh.quarantine-<ts>` (no `rm`). | moved |
-| 8 | 19 | Atlas | Copy (route from S-4; R1 shown): `ssh idea03 "sudo tar --numeric-owner --xattrs -cpf - -C /instances/usage-dashboard-8fhwrslsrq78xtswed4 --exclude=data/tailscale-run data" \| ssh idea "sudo tar --numeric-owner --xattrs -xpf - -C /instances/<new>"`. Then create an empty `data/tailscale-run` with the fresh install's owner and mode. Nothing is written on the box. | exit 0 on both ends |
-| 9 | 22 | Atlas | **Manifest after** on idea (same command). The diff must be empty: mode, uid:gid, size, path and sha256 of every file, including `data/tailscale/*` and `data/keys/*`. | identical |
-| 10 | 24 | Atlas | `startInstance <new> <idea-sys-disk-id>`. | Running; `/api/v1/health` 200 on idea localhost |
-| 11 | 27 | Kid | On idea: `BackendState=Running`, no AuthURL, nodekey `1382c2eab7500ea4`, IP `100.75.102.57`, `check-idea-hub-nodekey.py` → `match=true`. Collector pull of idea03 OK. That proves the `from=` pin in `/etc/ssh/idea_usage_keys/pi` on idea03, `restrict,from="100.75.102.57"`, still accepts the hub. | match=true, pull ok |
-| 12 | 32 | Atlas | idea unaffected: :3333 and :3334 = 200 (HTTP only), :8081 = 200, MilkWise IDs and StartedAt unchanged, `engine online`, `check-fleet-health.sh --pi wizardly-hugle`, temperature < 75 °C. | unchanged |
-| 13 | 36 | Koen | Log in at `http://idea.tail2d60.ts.net:<new port>/`. Check MilkWise and the Console. | Koen OK |
-| 14 | 40 | Atlas | If R2 or R3 was used, remove the temporary key and ask Koen to drop the ACL grant. Release both claims. Fleet-state notes: hub on idea as `<new>`; idea03's `8fhwrslsrq78xtswed4` stopped as the rollback source. Evidence to Steve. | pushed |
+| 1 | 0 | Atlas | Claim idea03 and wizardly-hugle (`claim "Atlas idea#416 hub move"`; statuses unchanged). Re-run M-P1 to M-P6. | green |
+| 2 | 5 | Atlas | On idea (Console :8081 or `engine-ctl.mjs send`): `installApp usage-dashboard-1.2 <idea-sysDiskId> --name usage-dashboard` (V2: `usage-dashboard-1.1`). Online it takes the GitHub route; no `--fresh`. **It always starts** (Axle). The sidecar refuses to start because `data/tailscale` and `TS_AUTHKEY` are both empty, so no node registers and no login URL is used. The collector and web start briefly with empty data. Record `<newId>` and its port. | Install Done. The new sidecar log shows the refusal. No new tailnet node. |
+| 3 | 8 | Atlas | `stopInstance <newId> <idea-sysDiskId>`. Commands run one at a time, so this runs after the install's start. | `docker ps -a`: all `<newId>` containers Exited |
+| 4 | 10 | Atlas (S-5) | Into `/instances/<newId>/.env`: write `port=58546`. Copy over `IDEA_USAGE_KOEN_PASSWORD`, `IDEA_USAGE_MARCO_PASSWORD` and `IDEA_USAGE_SESSION_SECRET` by key name from idea03, values never printed (piped over the S-4 route). Never copy the old `.env` whole, and never add `TS_AUTHKEY`. This is a **hand edit of an Engine file and needs Steve's OK**. | `.env` key names match M-P5; no `TS_AUTHKEY` |
+| 5 | 13 | Kid | Snapshot the idea03 hub (M-P3). No pull in flight. | as M-P3 |
+| 6 | 15 | Atlas | On idea03: `stopInstance usage-dashboard-8fhwrslsrq78xtswed4 <idea03-sysDiskId>`. Then `docker ps -a` and `docker inspect -f '{{.State.Status}} {{.RestartCount}}'` on all three hub containers. The `kill()` fallback path has not been verified. | No hub container Up on idea03; idea-hub offline on the tailnet. **From here on nobody presses Start on 2VroE.** |
+| 7 | 17 | Atlas | **Manifest before**, on idea03, from `/instances/usage-dashboard-8fhwrslsrq78xtswed4`: `sudo find data -path data/tailscale-run -prune -o -printf '%m %U:%G %s %p\n'` and `sudo sha256sum` of every file. Only hashes leave the Pi. | saved |
+| 8 | 19 | Atlas (S-6) | **Root copy, outside the Engine** (no Engine command copies across stores; Axle). The new `data/` is replaced wholesale and `data/tailscale-run/` is left out. **R1** (box relay): on idea, `sudo mv data data.fresh.quarantine-<ts>` (no `rm`). Then `ssh idea03 "sudo tar --numeric-owner --acls --xattrs -cpf - -C /instances/usage-dashboard-8fhwrslsrq78xtswed4 --exclude=data/tailscale-run data" \| ssh idea "sudo tar --numeric-owner --acls --xattrs -xpf - -C /instances/<newId>"`. **R2/R3** (direct): as root, `rsync -aHAX --numeric-ids --delete --exclude=tailscale-run/ <idea03>:/instances/<old>/data/ /instances/<newId>/data/`. Then create an empty `data/tailscale-run` with the fresh install's owner and mode. | exit 0 |
+| 9 | 22 | Atlas | **Manifest after**, on idea, with the same command. Diff against step 7. `authkey-join-blocked` is absent. | Identical: mode, uid:gid, size, path and sha256 of every file, including `data/tailscale/*` and `data/keys/*` |
+| 10 | 24 | Atlas | `startInstance <newId> <idea-sysDiskId>`. `TS_AUTHKEY` stays empty. | Running, on `:58546`. `/api/v1/health` 200 on idea localhost. |
+| 11 | 27 | Kid | On idea: `BackendState=Running`, no AuthURL, nodekey `1382c2eab7500ea4`, IP `100.75.102.57`, `check-idea-hub-nodekey.py` gives `match=true`. A collector pull of idea03 works, which proves the `from=` pin (`restrict,from="100.75.102.57"` in idea03's `/etc/ssh/idea_usage_keys/pi`). V2 only: `updateApp` to 1.2 on idea, then repeat this check. | match=true, pull ok |
+| 12 | 32 | Atlas | idea unaffected: :3333 and :3334 = 200 (HTTP only), :8081 = 200, MilkWise container IDs and StartedAt unchanged, `engine online`, `check-fleet-health.sh --pi wizardly-hugle`, temperature < 75 °C. | unchanged |
+| 13 | 36 | Koen | Log in at `http://idea.tail2d60.ts.net:58546/` (same port, same logins). Check MilkWise and the Console. | Koen OK |
+| 14 | 40 | Atlas | If R2 or R3 was used, wipe the temporary key, and ask Koen to drop the ACL grant if R3. Release both claims. Fleet-state notes: the hub is on idea as `<newId>`. idea03's `8fhwrslsrq78xtswed4` is stopped, as the rollback source. Evidence goes to Steve. | pushed |
+| 15 | after a soak agreed by Steve | Atlas (S-9) | On idea03: `removeInstance usage-dashboard-8fhwrslsrq78xtswed4`. It runs `compose down` without `-v`, moves the folder to `/.idea-quarantine/<id>-<stamp>` and drops the 2VroE record. **Needs Steve's or Koen's OK** because it behaves like a deletion; nothing is deleted. After this, no Engine path can start the old identity. Until then, the stopped instance is the rollback source. | quarantine path logged |
 
-**The idea03 instance stays stopped and untouched**, data included, as the
-rollback source. Do not remove it until Steve and Koen decide to, after a
-soak.
+**`data/tailscale-run`: leave it out.** It holds only the LocalAPI socket and
+the `restart-requested` flag, which are runtime-only. The backup contract also
+excludes it, and a copied socket would be stale. tailscaled makes a new one,
+and the wrapper clears the old in-state flag (Axle).
 
-**`data/tailscale-run`: leave it out.** It holds only the LocalAPI socket
-`tailscaled.sock`. The runbook calls it runtime only, and it is excluded from
-backups (`exclude: tailscale-run`). A copied socket is stale. tailscaled
-creates a new one at start, and the collector reaches the sidecar through
-that same bind mount. Copying `data/tailscale/authkey-join-blocked` is fine,
-because it only exists after a failed keyed join. M-P3 should show that
-idea03 has none.
+**Nothing in `data/` depends on the old id, on idea03 or on the store**
+(Axle, §11.5).
 
-### 11.5 Engine and App points: code-based answers, pending Axle confirmation
+### 11.5 Engine and App points (Axle, 2026-11-12 ~11:20 CET, `/workspace/axle-461-hubmove/REVIEW-461.md`)
 
-**Q1. Is `data/` tied to the instance id or `.env`, old `8fhwrslsrq78xtswed4`
-versus `<new>`?**
+Axle reviewed Engine main `537b16d` and App `88944fd` (1.1). He did **not**
+review 1.2, because it doesn't exist yet. Every App-side point needs a
+re-check against 1.2.
 
-My reading of the code: **no id coupling in `data/`.**
-- The collector reads `DATA_DIR=/data`, `REGISTRY_PATH`, `PULL_KEY=/data/keys/pull_key`,
-  `TS_SOCKET`, `IDEA_USAGE_*` and `IDENTITY_*` from compose and env.
-- Neither the App code nor `compose.yaml` refers to the instance id. The
-  compose project, and with it the container names, uses the id, but that
-  stays on the Engine side.
-- `data/` holds `usage.sqlite`, `registry.json`, `operators.json`,
-  `known_hosts`, `backup/`, `keys/` and `tailscale/`. None of them depends on
-  the id.
-- **`.env` is not in `data/`.** The Engine writes `port=` (new on idea).
-  App keys such as `IDEA_USAGE_SESSION_SECRET` default to empty. If idea03
-  sets it, the sessions on idea won't match, and users just log in again.
-  M-P5 lists the key names, which are then matched through the Console's
-  instance env and not by hand-copying `.env`.
-- The new instance has its own `x-app` backup links. Backups of `<new>` start
-  a new repo (§11.7).
+**Q1. Is `data/` tied to the instance id, the host or the store?** No.
+- `collector/`, `compose.yaml`, `web/` and `app.yaml` contain no instance id,
+  no host name and no store id.
+- `registry.json` lists the kits, not the hub's own host.
+- The compose project and container names come from the id (new id → new
+  containers). The App uses only bind mounts and a tmpfs: no named volumes,
+  no Engine labels.
+- **`.env` is the one coupling.** It holds the Engine-written `port=` (and
+  `port_zip=` if present) and the App keys `IDEA_USAGE_KOEN_PASSWORD`,
+  `IDEA_USAGE_MARCO_PASSWORD` and `IDEA_USAGE_SESSION_SECRET`. Carry those
+  over by key name, plus `port=58546`, before the first real start. Step 4
+  covers this (S-5). On start the Engine keeps a `.env` port unless that port
+  is listening, reserved or owned in the store.
 
-> Axle: ______
+**Q2. Can the install skip the start?** No.
+- Every route ends in `processInstance` → `tracedStartInstance`, and there
+  is no `--no-start` flag.
+- The new id is minted during the install, so nothing can be pre-seeded.
+- It is safe for identity because of the empty-state guard in
+  `sidecar-wrap.sh`: no `tailscaled`, it sleeps for 3600 s, then exits with 1.
+- Conditions:
+  - no `TS_AUTHKEY` in the new `.env`;
+  - 1.2 keeps the guard;
+  - the brief start of the collector and web on empty data is accepted.
+- Service tars: `pull_policy: never`, and **no install route copies
+  `services/`**. The tars for the chosen version must already be in idea's
+  `/services` (M-P6 / S-7), or the start ends in `Error`.
 
-**Q2. Can the install run without autostart?**
+**Q3. Does the stop on idea03 persist?** Yes.
+- `stopInstance` stops the containers through the Docker API (`kill()` if
+  that fails), keeps them (no `down`), sets the status to `Stopped` and
+  records an operator `stopApp` in 2VroE.
+- At Engine start or a reboot, `checkAndSetUndockedApps` and the
+  `processSystemInstance` gate both keep it Stopped.
+- Docker's `unless-stopped` does not restart containers that were stopped
+  explicitly. This is not verified for the `kill()` path, so step 6 checks it
+  with `docker ps -a` and `docker inspect`.
+- **Things that can still revive it:** an explicit `startInstance` or
+  `runInstance` from any Console or CLI on 2VroE, or an `updateApp`. A backup
+  of a stopped hub does not restart it.
+- Hence the step-15 `removeInstance`.
 
-My reading: **no.** `InstallApp.ts` always ends in `processInstance` →
-`tracedStartInstance`, on both the GitHub and the disk route, and
-`installApp` has no `--no-start` flag. The `shouldAutoStart` gate only holds
-back a store-recorded operator stop or a Stopped status, and a fresh record
-has neither.
+**Q4. Does anything depend on the store?** No blocker.
+- The new instance is a fresh 6f8m record (`lastBackup: null`, no history).
+- The 2VroE record stays until step 15. The stores never sync, so nothing
+  clashes.
+- Disk B's `BACKUP.yaml` still links the old id (see §11.7).
 
-**Safe anyway.** The App's `sidecar-wrap.sh` exits before containerboot when
-there is no persisted node key and `TS_AUTHKEY` is empty, so tailscaled never
-starts and no node can register. The compose `restart: unless-stopped`
-re-runs the same refusal. We stop it in step 3.
+**Q5. Real commands:**
+- step 2: `installApp <appId> <targetDiskId> [--source <diskId>] [--name …]`
+- steps 3, 6 and the rollback: `stopInstance <id> <diskId>`
+- step 10 and the rollback: `startInstance <id> <diskId>`
+- M-P4: `backupApp`, `listBackup`, `verifyBackup`
+- V2: `updateApp`
+- step 15: `removeInstance <id>`
+- M-6: `summariseDisk`, `eraseDisk`, `createBackupDisk <diskId> <mode> <instance…>`
 
-> Axle: ______ (a `--no-start` for installApp would be cleaner)
+**Copy (S-6): an ops root step that needs its own approval.**
+- No Engine command can do it. Cross-engine `copyApp` needs a shared store
+  and mints a new id, `moveApp` refuses remote targets, and Engines on
+  different stores refuse to peer at all.
+- Keep numeric owners (the Engine's own copy uses `-aHAX --numeric-ids`).
+- `pi` is uid 1000 on both Pis (M-P2). The container uids are the same,
+  because the images are the same.
 
-**Q3. Is the stop persistent?**
-
-My reading: **yes.**
-- `stopInstance` (`Instance.ts`) stops each container through the Docker
-  API, so Docker's `unless-stopped` won't restart them when the daemon starts.
-- It records a `stopApp` operation with an operator cause
-  (`console-command`/`cli-command`).
-- `AutoStart.ts` `userStopInForce` / `isUserStopped` keep the instance
-  Stopped at Engine start, at the 05:00 reboot and on re-dock, until an
-  operator start.
-- This applies both to idea03's `8fhwrslsrq78xtswed4` (store 2VroE) and to
-  idea's `<new>` between steps 3 and 10.
-
-> Axle: ______
-
-**Q4. Does anything depend on the store?**
-
-My reading: **none blocking.** Each instance lives only in its own Engine's
-store. 2VroE keeps `8fhwrslsrq78xtswed4` (Stopped), and 6f8m gets `<new>`.
-Nothing crosses stores, so neither store needs a hand edit. Side effects:
-- idea03's Disk B `BACKUP.yaml` links stay on the old id;
-- the old Disk B repo is a rollback source for idea03 only;
-- Consoles on the pool still show the stopped hub. That is expected.
-
-> Axle: ______
-
-**Q5. Real command names**, from `docs/COMMANDS.md` and `Commands.ts`. They
-are sent from the Console (idea03 :8080, idea :8081) or with the box's
-`engine-ctl.mjs send <command> <args>`.
-
-| Command | Used in |
-|---|---|
-| `installApp <appId> <targetDiskId> [--name …]` | step 2 |
-| `stopInstance <id> <diskId>` | steps 3, 5, rollback |
-| `startInstance <id> <diskId>` | step 10, rollback |
-| `backupApp`, `listBackup`, `verifyBackup` | M-P4 |
-
-`createBackupDisk <diskId> <mode> <instance…>` is for M-6. There is no
-`createAppDisk`.
-
-> Axle: ______
+**Other notes:**
+- The `/.pre-update/<id>` snapshot from #443 on idea03 excludes
+  `data/tailscale`, so it cannot revive the identity. It is never deleted
+  automatically.
+- 1.1 → 1.2 schema: **pending Kid** (see S-8).
 
 ### 11.6 Rollback (one hub at a time)
 
-1. On idea: `stopInstance <new> <idea-sys-disk-id>` (operator stop). Check
-   that no `<new>` container is Up and that idea-hub shows offline.
-2. On idea03: `startInstance usage-dashboard-8fhwrslsrq78xtswed4 <idea03-sys-disk-id>`.
+Only possible before step 15:
+
+1. On idea: `stopInstance <newId> <idea-sysDiskId>`. Then `docker ps -a`
+   shows no `<newId>` container Up, and idea-hub is offline.
+2. On idea03: `startInstance usage-dashboard-8fhwrslsrq78xtswed4 <idea03-sysDiskId>`.
    Kid checks nodekey `1382c2eab7500ea4`, `match=true` and health 200.
 
-**Data after the copy.** Usage pulled on idea after step 10 is not on idea03.
-- To keep it: stop both, run steps 6–9 in reverse (idea → idea03), then start
-  only idea03.
-- Never start an older copy of the Tailscale state while a newer one has run
-  elsewhere. Before rolling back after long hours on idea, copy `data/`
-  back first (the 2026-11-11 Expired incident).
+**Data written after step 10.** Usage pulled on idea after step 10 is not on
+idea03. If it matters, stop both instances, repeat steps 7–9 in the other
+direction (idea → idea03), then start only idea03.
+
+**Never start an older copy of the Tailscale state after a newer one has
+run.** idea03's copy is older once idea has run. After a long run on idea,
+copy `data/` back before you start idea03 (the 2026-11-11 Expired incident).
 
 **Other cases:**
+- After step 15: the only way back is to move the folder back out of
+  `.idea-quarantine` by hand, with Koen's OK, or Option B (M-5).
 - State lost or rejected: Option B with M-5.
-- MilkWise or the Console affected at any step: stop `<new>` first, then
-  report to Steve.
+- MilkWise or Console affected at any step: stop `<newId>` first, then report
+  to Steve.
 
 ### 11.7 M-6: backups on idea (open, proposal)
 
@@ -636,13 +648,23 @@ idea03. idea needs its own Backup Disk.
 
 | Option | How (Engine-native) | For | Against |
 |---|---|---|---|
-| **B1 (recommended): one dedicated USB SSD on idea** | Koen plugs a spare SSD into a free USB port on idea. `summariseDisk`, then `eraseDisk` it to an IDEA disk, then `createBackupDisk <id> scheduled <new>` (or `on-demand` plus a routine). Later add `milkwise-wizardly-hugle-001` with Koen's OK. | Off the system disk, so a failed boot SSD is survivable. Helper v10 can list, verify and clean it. Same flow as idea03. | A physical step for Koen and a disk to find. Same site, so no off-site copy. Archives are unencrypted, as the helper makes them. Keys and Tailscale state are excluded, so losing all of idea means M-5. |
+| **B1 (recommended): one dedicated USB SSD on idea** | Koen plugs a spare SSD into a free USB port on idea. `summariseDisk`, then `eraseDisk` it to an IDEA disk, then `createBackupDisk <id> scheduled <newId>` (or `on-demand` plus a routine). Later add `milkwise-wizardly-hugle-001` with Koen's OK. | Off the system disk, so a failed boot SSD is survivable. Helper v10 can list, verify and clean it. Same flow as idea03. | A physical step for Koen and a disk to find. Same site, so no off-site copy. Archives are unencrypted, as the helper makes them. Keys and Tailscale state are excluded, so losing all of idea means M-5. |
 | B2: idea's internal NVMe (Samsung 256 GB, serial S73YNXMX102912, unmounted bootfs and rootfs today) | `summariseDisk`, `eraseDisk`, `createBackupDisk` | No purchase or plug. Fast. | Wipes what is on it now (it may be Koen's spare OS disk; his call). Same machine, so a power or PSU fault can take both. |
 | B3: off-box copy of the hook dump | A box routine pulls the `data/backup/usage.sqlite` hook dump read-only over SSH, without keys or state. | Off-site. Costs nothing. | Not an Engine backup, so no restore path through `restoreApp`. Data passes through the ops box. Needs Steve's OK and a routine. |
 
 **Recommendation: B1** with mode `scheduled`, plus B3 later if Koen wants an
-off-site copy. Until M-6 lands, idea03's last Disk B archive (M-P4) and the
-stopped idea03 instance are the only copies.
+off-site copy. Until M-6 lands, idea03's last Disk B archive (M-P4) and the stopped
+idea03 instance are the only extra copies. With route V2, `updateApp` on idea
+needs this Backup Disk for its pre-update backup, so M-6 has to come before
+the V2 update.
+
+**Disk B's link to the old id.** Disk B's `BACKUP.yaml` on idea03 still links
+`usage-dashboard-8fhwrslsrq78xtswed4`. Links are keyed only by instance id,
+and the Engine has no per-link remove: `createBackupDisk` rewrites the whole
+list. So the link stays. It is harmless while the old instance is stopped,
+and once it is removed (step 15) it points at nothing. Leave it, or let Steve
+decide whether to rewrite the list with `createBackupDisk` (S-10). Either
+way, Disk B's hub repo stays idea03-side history only.
 
 ### 11.8 Koen actions (idea#375), decisions for Steve, fleet-state
 
@@ -651,11 +673,17 @@ stopped idea03 instance are the only copies.
 | M-1 | **DONE** (Steve's chat, 10:56 CET). |
 | M-2 | Covered by M-1. Window W1 (§11.3), after #462, #444 case B and #463. |
 | M-3, M-4 | **Dropped.** No physical step. Disk B stays on idea03. |
-| Step 13 | Koen logs in on idea's new dashboard port and checks MilkWise and the Console. |
+| Step 13 | Koen logs in at idea:58546 and checks MilkWise and the Console. |
 | M-5 | Rollback only: a single-use `tag:idea-hub` key and reassigning `100.75.102.57`. |
 | M-6 | Open: B1, B2 or B3 (§11.7). B1 needs a spare USB SSD from Koen. |
-| S-4 | Steve picks the copy route: R1 (box relay, recommended), R2 (LAN with a temporary key) or R3 (direct over Tailscale; Koen adds a temporary ACL grant and a temporary key). |
-| #463 | Steve reviews and merges the `deploy-engine-pi.sh --production` case, and confirms the DHCP vendor-class skip. |
+| S-4 | Steve chooses the copy route: R1 (relayed through the box, recommended), R2 (LAN with a temporary key) or R3 (direct over Tailscale, which needs a temporary ACL grant from Koen plus a temporary key). |
+| S-5 | Steve OKs the hand edit of `/instances/<newId>/.env`: `port=58546` plus three App keys carried over by name (step 4). |
+| S-6 | Steve OKs the ops root copy of `data/` outside the Engine (step 8). |
+| S-7 | Steve OKs copying the version's three service tars from the box's verified release dir into idea's `/services`, if M-P6 finds them missing. |
+| S-8 | Steve chooses the version route: V1 (fresh 1.2, which needs the 1.2 tag) or V2 (1.1, then `updateApp`, which needs M-6 first). Waiting on Kid for the 1.1 → 1.2 schema answer. |
+| S-9 | Steve or Koen OKs `removeInstance` of the old id on idea03 after the soak (step 15). |
+| S-10 | Steve decides whether Disk B's `BACKUP.yaml` link to the old id stays or is rewritten with `createBackupDisk`. |
+| #463 | Steve reviews and merges the `deploy-engine-pi.sh --production` case and confirms the DHCP vendor-class skip. |
 
 **Fleet-state:** the wizardly-hugle `version` field is stale (`745f2c3`,
 live `27e355a`). Per Steve (11:00) it is **not** fixed now. It is set through
