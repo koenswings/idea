@@ -1400,3 +1400,5 @@
 {"ts":"2026-11-12T01:05:39Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Axle: engine#326 (aa81ea4) + #329/idea#448 (b48b52a) Docker-dependent test rerun (Steve-authorized; pm2 engine stopped)","previous":null}
 {"ts":"2026-11-12T01:14:23Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Axle: engine#326 (aa81ea4) + #329/idea#448 (b48b52a) Docker-dependent test rerun (Steve-authorized; pm2 engine stopped)"}
 {"ts":"2026-11-12T01:14:23Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T01:18:37Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T01:18:37Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: agent-engine-dev#326 rollout (helper v9 + Engine 5f58f8c)","previous":null}
