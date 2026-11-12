@@ -1584,3 +1584,5 @@
 {"ts":"2026-11-12T12:58:24Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"status","value":"production","previous":"testing"}
 {"ts":"2026-11-12T12:59:45Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: SHORT app-nextcloud#23 tip 3fa97b1 pre-install skeleton check (idea#464), throwaway compose projects; hub and Disk B untouched"}
 {"ts":"2026-11-12T12:59:45Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T13:03:09Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":"Atlas idea#461 hub move","previous":null}
+{"ts":"2026-11-12T13:03:09Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas idea#461 hub move","previous":null}
