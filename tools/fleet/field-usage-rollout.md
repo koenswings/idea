@@ -324,198 +324,348 @@ Pi's `console_port`. On idea, also confirm MilkWise was not touched.
 
 ## 11. Move plan: usage-dashboard hub idea03 → production `idea` (PLAN ONLY)
 
-**Status:** written 2026-11-12 ~11:00 CET by Atlas for Steve. Nothing in this
-section has been run. It needs Koen's GO on idea#375 (items M-1 to M-6 below). It
-does not give anyone permission to touch idea, idea03 or Disk B.
+**Status:** revision 2, 2026-11-12 ~11:15 CET, by Atlas after Steve's review of
+PR #461 (10:58) and his 11:00 update. Nothing in this section has been run.
+**Koen's GO (M-1) was given in Steve's chat at 10:56 CET:** "Yes, move the
+dashboard to production idea when the plan and idea03 checks pass". That GO
+also covers the Engine update on idea (M-2, §11.3). Being written here does not
+let anyone touch idea, idea03 or Disk B outside a claimed window.
 
-Instance `usage-dashboard-8fhwrslsrq78xtswed4` (App `usage-dashboard-1.1`),
-today on **idea03's system disk** (`/instances/…`), store
-`automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH`. Target: production `idea`
-(`wizardly-hugle` in fleet-state, Tailscale 100.115.60.6,
-idea.tail2d60.ts.net).
+Instance `usage-dashboard-8fhwrslsrq78xtswed4` (App `usage-dashboard-1.1`;
+it becomes 1.2 once idea#462 lands) currently sits on **idea03's system disk**
+(`/instances/…`), in store `automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH`. The target is
+production `idea` (`wizardly-hugle` in fleet-state, 100.115.60.6,
+idea.tail2d60.ts.net), whose store is `automerge:6f8m5KxzARv9xwv4Lw18LgVUJzu`.
 
-Identity to keep: `idea-hub`, `tag:idea-hub`, nodekey prefix
-`1382c2eab7500ea4`, IPv4 `100.75.102.57`. State lives in the instance's
-`./data/tailscale` (tailscaled.state inode 7048947 on idea03). The pull key
-is in `./data/keys`. Containers on idea03 today: web `d756a3cd`, collector
-`fb5e0d1b`, tailscale `a05c46e4`. Health is on `:58546`.
+The identity to keep: `idea-hub`, `tag:idea-hub`, nodekey prefix `1382c2eab7500ea4`,
+IPv4 `100.75.102.57`. The Tailscale state is in the instance's `./data/tailscale`
+(inode 7048947 on idea03) and the pull key is in `./data/keys`.
 
-Evidence for the read-only inventory of idea (2026-11-12 10:53–10:55 CET) is
-on the ops box in `/workspace/hub-move-plan-20261112-105047/`.
+**Carrier: Disk B** (`diskb202610301247`, Intenso serial `3813430-532011020`, at
+`/disks/sdb1` on idea03), because idea03 has no free USB port. Koen released
+Disk B as free to use on 11 Nov at 23:48 CET. Disk B is idea03's App Disk and
+its Backup Disk, and it is also a Files Disk. It holds `BACKUP.yaml`,
+`backups/` (including the hub borg repo), `instances/`, `apps/`, `files/` and
+`FILES.yaml`, and it carries the test fixture `nextcloud-files-b-001`.
+
+The evidence for the read-only inventory of idea (2026-11-12 10:53–10:55 CET) is
+in `/workspace/hub-move-plan-20261112-105047/` on the ops box. The code
+answers below were read from agent-engine-dev main `537b16d` (box clone, not on
+any Pi). Nothing was re-checked over SSH for revision 2.
 
 ### 11.1 Findings that shape the plan
 
-1. **Store mismatch is a real blocker for an Engine "backup → restore" move.**
-   idea's Engine is on its **own** store `automerge:6f8m5KxzARv9xwv4Lw18LgVUJzu`
-   (`curl localhost:8081/api/store-url`, matching fleet-state). The pool
-   store is 2VroE. In agent-engine-dev main (537b16d):
-   - `restoreApp` runs `resolveInstanceArg(store, …)` first
-     (`src/data/Commands.ts` restoreAppWrapper, `src/data/InstanceArg.ts`).
-     On idea the 6f8m store has no record for this instance, so the
-     command fails with `restoreApp: instance '…' not found` before it
-     extracts anything.
-   - `moveApp` refuses a target disk on another Engine ("Cross-engine move
-     is not supported", `src/data/CopyMoveApp.ts`).
-   - A cross-engine `copyApp` needs both Engines in one store. It also mints
-     a **new** instance id and leaves the source in place, which would make
-     a second copy of the Tailscale state. The runbook forbids that.
-   - The #446 archive `2026-11-12T09-19-37-766Z` on Disk B leaves out
-     `data/tailscale` and `data/keys` by design, so a restore could not
-     carry the identity anyway.
+1. **Store mismatch: no Engine command restores or moves an instance across
+   stores.** idea's Engine is on its own store, 6f8m.
+   - `restoreApp` resolves the instance in the local store first
+     (`Commands.ts` restoreAppWrapper → `InstanceArg.ts`
+     `resolveInstanceArg`). On idea that fails with "not found".
+   - `moveApp` refuses a remote target (`CopyMoveApp.ts`: "Cross-engine move
+     is not supported").
+   - A cross-engine `copyApp` needs a shared store, mints a new instance id
+     and leaves the source behind, which would create a second copy of the state.
 
-   So **no Engine command restores or moves an instance between two stores
-   today.** The one Engine-native path across stores is an **App Disk
-   carried between Engines**. When an App Disk docks, `processDisk` →
-   `processInstance` → `createOrUpdateInstance` registers its `instances/<id>`
-   in the docking Engine's store and auto-starts it (`src/data/Disk.ts`,
-   `src/data/AutoStart.ts`). That is how disks already move between kits.
-   This plan uses that path. The Disk B borg archive is the data safety net
-   and the rollback source, not the transport.
-2. **idea's Engine is old.** The tree is `/home/pi/idea/agents/agent-engine-dev`
-   at `27e355a` (2026-10-15), not `745f2c3` as fleet-state says (that
-   record is stale). Helper `idea-app-data` is **v3**
-   (`IDEA_APP_DATA_VERSION=3`, sha `3f06f298…516b`). That version has no
-   `listBackup` or `verifyBackup`. It also lacks the
-   `x-app.backup.exclude` pass-through (v8), the backup hook (#444), the
-   pre-update method fix (#458), the restore quarantine (v4), and the
-   service-tar pin check (#445). The 1.1 App's backup hook and
-   exclude contract need main. **Prerequisite:** deploy Engine main and
-   helpers v10 to idea in its own Koen-approved window (M-2), before the
-   move.
-3. **No conflicts on idea for ports or resources.** Listening ports are 22,
-   3333 (MilkWise), 3334 (milkwise-test), 8081 (Console), 50065, 53503, 9980
-   (Nextcloud), 54189 (Kolibri), 61312 (Kiwix), 60758 (channel builder),
-   53677, and 54225 on the tailnet IP. **58546 is free**, so the Engine keeps
-   the instance's `.env` `port=58546` (startInstance keeps it unless it is
-   listening, reserved, or owned in the store). Only the web service
-   publishes a host port (`${port}:8080`). The collector shares the
-   sidecar's network namespace, so its SOCKS port 1055 is inside that
-   namespace and does not clash with idea's host tailscaled. The sidecar
-   does not mount the host `tailscaled.sock`. Resources: Pi 500 with
-   16 GB RAM (11.3 GB available), root disk 60 GB free (47%), 36.7 °C,
-   load 0.39. The hub is about 7 MB of data plus about 120 MB of images.
-4. **No usage-dashboard, tailscale or python images or tars on idea.** See §12.
-5. **Other disks on idea, which this plan leaves alone:** `sdb1` is a vfat
-   "Flash Drive FIT" (serial 0373219120013886), mounted read-only at
-   `/run/idea-usb/sdb1`. It is not an IDEA disk. `nvme0n1` (Samsung 256 GB,
-   serial S73YNXMX102912) has an unmounted bootfs and rootfs. Neither is a
-   move target. `/disks` has only the empty `sda` and `sda2` dirs, so
-   no App Disk is docked on idea.
-6. **Do not dock Disk B on idea.** It is an App, Files and Backup disk with
-   `nextcloud-files-b-001`. Docking it on production would register and
-   auto-start that instance in store 6f8m and rewrite `META.yaml`
-   `lastDocked`. Disk B also stays hands-off (§0, standing rules).
+   The one Engine-native way across stores is to **carry an App Disk**. On dock,
+   `processDisk` → `processAppDisk` → `processInstance` registers every
+   `instances/<id>` on the disk in the docking Engine's store and auto-starts it
+   (`Disk.ts`, `AutoStart.ts`). This plan uses that path, with Disk B as the carrier.
+2. **idea's Engine is old.** Its tree is `/home/pi/idea/agents/agent-engine-dev` at
+   `27e355a` (2026-10-15), with helper `idea-app-data` **v3**. Fleet-state
+   still says `745f2c3`, which is stale (§11.9). v3 has no `listBackup`,
+   `verifyBackup`, `clearBackupLock`, exclude pass-through (v8), backup hook,
+   pre-update fix (#458) or service-tar pin check (#445). `removeInstance`
+   needs v4. So M-2 has to land before the move.
+3. **`deploy-engine-pi.sh` refuses idea today.** The host case only allows
+   idea01/03/04 (store 2VroE) and the kits (3Vvv). Any other host dies with
+   "never idea02, wizardly-hugle or Milkwise". M-2 needs a reviewed script
+   change: an explicit `idea` case with `EXPECT_STORE` fixed to 6f8m and a
+   required `--production` flag. Atlas writes that PR and Steve merges it
+   (**decision S-3**). The store-identity save/restore in the script is
+   exactly what protects 6f8m. Never deploy to idea without it.
+4. **There are no port or resource conflicts on idea.** Port 58546 is free.
+   Only the web service publishes a host port (`${port}:8080`). The collector
+   shares the sidecar's network namespace. Resources: Pi 500, 16 GB RAM
+   (11.3 GB available), 60 GB free on the root disk, 36.7 °C.
+5. **Files role side effect (open, decision S-1).** Disk B keeps `FILES.yaml`
+   and `files/`, and no Engine command removes a Files role (the
+   `COMMANDS.md` list has only `createFilesDisk`). When a Files Disk docks,
+   `processFilesDisk` runs `scheduleFilesRemount` for **opted-in Running
+   instances on other disks** (`FilesDisk.ts`, `FilesMount.ts`:
+   `Running → docker compose up -d` with a new override). The Nextcloud App
+   opts in (`x-app.filesMount` path `/mnt/idea-files`, services
+   `nextcloud-app`). If production idea's Nextcloud instance
+   `nextcloud-yj8ral61js46bphogbi` (and the two `.backup-2026102x` copies)
+   carries that block, docking Disk B **recreates production Nextcloud's app
+   container** and mounts Disk B's `files/` into it. MilkWise does not opt in
+   and is not touched. See §11.4 (c).
+6. **Do not dock Disk B on idea until `nextcloud-files-b-001` is off it**
+   (§11.4 c). Otherwise it registers and auto-starts on production, because
+   store 6f8m has no operator stop for it (`AutoStart.ts`
+   `shouldAutoStart` reads the store only).
 
 ### 11.2 Identity: Option A (move the state), recommended
 
-- **Option A (recommended): carry the existing `./data/tailscale` and
-  `./data/keys` inside the instance folder on a carrier App Disk, with the
-  source stopped first.** The app-usage-dashboard `docs/runbook.md`
-  ("idea-hub identity") says to hand the identity "later to another
-  host" by **moving** the state directory, never copying it. It also says to
-  leave `TS_AUTHKEY` empty and open no login URL, and to install with the
-  moved state already in `./data/tailscale` so the sidecar never starts
-  empty. `moveApp` moves the instance folder as root through
-  `idea-app-data copy`, which keeps owners and modes and the same instance
-  id. It then deletes the source folder. The nodekey, the IPv4
-  `100.75.102.57`, the pull key and the `from=` pins all stay the same.
-- **Option B (fallback only): re-key with a fresh single-use `tag:idea-hub`
-  key from Koen.** This gives a new nodekey and usually a new 100.x
-  address. Koen would then have to reassign `100.75.102.57` in the admin
-  console (U-6), or every consumer would need updating:
-  - idea03's `/etc/ssh/idea_usage_keys/pi` `from=` line
-  - the planned kit `from=` lines (§6 of the #416 status: "keep `from=` at
-    `100.75.102.57`")
-  - the flows in `field-usage-lockdown-flows.md` (F6, F7)
-  - the box ACL probes
+**Option A** is to carry the existing `./data/tailscale` and `./data/keys`
+inside the instance folder, with the source stopped before the target starts.
+The `app-usage-dashboard` `docs/runbook.md` ("idea-hub identity") covers this:
+move the state directory "to another host", never copy it, leave
+`TS_AUTHKEY` empty, open no login URL, and install with the moved state
+already in place. `moveApp` copies the instance as root through
+`idea-app-data copy` (owners and modes kept, same instance id) and then
+deletes the source folder. The nodekey, `100.75.102.57`, the pull key and
+every `from=` pin stay as they are.
 
-  It also leaves a stale `idea-hub` node to delete, and a rejected key is
-  burned (runbook "One-join"). Use B only if the moved state fails the
-  nodekey check on idea and cannot be rolled back (§11.6).
+**Option B**, re-keying, stays **rollback-only (M-5)**. It means a new nodekey,
+a new 100.x address unless Koen reassigns `100.75.102.57` (U-6), and updates
+to idea03's `/etc/ssh/idea_usage_keys/pi` `from=`, the planned kit `from=` lines,
+and lockdown flows F6 and F7.
 
-Nothing in the repos points at the hub's **hostname**, apart from the test
-fixtures (`idea-hub.tail2d60.ts.net` in app-usage-dashboard tests). Consumers
-pin the **IPv4**. Koen's dashboard URL changes from idea03:58546 to
-`http://idea.tail2d60.ts.net:58546/` because the web port is published on the
-host, not on the sidecar.
+Only the test fixtures pin the hostname. The dashboard URL becomes
+`http://idea.tail2d60.ts.net:58546/` because the web port is a host port.
 
-### 11.3 Pre-checks (all read-only; T-1 day and T-0)
+### 11.3 Window W1 (M-2): Engine main and helper v10 on idea
+
+**Ordering gate:** W1 runs only after idea#462 (1.2 landing on idea03) and
+the idea#444 case B pass, and after the S-3 script PR has merged.
+
+**Pre-check list (read-only; Atlas sends the output to Steve before W1 starts):**
+
+| # | Check |
+|---|---|
+| W1-P1 | fleet-state: wizardly-hugle `claim: null`, status `production`. Atlas claims it for W1 (status stays `production`). |
+| W1-P2 | `docker ps -a` (IDs, StartedAt, ports) saved, especially `milkwise-wizardly-hugle-001-milkwise-1` and `milkwise-test`. |
+| W1-P3 | HTTP status only: :3333 and :3334 = 200, Console :8081 = 200. |
+| W1-P4 | `curl localhost:8081/api/store-url` = 6f8m. sha256 of `store-identity/*` and `config.yaml` (hash only, never printed). |
+| W1-P5 | Engine rev `27e355a`. sha256 of all `/usr/local/sbin/idea-*` helpers and `/etc/sudoers.d/10-engine`, `11-engine-files` (if present). Helper v3 sha `3f06f298…516b`. |
+| W1-P6 | `df -h` (≥ 5 GB free), `vcgencmd measure_temp` (< 65 °C), `pm2 jlist` name/status, `systemctl --failed`. |
+| W1-P7 | Read-only `grep -n filesMount /instances/nextcloud-yj8ral61js46bphogbi*/compose.yaml` to answer finding 5 for the move window. |
+| W1-P8 | `deploy-engine-pi.sh <main-sha> --fetch main --dry-run` (with the S-3 `idea` case) shows store 6f8m kept and the files to save and restore. |
+
+**Steps:**
+
+1. Copy the helpers and sudoers to `/home/pi/atlas-w1-pre-helpers.quarantine-<ts>`.
+2. Run `deploy-engine-pi.sh <main-sha> --fetch main --yes` (backup to
+   `/home/pi/quarantine/engine-deploy-<ts>`). It runs `install-root-helpers`
+   (v10), then `pm2 restart engine` as `pi`.
+3. Post-checks:
+   - Repeat W1-P2 to W1-P6. The MilkWise container IDs and StartedAt must be
+     unchanged. On idea03 the Engine deploys of 12 Nov left every running
+     container untouched, but that has not been proved on idea.
+   - :3333 and :3334 = 200, :8081 = 200.
+   - Store still 6f8m.
+   - `check-fleet-health.sh --pi wizardly-hugle`.
+4. Release the claim. Fleet-state version fix (§11.9).
+
+**Rollback:** run `deploy-engine-pi.sh 27e355a…` (full sha) `--yes`, or
+`git checkout --detach 27e355a` from the step-2 backup. Restore helper v3 and
+the sudoers from the step-1 copy (quarantine the v10 files, never `rm`), run
+`visudo -c`, then `pm2 restart engine` as `pi`. Repeat the post-checks. If
+MilkWise stops answering at any point, stop and call Steve. Atlas does not touch
+MilkWise.
+
+### 11.4 Engine-code answers (3a to 3e), pending Axle confirmation
+
+**(a) `moveApp` onto a disk that already holds the hub's backup repo.**
+*Code reading:* it works, with no path clash.
+- The instance goes to `<disk>/instances/<id>` and the borg repo is at
+  `<disk>/backups/<id>` (`backupMonitor.ts` `backupDir`).
+- `validate` refuses only these cases: same disk, undocked disk, remote source
+  or target, instance not on the source, app master or instance folder
+  missing, external symlinks. Nothing refers to backup links.
+- Locks: `moveApp` takes the instance lock and both disk locks, so it is
+  refused while a `backupApp` or `verifyBackup` (disk lock) runs on Disk B.
+  Run them one after another, never side by side.
+- No backup hook runs. `moveApp` stops the hub (`post-move`, not an operator
+  stop) and restarts it on Disk B.
+- `x-app.backup.exclude` does not apply to `moveApp`, by design: `data/tailscale`
+  and `data/keys` travel, which is the point. `data/tailscale-run` (a stale
+  socket) travels too.
+- Risk: the app master is copied with `rsync` onto Disk B's existing
+  `apps/usage-dashboard-1.x`, and every service tar is copied with
+  `rsync -a <src>/services/<tar> <disk>/services/`. **The idea03 system-disk
+  copies overwrite Disk B's copies.** Pre-check M-P5 has to show they are
+  byte-identical, or that the system-disk ones are the correct ones, first.
+- After the move the source app master is removed, if no other instance uses it.
+
+> Axle: ______ (confirm, or correct: stale `tailscale-run/tailscaled.sock`
+> handling, app-master overwrite)
+
+**(b) Disk B docking on idea: the backup role.** *Code reading:*
+- `processDisk` sees `BACKUP.yaml` and runs `processBackupDisk`. That sets
+  `backupConfig {mode, links}` from the file, indexes the app bundles on the
+  disk into 6f8m's `appDB`, and records stale `.backup-in-progress` locks
+  without retrying them (#446).
+- Auto-backups happen only for `mode: immediate`. Disk B's `BACKUP.yaml` is
+  `on-demand` (#446 evidence), so nothing runs on dock.
+- Links are instance ids, and the hub's id does not change, so idea adopts
+  Disk B as a Backup Disk with the hub link intact.
+- `backupApp <hub> diskb202610301247`, `listBackup` and `verifyBackup` then work
+  on idea with helper v10 (after W1).
+- No code refuses backing up an instance onto the disk it lives on. But that
+  is **not an off-disk backup**: one dead disk loses both. M-6 is answered "for
+  now", and a second Backup Disk for idea stays a follow-up (decision S-2).
+- `processAppDisk` also registers `apps/` (the 1.x bundle) in 6f8m.
+
+> Axle: ______ (confirm dual-role dock order Files → App → Backup, link
+> adoption across stores, no same-disk refusal)
+
+**(c) `nextcloud-files-b-001` and the production auto-start.**
+- **Fixture.** Steve's 11:00 pre-carry step settles this: take the fixture off
+  Disk B through the Engine before the carry.
+  - **Option C1 (recommended): `moveApp nextcloud-files-b-001
+    diskb202610301247 <idea03-system-disk-id>`.** It is Engine-native, keeps
+    the id and data, and has the Engine itself remove the source folder (and
+    `apps/nextcloud-1.0…` if nothing else on Disk B uses it). It leaves no
+    fixture data on Disk B, so nothing else auto-starts on production. Cost:
+    the fixture then runs on idea03's system disk (space check M-P6; stop it
+    afterwards with `stopInstance`, an operator stop).
+  - **Option C2: `stopInstance`, then `removeInstance <id>`** (helper v4,
+    `docker compose down` without `-v`). It quarantines to **Disk B's**
+    `.idea-quarantine/<id>-<stamp>`. Scans ignore `.idea-quarantine`, so
+    nothing auto-starts, but the fixture's data would still travel to
+    production inside Disk B. A quarantine copy on idea03's boot SSD
+    beforehand would be a hand copy, not an Engine step.
+  - Not allowed: `removeBackupRole`, or any hand change to META.yaml,
+    BACKUP.yaml, backups/, instances/, files/, FILES.yaml or apps/.
+  - **Recommendation: C1.** Check `listBackup nextcloud-files-b-001
+    diskb202610301247`. If it has a borg repo on Disk B, that repo travels to
+    idea as data. Accept that or keep it (decision S-1b).
+- **Files role (still open after C1, decision S-1a).** Disk B stays a Files Disk.
+  On idea, the dock remounts opted-in Running instances on other disks (§11.1
+  finding 5). Options:
+  - **F1:** Axle adds an Engine `removeFilesRole <diskId>` (like
+    `removeBackupRole`: quarantine `files/` and `FILES.yaml` to
+    `.idea-quarantine`, then `processDisk`), and it runs on idea03 before
+    the carry. Engine-native, no hand edits. This needs a Steve or Koen OK,
+    because it changes FILES.yaml and files/ through the Engine.
+  - **F2:** accept the recreate of production Nextcloud's app container
+    (Engine `up -d`, gated on `occ status`), with Disk B's `files/` showing up
+    as a share in production Nextcloud. Needs Koen's OK.
+  - **F3:** if W1-P7 shows production Nextcloud has no `filesMount` block,
+    nothing is remounted and no decision is needed.
+
+  **Recommendation:** decide from W1-P7. If production Nextcloud opts in, use F1.
+- On idea03, re-docking Disk B after the eject also re-runs `processDisk`, and
+  every dock rewrites `META.yaml` `lastDocked` (`Meta.ts`). That is Engine-native.
+  It already happened on idea03 at each Engine restart (#447 evidence).
+
+> Axle: ______ (confirm C1 is clean for a Files-opted-in instance whose Files
+> Disk is the source disk; and whether removeFilesRole is acceptable)
+
+**(d) Disk B leaving idea03.** Once Disk B is gone:
+- idea03 has **no Backup Disk**. Every `backupApp` on idea03, and the pre-update
+  backup that `updateApp` takes for a major update (#458), fails until another
+  Backup Disk is docked.
+- idea03 loses the Files share and the hub (by design).
+- So the move comes **after** idea#462 (1.2 on idea03) and the #444 case B pass,
+  and after the last idea03 backup and verify of the hub (M-P4).
+- Any later idea03 backup work (Kid or Axle) needs a new Backup Disk (**S-2**).
+- `nextcloud-files-b-001` (after C1) keeps running on idea03 without `files/`.
+  The Engine remounts it without Disk B's share.
+
+> Axle: ______
+
+**(e) Real command names** (Console on idea03 :8080 / idea :8081, or the box's
+`engine-ctl.mjs send <command> <args>`). There is no `createAppDisk` or
+"initialise" step: Disk B is already an App Disk, so the P-7 guess from
+revision 1 is gone.
+
+| Step | Command |
+|---|---|
+| backup | `backupApp usage-dashboard-8fhwrslsrq78xtswed4 diskb202610301247` |
+| list / verify | `listBackup <id> diskb202610301247 [archive]`, `verifyBackup <id> diskb202610301247 [archive]` |
+| stale lock (only if listed) | `clearBackupLock <id> diskb202610301247` |
+| fixture off | `moveApp nextcloud-files-b-001 diskb202610301247 <idea03-system-disk-id>`, then `stopInstance nextcloud-files-b-001 <idea03-system-disk-id>` |
+| hub onto Disk B | `moveApp usage-dashboard-8fhwrslsrq78xtswed4 <idea03-system-disk-id> diskb202610301247` |
+| stop / eject | `stopInstance usage-dashboard-8fhwrslsrq78xtswed4 diskb202610301247`, `ejectDisk diskb202610301247` |
+| on idea | nothing: the dock auto-starts. If needed, `startInstance <id> diskb202610301247` |
+| rollback | `stopInstance`, `ejectDisk` on idea; after the re-dock on idea03, `startInstance` |
+
+The idea03 system-disk id is the record with `diskTypes: ['system']` in 2VroE,
+read from the Console at M-P1.
+
+> Axle: ______
+
+### 11.5 Move window W2 (after W1; gates: #462 and #444 case B passed, S-1 decided)
+
+**Pre-checks (read-only, the output goes to Steve before W2):**
 
 | # | Check | Owner |
 |---|---|---|
-| P-1 | fleet-state: idea03 and wizardly-hugle both have `claim: null`. Kid's #159 run 3 is finished. | Atlas |
-| P-2 | idea: `docker ps -a`, `ss -ltn` (58546 still free), `df -h` (> 5 GB free), temperature < 65 °C. HTTP status only: MilkWise :3333/:3334 = 200, Console :8081 = 200. `pm2 jlist` shows `engine online`. Store URL is still 6f8m. | Atlas |
-| P-3 | idea is on Engine main and helpers v10 (M-2 done), and `check-fleet-health.sh --pi wizardly-hugle` is ok. | Atlas |
-| P-4 | idea03 hub identity: nodekey `1382c2eab7500ea4`, IP `100.75.102.57`, `BackendState=Running`, no `AuthURL` (`script/check-idea-hub-nodekey.py`, public prefixes only). `:58546/api/v1/health` = 200. Record the container IDs and the state inode. | Kid |
-| P-5 | idea03 `/services` holds the three 1.1 tars and they match §12's reference shas. Web `6beeb1e0…` (index `9b5501f0`), python `217bc5fb…`, tailscale `af9d4f86…`. If idea03 still has the old `ef48f1fa` web tar, refresh it first per the pin-change runbook (`docs/packaging.md`). Otherwise moveApp carries a MISMATCH tar that the new Engine on idea quarantines. Also confirm where the app master `apps/usage-dashboard-1.1` lives for this system-disk instance (system disk vs Disk B), because moveApp copies the app master from the source disk. | Atlas |
-| P-6 | A fresh backup exists: `backupApp usage-dashboard-8fhwrslsrq78xtswed4 diskb202610301247` (1.1 hook method, no stop), then `listBackup` and `verifyBackup`, all via Console or engine-ctl on idea03. Record the archive name. This is the data rollback source. It does not carry identity. | Atlas (after Kid releases idea03) |
-| P-7 | Carrier disk (M-3) is docked on idea03 as an **App Disk** (Engine `createAppDisk`/initialise flow on idea03, by disk id, matched by serial). It is empty apart from META.yaml. It is not Disk B, not the WD 20070Q450002, and not any protected fixture. | Atlas |
+| M-P1 | fleet-state: idea03 and wizardly-hugle `claim: null`. Kid's #159 run 3 is finished, #462 has landed, #444 case B has passed. Note the idea03 system-disk id. | Atlas |
+| M-P2 | idea: W1-P2 to W1-P6 again. 58546 is free. Engine is on main with helper v10. | Atlas |
+| M-P3 | Hub on idea03: nodekey `1382c2eab7500ea4`, IP `100.75.102.57`, Running, no AuthURL (`check-idea-hub-nodekey.py`), health 200. Record the container IDs and the inode. | Kid |
+| M-P4 | `backupApp` hub → Disk B (hook), then `listBackup` and `verifyBackup`. No stale lock. Record the archive. | Atlas |
+| M-P5 | sha256 of idea03 `/apps/usage-dashboard-<v>` and `/services/{web,python,tailscale}.tar` against Disk B's copies and the bundle reference (§12). The web tar must be the index-pin tar (1.1: `6beeb1e0…` / `9b5501f0`; use the 1.2 bundle's values if 1.2 lands). If not, refresh it per `docs/packaging.md` first. | Atlas |
+| M-P6 | Free space on idea03's system disk for `nextcloud-files-b-001` (instance size via `summariseDisk` or `du` read-only). `listBackup nextcloud-files-b-001 diskb202610301247`. | Atlas |
 
-### 11.4 Timed step list (move window, about 45 min; T = Koen's GO time)
+**Steps (about 60 min; T = start; never two hub copies live):**
 
-Never two hub containers with this state at once: the source is stopped
-before the target starts at every hand-over (steps 3, 6, 8).
-
-| Step | T+ | Owner | Action | Pass condition |
+| Step | T+ | Owner | Action | Pass |
 |---|---|---|---|---|
-| 1 | 0 | Atlas | Claim idea03 and wizardly-hugle in fleet-state (`claim "Atlas idea#416 hub move"`; wizardly-hugle `status` stays `production`). Run P-1 to P-6 again. | All green |
-| 2 | 5 | Kid | Snapshot the hub identity and health on idea03 (P-4). Collector status is ok, with no pull in flight. | Same as P-4 |
-| 3 | 8 | Atlas | On idea03, Engine `moveApp usage-dashboard-8fhwrslsrq78xtswed4 <idea03-system-disk-id> <carrier-disk-id>`. The Engine stops the hub (`post-move`), copies the app master, the instance (as root, modes kept, same id) and the service tars, registers the instance on the carrier and starts it there. It then removes the source folder (Engine-native, `idea-app-data delete`). | Operation Done. The hub runs from `<carrier>/instances/<id>` on idea03. Nodekey `1382c2eab7500ea4`, IP unchanged, health 200. No `/instances/<id>` left on the idea03 system disk. |
-| 4 | 15 | Kid | Run `check-idea-hub-nodekey.py` against the carrier copy: `match=true`. One collector pull of idea03 succeeds. | match=true |
-| 5 | 18 | Atlas | Run `stopInstance <id> <carrier-disk-id>` on idea03 (an operator stop, so idea03's store keeps it Stopped if the disk ever comes back). Then `ejectDisk <carrier-disk-id>`. Check `docker ps -a` on idea03: no usage-dashboard container is running. | No hub container Up on idea03. The tailnet shows idea-hub offline. |
-| 6 | 20 | Koen | Unplug the carrier disk from idea03 and plug it into a free USB port on **idea**. Leave the "Flash Drive FIT" and the NVMe alone. | Physical |
-| 7 | 22 | Atlas | Watch idea: the Engine docks the disk and registers instance `<id>` in store 6f8m. It auto-starts the hub, because there is no operator stop in 6f8m. The Engine loads the service tars, which must be `MATCH` (§12), and keeps port 58546. | Instance Running on idea, `:58546/api/v1/health` 200 from idea's localhost |
-| 8 | 25 | Kid | On idea, check identity: `BackendState=Running`, no `AuthURL`, nodekey `1382c2eab7500ea4`, IP `100.75.102.57`, `match=true`. Record the new container IDs and the new state inode (both are expected to change, being a new host and filesystem). Run one collector pull of idea03. | match=true, pull ok |
-| 9 | 30 | Atlas | Check idea is unaffected, using HTTP status only: MilkWise :3333 and :3334 = 200, Console :8081 = 200. `docker ps` shows the MilkWise containers keep their IDs and StartedAt. `pm2 jlist` shows `engine online`. Run `check-fleet-health.sh --pi wizardly-hugle`. Temperature < 75 °C. | All unchanged |
-| 10 | 35 | Koen | Log in at `http://idea.tail2d60.ts.net:58546/`. Confirm MilkWise and the Console still work (as in U-5). | Koen OK |
-| 11 | 40 | Atlas | Release the claims. Write the fleet-state notes: the hub is on idea on carrier `<disk-id>`, and idea03 no longer hosts it. Correct the wizardly-hugle `version` field. Send the evidence to Steve. | Pushed |
+| 1 | 0 | Atlas | Claim idea03 and wizardly-hugle (`claim "Atlas idea#416 hub move"`, statuses unchanged). Re-run M-P1 to M-P6. | green |
+| 2 | 5 | Atlas | Fixture off Disk B: `moveApp nextcloud-files-b-001 diskb202610301247 <sys>`, then `stopInstance` it on `<sys>`. | Done; no `instances/nextcloud-files-b-001` on Disk B |
+| 3 | 15 | Kid | Hub snapshot (M-P3). No pull in flight. | same |
+| 4 | 17 | Atlas | `moveApp usage-dashboard-8fhwrslsrq78xtswed4 <sys> diskb202610301247` | Done; hub Running from Disk B on idea03, nodekey/IP unchanged, health 200, no `/instances/<id>` on idea03's system disk |
+| 5 | 25 | Kid | `check-idea-hub-nodekey.py` on the Disk B copy: `match=true`. One pull of idea03 OK. | match=true |
+| 6 | 28 | Atlas | `stopInstance <hub> diskb202610301247` (operator stop), then `ejectDisk diskb202610301247`. Hub `docker ps -a` shows nothing Up. | idea-hub offline on the tailnet |
+| 7 | 30 | Koen | Unplug Disk B from idea03 and plug it into a free USB port on **idea**. Leave the "Flash Drive FIT" and the NVMe alone. | physical |
+| 8 | 32 | Atlas | Watch idea: the dock registers Disk B in 6f8m (App + Backup + Files), auto-starts the hub, loads the service tars (`MATCH`) and keeps port 58546. Watch the Files remount according to S-1. | hub Running; health 200 on idea localhost |
+| 9 | 35 | Kid | On idea: `BackendState=Running`, no AuthURL, nodekey `1382c2eab7500ea4`, IP `100.75.102.57`, `match=true`. New container IDs and inode recorded. One pull of idea03. | match=true |
+| 10 | 40 | Atlas | idea unaffected: :3333/:3334 = 200 (HTTP only), :8081 = 200, MilkWise IDs and StartedAt unchanged, `engine online`, `check-fleet-health.sh --pi wizardly-hugle`, temperature < 75 °C. On idea, `listBackup <hub> diskb202610301247` lists the M-P4 archive (proves 3b). | unchanged |
+| 11 | 45 | Koen | Log in at `http://idea.tail2d60.ts.net:58546/`. Confirm MilkWise and the Console still work. | Koen OK |
+| 12 | 50 | Atlas | Release claims. Fleet-state notes: hub on idea on Disk B; Disk B is idea's App/Backup/Files disk; idea03 has no Backup Disk. Evidence to Steve. | pushed |
 
-Later, optional, in a separate change: `moveApp` from the carrier to
-idea's system disk, which is the §2 "preferred" location (same Engine, same
-store). Until then the carrier stays docked. §2 allows that as the
-fallback, and it survives the 05:00 reboot because docking re-registers the
-disk. Backups on idea need their own Backup Disk decision (M-6). Disk B
-stays on idea03.
+### 11.6 What must stay untouched
 
-### 11.5 What must stay untouched
+- MilkWise (:3333 and :3334): HTTP status only.
+- Console :8081.
+- Other instances on idea, except the S-1 Files remount if it is chosen.
+- idea's host Tailscale. No tag or ACL changes.
+- Both Automerge stores: no hand edits.
+- No hand-placed compose files.
+- No copy of `./data/tailscale` (no `cp`, `rsync` or `docker cp`).
+- No `removeBackupRole` on Disk B, and no hand edits to Disk B's META.yaml,
+  BACKUP.yaml, backups/, instances/, files/, FILES.yaml or apps/.
 
-- MilkWise `milkwise-wizardly-hugle-001` (:3333) and `milkwise-test` (:3334):
-  HTTP status only, with no inspect, restart or compose action.
-- Console :8081 and the other instances on idea (Nextcloud, Kolibri, Kiwix,
-  channel builder).
-- idea's host Tailscale (`tag:idea`, 100.115.60.6). No tags or ACL changes.
-- No hand edits to either Automerge store. No hand-placed compose files.
-  No copy of `./data/tailscale` anywhere (no `cp`, `rsync` or `docker cp`).
+### 11.7 Rollback
 
-### 11.6 Rollback
+- **Before step 7:** `startInstance` on idea03 from Disk B, or `moveApp` back
+  to `<sys>`.
+- **After step 8:** on idea, `stopInstance <hub> diskb202610301247`
+  (operator stop), then `ejectDisk`. Koen moves Disk B back. idea03 re-docks
+  it, and the 2VroE record keeps the step-6 operator stop, so the hub does not
+  auto-start. Run `startInstance` and the nodekey check.
+- **Data:** `restoreApp` from the Disk B archive (M-P4). It contains no
+  `data/tailscale`. **Never start an older copy of the Tailscale state.**
+- **State lost:** Option B with M-5.
+- **MilkWise or Console affected:** stop the hub first, then report to Steve.
 
-- **Before step 6** (the disk is still on idea03): `startInstance <id> <carrier>`
-  on idea03, or `moveApp` back to idea03's system disk. The state never
-  left idea03.
-- **After step 7, if the hub misbehaves on idea:** `stopInstance <id> <carrier>`
-  on idea (operator stop) and `ejectDisk`. Koen moves the disk back to
-  idea03. idea03 re-docks it. The record in 2VroE carries the step-5
-  operator stop, so it does not auto-start. Then run `startInstance` on
-  idea03 and check the nodekey. There is still only one copy of the state,
-  and it is always the newest.
-- **Data loss or corruption:** `restoreApp` on idea03 from Disk B (archive
-  from P-6). That archive has no `data/tailscale`, so keep the carrier's
-  state dir as the identity. **Never start an older copy of the Tailscale
-  state** (the 2026-11-11 Expired incident).
-- **State lost:** Option B (§11.2) with M-5.
-- MilkWise or Console affected at any step: stop the hub on idea first
-  (`stopInstance`), then report to Steve. Do not touch MilkWise.
+### 11.8 Koen actions for idea#375
 
-### 11.7 Koen actions to add to idea#375
-
-| Item | Ask |
+| Item | Status / ask |
 |---|---|
-| M-1 | GO for moving the usage-dashboard hub onto production `idea`, with a window (about 45 min, step list in §11.4). |
-| M-2 | GO, in a separate earlier window, to deploy Engine main (537b16d or later) and helpers v10 to idea. It is on `27e355a` with helper v3 today. The Engine restarts as `pi`. MilkWise is checked by HTTP status before and after. |
-| M-3 | Provide one spare USB disk (≥ 8 GB is enough) to become the hub's carrier App Disk. Plug it into idea03 before the window. Not Disk B and not the WD 20070Q450002. |
-| M-4 | Step 6: move the carrier from idea03 to idea (any free USB port; leave the "Flash Drive FIT" and the NVMe in place). Step 10: log in to the dashboard at idea:58546 and confirm MilkWise and the Console. |
-| M-5 | Only if rollback fails and the state is lost: one single-use `tag:idea-hub` key, and reassign `100.75.102.57` to the new node (U-6). |
-| M-6 | Decide where idea's encrypted hub backups go (§3 "idea's encrypted Borg repo" does not exist yet; idea has no Backup Disk). |
+| M-1 | **DONE**: GO in Steve's chat, 2026-11-12 10:56 CET. |
+| M-2 | Covered by the M-1 GO. Window W1 (§11.3), after #462, #444 case B and the S-3 script PR. |
+| M-3 | Dropped. Disk B is the carrier. |
+| M-4 | W2 step 7: move Disk B (Intenso 3813430-532011020) from idea03 to idea. Step 11: dashboard login on idea:58546, plus the MilkWise and Console check. |
+| M-5 | Rollback only: a single-use `tag:idea-hub` key and reassigning `100.75.102.57`. |
+| M-6 | Answered for now: Disk B becomes idea's Backup Disk, and the hub repo goes with it. It is on the same disk as the hub, so it is not an off-disk backup (S-2). |
+
+### 11.9 Decisions for Steve, and follow-ups
+
+- **S-1a:** Files role on Disk B → production Nextcloud remount (F1 / F2 / F3,
+  §11.4 c), decided from W1-P7.
+- **S-1b:** If `nextcloud-files-b-001` has a borg repo on Disk B, does it
+  travel to idea?
+- **S-2:** A second Backup Disk, for idea (off-disk copy) and for idea03 (no
+  Backup Disk after W2).
+- **S-3:** Merge a `deploy-engine-pi.sh` `idea` case (store 6f8m,
+  `--production`) before W1.
+- **Fleet-state version fix:** wizardly-hugle `version` is stale
+  (`745f2c3`; live `27e355a`). Per Steve (11:00), it is **not** fixed now. It is
+  set through `update-fleet-state.sh` when W1 (M-2) lands, straight to the new
+  main sha.
 
 ## 12. Service-tar audit of production idea (read-only, 2026-11-12 10:54 CET)
 
@@ -526,7 +676,7 @@ the compose pin names:
 
 | Tar | sha256 | Top-level digest | Compose pin (1.1) |
 |---|---|---|---|
-| `ghcr.io_koenswings_usage-dashboard-web:1.0.tar` | `6beeb1e0…6af477af571` | `9b5501f0690f…` | `…usage-dashboard-web:1.0@sha256:9b5501f0…8139` ✔ |
+| `ghcr.io_koenswings_usage-dashboard-web:1.0.tar` | `6beeb1e0…230477af571` | `9b5501f0690f…` | `…usage-dashboard-web:1.0@sha256:9b5501f0…8139` ✔ |
 | `python:3.12-slim-bookworm.tar` | `217bc5fb…02db306` | `935c3c5b1235…` | `python:3.12-slim-bookworm@sha256:935c3c5b…` ✔ |
 | `tailscale_tailscale:v1.88.3.tar` | `af9d4f86…421353a2` | `b2a19f6b6402…` | `tailscale/tailscale:v1.88.3@sha256:b2a19f6b…` ✔ |
 
@@ -544,14 +694,17 @@ On idea:
   There are 12 images (10.56 GB, 9.9 GB reclaimable; nothing is pruned
   here).
 
-**Clashes:** none on idea itself, because nothing is there to clash. The
-known risk is on the **source**. #327 / #445: the pre-1.1 web tar was the
-single-manifest `ef48f1fa`, and the 1.1 pin is the index `9b5501f0`. If the
-tar that `moveApp` copies from idea03 is still the `ef48f1fa` one, the
-Engine's tar check calls it `MISMATCH` (no override) and quarantines it. The
-hub would then not start offline on idea. P-5 must confirm that idea03's
-`services/ghcr.io_koenswings_usage-dashboard-web:1.0.tar` has sha
-`6beeb1e0…` before step 3. The same applies to the local tag on idea03
-(Steve's 22:15 tag fix: `1.0-ba869399813e` → `ef48f1fa`, quarantine tag
-`5c1e7215`). Those are idea03 local tags and do not travel. idea loads from
-the tars.
+**Clashes:** none on idea itself, because nothing there could clash. The
+known risk sits on the **source**, and with Disk B as the carrier it matters
+twice. #327 / #445: the pre-1.1 web tar was the single-manifest `ef48f1fa`,
+while the 1.1 pin is the index `9b5501f0`.
+
+`moveApp` copies the idea03 system disk's `services/<tar>` over Disk B's copy
+(`rsync -a`, §11.4 a). If the system-disk tar is still `ef48f1fa`, it replaces
+a good Disk B tar. The Engine then rejects it as `MISMATCH` (no override) and
+the hub cannot start offline on idea.
+
+M-P5 checks every copy against the reference before W2 step 4. The idea03
+local tags (Steve's 22:15 fix: `1.0-ba869399813e` → `ef48f1fa`, quarantine tag
+`5c1e7215`) do not travel, because idea loads from the tars. If 1.2 lands
+(#462), the 1.2 bundle becomes the reference.
