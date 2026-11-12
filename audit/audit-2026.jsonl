@@ -1560,3 +1560,6 @@
 {"ts":"2026-11-12T12:21:24Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-12T12:23:49Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-12T12:23:49Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: engine#339 helper v12 proof + b8/b9 cleanup","previous":null}
+{"ts":"2026-11-12T12:33:43Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-12T12:33:43Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"--null","previous":"Atlas: engine#339 helper v12 proof + b8/b9 cleanup"}
+{"ts":"2026-11-12T12:33:53Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"--null"}
