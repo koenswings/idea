@@ -1491,3 +1491,5 @@
 {"ts":"2026-11-12T09:26:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas #456 argononed + #446 backup-verify","previous":null}
 {"ts":"2026-11-12T09:40:56Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-12T09:40:56Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas #456 argononed + #446 backup-verify"}
+{"ts":"2026-11-12T09:42:11Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T09:42:11Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: app-usage-dashboard#13 / idea#414 live SIGKILL re-test on idea03 hub (1.1)","previous":null}
