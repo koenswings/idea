@@ -1422,3 +1422,5 @@
 {"ts":"2026-11-12T06:43:07Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: idea04 build7 LAN probe (read-only)"}
 {"ts":"2026-11-12T07:10:44Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-12T07:10:44Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: idea#322 item 5"}
+{"ts":"2026-11-12T07:13:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-12T07:13:23Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: idea#76 fixture rebuild","previous":null}
