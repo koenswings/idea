@@ -97,7 +97,7 @@
       "instance": "milkwise-wizardly-hugle-001",
       "since": "2026-10-08"
     },
-    "claim": "Atlas: read-only 6f8m store dump (orphan check for idea03) + sudo mv two W2 leftovers out of hub instance vsd0acgun2mmeg573zw into quarantine; no hub stop/restart; MilkWise untouched (Steve)"
+    "claim": null
   },
   "sunny-robin": {
     "role": "kit-engine",
