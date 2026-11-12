@@ -1515,3 +1515,5 @@
 {"ts":"2026-11-12T10:28:46Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-12T10:29:21Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-12T10:29:21Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: #453 build 8 P-j flash proof-engine-b8a/b8b (WD 20070Q450002)","previous":null}
+{"ts":"2026-11-12T10:29:39Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: idea#159 run 3 Kolibri capacity (agent-app-dev#41); idea03 load generator only, capped (hub + Disk B untouched)"}
+{"ts":"2026-11-12T10:29:39Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
