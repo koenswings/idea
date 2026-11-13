@@ -6,6 +6,10 @@ Update this file whenever a proposal is added, approved, declined, or superseded
 
 ---
 
+## 2026-11-09-field-usage-monitoring.md
+**Status:** Draft (Design Review complete 2026-11-10 — Pixel, Kid, Axle, Atlas; off switch and reliability added 2026-11-10 after Koen's questions) · **Author:** Steve (Lead Bot)
+Programme dashboard for whether donated field kits are used as taught. Kit-side Option B (`idea-usage` plus per-App hooks) stores role-level day summaries at `/var/lib/idea/usage/<day>/<instanceId>.json`; idea pulls them over restricted SSH (helper v7) through a Tailscale sidecar tagged `tag:idea-hub`. The dashboard App runs on idea (Pixel builds the UI, Kid owns the collector), stores SQLite there, and never uses an LLM or the shared Automerge store. The existing Engine, Console and sync do not depend on monitoring; it ships with a persistent `usageMonitoring` switch **off** and can be turned off at fleet, kit or idea level (§10). D2 is deferred. Field kits stay on Engine `adfd9d3` until idea#374. PDF: `proposals/2026-11-09-field-usage-monitoring/`.
+
 ## 2026-10-15-router-image-and-flashing.md
 **Status:** Approved by Koen 2026-10-15 · **Author:** Steve (Lead Bot)
 IDEA school router image for the Cudy WR3000S v1: OpenWrt 25.12.5 Image Builder + uci-defaults first boot that bakes in `school-router-setup.sh` (10.42.x, `IDEA`/`idea911!` students-only, `IDEA-Teachers` with the toggleable `Teachers-Internet` rule, mDNS reflector, `idea.local` DNS fallback), Tailscale in the image with the fleet key injected over SSH after flashing (never in git or the image). Scripted flash: stock → Cudy intermediate (20251119, MD5 checked) → `sysupgrade -n` → sticker name + enrol + self-test; later a Console/Engine flash station. Engines by DHCP vendor class instead of MAC reservations; factory reset returns IDEA defaults. D1–D9 approved as recommended; D7: 4G is an optional school-funded add-on only (IDEA never funds 4G). PDF: `proposals/2026-10-15-router-image-and-flashing/`.

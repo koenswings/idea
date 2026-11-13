@@ -314,6 +314,52 @@ OUT="$(SSH_BIN="$WORK/xssh" "$CFH" --pi p1)"
 check "dhcp: remote snippet reports only the 10.42.0.x address" test "$(j '.pis[0].checks.dhcp.kit_lan_addresses|join(",")')" = "10.42.0.7"
 check "dhcp: remote snippet reports a vendor-class state" test "$(j '.pis[0].checks.dhcp.vendor_class | test("^(nm|dhcpcd|missing-nm|missing-dhcpcd)$")')" = true
 
+# 15. known-offline kits (fleet-state .known_offline.issue): alert, but do not PAUSED
+reset
+jq '.kit={"role":"kit-engine","status":"kit","tailscale":"10.0.0.3",
+          "known_offline":{"issue":"koenswings/idea#288","since":"2026-10-19"}}' \
+  "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+echo 255 > "$FAKE/10.0.0.3.ssh_rc"; echo 000 > "$FAKE/10.0.0.3.http"
+mkdir -p "$HEALTH_DIR"
+echo "fleet changes paused by check-fleet-health.sh since 2026-01-01T00:00:00Z" > "$HEALTH_DIR/PAUSED"
+NOW=30000 run --alert
+check "known-offline kit: exit 1, listed unhealthy" test "$RC:$(j '.unhealthy|join(",")')" = "1:kit"
+check "known-offline kit: report lists issue, since, problems" test "$(j '.known_offline|length'):$(j '.known_offline[0].pi'):$(j '.known_offline[0].issue'):$(j '.known_offline[0].since')" = "1:kit:koenswings/idea#288:2026-10-19"
+check "known-offline kit: excluded problem is the unreachable line" has_problem kit "unreachable over Tailscale"
+check "known-offline kit: alert sent (new)" test "$(j .alert.send):$(j .alert.reason)" = "true:new"
+check "known-offline kit: existing script PAUSED removed" test ! -e "$HEALTH_DIR/PAUSED"
+check "known-offline kit: fleet_changes_paused false" test "$(j .alert.fleet_changes_paused)" = false
+NOW=30100 run --alert
+check "known-offline kit: second run silent, still no PAUSED" test "$(j .alert.send):$(j .alert.reason):$(test -e "$HEALTH_DIR/PAUSED" && echo p || echo n)" = "false:already alerted:n"
+
+reset
+jq '.kit={"role":"kit-engine","status":"kit","tailscale":"10.0.0.3"}' \
+  "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+echo 255 > "$FAKE/10.0.0.3.ssh_rc"; echo 000 > "$FAKE/10.0.0.3.http"
+NOW=31000 run --alert
+check "unmarked kit offline: exit 1, PAUSED created" test "$RC:$(j '.unhealthy|join(",")'):$(test -e "$HEALTH_DIR/PAUSED" && echo p || echo n)" = "1:kit:p"
+check "unmarked kit offline: known_offline empty, paused true" test "$(j '.known_offline|length'):$(j .alert.fleet_changes_paused)" = "0:true"
+
+reset
+jq '.kit={"role":"kit-engine","status":"kit","tailscale":"10.0.0.3",
+          "known_offline":{"issue":"koenswings/idea#288","since":"2026-10-19"}}' \
+  "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+echo 255 > "$FAKE/10.0.0.3.ssh_rc"; echo 000 > "$FAKE/10.0.0.3.http"
+echo 502 > "$FAKE/10.0.0.1.http"
+NOW=32000 run --alert
+check "known-offline kit + unhealthy pool: PAUSED created" test "$RC:$(test -e "$HEALTH_DIR/PAUSED" && echo p || echo n):$(j .alert.fleet_changes_paused)" = "1:p:true"
+check "known-offline kit + unhealthy pool: both unhealthy, kit excluded" test "$(j '.unhealthy|join(",")'):$(j '.known_offline|length'):$(j '.known_offline[0].pi')" = "p1,kit:1:kit"
+
+reset
+jq '.kit={"role":"kit-engine","status":"kit","tailscale":"10.0.0.3",
+          "known_offline":{"issue":"koenswings/idea#288","since":"2026-10-19"}}' \
+  "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+echo 255 > "$FAKE/10.0.0.3.ssh_rc"; echo 000 > "$FAKE/10.0.0.3.http"
+mkdir -p "$HEALTH_DIR"; touch "$HEALTH_DIR/HOLD"
+NOW=33000 run --alert
+check "hold + known-offline kit: PAUSED created" test -e "$HEALTH_DIR/PAUSED"
+check "hold + known-offline kit: hold and paused true" test "$(j .alert.hold):$(j .alert.fleet_changes_paused)" = "true:true"
+
 check "real fleet-state.json untouched" test "$(real_fp)" = "$REAL_BEFORE"
 echo "---"
 echo "passed=$pass failed=$fail"

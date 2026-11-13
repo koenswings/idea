@@ -1,5 +1,7 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 27 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 11 November 2026
 
+> v2.0 (11 November 2026): `idea-for-teachers-tutorial-v2.0.pdf`. Chapter 1.4: how IDEA looks after the kit (counts how it is used, not who uses it or what they write).
+>
 > v1.9 (27 October 2026): `idea-for-teachers-tutorial-v1.9.pdf`. Combines v1.7 and v1.8.
 >
 > v1.8 (27 October 2026): chapter 2.1: a classroom computer can join IDEA-Teachers from its Wi-Fi menu (idea#285).
@@ -7,7 +9,7 @@
 > v1.7 (27 October 2026): chapter 7 (Wikipedia offline) rewritten to match its Wikipedia (Demo) screenshots (idea#295).
 >
 > v1.6 (25 October 2026): teaching one class period, reading Reports and troubleshooting added to chapter 3 (3.6, 3.7).
-> The v1.8, v1.7, v1.6 and v1.5 PDFs are kept in `superseded/`.
+> The v1.9, v1.8, v1.7, v1.6 and v1.5 PDFs are kept in `superseded/`.
 
 # Teacher tutorial
 

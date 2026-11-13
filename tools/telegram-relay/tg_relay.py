@@ -197,8 +197,14 @@ class Relay:
                 log.warning("ADMIN registered: id %s (%s)", uid, name)
                 self.send(frm["id"], "You are registered as admin. Next: add me to the monitor group and send /setup there.")
                 return
-            if frm["id"] == st["admin_id"]:
-                return  # Koen talks to the bot via the monitor group
+            if frm["id"] == st["admin_id"] and uid not in st["users"]:
+                # Koen writing privately = acting as a field person: auto-enrol (no approval step needed)
+                topic = None
+                if st["monitor_chat_id"]:
+                    t = self.api("createForumTopic", chat_id=st["monitor_chat_id"], name=name[:120])
+                    topic = t and t.get("message_thread_id")
+                st["users"][uid] = {"name": name, "topic_id": topic, "paused": False}
+                log.info("admin %s enrolled as field person (topic %s)", uid, topic)
             if uid not in st["users"]:
                 if text.startswith("/start") and uid not in st["pending"]:
                     st["pending"][uid] = {"name": name, "username": frm.get("username")}
