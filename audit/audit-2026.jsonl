@@ -1732,3 +1732,9 @@
 {"ts":"2026-11-13T12:00:24Z","bot":"atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"atlas (console#179 window, Pixel testing)","previous":null}
 {"ts":"2026-11-13T12:00:24Z","bot":"atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-13T12:00:24Z","bot":"atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"atlas (console#179 window, Pixel testing)","previous":null}
+{"ts":"2026-11-13T12:38:01Z","bot":"atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"atlas (console#179 window, Pixel testing)"}
+{"ts":"2026-11-13T12:38:01Z","bot":"atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"atlas (console#179 window, Pixel testing)"}
+{"ts":"2026-11-13T12:38:04Z","bot":"atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console main@0c860a6647c74461aa7a01deefc90751b745ad6a","previous":"engine main@3b7faa4424cab09e67681ab818ecd27537c92fa9, console main@0c860a6647c74461aa7a01deefc90751b745ad6a"}
+{"ts":"2026-11-13T12:38:04Z","bot":"atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-13T12:38:08Z","bot":"atlas","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console main@eafee356dda3ef024a2136e41e1f53d997314c81","previous":"engine main@3b7faa4424cab09e67681ab818ecd27537c92fa9, console main@eafee356dda3ef024a2136e41e1f53d997314c81"}
+{"ts":"2026-11-13T12:38:08Z","bot":"atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
