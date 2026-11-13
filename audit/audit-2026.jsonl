@@ -1693,3 +1693,6 @@
 {"ts":"2026-11-13T09:10:54Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":"Atlas: #375 item 9 read-only preflight (personal-app backup stick)","previous":null}
 {"ts":"2026-11-13T09:15:51Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":null,"previous":"Atlas: #375 item 9 read-only preflight (personal-app backup stick)"}
 {"ts":"2026-11-13T09:24:46Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":"Atlas: #375 item 9 read-only data-dir check (personal app)","previous":null}
+{"ts":"2026-11-13T09:26:37Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":null,"previous":"Atlas: #375 item 9 read-only data-dir check (personal app)"}
+{"ts":"2026-11-13T09:30:29Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":"Atlas: #375 item 9 read-only uid/perm check (personal app)","previous":null}
+{"ts":"2026-11-13T09:31:10Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":null,"previous":"Atlas: #375 item 9 read-only uid/perm check (personal app)"}
