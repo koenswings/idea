@@ -104,7 +104,7 @@ Files: `manuals/field/school-handover-note/README.md`, `manuals/field/school-han
 
 ## ops/boot-recovery.md
 **Status:** Authoritative  ·  **Maintained by:** Atlas
-What comes back after a reboot (Engine-managed instances vs non-store fixtures), fstab loop mounts for duration-test images, the 05:00 reboot (as of 2026-11-13: idea01 still on the D5 hold, idea04 held with #DISKSTATION-HOLD, idea03 live again), leftover idea166/idea168 fixtures for later quarantine, after-reboot checklist. Current pool is idea03/idea04; production hostname is idea.
+What comes back after a reboot (Engine-managed instances vs non-store fixtures), fstab loop mounts for duration-test images, the 05:00 reboot (as of 2026-11-13 17:45 CET: idea01 still `#D5-HOLD-IDEA01-20261010#` and left untouched; idea03 and idea04 now `#D5-HOLD-<pi>-20261113#`), quarantined idea03/idea04 leftovers (`quarantine-20261113-*`), idea01 idea166 leftovers left in place (golden), after-reboot checklist. Current pool is idea03/idea04; production hostname is idea.
 → [docs/ops/boot-recovery.md](ops/boot-recovery.md)
 
 ## ops/engine-deploy-pool-pi.md
