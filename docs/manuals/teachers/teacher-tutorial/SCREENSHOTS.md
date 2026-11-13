@@ -1,6 +1,13 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 16 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 13 November 2026
 
-# SCREENSHOTS — IDEA tutorial (captured 2026-10-12 CEST)
+# SCREENSHOTS — IDEA tutorial
+
+Kolibri shots (CON-03, K*, E1–E3, S1–S2 as used in chapters 3 and 4) were retaken on 13 November 2026 for v2.1, with headless Playwright (Chromium, viewport 1280×800) on the shared agent box, against Kolibri 0.19.5 in the IDEA Demo School (class Grade 5). The welcome window was dismissed in the browser and the page reloaded; forms for create, enroll and edit were filled and then cancelled, without saving. No passwords are visible. Console and Nextcloud shots are unchanged from earlier captures.
+
+Skipped (a save or a new learner attempt would have been needed, or the headless browser did not paint the item): the Manage resources topic and Fractions-item lists (the channel list is shown instead); the Create new quiz form and question list; an in-progress quiz with **SUBMIT QUIZ**; and the **Cake in quarters** activity itself. Unused older files for those IDs may still be in `screenshots/`.
+
+Earlier capture notes (12–16 October 2026) follow for the non-Kolibri shots.
+
 
 Captured with Playwright (Python, Chromium) on Koen's Mac, ~/idea-tutorial, against wizardly-hugle over Tailscale. Viewport 1280x800. No passwords visible in any shot.
 Demo-school retakes (15-16 Oct 2026): Kolibri on idea03 (IDEA Demo School, class Grade 5), Nextcloud on wizardly-hugle; accounts admin, teacher1, teacher2, learner1-3. Milkwise is never shown: in O2-01, O2-03, B2-11 and B2-12 its row is cut out of the image (and the app count badge removed). B4-31 and B4-33 were retaken on the idea03 demo school.
@@ -11,21 +18,21 @@ Hosts: Console :8081, Kolibri :54189, Nextcloud :50065 (Collabora :9980), Kiwix 
 | CON-01 | 02-getting-connected.md | none | yes |
 | CON-03 | 02-getting-connected.md | none | yes |
 | K1-01 | 03-kolibri-teachers.md | teacher1 | yes |
-| K1-02 | 03-kolibri-teachers.md | teacher1 | yes |
-| K1-03 | 03-kolibri-teachers.md | teacher1 | yes |
-| K2-01 | 03-kolibri-teachers.md | teacher1 | yes |
-| K2-02 | 03-kolibri-teachers.md | teacher1 | yes |
-| K2-03 | 03-kolibri-teachers.md | teacher1 | yes |
+| K1-02 | 03-kolibri-teachers.md | admin | yes |
+| K1-03 | 03-kolibri-teachers.md | admin | yes |
+| K2-01 | 03-kolibri-teachers.md | admin | yes |
+| K2-02 | 03-kolibri-teachers.md | admin | yes |
+| K2-03 | 03-kolibri-teachers.md | admin | yes |
 | K3-01a | 03-kolibri-teachers.md | teacher1 | yes |
 | K3-01 | 03-kolibri-teachers.md | teacher1 | yes |
 | K3-02 | 03-kolibri-teachers.md | teacher1 | yes |
 | K3-03a | 03-kolibri-teachers.md | teacher1 | yes |
-| K3-03 | 03-kolibri-teachers.md | teacher1 | yes |
-| K3-04 | 03-kolibri-teachers.md | teacher1 | yes |
+| K3-03 (unused in v2.1) | 03-kolibri-teachers.md | teacher1 | yes |
+| K3-04 (unused in v2.1) | 03-kolibri-teachers.md | teacher1 | yes |
 | K3-05 | 03-kolibri-teachers.md | teacher1 | yes |
 | K4-01 | 03-kolibri-teachers.md | teacher1 | yes |
-| K4-02 | 03-kolibri-teachers.md | teacher1 | yes |
-| K4-03a | 03-kolibri-teachers.md | teacher1 | yes |
+| K4-02 (unused in v2.1) | 03-kolibri-teachers.md | teacher1 | yes |
+| K4-03a (unused in v2.1) | 03-kolibri-teachers.md | teacher1 | yes |
 | K4-03 | 03-kolibri-teachers.md | teacher1 | yes |
 | K5-01 | 03-kolibri-teachers.md | teacher1 | yes |
 | K5-02 | 03-kolibri-teachers.md | teacher1 | yes |
@@ -33,11 +40,11 @@ Hosts: Console :8081, Kolibri :54189, Nextcloud :50065 (Collabora :9980), Kiwix 
 | K5-04 | 03-kolibri-teachers.md | teacher1 | yes |
 | S1-01 | 04-kolibri-learners.md | learner1 | yes |
 | S1-03 | 04-kolibri-learners.md | learner1 | yes |
-| S1-04 | 04-kolibri-learners.md | learner1 | yes |
+| S1-04 (unused in v2.1) | 04-kolibri-learners.md | learner1 | yes |
 | S1-05 | 04-kolibri-learners.md | learner1 | yes |
 | S2-01 | 04-kolibri-learners.md | learner1 | yes |
 | S2-02 | 04-kolibri-learners.md | learner1 | yes |
-| S2-03a | 04-kolibri-learners.md | learner1 | yes |
+| S2-03a (unused in v2.1) | 04-kolibri-learners.md | learner1 | yes |
 | S2-03 | 04-kolibri-learners.md | learner1 | yes |
 | N0-01 | 05-nextcloud-teachers.md | teacher1 | yes |
 | N1-01 | 05-nextcloud-teachers.md | teacher1 | yes |
