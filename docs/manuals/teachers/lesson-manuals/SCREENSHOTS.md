@@ -8,6 +8,8 @@ How they were taken: headless browser (no address bar), staff sign-in with usern
 
 Console pictures (01 to 03): the test box also lists other test apps that a school box does not have, and its device name. Those cards and the device name were hidden from the picture, so only the **Kolibri** card with **Open** shows, as on a school box. Both lessons are on the same Kolibri app, so the Grade 5A and Form 3 Console and sign-in pictures show the same screen.
 
+The sign-in pictures (04) were retaken after the facility was renamed to **IDEA School**; no picture shows the old test facility name.
+
 Learner pictures use learner01 (shown as **Learner One**). After the learner pictures, the progress pictures show **Learner One** as **Started** and the other two learners as **Has not started**.
 
 One picture per row below. Suggested filenames are the files in `shots/`.
@@ -25,7 +27,7 @@ Lesson on screen: **Grade 5A Duration Lesson**. Topic: Add and subtract fraction
 | 1 | G5A-01-network | Grade 5A | Current Console **Apps** page. The **Kolibri** card with a blue **Open** button. No address bar. Do not show a typed port or a device name. | g5a-01-network.png | Done (v1.2) |
 | 2 | G5A-02-disk-apps | Grade 5A | Only if the duration-test box still shows a separate disk or app name for Grade 5A. Otherwise this can be the same **Apps** page, cropped to the Kolibri card. | g5a-02-disk-apps.png | Done (v1.2) |
 | 3 | G5A-03-app-open | Grade 5A | The Kolibri card with **Open** visible. **Start** is not the action being shown. | g5a-03-app-open.png | Done (v1.2) |
-| 4 | G5A-04-sign-in | Grade 5A | Kolibri 0.19 sign-in page: username field and **NEXT**. Same computer the Console was opened on. | g5a-04-sign-in.png | Done (v1.2) |
+| 4 | G5A-04-sign-in | Grade 5A | Kolibri 0.19 sign-in page: facility name **IDEA School**, username field and **NEXT**. Same computer the Console was opened on. | g5a-04-sign-in.png | Done (v1.2) |
 | 5 | G5A-05-classes | Grade 5A | Teacher signed in. **Coach > Class home** for class **Grade 5A**, the screen right after sign-in. Sits in step 2 (Sign in), before **Lessons** is clicked. No **PLAN** or **REPORTS** tabs. | g5a-05-classes.png | Done (v1.2) |
 | 6 | G5A-06-lessons | Grade 5A | **Coach > Lessons**. The row **Grade 5A Duration Lesson** is visible, with its resources. | g5a-06-lessons.png | Done (v1.2) |
 | 7 | G5A-07-resources | Grade 5A | Lesson **Grade 5A Duration Lesson** open. All six resources visible in this order: (1) Visually adding fractions: 5/6+1/4 (2) Visually subtracting fractions: 3/4-5/8 (3) Estimating adding fractions with unlike denominators (4) Visually add and subtract fractions (5) Estimate to add and subtract fractions with different denominators (6) Common denominators. Videos above exercises. **Visible to learners** and **Recipients** are on the page. | g5a-07-resources.png | Done (v1.2) |
@@ -50,7 +52,7 @@ Lesson on screen: **Form 3 Duration Lesson**. Topic: Variables and expressions.
 | 1 | F3-01-network | Form 3 | Current Console **Apps** page. The **Kolibri** card with a blue **Open** button. No typed port or device name. | f3-01-network.png | Done (v1.2) |
 | 2 | F3-02-disk-apps | Form 3 | Only if the duration-test box still shows a separate disk or app name for Form 3. Otherwise this can be the same **Apps** page, cropped to the Kolibri card. | f3-02-disk-apps.png | Done (v1.2) |
 | 3 | F3-03-app-open | Form 3 | The Kolibri card with **Open** visible. **Start** is not the action being shown. | f3-03-app-open.png | Done (v1.2) |
-| 4 | F3-04-sign-in | Form 3 | Kolibri 0.19 sign-in page: username field and **NEXT**. | f3-04-sign-in.png | Done (v1.2) |
+| 4 | F3-04-sign-in | Form 3 | Kolibri 0.19 sign-in page: facility name **IDEA School**, username field and **NEXT**. | f3-04-sign-in.png | Done (v1.2) |
 | 5 | F3-05-classes | Form 3 | Teacher signed in. **Coach > Class home** for class **Form 3**, the screen right after sign-in. Sits in step 2 (Sign in), before **Lessons** is clicked. No **PLAN** or **REPORTS** tabs. | f3-05-classes.png | Done (v1.2) |
 | 6 | F3-06-lessons | Form 3 | **Coach > Lessons**. The row **Form 3 Duration Lesson** is visible, with its resources. | f3-06-lessons.png | Done (v1.2) |
 | 7 | F3-07-resources | Form 3 | Lesson **Form 3 Duration Lesson** open. All six resources visible in this order: (1) What is a variable? (2) Terms, factors, & coefficients (3) Why aren't we using the multiplication sign? (4) Parts of algebraic expressions (5) Evaluating expressions with one variable (6) Variable expressions with exponents. Videos above exercises. | f3-07-resources.png | Done (v1.2) |
