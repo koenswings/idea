@@ -236,7 +236,6 @@ table {{
   width: 100%;
   margin: 12px 0;
   font-size: 10.5pt;
-  table-layout: fixed;
 }}
 th {{
   background: #1e40af;
@@ -272,6 +271,7 @@ tr:nth-child(even) td {{ background: #f8fafc; }}
 }}
 .pdf-landscape h2 {{ margin-top: 0; margin-bottom: 8px; font-size: 13pt; }}
 .pdf-landscape table {{
+  table-layout: fixed;
   font-size: 8.5pt;
   line-height: 1.3;
   margin: 4px 0 0 0;
