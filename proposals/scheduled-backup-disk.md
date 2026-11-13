@@ -44,7 +44,7 @@ The first user is MilkWise production on `idea` (wh), which today runs an interi
 - A scheduled run backs up only instances whose App Disk is docked on the same Engine. Otherwise it records "App Disk not docked" for that instance. No backups over the network in v1.
 - Two new capabilities go into `ENGINE_CAPABILITIES` in `src/data/Engine.ts` (the idea#128 list, rewritten at every boot with `capabilitiesBootedAt`):
   - `scheduledBackups`: this Engine runs the schedule. The Console only offers scheduling to Engines that report it.
-  - `backupCleanup`: advertised **only when root helper v6 or newer is present**, the same pattern as `flashCard` and its helper. The Console reads it to show the HELPER_OUTDATED state.
+  - `backupCleanup`: advertised **only when root helper v10 or newer is present**, the same pattern as `flashCard` and its helper. The Console reads it to show the HELPER_OUTDATED state. (v10, not v6 as first written: v9's `borg-list` was broken on real borg, [idea#450](https://github.com/koenswings/idea/issues/450).)
 
 ### 3.2 When a run is due, and the clock
 
