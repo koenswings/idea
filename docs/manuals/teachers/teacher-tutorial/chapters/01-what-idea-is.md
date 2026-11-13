@@ -1,10 +1,10 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (Zimbabwe kit)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 11 November 2026 (v2.0: section 1.4 how IDEA looks after the kit; Zimbabwe kit)
 
 # 1. What IDEA is
 
 **IDEA (Initiative for Digital Education in Africa)** brings offline computing to rural schools. A small computer in the school, the **IDEA box**, holds ready-made lessons in Kolibri, a place for your own files in Nextcloud, and the whole of Wikipedia. Teachers and learners open them from any classroom computer, laptop or phone on the school Wi-Fi, without internet. This tutorial shows you, step by step, how to use them in your lessons.
 
-> **No internet needed.** Everything in this guide works inside the school. Nothing you do is sent to the internet.
+> **No internet needed.** Everything in this guide works inside the school.
 
 ## 1.1 Words used in this guide
 
@@ -35,3 +35,8 @@
 - Each chapter has numbered steps with screenshots. The screenshots use the demo setup that is on every IDEA box: the demo school **IDEA Demo School** with class **Grade 5** and the demo accounts in the appendix (`admin`, `teacher1`, `teacher2`, `learner1` to `learner3`; teachers and the admin have a password: the account name followed by `911!`; learners sign in in Kolibri with only their username). Your school's names will be different.
 - **Practise in the Demo apps.** Every IDEA box of the kit has six apps: the school's own **Kolibri**, **Nextcloud** and **Wikipedia**, and a Demo copy of each. Follow this tutorial in **Kolibri Demo**, **Nextcloud Demo** and **Wikipedia (Demo)**: they hold the demo school, the demo accounts and the example content. The school's own apps stay clean for real lessons.
 
+## 1.4 How IDEA looks after the kit
+
+This section explains what IDEA counts about the kit, and why.
+
+> IDEA counts how the kit is used, not who uses it or what they write, so that it can offer help. A donated kit may move to another school if it stays unused.
