@@ -1,10 +1,10 @@
 ---
 title: "Form 3 — Variables and expressions"
 subtitle: "IDEA lesson manual: Kolibri"
-audience: "Version 1.2, 13 November 2026"
+audience: "Version 1.3, 13 November 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Tapiwa) · 13 November 2026 (v1.2: all pictures retaken on Kolibri 0.19 and the current Console)
+**Status:** Authoritative · **Maintained by:** Marco (with Tapiwa) · 13 November 2026 (v1.3: Console card pictures retaken, the card is now named Grade 5A and Form 3; v1.2: all pictures retaken on Kolibri 0.19 and the current Console)
 
 # Form 3 — Variables and expressions
 
@@ -30,7 +30,7 @@ The app is already running. You only open it.
 
 1. On a classroom computer, double-click **IDEA** on the desktop. On your own laptop, tablet or phone, open the browser and type `http://idea.local` (or the address on the second line of the box's sticker, for example `http://brave-otter.local`).
 2. The Console opens on the **Apps** page: one card per app, each with a blue **Open** button. Do not type a port number. Do not type a new web address.
-3. Find the **Kolibri** card. Click **Open**. Right after the Console opens, **Open** can stay grey for a few seconds while the Console connects to the box. Wait until it turns blue, then click it.
+3. Find the **Grade 5A and Form 3** card. It says **Kolibri** underneath. For a moment the card may say it is connecting to the box; then **Open** turns blue. Click **Open**.
 
 ![F3-01-network](shots/f3-01-network.png)
 
@@ -110,7 +110,7 @@ You lead. The learners work on their own screens. Walk the room. Do not do the e
 Each learner:
 
 1. Opens the Console the same way you did (the **IDEA** shortcut, or `http://idea.local`).
-2. Finds the **Kolibri** card and clicks **Open**. Does not click **Start**.
+2. Finds the **Grade 5A and Form 3** card (with **Kolibri** underneath) and clicks **Open**. Does not click **Start**.
 3. Types their own username and clicks **NEXT**. If Kolibri asks for a password, they type it and click **Sign in**. Many learners sign in with only their username.
 
 They must sign in with their own name. If they do not sign in, you will not see them in the lesson report later.
@@ -182,7 +182,7 @@ Note one thing you saw. Example: "Form 3 watched the variable videos. Five learn
 
 | What you see | What to do |
 |--------------|------------|
-| No **Open** on the Kolibri card | Stop. Do not press **Start**. Tell the person walking you through this, or your school operator. |
+| No **Open** on the Grade 5A and Form 3 card | Stop. Do not press **Start**. Tell the person walking you through this, or your school operator. |
 | A learner cannot sign in | Check that they type their own username. If it still does not work, tell the person walking you through this, or your school operator. |
 | Lesson not on the learner's screen | Check **Recipients** shows the class. Switch **Visible to learners** on. |
 | Every learner shows **Has not started** | Learners must sign in with their own name before they start. |
@@ -196,6 +196,6 @@ These are the words on the screen. They are not web addresses.
 
 | Where | The name you click |
 |-------|--------------------|
-| Console | **Apps**, then the **Kolibri** card and **Open** |
+| Console | **Apps**, then the **Grade 5A and Form 3** card (**Kolibri** underneath) and **Open** |
 | Lesson | Form 3 Duration Lesson |
 | Class | the Form 3 class at Ndlovu Secondary |
