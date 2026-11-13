@@ -1,66 +1,57 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Tapiwa) · 14 October 2026
+---
+title: "Form 3 — Variables and expressions"
+subtitle: "IDEA lesson manual: Kolibri"
+audience: "Version 1.1, 13 November 2026"
+cover_logo: "yes"
+---
+**Status:** Authoritative · **Maintained by:** Marco (with Tapiwa) · 13 November 2026 (v1.1: steps and labels for Kolibri 0.19 and the current Console; screenshots still from an earlier capture)
 
 # Form 3 — Variables and expressions
-
-*Console pictures are not in this copy. The lesson screens start at sign-in.*
 
 Ndlovu Secondary School.
 
 Lesson name in Kolibri: **Form 3 Duration Lesson**.
 
-_Tapiwa walks the teacher through this. Read one step. Do it. Then go to the next step._
+_Read one step. Do it. Then go to the next step._
 
-The lesson is already on the computer. It has three videos, then three exercises. You do not add resources. You do not remove resources. You open it, check it, and make it **Visible** for the class.
+The lesson is already on the computer. It has three videos, then three exercises. You do not add resources. You do not remove resources. You open it, check it, and switch on **Visible to learners** for the class.
+
+The pictures in this manual were taken on an earlier Kolibri and an earlier Console. The steps use the names you see in Kolibri 0.19 and on the current Console. Console pictures are not in this copy yet; the lesson screens start at sign-in.
 
 ---
 
 ## Before class
 
-Do this before the learners come in.
+Do this before the learners come in, so the lesson is ready when they sit down.
 
 ### 1. Open Kolibri from the Console
 
-The app is already **Running**. You only open it.
+The app is already running. You only open it.
 
-1. Open **Chromium**.
-2. Go to the **Console** page this school already uses. Do not type a port number. Do not type a new web address.
-3. On the left, the heading says **Network**.
+1. On a classroom computer, double-click **IDEA** on the desktop. On your own laptop, tablet or phone, open the browser and type `http://idea.local` (or the address on the second line of the box's sticker, for example `http://brave-otter.local`).
+2. The Console opens on the **Apps** page: one card per app, each with a blue **Open** button. Do not type a port number. Do not type a new web address.
+3. Find the **Kolibri** card (on a duration-test box the card may be named for this test). Click **Open**.
 
-*Picture not in this copy.*
-
-4. You can stay on **All apps**. Or click the disk named **duration-kolibri-form3-001**. It sits under the engine name. The right side then shows that disk. The list is headed **Apps**.
-
-*Picture not in this copy.*
-
-5. Find the row named **kolibri-form3-001**. The line under that name is the app title. If there is no title, that line says **kolibri-1.0**.
-6. Point at the coloured dot on the left of the row. It should say **Running**. The dot is green.
-7. **Open** is on the right of that same row. Click **Open**.
-
-*Picture not in this copy.*
-
-A new tab opens. It uses the same computer you already opened the Console on. You do not type a port.
+A new tab opens. It uses the same computer you already opened the Console on.
 
 Do not click **Start**. Do not click **Stop**. Do not click **Back up**.
 
-If you do not see **Open**, stop. Call Tapiwa. Do not press **Start** yourself.
+If you do not see **Open**, stop. Do not press anything else. Tell the person walking you through this, or your school operator.
 
 ### 2. Sign in
 
-1. On the new tab, click **Sign in**.
-2. Type your username and password.
-3. You should see the Kolibri home page, with **Classes** in the left menu.
+1. On the new tab, type your username and click **NEXT**.
+2. If Kolibri then asks for a password, type it and click **Sign in**.
+3. You should see **Coach**. Choose the class **Form 3** if Kolibri asks you to pick a class.
 
 ![F3-04-sign-in](shots/f3-04-sign-in.png)
 
 ### 3. Open the lesson
 
-1. Click **Classes** in the left menu.
-2. Click the class for this group. The name on screen is the Form 3 class.
+1. In **Coach**, click **Lessons**.
+2. Click **Form 3 Duration Lesson**.
 
 ![F3-05-classes](shots/f3-05-classes.png)
-
-3. Click **Lessons**.
-4. Click **Form 3 Duration Lesson**.
 
 ![F3-06-lessons](shots/f3-06-lessons.png)
 
@@ -82,24 +73,24 @@ Look at the list inside the lesson. It should be three videos first, then three 
 
 ![F3-07-resources](shots/f3-07-resources.png)
 
-If a name is missing, or the order is wrong, stop. Tell Tapiwa. Do not add or delete resources yourself.
+If a name is missing, or the order is wrong, stop. Tell the person walking you through this, or your school operator. Do not add or delete resources yourself.
 
 ### 5. Check who the lesson is for
 
 1. On the open lesson, find **Recipients**.
-2. It must show your Form 3 class.
-3. If the class is not there: click **Edit**, add the class under **Recipients**, and save.
+2. It must show your Form 3 class (or **Entire class** for that class).
+3. If the class is not there, stop. Do not try to fix it yourself. Tell the person walking you through this, or your school operator.
 
 ![F3-08-recipients](shots/f3-08-recipients.png)
 
 ### 6. Make the lesson visible
 
-1. Set the lesson to **Visible**. The button turns blue.
+1. Switch on **Visible to learners**.
 2. Learners can see the lesson the next time they sign in.
 
 ![F3-09-visible](shots/f3-09-visible.png)
 
-If it is already **Visible**, leave it. Do not turn it off.
+If it is already on, leave it. Do not turn it off.
 
 ---
 
@@ -111,20 +102,15 @@ You lead. The learners work on their own screens. Walk the room. Do not do the e
 
 Each learner:
 
-1. Opens **Chromium** and the **Console**, the same way you did.
-2. Stays on **All apps**, or clicks the disk **duration-kolibri-form3-001**.
-3. Finds the row **kolibri-form3-001**. The dot says **Running**.
-4. Clicks **Open**. Does not click **Start**.
-5. Clicks **Sign in** and uses their own username and password.
+1. Opens the Console the same way you did (the **IDEA** shortcut, or `http://idea.local`).
+2. Finds the **Kolibri** card and clicks **Open**. Does not click **Start**.
+3. Types their own username and clicks **NEXT**. If Kolibri asks for a password, they type it and click **Sign in**. Many learners sign in with only their username.
 
-They must sign in with their own name. If they do not sign in, you will not see them in Reports later.
+They must sign in with their own name. If they do not sign in, you will not see them in the lesson report later.
 
 ### 2. Learners open the lesson
 
-1. Click **Classes**.
-2. Click the Form 3 class.
-3. Click **Lessons**.
-4. Click **Form 3 Duration Lesson**.
+1. On **Home**, under **Recent lessons**, click **Form 3 Duration Lesson**.
 
 ![F3-10-student-lesson](shots/f3-10-student-lesson.png)
 
@@ -145,49 +131,43 @@ Say this to the class:
    - Parts of algebraic expressions
    - Evaluating expressions with one variable
    - Variable expressions with exponents
-6. Answer the questions on the screen. Kolibri tells them straight away if the answer is right.
+6. Answer the questions on the screen. Click **CHECK**. Kolibri tells them straight away if the answer is right. Keep going until the goal at the top is reached (for example **Get 4 correct**).
 7. Stay in this lesson until the six resources are done, or until you say stop.
 
 ![F3-12-student-exercise](shots/f3-12-student-exercise.png)
 
 The video plays in the browser. They do not download it.
 
-If a learner cannot find the lesson, check with them: Did they sign in? Is the lesson **Visible**? Does **Recipients** show this class?
+If a learner cannot find the lesson, check with them: Did they sign in? Is **Visible to learners** on? Does **Recipients** show this class?
 
 ---
 
-## After class — check Reports
+## After class — see how the class did
 
-Do this when the learners have finished, or at the end of the period.
+Do this when the learners have finished, or at the end of the period. In Kolibri 0.19 you read this on the lesson itself, not on a separate **Reports** tab.
 
 1. You are signed in as the teacher.
-2. Click **Reports** in the left menu.
-3. Click **Classes**.
-4. Click the Form 3 class.
-5. Click **Lessons**.
-6. Click **Form 3 Duration Lesson**.
+2. Open **Coach**, choose the Form 3 class, and click **Lessons**.
+3. Click **Form 3 Duration Lesson**.
+4. Open the **Learners** tab. You see one row for each learner. The **Resources** tab shows time spent on each item.
 
 ![F3-13-reports-lesson](shots/f3-13-reports-lesson.png)
-
-You see one row for each learner.
 
 ![F3-14-reports-progress](shots/f3-14-reports-progress.png)
 
 | What you see | What it means |
 |--------------|----------------|
-| Not started | They have not opened the lesson. Did they sign in? Could they find it? |
-| In progress | They started. They have not finished every resource. |
-| Completed | They finished the resources in the lesson. |
-| Progress | How much of the lesson they opened. |
-| Time spent | How long they were on the lesson. |
+| **Has not started** | They have not opened the lesson. Did they sign in? Could they find it? |
+| **Started** | They began but did not finish. |
+| **Completed** | They finished the resources in the lesson. |
 
 What to do with it:
 
-- **Not started:** ask the learner. Often they were not signed in, or the lesson was not **Visible**.
-- **In progress:** they can finish next time. Note the name.
+- **Has not started:** ask the learner. Often they were not signed in, or **Visible to learners** was off.
+- **Started:** they can finish next time. Note the name.
 - You do not need every learner at 100% today. You need to see that they signed in, watched, and tried the exercises.
 
-Tell Tapiwa one thing you saw. Example: "Form 3 watched the variable videos. Five learners have not started the exercises."
+Note one thing you saw. Example: "Form 3 watched the variable videos. Five learners have not started the exercises."
 
 ---
 
@@ -195,11 +175,11 @@ Tell Tapiwa one thing you saw. Example: "Form 3 watched the variable videos. Fiv
 
 | What you see | What to do |
 |--------------|------------|
-| No **Open** on the row **kolibri-form3-001** | Stop. Call Tapiwa. Do not press **Start**. |
-| Learner cannot sign in | Class → the learner’s name → **Edit** → reset the password. Or call Tapiwa. |
-| Lesson not on the learner’s screen | Check **Recipients** shows the class. Turn **Visible** on (button blue). |
-| Reports is empty | Learners must sign in with their own name before they start. |
-| A resource name is missing | Stop. Tell Tapiwa. Do not add resources yourself. |
+| No **Open** on the Kolibri card | Stop. Do not press **Start**. Tell the person walking you through this, or your school operator. |
+| A learner cannot sign in | Check that they type their own username. If it still does not work, tell the person walking you through this, or your school operator. |
+| Lesson not on the learner's screen | Check **Recipients** shows the class. Switch **Visible to learners** on. |
+| Every learner shows **Has not started** | Learners must sign in with their own name before they start. |
+| A resource name is missing | Stop. Do not add resources yourself. Tell the person walking you through this, or your school operator. |
 
 ---
 
@@ -209,7 +189,6 @@ These are the words on the screen. They are not web addresses.
 
 | Where | The name you click |
 |-------|--------------------|
-| Disk under the engine name | duration-kolibri-form3-001 |
-| App row | kolibri-form3-001 |
+| Console | **Apps**, then the **Kolibri** card (or the duration-test name for this lesson) and **Open** |
 | Lesson | Form 3 Duration Lesson |
 | Class | the Form 3 class at Ndlovu Secondary |

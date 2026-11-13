@@ -1,4 +1,10 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Tapiwa) · 14 October 2026
+---
+title: "Grade 5A — Add and subtract fractions"
+subtitle: "IDEA lesson manual: Kolibri"
+audience: "Version 1.1, 13 November 2026"
+cover_logo: "yes"
+---
+**Status:** Authoritative · **Maintained by:** Marco (with Tapiwa) · 13 November 2026 (v1.1: steps and labels for Kolibri 0.19 and the current Console; screenshots still from an earlier capture)
 
 # Grade 5A — Add and subtract fractions
 
@@ -6,65 +12,52 @@ Monde Primary School.
 
 Lesson name in Kolibri: **Grade 5A Duration Lesson**.
 
-_Tapiwa walks the teacher through this. Read one step. Do it. Then go to the next step._
+_Read one step. Do it. Then go to the next step._
 
-The lesson is already on the computer. It has three videos, then three exercises. You do not add resources. You do not remove resources. You open it, check it, and make it **Visible** for the class.
+The lesson is already on the computer. It has three videos, then three exercises. You do not add resources. You do not remove resources. You open it, check it, and switch on **Visible to learners** for the class.
+
+The pictures in this manual were taken on an earlier Kolibri and an earlier Console. The steps use the names you see in Kolibri 0.19 and on the current Console.
 
 ---
 
 ## Before class
 
-Do this before the learners come in.
+Do this before the learners come in, so the lesson is ready when they sit down.
 
 ### 1. Open Kolibri from the Console
 
-The app is already **Running**. You only open it.
+The app is already running. You only open it.
 
-1. Open **Chromium**.
-2. Go to the **Console** page this school already uses. Do not type a port number. Do not type a new web address.
-3. On the left, the heading says **Network**. **All apps** is in that list.
+1. On a classroom computer, double-click **IDEA** on the desktop. On your own laptop, tablet or phone, open the browser and type `http://idea.local` (or the address on the second line of the box's sticker, for example `http://brave-otter.local`).
+2. The Console opens on the **Apps** page: one card per app, each with a blue **Open** button. Do not type a port number. Do not type a new web address.
+3. Find the **Kolibri** card (on a duration-test box the card may be named for this test). Click **Open**.
 
 ![G5A-01-network](shots/g5a-01-network.png)
 
-*Network. All apps is selected. The rows are kolibri and nextcloud. Open is on the right of each row.*
-
-4. You can stay on **All apps**. The disk titled **Duration Tests — Kolibri Grade 5A** shows the same row. On that disk the list is headed **Apps**.
-
 ![G5A-02-disk-apps](shots/g5a-02-disk-apps.png)
-
-*Disk Duration Tests — Kolibri Grade 5A. The list is headed Apps. The row is kolibri. The line under the name is kolibri-1.0-duration.*
-
-5. Find the row named **kolibri**. The line under that name says **kolibri-1.0-duration**.
-6. The dot on the left of the row is green.
-7. **Open** is on the right of that same row. Click **Open**.
 
 ![G5A-03-app-open](shots/g5a-03-app-open.png)
 
-*The kolibri row. The dot is green. Open is on the right.*
-
-A new tab opens. It uses the same computer you already opened the Console on. You do not type a port.
+A new tab opens. It uses the same computer you already opened the Console on.
 
 Do not click **Start**. Do not click **Stop**. Do not click **Back up**.
 
-If you do not see **Open**, stop. Call Tapiwa. Do not press **Start** yourself.
+If you do not see **Open**, stop. Do not press anything else. Tell the person walking you through this, or your school operator.
 
 ### 2. Sign in
 
-1. On the new tab, click **Sign in**.
-2. Type your username and password.
-3. You should see the Kolibri home page, with **Classes** in the left menu.
+1. On the new tab, type your username and click **NEXT**.
+2. If Kolibri then asks for a password, type it and click **Sign in**.
+3. You should see **Coach**. Choose the class **Grade 5A** if Kolibri asks you to pick a class.
 
 ![G5A-04-sign-in](shots/g5a-04-sign-in.png)
 
 ### 3. Open the lesson
 
-1. Click **Classes** in the left menu.
-2. Click the class for this group. The name on screen is the Grade 5A class.
+1. In **Coach**, click **Lessons**.
+2. Click **Grade 5A Duration Lesson**.
 
 ![G5A-05-classes](shots/g5a-05-classes.png)
-
-3. Click **Lessons**.
-4. Click **Grade 5A Duration Lesson**.
 
 ![G5A-06-lessons](shots/g5a-06-lessons.png)
 
@@ -88,24 +81,24 @@ Look at the list inside the lesson. It should be three videos first, then three 
 
 ![G5A-07-resources](shots/g5a-07-resources.png)
 
-If a name is missing, or the order is wrong, stop. Tell Tapiwa. Do not add or delete resources yourself.
+If a name is missing, or the order is wrong, stop. Tell the person walking you through this, or your school operator. Do not add or delete resources yourself.
 
 ### 5. Check who the lesson is for
 
 1. On the open lesson, find **Recipients**.
-2. It must show your Grade 5A class.
-3. If the class is not there: click **Edit**, add the class under **Recipients**, and save.
+2. It must show your Grade 5A class (or **Entire class** for that class).
+3. If the class is not there, stop. Do not try to fix it yourself. Tell the person walking you through this, or your school operator.
 
 ![G5A-08-recipients](shots/g5a-08-recipients.png)
 
 ### 6. Make the lesson visible
 
-1. Set the lesson to **Visible**. The button turns blue.
+1. Switch on **Visible to learners**.
 2. Learners can see the lesson the next time they sign in.
 
 ![G5A-09-visible](shots/g5a-09-visible.png)
 
-If it is already **Visible**, leave it. Do not turn it off.
+If it is already on, leave it. Do not turn it off.
 
 ---
 
@@ -117,20 +110,15 @@ You lead. The learners work on their own screens. Walk the room. Do not do the e
 
 Each learner:
 
-1. Opens **Chromium** and the **Console**, the same way you did.
-2. Stays on **All apps**, or opens the disk titled **Duration Tests — Kolibri Grade 5A**.
-3. Finds the row **kolibri**. The line under the name says **kolibri-1.0-duration**. The dot is green.
-4. Clicks **Open**. Does not click **Start**.
-5. Clicks **Sign in** and uses their own username and password.
+1. Opens the Console the same way you did (the **IDEA** shortcut, or `http://idea.local`).
+2. Finds the **Kolibri** card and clicks **Open**. Does not click **Start**.
+3. Types their own username and clicks **NEXT**. If Kolibri asks for a password, they type it and click **Sign in**. Many learners sign in with only their username.
 
-They must sign in with their own name. If they do not sign in, you will not see them in Reports later.
+They must sign in with their own name. If they do not sign in, you will not see them in the lesson report later.
 
 ### 2. Learners open the lesson
 
-1. Click **Classes**.
-2. Click the Grade 5A class.
-3. Click **Lessons**.
-4. Click **Grade 5A Duration Lesson**.
+1. On **Home**, under **Recent lessons**, click **Grade 5A Duration Lesson**.
 
 ![G5A-10-student-lesson](shots/g5a-10-student-lesson.png)
 
@@ -151,49 +139,43 @@ Say this to the class:
    - Visually add and subtract fractions
    - Estimate to add and subtract fractions with different denominators
    - Common denominators
-6. Answer the questions on the screen. Kolibri tells them straight away if the answer is right.
+6. Answer the questions on the screen. Click **CHECK**. Kolibri tells them straight away if the answer is right. Keep going until the goal at the top is reached (for example **Get 4 correct**).
 7. Stay in this lesson until the six resources are done, or until you say stop.
 
 ![G5A-12-student-exercise](shots/g5a-12-student-exercise.png)
 
 The video plays in the browser. They do not download it.
 
-If a learner cannot find the lesson, check with them: Did they sign in? Is the lesson **Visible**? Does **Recipients** show this class?
+If a learner cannot find the lesson, check with them: Did they sign in? Is **Visible to learners** on? Does **Recipients** show this class?
 
 ---
 
-## After class — check Reports
+## After class — see how the class did
 
-Do this when the learners have finished, or at the end of the period.
+Do this when the learners have finished, or at the end of the period. In Kolibri 0.19 you read this on the lesson itself, not on a separate **Reports** tab.
 
 1. You are signed in as the teacher.
-2. Click **Reports** in the left menu.
-3. Click **Classes**.
-4. Click the Grade 5A class.
-5. Click **Lessons**.
-6. Click **Grade 5A Duration Lesson**.
+2. Open **Coach**, choose the Grade 5A class, and click **Lessons**.
+3. Click **Grade 5A Duration Lesson**.
+4. Open the **Learners** tab. You see one row for each learner. The **Resources** tab shows time spent on each item.
 
 ![G5A-13-reports-lesson](shots/g5a-13-reports-lesson.png)
-
-You see one row for each learner.
 
 ![G5A-14-reports-progress](shots/g5a-14-reports-progress.png)
 
 | What you see | What it means |
 |--------------|----------------|
-| Not started | They have not opened the lesson. Did they sign in? Could they find it? |
-| In progress | They started. They have not finished every resource. |
-| Completed | They finished the resources in the lesson. |
-| Progress | How much of the lesson they opened. |
-| Time spent | How long they were on the lesson. |
+| **Has not started** | They have not opened the lesson. Did they sign in? Could they find it? |
+| **Started** | They began but did not finish. |
+| **Completed** | They finished the resources in the lesson. |
 
 What to do with it:
 
-- **Not started:** ask the learner. Often they were not signed in, or the lesson was not **Visible**.
-- **In progress:** they can finish next time. Note the name.
+- **Has not started:** ask the learner. Often they were not signed in, or **Visible to learners** was off.
+- **Started:** they can finish next time. Note the name.
 - You do not need every learner at 100% today. You need to see that they signed in, watched, and tried the exercises.
 
-Tell Tapiwa one thing you saw. Example: "Most of Grade 5A finished the videos. Three learners did not start."
+Note one thing you saw. Example: "Most of Grade 5A finished the videos. Three learners did not start."
 
 ---
 
@@ -201,11 +183,11 @@ Tell Tapiwa one thing you saw. Example: "Most of Grade 5A finished the videos. T
 
 | What you see | What to do |
 |--------------|------------|
-| No **Open** on the row **kolibri** | Stop. Call Tapiwa. Do not press **Start**. |
-| Learner cannot sign in | Class → the learner’s name → **Edit** → reset the password. Or call Tapiwa. |
-| Lesson not on the learner’s screen | Check **Recipients** shows the class. Turn **Visible** on (button blue). |
-| Reports is empty | Learners must sign in with their own name before they start. |
-| A resource name is missing | Stop. Tell Tapiwa. Do not add resources yourself. |
+| No **Open** on the Kolibri card | Stop. Do not press **Start**. Tell the person walking you through this, or your school operator. |
+| A learner cannot sign in | Check that they type their own username. If it still does not work, tell the person walking you through this, or your school operator. |
+| Lesson not on the learner's screen | Check **Recipients** shows the class. Switch **Visible to learners** on. |
+| Every learner shows **Has not started** | Learners must sign in with their own name before they start. |
+| A resource name is missing | Stop. Do not add resources yourself. Tell the person walking you through this, or your school operator. |
 
 ---
 
@@ -215,7 +197,6 @@ These are the words on the screen. They are not web addresses.
 
 | Where | The name you click |
 |-------|--------------------|
-| Disk | Duration Tests — Kolibri Grade 5A |
-| App row | kolibri |
+| Console | **Apps**, then the **Kolibri** card (or the duration-test name for this lesson) and **Open** |
 | Lesson | Grade 5A Duration Lesson |
 | Class | the Grade 5A class at Monde Primary |

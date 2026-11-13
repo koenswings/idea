@@ -1752,3 +1752,4 @@
 {"ts":"2026-11-13T13:28:12Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid","previous":null}
 {"ts":"2026-11-13T13:28:12Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-13T13:28:12Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid","previous":null}
+{"ts": "2026-11-13T13:29:51Z", "bot": "Marco", "action": "doc_update", "file": "docs/manuals/teachers/lesson-manuals/idea-grade-5a-add-and-subtract-fractions-v1.1.pdf", "summary": "Lesson manuals v1.1 (idea#499): steps and labels for Kolibri 0.19 and the current Console; house-style versioned PDFs; v1.0 moved to superseded/; screenshots still need a duration-test retake"}
