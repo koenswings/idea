@@ -14,7 +14,7 @@ The Pi `idea` (formerly `wizardly-hugle`, "wh"; Tailscale 100.115.60.6) started 
 
 This proposal calls that role **the hub**, and gives it one home in `koenswings/idea`: a `hub/` folder with one sub-folder per service, an install script that rebuilds a fresh Pi, and a read-only drift check.
 
-## 2. Inventory (read-only, 2026-11-04 ~04:00 CET; graphify and tokens checked 2026-11-13)
+## 2. Inventory (read-only, 2026-11-04 ~04:00 CET; graphify, tokens and leftover stacks checked 2026-11-13)
 
 | Service | How it runs | Code on the Pi | In a repo? | Documented? | Explanation |
 |---|---|---|---|---|---|
@@ -34,7 +34,7 @@ Secrets in use: `~/.config/tg-relay/env` (relay token, read by `tg_relay.py` its
 2. **Drift.** The relay ran code that was not in the repo (fixed by #407). Nothing detects drift.
 3. **Hidden coupling.** The relay install depends on the untracked `~/.config/kit-watch/env`.
 4. **Security finding.** A GitHub personal access token was stored in plain text in the origin URL in `/home/pi/idea/.git/config`. The 2026-11-13 survey found plaintext tokens only on production idea (three repo configs, two tokens). idea01, idea03 and idea04 are clean, and all three repos are public. Koen approved the fix (S-1) at 09:21 CET. The remotes on idea were switched to credential-free https on 13 Nov; fetch works without tokens. Koen still has to revoke the two old tokens on GitHub (`github_pat_` and `ghp_`). See phase 4.
-5. **Leftovers.** Two Nextcloud backup stacks from 27 Oct and assorted ad-hoc folders in `/home/pi`. Progress is under phase 5.
+5. **Leftovers.** Two Nextcloud backup stacks from 27 Oct and assorted ad-hoc folders in `/home/pi`. The stacks are still on idea and cannot be removed safely yet (their instance ids contain a dot). See phase 5.
 6. **No owner list.** No one place says which service runs on which port, who owns it, where its logs and state live.
 
 ## 4. Recommended layout
@@ -82,7 +82,7 @@ The migration (phases 1–3) starts only after the personal app on idea has its 
 2. **Create `hub/`**: README, `check.sh`, move `tools/telegram-relay/` to `hub/services/telegram-relay/` (leave a pointer in `tools/`). No Pi change. Not started; waits for the gate above.
 3. **Bring in the rest**: kit-watch/mail-watch (as a systemd `--user` timer: a `.timer` unit plus a oneshot `.service` unit), graphify, `host/` (cron, boot.sh, Caddyfile), `bootstrap.sh`, runbook. Deploy service by service with Koen's OK, checking `check.sh` shows no drift. Not started; waits for the gate above.
 4. **Token rotation** — remotes done 13 Nov; revoke still needed. The survey found plaintext tokens only on production idea (three repo configs, two tokens). idea01, idea03 and idea04 are clean. All three repos (`idea`, `agent-engine-dev`, `agent-app-dev`) are public. Koen approved S-1 at 09:21 CET. On 13 Nov the three remotes on production idea were switched to credential-free https; fetch works without tokens. Rollback copies are root-only in quarantine. Koen still has to revoke the two old tokens on GitHub (`github_pat_` and `ghp_`). The `gh` CLI login on idea (`koenswings`; scopes `gist`, `read:org`, `repo`) is still in place.
-5. **Cleanup** — in progress, 2026-11-13. Removal of the two 27 Oct Nextcloud backup stacks (compose down without `-v`, then quarantine the folders): STACKS-TBD. Cleanup of other ad-hoc home folders: not started (quarantine first, delete only with Koen's OK).
+5. **Cleanup** — blocked, 2026-11-13. The two 27 Oct Nextcloud backup stacks are still on idea. They are Engine-managed instances: one is running on port 55260, and the other is half-running and holds host port 9980. They cannot be removed safely yet. Their instance ids contain a dot, which the Engine's remove step and root helper reject. That step would stop the containers first and then refuse, leaving a half-done state. They will be removed through the Engine, one at a time, once the Engine fix for these old dotted ids lands (owner Axle). The same dotted-name overlap is why the live Nextcloud wrongly shows Error after a restart; the live Nextcloud itself works fine. Cleanup of other ad-hoc home folders: not started (quarantine first, delete only with Koen's OK).
 
 ## 8. Open questions for Koen
 
@@ -90,4 +90,4 @@ The migration (phases 1–3) starts only after the personal app on idea has its 
 2. May I revoke the GitHub token on the hub and switch to a deploy key (phase 4), and when? **Answered 2026-11-13:** Koen approved S-1 at 09:21 CET: switch the remotes to plain https (the repos are public). That switch is done; fetch works without tokens. Koen still has to revoke the two old tokens on GitHub (`github_pat_` and `ghp_`). See phase 4.
 3. Should kit-watch's every-minute cron become a systemd timer, or stay cron? **Answered 2026-11-13:** it becomes a systemd timer, meaning a `.timer` unit plus a oneshot `.service` unit.
 4. Is graphify still needed on the hub, or can it be retired? **Answered 2026-11-13:** it stays in. Checked the same day: it serves the 5 May 2026 knowledge graph of the idea repo's design and process docs from `/home/pi/graphify-out` on port 8083. The rebuild is retired, and the running service has no LLM key. See the inventory explanation.
-5. Can the 27 Oct Nextcloud backup stacks be removed after quarantine? **Answered 2026-11-13:** yes; removal is under way in phase 5. STACKS-TBD
+5. Can the 27 Oct Nextcloud backup stacks be removed after quarantine? **Answered 2026-11-13:** not yet. They are still on idea. Their instance ids contain a dot, which the Engine's remove step and root helper reject, so a remove now would stop the containers and then refuse, leaving a half-done state. They will be removed through the Engine, one at a time, once Axle's Engine fix for these old dotted ids lands. The same overlap is why the live Nextcloud wrongly shows Error after a restart; the live Nextcloud itself works fine. See phase 5.
