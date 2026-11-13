@@ -1,10 +1,10 @@
 ---
 title: "Grade 5A — Add and subtract fractions"
 subtitle: "IDEA lesson manual: Kolibri"
-audience: "Version 1.1, 13 November 2026"
+audience: "Version 1.2, 13 November 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Tapiwa) · 13 November 2026 (v1.1: steps and labels for Kolibri 0.19 and the current Console; screenshots still from an earlier capture)
+**Status:** Authoritative · **Maintained by:** Marco (with Tapiwa) · 13 November 2026 (v1.2: all pictures retaken on Kolibri 0.19 and the current Console)
 
 # Grade 5A — Add and subtract fractions
 
@@ -16,7 +16,7 @@ _Read one step. Do it. Then go to the next step._
 
 The lesson is already on the computer. It has three videos, then three exercises. You do not add resources. You do not remove resources. You open it, check it, and switch on **Visible to learners** for the class.
 
-The pictures in this manual were taken on an earlier Kolibri and an earlier Console. The steps use the names you see in Kolibri 0.19 and on the current Console.
+The pictures and the steps in this manual show Kolibri 0.19 and the current Console, so what you see on the screen should match.
 
 ---
 
@@ -30,7 +30,7 @@ The app is already running. You only open it.
 
 1. On a classroom computer, double-click **IDEA** on the desktop. On your own laptop, tablet or phone, open the browser and type `http://idea.local` (or the address on the second line of the box's sticker, for example `http://brave-otter.local`).
 2. The Console opens on the **Apps** page: one card per app, each with a blue **Open** button. Do not type a port number. Do not type a new web address.
-3. Find the **Kolibri** card (on a duration-test box the card may be named for this test). Click **Open**.
+3. Find the **Kolibri** card. Click **Open**. Right after the Console opens, **Open** can stay grey for a few seconds while the Console connects to the box. Wait until it turns blue, then click it.
 
 ![G5A-01-network](shots/g5a-01-network.png)
 
@@ -48,16 +48,17 @@ If you do not see **Open**, stop. Do not press anything else. Tell the person wa
 
 1. On the new tab, type your username and click **NEXT**.
 2. If Kolibri then asks for a password, type it and click **Sign in**.
-3. You should see **Coach**. Choose the class **Grade 5A** if Kolibri asks you to pick a class.
 
 ![G5A-04-sign-in](shots/g5a-04-sign-in.png)
+
+You should see **Coach**. If Kolibri shows a list of classes, click **Grade 5A**. You land on **Class home** for that class.
+
+![G5A-05-classes](shots/g5a-05-classes.png)
 
 ### 3. Open the lesson
 
 1. In **Coach**, click **Lessons**.
 2. Click **Grade 5A Duration Lesson**.
-
-![G5A-05-classes](shots/g5a-05-classes.png)
 
 ![G5A-06-lessons](shots/g5a-06-lessons.png)
 
@@ -98,7 +99,7 @@ If a name is missing, or the order is wrong, stop. Tell the person walking you t
 
 ![G5A-09-visible](shots/g5a-09-visible.png)
 
-If it is already on, leave it. Do not turn it off.
+Kolibri shows *Lesson is visible to learners* at the bottom of the screen for a moment. If the switch is already on, leave it. Do not turn it off.
 
 ---
 
@@ -118,7 +119,7 @@ They must sign in with their own name. If they do not sign in, you will not see 
 
 ### 2. Learners open the lesson
 
-1. On **Home**, under **Recent lessons**, click **Grade 5A Duration Lesson**.
+1. On **Home**, under **Recent lessons**, click **Grade 5A Duration Lesson**. (They can also click **Grade 5A** under **Your classes**, then the lesson.)
 
 ![G5A-10-student-lesson](shots/g5a-10-student-lesson.png)
 
@@ -139,7 +140,7 @@ Say this to the class:
    - Visually add and subtract fractions
    - Estimate to add and subtract fractions with different denominators
    - Common denominators
-6. Answer the questions on the screen. Click **CHECK**. Kolibri tells them straight away if the answer is right. Keep going until the goal at the top is reached (for example **Get 4 correct**).
+6. Answer the questions on the screen. Click **CHECK**. Kolibri tells them straight away if the answer is right. Keep going until the goal at the top is reached (for example **Get 3 correct**).
 7. Stay in this lesson until the six resources are done, or until you say stop.
 
 ![G5A-12-student-exercise](shots/g5a-12-student-exercise.png)
@@ -197,6 +198,6 @@ These are the words on the screen. They are not web addresses.
 
 | Where | The name you click |
 |-------|--------------------|
-| Console | **Apps**, then the **Kolibri** card (or the duration-test name for this lesson) and **Open** |
+| Console | **Apps**, then the **Kolibri** card and **Open** |
 | Lesson | Grade 5A Duration Lesson |
 | Class | the Grade 5A class at Monde Primary |
