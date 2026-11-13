@@ -126,3 +126,7 @@ Console "Set up demo" button (Koen 2026-10-16, replaces the IDEA-DEMO disk idea)
 ## 2026-10-28-update-app.md
 **Status:** Draft · **Author:** Steve · IDEA Lead Bot
 Engine `updateApp` command (Koen approved 2026-10-28): update an installed App instance in place to a newer version from a docked App Disk, with an on-disk snapshot of data and named volumes, a health gate, and automatic rollback; dock-time "Update available" hint for #76. Issues agent-engine-dev#230, idea#76. PDF in `proposals/2026-10-28-update-app/`.
+
+## 2026-11-04-hub-services.md
+
+The Pi `idea` as the organisation's hub: inventory of the services it runs, gaps (unrepoed services, drift, plaintext GitHub token), recommended `hub/` layout with bootstrap and drift check, rules for secrets and deploys, phased migration. PDF in `proposals/2026-11-04-hub-services/`.

@@ -66,6 +66,28 @@ def build_toc_html(headings):
     lines.append('</ol></nav>')
     return '\n'.join(lines)
 
+
+def wrap_wide_tables(body):
+    """Put tables with 6+ columns on a landscape page; give the last column more width."""
+    def repl(m):
+        table = m.group(0)
+        first_row = re.search(r'<tr\b.*?</tr>', table, flags=re.DOTALL)
+        if not first_row:
+            return table
+        cols = len(re.findall(r'<t[hd]\b', first_row.group(0)))
+        if cols < 6:
+            return table
+        if cols == 6:
+            widths = [12, 15, 13, 13, 10, 37]
+        else:
+            head = [max(8, 60 // (cols - 1))] * (cols - 1)
+            head[-1] += 60 - sum(head)
+            widths = head + [40]
+        colgroup = '<colgroup>' + ''.join(f'<col style="width:{w}%">' for w in widths) + '</colgroup>'
+        table = re.sub(r'<table([^>]*)>', r'<table\1>' + colgroup, table, count=1)
+        return f'<div class="pdf-landscape">{table}</div>'
+    return re.sub(r'<table\b.*?</table>', repl, body, flags=re.DOTALL)
+
 def convert(input_path, output_path):
     md_text = Path(input_path).read_text(encoding='utf-8')
     
@@ -99,6 +121,16 @@ def convert(input_path, output_path):
         r'<img([^>]*)src="(?!http|file|data)([^"]+)"',
         lambda m: f'<img{m.group(1)}src="{os.path.join(base_dir, m.group(2))}"',
         body
+    )
+
+    body = wrap_wide_tables(body)
+    # Keep a section heading with its wide table on the landscape page
+    body = re.sub(
+        # Only the heading immediately before the table (do not swallow earlier sections).
+        r'(<h2\b[^>]*>(?:(?!<h2\b).)*</h2>)\s*<div class="pdf-landscape">',
+        r'<div class="pdf-landscape">\1',
+        body,
+        flags=re.DOTALL,
     )
 
     html = f"""<!DOCTYPE html>
@@ -188,6 +220,8 @@ pre {{
   overflow-x: auto;
   font-size: 9pt;
   line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }}
 pre code {{
   background: none;
@@ -196,11 +230,55 @@ pre code {{
   font-size: inherit;
 }}
 
-/* Tables */
-table {{ border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10.5pt; }}
-th {{ background: #1e40af; color: white; padding: 8px 12px; text-align: left; }}
-td {{ padding: 7px 12px; border-bottom: 1px solid #e2e8f0; }}
+/* Tables: wrap long cell text so it is not clipped in print */
+table {{
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+  font-size: 10.5pt;
+}}
+th {{
+  background: #1e40af;
+  color: white;
+  padding: 8px 12px;
+  text-align: left;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  vertical-align: top;
+}}
+td {{
+  padding: 7px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  vertical-align: top;
+}}
 tr:nth-child(even) td {{ background: #f8fafc; }}
+
+/* Wide (6+ column) tables go on a landscape page */
+@media print {{
+  body {{ max-width: none; }}
+}}
+@page landscape {{
+  size: letter landscape;
+  margin: 12mm 12mm 10mm 12mm;
+}}
+.pdf-landscape {{
+  page: landscape;
+  break-before: page;
+  max-width: none;
+  width: 100%;
+}}
+.pdf-landscape h2 {{ margin-top: 0; margin-bottom: 8px; font-size: 13pt; }}
+.pdf-landscape table {{
+  table-layout: fixed;
+  font-size: 8.5pt;
+  line-height: 1.3;
+  margin: 4px 0 0 0;
+}}
+.pdf-landscape th, .pdf-landscape td {{ padding: 4px 6px; }}
+.pdf-landscape tr {{ break-inside: avoid; page-break-inside: avoid; }}
+
 
 /* Blockquote */
 blockquote {{
