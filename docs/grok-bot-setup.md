@@ -1148,6 +1148,7 @@ The fleet scripts handle deployment. For reference, the fleet deploy script:
 **Known gotchas**
 
 - pnpm build writes into dist.new-<timestamp>/ and swaps into dist/ only after success, keeping one dist.prev. Rollback: rename dist.prev to dist. If permissions fail, check who owns dist/.
+- Since agent-console-dev#189 (Console main cdda261), pnpm build also carries dist/hidden-instances.json into the new dist. tools/fleet/build-console-pi.sh does not restore it in that case; it only backfills the file if a pre-#189 build dropped it (pool Consoles still on 6c15bcf; kits pinned older).
 - pnpm dev binds 0.0.0.0 — accessible at pi-tailscale-ip:5173 during dev.
 - Use mock store in tests — avoids needing a live Engine.
 - background.ts is legacy. Do not add feature logic there.
