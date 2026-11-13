@@ -1794,3 +1794,4 @@
 {"ts":"2026-11-13T16:18:20Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-13T16:18:20Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: Console main ffab96d deploy + live check","previous":null}
 {"ts": "2026-11-13T16:17:26Z", "bot": "Marco", "action": "doc_update", "file": "docs/manuals/teachers/teacher-tutorial/SCREENSHOTS.md", "summary": "idea#499 nit: ch. 4 learner retake list now names the S2 shots that exist (S2-01, S2-03, S2-03a); S2-02 was removed in v2.1.1"}
+{"ts": "2026-11-13T16:20:58Z", "bot": "Marco", "action": "doc_update", "file": "docs/README.md", "summary": "idea#499: docs/README.md refreshed against docs/ as it is now: current manuals with PDF versions, platform and ops docs, links checked, empty placeholder table dropped"}
