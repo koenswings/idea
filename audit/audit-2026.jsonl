@@ -1781,3 +1781,5 @@
 {"ts":"2026-11-13T15:48:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-13T15:50:56Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-13T15:50:56Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle: #334 rebuild verify-sanitised 8/8","previous":null}
+{"ts":"2026-11-13T15:51:38Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-13T15:51:38Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: rename G5A+Form3 facility display name to IDEA School (kolibri-st9ddvr2mf957oebpgv); kid-kolibri-demo, Disk B untouched","previous":null}
