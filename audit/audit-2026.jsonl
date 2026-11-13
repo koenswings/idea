@@ -1798,3 +1798,5 @@
 {"ts":"2026-11-13T16:22:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: Console main ffab96d deploy + live check"}
 {"ts":"2026-11-13T16:22:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console main@ffab96da8debdcbfbda5674842305b1458cc3ed9","previous":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console pr192@eee211a"}
 {"ts":"2026-11-13T16:22:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-13T16:28:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-13T16:28:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"atlas (read-only #499)","previous":null}
