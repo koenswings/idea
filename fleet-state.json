@@ -63,7 +63,7 @@
     "role": "spare",
     "domain": "any",
     "pr": "idea#76 WD fixtures written (sdb1-4); sdb3/sdb4 not docked: 90-docking.rules only matches sd?1|sd?2",
-    "status": "idle",
+    "status": "testing",
     "host": "100.108.39.45",
     "tailscale": "100.108.39.45",
     "lan": "192.168.0.113",
@@ -72,7 +72,7 @@
     "runner": "none",
     "grok_build": null,
     "note": "Spare fleet Pi (2026-09-28). Pi 4 / Debian 13 trixie / 240 GB SSD. Duration pool (idea#168, 2026-10-06): Engine config mdns:true, shared store automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH, no static peers. On Tailscale as idea04 (100.108.39.45). pi password not set yet (Koen). UPDATE 2026-11-11 00:41 CET (Atlas): engine main@8241221 (#310) deployed for idea#415 scratch; usageMonitoring left OFF (no /var/lib/idea/usage/settings.json); IDEA_USAGE_AS_MAIN absent. UPDATE 2026-11-11 01:05 CET (Atlas): usageMonitoring ON for idea#415 scratch; IDEA_USAGE_AS_MAIN still absent. UPDATE 2026-11-11 03:45 CET (Atlas): post-#311 verify matched idea03 v7 helpers; engine main@825c66c deployed with fresh pm2 env (no IDEA_CONFIG_FILE, no IDEA_USAGE_AS_MAIN); usageMonitoring left ON. UPDATE 2026-11-11 04:35 CET (Atlas): engine main@e91467d (#313 empty SYSTEM_ROOT / avail_kb) deployed with fresh pm2 env (no IDEA_CONFIG_FILE, no IDEA_USAGE_AS_MAIN); install-root-helpers ran (idea-app-data changed c8ca658b…530c → 05886f4e…1766, still v7); usageMonitoring left ON; System Disk store rows and Axle quarantine folders left alone. UPDATE 2026-11-11 05:04 CET (Atlas): engine main@aec3930 (#314) deployed with fresh pm2 env (no IDEA_CONFIG_FILE, no IDEA_USAGE_AS_MAIN); install-root-helpers skipped (helpers already matched the tip, idea-app-data still 05886f4e…1766); usageMonitoring left ON; Axle 428 quarantine and /.idea-quarantine left alone. UPDATE 2026-11-13 17:45 CET (Atlas): 05:00 hold D5-HOLD-idea04-20261113, leftovers quarantine-20261113-*. UPDATE 2026-11-13 21:23 CET (Atlas): Engine f114a28 (#400 scheduled backups A-D). UPDATE 2026-11-13 22:04 CET (Atlas): Engine f59ee12, Console ffd84b4. Engine f59ee12910176265fe329c8e09fe317d9d396f77 (#354 backupCleanup); Console main ffd84b4125f2dcd6d984a6c65d7d5cdbb68eac1a (#186 merged). idea-app-data still v13 sha 65a241aa…. Pre-deploy backup /home/pi/quarantine/engine-deploy-20261113-215754. UPDATE 2026-11-13 22:28 CET (Atlas): Console 32f0082, Engine f59ee12. UPDATE 2026-11-13 22:41 CET (Atlas): Console 4b039c7, Engine f59ee12. UPDATE 2026-11-13 22:54 CET (Atlas): two Failed Update-app OPERATIONS cards cancelled via cancelOperation (z5gri9eoit1ea3p7otf, qg81zrthdltj3vy05db; records kept). idea04 left idle for Axle's stick proof. Console 4b039c7, Engine f59ee12.",
-    "claim": null,
+    "claim": "Atlas: deploy Engine 8c245a4 (engine#356)",
     "branch": null,
     "review_url": "http://100.108.39.45:8080/",
     "idle_since": "2026-11-13T21:54:48Z"
