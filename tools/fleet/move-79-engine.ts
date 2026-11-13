@@ -39,7 +39,7 @@ if (mode === 'state') {
     const d = s.diskDB?.[i.storedOn]; out({ ...inst(i), dockedTo: d?.dockedTo ?? null })
   }
 } else if (mode === 'op' && CMD) {
-  const ops = Object.values<any>(s.operationDB ?? {}).filter(o => o.kind === 'moveApp' && String(o.subject) === CMD)
+  const ops = Object.values<any>(s.operationDB ?? {}).filter(o => o.kind === 'moveApp' && String(o.subject?.id ?? o.subject) === CMD)
     .sort((a, b) => (b.createdAt ?? b.startedAt ?? 0) - (a.createdAt ?? a.startedAt ?? 0))
   out(ops[0] ? { id: ops[0].id, status: ops[0].status, stepLabel: ops[0].stepLabel ?? null, error: ops[0].error ?? null, move: ops[0].move ?? null } : { error: 'no moveApp op' })
 } else if (mode === 'cmd' && CMD) {

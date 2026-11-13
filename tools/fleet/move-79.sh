@@ -390,7 +390,8 @@ move|move-back)
   [ "$(jq -r .status <<<"$ti")" = Running ] || die "instance $NID on $TP is $(jq -r .status <<<"$ti"), not Running"
   remote "$TH" manifest "$FIXTURE_ROOT/$TSLOT/instances/$NID" > "$EVID/target.sha256" || die "target manifest failed"
   diff <(awk '{print $2}' "$EVID/source.sha256") <(awk '{print $2}' "$EVID/target.sha256") > "$EVID/files.diff" || die "file lists differ (see $EVID/files.diff); source kept or quarantined, never deleted"
-  diff "$EVID/source.sha256" "$EVID/target.sha256" > "$EVID/sums.diff" || die "checksums differ (see $EVID/sums.diff)"
+  diff <(grep -v '  \.env$' "$EVID/source.sha256") <(grep -v '  \.env$' "$EVID/target.sha256") > "$EVID/sums.diff" || die "checksums differ (see $EVID/sums.diff)"
+  diff "$EVID/source.sha256" "$EVID/target.sha256" > "$EVID/sums-incl-env.diff" || log ".env differs (the Engine writes per-host IDEA_HOSTNAME/IDEA_HOST_IPS/port); every other file is sha256-identical"
   port="$(jq -r '.port // empty' <<<"$ti")"
   if [ -n "$port" ]; then hc="$(rsh "$TH" "curl -s -o /dev/null -w %{http_code} --max-time 10 http://127.0.0.1:$port/" || true)"
     [ "$hc" = 200 ] || die "moved instance on $TP:$port answers HTTP ${hc:-none}"; log "moved instance answers HTTP 200 on $TP:$port"; fi
