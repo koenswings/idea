@@ -1649,3 +1649,4 @@
 {"ts":"2026-11-13T07:41:33Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":"Atlas: idea#416 hub 1.5 update","previous":null}
 {"ts":"2026-11-13T07:44:30Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-13T07:44:30Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: Kolibri 0.19.5 Demo for Marco (app-kolibri 1.2-0.19.5 ff58de7; Steve). Separate compose project kid-kolibri-demo; idea166-*, :18080, 0d8f9984, old hub, Disk B untouched; release by 13:00 CET","previous":null}
+{"ts":"2026-11-13T07:48:34Z","bot":"Atlas","action":"fleet_state_update","pi":"wizardly-hugle","field":"claim","value":null,"previous":"Atlas: idea#416 hub 1.5 update"}
