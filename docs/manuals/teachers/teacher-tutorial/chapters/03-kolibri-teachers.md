@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 13 November 2026 (v2.1: Kolibri 0.19.5 paths and screenshots)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 13 November 2026 (v2.1.1: screenshot and appendix fixes; v2.1: Kolibri 0.19.5 paths and screenshots)
 
 # 3. Kolibri for teachers
 
@@ -117,7 +117,7 @@ In Kolibri 0.19 you read reports on the lesson, the quiz or the learner, rather 
    ![Lesson report](../screenshots/K5-02.png)
 3. **Quizzes > (the quiz)**: status and score per learner; **Difficult questions** shows what to re-teach.
    ![Quiz report](../screenshots/K5-03.png)
-4. **Learners > (a name)**: that learner's lessons and quizzes. A lesson that is hidden from learners can still appear on this report.
+4. **Learners > (a name)**: that learner's lessons and quizzes. A lesson that is hidden from learners can still appear on this report (in the Demo, the **Khan Academy (English - US curriculum) lesson**, counted in **Lessons completed**).
    ![Learner report](../screenshots/K5-04.png)
 Reports can be printed or exported as CSV (icons top right).
 

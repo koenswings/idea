@@ -2,16 +2,17 @@
 
 # SCREENSHOTS — IDEA tutorial
 
-Kolibri shots (CON-03, K*, E1–E3, S1–S2 as used in chapters 3 and 4) were retaken on 13 November 2026 for v2.1, with headless Playwright (Chromium, viewport 1280×800) on the shared agent box, against Kolibri 0.19.5 in the IDEA Demo School (class Grade 5). The welcome window was dismissed in the browser and the page reloaded; forms for create, enroll and edit were filled and then cancelled, without saving. No passwords are visible. Console and Nextcloud shots are unchanged from earlier captures.
+Kolibri shots (CON-03, K*, E1–E3, S1–S2 as used in chapters 3 and 4) were taken with headless Playwright (Chromium, viewport 1280×800) on the shared agent box, from the Kolibri Demo test instance (Kolibri 0.19.5, IDEA Demo School, class Grade 5). The welcome window was dismissed in the browser and the page reloaded; forms for create, enroll and edit were filled and then cancelled, without saving. No passwords are visible. Console and Nextcloud shots are unchanged from earlier captures.
+
+v2.1.1 (13 November 2026): E1-03 / S1-05 retaken after the **Correct** pop-up faded; E2-01 / S2-01 recropped so a full quiz question is visible and no heading is cut (the seed title **IDEA demo quiz** was cropped out of the frame). S2-02 was removed (unused). K5-04 was kept: cropping the hidden fourth lesson would have left a misleading **0 of 4**, so the appendix now names that hidden lesson.
 
 Skipped (a save or a new learner attempt would have been needed, or the headless browser did not paint the item): the Manage resources topic and Fractions-item lists (the channel list is shown instead); the Create new quiz form and question list; an in-progress quiz with **SUBMIT QUIZ**; and the **Cake in quarters** activity itself. Unused older files for those IDs may still be in `screenshots/`.
 
 Earlier capture notes (12–16 October 2026) follow for the non-Kolibri shots.
 
 
-Captured with Playwright (Python, Chromium) on Koen's Mac, ~/idea-tutorial, against wizardly-hugle over Tailscale. Viewport 1280x800. No passwords visible in any shot.
-Demo-school retakes (15-16 Oct 2026): Kolibri on idea03 (IDEA Demo School, class Grade 5), Nextcloud on wizardly-hugle; accounts admin, teacher1, teacher2, learner1-3. Milkwise is never shown: in O2-01, O2-03, B2-11 and B2-12 its row is cut out of the image (and the app count badge removed). B4-31 and B4-33 were retaken on the idea03 demo school.
-Hosts: Console :8081, Kolibri :54189, Nextcloud :50065 (Collabora :9980), Kiwix :61312 (app-kiwix 1.0.1). Apps opened via Console Apps card → Open for CON-03; direct URLs elsewhere.
+Captured with Playwright (Python, Chromium), viewport 1280×800. No passwords visible in any shot.
+Earlier non-Kolibri retakes (15–16 October 2026) used the demo school **IDEA Demo School**, class **Grade 5**, and the accounts admin, teacher1, teacher2, learner1–3. Console shots were opened from the Console Apps card (CON-03).
 
 | ID | Chapter | Login | File present |
 |---|---|---|---|
@@ -41,9 +42,8 @@ Hosts: Console :8081, Kolibri :54189, Nextcloud :50065 (Collabora :9980), Kiwix 
 | S1-01 | 04-kolibri-learners.md | learner1 | yes |
 | S1-03 | 04-kolibri-learners.md | learner1 | yes |
 | S1-04 (unused in v2.1) | 04-kolibri-learners.md | learner1 | yes |
-| S1-05 | 04-kolibri-learners.md | learner1 | yes |
-| S2-01 | 04-kolibri-learners.md | learner1 | yes |
-| S2-02 | 04-kolibri-learners.md | learner1 | yes |
+| S1-05 | 04-kolibri-learners.md | learner3 | yes |
+| S2-01 | 04-kolibri-learners.md | learner3 | yes |
 | S2-03a (unused in v2.1) | 04-kolibri-learners.md | learner1 | yes |
 | S2-03 | 04-kolibri-learners.md | learner1 | yes |
 | N0-01 | 05-nextcloud-teachers.md | teacher1 | yes |
@@ -74,7 +74,7 @@ Not captured (skipped by rule): F1 files disk, B2–B4 backup/restore, C3–C4 o
 
 ## To retake for IDEA Demo School (2026-10-15)
 
-The text now uses the demo school **IDEA Demo School**, class **Grade 5** and the accounts `admin`, `teacher1`, `teacher2`, `learner1`–`learner3` (passwords `<name>911!`, see the appendix). Shots that show the old `demo-…` / `demo_…` names, `demo-Grade5A` or `demo-School` must be retaken once wizardly-hugle has the demo school. No error messages or password fields with typed text in any shot.
+The text now uses the demo school **IDEA Demo School**, class **Grade 5** and the accounts `admin`, `teacher1`, `teacher2`, `learner1`–`learner3` (passwords `<name>911!`, see the appendix). Shots that show the old `demo-…` / `demo_…` names, `demo-Grade5A` or `demo-School` must be retaken on the Kolibri Demo test instance (this is now done for the Kolibri shots in chapters 3 and 4). No error messages or password fields with typed text in any shot.
 
 - Kolibri teacher (ch. 3): K1-01–K1-03, K2-01–K2-03, K3-01a, K3-01–K3-05, K3-03a, K4-01–K4-03, K4-03a, K5-01–K5-04 (sign in as `teacher1`; K1-03/K2 class creation and enrolment as `admin`).
 - Kolibri learner (ch. 4): S1-01, S1-03–S1-05, S2-01–S2-03, S2-03a (sign in as `learner1`; the sign-in step now asks for a password).
@@ -87,8 +87,8 @@ The text now uses the demo school **IDEA Demo School**, class **Grade 5** and th
 
 The text (v1.1) follows the kit handed over on 18 October 2026. These shots still show the demo server or older content. Retake them on a kit Engine (one switched on at a time), with no error messages on screen.
 
-- Console Apps page / Network view without the Demo apps or the "on <Engine>" label, or showing wizardly-hugle or `kiwix-1.0.1`: CON-01, CON-04, O2-01, O2-03, O3-01, O4-01 (check), B2-00, B2-01, B2-10, B2-11, B2-12 (only Kolibri and Nextcloud ticked; the kit backs up all six apps), B2-13, B3-10a, B4-20–B4-28, F1-11, F1-12, F1-14, F2-01, C5-02.
-- Channel builder shots with idea01/idea03/idea04 (ch. 5, builder not on the kit): SC-01–SC-04.
+- Console Apps page / Network view without the Demo apps or the "on <Engine>" label, or showing a lab Engine name or `kiwix-1.0.1`: CON-01, CON-04, O2-01, O2-03, O3-01, O4-01 (check), B2-00, B2-01, B2-10, B2-11, B2-12 (only Kolibri and Nextcloud ticked; the kit backs up all six apps), B2-13, B3-10a, B4-20–B4-28, F1-11, F1-12, F1-14, F2-01, C5-02.
+- Channel builder shots that show an Engine name (ch. 5, builder not on the kit): SC-01–SC-04.
 - Nextcloud shots with the group "Grade 5" (Nextcloud Demo has the groups teachers and learners): N1-01, N1-03, F2-06, F2-07.
 - F2-02: old "demo-" folder names (now Worksheets, Teacher Notes).
 - Khan Academy (not on the kit): K4-02, K4-03a, K4-03, K5-03, S1-05, S2-*.

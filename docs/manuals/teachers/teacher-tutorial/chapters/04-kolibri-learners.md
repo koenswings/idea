@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 13 November 2026 (v2.1: Kolibri 0.19.5 paths and screenshots)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 13 November 2026 (v2.1.1: screenshot fixes; v2.1: Kolibri 0.19.5 paths and screenshots)
 
 # 4. Kolibri for learners (try it yourself)
 
