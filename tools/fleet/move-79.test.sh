@@ -21,7 +21,8 @@ cat > "$W/bin/fakessh" <<'SH'
 host="${1#pi@}"; shift; R="$W/$host"; cmd="$*"; cmd="${cmd//@ROOT@/$R}"
 echo "$host :: ${cmd:0:160}" >> "$W/ssh.log"
 [ -n "${FAKE_UNREACH:-}" ] && [ "$FAKE_UNREACH" = "$host" ] && exit 255
-export FAKE_HOST="$host" FAKE_R="$R" MV79_LOSETUP="$W/bin/losetup-ro" MV79_MKFS="$W/bin/mkfs-fake"
+export FAKE_HOST="$host" FAKE_R="$R" MV79_LOSETUP="$W/bin/losetup-ro" MV79_MKFS="$W/bin/mkfs-fake" \
+  MV79_APPDATA_ROOTS="$R/app-data-roots" MV79_ROOT_OWNER="$(id -u):$(id -g)" MV79_PEER_KEY="$R/engine.pub" MV79_AUTHZ="$R/authz"
 exec bash -c "$cmd"
 SH
 cat > "$W/bin/vcgencmd" <<'SH'
@@ -41,7 +42,10 @@ cat > "$W/bin/docker" <<'SH'
 case "$1 $2" in
   "ps -a") if [[ "$*" == *org.idea.mv79* ]]; then exit 0; fi; cat "$FAKE_R/docker-ps" ;;
   "inspect -f") grep "^$4 " "$FAKE_R/docker-started" | cut -d' ' -f2 ;;
-  "image inspect") [ -e "$FAKE_R/image-present" ] ;;
+  "image inspect") [ -e "$FAKE_R/image-present" ] || exit 1; [ "$3" = -f ] && cat "$FAKE_R/image-id"; exit 0 ;;
+  "save sha256:"*) echo "DOCKER_SAVE $2 $(cat "$FAKE_R/image-id")"; echo "$FAKE_HOST docker save $2" >> "$W/docker.log" ;;
+  "load ") read -r _ id want; [ "$id" = "$want" ] || exit 1; touch "$FAKE_R/image-present"; echo "$want" > "$FAKE_R/image-id"
+           echo "$FAKE_HOST docker load $want" >> "$W/docker.log"; echo "Loaded image ID: $want" ;;
   *) echo "FORBIDDEN docker $*" >> "$W/forbidden.log"; exit 9 ;;
 esac
 SH
@@ -83,8 +87,17 @@ case "$1" in
       *) echo "FORBIDDEN losetup $*" >> "$W/forbidden.log"; exit 9 ;;
     esac ;;
   /usr/bin/mount) [ "$2 $3" = "-t ext4" ] || exit 9; echo "$4 $5" >> "$T" ;;
-  /usr/bin/umount) grep -v " $2$" "$T" > "$T.t"; mv "$T.t" "$T" ;;
+  /usr/bin/umount) grep -v " $2$" "$T" > "$T.t"; mv "$T.t" "$T"
+    n=$(( $(cat "$FAKE_R/umountn" 2>/dev/null || echo 0) + 1 )); echo $n > "$FAKE_R/umountn"; mkdir -p "$FAKE_R/unmounted-$n"
+    find "$2" -mindepth 1 -maxdepth 1 -exec mv {} "$FAKE_R/unmounted-$n/" \; ;;
   /usr/bin/find|/usr/bin/sha256sum) exit 1 ;;
+  true) [ -z "${FAKE_NOSUDO:-}" ] ;;
+  /usr/bin/tee) [ "$2" = -a ] && [ "$3" = "$MV79_APPDATA_ROOTS" ] || exit 9; exec /usr/bin/tee -a "$3" ;;
+  /usr/bin/cp) [ "$3" = "$MV79_APPDATA_ROOTS" ] || exit 9; exec /bin/cp "$2" "$3" ;;
+  /usr/bin/chown|/usr/bin/chmod) [ "$3" = "$MV79_APPDATA_ROOTS" ] || [ "$3" = "$FAKE_R/fixroot" ] || exit 9
+    [ "$1" = /usr/bin/chmod ] && exec /bin/chmod "$2" "$3"; exec /bin/chown "$2" "$3" ;;
+  /usr/bin/install) [ "$*" = "/usr/bin/install -d -o pi -g pi -m 0755 $9" ] || exit 9; exec /bin/mkdir -m 0755 "$9" ;;
+  /usr/bin/rmdir) case "$2" in "$FAKE_R"/fixroot/idea-test-*) exec /bin/rmdir "$2" ;; *) exit 9 ;; esac ;;
   *) echo "FORBIDDEN sudo $*" >> "$W/forbidden.log"; exit 9 ;;
 esac
 SH
@@ -121,8 +134,17 @@ def insts(r):
     return out
 hosts=[h for h in glob.glob(W+'/1*') if os.path.isdir(h)]
 if mode=='state':
+    dk=[{k:d[k] for k in ('id','name','device')} for d in disks(R)]; ins=insts(R)
+    if os.path.exists(R+'/diskb-docked'):
+        dk.append({'id':'diskb202610301247','name':'Disk B','device':'sdb'})
+        ins.append({'id':'nc1','name':'nextcloud-files-b-001','instanceOf':'nextcloud','status':open(R+'/diskb-docked').read().strip() or 'Running','diskId':'diskb202610301247','port':8080,'lastStarted':1})
     print(json.dumps({'engineId':'e-'+os.path.basename(R),'hostname':os.path.basename(R),'lastBooted':1,'moveAppCrossEngine': not os.path.exists(R+'/nocap'),
-        'disks':[{k:d[k] for k in ('id','name','device')} for d in disks(R)],'instances':insts(R)}))
+        'disks':dk,'instances':ins}))
+elif mode=='peers':
+    def pa(h):
+        f=h+'/store-authorized'
+        return {'sshKey':'SHA256:s-'+os.path.basename(h),'hostKey':'SHA256:h-'+os.path.basename(h),'authorized':[l.strip() for l in open(f) if l.strip()]} if os.path.exists(f) else None
+    print(json.dumps({'localEngineId':'e-'+os.path.basename(R),'engines':[{'id':'e-'+os.path.basename(h),'hostname':os.path.basename(h),'peerAccess':pa(h)} for h in sorted(hosts)]}))
 elif mode=='find':
     for h in hosts:
         for i in insts(h):
@@ -164,7 +186,10 @@ reset_hosts() {
   for h in "$SRC" "$TGT"; do
     mkdir -p "$W/$h/engine/script" "$W/$h/engine/store-identity" "$W/$h/fixroot/idea-test-1" "$W/$h/watch" "$W/$h/scratch"
     echo "automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH" > "$W/$h/engine/store-identity/store-url.txt"
-    git -C "$W/$h/engine" init -q && git -C "$W/$h/engine" -c user.email=t@t -c user.name=t commit -q --allow-empty -m x
+    git -C "$W/$h/engine" init -q && GIT_AUTHOR_DATE=@1763000000 GIT_COMMITTER_DATE=@1763000000 git -C "$W/$h/engine" -c user.email=t@t -c user.name=t commit -q --allow-empty -m x
+    printf '/home/pi/idea/other-root\n' > "$W/$h/app-data-roots"; chmod 644 "$W/$h/app-data-roots"; chmod 755 "$W/$h/fixroot"
+    printf 'settings:\n  isDev: false\n  peerAccess: false\n' > "$W/$h/engine/config.yaml"; chmod 640 "$W/$h/engine/config.yaml"
+    echo "ssh-ed25519 AAAAC3k${h//./} idea-engine" > "$W/$h/engine.pub"; echo "sha256:$(printf 'a%.0s' {1..64})" > "$W/$h/image-id"
     touch "$W/$h/image-present"; echo 50.1 > "$W/$h/temp"
     jq -n --arg r "@ROOT@" '[{name:"engine",pm2_env:{status:"online",username:"pi",env:{IDEA_TEST_MODE:"true",IDEA_DISKS_ROOT:($r+"/fixroot"),IDEA_WATCH_DIR:($r+"/watch")}}}]' > "$W/$h/pm2.json"
     : > "$W/$h/docker-ps"; : > "$W/$h/docker-started"
@@ -174,7 +199,13 @@ reset_hosts() {
   printf 'k1|kid-kolibri-demo-kolibri-1|running\ns1|idea166-kolibri-live|exited\nh1|idea-hub-sidecar|exited\n' > "$W/$SRC/docker-ps"
   printf 'k1 2026-11-13T08:00:00Z\ns1 2026-11-13T04:00:00Z\nh1 2026-11-13T04:00:00Z\n' > "$W/$SRC/docker-started"
   echo busy > "$W/$SRC/fixroot/idea-test-1/other"
+  add_peers
 }
+add_peers() {  # both Engines accept each other: store authorized[] + the authorized_keys lines the Engine's own sync writes
+  local a b; for a in "$SRC" "$TGT"; do b=$TGT; [ "$a" = "$TGT" ] && b=$SRC
+    echo "e-$b SHA256:s-$b SHA256:h-$b" > "$W/$a/store-authorized"
+    echo "command=\"/usr/local/sbin/idea-peer-gate e-$b\",restrict ssh-ed25519 AAAAC3k${b//./} idea-engine" > "$W/$a/authz"; done; }
+fstate() { local h="$W/$1"; for f in "$h/app-data-roots" "$h/engine/config.yaml"; do printf '%s %s\n' "$(sha256sum < "$f" | cut -c1-64)" "$(stat -c '%u:%g %a %F' "$f")"; done; stat -c '%u:%g %a' "$h/fixroot"; }
 # app-data-roots is read from /etc on the "Pi": the fake root cannot provide it, so preflight would FAIL on it.
 # Shim: a cat that maps /etc/idea/app-data-roots to the sandbox.
 cat > "$W/bin/tr" <<'SH'
@@ -187,12 +218,13 @@ rc() { cat "$W/rc"; }
 has() { grep -q -- "$1" "$W/out"; }
 nossh() { ! [ -s "$W/ssh.log" ]; }
 
-# The probe reads /etc/idea/app-data-roots; point the remote script at a sandbox copy via a sed'd copy.
-REMOTE_ORIG="$R"; cp "$R" "$W/remote.sh.orig"
-sed -i "s#/etc/idea/app-data-roots#\$FAKE_R/app-data-roots#" "$R"
-restore_remote() { cp "$W/remote.sh.orig" "$REMOTE_ORIG"; }
-trap 'restore_remote; rm -rf "$W"' EXIT
-add_roots() { for h in "$SRC" "$TGT"; do echo "@ROOT@/fixroot" > "$W/$h/app-data-roots"; done; }   # tokens: compared box-side as-is
+# The Pi-side paths (/etc/idea/app-data-roots, the Engine key, authorized_keys) are pointed at the sandbox by the
+# MV79_* env the fake ssh exports; the remote script itself is never patched.
+cp "$R" "$W/remote.sh.orig"
+restore_remote() { :; }
+add_roots() { :; }   # kept for the older call sites: app-data-roots now comes from reset_hosts + --setup-window
+FAKE_HEAD="$(cd "$W" && git init -q h && GIT_AUTHOR_DATE=@1763000000 GIT_COMMITTER_DATE=@1763000000 git -C h -c user.email=t@t -c user.name=t commit -q --allow-empty -m x && git -C h rev-parse HEAD)"
+export ENGINE_SHA="$FAKE_HEAD" MV_MIN_RELEASE_SHA="$FAKE_HEAD"
 
 echo "== syntax / lint"
 check "bash -n move-79.sh" bash -n "$S"
@@ -220,10 +252,14 @@ reset_state; : > "$W/ssh.log"; BOT_NAME="" run --preflight;     check "refuse wi
 
 echo "== preflight"
 reset_state; reset_hosts; add_roots
-export MOVE_WORK="$W/work-pf"; run --preflight
-check "preflight ALL PASS on a ready fake pool" bash -c "[ $(rc) = 0 ] && grep -q 'ALL PASS' '$W/out'"
+export MOVE_WORK="$W/work-pf"; F0="$(fstate "$SRC")$(fstate "$TGT")"; run --preflight
+check "preflight before the window: NOT READY only on TODOs (slot line, peerAccess)" bash -c "[ $(rc) = 1 ] && grep -q 'PREFLIGHT TODO: idea03 .*no scratch slot line yet' '$W/out' && grep -q 'PREFLIGHT TODO: idea04 config.yaml peerAccess' '$W/out' && ! grep -q 'PREFLIGHT FAIL' '$W/out'"
+check "  peer keys check passes (read-only)" has "peer keys idea03<->idea04 in place"
+check "  no sudo / no mutation during preflight" bash -c "! grep -vqE 'losetup --version|sudo true$' '$W/sudo.log'"
+check "  preflight left app-data-roots, config.yaml, fixture root as they were" test "$(fstate "$SRC")$(fstate "$TGT")" = "$F0"
+run --setup-window --ref test; run --preflight
+check "preflight ALL PASS on a ready fake pool (after --setup-window)" bash -c "[ $(rc) = 0 ] && grep -q 'ALL PASS' '$W/out'"
 check "  kid-kolibri-demo seen running on idea03" has "kid-kolibri-demo running"
-check "  no sudo / no mutation during preflight" bash -c "! grep -vq 'losetup --version' '$W/sudo.log'"
 check "  no loop images created" bash -c "! ls '$W/$SRC/scratch/img' 2>/dev/null | grep -q ."
 jq '.[0].pm2_env.env={}' "$W/$TGT/pm2.json" > "$W/t" && mv "$W/t" "$W/$TGT/pm2.json"; run --preflight
 check "NOT READY when the target Engine is not in fixture mode" bash -c "[ $(rc) = 1 ] && grep -q 'idea04 Engine not in fixture mode' '$W/out'"
@@ -240,8 +276,100 @@ check "NOT READY when the scratch image is missing on the target" bash -c "[ $(r
 reset_hosts; add_roots; run --preflight --engine-sha deadbee
 check "NOT READY when Engine HEAD differs from --engine-sha" bash -c "[ $(rc) = 1 ] && grep -q 'expected deadbee' '$W/out'"
 
-echo "== full run: create -> move -> move-back -> teardown"
+echo "== window prerequisites: fail cases (setup refuses, nothing changed)"
+pf_setup() {  # pf_setup <label> <grep>: preflight shows FAIL <grep>, setup refuses, files unchanged, no window state
+  local F; F="$(fstate "$SRC" 2>/dev/null)$(fstate "$TGT" 2>/dev/null)"; export MOVE_WORK="$W/work-$RANDOM"
+  run --preflight; check "$1: preflight FAIL" pf_has "$2"
+  run --setup-window --ref test; check "  setup refused" bash -c "[ $(rc) = 3 ] && grep -q 'window setup blocked' '$W/out'"
+  check "  nothing changed, no window state" unchanged "$F"; }
+pf_has() { [ "$(rc)" = 1 ] && grep -q "PREFLIGHT FAIL: .*$1" "$W/out"; }
+unchanged() { [ "$(fstate "$SRC" 2>/dev/null)$(fstate "$TGT" 2>/dev/null)" = "$1" ] && ! ls "$W"/1*/scratch/window.win >/dev/null 2>&1; }
+both_as() { [ "$(rc)" = 0 ] && [ "$(fstate "$SRC")" = "$1" ] && [ "$(fstate "$TGT")" = "$2" ]; }
+reset_state; reset_hosts; mv "$W/$TGT/app-data-roots" "$W/$TGT/adr.real"; ln -s adr.real "$W/$TGT/app-data-roots"
+pf_setup "app-data-roots is a symlink" "idea04 /etc/idea/app-data-roots is a symlink"
+reset_hosts; mv "$W/$SRC/app-data-roots" "$W/$SRC/adr.gone"
+pf_setup "app-data-roots missing" "idea03 /etc/idea/app-data-roots is missing"
+reset_hosts; chmod 664 "$W/$SRC/app-data-roots"
+pf_setup "app-data-roots mode 664" "idea03 /etc/idea/app-data-roots is '.* 664 regular file'"
+reset_hosts; mv "$W/$TGT/fixroot" "$W/$TGT/fixroot.real"; ln -s fixroot.real "$W/$TGT/fixroot"
+pf_setup "fixture root is a symlink" "idea04 .*fixroot.*symlink"
+reset_hosts; FAKE_NOSUDO=1 pf_setup "no sudo -n" "sudo -n not allowed"
+reset_hosts; jq '.[0].pm2_env.env.IDEA_CONFIG_FILE="/etc/idea/engine.yaml"' "$W/$TGT/pm2.json" > "$W/t" && mv "$W/t" "$W/$TGT/pm2.json"
+pf_setup "Engine reads another config file" "IDEA_CONFIG_FILE=/etc/idea/engine.yaml"
+reset_hosts; : > "$W/$SRC/store-authorized"
+pf_setup "peer keys: idea03's Engine has not accepted idea04" "peer keys between idea03 and idea04 are NOT in place: idea03's Engine has not accepted idea04's key"
+check "  message says the script never changes keys and to ask Steve" bash -c "grep -q 'never adds or changes SSH keys, so ask Steve' '$W/out'"
+reset_hosts; : > "$W/$TGT/authz"
+pf_setup "peer keys: idea04's authorized_keys lacks idea03's Engine key" "idea04's authorized keys lack idea03's Engine key"
+reset_hosts; rm "$W/$SRC/store-authorized" "$W/$TGT/store-authorized"; A0="$(cat "$W"/1*/authz "$W"/1*/engine.pub | sha256sum)"
+pf_setup "peer keys: no peerAccess in the store at all" "peer keys between idea03 and idea04 are NOT in place"
+check "  no SSH key file written by preflight/setup" test "$(cat "$W"/1*/authz "$W"/1*/engine.pub | sha256sum)" = "$A0"
+check "no SSH key writes anywhere in the scripts (code lines)" bash -c "! grep -hvE '^ *#' '$S' '$W/remote.sh.orig' | grep -nE 'ssh-keygen|ssh-copy-id|sync-peers|>>? *[^ ]*(authorized_keys|idea_authorized_keys|known_hosts|idea_engine_ed25519)'"
+reset_hosts; chmod 444 "$W/$TGT/authz"; mv "$W/$TGT/authz" "$W/$TGT/authz.x"; touch "$W/$TGT/authz"; chmod 000 "$W/$TGT/authz"
+export MOVE_WORK="$W/work-$RANDOM"; run --preflight
+if [ -r "$W/$TGT/authz" ]; then echo "SKIP unreadable authorized_keys (running as root)"; else
+check "unreadable authorized_keys: store check only (INFO, not FAIL)" bash -c "grep -q \"PREFLIGHT INFO: peer keys: idea04's authorized_keys file is not readable\" '$W/out' && grep -q 'peer keys idea03<->idea04 in place' '$W/out'"; fi
+chmod 644 "$W/$TGT/authz"
+
+echo "== window prerequisites: setup variants + exact restore"
+reset_state; reset_hosts; export MOVE_WORK="$W/work-var"
+printf 'settings:\n  isDev: false\n' > "$W/$SRC/engine/config.yaml"; chmod 600 "$W/$SRC/engine/config.yaml"          # no peerAccess line
+printf 'settings:\n  peerAccess: true\n' > "$W/$TGT/engine/config.yaml"; chmod 644 "$W/$TGT/engine/config.yaml"      # already on
+printf '/home/pi/idea/duration-disks/idea-test-7\n%s\n' "$W/$TGT/fixroot/idea-test-1" > "$W/$TGT/app-data-roots"  # already listed
+F0S="$(fstate "$SRC")"; F0T="$(fstate "$TGT")"; CT0="$(stat -c %i "$W/$SRC/engine/config.yaml")"
+run --setup-window --ref test
+check "setup inserts peerAccess: true under settings: when absent" bash -c "[ $(rc) = 0 ] && sed -n 2p '$W/$SRC/engine/config.yaml' | grep -q '^  peerAccess: true' && [ \$(stat -c %i '$W/$SRC/engine/config.yaml') = $CT0 ]"
+check "  config already peerAccess: true and slot already listed: idea04 untouched" test "$(fstate "$TGT")" = "$F0T"
+run --preflight; check "  preflight ALL PASS" bash -c "[ $(rc) = 0 ]"
+run --teardown --ref test
+check "  teardown restores the 0600 config byte-exact" both_as "$F0S" "$F0T"
+reset_state; reset_hosts; export MOVE_WORK="$W/work-half"
+printf 'nosettings: 1\n' > "$W/$TGT/engine/config.yaml"; F0T="$(fstate "$TGT")"; F0S="$(fstate "$SRC")"
+run --setup-window --ref test
+check "half-finished setup (no settings: block on idea04) stops" bash -c "[ $(rc) = 3 ] && grep -q 'could not set peerAccess' '$W/out'"
+run --setup-window --ref test
+check "  re-run refuses until teardown" bash -c "[ $(rc) = 3 ] && grep -q 'half-finished window setup' '$W/out'"
+run --teardown --ref test
+check "  teardown restores the half-finished setup exactly on both Pis" both_as "$F0S" "$F0T"
+check "  idea04 app-data-roots slot line removed again" bash -c "! grep -q idea-test '$W/$TGT/app-data-roots'"
+reset_state; reset_hosts; export MOVE_WORK="$W/work-mm"; run --setup-window --ref test
+echo "  peerAccess: true  # hand edit" >> "$W/$SRC/engine/config.yaml"; chmod 600 "$W/$SRC/engine/config.yaml"
+run --teardown --ref test
+check "teardown verifies after restore (config overwritten with the backup, mode fixed)" bash -c "[ $(rc) = 0 ] && grep -q 'idea03 CONFIG_STAT restored' '$W/out'"
+reset_hosts; export MOVE_WORK="$W/work-sym"; run --setup-window --ref test
+mv "$W/$TGT/app-data-roots" "$W/$TGT/adr.real"; ln -s adr.real "$W/$TGT/app-data-roots"; run --teardown --ref test
+check "teardown refuses to write through an app-data-roots that became a symlink" bash -c "[ $(rc) = 3 ] && grep -q 'became a symlink' '$W/out'"
+
+echo "== load-image (optional, guarded)"
+reset_state; reset_hosts; rm "$W/$TGT/image-present"; echo "sha256:$(printf 'b%.0s' {1..64})" > "$W/$TGT/image-id"; export MOVE_WORK="$W/work-img"; : > "$W/docker.log"
+run --load-image; check "load-image needs --ref" bash -c "[ $(rc) = 4 ]"
+reset_state "Kid #159 run 3"; : > "$W/ssh.log"; run --load-image --ref test; check "load-image refused when not claimed (no ssh)" bash -c "[ $(rc) = 4 ] && ! [ -s '$W/ssh.log' ]"
+reset_state; run --load-image --ref test
+check "load-image copies the source image id to the target" bash -c "[ $(rc) = 0 ] && grep -q 'IMAGE READY on idea04: sha256:aaaa' '$W/out' && [ \"\$(cat '$W/$TGT/image-id')\" = \"\$(cat '$W/$SRC/image-id')\" ]"
+img_only() { [ "$(cut -d' ' -f1-3 "$W/docker.log" | tr '\n' ';')" = "$SRC docker save;$TGT docker load;" ] && ! [ -s "$W/forbidden.log" ] && grep -q '^k1 2026-11-13T08:00:00Z$' "$W/$SRC/docker-started"; }
+check "  only docker save on idea03 and docker load on idea04; nothing restarted" img_only
+: > "$W/docker.log"; run --load-image --ref test
+check "  re-run is a no-op" bash -c "[ $(rc) = 0 ] && grep -q 'already has' '$W/out' && ! [ -s '$W/docker.log' ]"
+rm "$W/$SRC/image-present"; run --load-image --ref test
+check "load-image stops when the source lacks the image" bash -c "[ $(rc) = 3 ] && grep -q 'not found on idea03' '$W/out'"
+
+echo "== full run: setup-window -> create -> move -> move-back -> teardown -> release-check"
 reset_state; reset_hosts; add_roots; export MOVE_WORK="$W/work-run"
+chmod 775 "$W/$SRC/fixroot"; printf '/home/pi/idea/other-root' > "$W/$TGT/app-data-roots"   # group-writable root; no trailing newline
+F0S="$(fstate "$SRC")"; F0T="$(fstate "$TGT")"
+run --create-disks --size-gb 1 --data-mb 1 --ref "test"
+check "create-disks refused before --setup-window" bash -c "[ $(rc) = 3 ] && grep -q 'run --setup-window first' '$W/out'"
+run --setup-window --ref "test"
+check "setup-window ok" bash -c "[ $(rc) = 0 ] && grep -q 'WINDOW SET UP' '$W/out'"
+check "  app-data-roots: original line kept, slot line appended (idea03 slot 2)" bash -c "[ \"\$(cat '$W/$SRC/app-data-roots')\" = \"\$(printf '/home/pi/idea/other-root\n$W/$SRC/fixroot/idea-test-2')\" ]"
+check "  app-data-roots without trailing newline gets one before the slot line" bash -c "[ \"\$(sed -n 2p '$W/$TGT/app-data-roots')\" = '$W/$TGT/fixroot/idea-test-1' ]"
+check "  app-data-roots still a regular 0644 file" bash -c "[ \"\$(stat -c '%a %F' '$W/$SRC/app-data-roots')\" = '644 regular file' ]"
+check "  fixture root no longer group-writable" bash -c "[ \"\$(stat -c %a '$W/$SRC/fixroot')\" = 755 ]"
+check "  config.yaml peerAccess: true, mode kept" bash -c "grep -q '^  peerAccess: true' '$W/$SRC/engine/config.yaml' && [ \"\$(stat -c %a '$W/$SRC/engine/config.yaml')\" = 640 ] && [ \$(grep -c peerAccess '$W/$SRC/engine/config.yaml') = 1 ]"
+check "  backups in the quarantine-window dir" bash -c "ls '$W/$SRC'/scratch/quarantine-window-*/app-data-roots.orig '$W/$SRC'/scratch/quarantine-window-*/config.orig >/dev/null"
+check "  no SSH key file touched" bash -c "[ \"\$(cat '$W/$SRC/authz' '$W/$TGT/authz' '$W/$SRC/engine.pub' '$W/$TGT/engine.pub' | sha256sum)\" = \"$(cat "$W/$SRC/authz" "$W/$TGT/authz" "$W/$SRC/engine.pub" "$W/$TGT/engine.pub" | sha256sum)\" ]"
+run --setup-window --ref "test"
+check "setup-window re-run is a no-op" bash -c "[ $(rc) = 0 ] && grep -q 'already set up' '$W/out' && [ \$(grep -c idea-test '$W/$SRC/app-data-roots') = 1 ]"
 run --create-disks --size-gb 1 --data-mb 1 --ref "test"
 check "create-disks ok" bash -c "[ $(rc) = 0 ] && grep -q 'DISKS READY' '$W/out'"
 check "  idea03 skipped busy slot 1, used idea-test-2" grep -q 'mv289-src.*idea-test-2' "$W/out"
@@ -269,10 +397,35 @@ check "  images + state quarantined (mv, not rm)" bash -c "ls '$W/$SRC'/scratch/
 check "  sentinels removed" bash -c "! [ -e '$W/$SRC/watch/idea-test-2' ] && ! [ -e '$W/$TGT/watch/idea-test-1' ]"
 check "  Kid's demo untouched (ids + StartedAt same)" grep -q '^k1 2026-11-13T08:00:00Z$' "$W/$SRC/docker-started"
 check "  nothing forbidden called (losetup -D, docker stop/rm, other sudo)" bash -c "! [ -s '$W/forbidden.log' ]"
+check "  window restored: verify OK on both Pis" bash -c "grep -q 'idea03 winrestore: .*RESTORE_OK' '$W/out' && grep -q 'idea04 winrestore: .*RESTORE_OK' '$W/out'"
+check "  idea03 app-data-roots, config.yaml, fixture root owner/mode byte-exact as before" test "$(fstate "$SRC")" = "$F0S"
+check "  idea04 (no-trailing-newline file) byte-exact as before" test "$(fstate "$TGT")" = "$F0T"
+check "  slot dir made by the window removed; idea04's pre-existing empty slot kept" bash -c "! [ -e '$W/$SRC/fixroot/idea-test-2' ] && [ -d '$W/$TGT/fixroot/idea-test-1' ]"
+check "  idea03's pre-existing busy slot 1 left alone" test -f "$W/$SRC/fixroot/idea-test-1/other"
+check "  restore evidence written" bash -c "grep -q 'APPDATA_SHA restored' '$W/out' && grep -q 'CONFIG_STAT restored' '$W/out'"
+run --teardown --ref "test"
+check "teardown re-run is a no-op" bash -c "[ $(rc) = 0 ] && grep -q 'already restored' '$W/out'"
+
+echo "== release-check"
+run --release-check
+check "release-check FAILS while Engines are still in fixture mode / Disk B out" bash -c "[ $(rc) = 1 ] && grep -q 'still in fixture mode' '$W/out' && grep -q 'Disk B diskb202610301247 not docked' '$W/out'"
+for h in "$SRC" "$TGT"; do jq '.[0].pm2_env.env={}' "$W/$h/pm2.json" > "$W/t" && mv "$W/t" "$W/$h/pm2.json"
+  GIT_AUTHOR_DATE=@1763000100 GIT_COMMITTER_DATE=@1763000100 git -C "$W/$h/engine" -c user.email=t@t -c user.name=t commit -q --allow-empty -m main; done
+echo Running > "$W/$SRC/diskb-docked"; run --release-check
+check "release-check PASS: normal mode, >= min sha, Disk B + nextcloud-files-b-001 back, kid unchanged" bash -c "[ $(rc) = 0 ] && grep -q 'RELEASE CHECK: PASS' '$W/out'"
+check "  evidence file lists every check" bash -c "f=\$(ls -t '$MOVE_WORK'/evidence-*-release-check/release-check.txt | head -1); grep -q 'kid-kolibri-demo unchanged and running' \$f && grep -q 'nextcloud-files-b-001 Running on Disk B' \$f && grep -q 'contains' \$f && grep -q 'RELEASE CHECK: PASS' \$f"
+echo Stopped > "$W/$SRC/diskb-docked"; run --release-check
+check "release-check FAILS when nextcloud-files-b-001 is not Running" bash -c "[ $(rc) = 1 ] && grep -q 'nextcloud-files-b-001 not Running' '$W/out'"
+echo Running > "$W/$SRC/diskb-docked"; sed -i 's/^k1 .*/k1 2026-11-13T11:11:11Z/' "$W/$SRC/docker-started"; run --release-check
+check "release-check FAILS when kid-kolibri-demo restarted (StartedAt differs from the window baseline)" bash -c "[ $(rc) = 1 ] && grep -q 'kid-kolibri-demo now' '$W/out'"
+sed -i 's/^k1 .*/k1 2026-11-13T08:00:00Z/' "$W/$SRC/docker-started"; MV_MIN_RELEASE_SHA=1111111111111111111111111111111111111111 run --release-check
+check "release-check FAILS when an Engine is not on the min release sha" bash -c "[ $(rc) = 1 ] && grep -q 'is not on 1111111 or newer' '$W/out'"
+printf 'x\n' >> "$W/$TGT/app-data-roots"; run --release-check
+check "release-check FAILS when app-data-roots drifted from the original" bash -c "[ $(rc) = 1 ] && grep -q 'idea04 APPDATA_SHA is' '$W/out'"
 
 echo "== guard trips if a hands-off container changes mid-run"
 reset_state; reset_hosts; add_roots; export MOVE_WORK="$W/work-tamper"
-run --create-disks --size-gb 1 --data-mb 1 --ref test
+run --setup-window --ref test; run --create-disks --size-gb 1 --data-mb 1 --ref test
 touch "$W/tamper"; run --move --ref test; rm -f "$W/tamper"
 check "move stops when kid-kolibri-demo's StartedAt changes" bash -c "[ $(rc) = 3 ] && grep -q 'hands-off containers on idea03 changed' '$W/out'"
 

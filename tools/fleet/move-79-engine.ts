@@ -4,6 +4,7 @@
 //                         disks and the instances stored on them (read-only)
 //   find <name>           one JSON line per instance with that name anywhere in the store (read-only)
 //   op <sourceInstanceId> the newest moveApp Operation whose subject is that id (read-only)
+//   peers                 one JSON line: every Engine's id, hostname and peerAccess {sshKey, hostKey, authorized} (read-only)
 //   cmd <command...>      push ONE Engine command to THIS Engine and wait for its trace (MOVE_TIMEOUT s, default 5400)
 import { Repo, DocumentId } from '@automerge/automerge-repo'
 import { WebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
@@ -30,6 +31,9 @@ if (mode === 'state') {
     moveAppCrossEngine: caps.includes('moveAppCrossEngine') && eng.capabilitiesBootedAt === eng.lastBooted,
     disks: disks.map(d => ({ id: d.id, name: d.name ?? null, device: d.device ?? null })),
     instances: Object.values<any>(s.instanceDB ?? {}).filter(i => ids.has(i.storedOn)).map(inst) })
+} else if (mode === 'peers') {
+  out({ localEngineId: eng.id, engines: Object.values<any>(s.engineDB ?? {}).map((e: any) => ({ id: e.id, hostname: e.hostname ?? null,
+    peerAccess: e.peerAccess ? { sshKey: e.peerAccess.sshKey ?? null, hostKey: e.peerAccess.hostKey ?? null, authorized: [...(e.peerAccess.authorized ?? [])] } : null })) })
 } else if (mode === 'find' && CMD) {
   for (const i of Object.values<any>(s.instanceDB ?? {})) if (i.name === CMD) {
     const d = s.diskDB?.[i.storedOn]; out({ ...inst(i), dockedTo: d?.dockedTo ?? null })
@@ -47,5 +51,5 @@ if (mode === 'state') {
     if (t) { out({ trace: t.command, status: t.status, errorCode: t.errorCode ?? null, errorMessage: t.errorMessage ?? null, result: t.result ?? null }); clearTimeout(to); process.exit(t.status === 'error' ? 4 : 0) }
   }
   out({ error: 'no trace within MOVE_TIMEOUT' }); process.exit(4)
-} else { out({ error: 'usage: state | find <name> | op <id> | cmd <command...>' }); process.exit(2) }
+} else { out({ error: 'usage: state | peers | find <name> | op <id> | cmd <command...>' }); process.exit(2) }
 clearTimeout(to); process.exit(0)

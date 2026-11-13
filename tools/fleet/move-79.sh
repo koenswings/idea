@@ -3,15 +3,19 @@
 # loop-file scratch App Disks (no physical disks). Default for the #289 proof: source idea03, target idea04.
 #
 #   BOT_NAME=Atlas tools/fleet/move-79.sh --preflight                              # read-only
-#   BOT_NAME=Atlas tools/fleet/move-79.sh --create-disks --ref "<who said go>"     # make + dock mv289-src/-dst
+#   BOT_NAME=Atlas tools/fleet/move-79.sh --setup-window --ref "<who said go>"     # back up + set the 3 window prerequisites
+#   BOT_NAME=Atlas tools/fleet/move-79.sh --load-image   --ref "<ref>"             # optional: scratch image source -> target
+#   BOT_NAME=Atlas tools/fleet/move-79.sh --create-disks --ref "<ref>"             # make + dock mv289-src/-dst
 #   BOT_NAME=Atlas tools/fleet/move-79.sh --move       --ref "<ref>"               # source -> target
 #   BOT_NAME=Atlas tools/fleet/move-79.sh --move-back  --ref "<ref>"               # target -> source
-#   BOT_NAME=Atlas tools/fleet/move-79.sh --teardown   --ref "<ref>"               # undock, detach, quarantine
+#   BOT_NAME=Atlas tools/fleet/move-79.sh --teardown   --ref "<ref>"               # disks out + window restored exactly
+#   BOT_NAME=Atlas tools/fleet/move-79.sh --release-check                          # read-only, after Axle's normal-mode restart
 # Options (env in brackets):
 #   --source <pi> [MOVE_SOURCE, default idea03]   --target <pi> [MOVE_TARGET, default idea04]
 #   --src-disk <id> [default mv289-src]  --dst-disk <id> [default mv289-dst]  (must start with --prefix)
 #   --instance <name> [default mv289-web]  --prefix <p> [default mv289-]  --size-gb <n> [default 4]
-#   --src-slot/--dst-slot idea-test-N [default: first free 1..8]  --engine-sha <sha> [ENGINE_SHA; expected HEAD]
+#   --src-slot/--dst-slot idea-test-N [default: first free 1..8]
+#   --engine-sha <sha> [ENGINE_SHA; expected HEAD in the window, default the #289 tip 10ee458]
 #   --image <ref> [MV_IMAGE; scratch App image, must already be on both Pis]  --data-mb <n> [default 16]
 # Guards (every mode): both Pis claimed by $BOT_NAME in fleet-state; neither is wizardly-hugle/idea, idea01,
 # idea02, a golden/production/kit Pi; Engine store is 2VroE; scratch never on Disk B / WD / a boot disk; only
@@ -19,7 +23,7 @@
 # kid-kolibri-demo and the hands-off containers must be identical (id, state, StartedAt) before and after.
 # Loop disks dock only on an Engine in fixture (testMode) mode: pm2 env IDEA_TEST_MODE=true,
 # IDEA_DISKS_ROOT=/home/pi/idea/duration-disks, IDEA_WATCH_DIR=/home/pi/idea/duration-watch. This script never
-# changes the Engine or its env; --preflight reports it. Docs: tools/fleet/move-79.md.
+# changes the Engine's mode or pm2 env; --preflight reports it. It never adds or changes an SSH key. Docs: move-79.md.
 # pf never fails, so `cond && pf PASS .. || pf FAIL ..` is a safe if/else here.
 # shellcheck disable=SC2015
 set -euo pipefail
@@ -42,12 +46,16 @@ TEMP_PAUSE=75; TEMP_RESUME=65; TEMP_POLL="${TEMP_POLL:-30}"; DOCK_WAIT="${DOCK_W
 
 MODE=""; REF=""; SRC_PI="${MOVE_SOURCE:-idea03}"; TGT_PI="${MOVE_TARGET:-idea04}"
 PREFIX=mv289-; SRC_DISK=""; DST_DISK=""; INSTANCE=""; SIZE_GB=4; SRC_SLOT=""; DST_SLOT=""
-ENGINE_SHA="${ENGINE_SHA:-}"; DATA_MB=16
+ENGINE_SHA="${ENGINE_SHA:-10ee4583bdf492756867a45560411ae4d7dda410}"   # agent-engine-dev#289 tip (code 324be8f = main 9569e72 merged in)
+MIN_RELEASE_SHA="${MV_MIN_RELEASE_SHA:-9569e721f3e695945e9371f048e3f4b4f1f676df}"           # release: both Engines on 9569e72 or newer, normal mode
+DISKB_PI="${DISKB_PI:-idea03}"; DISKB_ID=diskb202610301247; DISKB_INSTANCE=nextcloud-files-b-001
+APPDATA_PATH=/etc/idea/app-data-roots; DATA_MB=16
 MV_IMAGE="${MV_IMAGE:-nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2}"
-usage() { sed -n '2,23p' "$0"; }
+usage() { sed -n '2,27p' "$0"; }
 while [ $# -gt 0 ]; do case "$1" in
   --preflight) MODE=preflight ;; --create-disks) MODE=create ;; --move) MODE=move ;;
-  --move-back) MODE=move-back ;; --teardown) MODE=teardown ;;
+  --move-back) MODE=move-back ;; --teardown) MODE=teardown ;; --setup-window) MODE=setup ;;
+  --load-image) MODE=load-image ;; --release-check) MODE=release-check ;;
   --ref) REF="${2:?}"; shift ;; --source) SRC_PI="${2:?}"; shift ;; --target) TGT_PI="${2:?}"; shift ;;
   --src-disk) SRC_DISK="${2:?}"; shift ;; --dst-disk) DST_DISK="${2:?}"; shift ;;
   --instance) INSTANCE="${2:?}"; shift ;; --prefix) PREFIX="${2:?}"; shift ;; --size-gb) SIZE_GB="${2:?}"; shift ;;
@@ -133,21 +141,27 @@ for h in "$SRC_HOST" "$TGT_HOST"; do for n in $DENY_HOSTS; do [ "$h" = "$n" ] &&
 exec 9>>"$WORK/lock"; flock -n 9 || { echo "BUSY: another move-79.sh holds $WORK/lock" >&2; exit 75; }
 log "move-79.sh $MODE: source $SRC_PI ($SRC_HOST) disk $SRC_DISK -> target $TGT_PI ($TGT_HOST) disk $DST_DISK, instance $INSTANCE (evidence $EVID)"
 guard_claims
-if [ "$MODE" != preflight ]; then [ -n "$REF" ] || refuse "--$MODE needs --ref \"<who authorised this run, time + link>\""; log "ref: $REF"; fi
+if [ "$MODE" != preflight ] && [ "$MODE" != release-check ]; then [ -n "$REF" ] || refuse "--$MODE needs --ref \"<who authorised this run, time + link>\""; log "ref: $REF"; fi
 
 # ---------- probe + preflight (read-only) ----------
-PF_OK=1
+PF_OK=1; SETUP_OK=1
 pf() { log "PREFLIGHT $1: $2"; [ "$1" = PASS ] || [ "$1" = INFO ] || PF_OK=0; }
+pfb() { pf "$@"; [ "$1" = PASS ] || [ "$1" = INFO ] || SETUP_OK=0; }   # also blocks --setup-window
+declare -A P_ENGINE P_PUB P_IMAGEID
+win_set() { [ -s "$WORK/window-$1.env" ]; }          # setup started (originals recorded): teardown restores
+win_ok() { [ -e "$WORK/window-$1.ok" ]; }            # setup finished (SETUP_OK) and not yet restored
+slot_of() { cat "$WORK/slot-$1" 2>/dev/null || true; }
 probe_pi() {  # probe_pi <pi> <host> <role>
-  local pi="$1" host="$2" role="$3" r
-  r="$(remote "$host" probe "$SCRATCH" "$MV_IMAGE" "$ENGINE_DIR" 2>>"$LOG")" || { pf FAIL "$pi unreachable / probe failed"; return; }
+  local pi="$1" host="$2" role="$3" r img="$MV_IMAGE"
+  [ "$role" = target ] && [ -n "${P_IMAGEID[$SRC_PI]:-}" ] && img="${P_IMAGEID[$SRC_PI]}"
+  r="$(remote "$host" probe "$SCRATCH" "$img" "$ENGINE_DIR" "$(slot_of "$pi")" "$FIXTURE_ROOT" "" "$MIN_RELEASE_SHA" 2>>"$LOG")" || { pfb FAIL "$pi unreachable / probe failed"; return; }
   printf '%s\n' "$r" > "$EVID/probe-$pi.txt"
   local t; t="$(kv "$r" TEMP)"
   if [ -z "$t" ]; then pf FAIL "$pi temperature unreadable"
-  elif awk -v t="$t" -v p=$TEMP_PAUSE 'BEGIN{exit !(t>p)}'; then pf FAIL "$pi temp ${t} C > ${TEMP_PAUSE} C (pause; resume below ${TEMP_RESUME} C)"
+  elif awk -v t="$t" -v p=$TEMP_PAUSE 'BEGIN{exit !(t>p)}'; then pfb FAIL "$pi temp ${t} C > ${TEMP_PAUSE} C (pause; resume below ${TEMP_RESUME} C)"
   else pf PASS "$pi temp ${t} C"; fi
   local su; su="$(kv "$r" STORE_URL)"
-  [[ "$su" == "$EXPECT_STORE"* ]] && pf PASS "$pi store ${su:0:20}… (2VroE)" || pf FAIL "$pi store '${su:-none}' is not 2VroE"
+  [[ "$su" == "$EXPECT_STORE"* ]] && pf PASS "$pi store ${su:0:20}… (2VroE)" || pfb FAIL "$pi store '${su:-none}' is not 2VroE"
   local head; head="$(kv "$r" ENGINE_HEAD)"
   if [ -n "$ENGINE_SHA" ]; then [[ "$head" == "$ENGINE_SHA"* ]] && pf PASS "$pi Engine HEAD ${head:0:7} = expected" || pf FAIL "$pi Engine HEAD ${head:0:7}, expected ${ENGINE_SHA:0:7}"
   else pf INFO "$pi Engine HEAD ${head:-?} (no --engine-sha given)"; fi
@@ -155,9 +169,11 @@ probe_pi() {  # probe_pi <pi> <host> <role>
   local tm dr wd; tm="$(kv "$r" IDEA_TEST_MODE)"; dr="$(kv "$r" IDEA_DISKS_ROOT)"; wd="$(kv "$r" IDEA_WATCH_DIR)"
   if [ "$tm" = true ] && [ "$dr" = "$FIXTURE_ROOT" ] && [ "$wd" = "$FIXTURE_WATCH" ]; then pf PASS "$pi Engine in fixture mode ($dr, $wd)"
   else pf FAIL "$pi Engine not in fixture mode (IDEA_TEST_MODE='${tm}' IDEA_DISKS_ROOT='${dr}' IDEA_WATCH_DIR='${wd}'): a live Engine ignores loop/idea-test-N disks. Switching modes is Axle's call (see move-79.md), not this script's"; fi
-  grep -qw -- "$FIXTURE_ROOT" <<<"$(kv "$r" APP_DATA_ROOTS)" && pf PASS "$pi /etc/idea/app-data-roots lists $FIXTURE_ROOT" || pf FAIL "$pi /etc/idea/app-data-roots lacks $FIXTURE_ROOT (helper would refuse the slot)"
+  prereqs "$pi" "$r"
   [ "$(kv "$r" SUDO_LOSETUP)" = yes ] && pf PASS "$pi sudo -n losetup available" || pf FAIL "$pi sudo -n /usr/sbin/losetup not allowed"
-  [ "$(kv "$r" IMAGE_PRESENT)" = yes ] && pf PASS "$pi scratch App image present" || pf FAIL "$pi lacks image $MV_IMAGE (pull_policy never)"
+  if [ "$(kv "$r" IMAGE_PRESENT)" = yes ]; then pf PASS "$pi scratch App image present ($img)"
+    [ "$role" = source ] && P_IMAGEID[$pi]="$(kv "$r" IMAGE_ID)"
+  else pf FAIL "$pi lacks image $img (pull_policy never)$([ "$role" = target ] && echo "; --load-image copies it from $SRC_PI")"; fi
   local ss rs p; ss="$(kv "$r" SCRATCH_SERIAL)"; rs="$(kv "$r" ROOT_SERIAL)"
   for p in ${PROTECTED_SERIALS//,/ }; do
     if [ "$ss" = "$p" ] && [ "$ss" != "$rs" ]; then pf FAIL "$pi scratch $SCRATCH sits on protected disk $p"; fi; done
@@ -167,17 +183,53 @@ probe_pi() {  # probe_pi <pi> <host> <role>
   local loops; loops="$(section "$r" LOOPS)"
   pf INFO "$pi loop devices now: $(tr '\n' ';' <<<"$loops")"
   local kid; kid="$(section "$r" GUARD | grep "|$KID_PROJECT" || true)"
-  if [ "$pi" = "$KID_PI" ]; then grep -q '|running|' <<<"$kid" && pf PASS "$pi $KID_PROJECT running: $kid (never touched)" || pf FAIL "$pi $KID_PROJECT not running: '${kid:-absent}'"
+  if [ "$pi" = "$KID_PI" ]; then grep -q '|running|' <<<"$kid" && pf PASS "$pi $KID_PROJECT running: $kid (never touched)" || pfb FAIL "$pi $KID_PROJECT not running: '${kid:-absent}'"
   elif [ -n "$kid" ]; then pf INFO "$pi has $KID_PROJECT: $kid (never touched)"; fi
   section "$r" GUARD > "$EVID/guard-$pi.baseline.txt"
   section "$r" SCRATCH_STATE > "$EVID/scratch-state-$pi.txt"
   local cons; cons="$(kv "$r" CONSOLE_HTTP)"; pf INFO "$pi Console HTTP ${cons:-none}"
   if upload_helper "$host" 2>>"$LOG"; then
     local st; st="$(helper "$host" state 2>>"$LOG" | tail -1)"; echo "$st" > "$EVID/state-$pi.json"
+    P_ENGINE[$pi]="$(jq -r '.engineId // empty' <<<"$st" 2>/dev/null)"; P_PUB[$pi]="$(kv "$r" ENGINE_PUB)"
     pf INFO "$pi moveAppCrossEngine: $(jq -r '.moveAppCrossEngine // "?"' <<<"$st" 2>/dev/null) (must be true before --move)"
     pf INFO "$pi docked disks: $(jq -c '[.disks[]|{id,device}]' <<<"$st" 2>/dev/null)"
-  else pf FAIL "$pi store helper upload failed"; fi
-  : "$role"; }
+  else pfb FAIL "$pi store helper upload failed"; fi
+  section "$r" AUTHZ > "$EVID/authz-$pi.txt"; kv "$r" AUTHZ_READABLE > "$EVID/authz-$pi.readable"; }
+prereqs() {  # the window prerequisites: app-data-roots + fixture root, peerAccess, sudo for them. TODO = --setup-window does it
+  local pi="$1" r="$2" ws=0 slot miss x
+  win_ok "$pi" && ws=1
+  todo() { if [ $ws = 1 ]; then pf FAIL "$1"; else pf TODO "$1 (--setup-window does this)"; fi; }
+  x="$(kv "$r" APPDATA_PROBLEM)"
+  if [ -z "$x" ]; then pf PASS "$pi $APPDATA_PATH is a regular root:root 0644 file ($(kv "$r" APPDATA_STAT))"
+  else pfb FAIL "$pi $APPDATA_PATH $x: --setup-window refuses until it is a regular root:root 0644 file"; fi
+  slot="$(slot_of "$pi")"; miss="$(kv "$r" APPDATA_MISSING_SLOTS)"
+  if [ -z "$slot" ]; then todo "$pi $APPDATA_PATH has no scratch slot line yet"
+  elif [ -z "$miss" ]; then pf PASS "$pi $APPDATA_PATH lists $FIXTURE_ROOT/$slot"; else todo "$pi $APPDATA_PATH lacks $miss"; fi
+  x="$(kv "$r" SLOT_PATH_PROBLEMS)"; [ -z "$x" ] || pfb FAIL "$pi slot path problem: $x"
+  x="$(kv "$r" FIXROOT_PATH_PROBLEM)"; [ -z "$x" ] || pfb FAIL "$pi $FIXTURE_ROOT path: $x"
+  x="$(kv "$r" FIXROOT_PROBLEM)"
+  if [ -z "$x" ]; then pf PASS "$pi $FIXTURE_ROOT root-owned, not group/other writable ($(kv "$r" FIXROOT_STAT))"
+  elif [ "$x" = missing ] || [ "$x" = "is a symlink" ]; then pfb FAIL "$pi $FIXTURE_ROOT $x"; else todo "$pi $FIXTURE_ROOT $x"; fi
+  x="$(kv "$r" IDEA_CONFIG_FILE)"
+  case "$x" in ""|config.yaml|./config.yaml|"$ENGINE_DIR/config.yaml") ;; *) pfb FAIL "$pi Engine uses IDEA_CONFIG_FILE=$x; this script only handles $ENGINE_DIR/config.yaml" ;; esac
+  x="$(kv "$r" CONFIG_PEERACCESS)"
+  if [ "$x" = true ]; then pf PASS "$pi config.yaml peerAccess: true"; else todo "$pi config.yaml peerAccess is '$x' (testMode turns peer access off unless it is true)"; fi
+  if [ "$(kv "$r" SUDO_ALL)" = yes ]; then pf PASS "$pi sudo -n available for the window setup/restore"
+  else pfb FAIL "$pi sudo -n not allowed (setup/restore need chown/chmod/tee/cp/install/rmdir)"; fi
+  if [ "$(kv "$r" WINDOW_ACTIVE)" = yes ] && ! win_set "$pi"; then pfb FAIL "$pi has an active window state from another run ($SCRATCH/window.win)"; fi
+  return 0; }
+check_peers() {  # READ ONLY: both Engines accept each other's Engine key (store) and the key files agree. Never writes a key.
+  local a="$SRC_PI" b="$TGT_PI" ia="${P_ENGINE[$SRC_PI]:-}" ib="${P_ENGINE[$TGT_PI]:-}" pj why="" p q x y yid
+  if [ -z "$ia" ] || [ -z "$ib" ]; then pfb FAIL "peer keys $a<->$b: Engine ids unknown (store helper failed)"; return; fi
+  pj="$(helper "$SRC_HOST" peers 2>>"$LOG" | tail -1)"; echo "$pj" > "$EVID/peers.json"
+  jq -e --arg x "$ia" --arg y "$ib" '[.engines[]|select(.id==$x)|.peerAccess.authorized // []|.[]|select(startswith($y+" "))]|length>0' <<<"$pj" >/dev/null 2>&1 || why="$why $a's Engine has not accepted $b's key;"
+  jq -e --arg x "$ib" --arg y "$ia" '[.engines[]|select(.id==$x)|.peerAccess.authorized // []|.[]|select(startswith($y+" "))]|length>0' <<<"$pj" >/dev/null 2>&1 || why="$why $b's Engine has not accepted $a's key;"
+  for p in "$a|$b|$ib" "$b|$a|$ia"; do IFS='|' read -r x y yid <<<"$p"
+    if [ "$(cat "$EVID/authz-$x.readable" 2>/dev/null)" = yes ]; then
+      q="${P_PUB[$y]:-}"; { [ -n "$q" ] && grep -qxF "$yid $q" "$EVID/authz-$x.txt"; } || why="$why $x's authorized keys lack $y's Engine key;"
+    else pf INFO "peer keys: $x's authorized_keys file is not readable as pi; store check only"; fi; done
+  if [ -z "$why" ]; then pf PASS "peer keys $a<->$b in place (both Engines accept each other's key)"
+  else pfb FAIL "peer keys between $a and $b are NOT in place:$why this script never adds or changes SSH keys, so ask Steve to get them set up"; fi; }
 guard_now() {  # hands-off containers (kid-kolibri-demo, idea166-*, nextcloud-files-b-001, idea-hub-sidecar) unchanged
   local pi="$1" host="$2" now; now="$(remote "$host" guardsnap 2>>"$LOG" || true)"
   printf '%s\n' "$now" > "$EVID/guard-$pi-$(date +%H%M%S).txt"
@@ -199,21 +251,64 @@ wait_undocked() { local host="$1" d="$2"
   for _ in $(seq 1 $(( DOCK_WAIT / 5 ))); do jq -e --arg d "$d" '.disks|any(.id==$d)|not' <<<"$(disk_state "$host")" >/dev/null 2>&1 && return 0; sleep 5; done; return 1; }
 
 run_preflight() {
-  probe_pi "$SRC_PI" "$SRC_HOST" source; probe_pi "$TGT_PI" "$TGT_HOST" target
+  probe_pi "$SRC_PI" "$SRC_HOST" source; probe_pi "$TGT_PI" "$TGT_HOST" target; check_peers
   log "PREFLIGHT RESULT: $([ $PF_OK = 1 ] && echo ALL PASS || echo NOT READY)"; }
+
+orig_matches() {  # orig_matches <pi> <probe-output>: app-data-roots, fixture root, config.yaml back to the setup-time originals
+  local pi="$1" r="$2" k bad=0 want got
+  for k in APPDATA_SHA APPDATA_STAT FIXROOT_STAT CONFIG_SHA CONFIG_STAT; do
+    want="$(sed -n "s/^$k=//p" "$WORK/window-$pi.env" | head -1)"; got="$(kv "$r" "$k")"
+    if [ "$want" = "$got" ]; then pf PASS "$pi $k restored ($got)"; else pf FAIL "$pi $k is '$got', original '$want'"; bad=1; fi; done
+  if [ "$(kv "$r" WINDOW_ACTIVE)" = no ]; then pf PASS "$pi no active window state"; else pf FAIL "$pi window state still active"; bad=1; fi
+  return $bad; }
+reprobe() { remote "$2" probe "$SCRATCH" "$MV_IMAGE" "$ENGINE_DIR" "" "$FIXTURE_ROOT" "" "$MIN_RELEASE_SHA" 2>>"$LOG" | tee "$EVID/probe-$1-after.txt"; }
 
 # ---------- modes ----------
 case "$MODE" in
 preflight) run_preflight; exit $(( 1 - PF_OK )) ;;
+setup)
+  run_preflight; [ $SETUP_OK = 1 ] || die "window setup blocked by the preflight FAILs above"
+  STAMP="$(date +%Y%m%d-%H%M%S)"
+  for pair in "$SRC_PI|$SRC_HOST|$SRC_SLOT" "$TGT_PI|$TGT_HOST|$DST_SLOT"; do
+    IFS='|' read -r pi host slot <<<"$pair"
+    if win_ok "$pi"; then log "$pi window already set up (slot $(slot_of "$pi"))"; continue; fi
+    [ -e "$WORK/window-$pi.restored" ] && die "$pi: this run's window was already restored; start a new run (new --prefix or MOVE_WORK)"
+    win_set "$pi" && die "$pi: a half-finished window setup is recorded; run --teardown (restores it), then retry"
+    guard_now "$pi" "$host"
+    [ -n "$slot" ] || slot="$(slot_of "$pi")"; [ -n "$slot" ] || slot="$(first_free_slot "$host")" || die "no free idea-test-N slot under $FIXTURE_ROOT on $pi"
+    [[ "$slot" =~ ^idea-test-[0-9]+$ ]] || die "bad slot '$slot'"
+    # originals first (box side), so --teardown can verify even a half-finished setup
+    grep -E '^(APPDATA_SHA|APPDATA_STAT|FIXROOT_STAT|CONFIG_SHA|CONFIG_STAT|CONFIG_PATH)=' "$EVID/probe-$pi.txt" > "$WORK/window-$pi.env"
+    echo "$slot" > "$WORK/slot-$pi"
+    if [ "$pi" = "$KID_PI" ] && [ ! -s "$WORK/kid-baseline.txt" ]; then section "$(cat "$EVID/probe-$pi.txt")" GUARD | grep "|$KID_PROJECT" > "$WORK/kid-baseline.txt" || true; fi
+    out="$(remote "$host" winsetup "$SCRATCH" "$FIXTURE_ROOT" "$slot" "$ENGINE_DIR/config.yaml" "$STAMP" 2>&1)" || true
+    printf '%s\n' "$out" > "$EVID/winsetup-$pi.txt"; log "$pi winsetup: $(tr '\n' ';' <<<"$out")"
+    grep -q '^SETUP_OK' <<<"$out" || die "window setup on $pi failed (what was changed is recorded on the Pi; --teardown restores it)"
+    date '+%F %T %Z' > "$WORK/window-$pi.ok"
+    guard_now "$pi" "$host"; done
+  log "WINDOW SET UP (backups in $SCRATCH/quarantine-window-$STAMP/ on each Pi). Next: Axle deploys ${ENGINE_SHA:0:7} and restarts both Engines in fixture mode; peerAccess: true takes effect at that restart" ;;
+load-image)
+  sid="$(rsh "$SRC_HOST" "docker image inspect -f '{{.Id}}' $(printf '%q' "$MV_IMAGE")" 2>>"$LOG" || true)"
+  [[ "$sid" =~ ^sha256:[0-9a-f]{64}$ ]] || die "image $MV_IMAGE not found on $SRC_PI (got '${sid}')"
+  guard_now "$SRC_PI" "$SRC_HOST"; guard_now "$TGT_PI" "$TGT_HOST"
+  if rsh "$TGT_HOST" "docker image inspect $sid >/dev/null 2>&1"; then log "$TGT_PI already has $sid: nothing loaded"
+  else
+    log "copying image $sid ($MV_IMAGE) $SRC_PI -> $TGT_PI: docker save | docker load (image only; no tag change, nothing restarted)"
+    rsh "$SRC_HOST" "docker save $sid" | rsh "$TGT_HOST" "docker load" >>"$LOG" 2>&1 || die "docker save | load failed"
+    rsh "$TGT_HOST" "docker image inspect $sid >/dev/null 2>&1" || die "$TGT_PI still lacks $sid after load"
+    echo "$sid $(date '+%F %T %Z')" > "$WORK/image-loaded-$TGT_PI"; fi
+  guard_now "$SRC_PI" "$SRC_HOST"; guard_now "$TGT_PI" "$TGT_HOST"
+  log "IMAGE READY on $TGT_PI: $sid" ;;
 create)
+  win_ok "$SRC_PI" && win_ok "$TGT_PI" || die "run --setup-window first"
   run_preflight; [ $PF_OK = 1 ] || die "preflight not clean"
-  for pair in "$SRC_PI|$SRC_HOST|$SRC_DISK|$SRC_SLOT|src" "$TGT_PI|$TGT_HOST|$DST_DISK|$DST_SLOT|dst"; do
+  IMG_ID="${P_IMAGEID[$SRC_PI]:-}"; [[ "$IMG_ID" =~ ^sha256:[0-9a-f]{64}$ ]] || die "no image id for $MV_IMAGE on $SRC_PI"
+  for pair in "$SRC_PI|$SRC_HOST|$SRC_DISK|$(slot_of "$SRC_PI")|src" "$TGT_PI|$TGT_HOST|$DST_DISK|$(slot_of "$TGT_PI")|dst"; do
     IFS='|' read -r pi host disk slot role <<<"$pair"
     [ -e "$WORK/created-$disk" ] && { log "$disk already created ($(cat "$WORK/created-$disk"))"; continue; }
     temp_gate "$host"; guard_now "$pi" "$host"
-    [ -n "$slot" ] || slot="$(first_free_slot "$host")" || die "no free idea-test-N slot under $FIXTURE_ROOT on $pi"
-    [[ "$slot" =~ ^idea-test-[0-9]+$ ]] || die "bad slot '$slot'"
-    if [ "$role" = src ]; then out="$(remote "$host" create "$SCRATCH" "$FIXTURE_ROOT" "$FIXTURE_WATCH" "$slot" "$disk" "$SIZE_GB" "$PREFIX" "$PROTECTED_SERIALS" "$INSTANCE" "$MV_IMAGE" "$DATA_MB" 2>&1)" || true
+    [[ "$slot" =~ ^idea-test-[0-9]+$ ]] || die "bad slot '$slot' recorded by --setup-window"
+    if [ "$role" = src ]; then out="$(remote "$host" create "$SCRATCH" "$FIXTURE_ROOT" "$FIXTURE_WATCH" "$slot" "$disk" "$SIZE_GB" "$PREFIX" "$PROTECTED_SERIALS" "$INSTANCE" "$IMG_ID" "$DATA_MB" 2>&1)" || true
     else out="$(remote "$host" create "$SCRATCH" "$FIXTURE_ROOT" "$FIXTURE_WATCH" "$slot" "$disk" "$SIZE_GB" "$PREFIX" "$PROTECTED_SERIALS" 2>&1)" || true; fi
     log "$pi create: $out"; grep -q '^CREATED ' <<<"$out" || die "create $disk on $pi failed"
     loop="$(grep -o 'loop=/dev/loop[0-9]*' <<<"$out" | cut -d= -f2)"
@@ -277,5 +372,38 @@ teardown)
     left="$(rsh "$host" "docker ps -a --filter label=org.idea.mv79=true --format '{{.ID}} {{.Names}} {{.Status}}'" || true)"
     log "$pi leftover scratch containers (not removed): ${left:-none}"
     mv "$WORK/created-$disk" "$EVID/"; guard_now "$pi" "$host"; done
-  log "TEARDOWN DONE: images + state in $SCRATCH/quarantine-$STAMP/ on each Pi; release claims next" ;;
+  log "disks torn down: images + state in $SCRATCH/quarantine-$STAMP/ on each Pi"
+  for pair in "$SRC_PI|$SRC_HOST" "$TGT_PI|$TGT_HOST"; do
+    IFS='|' read -r pi host <<<"$pair"
+    win_set "$pi" || { log "$pi: no window set up by this run"; continue; }
+    [ -e "$WORK/window-$pi.restored" ] && { log "$pi window already restored"; continue; }
+    guard_now "$pi" "$host"
+    out="$(remote "$host" winrestore "$SCRATCH" 2>&1)" || true; printf '%s\n' "$out" > "$EVID/winrestore-$pi.txt"
+    log "$pi winrestore: $(tr '\n' ';' <<<"$out")"
+    grep -qE '^RESTORE_OK|^REFUSE: no active window' <<<"$out" || die "window restore on $pi failed (backup kept in $SCRATCH/quarantine-window-*/)"
+    r="$(reprobe "$pi" "$host")"; orig_matches "$pi" "$r" || die "$pi not back to the original app-data-roots / fixture root / config.yaml"
+    date '+%F %T %Z' > "$WORK/window-$pi.restored"; [ -e "$WORK/window-$pi.ok" ] && mv "$WORK/window-$pi.ok" "$EVID/"; guard_now "$pi" "$host"; done
+  log "TEARDOWN DONE: disks out; app-data-roots, $FIXTURE_ROOT owner/mode and config.yaml restored exactly (sha256 + stat). Next: Axle restarts both Engines in normal mode on main (>= ${MIN_RELEASE_SHA:0:7}), then --release-check" ;;
+release-check)
+  REL="$EVID/release-check.txt"
+  for pair in "$SRC_PI|$SRC_HOST" "$TGT_PI|$TGT_HOST"; do
+    IFS='|' read -r pi host <<<"$pair"
+    r="$(reprobe "$pi" "$host")" || { pf FAIL "$pi probe failed"; continue; }
+    [ "$(kv "$r" PM2_ENGINE)" = "online pi" ] && pf PASS "$pi pm2 engine online as pi" || pf FAIL "$pi pm2 engine '$(kv "$r" PM2_ENGINE)'"
+    if [ "$(kv "$r" IDEA_TEST_MODE)" != true ] && [ -z "$(kv "$r" IDEA_DISKS_ROOT)" ] && [ -z "$(kv "$r" IDEA_WATCH_DIR)" ]; then pf PASS "$pi Engine in normal mode (no IDEA_TEST_MODE/IDEA_DISKS_ROOT/IDEA_WATCH_DIR)"
+    else pf FAIL "$pi Engine still in fixture mode (IDEA_TEST_MODE='$(kv "$r" IDEA_TEST_MODE)' IDEA_DISKS_ROOT='$(kv "$r" IDEA_DISKS_ROOT)')"; fi
+    [ "$(kv "$r" ENGINE_HAS_MIN)" = yes ] && pf PASS "$pi Engine $(kv "$r" ENGINE_HEAD | cut -c1-7) contains ${MIN_RELEASE_SHA:0:7}" || pf FAIL "$pi Engine $(kv "$r" ENGINE_HEAD | cut -c1-7) is not on ${MIN_RELEASE_SHA:0:7} or newer"
+    if win_set "$pi"; then orig_matches "$pi" "$r" || true; else pf INFO "$pi: no window was set up by this run"; fi
+    [ -z "$(section "$r" SCRATCH_STATE)" ] && pf PASS "$pi no scratch disk state left" || pf FAIL "$pi scratch disk state left: $(section "$r" SCRATCH_STATE | tr '\n' ' ')"
+    if [ "$pi" = "$KID_PI" ]; then kid="$(section "$r" GUARD | grep "|$KID_PROJECT" || true)"
+      if [ -s "$WORK/kid-baseline.txt" ] && [ "$kid" = "$(cat "$WORK/kid-baseline.txt")" ] && grep -q '|running|' <<<"$kid"; then pf PASS "$pi $KID_PROJECT unchanged and running: $kid"
+      else pf FAIL "$pi $KID_PROJECT now '${kid:-absent}', window baseline '$(cat "$WORK/kid-baseline.txt" 2>/dev/null)'"; fi; fi
+    if [ "$pi" = "$DISKB_PI" ]; then upload_helper "$host" 2>>"$LOG" || true; st="$(disk_state "$host")"; echo "$st" > "$EVID/state-$pi-release.json"
+      jq -e --arg d "$DISKB_ID" '.disks|any(.id==$d)' <<<"$st" >/dev/null 2>&1 && pf PASS "$pi Disk B $DISKB_ID docked" || pf FAIL "$pi Disk B $DISKB_ID not docked"
+      jq -e --arg d "$DISKB_ID" --arg n "$DISKB_INSTANCE" '.instances|any(.diskId==$d and .name==$n and .status=="Running")' <<<"$st" >/dev/null 2>&1 \
+        && pf PASS "$pi $DISKB_INSTANCE Running on Disk B" || pf FAIL "$pi $DISKB_INSTANCE not Running on Disk B ($(jq -c --arg n "$DISKB_INSTANCE" '[.instances[]|select(.name==$n)|{diskId,status}]' <<<"$st" 2>/dev/null))"; fi
+  done
+  grep 'PREFLIGHT ' "$LOG" | sed 's/PREFLIGHT /CHECK /' > "$REL"
+  echo "RELEASE CHECK: $([ $PF_OK = 1 ] && echo PASS || echo FAIL) ($(date '+%F %T %Z'))" >> "$REL"; cp "$REL" "$WORK/release-check-$(date +%Y%m%d-%H%M%S).txt"
+  log "RELEASE CHECK: $([ $PF_OK = 1 ] && echo PASS || echo FAIL) (evidence $REL)"; exit $(( 1 - PF_OK )) ;;
 esac
