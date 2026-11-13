@@ -41,3 +41,7 @@ Status: implemented on the Engine side by agent-engine-dev#292 (`script/build-en
 After the Engine build, `sanitise.sh` re-applies the identity rules idempotently and `verify-sanitised.sh` fails the
 image if machine-id is non-empty, any /etc/ssh/ssh_host_* key exists, ssh key regeneration is not enabled,
 /var/lib/tailscale has state, /etc/tailscale/debug-authkey exists, /META.yaml carries a diskId, or the secret scan hits.
+It also has one positive check (idea#453): the image must carry the baked fleet operator key list
+`/etc/ssh/idea_operator_keys/pi` (installed by the Engine build; sshd is key-only), as a regular file (not a symlink)
+with at least one key, where every non-comment line is a bare public key (no options) that `ssh-keygen -lf` accepts
+and nothing looks like a private key. `sanitise.sh` never touches it.
