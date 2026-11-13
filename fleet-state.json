@@ -97,7 +97,7 @@
       "instance": "milkwise-wizardly-hugle-001",
       "since": "2026-10-08"
     },
-    "claim": "Atlas: #408 remove 2 old NC backup stacks via removeInstance + read-only NC status/argononed"
+    "claim": null
   },
   "sunny-robin": {
     "role": "kit-engine",
