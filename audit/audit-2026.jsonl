@@ -1808,3 +1808,5 @@
 {"ts":"2026-11-13T16:29:22Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":"atlas (read-only #499)","previous":null}
 {"ts":"2026-11-13T16:29:41Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-13T16:29:41Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: Console main ffab96d deploy + live check + #499 read-only","previous":null}
+{"ts":"2026-11-13T16:29:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"atlas (read-only #499)"}
+{"ts":"2026-11-13T16:29:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
