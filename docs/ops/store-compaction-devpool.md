@@ -1,17 +1,37 @@
-# Runbook: dev-pool store compaction (3zoqd → new doc)
+# Runbook: dev-pool store compaction (3zoqd → 2VroE)
 
-**Status:** Authoritative (executed 2026-10-13) · **Maintained by:** Atlas (executor); plan by Axle
+**Status:** Authoritative result record (executed 2026-10-13); current store map updated 2026-11-13 · **Maintained by:** Atlas (executor); plan by Axle
 Design and reasoning: [proposals/2026-10-13-store-growth.md](../../proposals/2026-10-13-store-growth.md). References to /workspace paths are ops-box evidence.
 
 ## Result record (2026-10-13)
-- Dev-pool store **3zoqd compacted to 2VroE** (`automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH`) on idea01/03/04, 2026-10-13 **14:54-15:14 CEST** (freeze to Engine start). 175,189 changes → 1; 26 MB → 322 KB. Gates G1-G4 GO, verify steps 13-18 PASS, no rollback. idea02 and wizardly-hugle unchanged.
+- Dev-pool store **3zoqd compacted to 2VroE** (`automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH`) on idea01/03/04, 2026-10-13 **14:54-15:14 CEST** (freeze to Engine start). 175,189 changes → 1; 26 MB → 322 KB. Gates G1-G4 GO, verify steps 13-18 PASS, no rollback. idea02 and production `idea` (then already on store 6f8m; fleet-state key `wizardly-hugle`) were left unchanged.
 - Evidence (ops box): `duration-evidence/path-a-stage2/compaction-devpool/RESULT.md`.
 - Afterwards: cover-all **r86t PASSED 128/128** on 2VroE.
+
+## Current state (2026-11-13)
+
+This was a one-time manual compaction. There is no automated weekly reset (store-growth proposal Q2).
+
+The 2026-10-13 store-growth design is what the Engine follows now: heartbeats and metrics are ephemeral (not stored), a coarse `lastSeen` is written at most hourly, and Done/Failed operations older than 7 days are pruned into the CommandLog. A later compaction, if needed, is again a planned manual migration, not a scheduled job.
+
+| Store | Who uses it now |
+|---|---|
+| `automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH` | Dev pool: idea03 and idea04, and golden idea01 (local `store-url.txt`; `deploy-engine-pi.sh` requires this URL on those hosts) |
+| `automerge:6f8m5KxzARv9xwv4Lw18LgVUJzu` | Production hostname `idea` (fleet-state key `wizardly-hugle`, Tailscale `idea.tail2d60.ts.net` / 100.115.60.6, Console :8081) |
+| `automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk` | The three kit Engines (sunny-robin, kind-panda, happy-zebra). Since idea#452 this is also `FLEET_STORE_URL` and the tracked `store-identity/store-url.txt` shipped in Engine images |
+| `automerge:4GQmEZehPDfryGDxkFo9XixbvmAC` | Retired. It was idea02's store (and the old image default). idea02 is on hold; MilkWise cut over to production `idea` on 2026-10-08 |
+
+If `store-url.txt` is missing, the Engine refuses to start (engine#193). Only with `IDEA_ALLOW_STORE_URL_FALLBACK=true` (set nowhere by default) would it write `FLEET_STORE_URL`, which is now the kit store, not 4GQm and not 2VroE. Pool and production deploys must keep their local `store-url.txt`.
+
+LAN addresses in §0 below are the 2026-10-13 read-only snapshot (idea01/03/04 then on 10.99.0.11/.13/.14). Current `fleet-state.json` LAN addresses are idea01 192.168.0.138, idea03 192.168.0.228, idea04 192.168.0.113, idea02 10.99.0.12, production `idea` 192.168.0.231. The Engine checkout is still `/home/pi/idea/agents/agent-engine-dev`, and pm2 still runs the `engine` app as `pi`.
+
+The sections after this heading are the plan as written and executed on 2026-10-13. They are a historical record; do not treat host roles, LAN IPs or `FLEET_STORE_URL` in those steps as current.
 
 ## Plan (as written by Axle before execution; executed as below)
 Background: store-growth proposal (Q2), /workspace/r86q-diag/NOTES.md (173,991 changes, 2.90 MB saved, load(full) ~10 s on the box; compacted 322 KB, 0.39 s).
 
-## 0. Facts confirmed read-only (14:40 CEST)
+## 0. Facts confirmed read-only (14:40 CEST, 2026-10-13)
+These were true at freeze time. See **Current state** above for what differs now (roles, LAN IPs, `FLEET_STORE_URL`).
 - Pool Pis idea01 10.99.0.11, idea03 .13, idea04 .14. Engine dir `/home/pi/idea/agents/agent-engine-dev` (D below), pm2 app `engine`.
   config.yaml: `mdns: true`, no static peers, `storeDataFolder: store-data`, `storeIdentityFolder: store-identity`.
 - `D/store-identity/store-url.txt` = `automerge:3zoqdSVsEtj4ygNJPNcDyKWvdxo6` on all 3. Also there: `store-template.json`, `command-log-url.txt` (idea01 also has a stray nested `store-identity/store-identity/`; leave it).
@@ -104,4 +124,6 @@ R4. Note: any change made while on NEWID (e.g. a short walk) is lost on rollback
 Prep 20 min (no downtime) · freeze+snapshot 10 · build 5 · swap 10 · start+verify 25 → ~70 min total, ~50 min pool downtime. Rollback ≤10 min.
 
 ## 8. What this rehearses for production
-Same steps with idea02 production store: needs FLEET_STORE_URL change in Engine (else a Pi missing store-url.txt rejoins the old doc), Console users clearing cached `storeUrl`, and a quiet window. Record actual timings here in E/RESULT.md.
+The 2026-10-13 plan treated idea02's 4GQm store as the production rehearsal target and said a missing `store-url.txt` would fall back to `FLEET_STORE_URL` (then 4GQm). That is no longer how production or the Engine works.
+
+A compaction of production would be a planned manual migration of production `idea`'s own store (`automerge:6f8m5KxzARv9xwv4Lw18LgVUJzu`), not idea02 (idea02 is on hold; 4GQm is retired). It still needs a quiet window, every Console user to clear a cached `storeUrl`, the new doc pre-placed on every peer of that store, and local `store-url.txt` updated together. Do not change `FLEET_STORE_URL` for a production compaction: that constant is now the kit store (idea#452). A missing `store-url.txt` does not silently join another store; the Engine refuses to start (engine#193) unless `IDEA_ALLOW_STORE_URL_FALLBACK=true`, which would write the kit store and must not be used on production or the pool. Record actual timings in E/RESULT.md if this is ever rehearsed.
