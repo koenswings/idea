@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # engine-placement.test.sh — idea#335: where quality-scan runs Engine tests.
-# Box by default; opt-in claimed idle pool Pi (claim, pm2 stop/start as pi, release);
+# Box by default; opt-in claimed idle pool Pi (claim, pm2 stop/restart engine and idea-usage as pi, release);
 # idea04 default → box (optional second Pi) fallback chain (idea#332); refusals for idea02, production, kits, busy/claimed Pis.
 # SSH and update-fleet-state.sh are stubbed; no network, no real Pi.
 set -euo pipefail
@@ -34,7 +34,15 @@ host="$1"; shift
 echo "$host :: $*" >>"$FAKE_LOG"
 case "$*" in
   *"ls-remote"*) echo "${FAKE_SHA:-0123456789abcdef0123456789abcdef01234567}	refs/heads/main" ;;
-  *"pm2 jlist"*) if [[ "${FAKE_ONLINE:-1}" == 1 ]]; then echo '[{"name":"engine","pm2_env":{"status":"online"}}]'; else echo '[]'; fi ;;
+  *"pm2 jlist"*)
+    if [[ -n "${FAKE_JLIST:-}" ]]; then printf '%s\n' "$FAKE_JLIST"
+    elif [[ "${FAKE_ONLINE:-1}" == 1 ]]; then
+      if [[ "${FAKE_USAGE:-0}" == 1 ]]; then
+        echo '[{"name":"engine","pm2_env":{"status":"online"}},{"name":"idea-usage","pm2_env":{"status":"online"}}]'
+      else
+        echo '[{"name":"engine","pm2_env":{"status":"online"}}]'
+      fi
+    else echo '[]'; fi ;;
   *"thermal_zone0/temp"*) if [[ -n "${FAKE_HOT_HOST:-}" && "${host#pi@}" == "$FAKE_HOT_HOST" ]]; then echo "${FAKE_HOT_TEMP:-80000}"; else echo "${FAKE_TEMP:-50000}"; fi ;;
   *".qs-pgid); fi"*) : >"$FAKE_LOG.killed" ;;
   *"pnpm test:full"*) echo remote-tests-ran
@@ -261,6 +269,58 @@ check "thermal: trip point configurable (75 → 74 °C stays)" "$tst.where==\"po
 out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=0)"
 check "pool engine offline passes" "$tst.status==\"passed\"" "$out"
 lognot "offline: no pm2 restart" "pm2 restart engine"
+
+# idea#500: preflight counts idea-usage as live, so the pool path must stop and
+# restart it (as pi) when it is in the pm2 list; skip it cleanly when it is not.
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1)"
+check "missing idea-usage: pool still passes" "$tst.status==\"passed\" and $tst.where==\"pool\"" "$out"
+loghas "missing idea-usage: still stops engine" "pm2 stop engine"
+lognot "missing idea-usage: no stop idea-usage" "pm2 stop idea-usage"
+loghas "missing idea-usage: still restarts engine" "pm2 restart engine"
+lognot "missing idea-usage: no restart idea-usage" "pm2 restart idea-usage"
+
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_USAGE=1)"
+check "idea-usage present: pool passes" "$tst.status==\"passed\" and $tst.where==\"pool\"" "$out"
+loghas "stop order: engine" "pm2 stop engine"
+loghas "stop order: idea-usage" "pm2 stop idea-usage"
+loghas "restart on success: engine" "pm2 restart engine"
+loghas "restart on success: idea-usage" "pm2 restart idea-usage"
+order="$(grep -nE 'pm2 stop engine|pm2 stop idea-usage|pnpm test:full|pm2 restart engine|pm2 restart idea-usage|--null idea03 claim' "$T/log" | cut -d: -f1 | tr '\n' ' ')"
+if [[ "$(echo "$order" | tr ' ' '\n' | grep -v '^$' | sort -n | tr '\n' ' ')" == "$order" ]] && [[ $(echo "$order" | wc -w) -eq 6 ]]; then
+  echo "PASS idea-usage order stop-engine→stop-usage→test→restart-engine→restart-usage→release"; pass=$((pass+1))
+else echo "FAIL idea-usage order: $order"; fail=$((fail+1)); fi
+
+out="$(scan env BOT_NAME=Atlas QUALITY_SCAN_ENGINE_PI=idea03 FAKE_ONLINE=1 FAKE_USAGE=1 FAKE_RC=1)"
+check "idea-usage: test failure still reported" "$tst.status==\"failed\"" "$out"
+loghas "idea-usage: failure still restarts engine" "pm2 restart engine"
+loghas "idea-usage: failure still restarts idea-usage" "pm2 restart idea-usage"
+loghas "idea-usage: failure still releases" "--null idea03 claim"
+
+# TERM during the stubbed suite: the EXIT/TERM trap restarts only what was stopped
+# and must not turn the signal into a success exit (idea#500).
+: >"$T/log"; rm -f "$T/log.killed"
+set +e
+PATH="$T/bin:$PATH" FAKE_LOG="$T/log" QUALITY_SCAN_FLEET_STATE="$T/state.json" \
+  QUALITY_SCAN_SSH="$T/bin/fakessh" QUALITY_SCAN_UFS="$T/bin/fakeufs" \
+  IDEA_TEST_ALLOW_LIVE=1 QUALITY_SCAN_DRY_RUN_TESTS=0 QUALITY_SCAN_ENGINE_PI=idea03 \
+  QUALITY_SCAN_ENGINE_PI_FALLBACK='' QUALITY_SCAN_THERMAL_INTERVAL=0.1 \
+  BOT_NAME=Atlas FAKE_ONLINE=1 FAKE_USAGE=1 FAKE_TEST_SLEEP=20 \
+  timeout --preserve-status -s TERM 2s "$SCAN" --repo-root "$T/root" --repos agent-engine-dev >/dev/null 2>/dev/null
+sigrc=$?
+# The pool function runs in $(…); its EXIT/TERM restore can finish just after the
+# parent exits. Wait for the trap to land restarts and the release.
+for _i in $(seq 1 50); do
+  grep -qF "pm2 restart idea-usage" "$T/log" && grep -qF -- "--null idea03 claim" "$T/log" && break
+  sleep 0.1
+done
+set -e
+# 143 = 128+SIGTERM from the scan's TERM trap; 124 would mean timeout overrode the status.
+if [[ "$sigrc" -eq 143 ]]; then echo "PASS idea-usage: TERM keeps exit 143"; pass=$((pass+1))
+else echo "FAIL idea-usage: TERM exit was $sigrc (want 143)"; fail=$((fail+1)); fi
+loghas "idea-usage: TERM still restarts engine" "pm2 restart engine"
+loghas "idea-usage: TERM still restarts idea-usage" "pm2 restart idea-usage"
+loghas "idea-usage: TERM still releases" "--null idea03 claim"
+lognot "idea-usage: TERM did not start a process that was not stopped" "pm2 stop pm2-logrotate"
 
 # Known box exceptions (PR #343, Steve option c)
 K1='dist-test/test/automated/instance-lifecycle.test.js > Instance lifecycle (automated, real containers) > instance reaches Running and container responds to HTTP after dock'
