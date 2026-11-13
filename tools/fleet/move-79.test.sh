@@ -43,9 +43,9 @@ case "$1 $2" in
   "ps -a") if [[ "$*" == *org.idea.mv79* ]]; then exit 0; fi; cat "$FAKE_R/docker-ps" ;;
   "inspect -f") grep "^$4 " "$FAKE_R/docker-started" | cut -d' ' -f2 ;;
   "image inspect") [ -e "$FAKE_R/image-present" ] || exit 1; [ "$3" = -f ] && cat "$FAKE_R/image-id"; exit 0 ;;
-  "save sha256:"*) echo "DOCKER_SAVE $2 $(cat "$FAKE_R/image-id")"; echo "$FAKE_HOST docker save $2" >> "$W/docker.log" ;;
-  "load ") read -r _ id want; [ "$id" = "$want" ] || exit 1; touch "$FAKE_R/image-present"; echo "$want" > "$FAKE_R/image-id"
-           echo "$FAKE_HOST docker load $want" >> "$W/docker.log"; echo "Loaded image ID: $want" ;;
+  "save "*) [ "$#" = 2 ] && [ -e "$FAKE_R/image-present" ] || exit 1; echo "DOCKER_SAVE $2 $(cat "$FAKE_R/image-id")"; echo "$FAKE_HOST docker save $2" >> "$W/docker.log" ;;
+  "load ") read -r _ tag id; [ -n "$id" ] || exit 1; touch "$FAKE_R/image-present"; echo "$id" > "$FAKE_R/image-id"; echo "$tag" > "$FAKE_R/image-tag"
+           echo "$FAKE_HOST docker load $tag $id" >> "$W/docker.log"; echo "Loaded image: $tag" ;;
   *) echo "FORBIDDEN docker $*" >> "$W/forbidden.log"; exit 9 ;;
 esac
 SH
@@ -76,6 +76,10 @@ cat > "$W/bin/sudo" <<'SH'
 #!/usr/bin/env bash
 [ "$1" = -n ] && shift
 echo "$FAKE_HOST sudo $*" >> "$W/sudo.log"
+if [ "$1" = -l ]; then   # read-only listing; with a command: is that command allowed without a password
+  [ -n "${FAKE_NOSUDO:-}" ] && { echo "sudo: a password is required"; exit 1; }
+  if [ -z "${2:-}" ]; then cat "$FAKE_R/sudo-l"; exit 0; fi
+  grep -qE "NOPASSWD: (.*, )?(ALL|$2)(,|\$)" "$FAKE_R/sudo-l" && { echo "$2"; exit 0; }; exit 1; fi
 L="$FAKE_R/loops"; T="$FAKE_R/mounts"; touch "$L" "$T"
 case "$1" in
   /usr/sbin/losetup) shift
@@ -191,6 +195,7 @@ reset_hosts() {
     printf 'settings:\n  isDev: false\n  peerAccess: false\n' > "$W/$h/engine/config.yaml"; chmod 640 "$W/$h/engine/config.yaml"
     echo "ssh-ed25519 AAAAC3k${h//./} idea-engine" > "$W/$h/engine.pub"; echo "sha256:$(printf 'a%.0s' {1..64})" > "$W/$h/image-id"
     touch "$W/$h/image-present"; echo 50.1 > "$W/$h/temp"
+    printf 'Matching Defaults entries for pi on x:\n    env_reset\n\nUser pi may run the following commands on x:\n    (ALL : ALL) ALL\n    (ALL) NOPASSWD: ALL\n' > "$W/$h/sudo-l"
     jq -n --arg r "@ROOT@" '[{name:"engine",pm2_env:{status:"online",username:"pi",env:{IDEA_TEST_MODE:"true",IDEA_DISKS_ROOT:($r+"/fixroot"),IDEA_WATCH_DIR:($r+"/watch")}}}]' > "$W/$h/pm2.json"
     : > "$W/$h/docker-ps"; : > "$W/$h/docker-started"
   done
@@ -255,7 +260,7 @@ reset_state; reset_hosts; add_roots
 export MOVE_WORK="$W/work-pf"; F0="$(fstate "$SRC")$(fstate "$TGT")"; run --preflight
 check "preflight before the window: NOT READY only on TODOs (slot line, peerAccess)" bash -c "[ $(rc) = 1 ] && grep -q 'PREFLIGHT TODO: idea03 .*no scratch slot line yet' '$W/out' && grep -q 'PREFLIGHT TODO: idea04 config.yaml peerAccess' '$W/out' && ! grep -q 'PREFLIGHT FAIL' '$W/out'"
 check "  peer keys check passes (read-only)" has "peer keys idea03<->idea04 in place"
-check "  no sudo / no mutation during preflight" bash -c "! grep -vqE 'losetup --version|sudo true$' '$W/sudo.log'"
+check "  no sudo / no mutation during preflight" bash -c "! grep -vqE 'losetup --version|sudo -l$' '$W/sudo.log'"
 check "  preflight left app-data-roots, config.yaml, fixture root as they were" test "$(fstate "$SRC")$(fstate "$TGT")" = "$F0"
 run --setup-window --ref test; run --preflight
 check "preflight ALL PASS on a ready fake pool (after --setup-window)" bash -c "[ $(rc) = 0 ] && grep -q 'ALL PASS' '$W/out'"
@@ -293,7 +298,18 @@ reset_hosts; chmod 664 "$W/$SRC/app-data-roots"
 pf_setup "app-data-roots mode 664" "idea03 /etc/idea/app-data-roots is '.* 664 regular file'"
 reset_hosts; mv "$W/$TGT/fixroot" "$W/$TGT/fixroot.real"; ln -s fixroot.real "$W/$TGT/fixroot"
 pf_setup "fixture root is a symlink" "idea04 .*fixroot.*symlink"
-reset_hosts; FAKE_NOSUDO=1 pf_setup "no sudo -n" "sudo -n not allowed"
+reset_hosts; FAKE_NOSUDO=1 pf_setup "sudo -n -l: no NOPASSWD rules (password required)" "sudo -n -l lists no NOPASSWD rules"
+reset_hosts; printf 'User pi may run the following commands on x:\n    (root) NOPASSWD: /usr/sbin/losetup -f --show *, /usr/bin/chown, /usr/bin/chmod\n    (root) NOPASSWD: /usr/bin/tee -a /etc/idea/app-data-roots\n    (root) PASSWD: /usr/bin/cp\n' > "$W/$TGT/sudo-l"
+pf_setup "sudo -n -l: partial NOPASSWD rules" "idea04 sudo -n -l: no NOPASSWD rule for: /usr/bin/tee(only with fixed arguments) /usr/bin/cp /usr/bin/install /usr/bin/rmdir "
+check "  chown/chmod not listed as missing" bash -c "! grep -q 'no NOPASSWD rule for: /usr/bin/ch' '$W/out'"
+reset_hosts; printf 'User pi may run the following commands on x:\n    (www-data) NOPASSWD: ALL\n    (ALL) NOPASSWD: ALL, !/usr/bin/rmdir\n' > "$W/$SRC/sudo-l"
+pf_setup "sudo -n -l: ALL rule but rmdir negated / ALL only as another user" "idea03 sudo -n -l: no NOPASSWD rule for: /usr/bin/rmdir(negated)"
+reset_state; reset_hosts; export MOVE_WORK="$W/work-sudo"
+printf 'User pi may run the following commands on x:\n    (root) NOPASSWD: /usr/sbin/losetup, /usr/bin/mount, /usr/bin/umount, /usr/bin/chown, /usr/bin/chmod, /usr/bin/tee, /usr/bin/cp, /usr/bin/install, /usr/bin/rmdir\n' > "$W/$SRC/sudo-l"
+run --preflight; check "sudo -n -l: each needed command listed with NOPASSWD -> PASS" has "idea03 sudo -n -l: NOPASSWD entries cover"
+check "  ALL rule on idea04 -> PASS" has "idea04 sudo -n -l: an ALL rule with NOPASSWD covers"
+check "  sudo -l only; sudoers never touched" bash -c "! grep -qE 'visudo|sudoers' '$W/sudo.log' && ! grep -hvE '^ *#' '$S' '$W/remote.sh.orig' | grep -qE 'visudo|>>? *[^ ]*sudoers'"
+run --setup-window --ref test; check "  setup works with per-command rules (checks each with sudo -n -l <cmd>)" bash -c "[ $(rc) = 0 ] && grep -q 'WINDOW SET UP' '$W/out'"
 reset_hosts; jq '.[0].pm2_env.env.IDEA_CONFIG_FILE="/etc/idea/engine.yaml"' "$W/$TGT/pm2.json" > "$W/t" && mv "$W/t" "$W/$TGT/pm2.json"
 pf_setup "Engine reads another config file" "IDEA_CONFIG_FILE=/etc/idea/engine.yaml"
 reset_hosts; : > "$W/$SRC/store-authorized"
@@ -340,16 +356,28 @@ reset_hosts; export MOVE_WORK="$W/work-sym"; run --setup-window --ref test
 mv "$W/$TGT/app-data-roots" "$W/$TGT/adr.real"; ln -s adr.real "$W/$TGT/app-data-roots"; run --teardown --ref test
 check "teardown refuses to write through an app-data-roots that became a symlink" bash -c "[ $(rc) = 3 ] && grep -q 'became a symlink' '$W/out'"
 
-echo "== load-image (optional, guarded)"
-reset_state; reset_hosts; rm "$W/$TGT/image-present"; echo "sha256:$(printf 'b%.0s' {1..64})" > "$W/$TGT/image-id"; export MOVE_WORK="$W/work-img"; : > "$W/docker.log"
+echo "== scratch image by repo:tag (IDs compared, never in compose)"
+BID="sha256:$(printf 'b%.0s' {1..64})"; AID="sha256:$(printf 'a%.0s' {1..64})"
+reset_state; reset_hosts; export MOVE_WORK="$W/work-imgpf"; echo "$BID" > "$W/$TGT/image-id"; run --preflight
+check "preflight FAILs when nginx:alpine has a different ID on the two Pis" bash -c "[ $(rc) = 1 ] && grep -q 'nginx:alpine image ID differs: idea03 sha256:aaaa.*idea04 sha256:bbbb' '$W/out'"
+reset_hosts; run --preflight; check "  same ID -> PASS" has "nginx:alpine has the same image ID on idea03 and idea04"
+run --preflight --image-id "$BID"; check "  --image-id pin mismatch -> FAIL" bash -c "[ $(rc) = 1 ] && grep -q 'idea03 nginx:alpine is sha256:aaaa.*pinned' '$W/out'"
+run --preflight --image-id "$AID"; check "  --image-id pin match -> no pin FAIL" bash -c "! grep -q 'pinned' '$W/out'"
+
+echo "== load-image (optional, guarded; docker save nginx:alpine | docker load)"
+reset_state; reset_hosts; rm "$W/$TGT/image-present" "$W/$TGT/image-id"; export MOVE_WORK="$W/work-img"; : > "$W/docker.log"
 run --load-image; check "load-image needs --ref" bash -c "[ $(rc) = 4 ]"
 reset_state "Kid #159 run 3"; : > "$W/ssh.log"; run --load-image --ref test; check "load-image refused when not claimed (no ssh)" bash -c "[ $(rc) = 4 ] && ! [ -s '$W/ssh.log' ]"
 reset_state; run --load-image --ref test
-check "load-image copies the source image id to the target" bash -c "[ $(rc) = 0 ] && grep -q 'IMAGE READY on idea04: sha256:aaaa' '$W/out' && [ \"\$(cat '$W/$TGT/image-id')\" = \"\$(cat '$W/$SRC/image-id')\" ]"
-img_only() { [ "$(cut -d' ' -f1-3 "$W/docker.log" | tr '\n' ';')" = "$SRC docker save;$TGT docker load;" ] && ! [ -s "$W/forbidden.log" ] && grep -q '^k1 2026-11-13T08:00:00Z$' "$W/$SRC/docker-started"; }
-check "  only docker save on idea03 and docker load on idea04; nothing restarted" img_only
+check "load-image saves nginx:alpine by tag and idea04 then has it with the same ID" bash -c "[ $(rc) = 0 ] && grep -q 'IMAGE READY on idea04: nginx:alpine sha256:aaaa' '$W/out' && [ \"\$(cat '$W/$TGT/image-id')\" = '$AID' ] && [ \"\$(cat '$W/$TGT/image-tag')\" = nginx:alpine ]"
+img_only() { [ "$(cut -d' ' -f1-4 "$W/docker.log" | tr '\n' ';')" = "$SRC docker save nginx:alpine;$TGT docker load nginx:alpine;" ] && ! [ -s "$W/forbidden.log" ] && grep -q '^k1 2026-11-13T08:00:00Z$' "$W/$SRC/docker-started"; }
+check "  only docker save nginx:alpine on idea03 and docker load on idea04; nothing restarted" img_only
 : > "$W/docker.log"; run --load-image --ref test
-check "  re-run is a no-op" bash -c "[ $(rc) = 0 ] && grep -q 'already has' '$W/out' && ! [ -s '$W/docker.log' ]"
+check "  re-run (same ID already on idea04) is a no-op" bash -c "[ $(rc) = 0 ] && grep -q 'already has nginx:alpine with the same ID' '$W/out' && ! [ -s '$W/docker.log' ]"
+echo "$BID" > "$W/$TGT/image-id"; : > "$W/docker.log"; run --load-image --ref test
+check "load-image FAILs (no overwrite) when idea04 has nginx:alpine with a different ID" bash -c "[ $(rc) = 3 ] && grep -q 'DIFFERENT image ID' '$W/out' && [ \"\$(cat '$W/$TGT/image-id')\" = '$BID' ] && ! [ -s '$W/docker.log' ]"
+echo "$AID" > "$W/$TGT/image-id"; run --load-image --image "nginx:alpine@sha256:abc" --ref test
+check "load-image refuses a non repo:tag reference" bash -c "[ $(rc) = 3 ] && grep -q 'plain repo:tag' '$W/out'"
 rm "$W/$SRC/image-present"; run --load-image --ref test
 check "load-image stops when the source lacks the image" bash -c "[ $(rc) = 3 ] && grep -q 'not found on idea03' '$W/out'"
 
@@ -375,6 +403,7 @@ check "create-disks ok" bash -c "[ $(rc) = 0 ] && grep -q 'DISKS READY' '$W/out'
 check "  idea03 skipped busy slot 1, used idea-test-2" grep -q 'mv289-src.*idea-test-2' "$W/out"
 check "  idea04 used free slot idea-test-1" bash -c "grep -q '^idea04 idea-test-1 /dev/loop' '$MOVE_WORK/created-mv289-dst'"
 check "  sparse images under scratch" bash -c "[ -f '$W/$SRC/scratch/img/mv289-src.img' ] && [ -f '$W/$TGT/scratch/img/mv289-dst.img' ]"
+check "  compose uses image: nginx:alpine (no ID, no digest)" bash -c "grep -q '^ *image: nginx:alpine$' '$W/$SRC/fixroot/idea-test-2/instances/mv289-web/compose.yaml' && ! grep -q sha256 '$W/$SRC/fixroot/idea-test-2/instances/mv289-web/compose.yaml'"
 check "  instance tree on the source disk" test -f "$W/$SRC/fixroot/idea-test-2/instances/mv289-web/data/payload.bin"
 check "  META diskId mv289-dst on target" grep -q 'diskId: "mv289-dst"' "$W/$TGT/fixroot/idea-test-1/META.yaml"
 check "  sentinels fired" bash -c "[ -e '$W/$SRC/watch/idea-test-2' ] && [ -e '$W/$TGT/watch/idea-test-1' ]"

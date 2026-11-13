@@ -70,7 +70,6 @@ probe)
   echo "SUDO_LOSETUP=$(sudo -n /usr/sbin/losetup --version >/dev/null 2>&1 && echo yes || echo no)"
   echo "IMAGE_PRESENT=$(docker image inspect "$image" >/dev/null 2>&1 && echo yes || echo no)"
   echo "IMAGE_ID=$(docker image inspect -f '{{.Id}}' "$image" 2>/dev/null)"
-  echo "SUDO_ALL=$(sudo -n true >/dev/null 2>&1 && echo yes || echo no)"
   [ -n "$minsha" ] && echo "ENGINE_HAS_MIN=$(git -C "$ED" merge-base --is-ancestor "$minsha" HEAD 2>/dev/null && echo yes || echo no)"
   echo "APPDATA_PROBLEM=$(appdata_problem)"; echo "APPDATA_STAT=$(fstat "$APPDATA")"; echo "APPDATA_SHA=$(fsha "$APPDATA")"
   miss=""; bad=""; for sl in ${slots//,/ }; do grep -qxF -- "$root/$sl" "$APPDATA" 2>/dev/null || miss="$miss $root/$sl"
@@ -98,6 +97,7 @@ for p in ps:
   echo "--- SCRATCH_STATE"; for f in "$scratch"/*.state; do [ -f "$f" ] && { echo "## $f"; cat "$f"; }; done
   echo "--- GUARD"; guardsnap
   echo "--- AUTHZ"; sed -n 's/.*idea-peer-gate \([^"]*\)".* ssh-ed25519 \([A-Za-z0-9+/=]*\).*/\1 \2/p' "$AUTHZ" 2>/dev/null
+  echo "--- SUDO_L"; LC_ALL=C sudo -n -l 2>&1 | head -60     # read-only: lists pi's sudo rules, changes nothing
   echo "--- WINDOW"; cat "$scratch/window.win" 2>/dev/null
   echo "--- END" ;;
 winsetup)
@@ -110,7 +110,8 @@ winsetup)
   [ -d "$root" ] || refuse "fixture root $root missing"
   sp="$root/$slot"; pr="$(path_problem "$sp")"; [ -z "$pr" ] || refuse "slot path $sp: $pr"
   [ -f "$cfg" ] && [ ! -L "$cfg" ] || refuse "Engine config $cfg missing or a symlink"
-  sudo -n true 2>/dev/null || refuse "needs sudo -n for chown/chmod/tee/cp/install/rmdir"
+  for c in /usr/bin/chown /usr/bin/chmod /usr/bin/tee /usr/bin/cp /usr/bin/install /usr/bin/rmdir; do
+    sudo -n -l "$c" >/dev/null 2>&1 || refuse "sudo -n not allowed for $c (never changing sudoers)"; done
   bk="$scratch/quarantine-window-$stamp"; mkdir -p "$bk" || refuse "mkdir $bk"
   cat "$APPDATA" > "$bk/app-data-roots.orig" || refuse "backup of $APPDATA failed"
   cp -p "$cfg" "$bk/config.orig" || refuse "backup of $cfg failed"

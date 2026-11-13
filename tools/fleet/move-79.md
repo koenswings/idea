@@ -13,10 +13,10 @@ Files: `move-79.sh` (box side), `move-79-remote.sh` (Pi side, sent over ssh as `
 
 | Mode | Changes | What it does |
 |---|---|---|
-| `--preflight` | no Pi state (only the untracked `.zz-move-79.ts` upload, skipped when identical) | Checks claims, protected-Pi list, store 2VroE, Engine HEAD (`--engine-sha`, default the #289 tip `10ee458`), pm2 engine online as pi, **fixture mode**, the three **window prerequisites** (below; `TODO` = `--setup-window` does it, `FAIL` = setup refuses), `sudo -n`, the scratch image on both Pis, the scratch fs on the root disk (not Disk B/WD), free space, temperature ≤ 75 °C, `kid-kolibri-demo` running on idea03, and `moveAppCrossEngine` |
+| `--preflight` | no Pi state (only the untracked `.zz-move-79.ts` upload, skipped when identical) | Checks claims, protected-Pi list, store 2VroE, Engine HEAD (`--engine-sha`, default the #289 tip `10ee458`), pm2 engine online as pi, **fixture mode**, the three **window prerequisites** (below; `TODO` = `--setup-window` does it, `FAIL` = setup refuses), a read-only `sudo -n -l` (below), `nginx:alpine` present on both Pis **with the same image ID** (and equal to `--image-id` if given), the scratch fs on the root disk (not Disk B/WD), free space, temperature ≤ 75 °C, `kid-kolibri-demo` running on idea03, and `moveAppCrossEngine` |
 | `--setup-window` | yes (reversible, restored by `--teardown`) | Runs preflight; any blocking FAIL stops it. Per Pi: records the originals box-side, backs them up on the Pi to `$SCRATCH/quarantine-window-<stamp>/`, then makes `/home/pi/idea/duration-disks` root-owned and not group/other writable, creates the slot dir, appends **only** the slot line to `/etc/idea/app-data-roots`, and sets `peerAccess: true` in the Engine `config.yaml`. Each change is written to `$SCRATCH/window.win` *before* it is made. Saves the `kid-kolibri-demo` baseline for the release check. **Never touches an SSH key** |
-| `--load-image` | image only (optional) | Copies the scratch App image from source to target by image ID: `docker save <id>` on the source piped into `docker load` on the target. Does nothing if the target already has it. No tag change, nothing is restarted, and the hands-off guard runs before and after |
-| `--create-disks` | yes | Needs `--setup-window` on both Pis, then runs preflight (it must pass). Per Pi: uses the slot recorded by `--setup-window`, creates a sparse image `$SCRATCH/img/<id>.img` (default 4 GB), formats it ext4 (pi-owned root), attaches it with `sudo -n losetup -f --show` and checks that its BACK-FILE is our image, mounts it on the slot, writes META.yaml (`diskId: mv289-src` / `mv289-dst`, `isHardwareId: false`), and fires the testMode sentinel. The source also gets the throwaway App `mv79web` with instance `mv289-web` (compose `image:` = the source's image ID for `nginx:alpine`, `pull_policy: never`, `./data` bind only, 16 MB payload). The script then waits until the disk is docked and the instance is Running |
+| `--load-image` | image only (optional) | `docker save nginx:alpine` on the source piped into `docker load` on the target, then `docker image inspect nginx:alpine` on the target must show the source's image ID. Skipped if the target already has `nginx:alpine` with the same ID. If the target has `nginx:alpine` with a **different** ID it stops and reports, and never overwrites the tag. Only a plain `repo:tag` is accepted. Nothing is restarted, and the hands-off guard runs before and after |
+| `--create-disks` | yes | Needs `--setup-window` on both Pis, then runs preflight (it must pass). Per Pi: uses the slot recorded by `--setup-window`, creates a sparse image `$SCRATCH/img/<id>.img` (default 4 GB), formats it ext4 (pi-owned root), attaches it with `sudo -n losetup -f --show` and checks that its BACK-FILE is our image, mounts it on the slot, writes META.yaml (`diskId: mv289-src` / `mv289-dst`, `isHardwareId: false`), and fires the testMode sentinel. The source also gets the throwaway App `mv79web` with instance `mv289-web` (compose `image: nginx:alpine`, `pull_policy: never`; image IDs are only compared by preflight and never written to compose, `./data` bind only, 16 MB payload). The script then waits until the disk is docked and the instance is Running |
 | `--move` | yes | Sends `moveApp <id> mv289-src mv289-dst` to the source Engine. It verifies the op code (MOVED / SOURCE_NOT_REMOVED / SOURCE_CHANGED), checks the new instance is Running on `mv289-dst`, compares the file list **and** sha256 of every file, and checks HTTP 200 on the instance port |
 | `--move-back` | yes | The same check in the other direction: `moveApp <newId> mv289-dst mv289-src`, sent to the target Engine |
 | `--teardown` | yes | Removes the sentinel (the Engine undocks) and waits for the undock. It then unmounts our slot, runs `sudo -n losetup -d` on **our own recorded /dev/loopN**, but only if that device still backs our image, and runs `mv` on image + state into `$SCRATCH/quarantine-<stamp>/`. It reports leftover `org.idea.mv79` containers and does not remove them. It then runs the window restore on each Pi (removes the slot dir only if the window created it and it is empty and unmounted, restores the fixture root owner/mode, copies the backup over app-data-roots, writes `config.orig` back over `config.yaml` in place), verifies sha256 + `owner:group mode type` against the originals both on the Pi and from a fresh box-side probe, and stops on any mismatch. Evidence: `winrestore-<pi>.txt`, `probe-<pi>-after.txt` |
@@ -58,7 +58,11 @@ Every mode except `--preflight` and `--release-check` needs `--ref "<who authori
    the keys are missing, preflight FAILs with "peer keys between idea03 and idea04 are NOT in place: … ask Steve".
    (While `peerAccess` is on, the Engine syncs peer keys itself. That is Engine behaviour, not the script.)
 
-Setup and restore need `sudo -n` for `/usr/bin/{chown,chmod,tee -a,cp,install -d,rmdir}`. Preflight checks `sudo -n true`.
+Setup and restore need `sudo -n` for `/usr/bin/{chown,chmod,tee,cp,install,rmdir}`. Preflight runs a read-only `sudo -n -l` as pi on
+both Pis and saves it as `sudo-l-<pi>.txt`. An `ALL` command rule with `NOPASSWD`, runnable as root/ALL, passes. Otherwise every needed command must appear
+in a `NOPASSWD` entry with no arguments or `*`. If any are missing, preflight FAILs and lists them, marking `(only with fixed arguments)` and
+`(negated)` where that applies. `PASSWD:` entries and rules for other run-as users don't count. `winsetup` checks each command again with
+`sudo -n -l <cmd>`. **The script never adds or changes sudoers.**
 A half-finished setup stops with a message, is recorded on the Pi, and `--teardown` restores it. A re-run of `--setup-window`
 refuses until then.
 
@@ -95,7 +99,7 @@ Then release the claims and set status idle. Attach `release-check.txt`, the `wi
 move evidence to #289.
 
 ## Not reversed by the script
-- A loaded image (`--load-image`) stays on idea04 (untagged, by ID). Removing it is a separate, explicit step.
+- A loaded image (`--load-image`) stays on idea04 as `nginx:alpine`. Removing it is a separate, explicit step.
 - What the Engine does itself while `peerAccess` is on (peer-key sync into `/etc/ssh/idea_authorized_keys/pi` and
   `/etc/idea/peer_known_hosts`, and the Engine key it publishes). The script only checks it.
 - Engine mode, deploys and restarts, and Disk B / `nextcloud-files-b-001` dropping out in fixture mode: these are Axle's.
@@ -106,6 +110,6 @@ move evidence to #289.
 Tests: `tools/fleet/move-79.test.sh` (fake ssh/Engine sandbox; covers guards, preflight failures, and a full
 setup-window → create → move → move-back → teardown → release-check, plus a guard trip when kid-kolibri-demo's StartedAt changes
 mid-move). Each window prerequisite has pass and fail cases (symlink/missing/wrong-mode app-data-roots, symlinked
-fixture root, no sudo, foreign `IDEA_CONFIG_FILE`, missing peer keys in the store or in authorized_keys). There are also exact-restore checks
-(sha256 + stat, a file with no trailing newline, a config with no `peerAccess` line, a half-finished setup) and `--load-image`. The
+fixture root, `sudo -n -l` pass/partial/fail/negated, foreign `IDEA_CONFIG_FILE`, missing peer keys in the store or in authorized_keys). There are also exact-restore checks
+(sha256 + stat, a file with no trailing newline, a config with no `peerAccess` line, a half-finished setup), image-ID compare and pin, and `--load-image` (load, same-ID skip, different-ID refusal). The
 owner part of the restore runs as the test user; a real root:root restore needs a Pi.
