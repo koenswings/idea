@@ -19,6 +19,11 @@ control (§5), routines, team structure, and Bot descriptions.
 Ops view of IDEA security: Tailscale tag:idea/ACL, school network zones, the <account>911! default-password convention, SSH key-only, pm2 as pi, sudoers, secrets handling, backups and open risks. Contains no secret values.
 → [docs/ops/security-overview.md](ops/security-overview.md)
 
+## ops/tailscale-field-access.md
+**Status:** Authoritative (idea#117, docs side)  ·  **Maintained by:** Atlas
+How IDEA staff reach schools and Pis over Tailscale: one `tag:idea` and one reusable fleet key, ACL (admins → tag:idea, tag:idea → nothing), always-on at schools, SSH key-only to each Pi's Tailscale IP with no jump host, production idea as `idea.tail2d60.ts.net:<port>`, school LANs on `10.42.x` with sticker names, and the remaining gaps (idea#375 T-a/T-c, engine#291). Contains no secret values.
+→ [docs/ops/tailscale-field-access.md](ops/tailscale-field-access.md)
+
 ## ops/zimbabwe-2026-10-deployment.md
 **Status:** Draft (idea#288)  ·  **Maintained by:** Marco / Atlas
 The 20 Oct 2026 Zimbabwe kit (Chigonda and Nharira): schools (most fields TBC with Justice), kit devices with sticker names, hardware and versions, Kolibri ID status, open gaps, and links to the deployments/ records. Contains no secret values.

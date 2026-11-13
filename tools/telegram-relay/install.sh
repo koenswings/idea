@@ -1,5 +1,5 @@
 #!/bin/sh
-# Install on wizardly-hugle as user pi (user service; linger is already on). Never prints secrets.
+# Install on the hub Pi "idea" (formerly wizardly-hugle) as user pi (user service; linger is already on). Never prints secrets.
 set -e
 D=$HOME/tg-relay; C=$HOME/.config/tg-relay
 mkdir -p "$D/files" "$C" "$HOME/.config/systemd/user" "$HOME/.local/bin"
