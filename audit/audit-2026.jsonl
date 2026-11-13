@@ -1770,3 +1770,5 @@
 {"ts":"2026-11-13T15:07:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-13T15:09:19Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle: idea#453 build 10 re-pin to engine main afefd04"}
 {"ts":"2026-11-13T15:09:19Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-13T15:10:07Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-13T15:10:07Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: G5A+Form3 Kolibri 0.19.5 instance for Marco manuals (Console cdda261); System Disk gge6zxyl6ftmnri4qx6; kid-kolibri-demo, idea166-*, nextcloud-files-b-001, 0d8f9984, Disk B, usage dashboard untouched","previous":null}
