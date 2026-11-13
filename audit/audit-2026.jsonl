@@ -1798,4 +1798,10 @@
 {"ts":"2026-11-13T16:22:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: Console main ffab96d deploy + live check"}
 {"ts":"2026-11-13T16:22:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console main@ffab96da8debdcbfbda5674842305b1458cc3ed9","previous":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console pr192@eee211a"}
 {"ts":"2026-11-13T16:22:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-13T16:28:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-13T16:28:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"atlas (read-only #499)","previous":null}
+{"ts":"2026-11-13T16:28:45Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-13T16:28:45Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle: #334 rebuild verify-sanitised 8/8"}
+{"ts":"2026-11-13T16:29:06Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"atlas (read-only #499)"}
+{"ts":"2026-11-13T16:29:06Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts": "2026-11-13T16:27:38Z", "bot": "Marco", "action": "doc_update", "file": "docs/manuals/teachers/lesson-manuals/idea-grade-5a-add-and-subtract-fractions-v1.3.pdf", "summary": "Lesson manuals v1.3: Console card shots G5A-01-03 and F3-01-03 retaken (card now Grade 5A and Form 3, Kolibri underneath; Console main ffab96d); text says the card may briefly say it is connecting, then Open turns blue; v1.2 PDFs moved to superseded/"}
