@@ -1700,3 +1700,5 @@
 {"ts":"2026-11-13T10:08:09Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-13T10:08:09Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: idea#159 run 3 Kolibri capacity (agent-app-dev#41 tip dabee24); idea03 load generator only, capped (kid-kolibri-demo, idea166-*, :18080, 0d8f9984, Disk B untouched)"}
 {"ts":"2026-11-13T10:08:09Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-13T10:11:32Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-13T10:11:32Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: Kolibri Demo re-seed v4 (app-kolibri 3e7fe10)","previous":null}
