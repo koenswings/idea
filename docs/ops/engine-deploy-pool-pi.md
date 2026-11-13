@@ -38,11 +38,17 @@ Hosts: pool Pis idea01/03/04 expect `automerge:2VroE…`; kit Engines sunny-robi
 shared kit store `automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk` (kits only after Steve's GO naming the Engine). Any other
 host is refused; a store mismatch aborts before anything changes.
 
-From the box, prefer `tools/fleet/deploy-engine-remote.sh <ts-ip> <tip-sha> [--fetch main] [--dry-run|--yes]`: it holds a
+From the box, prefer `tools/fleet/deploy-engine-remote.sh <ts-ip> <tip-sha> [--fetch main] [--dry-run|--yes] [--allow-midnight]`: it holds a
 per-host box lock (`/tmp/idea-deploy-<host>.lock`) and the script holds `/tmp/idea-deploy.lock` on the Pi; either busy
 exits 75 without changing anything (two routines or two bots can no longer deploy the same Pi at once). If HEAD already
 equals the tip, the helpers (including `idea-usage-settings` and `idea-usage-export`) match the
-repo assets and pm2 `engine` is online, it prints `already on <sha>, skipping` and exits 0.
+repo assets, pm2 `engine` is online, **and the running process sha equals the tip**, it prints `already on <sha>, skipping` and exits 0.
+The running sha is `dist/build-info.json`'s commit only when that process started at or after the file was written
+(idea#512). If HEAD and dist are already the tip but the running Engine is older, the script does not skip: it continues and restarts.
+A command-log rotation during the build (`store-identity/command-log-url.txt` or `command-log-day.txt` changes while
+`store-url.txt` is unchanged) is logged and accepted; the live URL is kept and the old one is never restored. A change
+to the store URL itself still aborts before `pm2 restart`. Deploys between 23:55 and 00:05 local time are refused unless
+`--allow-midnight` is passed (the window in which the daily command log rotates).
 A missing or stale usage helper (the idea03 idea#412 case) is not skipped: `install-root-helpers`
 runs and each helper is sha256-checked against the tip.
 Temperature guard: before each step (install, build, root helpers, restart) above 75 C it pauses, polling every 30 s

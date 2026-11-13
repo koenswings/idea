@@ -2,11 +2,11 @@
 # deploy-engine-pi.sh — option-2 Engine deploy on ONE pool Pi: keep the Pi's local config
 # AND store identity across a git checkout of a new Engine commit.
 #
-#   ssh <pi> 'bash -s -- <tip-sha> [--fetch <branch>] [--dry-run|--yes]' < tools/fleet/deploy-engine-pi.sh
+#   ssh <pi> 'bash -s -- <tip-sha> [--fetch <branch>] [--dry-run|--yes] [--allow-midnight]' < tools/fleet/deploy-engine-pi.sh
 #
 # Steps: guard host + store -> save config.yaml, pm2.config.cjs and every store-identity/ file
 # -> discard those local edits -> git checkout --detach <tip> -> restore the saved files
-# -> verify they are byte-identical and store-url.txt is still the expected store
+# -> verify store-url.txt is still the expected store (command-log-url/day may rotate; never restore the old URL)
 # -> pnpm install + build -> DHCP vendor class (idea#284) -> ./install-root-helpers (flash/app-data/
 # erase/usage-settings/usage-export helpers + sudoers, then sha256 vs the repo and visudo -c) -> verify again -> pm2 restart engine + pm2 save.
 # Any failed check aborts BEFORE pm2 restart (exit 3); the running Engine keeps its old store.
@@ -23,13 +23,18 @@
 #
 # Lock: one deploy per Pi at a time (flock on $LOCK_FILE, default /tmp/idea-deploy.lock, non-blocking;
 # busy -> exit 75). Box side: tools/fleet/deploy-engine-remote.sh also locks per host on the box.
-# Already on target (HEAD = tip, helpers in HELPERS = repo assets, pm2 engine online): "already on <sha>, skipping", exit 0.
-# If idea-usage-settings or idea-usage-export (or any other HELPERS entry present in the tip) is missing or differs, do not skip: run install-root-helpers.
+# Already on target (HEAD = tip, helpers in HELPERS = repo assets, pm2 engine online, and the
+# running process sha equals the tip): "already on <sha>, skipping", exit 0. The running sha is
+# dist/build-info.json's commit only when the pm2 engine process started at or after that file
+# was written (idea#512). If HEAD and dist are already the tip but the running process is older,
+# do not skip: continue so the Engine is restarted. If a helper in HELPERS is missing or differs, do not skip: run install-root-helpers.
+# Midnight window: refuse to start between 23:55 and 00:05 local time unless --allow-midnight
+# (daily command-log rotation can land in that window). Tests may set DEPLOY_CLOCK_HM=HH:MM.
 # Temperature guard: before each build/install step, above TEMP_PAUSE (75 C) it pauses and polls every
 # TEMP_POLL s (30) until below TEMP_RESUME (65 C); the peak per step is logged and summarised at the end.
 # This script does not deploy the Console (see docs/ops/engine-deploy-pool-pi.md).
 # Env overrides (tests): ENGINE_DIR, HOST_NAME, EXPECT_STORE, BACKUP_ROOT, IDEA_LOCAL, SBIN, POST_RESTART_WAIT,
-# LOCK_FILE, TEMP_PAUSE, TEMP_RESUME, TEMP_POLL.
+# LOCK_FILE, TEMP_PAUSE, TEMP_RESUME, TEMP_POLL, DEPLOY_CLOCK_HM.
 set -euo pipefail
 
 ENGINE_DIR="${ENGINE_DIR:-/home/pi/idea/agents/agent-engine-dev}"
@@ -77,18 +82,19 @@ peak_summary() {
   echo "TEMP PEAKS per step (C):"
   for kv in $PEAKS; do echo "$kv"; done | awk -F= '{ if(!($1 in m)){o[++n]=$1; m[$1]=$2} else if($2+0>m[$1]+0) m[$1]=$2 } END{for(i=1;i<=n;i++) printf "  %s %s\n", o[i], m[o[i]]}'
 }
-TIP=""; BRANCH=""; YES=""; DRY=""; PROD=""
+TIP=""; BRANCH=""; YES=""; DRY=""; PROD=""; ALLOW_MIDNIGHT=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --yes) YES=1 ;;
     --dry-run|-n) YES="" ; DRY=1 ;;
     --fetch) BRANCH="${2:?--fetch needs a branch}"; shift ;;
     --production) PROD=1 ;;
+    --allow-midnight) ALLOW_MIDNIGHT=1 ;;
     -*) die "unknown option $1" ;;
     *) TIP="$1" ;;
   esac; shift
 done
-[ -n "$TIP" ] || { sed -n '2,20p' "$0" 2>/dev/null; die "usage: <tip-sha> [--fetch <branch>] [--dry-run|--yes]"; }
+[ -n "$TIP" ] || { sed -n '2,20p' "$0" 2>/dev/null; die "usage: <tip-sha> [--fetch <branch>] [--dry-run|--yes] [--allow-midnight]"; }
 [ -n "$DRY" ] && YES=""
 
 case "$HOST_NAME" in
@@ -115,7 +121,83 @@ kept_files() { echo $KEEP; find store-identity -type f | sort; }
 sums() { for f in $(kept_files); do sha256sum "$f"; done; [ -f "$IDEA_LOCAL" ] && sha256sum "$IDEA_LOCAL"; true; }
 check_store() { [ "$(store_now)" = "$EXPECT_STORE" ] || die "$1: store-url.txt is $(store_now), expected $EXPECT_STORE"; }
 
+# Clock used by the midnight window (Pi local time). Tests set DEPLOY_CLOCK_HM=HH:MM.
+clock_hm() { echo "${DEPLOY_CLOCK_HM:-$(date +%H:%M)}"; }
+# True between 23:55 and 00:05 inclusive (the daily command-log rotation window, idea#512).
+in_midnight_window() {
+  local hm hh mm n
+  hm=$(clock_hm)
+  hh=${hm%%:*}; mm=${hm##*:}
+  hh=$((10#$hh)); mm=$((10#$mm))
+  n=$((hh * 60 + mm))
+  [ "$n" -ge 1435 ] || [ "$n" -le 5 ]
+}
+
+# Running Engine sha (idea#512). dist/build-info.json is written at `pnpm build` and is
+# overwritten by a later build, so it is the *built* sha, not always the *running* sha.
+# Trust it only when the pm2 `engine` process started at or after the file was written
+# (2s slack for mtime granularity). Otherwise the process is older than this dist.
+read_dist_commit() {
+  python3 -c 'import json, re, sys
+try:
+    c = json.load(open("dist/build-info.json")).get("commit", "")
+except Exception:
+    sys.exit(1)
+if not re.fullmatch(r"[0-9a-f]{40}", c or ""):
+    sys.exit(1)
+print(c)'
+}
+running_engine_start_ms() {
+  python3 -c 'import json, subprocess, sys
+try:
+    raw = subprocess.check_output(["pm2", "jlist"], text=True, stderr=subprocess.STDOUT)
+except Exception:
+    sys.exit(1)
+i = raw.find("[")
+if i < 0:
+    sys.exit(1)
+try:
+    data = json.loads(raw[i:])
+except Exception:
+    sys.exit(1)
+if not isinstance(data, list):
+    sys.exit(1)
+for a in data:
+    if not isinstance(a, dict) or a.get("name") != "engine":
+        continue
+    u = (a.get("pm2_env") or {}).get("pm_uptime")
+    if u in (None, "", 0, "0"):
+        sys.exit(1)
+    print(int(u))
+    sys.exit(0)
+sys.exit(1)'
+}
+dist_mtime_ms() {
+  python3 -c 'import os, sys
+p = "dist/build-info.json"
+try:
+    print(int(os.path.getmtime(p) * 1000))
+except Exception:
+    sys.exit(1)'
+}
+# Prints the running sha when it can be proven; otherwise returns 1.
+running_engine_sha() {
+  local commit start dist_ms
+  commit=$(read_dist_commit) || return 1
+  start=$(running_engine_start_ms) || return 1
+  dist_ms=$(dist_mtime_ms) || return 1
+  # Process started more than 2s before this dist was written: not this build.
+  if [ $((start + 2000)) -lt "$dist_ms" ]; then
+    return 1
+  fi
+  printf '%s
+' "$commit"
+}
+
 # 1. Guards (read-only)
+if in_midnight_window && [ -z "$ALLOW_MIDNIGHT" ]; then
+  die "refusing to deploy between 23:55 and 00:05 local time (now $(clock_hm)); pass --allow-midnight to override (idea#512)"
+fi
 check_store "before deploy"
 mods="$(git status --porcelain --untracked-files=no | awk '{print $2}')"
 for f in $mods; do
@@ -132,7 +214,8 @@ case "$HOST_NAME" in
     ;;
 esac
 echo "HOST $HOST_NAME HEAD $(git rev-parse --short HEAD) STORE $(store_now) local mods: $(echo $mods)"
-# Already on target: same commit, helpers equal to the repo assets, Engine online -> nothing to do.
+# Already on target: same commit, helpers equal to the repo assets, Engine online,
+# and the running process sha equals the tip (not just checkout HEAD / dist) -> nothing to do.
 if git cat-file -e "$TIP^{commit}" 2>/dev/null && [ "$(git rev-parse HEAD)" = "$(git rev-parse "$TIP^{commit}")" ]; then
   same=1
   for h in $HELPERS; do
@@ -141,7 +224,15 @@ if git cat-file -e "$TIP^{commit}" 2>/dev/null && [ "$(git rev-parse HEAD)" = "$
   done
   pid=$(pm2 pid engine 2>/dev/null | tail -1)
   case "$pid" in ''|0) same=""; echo "on $TIP but pm2 engine is not online: not skipping" ;; esac
-  [ -n "$same" ] && { echo "already on $(git rev-parse --short HEAD), skipping (helpers match, pm2 engine pid $pid)"; exit 0; }
+  if [ -n "$same" ]; then
+    tip_full=$(git rev-parse "$TIP^{commit}")
+    run_sha=$(running_engine_sha) || run_sha=""
+    if [ "$run_sha" = "$tip_full" ]; then
+      echo "already on $(git rev-parse --short HEAD), skipping (helpers match, pm2 engine pid $pid, running sha ${run_sha:0:12})"
+      exit 0
+    fi
+    echo "HEAD and dist already $TIP but the running Engine is older (pid $pid${run_sha:+ sha $run_sha}): not skipping, will restart"
+  fi
 fi
 if [ -z "$YES" ]; then
   echo "DRY RUN (nothing changed). Target $TIP$([ -n "$BRANCH" ] && echo " (would fetch origin $BRANCH first)")"
@@ -186,12 +277,37 @@ git checkout -q --detach "$TIP"
 # 5. Restore every saved file (including untracked ones), 6. verify
 cp -a "$BK/config.yaml" "$BK/pm2.config.cjs" .
 cp -a "$BK/store-identity/." store-identity/
-verify_kept() {  # byte-for-byte against the backup, then sha256 against SHA256SUMS
+# Daily command-log identity files that may change at midnight while store-url stays put (idea#512).
+is_command_log_rotation_path() {
+  case "$1" in
+    store-identity/command-log-url.txt|store-identity/command-log-day.txt) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+verify_kept() {  # byte-for-byte against the backup, then sha256 against SHA256SUMS.
+  # A command-log rotation (url/day differ, store-url unchanged) is logged and accepted;
+  # the live files are kept and the old URL is never restored. A store-url change still aborts.
+  local label="$1" rotation="" f
+  if ! cmp -s store-identity/store-url.txt "$BK/store-identity/store-url.txt"; then
+    die "$label: store-identity/store-url.txt differs from the saved copy (backup: $BK)"
+  fi
   for f in $KEEP $(cd "$BK" && find store-identity -type f); do
-    cmp -s "$f" "$BK/$f" || die "$1: $f differs from the saved copy (backup: $BK)"
+    [ "$f" = store-identity/store-url.txt ] && continue
+    if cmp -s "$f" "$BK/$f"; then continue; fi
+    if is_command_log_rotation_path "$f"; then
+      echo "$label: $f differs from the saved copy; treating as command-log rotation (store-url unchanged $(store_now)); keeping the live file, not restoring the old URL"
+      rotation=1
+      continue
+    fi
+    die "$label: $f differs from the saved copy (backup: $BK)"
   done
-  if [ -f "$BK/idea-local" ]; then cmp -s "$IDEA_LOCAL" "$BK/idea-local" || die "$1: $IDEA_LOCAL changed (backup: $BK)"; fi
-  sha256sum --quiet -c "$BK/SHA256SUMS" || die "$1: sha256 mismatch on kept files (backup: $BK)"
+  if [ -f "$BK/idea-local" ]; then cmp -s "$IDEA_LOCAL" "$BK/idea-local" || die "$label: $IDEA_LOCAL changed (backup: $BK)"; fi
+  if [ -n "$rotation" ]; then
+    # Exclude the rotated command-log files from the backup sums; everything else must still match.
+    grep -Ev '[[:space:]]store-identity/command-log-(url|day)\.txt$' "$BK/SHA256SUMS" | sha256sum --quiet -c -       || die "$label: sha256 mismatch on kept files (backup: $BK)"
+  else
+    sha256sum --quiet -c "$BK/SHA256SUMS" || die "$label: sha256 mismatch on kept files (backup: $BK)"
+  fi
 }
 verify_kept "after checkout"
 check_store "after checkout"

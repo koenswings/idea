@@ -19,7 +19,12 @@ SH
 cat > "$WORK/bin/pnpm" <<'SH'
 #!/usr/bin/env bash
 # FAKE_BUILD_CLOBBER=1 simulates a build step that resets the store id.
+# FAKE_BUILD_ROTATE=1 simulates a midnight command-log rotation during the build (idea#512).
 [ "$1" = build ] && [ -n "${FAKE_BUILD_CLOBBER:-}" ] && git checkout -q -- store-identity/store-url.txt
+if [ "$1" = build ] && [ -n "${FAKE_BUILD_ROTATE:-}" ]; then
+  echo "automerge:cmdlogRotated" > store-identity/command-log-url.txt
+  echo "2026-11-14" > store-identity/command-log-day.txt
+fi
 exit 0
 SH
 # Fake sudo/systemctl/nmcli: log only. FAKE_SUDO_FAIL=<regex> makes matching sudo calls fail.
@@ -180,7 +185,12 @@ check "box lock free runs ssh" [ "$rc" = 0 ]
 cat > "$WORK/bin/pm2" <<'SH'
 #!/usr/bin/env bash
 echo "$*" >> "$WORK/pm2.log"
-[ "$1" = pid ] && echo "${FAKE_PM2_PID:-}"
+if [ "$1" = pid ]; then echo "${FAKE_PM2_PID:-}"; exit 0; fi
+if [ "$1" = jlist ]; then
+  # pm_uptime is ms-since-epoch when the process started (pm2).
+  printf '[{"name":"engine","pid":%s,"pm2_env":{"status":"online","pm_uptime":%s}}]\n' "${FAKE_PM2_PID:-0}" "${FAKE_PM2_UPTIME_MS:-0}"
+  exit 0
+fi
 exit 0
 SH
 chmod +x "$WORK/bin/pm2"
@@ -191,7 +201,19 @@ install_repo_helpers() {  # copy every HELPERS asset from $1 (repo) into $2 (sbi
     [ -f "$src/$h" ] && cp "$src/$h" "$dest/$h"
   done
 }
+# Write dist/build-info.json for $R at HEAD and set FAKE_PM2_UPTIME_MS relative to its mtime.
+# offset_ms > 0: process started after the dist (running sha can be trusted).
+# offset_ms < 0: process started before the dist (running process is older, idea#512).
+stamp_build_info() {
+  local offset_ms="${1:-5000}" commit
+  commit=$(git -C "$R" rev-parse HEAD)
+  mkdir -p "$R/dist"
+  printf '{"commit":"%s","commitTimeMs":1}\n' "$commit" > "$R/dist/build-info.json"
+  FAKE_PM2_UPTIME_MS=$(python3 -c "import os; print(int(os.path.getmtime('$R/dist/build-info.json')*1000)+int('$offset_ms'))")
+  export FAKE_PM2_UPTIME_MS
+}
 WITH_HELPERS=1 setup on; git -C "$R" checkout -q "$TIP"; install_repo_helpers "$R" "$WORK/sbin-on"
+stamp_build_info 5000
 FAKE_PM2_PID=4242 run on --yes; rc=$?
 check "already on target skips" [ "$rc" = 0 ] && grep -q "already on .*, skipping" "$WORK/out" && ! grep -q "restart" "$WORK/pm2.log" && [ ! -d "$WORK/bk-on" ]
 WITH_HELPERS=1 setup onh; git -C "$R" checkout -q "$TIP"; install_repo_helpers "$R" "$WORK/sbin-onh"; echo old > "$WORK/sbin-onh/idea-flash-card"
@@ -210,6 +232,45 @@ check "on target but idea-usage-export differs: not skip, helper refreshed" [ "$
 WITH_HELPERS=1 setup dryusage; git -C "$R" checkout -q "$TIP"; install_repo_helpers "$R" "$WORK/sbin-dryusage"; rm -f "$WORK/sbin-dryusage/idea-usage-settings"
 FAKE_PM2_PID=4242 run dryusage --dry-run; rc=$?
 check "dry-run lists idea-usage-settings WOULD CHANGE and does not install" [ "$rc" = 0 ] && grep -q "idea-usage-settings" "$WORK/out" && grep -q "WOULD CHANGE" "$WORK/out" && [ ! -f "$WORK/sbin-dryusage/idea-usage-settings" ] && [ ! -e "$WORK/pm2.log" ] && [ ! -d "$WORK/bk-dryusage" ]
+
+# idea#512: command-log rotation, running-sha skip, midnight window
+setup rot; FAKE_BUILD_ROTATE=1 run rot --yes; rc=$?
+check "command-log rotation during build does not abort" [ "$rc" = 0 ]
+check "command-log rotation is logged and live URL is kept" grep -q "treating as command-log rotation" "$WORK/out" && [ "$(cat "$R/store-identity/command-log-url.txt")" = automerge:cmdlogRotated ]
+check "command-log rotation leaves store-url unchanged and still restarts" [ "$(cat "$R/store-identity/store-url.txt")" = "$POOL" ] && grep -q "restart engine" "$WORK/pm2.log"
+check "command-log rotation never restores the old URL" [ "$(cat "$R/store-identity/command-log-url.txt")" = automerge:cmdlogRotated ]
+check "command-log rotation leaves the new day file in place" [ "$(cat "$R/store-identity/command-log-day.txt")" = "2026-11-14" ]
+
+setup rotstore; FAKE_BUILD_CLOBBER=1 FAKE_BUILD_ROTATE=1 run rotstore --yes; rc=$?
+check "store-url change still aborts even if the command log also rotated" [ "$rc" = 3 ] && grep -q "before pm2 restart: store-identity/store-url.txt" "$WORK/out" && [ ! -e "$WORK/pm2.log" ]
+
+# HEAD + dist already the tip, but the running process started before this dist was written.
+WITH_HELPERS=1 setup stale; git -C "$R" checkout -q "$TIP"; install_repo_helpers "$R" "$WORK/sbin-stale"
+stamp_build_info -600000
+FAKE_PM2_PID=4242 run stale --yes; rc=$?
+check "on target but running Engine is older: does not skip, restarts" [ "$rc" = 0 ] && grep -q "running Engine is older" "$WORK/out" && grep -q "restart engine" "$WORK/pm2.log" && ! grep -q "skipping" "$WORK/out"
+
+# No build-info: cannot prove the running sha, so do not skip on HEAD alone.
+WITH_HELPERS=1 setup nobi; git -C "$R" checkout -q "$TIP"; install_repo_helpers "$R" "$WORK/sbin-nobi"
+unset FAKE_PM2_UPTIME_MS || true
+FAKE_PM2_PID=4242 run nobi --yes; rc=$?
+check "on target but no build-info: does not skip, restarts" [ "$rc" = 0 ] && grep -q "running Engine is older" "$WORK/out" && grep -q "restart engine" "$WORK/pm2.log" && ! grep -q "skipping" "$WORK/out"
+
+setup mid; DEPLOY_CLOCK_HM=00:00 run mid --yes; rc=$?
+check "midnight 00:00 refuses without --allow-midnight" [ "$rc" = 3 ] && grep -q "refusing to deploy between 23:55 and 00:05" "$WORK/out" && [ "$(git -C "$R" rev-parse HEAD)" != "$TIP" ] && [ ! -e "$WORK/pm2.log" ] && [ ! -d "$WORK/bk-mid" ]
+setup mid55; DEPLOY_CLOCK_HM=23:55 run mid55 --yes; rc=$?
+check "midnight 23:55 refuses" [ "$rc" = 3 ] && grep -q "refusing to deploy between 23:55 and 00:05" "$WORK/out" && [ ! -e "$WORK/pm2.log" ]
+setup mid05; DEPLOY_CLOCK_HM=00:05 run mid05 --yes; rc=$?
+check "midnight 00:05 refuses" [ "$rc" = 3 ] && grep -q "refusing to deploy between 23:55 and 00:05" "$WORK/out" && [ ! -e "$WORK/pm2.log" ]
+setup midgo; DEPLOY_CLOCK_HM=00:00 run midgo --yes --allow-midnight; rc=$?
+check "--allow-midnight deploys at 00:00" [ "$rc" = 0 ] && grep -q "restart engine" "$WORK/pm2.log" && [ "$(git -C "$R" rev-parse HEAD)" = "$TIP" ]
+setup mid54; DEPLOY_CLOCK_HM=23:54 run mid54 --yes; rc=$?
+check "23:54 is outside the window and deploys" [ "$rc" = 0 ] && grep -q "restart engine" "$WORK/pm2.log"
+setup mid06; DEPLOY_CLOCK_HM=00:06 run mid06 --yes; rc=$?
+check "00:06 is outside the window and deploys" [ "$rc" = 0 ] && grep -q "restart engine" "$WORK/pm2.log"
+# remote forwards --allow-midnight in $*
+BOX_LOCK_DIR="$WORK" SSH_CMD=true bash "$REMOTE" idea04 abc --yes --allow-midnight > "$WORK/out" 2>&1; rc=$?
+check "box remote forwards --allow-midnight" [ "$rc" = 0 ]
 
 # Temperature guard (mocked vcgencmd reads a queue of temps; last value repeats)
 cat > "$WORK/bin/vcgencmd" <<'SH'
