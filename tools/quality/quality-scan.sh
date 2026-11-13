@@ -754,12 +754,18 @@ run_engine_tests_box() {
 QUALITY_SCAN_BOX_EXCEPTIONS="${QUALITY_SCAN_BOX_EXCEPTIONS:-${SCRIPT_DIR}/engine-box-exceptions.txt}"
 
 # Failed vitest tests: "<file> > <suite> > <test><TAB><docker>" per line (deduped),
-# <docker>=1 when that failure's first Error line is "docker: command not found".
+# <docker>=1 when that failure's first Error line is "docker: command not found"
+# or "Cannot connect to the Docker daemon" (CLI present, no daemon; idea#500).
 engine_failed_tests() {
   printf '%s\n' "$1" | awk '
     function flush() { if (name != "") print name "\t" dock; name = ""; dock = 0; seen = 0 }
     /^ *FAIL  / { flush(); n = $0; sub(/^ *FAIL  /, "", n); sub(/ +$/, "", n); name = n; next }
-    name != "" && !seen && /^[A-Za-z]*Error:/ { seen = 1; if ($0 ~ /^Error: .*line [0-9]+: docker: command not found *$/) dock = 1; next }
+    name != "" && !seen && /^[A-Za-z]*Error:/ {
+      seen = 1
+      if ($0 ~ /^Error: .*line [0-9]+: docker: command not found *$/ ||
+          $0 ~ /^Error: (.*: )?(docker: )?Cannot connect to the Docker daemon/) dock = 1
+      next
+    }
     /⎯\[[0-9]+\/[0-9]+\]⎯/ { flush() }
     END { flush() }' | sort -u
 }
