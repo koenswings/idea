@@ -48,16 +48,17 @@ If you do not see **Open**, stop. Do not press anything else. Tell the person wa
 
 1. On the new tab, type your username and click **NEXT**.
 2. If Kolibri then asks for a password, type it and click **Sign in**.
-3. You should see **Coach**. If Kolibri shows a list of classes, click **Form 3**. You land on **Class home** for that class.
 
 ![F3-04-sign-in](shots/f3-04-sign-in.png)
+
+You should see **Coach**. If Kolibri shows a list of classes, click **Form 3**. You land on **Class home** for that class.
+
+![F3-05-classes](shots/f3-05-classes.png)
 
 ### 3. Open the lesson
 
 1. In **Coach**, click **Lessons**.
 2. Click **Form 3 Duration Lesson**.
-
-![F3-05-classes](shots/f3-05-classes.png)
 
 ![F3-06-lessons](shots/f3-06-lessons.png)
 

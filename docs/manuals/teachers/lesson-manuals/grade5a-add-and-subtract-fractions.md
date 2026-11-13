@@ -48,16 +48,17 @@ If you do not see **Open**, stop. Do not press anything else. Tell the person wa
 
 1. On the new tab, type your username and click **NEXT**.
 2. If Kolibri then asks for a password, type it and click **Sign in**.
-3. You should see **Coach**. If Kolibri shows a list of classes, click **Grade 5A**. You land on **Class home** for that class.
 
 ![G5A-04-sign-in](shots/g5a-04-sign-in.png)
+
+You should see **Coach**. If Kolibri shows a list of classes, click **Grade 5A**. You land on **Class home** for that class.
+
+![G5A-05-classes](shots/g5a-05-classes.png)
 
 ### 3. Open the lesson
 
 1. In **Coach**, click **Lessons**.
 2. Click **Grade 5A Duration Lesson**.
-
-![G5A-05-classes](shots/g5a-05-classes.png)
 
 ![G5A-06-lessons](shots/g5a-06-lessons.png)
 
