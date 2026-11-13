@@ -1679,3 +1679,7 @@
 {"ts":"2026-11-13T08:18:14Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: #408 token check + S-9 /.pre-update cleanup","previous":null}
 {"ts":"2026-11-13T08:19:53Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: #408 token check + S-9 /.pre-update cleanup"}
 {"ts":"2026-11-13T08:19:53Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-13T08:23:29Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid: idea#159 run 3 Kolibri capacity (agent-app-dev#41 tip dabee24); idea04 serves Kolibri, idea03 load only (WD 20070Q450002 untouched)","previous":null}
+{"ts":"2026-11-13T08:23:29Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-13T08:23:29Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: idea#159 run 3 Kolibri capacity (agent-app-dev#41 tip dabee24); idea03 load generator only, capped (kid-kolibri-demo, idea166-*, :18080, 0d8f9984, Disk B untouched)","previous":null}
+{"ts":"2026-11-13T08:23:29Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
