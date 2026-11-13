@@ -306,7 +306,7 @@
       "purpose": "test fixture for the kit Kolibri MORANGO restart hw test (idea#288 / app-kolibri#8) and other Ops hw tests",
       "history": "docked on idea03 2026-10-28 09:50 CET for idea#110; removed by Koen 2026-10-28, gone from lsblk 10:25 CET",
       "location": "docked on idea04 at /disks/sdb1 (Axle reported 2026-10-29 10:20 CET at idea04 release)",
-      "docked_on": "idea04",
+      "docked_on": null,
       "match_rule": "match by disk_serial, never by device name",
       "device": "/dev/sdb (USB 2-1; match by disk_serial, never by device name)",
       "label": "IDEA Disk",
