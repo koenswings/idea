@@ -320,7 +320,7 @@ ssh to pi
 ssh to pi
   cd /home/pi/idea/agents/agent-console-dev
   git fetch origin && git checkout <branch>
-  pnpm install --frozen-lockfile && pnpm build   # Vite → dist/
+  pnpm install --frozen-lockfile && pnpm build   # → dist/ (keeps dist.prev; rollback: rename dist.prev to dist)
   # Engine config.yaml: consolePath: /home/pi/idea/agents/agent-console-dev/dist
   pm2 restart engine
 HTTP check on http://<pi>/            (expect 200)
@@ -1114,7 +1114,7 @@ scripts/
 
 ```bash
 pnpm install        # first time or after package.json changes
-pnpm build          # Vite build → dist/
+pnpm build          # → dist/ via dist.new-<ts>/ swap (keeps dist.prev; rollback: rename dist.prev to dist)
 pnpm typecheck      # TypeScript check only
 ```
 
@@ -1147,7 +1147,7 @@ The fleet scripts handle deployment. For reference, the fleet deploy script:
 
 **Known gotchas**
 
-- pnpm build removes dist/ with sudo rm first. If permissions fail, check who owns dist/.
+- pnpm build writes into dist.new-<timestamp>/ and swaps into dist/ only after success, keeping one dist.prev. Rollback: rename dist.prev to dist. If permissions fail, check who owns dist/.
 - pnpm dev binds 0.0.0.0 — accessible at pi-tailscale-ip:5173 during dev.
 - Use mock store in tests — avoids needing a live Engine.
 - background.ts is legacy. Do not add feature logic there.
