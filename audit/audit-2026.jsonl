@@ -1781,4 +1781,6 @@
 {"ts":"2026-11-13T15:48:36Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-13T15:50:56Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-13T15:50:56Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle: #334 rebuild verify-sanitised 8/8","previous":null}
+{"ts":"2026-11-13T15:51:38Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-13T15:51:38Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: rename G5A+Form3 facility display name to IDEA School (kolibri-st9ddvr2mf957oebpgv); kid-kolibri-demo, Disk B untouched","previous":null}
 {"ts": "2026-11-13T15:45:22Z", "bot": "Marco", "action": "doc_update", "file": "docs/manuals/teachers/lesson-manuals/idea-grade-5a-add-and-subtract-fractions-v1.2.pdf", "summary": "Lesson manuals v1.2: all 28 screenshots (G5A-01-14, F3-01-14) retaken on Kolibri 0.19.5 and the current Console on the duration-test instance; text matched to the UI (Get 3 correct, Open grey while connecting, visibility message); v1.1 PDFs moved to superseded/"}
