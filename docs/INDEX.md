@@ -104,7 +104,7 @@ Files: `manuals/field/school-handover-note/README.md`, `manuals/field/school-han
 
 ## ops/boot-recovery.md
 **Status:** Authoritative  ·  **Maintained by:** Atlas
-What comes back after a reboot, fstab loop mounts for fixture disks (rules, rollback), the 05:00 reboot hold, after-reboot checklist.
+What comes back after a reboot (Engine-managed instances vs non-store fixtures), fstab loop mounts for duration-test images, the 05:00 reboot (as of 2026-11-13 17:45 CET: idea01 still `#D5-HOLD-IDEA01-20261010#` and left untouched; idea03 and idea04 now `#D5-HOLD-<pi>-20261113#`), quarantined idea03/idea04 leftovers (`quarantine-20261113-*`), idea01 idea166 leftovers left in place (golden), after-reboot checklist. Current pool is idea03/idea04; production hostname is idea.
 → [docs/ops/boot-recovery.md](ops/boot-recovery.md)
 
 ## ops/engine-deploy-pool-pi.md
@@ -114,5 +114,5 @@ Option-2 Engine deploy on a pool Pi: save, discard, check out and restore config
 
 ## ops/store-compaction-devpool.md
 **Status:** Authoritative (executed 2026-10-13)  ·  **Maintained by:** Atlas
-Runbook for compacting the dev-pool Automerge store into a fresh document (freeze, merge heads, swap, verify 13-18, rollback), with the result record: 3zoqd -> 2VroE on 2026-10-13 14:54-15:14 CEST, cover-all r86t 128/128 afterwards.
+Historical runbook and result record for compacting the dev-pool Automerge store (3zoqd -> 2VroE on 2026-10-13 14:54-15:14 CEST, cover-all r86t 128/128 afterwards). 2VroE is still the idea01/03/04 store; production idea has its own store (6f8m); kits use 3Vvv (idea#452). No automated weekly reset.
 → [docs/ops/store-compaction-devpool.md](ops/store-compaction-devpool.md)
