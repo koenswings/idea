@@ -24,7 +24,7 @@ The Engine image still ships those three cron lines in `script/build_image_asset
 
 ## 2. What does come back on its own
 - **Engine-managed instances** (in the store's instanceDB): yes, when their disk is visible again. At boot the Engine's USB monitor walks the watch folder (default `/dev/engine`, from `90-docking.rules`) and mounts App Disks under `/disks`. Duration-test fixtures that still use the Stage 1 layout are the exception: they are re-added from `~/idea/duration-watch` sentinels with `IDEA_DISKS_ROOT=~/idea/duration-disks`. After the disk is docked, AutoStart (idea#176) starts the instance unless an operator stop is still in force. Engine-managed containers do not rely on a Docker restart policy; the Engine starts them.
-- **Non-store fixture containers** (the 2026-10 duration sidecars `idea166-*`, `idea168-*`, as last recorded): only if they have a Docker restart policy. As of 2026-10-06 (r33): `unless-stopped` for idea166-kiwix-live (idea01), idea168-kolibri-form3 and idea168-kolibri-g5a-khan (idea04). `idea166-nextcloud-live-*` on idea01 was left `restart=no` pending approval. Whether those containers are still present has not been re-checked in this refresh (box-only).
+- **Non-store fixture containers** (`idea166-*`, `idea168-*`): only if they have a Docker restart policy. As of 2026-10-06 (r33): `unless-stopped` for idea166-kiwix-live (idea01), idea168-kolibri-form3 and idea168-kolibri-g5a-khan (idea04). `idea166-nextcloud-live-*` on idea01 was left `restart=no` pending approval. Live presence was re-checked on 2026-11-13 (idea01 and idea03; idea04 pending): leftover containers are still present but all **Exited**; see **Leftover fixtures for later quarantine** below. Remove nothing until that cleanup is agreed.
 
 ## 3. Loop mounts at boot (/etc/fstab)
 Duration-test loop images need an fstab line so the slot path is mounted before the Engine's pm2 unit:
@@ -32,7 +32,11 @@ Duration-test loop images need an fstab line so the slot path is mounted before 
 # idea duration-test loop images (nofail; before Engine pm2-pi)
 /home/pi/idea/duration-disk-images/idea-test-N.ext4.img /home/pi/idea/duration-disks/idea-test-N ext4 loop,nofail,x-systemd.before=pm2-pi.service 0 0
 ```
-Last recorded in place on idea01 for idea-test-3/4/5 (r33, 2026-10-06 05:49) and idea-test-6 (r39, 17:32). idea01 is golden and read-only now: do not add or edit fstab there unless Steve has a window. Whether those lines are still present has not been re-checked in this refresh (box-only).
+Observed on **idea01** on 2026-11-13 17:29:36 CET: the four duration-test lines (idea-test-3/4/5/6) are still in `/etc/fstab`, but each is commented with a `#STAGE2-20261009#` prefix, so they do not mount at boot. `findmnt` has no `duration-disks` or loop-backed ext4 mounts (only `/` and `/disks/sdb1`). `/sbin/losetup -l` shows no loop device for those images (the only loop device is `/var/swap` on `loop0`; leave it alone). idea01 is golden and read-only: do not uncomment or edit fstab there unless Steve has a window.
+
+Observed on **idea03** on 2026-11-13 17:28:40 CET: `/etc/fstab` has only the root and boot entries (no duration-test loop lines). No duration-disk mounts; `/sbin/losetup -l` likewise has no duration-test image (only `/var/swap` on `loop0`).
+
+**idea04:** pending (held by Axle; to be read later under a separate claim).
 
 Rules for applying a new line (pool Pis only, under a claim):
 1. Back up first: `cp /etc/fstab /etc/fstab.bak-<run>-<ts>`.
@@ -46,9 +50,13 @@ Rollback: `cp /etc/fstab.bak-<run>-<ts> /etc/fstab && systemctl daemon-reload`.
 Caveat: data on the images now survives a reboot. A reboot no longer "resets" fixtures, so re-seed the empty and add-files images before a walk (Path A reset).
 
 ## 4. The 05:00 reboot during test work
+The 05:00 reboot is defined in the **root crontab** (the same three lines the Engine image ships in `script/build_image_assets/crondefs`). It is not in `/etc/cron.d`, `/etc/crontab`, or a systemd timer. User `pi` has no crontab. A hold looks like the reboot line left in place but commented with a `#D5-HOLD-…#` prefix.
+
+- **idea01 (observed 2026-11-13 17:29:36 CET):** the D5 hold is still in place. Root crontab (installed 2026-10-10 10:09:40 CET) has `#D5-HOLD-IDEA01-20261010# 0 5 * * * /sbin/shutdown -r now`. The hourly `systemctl restart avahi-daemon` and `@reboot /usr/local/bin/boot.sh` lines are still active. Backups remain in `~/idea/quarantine-stage2-20261009/` (`root-crontab.bak-20261009-1452`, `root-crontab.bak-20261010-1011`, plus `fstab.stage1`).
+- **idea03 (observed 2026-11-13 17:28:40 CET):** the D5 hold is **not** in place. Root crontab has a live `0 5 * * * /sbin/shutdown -r now` (no `#D5-HOLD-` prefix), plus the hourly avahi restart and `@reboot boot.sh`. The file header says it was installed from `/home/pi/idea/root-crontab.bak-20261011-0243` on 2026-10-11 11:34:25 CET. `~/idea/quarantine-stage2-20261009/` is not present. **Do not schedule a walk across 05:00 on idea03.**
+- **idea04:** pending (held by Axle; to be read later under a separate claim). Production `idea` and idea02 were last recorded (2026-10-11) as still having the live 05:00 line; they were not re-checked here.
 - The image default remains `0 5 * * * /sbin/shutdown -r now`. Later runbooks (scheduled backup, field-usage, hub services) still treat that reboot as current on production `idea` and on kits.
-- As last recorded on 2026-10-11 (check the root crontab before relying on it), the 05:00 line was commented out on the then-pool (`#D5-HOLD-…#` prefix, backups in `~/idea/quarantine-stage2-20261009/`): idea01 since 2026-10-09/10, idea03 and idea04 since 2026-10-11. idea02 and production `idea` (fleet-state key `wizardly-hugle`) still had it. Live crontabs have not been re-read in this refresh (box-only).
-- Never schedule a walk across 05:00 where the reboot is active.
+- Never schedule a walk across 05:00 where the reboot is active. Check the root crontab before relying on it.
 - Restore after a hold: remove the prefix (rollback notes per Pi in the D5 hold files).
 
 ## 5. Boot hang (idea01, 2026-10-08)
@@ -61,3 +69,25 @@ Open suggestions (not applied): persistent journal on the pool, EEPROM update, c
 3. Instances Running per store, subject to AutoStart (an operator-stopped app stays stopped). Start non-store fixture containers by hand if they have `restart=no`.
 4. As last recorded: G5A Kolibri can crash in python-zeroconf when it starts together with Form3. If it hangs instead of exiting: `docker restart idea168-kolibri-g5a-khan` (only if that container is still the one that hung).
 5. `check-fleet-health.sh --origin`.
+
+## 7. Leftover fixtures for later quarantine
+Read-only `docker ps -a` on 2026-11-13. **Remove nothing** until a cleanup is agreed. idea04 is pending.
+
+**idea03** (observed 2026-11-13 17:28:40 CET). No `idea168-*`. All listed containers are Exited:
+
+| Name | Status | Created | Image |
+|---|---|---|---|
+| `idea166-nextcloud-live-app` | Exited (0), 12 hours before the check | 2026-11-12 16:16:02 CET | `koenswings/nextcloud:1.0-31.0.1` |
+| `idea166-nextcloud-live-db` | Exited (0), 12 hours before the check | 2026-11-12 16:16:02 CET | `koenswings/nextcloud-mariadb:1.0-11.7.2-MariaDB-ubu2404` |
+| `idea166-kolibri-live` | Exited (143), 12 hours before the check | 2026-10-01 11:04:28 CEST | `koenswings/kolibri:1.0-0.15.5-dev` |
+
+**idea01** (observed 2026-11-13 17:29:36 CET; recorded here because the same check ran under the golden read-only claim). No `idea168-*`. All listed containers are Exited:
+
+| Name | Status | Created | Image |
+|---|---|---|---|
+| `idea166-kiwix-live` | Exited (143), 2 weeks before the check | 2026-10-05 12:47:02 CEST | `ghcr.io/kiwix/kiwix-serve:3.8.2` |
+| `idea166-nextcloud-live-app` | Exited (0), 2 weeks before the check | 2026-10-05 12:46:24 CEST | `koenswings/nextcloud:1.0-31.0.1` |
+| `idea166-kolibri-live` | Exited (143), 6 weeks before the check | 2026-10-01 22:42:14 CEST | `koenswings/kolibri:1.0-0.15.5-dev` |
+| `idea166-nextcloud-live-db` | Exited (0), 2 weeks before the check | 2026-10-01 22:42:14 CEST | `koenswings/nextcloud-mariadb:1.0-11.7.2-MariaDB-ubu2404` |
+
+**idea04:** pending (held by Axle; to be read later under a separate claim).
