@@ -37,7 +37,7 @@ Quality scan and version monitoring scripts. Lead Bot and App Dev Bot call these
 
 | Script | Purpose | Status |
 |--------|---------|--------|
-| `quality-scan.sh` | Full/PR quality gate: structure, hygiene, docs currency, domain bake-ins, staleness (full only), domain tests via Pi selection. JSON report on stdout; audit line in `audit/`. | **Implemented** |
+| `quality-scan.sh` | Full/PR quality gate: structure, hygiene, docs currency, domain bake-ins, staleness (full only), domain tests via Pi selection. Pool-Pi Engine tests (`QUALITY_SCAN_ENGINE_PI`) stop and restart pm2 `engine` and `idea-usage` as pi (idea#500; skip `idea-usage` if it is not in the list). JSON report on stdout; audit line in `audit/`. | **Implemented** |
 | `check-app-versions.sh` | Read app.yaml monitors, query DockerHub / http-scrape, return JSON updates (idea#88) | **Implemented** |
 | `selftest.sh` | Runs `quality-scan.sh` against `testdata/` fixtures (structural; no Pi required) | **Implemented** |
 | `lib-static-assets.sh` | `is_static_doc_asset`: docs/ files that are static assets (stylesheets, images, PDFs, sample JSON/YAML/CSV data, `styles/` `assets/` `screenshots/` `superseded/` folders), skipped by `docs.missing_from_index` and `staleness.doc` (idea#308). Markdown is always checked. | **Implemented** |

@@ -52,11 +52,12 @@ Paths (canonical Pi / local layout):
   --repo-root DIR → override parent of agents/ (fixtures: DIR/agents/<name>)
   remote tests    → same nesting under /home/pi/idea/
 
-Engine tests (idea#335, idea#332): run on pool Pi idea04 by default (claim, pm2 stop,
+Engine tests (idea#335, idea#332, idea#500): run on pool Pi idea04 by default (claim,
+  pm2 stop engine and idea-usage as pi — idea-usage is skipped if it is not in the pm2 list,
   run in a scratch clone under /home/pi/scratch (created when missing) checked out at origin/main
   HEAD, or at the --head SHA in --pr mode (scanned_sha/scanned_ref), then quarantine the clone (moved, never deleted: idea04 → ~/quarantine/<date>,
-  other Pis → ~/scratch/quarantine/<date>), pm2 restart + online check, release;
-  trap on failure/interrupt; needs BOT_NAME).
+  other Pis → ~/scratch/quarantine/<date>), pm2 restart of only the processes this run stopped + online check, release;
+  EXIT/INT/TERM trap restores those processes and does not override the scan exit status; needs BOT_NAME).
   Fallback chain idea04 → box (optional second Pi via QUALITY_SCAN_ENGINE_PI_FALLBACK): a Pi is skipped when it is claimed, held, not idle,
   unreachable, its pre-flight refuses, or the thermal guard aborts; every hop is recorded in
   checks.tests.fallback_chain (first hop also as fallback_from/fallback_reason/pool_attempt) and
@@ -644,7 +645,8 @@ check_bakeins() {
 
 # --- Engine test placement (idea#335; agent-engine-dev AGENTS.md "Where Engine tests run") ---
 # Default: run Engine tests on the box (no live Engine). Optional: a claimed idle
-# pool Pi with `pm2 stop engine` (QUALITY_SCAN_ENGINE_PI=<pi>). Never next to a live
+# pool Pi with `pm2 stop engine` and `pm2 stop idea-usage` as pi (QUALITY_SCAN_ENGINE_PI=<pi>;
+# idea-usage is skipped when it is not in the pm2 list). Never next to a live
 # production Engine (idea01 while live, idea02, 'idea'/production, kit Engines).
 # The idea#105 pre-flight in the Engine suite is NOT touched: IDEA_TEST_ALLOW_LIVE is
 # always unset for the test command.
@@ -830,7 +832,7 @@ engine_result() {
 }
 
 # Pool-Pi path (opt-in). Claims, stops pm2 engine as pi, runs, restores, releases.
-ENGINE_POOL_PI=""; ENGINE_POOL_HOST=""; ENGINE_POOL_WAS_ONLINE=0; ENGINE_POOL_CLAIMED=0; ENGINE_POOL_SCRATCH=""
+ENGINE_POOL_PI=""; ENGINE_POOL_HOST=""; ENGINE_POOL_STOPPED_ENGINE=0; ENGINE_POOL_STOPPED_USAGE=0; ENGINE_POOL_CLAIMED=0; ENGINE_POOL_SCRATCH=""
 QUALITY_SCAN_PI_SCRATCH_ROOT="${QUALITY_SCAN_PI_SCRATCH_ROOT:-/home/pi/scratch}"
 # Where a used scratch clone is moved (never deleted). idea04 keeps its quarantine in
 # ~/quarantine; the other pool Pis use <scratch root>/quarantine. QUALITY_SCAN_PI_QUARANTINE_ROOT
@@ -901,18 +903,26 @@ engine_pool_restore() {
       || echo "WARN: could not quarantine ${ENGINE_POOL_SCRATCH} on ${ENGINE_POOL_PI}" >&2
     ENGINE_POOL_SCRATCH=""
   fi
-  if [[ $ENGINE_POOL_WAS_ONLINE -eq 1 ]]; then
-    local back
-    engine_ssh "$ENGINE_POOL_HOST" "pm2 restart engine >/dev/null" >/dev/null 2>&1 \
-      || echo "WARN: pm2 restart engine failed on ${ENGINE_POOL_PI}; restore by hand" >&2
+  # Restart only processes this run actually stopped (idea#500). Order: engine, then idea-usage.
+  engine_pool_restart_one() {
+    local name="$1" back
+    engine_ssh "$ENGINE_POOL_HOST" "pm2 restart ${name} >/dev/null" >/dev/null 2>&1 \
+      || echo "WARN: pm2 restart ${name} failed on ${ENGINE_POOL_PI}; restore by hand" >&2
     back="$(engine_ssh "$ENGINE_POOL_HOST" "pm2 jlist 2>/dev/null" 2>/dev/null \
-      | jq -r '[.[] | select(.name=="engine" and .pm2_env.status=="online")] | length' 2>/dev/null || echo 0)"
+      | jq -r --arg n "$name" '[.[] | select(.name==$n and .pm2_env.status=="online")] | length' 2>/dev/null || echo 0)"
     if [[ "${back:-0}" == "0" ]]; then
-      echo "WARN: Engine on ${ENGINE_POOL_PI} is not online after pm2 restart; restore by hand" >&2
+      echo "WARN: ${name} on ${ENGINE_POOL_PI} is not online after pm2 restart; restore by hand" >&2
     else
-      echo "quality-scan: Engine on ${ENGINE_POOL_PI} restored (pm2 online)" >&2
+      echo "quality-scan: ${name} on ${ENGINE_POOL_PI} restored (pm2 online)" >&2
     fi
-    ENGINE_POOL_WAS_ONLINE=0
+  }
+  if [[ $ENGINE_POOL_STOPPED_ENGINE -eq 1 ]]; then
+    engine_pool_restart_one engine
+    ENGINE_POOL_STOPPED_ENGINE=0
+  fi
+  if [[ $ENGINE_POOL_STOPPED_USAGE -eq 1 ]]; then
+    engine_pool_restart_one idea-usage
+    ENGINE_POOL_STOPPED_USAGE=0
   fi
   if [[ $ENGINE_POOL_CLAIMED -eq 1 ]]; then
     STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" --null "$ENGINE_POOL_PI" claim >/dev/null 2>&1 || true
@@ -923,7 +933,7 @@ engine_pool_restore() {
 }
 
 run_engine_tests_pool() {
-  local repo="$1" root="$2" pi="${3:-$QUALITY_SCAN_ENGINE_PI}" host why online out rc=0 cmd remote_path
+  local repo="$1" root="$2" pi="${3:-$QUALITY_SCAN_ENGINE_PI}" host why online usage_online jlist out rc=0 cmd remote_path
   if why="$(engine_pi_forbidden "$pi")"; then
     jq -nc --arg r "${why%%:*}" --arg d "$why" '{status:"skipped",reason:$r,detail:$d}'
     return
@@ -943,27 +953,41 @@ run_engine_tests_pool() {
     jq -nc --arg pi "$pi" '{status:"skipped",reason:"pi_unreachable",pi:$pi}'
     return
   fi
-  online="$(engine_ssh "$host" "pm2 jlist 2>/dev/null" 2>/dev/null \
-    | jq -r '[.[] | select(.name=="engine" and .pm2_env.status=="online")] | length' 2>/dev/null || echo 0)"
-  # idea01 is stop-aware like the other pool Pis (idea#332): claim, pm2 stop, run, restore, release.
+  jlist="$(engine_ssh "$host" "pm2 jlist 2>/dev/null" 2>/dev/null || true)"
+  if ! printf '%s' "${jlist:-}" | jq -e . >/dev/null 2>&1; then jlist='[]'; fi
+  online="$(printf '%s' "$jlist" | jq -r '[.[] | select(.name=="engine" and .pm2_env.status=="online")] | length' 2>/dev/null || echo 0)"
+  usage_online="$(printf '%s' "$jlist" | jq -r '[.[] | select(.name=="idea-usage" and .pm2_env.status=="online")] | length' 2>/dev/null || echo 0)"
+  # idea01 is stop-aware like the other pool Pis (idea#332 / idea#500): claim, pm2 stop
+  # engine and idea-usage (as pi; skip idea-usage when it is not in the list), run, restore, release.
   # Claim (update-fleet-state.sh holds the flock).
   if ! STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" "$pi" claim "${BOT_NAME} quality-scan engine tests" >/dev/null 2>&1; then
     jq -nc --arg pi "$pi" '{status:"skipped",reason:"claim_failed",pi:$pi}'
     return
   fi
   ENGINE_POOL_PI="$pi"; ENGINE_POOL_HOST="$host"; ENGINE_POOL_CLAIMED=1
+  ENGINE_POOL_STOPPED_ENGINE=0; ENGINE_POOL_STOPPED_USAGE=0
   # This function runs inside $(…), which does not inherit the top-level traps: set them here
-  # so a failure or interrupt still restores the Engine and releases the claim (idea#332).
+  # so a failure or interrupt still restores the processes this run stopped and releases the claim
+  # (idea#332, idea#500). The traps must not change the scan's exit status (EXIT uses || true;
+  # INT/TERM exit 130/143 and then EXIT restores).
   trap 'engine_pool_restore 2>/dev/null || true' EXIT
   trap 'exit 130' INT; trap 'exit 143' TERM
   STATE_FILE="$FLEET_STATE" "$QUALITY_SCAN_UFS" "$pi" status testing >/dev/null 2>&1 || true
   if [[ "${online:-0}" != "0" ]]; then
-    ENGINE_POOL_WAS_ONLINE=1
     if ! engine_ssh "$host" "pm2 stop engine >/dev/null" >/dev/null 2>&1; then
       engine_pool_restore
       jq -nc --arg pi "$pi" '{status:"skipped",reason:"pm2_stop_failed",pi:$pi}'
       return
     fi
+    ENGINE_POOL_STOPPED_ENGINE=1
+  fi
+  if [[ "${usage_online:-0}" != "0" ]]; then
+    if ! engine_ssh "$host" "pm2 stop idea-usage >/dev/null" >/dev/null 2>&1; then
+      engine_pool_restore
+      jq -nc --arg pi "$pi" '{status:"skipped",reason:"pm2_stop_failed",pi:$pi}'
+      return
+    fi
+    ENGINE_POOL_STOPPED_USAGE=1
   fi
   # idea#332: never run in the deployed tree. Clone it into a scratch dir, fetch origin/main there
   # and check out its HEAD SHA (recorded as scanned_sha), run, then quarantine the clone (moved,
