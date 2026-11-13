@@ -3,9 +3,10 @@
 # the box for the whole run (non-blocking; busy -> exit 75), so two routines on this box never deploy the
 # same Pi at once. The Pi-side lock in deploy-engine-pi.sh (/tmp/idea-deploy.lock) covers other boxes/bots.
 #
-#   tools/fleet/deploy-engine-remote.sh <host-or-ip> <tip-sha> [--fetch <branch>] [--dry-run|--yes]
+#   tools/fleet/deploy-engine-remote.sh <host-or-ip> <tip-sha> [--fetch <branch>] [--dry-run|--yes] [--allow-midnight]
 #
 # SSH goes straight to the Tailscale IP through the box SOCKS proxy (never a jump host).
+# Remaining args are forwarded to deploy-engine-pi.sh, including --allow-midnight (idea#512).
 # Env overrides (tests): SSH_CMD, BOX_LOCK_DIR, PROXY.
 set -euo pipefail
 HOST="${1:?usage: <host-or-ip> <tip-sha> [args...]}"; shift
