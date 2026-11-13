@@ -1,28 +1,32 @@
-**Status:** Draft (idea#181, ops side) · **Maintained by:** Atlas / Steve · 27 October 2026
+**Status:** Draft (idea#181, ops side) · **Maintained by:** Atlas / Steve · 13 November 2026 (Tailscale section aligned with idea#117)
 
 # IDEA security overview (ops view)
 
 This page explains how IDEA is secured and which risks are still open. It is written for Koen, the IDEA team and future operators. The decisions it records come from idea#181. **This page contains no secret values**: it names where each one lives, never what it is.
 
+The Tailscale field-access model (how staff reach Pis and schools, enrolment, and what is still open) is in [`docs/ops/tailscale-field-access.md`](tailscale-field-access.md) (idea#117).
+
 ## 1. Remote access: Tailscale
 
 - Tailscale is always on at every school, on the router and on every Pi.
-- There is **one fleet tag, `tag:idea`, and one fleet auth key**. There are no tags or keys per school, so a Pi can move to another school without any admin step.
+- There is **one fleet tag, `tag:idea`, and one reusable fleet auth key** (tagged `tag:idea`). There are no tags or keys per school, so a Pi can move to another school without any admin step.
 - ACL rules:
   - admins → `tag:idea` (all Pis and routers): allowed;
   - `tag:idea` → anything: **denied**, so there is no Pi-to-Pi or school-to-school traffic over the tailnet.
+  - A later idea#416 exception allows only the usage-dashboard sidecar (`tag:idea-hub`) to reach `tag:idea` on tcp/22. It does not give school Pis Pi-to-Pi access. See `tools/fleet/field-usage-acl.md`.
 - Pis talk to each other only over the school LAN (the Engine websocket and mDNS).
 - An admin on one Pi or router can reach the rest of that school's LAN. An attacker on a compromised Pi can do the same, but is confined to that one school.
 - Tagged devices don't expire and don't belong to a person.
-- **The auth key is never written into a document, repo, image or log.** It is entered at install or flash time. Ops boxes keep their copy in a 0600 file outside any repo.
-- Ops reaches Pis directly on their Tailscale IP, never through a jump host.
-- **Current state differs from this design (read-only audit 29 Oct 2026, [idea#117](https://github.com/koenswings/idea/issues/117)):**
+- **The auth key is never written into a document, repo, image or log.** A new Engine joins once at first boot (engine#291, idea#117 option 3) and then deletes the key. Ops boxes keep their copy in a 0600 file outside any repo.
+- Ops reaches Pis directly on their Tailscale IP, never through a jump host. Production idea is reached as `idea.tail2d60.ts.net:<port>` (IPv4 fallback `100.115.60.6`).
+- **Current state versus this design** (audits 29 Oct and 10 Nov 2026, recorded on [idea#117](https://github.com/koenswings/idea/issues/117) and in `tools/fleet/tag-fleet-idea-tc.md`):
   - The kit Pis and kit routers (sunny-robin, happy-zebra, kind-panda) carry `tag:idea` and have no node-key expiry.
-  - The five fleet Pis (idea01–04 and `idea`) are **untagged** and their node keys expire; idea02 and idea03 expire on 2 December 2026 14:36 CET unless Koen tags them or disables key expiry in the admin console (idea#375).
-  - Not yet confirmed in the admin console: whether the fleet auth key itself is tagged, reusable or ephemeral, its expiry, and whether the ACL already makes `tag:idea` reach nothing.
+  - The five fleet Pis (idea01–04 and `idea`) were still **untagged** on 10 November 2026 and their node keys expire; idea02 and idea03 expire on 2 December 2026 14:36 Europe/Brussels unless Koen tags them (with re-auth or Disable key expiry) in the admin console (idea#375 T-c).
+  - Not yet confirmed in the admin console (idea#375 T-a): whether the fleet auth key itself is tagged, reusable or ephemeral, and its expiry.
 
 ## 2. School network
 
+- Every school uses the same **`10.42.x` LAN**. Devices are identified by **sticker names**, not numbers. The router is `10.42.0.1`, Engines are DHCP `10.42.0.2`–`.9`, the switch is `10.42.0.10`. Student Wi-Fi `IDEA` is `10.42.1.0/24`; teacher Wi-Fi `IDEA-Teachers` is `10.42.2.0/24`.
 - **Student Wi-Fi `IDEA`** has its own firewall zone. Students can reach only the Pis: no internet, outside DNS and VPNs blocked, and no client-to-client traffic.
 - **Teacher Wi-Fi `IDEA-Teachers`** reaches the Pis, plus the internet through one rule that can be switched on and off.
 - The Pis don't forward traffic. The Starlink router runs in bypass mode with its own Wi-Fi off.
