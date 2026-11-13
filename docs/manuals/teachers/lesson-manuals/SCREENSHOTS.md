@@ -6,9 +6,11 @@ All 28 pictures in `shots/` were retaken for v1.2 (13 November 2026) on a durati
 
 How they were taken: headless browser (no address bar), staff sign-in with username, **NEXT**, password, **Sign in**; learners with username only. No error or warning messages, no IP addresses, ports or device names, and no passwords are on screen. Do not type a port. Do not invent a web address. Console access is `http://idea.local` or `http://<sticker>.local`.
 
-Console pictures (01 to 03): the test box also lists other test apps that a school box does not have, and its device name. Those cards and the device name were hidden from the picture, so only the **Kolibri** card with **Open** shows, as on a school box. Both lessons are on the same Kolibri app, so the Grade 5A and Form 3 Console and sign-in pictures show the same screen.
+Console pictures (01 to 03): the test box also lists other test apps that a school box does not have, and its device name. Those cards and the device name were hidden from the picture, so only the lesson card with **Open** shows, as on a school box. Both lessons are on the same Kolibri app, so the Grade 5A and Form 3 Console and sign-in pictures show the same screen.
 
 The sign-in pictures (04) were retaken after the facility was renamed to **IDEA School**; no picture shows the old test facility name.
+
+Console pictures 01 to 03 in both manuals were retaken for v1.3 (13 November 2026, Console main ffab96d) after the card was renamed **Grade 5A and Form 3**, with **Kolibri** underneath. The cards first say *Connecting to …* and need up to about 20 seconds before they appear and **Open** turns blue; the pictures were taken after that.
 
 Learner pictures use learner01 (shown as **Learner One**). After the learner pictures, the progress pictures show **Learner One** as **Started** and the other two learners as **Has not started**.
 
@@ -22,11 +24,11 @@ Manual: `grade5a-add-and-subtract-fractions.md`
 
 Lesson on screen: **Grade 5A Duration Lesson**. Topic: Add and subtract fractions.
 
-| Order | Shot id | Manual | Exact UI state to capture | Suggested filename | v1.2 status |
+| Order | Shot id | Manual | Exact UI state to capture | Suggested filename | Status |
 |------:|---------|--------|---------------------------|--------------------|-------------|
-| 1 | G5A-01-network | Grade 5A | Current Console **Apps** page. The **Kolibri** card with a blue **Open** button. No address bar. Do not show a typed port or a device name. | g5a-01-network.png | Done (v1.2) |
-| 2 | G5A-02-disk-apps | Grade 5A | Only if the duration-test box still shows a separate disk or app name for Grade 5A. Otherwise this can be the same **Apps** page, cropped to the Kolibri card. | g5a-02-disk-apps.png | Done (v1.2) |
-| 3 | G5A-03-app-open | Grade 5A | The Kolibri card with **Open** visible. **Start** is not the action being shown. | g5a-03-app-open.png | Done (v1.2) |
+| 1 | G5A-01-network | Grade 5A | Current Console **Apps** page. The **Grade 5A and Form 3** card, with **Kolibri** underneath and a blue **Open** button. No address bar. Do not show a typed port or a device name. | g5a-01-network.png | Done (v1.3) |
+| 2 | G5A-02-disk-apps | Grade 5A | Only if the duration-test box still shows a separate disk or app name for Grade 5A. Otherwise this can be the same **Apps** page, cropped to the Grade 5A and Form 3 card. | g5a-02-disk-apps.png | Done (v1.3) |
+| 3 | G5A-03-app-open | Grade 5A | The Grade 5A and Form 3 card with **Open** visible (blue, after the card has finished connecting). **Start** is not the action being shown. | g5a-03-app-open.png | Done (v1.3) |
 | 4 | G5A-04-sign-in | Grade 5A | Kolibri 0.19 sign-in page: facility name **IDEA School**, username field and **NEXT**. Same computer the Console was opened on. | g5a-04-sign-in.png | Done (v1.2) |
 | 5 | G5A-05-classes | Grade 5A | Teacher signed in. **Coach > Class home** for class **Grade 5A**, the screen right after sign-in. Sits in step 2 (Sign in), before **Lessons** is clicked. No **PLAN** or **REPORTS** tabs. | g5a-05-classes.png | Done (v1.2) |
 | 6 | G5A-06-lessons | Grade 5A | **Coach > Lessons**. The row **Grade 5A Duration Lesson** is visible, with its resources. | g5a-06-lessons.png | Done (v1.2) |
@@ -47,11 +49,11 @@ Manual: `form3-variables-and-expressions.md`
 
 Lesson on screen: **Form 3 Duration Lesson**. Topic: Variables and expressions.
 
-| Order | Shot id | Manual | Exact UI state to capture | Suggested filename | v1.2 status |
+| Order | Shot id | Manual | Exact UI state to capture | Suggested filename | Status |
 |------:|---------|--------|---------------------------|--------------------|-------------|
-| 1 | F3-01-network | Form 3 | Current Console **Apps** page. The **Kolibri** card with a blue **Open** button. No typed port or device name. | f3-01-network.png | Done (v1.2) |
-| 2 | F3-02-disk-apps | Form 3 | Only if the duration-test box still shows a separate disk or app name for Form 3. Otherwise this can be the same **Apps** page, cropped to the Kolibri card. | f3-02-disk-apps.png | Done (v1.2) |
-| 3 | F3-03-app-open | Form 3 | The Kolibri card with **Open** visible. **Start** is not the action being shown. | f3-03-app-open.png | Done (v1.2) |
+| 1 | F3-01-network | Form 3 | Current Console **Apps** page. The **Grade 5A and Form 3** card, with **Kolibri** underneath and a blue **Open** button. No typed port or device name. | f3-01-network.png | Done (v1.3) |
+| 2 | F3-02-disk-apps | Form 3 | Only if the duration-test box still shows a separate disk or app name for Form 3. Otherwise this can be the same **Apps** page, cropped to the Grade 5A and Form 3 card. | f3-02-disk-apps.png | Done (v1.3) |
+| 3 | F3-03-app-open | Form 3 | The Grade 5A and Form 3 card with **Open** visible (blue, after the card has finished connecting). **Start** is not the action being shown. | f3-03-app-open.png | Done (v1.3) |
 | 4 | F3-04-sign-in | Form 3 | Kolibri 0.19 sign-in page: facility name **IDEA School**, username field and **NEXT**. | f3-04-sign-in.png | Done (v1.2) |
 | 5 | F3-05-classes | Form 3 | Teacher signed in. **Coach > Class home** for class **Form 3**, the screen right after sign-in. Sits in step 2 (Sign in), before **Lessons** is clicked. No **PLAN** or **REPORTS** tabs. | f3-05-classes.png | Done (v1.2) |
 | 6 | F3-06-lessons | Form 3 | **Coach > Lessons**. The row **Form 3 Duration Lesson** is visible, with its resources. | f3-06-lessons.png | Done (v1.2) |
@@ -70,6 +72,7 @@ Lesson on screen: **Form 3 Duration Lesson**. Topic: Variables and expressions.
 
 - Grade 5A: 14 shots (G5A-01 through G5A-14), all retaken in v1.2.
 - Form 3: 14 shots (F3-01 through F3-14), all retaken in v1.2. F3-01, F3-02 and F3-03 are new in v1.2 and are now in the manual.
+- v1.3: G5A-01 to 03 and F3-01 to 03 retaken (Console card renamed).
 - Total: 28. Each manual has its own files. The Console and sign-in pictures (01 to 04) show the same screen in both manuals, because both lessons are on one Kolibri app.
 
 No Kolibri content ids in these shots. Capture visible names only.
