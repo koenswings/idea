@@ -1816,3 +1816,5 @@
 {"ts":"2026-11-13T16:34:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: Console main ffab96d deploy + live check + #499 read-only"}
 {"ts":"2026-11-13T16:34:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console main@ffab96da8debdcbfbda5674842305b1458cc3ed9","previous":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console main@cdda261e2bc4372db1b20194f8e72eb71f2e3800"}
 {"ts":"2026-11-13T16:34:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-13T16:37:49Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: removeInstance kolibri-st9ddvr2mf957oebpgv (Marco done); kid-kolibri-demo, Disk B, other instances untouched"}
+{"ts":"2026-11-13T16:37:49Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
