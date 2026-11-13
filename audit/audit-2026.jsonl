@@ -1799,5 +1799,25 @@
 {"ts":"2026-11-13T16:22:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console main@ffab96da8debdcbfbda5674842305b1458cc3ed9","previous":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console pr192@eee211a"}
 {"ts":"2026-11-13T16:22:30Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts": "2026-11-13T16:24:40Z", "bot": "Atlas", "action": "doc_update", "file": "docs/ops/boot-recovery.md, docs/ops/store-compaction-devpool.md, docs/manuals/install/scripts/router-tailscale-zone.sh", "summary": "idea#499: refresh boot-recovery, dev-pool store compaction runbook and router-tailscale-zone.sh against current fleet, stores and enrol path"}
+{"ts": "2026-11-13T16:27:38Z", "bot": "Marco", "action": "doc_update", "file": "docs/manuals/teachers/lesson-manuals/idea-grade-5a-add-and-subtract-fractions-v1.3.pdf", "summary": "Lesson manuals v1.3: Console card shots G5A-01-03 and F3-01-03 retaken (card now Grade 5A and Form 3, Kolibri underneath; Console main ffab96d); text says the card may briefly say it is connecting, then Open turns blue; v1.2 PDFs moved to superseded/"}
+{"ts":"2026-11-13T16:28:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"atlas (read-only #499)","previous":null}
+{"ts":"2026-11-13T16:28:24Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-13T16:28:45Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle: #334 rebuild verify-sanitised 8/8"}
+{"ts":"2026-11-13T16:28:45Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-13T16:29:06Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"atlas (read-only #499)"}
+{"ts":"2026-11-13T16:29:06Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-13T16:29:22Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":"atlas (read-only #499)","previous":null}
+{"ts":"2026-11-13T16:29:22Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-13T16:29:41Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: Console main ffab96d deploy + live check + #499 read-only","previous":null}
+{"ts":"2026-11-13T16:29:41Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-13T16:29:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"atlas (read-only #499)"}
+{"ts":"2026-11-13T16:29:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
 {"ts": "2026-11-13T16:30:26Z", "bot": "Atlas", "action": "doc_update", "file": "docs/ops/boot-recovery.md", "summary": "idea#499 / PR #509: dated 2026-11-13 CET read-only facts for D5 hold, idea01 fstab loop lines, and leftover idea166 containers on idea01/idea03 (idea04 pending)"}
+{"ts":"2026-11-13T16:32:24Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: removeInstance kolibri-st9ddvr2mf957oebpgv (Marco done); kid-kolibri-demo, Disk B, other instances untouched","previous":null}
+{"ts":"2026-11-13T16:32:24Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-13T16:34:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: Console main ffab96d deploy + live check + #499 read-only"}
+{"ts":"2026-11-13T16:34:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-13T16:34:51Z","bot":"Atlas","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console main@ffab96da8debdcbfbda5674842305b1458cc3ed9","previous":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console main@cdda261e2bc4372db1b20194f8e72eb71f2e3800"}
 {"ts": "2026-11-13T16:37:00Z", "bot": "Atlas", "action": "doc_update", "file": "docs/ops/boot-recovery.md", "summary": "idea#499 / PR #509: fill idea04 pending entries from Steve read-only check at 17:31 CET (DISKSTATION-HOLD, no duration fstab, two Exited idea168 leftovers); pool Console main ffab96d"}
+{"ts":"2026-11-13T16:37:49Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: removeInstance kolibri-st9ddvr2mf957oebpgv (Marco done); kid-kolibri-demo, Disk B, other instances untouched"}
+{"ts":"2026-11-13T16:37:49Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}

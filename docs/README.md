@@ -17,7 +17,7 @@ This section lists the user-facing manuals and their current PDF versions. Each 
 | Manual | Current PDF | Folder |
 |---|---|---|
 | IDEA for Teachers: Tutorial | v2.1.1 | [`manuals/teachers/teacher-tutorial/`](manuals/teachers/teacher-tutorial/) |
-| Lesson manuals: Grade 5A — Add and subtract fractions, Form 3 — Variables and expressions | v1.2 | [`manuals/teachers/lesson-manuals/`](manuals/teachers/lesson-manuals/) |
+| Lesson manuals: Grade 5A — Add and subtract fractions, Form 3 — Variables and expressions | v1.3 | [`manuals/teachers/lesson-manuals/`](manuals/teachers/lesson-manuals/) |
 | IDEA for Operators: Tutorial | v1.1 | [`manuals/operators/operator-tutorial/`](manuals/operators/operator-tutorial/) |
 | IDEA Field Install Manual: School Server | v1.8 | [`manuals/install/install-manual-school-server/`](manuals/install/install-manual-school-server/) |
 | IDEA Field Install Manual: Classroom Computer | v2.6 | [`manuals/install/install-manual-classroom-computer/`](manuals/install/install-manual-classroom-computer/) |
