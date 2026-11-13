@@ -1791,4 +1791,6 @@
 {"ts":"2026-11-13T16:11:52Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: agent-console-dev#191 live check @5ddb94e"}
 {"ts":"2026-11-13T16:11:52Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console pr192@eee211a","previous":"engine main@bc17db3960cb021bc924083e3c9043f73beed771, console main@cdda261e2bc4372db1b20194f8e72eb71f2e3800"}
 {"ts":"2026-11-13T16:11:52Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-13T16:18:20Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-13T16:18:20Z","bot":"Atlas","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: Console main ffab96d deploy + live check","previous":null}
 {"ts": "2026-11-13T16:17:26Z", "bot": "Marco", "action": "doc_update", "file": "docs/manuals/teachers/teacher-tutorial/SCREENSHOTS.md", "summary": "idea#499 nit: ch. 4 learner retake list now names the S2 shots that exist (S2-01, S2-03, S2-03a); S2-02 was removed in v2.1.1"}
