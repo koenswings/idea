@@ -1,0 +1,75 @@
+// Field-usage ACL — Final (L-1 lockdown, idea#416 / idea#430).
+//
+// The policy Koen saved on 2026-11-11, minus the first `tests` entry.
+// Tailscale rejected a test with src autogroup:admin ("unknown user or
+// host"). Admin reach (autogroup:admin → tag:idea / tag:idea-hub) is
+// checked by probe-field-usage-acl.sh (the box re-probe), not by policy
+// tests.
+//
+// Live admin source (idea#375 T-b, confirmed 2026-11-11): autogroup:admin,
+// not group:admins. Do not invent a group that is not already defined.
+//
+// Grants: admins reach tag:idea and tag:idea-hub; tag:idea-hub may reach
+// tag:idea on tcp/22 only (plain OpenSSH, not Tailscale SSH). tag:idea
+// still initiates nothing. Tests cannot use "*" wildcards. The ssh check
+// rule is the existing one; do not add Tailscale SSH access rules.
+
+{
+  "tagOwners": {
+    "tag:idea": ["autogroup:admin"],
+    "tag:idea-hub": ["autogroup:admin"],
+  },
+
+  "grants": [
+    // Koen's devices and the bot computer reach every IDEA machine.
+    { "src": ["autogroup:admin"], "dst": ["tag:idea"], "ip": ["*"] },
+    // Koen's devices and the bot computer reach the dashboard node.
+    { "src": ["autogroup:admin"], "dst": ["tag:idea-hub"], "ip": ["*"] },
+    // The dashboard only pulls usage data over SSH.
+    { "src": ["tag:idea-hub"], "dst": ["tag:idea"], "ip": ["tcp:22"] },
+    // No rule starts from tag:idea: Pis reach nothing over Tailscale.
+  ],
+
+  "ssh": [
+    {
+      "action": "check",
+      "src": ["autogroup:member"],
+      "dst": ["autogroup:self"],
+      "users": ["autogroup:nonroot", "root"],
+    },
+  ],
+
+  "tests": [
+    {
+      "src": "tag:idea",
+      "proto": "tcp",
+      "deny": [
+        "tag:idea:22",
+        "tag:idea:80",
+        "tag:idea:443",
+        "tag:idea:3333",
+        "tag:idea:3334",
+        "tag:idea:8080",
+        "tag:idea:8081",
+        "tag:idea-hub:22",
+        "tag:idea-hub:80",
+        "tag:idea-hub:443",
+      ],
+    },
+    {
+      "src": "tag:idea-hub",
+      "proto": "tcp",
+      "accept": ["tag:idea:22"],
+      "deny": [
+        "tag:idea:80",
+        "tag:idea:443",
+        "tag:idea:3333",
+        "tag:idea:3334",
+        "tag:idea:8080",
+        "tag:idea:8081",
+        "tag:idea-hub:22",
+        "tag:idea-hub:80",
+      ],
+    },
+  ],
+}

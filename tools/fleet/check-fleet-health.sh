@@ -29,6 +29,10 @@
 #              (alert when a problem is new, changes, lasts beyond ALERT_REPEAT_SECS
 #              (default 7200) since the last alert, or clears). Adds an "alert" object,
 #              and creates/removes $HEALTH_DIR/PAUSED while the fleet is unhealthy.
+#              Known-offline hosts (fleet-state .known_offline.issue, typically a kit
+#              tracked on an open issue such as idea#288) still appear in the report
+#              (.known_offline, with the issue reference) and in the --alert signature,
+#              but do not create or keep PAUSED. An unmarked unreachable kit still pauses.
 #              Manual walk hold: while $HEALTH_DIR/HOLD exists, PAUSED is kept (created if
 #              missing) and never removed, even on a healthy run; the report then shows
 #              alert.hold=true, alert.fleet_changes_paused=true and alert.hold_file.
@@ -78,7 +82,7 @@ while [ $# -gt 0 ]; do
     --alert) ALERT=1; shift ;;
     --origin) ORIGIN=1; shift ;;
     --dhcp) DHCP_STRICT=1; shift ;;
-    -h|--help) sed -n '2,40p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,44p' "$0"; exit 0 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -136,6 +140,12 @@ for PI in "${PIS[@]}"; do
   claim="$(jq -r '.claim // empty' <<<"$entry")"
   status="$(jq -r '.status // "unknown"' <<<"$entry")"
   version="$(jq -r '.version // empty' <<<"$entry")"
+  # Explicit marker: {issue: "koenswings/idea#288", since: "..."} — required issue, optional since.
+  known_offline="$(jq -c 'if (.known_offline | type) == "object"
+      and ((.known_offline.issue // "") | type) == "string"
+      and (.known_offline.issue // "") != ""
+    then {issue: .known_offline.issue, since: (.known_offline.since // null)}
+    else null end' <<<"$entry")"
   claimed=false
   if [ -n "$claim" ] || [ "$status" != "idle" ]; then claimed=true; fi
   problems=()
@@ -143,8 +153,9 @@ for PI in "${PIS[@]}"; do
   if [ -z "$host" ]; then
     problems+=("no host/tailscale address in fleet-state")
     results+=("$(jq -nc --arg pi "$PI" --argjson claimed "$claimed" --arg claim "$claim" --arg status "$status" \
+      --argjson known_offline "$known_offline" \
       --argjson problems "$(printf '%s\n' "${problems[@]}" | jq -R . | jq -sc .)" \
-      '{pi:$pi,host:null,status:$status,claim:(if $claim=="" then null else $claim end),claimed:$claimed,ok:false,checks:{},problems:$problems}')")
+      '{pi:$pi,host:null,status:$status,claim:(if $claim=="" then null else $claim end),claimed:$claimed,known_offline:$known_offline,ok:false,checks:{},problems:$problems}')")
     continue
   fi
 
@@ -225,6 +236,7 @@ for PI in "${PIS[@]}"; do
   ok=true; [ ${#problems[@]} -gt 0 ] && ok=false
   results+=("$(jq -nc \
     --arg pi "$PI" --arg host "$host" --arg status "$status" --arg claim "$claim" --argjson claimed "$claimed" \
+    --argjson known_offline "$known_offline" \
     --argjson ok "$ok" --argjson reachable "$reachable" --arg http "$http" --argjson console_ok "$console_ok" --arg console_port "$console_port" \
     --argjson engine_ok "$engine_ok" --arg e_status "$e_status" --arg e_user "$e_user" \
     --arg e_restarts "$e_restarts" --arg prev "$prev" \
@@ -234,7 +246,7 @@ for PI in "${PIS[@]}"; do
     --argjson dhcp_ok "$dhcp_ok" --arg dhcp_vc "$dhcp_vc" --arg kit_addrs "$kit_addrs" \
     --argjson problems "$( [ ${#problems[@]} -gt 0 ] && printf '%s\n' "${problems[@]}" | jq -R . | jq -sc . || echo '[]')" \
     'def n: if .=="" then null else (tonumber? // .) end; def s: if .=="" then null else . end;
-     {pi:$pi, host:$host, status:$status, claim:($claim|s), claimed:$claimed, ok:$ok,
+     {pi:$pi, host:$host, status:$status, claim:($claim|s), claimed:$claimed, known_offline:$known_offline, ok:$ok,
       checks:{
         reachable:{ok:$reachable},
         console:{ok:$console_ok, http:($http|n), port:($console_port|n)},
@@ -252,6 +264,12 @@ report="$(printf '%s\n' "${results[@]}" | jq -sc --argjson now "$NOW" '
    unhealthy: [.[] | select(.ok|not) | select((.claimed|not) or (.checks.reachable.ok == false)) | .pi],
    claimed_with_problems: [.[] | select(.ok|not) | select(.claimed) | select(.checks.reachable.ok != false) | .pi],
    dhcp_unhealthy: [.[] | select(.checks.dhcp.ok == false) | .pi]}
+  | .known_offline = [.pis[]
+      | select((.known_offline.issue // "") != "")
+      | select(.ok|not)
+      | select((.claimed|not) or (.checks.reachable.ok == false))
+      | {pi, issue: .known_offline.issue, since: (.known_offline.since // null),
+         problems: (if .claimed then [.problems[] | select(startswith("unreachable"))] else .problems end)}]
   | .ok = (.unhealthy|length==0)')"
 
 if [ $ALERT -eq 1 ]; then
@@ -278,17 +296,21 @@ if [ $ALERT -eq 1 ]; then
   fi
   HOLD_FILE="$HEALTH_DIR/HOLD"
   hold=false; [ -e "$HOLD_FILE" ] && hold=true
+  # Alert signature is unchanged (known-offline problems still alert). PAUSED only
+  # follows problems that are not on a known-offline host. HOLD always wins.
+  pause_sig="$(jq -c --argjson ko "$(jq -c '.known_offline // []' <<<"$report")" \
+    '($ko | map(.pi)) as $skip | [.[] | select(.pi as $p | ($skip | index($p) | not))]' <<<"$sig")"
   if $hold; then
     # Manual walk hold: keep (or create) PAUSED and never remove it here.
     [ -f "$HEALTH_DIR/PAUSED" ] || echo "fleet changes paused (manual hold $HOLD_FILE) since $(date -u -d "@$NOW" +%FT%TZ)" > "$HEALTH_DIR/PAUSED"
-  elif jq -e '.signature|length>0' <<<"$decision" >/dev/null; then
+  elif jq -e 'length>0' <<<"$pause_sig" >/dev/null; then
     [ -f "$HEALTH_DIR/PAUSED" ] || echo "fleet changes paused by check-fleet-health.sh since $(date -u -d "@$NOW" +%FT%TZ)" > "$HEALTH_DIR/PAUSED"
   else
     rm -f "$HEALTH_DIR/PAUSED"
   fi
-  report="$(jq -c --argjson d "$decision" --arg paused "$HEALTH_DIR/PAUSED" --arg holdf "$HOLD_FILE" --argjson hold "$hold" \
+  report="$(jq -c --argjson d "$decision" --argjson pause_sig "$pause_sig" --arg paused "$HEALTH_DIR/PAUSED" --arg holdf "$HOLD_FILE" --argjson hold "$hold" \
     '.alert = {send:$d.send, reason:$d.reason, unhealthy_since:(if $d.since then ($d.since|todate) else null end),
-               fleet_changes_paused: ($hold or ($d.signature|length>0)), pause_file:$paused,
+               fleet_changes_paused: ($hold or ($pause_sig|length>0)), pause_file:$paused,
                hold:$hold, hold_file:(if $hold then $holdf else null end)}' <<<"$report")"
 fi
 

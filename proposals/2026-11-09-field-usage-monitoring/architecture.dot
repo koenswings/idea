@@ -1,0 +1,133 @@
+// IDEA field-usage monitoring — architecture
+// Existing = navy outline; New = amber fill; Deferred = dashed grey.
+// Structural Graphviz source, kept next to architecture.png.
+// The published PNG is rendered by render_architecture.py (matplotlib)
+// so type and layout stay readable at letter/A4 content width; Graphviz
+// is optional: dot -Tpng -Gdpi=180 architecture.dot -o architecture-dot.png
+
+digraph field_usage {
+  graph [
+    rankdir=LR
+    bgcolor="white"
+    fontname="Segoe UI, Helvetica, Arial, sans-serif"
+    fontsize=12
+    label="IDEA field-usage monitoring — existing (navy) and new (amber) modules"
+    labelloc=t
+    pad=0.3
+    nodesep=0.35
+    ranksep=0.7
+    splines=polyline
+  ];
+  node [
+    shape=box
+    style="rounded,filled"
+    fontname="Segoe UI, Helvetica, Arial, sans-serif"
+    fontsize=10
+    color="#1e3a5f"
+    fillcolor="#f8fafc"
+    fontcolor="#0b1f33"
+  ];
+  edge [
+    fontname="Segoe UI, Helvetica, Arial, sans-serif"
+    fontsize=9
+    color="#334155"
+  ];
+
+  // —— Field kit ——————————————————————————————————————————————
+  subgraph cluster_kit {
+    label="Field kit (one school)"
+    bgcolor="#f1f5f9"
+    color="#1e3a5f"
+    style="rounded"
+    fontsize=12
+    fontcolor="#0b1f33"
+
+    clients [label="Classroom clients\n(school LAN)"];
+    router  [label="Router\nIDEA / IDEA-Teachers Wi-Fi"];
+    kolibri [label="Kolibri\n(one DB per instance)"];
+    nextcloud [label="Nextcloud + MariaDB\n+ Collabora CODE"];
+    kiwix [label="Kiwix\n(ZIM files, read-only)"];
+
+    k_hook  [label="Kolibri usage hook" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412"];
+    nc_hook [label="Nextcloud usage hook" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412"];
+    kx_proxy [label="Kiwix access-log\nproxy sidecar" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412"];
+    kx_hook [label="Kiwix usage hook" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412"];
+
+    engine [label="Engine (pm2)\nConsole :80"];
+    automerge [label="Automerge store\nusage is NEVER written here"];
+    sampler [label="Presence sampler\n(every 5 min)" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412"];
+    runner [label="Hook runner" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412"];
+    summaries [label="Day summaries\n/var/lib/idea/usage/<day>/<instanceId>.json\n(pi-owned, created at install)" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412"];
+    export [label="Restricted export\n(SSH forced command)" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412"];
+    kit_ts [label="Tailscale client\ntag:idea"];
+    d2 [label="D2 Console Usage panel\n(later, this kit only)" style="rounded,dashed,filled" fillcolor="#f1f5f9" color="#64748b" fontcolor="#475569"];
+  }
+
+  // —— Tailscale ———————————————————————————————————————————————
+  subgraph cluster_ts {
+    label="Tailscale tailnet"
+    bgcolor="#eff6ff"
+    color="#1d4ed8"
+    style="rounded"
+    fontsize=12
+
+    acl [label="ACL\ntag:idea-hub → tag:idea :22 only\nno kit-to-kit traffic" fillcolor="#dbeafe" color="#1d4ed8"];
+  }
+
+  // —— idea ————————————————————————————————————————————————————
+  subgraph cluster_idea {
+    label="idea (programme hub Pi)"
+    bgcolor="#f8fafc"
+    color="#0b1f33"
+    style="rounded"
+    fontsize=12
+
+    idea_engine [label="Engine (existing)\nConsole :80, Automerge"];
+    milkwise [label="MilkWise :3333 / :3334\nuntouched — not connected" fillcolor="#e2e8f0" color="#94a3b8" fontcolor="#64748b"];
+
+    collector [label="Collector\nTailscale LocalAPI trigger\nno LLM" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412"];
+    sqlite [label="SQLite store\n(on idea only)" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412"];
+    backup [label="Daily backup" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412"];
+    web [label="Web dashboard" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412"];
+    dashboard [label="app-usage-dashboard\n(IDEA App on idea)" fillcolor="#fef3c7" color="#b45309" fontcolor="#9a3412" shape=folder];
+  }
+
+  people [label="Koen / Marco\nbrowser" fillcolor="#e0f2fe" color="#075985" fontcolor="#0c4a6e"];
+
+  // School LAN
+  clients -> router [label="HTTP"];
+  router -> kolibri;
+  router -> nextcloud;
+  router -> kiwix;
+  kiwix -> kx_proxy [label="HTTP via sidecar"];
+
+  // Hooks read app data (on the kit, usernames stay)
+  kolibri -> k_hook [label="read-only\nqueries"];
+  nextcloud -> nc_hook [label="read-only\nqueries"];
+  kx_proxy -> kx_hook [label="access log"];
+
+  k_hook -> runner;
+  nc_hook -> runner;
+  kx_hook -> runner;
+  runner -> summaries [label="JSON\nrole-level counts"];
+  sampler -> summaries [label="power-on\nsamples"];
+  summaries -> export;
+  summaries -> d2 [style=dashed color="#64748b" label="later"];
+
+  engine -> automerge [label="state only\n(not usage)"];
+  engine -> sampler [style=dotted];
+  engine -> runner [style=dotted];
+
+  // Across the tailnet
+  kit_ts -> acl [label="uplink events\nOnline / LastSeen" color="#0f766e" fontcolor="#0f766e"];
+  acl -> collector [color="#0f766e"];
+  collector -> export [label="E1 pull over SSH\nrole-level counts only" color="#1d4ed8" fontcolor="#1d4ed8" dir=back];
+
+  collector -> sqlite;
+  sqlite -> backup;
+  sqlite -> web;
+  web -> people [label="dashboard\nover Tailscale" color="#1e3a5f"];
+
+  // Explicitly no edge from anything to automerge for usage,
+  // and no edge to or from milkwise.
+}

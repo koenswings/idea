@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IDEA Field Usage — design mockup</title>
+<style>
+  :root {
+    --navy: #0b1f33;
+    --navy-2: #14324f;
+    --blue: #1d4ed8;
+    --blue-soft: #dbeafe;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --bg: #eef2f6;
+    --card: #ffffff;
+    --good: #047857;
+    --good-bg: #d1fae5;
+    --amber: #b45309;
+    --amber-bg: #fef3c7;
+    --grey: #64748b;
+    --grey-bg: #e2e8f0;
+    --alert: #9f1239;
+    --alert-bg: #ffe4e6;
+    --teal: #0f766e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+  }
+  .app {
+    width: 1440px;
+    margin: 0 auto;
+    background: var(--bg);
+  }
+  header {
+    background: linear-gradient(90deg, var(--navy) 0%, var(--navy-2) 100%);
+    color: white;
+    padding: 18px 32px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .mark {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: #f59e0b; color: var(--navy);
+    font-weight: 800; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    letter-spacing: -0.5px;
+  }
+  .brand h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.2px; }
+  .brand p { margin: 2px 0 0; font-size: 12px; color: #cbd5e1; }
+  .meta { text-align: right; font-size: 12px; color: #cbd5e1; }
+  .meta strong { color: white; display: block; font-size: 13px; }
+  .banner {
+    margin: 16px 32px 0;
+    background: var(--alert-bg);
+    border: 1px solid #fecdd3;
+    color: var(--alert);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  .banner strong { font-weight: 700; }
+  .note {
+    margin: 10px 32px 0;
+    background: #fff7ed;
+    border: 1px dashed #fdba74;
+    color: #9a3412;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  .wrap { padding: 16px 32px 32px; }
+  h2 { font-size: 15px; margin: 22px 0 10px; color: var(--navy); }
+  .schools { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 16px 14px;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+  }
+  .card.selected { outline: 2px solid var(--blue); }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .school-name { font-size: 16px; font-weight: 700; margin: 0; }
+  .engine { color: var(--muted); font-size: 12px; margin: 2px 0 10px; }
+  .pill {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+    padding: 3px 8px; border-radius: 999px; text-transform: uppercase;
+  }
+  .pill.good { background: var(--good-bg); color: var(--good); }
+  .pill.amber { background: var(--amber-bg); color: var(--amber); }
+  .pill.grey { background: var(--grey-bg); color: var(--grey); }
+  .lines { display: flex; flex-direction: column; gap: 6px; }
+  .line { display: grid; grid-template-columns: 140px 1fr 52px; gap: 8px; align-items: center; font-size: 12px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .dot.good { background: var(--good); }
+  .dot.amber { background: #d97706; }
+  .dot.grey { background: #94a3b8; }
+  .bar { height: 6px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+  .bar > span { display: block; height: 100%; border-radius: 99px; }
+  .bar > span.good { background: var(--good); }
+  .bar > span.amber { background: #d97706; }
+  .bar > span.grey { background: #cbd5e1; }
+  .statrow { display: flex; gap: 16px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .statrow div { font-size: 11px; color: var(--muted); }
+  .statrow strong { display: block; color: var(--ink); font-size: 16px; }
+
+  .grid2 { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .kpi .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+  .kpi .value { font-size: 26px; font-weight: 700; margin: 4px 0 2px; color: var(--navy); }
+  .kpi .sub { font-size: 12px; color: var(--muted); }
+
+  .strip { display: flex; gap: 3px; align-items: flex-end; height: 56px; margin-top: 8px; }
+  .strip .h { width: 18px; border-radius: 3px 3px 0 0; background: #93c5fd; position: relative; }
+  .strip .h.off { background: #fecaca; }
+  .strip .h.low { background: #fcd34d; }
+  .days { display: flex; gap: 3px; margin-top: 4px; font-size: 10px; color: var(--muted); }
+  .days span { width: 18px; text-align: center; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; font-size: 11px; color: var(--muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  td { padding: 7px 8px; border-bottom: 1px solid #f1f5f9; }
+  .right { text-align: right; }
+  .tag { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #e0f2fe; color: #075985; }
+  .tag.demo { background: #f3e8ff; color: #6b21a8; }
+
+  .hours { display: flex; gap: 2px; align-items: flex-end; height: 72px; }
+  .hours i { display: block; width: 10px; border-radius: 2px 2px 0 0; background: var(--teal); }
+  .hours .lbl { display: none; }
+
+  footer {
+    background: var(--navy);
+    color: #94a3b8;
+    padding: 12px 32px;
+    font-size: 11px;
+    display: flex; justify-content: space-between;
+  }
+  footer span { color: #e2e8f0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="mark">I</div>
+      <div>
+        <h1>IDEA Field Usage</h1>
+        <p>Programme dashboard · running on idea · against the teacher tutorial</p>
+      </div>
+    </div>
+    <div class="meta">
+      <strong>Week of 3–7 Nov 2026</strong>
+      Last pull: 10 Nov 2026, 13:40 Europe/Brussels<br>
+      Stored only on idea · role-level counts, no names
+    </div>
+  </header>
+
+  <div class="banner"><strong>Help first.</strong> sunny-robin (Chigonda) shows a school-day power pattern but almost no learner activity this week — offer help on tutorial chapters 3.3–3.4 and 4. The dashboard never retracts a kit.</div>
+  <div class="note">Design mockup with illustrative sample numbers, not real measurements from the field kits.</div>
+
+  <div class="wrap">
+    <h2>Schools this week</h2>
+    <div class="schools">
+      <div class="card selected">
+        <div class="card-top">
+          <div>
+            <p class="school-name">Nharira</p>
+            <p class="engine">happy-zebra · own apps + Demo</p>
+          </div>
+          <span class="pill amber">Help</span>
+        </div>
+        <div class="lines">
+          <div class="line"><span><i class="dot good"></i>Available</span><div class="bar"><span class="good" style="width:82%"></span></div><span>4 / 5 days</span></div>
+          <div class="line"><span><i class="dot amber"></i>Set up</span><div class="bar"><span class="amber" style="width:55%"></span></div><span>Partial</span></div>
+          <div class="line"><span><i class="dot amber"></i>Teaching cycle</span><div class="bar"><span class="amber" style="width:40%"></span></div><span>Started</span></div>
+          <div class="line"><span><i class="dot amber"></i>Learners operate</span><div class="bar"><span class="amber" style="width:32%"></span></div><span>32%</span></div>
+          <div class="line"><span><i class="dot amber"></i>Nextcloud</span><div class="bar"><span class="amber" style="width:28%"></span></div><span>Teachers</span></div>
+          <div class="line"><span><i class="dot good"></i>Wikipedia</span><div class="bar"><span class="good" style="width:70%"></span></div><span>In use</span></div>
+        </div>
+        <div class="statrow">
+          <div><strong>2</strong>classes</div>
+          <div><strong>18</strong>learners registered</div>
+          <div><strong>2</strong>teachers</div>
+          <div><strong>6.4h</strong>Kolibri time</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-top">
+          <div>
+            <p class="school-name">Chigonda</p>
+            <p class="engine">sunny-robin · intermittent power</p>
+          </div>
+          <span class="pill amber">Help</span>
+        </div>
+        <div class="lines">
+          <div class="line"><span><i class="dot amber"></i>Available</span><div class="bar"><span class="amber" style="width:48%"></span></div><span>Cuts</span></div>
+          <div class="line"><span><i class="dot grey"></i>Set up</span><div class="bar"><span class="grey" style="width:20%"></span></div><span>Seeds only</span></div>
+          <div class="line"><span><i class="dot grey"></i>Teaching cycle</span><div class="bar"><span class="grey" style="width:8%"></span></div><span>None</span></div>
+          <div class="line"><span><i class="dot grey"></i>Learners operate</span><div class="bar"><span class="grey" style="width:5%"></span></div><span>Admin</span></div>
+          <div class="line"><span><i class="dot grey"></i>Nextcloud</span><div class="bar"><span class="grey" style="width:10%"></span></div><span>Idle</span></div>
+          <div class="line"><span><i class="dot grey"></i>Wikipedia</span><div class="bar"><span class="grey" style="width:12%"></span></div><span>Low</span></div>
+        </div>
+        <div class="statrow">
+          <div><strong>0</strong>own classes</div>
+          <div><strong>1</strong>learner seed</div>
+          <div><strong>7</strong>boots on Tue</div>
+          <div><strong>22m</strong>Kolibri time</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-top">
+          <div>
+            <p class="school-name">kind-panda</p>
+            <p class="engine">Not installed yet</p>
+          </div>
+          <span class="pill grey">No data</span>
+        </div>
+        <div class="lines">
+          <div class="line"><span><i class="dot grey"></i>Available</span><div class="bar"><span class="grey" style="width:0%"></span></div><span>Grey</span></div>
+          <div class="line"><span><i class="dot grey"></i>Set up</span><div class="bar"><span class="grey" style="width:0%"></span></div><span>Grey</span></div>
+          <div class="line"><span><i class="dot grey"></i>Teaching cycle</span><div class="bar"><span class="grey" style="width:0%"></span></div><span>Grey</span></div>
+          <div class="line"><span><i class="dot grey"></i>Learners operate</span><div class="bar"><span class="grey" style="width:0%"></span></div><span>Grey</span></div>
+          <div class="line"><span><i class="dot grey"></i>Nextcloud</span><div class="bar"><span class="grey" style="width:0%"></span></div><span>Grey</span></div>
+          <div class="line"><span><i class="dot grey"></i>Wikipedia</span><div class="bar"><span class="grey" style="width:0%"></span></div><span>Grey</span></div>
+        </div>
+        <div class="statrow">
+          <div><strong>—</strong>Grey never counts against a school</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Nharira · happy-zebra · week detail</h2>
+    <div class="grid4" style="margin-bottom:14px;">
+      <div class="kpi"><div class="label">Classes created (own Kolibri)</div><div class="value">2</div><div class="sub">current count · 1 added vs last week</div></div>
+      <div class="kpi"><div class="label">Learners registered</div><div class="value">18</div><div class="sub">12 enrolled in a class · ch. 3.2–3.3</div></div>
+      <div class="kpi"><div class="label">Teachers / coaches</div><div class="value">2</div><div class="sub">1 admin · own instance, not Demo</div></div>
+      <div class="kpi"><div class="label">Learner share of time</div><div class="value">32%</div><div class="sub">6.4 h total · rest coach/admin</div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <strong>Kit active / idle this week</strong>
+        <div class="sub" style="color:#64748b;font-size:12px;margin:4px 0 8px;">Presence sampler on the Engine (power) plus Tailscale uplink seen from idea. Red ticks are power-off gaps.</div>
+        <div class="strip">
+          <div class="h" style="height:70%"></div><div class="h" style="height:80%"></div><div class="h" style="height:40%"></div><div class="h" style="height:75%"></div><div class="h off" style="height:18%"></div>
+          <div class="h" style="height:88%"></div><div class="h" style="height:82%"></div><div class="h low" style="height:30%"></div><div class="h" style="height:78%"></div><div class="h off" style="height:12%"></div>
+          <div class="h" style="height:86%"></div><div class="h" style="height:90%"></div><div class="h" style="height:55%"></div><div class="h" style="height:70%"></div><div class="h off" style="height:15%"></div>
+          <div class="h" style="height:84%"></div><div class="h" style="height:76%"></div><div class="h" style="height:48%"></div><div class="h" style="height:66%"></div><div class="h off" style="height:20%"></div>
+          <div class="h" style="height:72%"></div><div class="h" style="height:60%"></div><div class="h off" style="height:14%"></div><div class="h off" style="height:10%"></div><div class="h off" style="height:8%"></div>
+        </div>
+        <div class="days" style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-top:6px;font-size:11px;color:#475569;font-weight:600;">
+          <span style="text-align:center;">Mon</span>
+          <span style="text-align:center;">Tue</span>
+          <span style="text-align:center;">Wed</span>
+          <span style="text-align:center;">Thu</span>
+          <span style="text-align:center;">Fri</span>
+        </div>
+        <div class="sub" style="color:#64748b;font-size:12px;margin-top:8px;">Mon–Thu: on during school hours, off overnight. Friday: stopped at midday. 1 boot per school day — not a power-cut pattern.</div>
+      </div>
+      <div class="card">
+        <strong>Who operated Kolibri (own instance)</strong>
+        <table>
+          <thead><tr><th>Role</th><th class="right">Accounts</th><th class="right">Sessions</th><th class="right">Minutes</th></tr></thead>
+          <tbody>
+            <tr><td>Learners</td><td class="right">18 registered</td><td class="right">27</td><td class="right">122</td></tr>
+            <tr><td>Teachers / coaches</td><td class="right">2</td><td class="right">11</td><td class="right">186</td></tr>
+            <tr><td>Admin</td><td class="right">1</td><td class="right">6</td><td class="right">74</td></tr>
+            <tr><td>Guest (not signed in)</td><td class="right">—</td><td class="right">4 visits</td><td class="right">19</td></tr>
+          </tbody>
+        </table>
+        <div class="sub" style="color:#64748b;font-size:12px;margin-top:10px;">Teaching cycle: 3 lessons created, 2 visible to learners, 1 quiz started. 41% of learner visits were on assigned lesson resources.</div>
+      </div>
+    </div>
+
+    <div class="grid3" style="margin-top:14px;">
+      <div class="card">
+        <strong>Kolibri content this week</strong>
+        <table>
+          <thead><tr><th>Channel / title</th><th>Role</th><th class="right">Visits</th><th class="right">Min</th></tr></thead>
+          <tbody>
+            <tr><td>Maths · Fraction circles</td><td>learner</td><td class="right">14</td><td class="right">48</td></tr>
+            <tr><td>Maths · Fractions practice</td><td>learner</td><td class="right">9</td><td class="right">37</td></tr>
+            <tr><td>Grade 5 Science · Water</td><td>coach</td><td class="right">3</td><td class="right">22</td></tr>
+            <tr><td>Early Reading · Rudo…</td><td>learner</td><td class="right">5</td><td class="right">15</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:8px;"><span class="tag">own · kolibri-a1b2…</span> <span class="tag demo">Demo excluded</span></div>
+      </div>
+      <div class="card">
+        <strong>Nextcloud · Office and apps</strong>
+        <table>
+          <thead><tr><th>Metric</th><th class="right">Teachers</th><th class="right">Learners</th></tr></thead>
+          <tbody>
+            <tr><td>Accounts</td><td class="right">3</td><td class="right">4</td></tr>
+            <tr><td>Logins this week</td><td class="right">8</td><td class="right">2</td></tr>
+            <tr><td>Office opens (word processor)</td><td class="right">11</td><td class="right">1</td></tr>
+            <tr><td>Documents created / edited</td><td class="right">4</td><td class="right">1</td></tr>
+            <tr><td>Worksheet shares · File drops</td><td class="right" colspan="2">1 share · 0 drops</td></tr>
+          </tbody>
+        </table>
+        <div class="sub" style="color:#64748b;font-size:12px;margin-top:8px;">Word processor is Nextcloud Office (Collabora CODE). Apps opened: Files 46, Office 12, Photos 0.</div>
+      </div>
+      <div class="card">
+        <strong>Wikipedia offline</strong>
+        <div class="sub" style="color:#64748b;font-size:12px;margin:4px 0 8px;">No accounts — page views and articles only, never a person.</div>
+        <div class="statrow" style="border:0;padding:0;margin:0 0 10px;">
+          <div><strong>142</strong>page views</div>
+          <div><strong>38</strong>articles</div>
+          <div><strong>11</strong>sessions</div>
+        </div>
+        <table>
+          <thead><tr><th>Top articles</th><th class="right">Views</th></tr></thead>
+          <tbody>
+            <tr><td>Fraction</td><td class="right">21</td></tr>
+            <tr><td>Photosynthesis</td><td class="right">14</td></tr>
+            <tr><td>Zimbabwe</td><td class="right">11</td></tr>
+            <tr><td>Water cycle</td><td class="right">8</td></tr>
+          </tbody>
+        </table>
+        <div class="hours" style="margin-top:10px;">
+          <i style="height:10%"></i><i style="height:8%"></i><i style="height:6%"></i><i style="height:6%"></i>
+          <i style="height:8%"></i><i style="height:10%"></i><i style="height:14%"></i><i style="height:55%"></i>
+          <i style="height:80%"></i><i style="height:95%"></i><i style="height:70%"></i><i style="height:40%"></i>
+          <i style="height:85%"></i><i style="height:90%"></i><i style="height:48%"></i><i style="height:22%"></i>
+          <i style="height:12%"></i><i style="height:10%"></i><i style="height:8%"></i><i style="height:8%"></i>
+          <i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i>
+        </div>
+        <div class="sub" style="color:#64748b;font-size:11px;margin-top:4px;">Views by hour (local kit time, 00–23). Peak during school hours.</div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div>IDEA Field Usage · dashboard App on <span>idea</span> · data store on idea only</div>
+    <div>Grey = no data · never counts against a school · retraction is always a human decision</div>
+  </footer>
+</div>
+</body>
+</html>
