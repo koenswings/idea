@@ -2094,3 +2094,5 @@
 {"ts":"2026-11-14T13:16:43Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-14T13:22:35Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Kid (app-nextcloud demo pack dry run)"}
 {"ts":"2026-11-14T13:22:35Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T13:25:38Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: deploy Engine main bdbaf0d + Console 67972db (Steve 14:10/14:13)","previous":null}
+{"ts":"2026-11-14T13:25:38Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
