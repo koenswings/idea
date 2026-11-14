@@ -2012,3 +2012,5 @@
 {"ts":"2026-11-14T08:24:19Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-14T08:27:56Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Kid: app-nextcloud#22 7-step on-Pi check (throwaway compose project; Steve go)"}
 {"ts":"2026-11-14T08:27:56Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T08:28:15Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: idea system-disk read-only rescue (moved from idea02 per Steve 09:27); Engine stopped","previous":null}
+{"ts":"2026-11-14T08:28:15Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
