@@ -2050,3 +2050,5 @@
 {"ts":"2026-11-14T10:29:37Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-14T10:29:37Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"claim","value":null,"previous":"Atlas: idea#498 Console lag capture (Steve 10:40), from 10:45 CET (client only: LAN browser host, no Engine)"}
 {"ts":"2026-11-14T10:29:37Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: deploy Engine 6891b50 (Steve 11:28), from 11:30 CET","previous":"Atlas: idea#498 Console lag capture (Steve 10:40), from 10:45 CET"}
+{"ts":"2026-11-14T10:32:18Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-14T10:32:18Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid: app-kolibri#25 demo pack hook dry run (throwaway Kolibri, ~30min)","previous":null}
