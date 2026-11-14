@@ -41,6 +41,12 @@ Status: implemented on the Engine side by agent-engine-dev#292 (`script/build-en
 After the Engine build, `sanitise.sh` re-applies the identity rules idempotently and `verify-sanitised.sh` fails the
 image if machine-id is non-empty, any /etc/ssh/ssh_host_* key exists, ssh key regeneration is not enabled,
 /var/lib/tailscale has state, /etc/tailscale/debug-authkey exists, /META.yaml carries a diskId, or the secret scan hits.
+idea#524: it also fails when the per-Pi Engine peer key `/home/pi/.ssh/idea_engine_ed25519` (or `.pub`) or the
+peer-owner stamp `/etc/idea/peer-owner` or sync-peers' copies of earlier peer files `/etc/idea/.peer-quarantine/`
+(the whole folder, even empty) exists (`sanitise.sh` removes them; the Engine's `IDENTITY_PATHS` lists them too, and
+its own verify refuses the same `skipHardwareId` setting), and when the image's Engine `config.yaml` (`$ENGINE_PATH`, default `/home/pi/idea/agents/agent-engine-dev`) sets
+`settings.skipHardwareId` to any value. `sanitise.sh` never edits config.yaml, so that one is a hard refusal; the
+Engine id policy (freeze or not) is open in idea#524. `sanitise.sh` refuses `/` as its root.
 It also has one positive check (idea#453): the image must carry the baked fleet operator key list
 `/etc/ssh/idea_operator_keys/pi` (installed by the Engine build; sshd is key-only), as a regular file (not a symlink)
 with at least one key, where every non-comment line is a bare public key (no options) that `ssh-keygen -lf` accepts

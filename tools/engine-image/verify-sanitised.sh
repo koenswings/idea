@@ -11,6 +11,29 @@ c "no tailscale state" bash -c '! [ -d "$0/var/lib/tailscale" ] || [ -z "$(ls -A
 c "no tailscale debug authkey" test ! -e "$M/etc/tailscale/debug-authkey"
 c "no /META.yaml diskId" bash -c '! grep -qE "^(diskId|isHardwareId):" "$0/META.yaml" 2>/dev/null' "$M"
 c "no idea-secrets dir" bash -c '! compgen -G "$0/boot/firmware/idea-secrets*" >/dev/null' "$M"
+# idea#524: no per-Pi Engine peer key and no peer-owner stamp (a symlink counts as present)
+absent() { local f; for f in "$@"; do [ ! -e "$f" ] && [ ! -L "$f" ] || return 1; done; }
+c "no Engine peer key (home/pi/.ssh/idea_engine_ed25519[.pub])" absent "$M/home/pi/.ssh/idea_engine_ed25519" "$M/home/pi/.ssh/idea_engine_ed25519.pub"
+c "no peer-owner stamp (etc/idea/peer-owner)" absent "$M/etc/idea/peer-owner"
+c "no peer quarantine folder (etc/idea/.peer-quarantine)" absent "$M/etc/idea/.peer-quarantine"
+# idea#524: the image's Engine config.yaml must not set settings.skipHardwareId (any value). With it, every card keeps
+# whatever diskId its META.yaml carries and the Engine id can no longer follow the hardware; the id policy is Koen's call
+# (idea#524), so an image must leave it unset. ENGINE_PATH overrides the Engine folder inside the image.
+ENGINE_CFG="$M${ENGINE_PATH:-/home/pi/idea/agents/agent-engine-dev}/config.yaml"
+no_skip_hardware_id() {   # 0 when config.yaml is absent or its settings block has no skipHardwareId key
+  local f="$1"; [ -e "$f" ] || return 0
+  [ -f "$f" ] && [ ! -L "$f" ] || { echo "$f is not a regular file" >&2; return 1; }
+  if awk '
+    { sub(/\r$/, "") }
+    /^[^[:space:]#]/ { ins = ($0 ~ /^settings[[:space:]]*:/) }
+    /^settings[[:space:]]*:[[:space:]]*\{/ && /skipHardwareId[[:space:]]*:/ { hit = 1 }
+    ins && /^[[:space:]]+skipHardwareId[[:space:]]*:/ { hit = 1 }
+    END { exit hit ? 0 : 1 }' "$f"; then
+    echo "refused: $f sets settings.skipHardwareId; an image must leave it unset (idea#524)" >&2
+    return 1
+  fi
+}
+c "Engine config.yaml does not set settings.skipHardwareId ($ENGINE_CFG)" no_skip_hardware_id "$ENGINE_CFG"
 # Positive check (idea#453): the image must carry the baked fleet operator key list (root-owned, plain public keys
 # only) or no operator can log in (sshd is key-only). Each non-comment line must be a bare key that ssh-keygen -lf accepts.
 operator_keys_ok() {
