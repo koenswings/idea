@@ -2096,3 +2096,6 @@
 {"ts":"2026-11-14T13:22:35Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-14T13:25:38Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: deploy Engine main bdbaf0d + Console 67972db (Steve 14:10/14:13)","previous":null}
 {"ts":"2026-11-14T13:25:38Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-14T13:32:04Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@bdbaf0dccd4885993a06409ac203a4529273b874, console main@67972db9fde3a1b342573d58ed3572f39f5f4de3","previous":"engine main@06d9975893024f2b61e1050f149e1673474fb94f, console main@6bb0974e9df62b3e5d28b7b70be1dcbfc86e8e4e"}
+{"ts":"2026-11-14T13:32:04Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: deploy Engine main bdbaf0d + Console 67972db (Steve 14:10/14:13)"}
+{"ts":"2026-11-14T13:32:04Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
