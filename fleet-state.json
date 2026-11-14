@@ -111,7 +111,7 @@
     "lan": "192.168.0.231",
     "runner": "none",
     "grok_build": null,
-    "version": "engine main@6b44c8a3e9fdcc2360c06d37dc865336b4416acd, console main@4272c4fb717d1c9412f429f71aa40ec5ac650ee1",
+    "version": "engine main@4522d7ff9a2652a44e2135ed279e55302b2b90a7, console main@6f314a0ab264b8b5d5e20ec6b355e45fa7518717",
     "mdns": false,
     "store": "automerge:6f8m5KxzARv9xwv4Lw18LgVUJzu",
     "console_port": 8081,
@@ -122,7 +122,7 @@
       "instance": "milkwise-wizardly-hugle-001",
       "since": "2026-10-08"
     },
-    "claim": "Atlas (IDEA Ops) v15+4522d7f+6f314a0 production rollout (hold bypass, Steve OK)"
+    "claim": null
   },
   "sunny-robin": {
     "role": "kit-engine",
