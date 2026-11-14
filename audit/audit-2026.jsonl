@@ -2393,3 +2393,6 @@
 {"ts":"2026-11-14T22:16:21Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Atlas (IDEA Ops) golden v15+4522d7f+6f314a0 (hold bypass, Steve OK)"}
 {"ts":"2026-11-14T22:21:45Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas (IDEA Ops)","previous":null}
 {"ts":"2026-11-14T22:21:45Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-14T22:30:57Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas (IDEA Ops)"}
+{"ts":"2026-11-14T22:30:57Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T22:30:57Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@64a4b3545219ae0dc756ab65cb232637252fd5e5, console main@073dfc5ee3fb0b692c06c55586b7e77fe719dba2","previous":"engine main@4522d7ff9a2652a44e2135ed279e55302b2b90a7, console main@6f314a0ab264b8b5d5e20ec6b355e45fa7518717"}
