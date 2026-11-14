@@ -2033,3 +2033,8 @@
 {"ts":"2026-11-14T09:42:41Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-14T09:42:41Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle: idea#498 two-Engine sync lag check (~1h, from 10:40 CET)"}
 {"ts":"2026-11-14T09:42:41Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T09:45:38Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-14T09:45:38Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: idea#498 Console lag capture (Steve 10:40), from 10:45 CET","previous":null}
+{"ts":"2026-11-14T09:45:38Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-14T09:45:38Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: idea#498 Console lag capture (Steve 10:40), from 10:45 CET","previous":null}
+{"ts":"2026-11-14T09:45:38Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"claim","value":"Atlas: idea#498 Console lag capture (Steve 10:40), from 10:45 CET (client only: LAN browser host, no Engine)","previous":null}
