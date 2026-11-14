@@ -2016,3 +2016,5 @@
 {"ts":"2026-11-14T08:28:15Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-14T08:29:56Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-14T08:29:56Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: (A) app-nextcloud#22 step 7 throwaway, (B) usage-dashboard 1.5 updateApp tar route, (C) kid-kolibri-demo re-seed 8082585 (Steve go)","previous":null}
+{"ts":"2026-11-14T08:35:55Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: (A) app-nextcloud#22 step 7 throwaway, (B) usage-dashboard 1.5 updateApp tar route, (C) kid-kolibri-demo re-seed 8082585 (Steve go)"}
+{"ts":"2026-11-14T08:35:55Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
