@@ -19,4 +19,6 @@ rm -f "$M"/root/.bash_history "$M"/home/*/.bash_history
 # sync-peers). Copied into every card they make peers distrust all copies (one shared key) and make sync-peers refuse
 # PEER_OWNER_MISMATCH. The Engine makes a new key at its first start; sync-peers records the owner on its first run.
 rm -f "$M/home/pi/.ssh/idea_engine_ed25519" "$M/home/pi/.ssh/idea_engine_ed25519.pub" "$M/etc/idea/peer-owner"
+# idea#524: sync-peers' copies of earlier peer files (other Pis' keys and host keys), the whole folder
+rm -rf -- "$M/etc/idea/.peer-quarantine"
 echo "sanitised: $M"

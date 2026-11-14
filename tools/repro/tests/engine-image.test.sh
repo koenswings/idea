@@ -14,6 +14,7 @@ printf 'diskId: abc\nisHardwareId: true\nversion: 1\n' > "$F/META.yaml"; echo h 
 # idea#524: a Pi that has run carries its Engine peer key and the v15 peer-owner stamp
 mkdir -p "$F/home/pi/.ssh" "$F/etc/idea"; echo k > "$F/home/pi/.ssh/idea_engine_ed25519"; echo k > "$F/home/pi/.ssh/idea_engine_ed25519.pub"
 echo 'ENGINE_AA000000000000055000 2VroEUvDkmYsDAwE5oG9YeFNadWH' > "$F/etc/idea/peer-owner"
+mkdir -p "$F/etc/idea/.peer-quarantine/20261114T214800Z"; echo 'ENGINE_X ssh-ed25519 AAAA' > "$F/etc/idea/.peer-quarantine/20261114T214800Z/peer_known_hosts"
 # idea#453: the baked operator key list (public keys only) is part of a good image, not identity
 OPK="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP5pJ426w/HVTUBn4wIfxv4XGnRjoQnihRAavat+ww/p atlas-box@grok-bot"
 mkdir -p "$F/etc/ssh/idea_operator_keys"; printf '# fleet operators\n%s\n' "$OPK" > "$F/etc/ssh/idea_operator_keys/pi"
@@ -21,7 +22,7 @@ mkdir -p "$F/etc/ssh/idea_operator_keys"; printf '# fleet operators\n%s\n' "$OPK
 CLB='console=serial0,115200 console=tty1 root=PARTUUID=abcd1234-02 rootfstype=ext4 fsck.repair=yes rootwait'
 printf '%s' "$CLB" > "$F/boot/firmware/cmdline.txt"
 nope "verify fails on a dirty root" "$EI/verify-sanitised.sh" "$F"
-check "verify reports every identity item + missing cmdline flag (9 FAIL lines)" bash -c "[ \"\$('$EI/verify-sanitised.sh' '$F' | grep -c '^FAIL')\" = 9 ]"
+check "verify reports every identity item + missing cmdline flag (10 FAIL lines)" bash -c "[ \"\$('$EI/verify-sanitised.sh' '$F' | grep -c '^FAIL')\" = 10 ]"
 check "sanitise succeeds" "$EI/sanitise.sh" "$F"
 nope "verify fails without cgroup_enable=memory in cmdline.txt" "$EI/verify-sanitised.sh" "$F"
 check "kernel-cmdline.sh appends the configured flag" "$EI/kernel-cmdline.sh" "$F"
@@ -39,6 +40,10 @@ check "shell history removed" test ! -e "$F/home/pi/.bash_history"
 # idea#524: Engine peer key + peer-owner stamp removed; verify fails on each (a symlink too); skipHardwareId refused
 check "Engine peer key removed" bash -c "test ! -e '$F/home/pi/.ssh/idea_engine_ed25519' && test ! -e '$F/home/pi/.ssh/idea_engine_ed25519.pub'"
 check "peer-owner stamp removed" test ! -e "$F/etc/idea/peer-owner"
+check "peer quarantine folder removed" test ! -e "$F/etc/idea/.peer-quarantine"
+mkdir -p "$F/etc/idea/.peer-quarantine"; nope "verify fails on an empty peer quarantine folder" "$EI/verify-sanitised.sh" "$F"
+check "sanitise removes it again" bash -c "'$EI/sanitise.sh' '$F' >/dev/null && test ! -e '$F/etc/idea/.peer-quarantine'"
+ln -s /nonexistent "$F/etc/idea/.peer-quarantine"; nope "verify fails on a dangling peer quarantine symlink" "$EI/verify-sanitised.sh" "$F"; rm -f "$F/etc/idea/.peer-quarantine"
 check "verify reports the peer key and peer-owner checks ok" bash -c "'$EI/verify-sanitised.sh' '$F' | grep -q '^ok   no Engine peer key' && '$EI/verify-sanitised.sh' '$F' | grep -q '^ok   no peer-owner stamp'"
 echo k > "$F/home/pi/.ssh/idea_engine_ed25519.pub"; nope "verify fails on a leftover Engine peer key .pub" "$EI/verify-sanitised.sh" "$F"; rm -f "$F/home/pi/.ssh/idea_engine_ed25519.pub"
 ln -s /nonexistent "$F/etc/idea/peer-owner"; nope "verify fails on a dangling peer-owner symlink" "$EI/verify-sanitised.sh" "$F"; rm -f "$F/etc/idea/peer-owner"

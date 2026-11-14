@@ -15,6 +15,7 @@ c "no idea-secrets dir" bash -c '! compgen -G "$0/boot/firmware/idea-secrets*" >
 absent() { local f; for f in "$@"; do [ ! -e "$f" ] && [ ! -L "$f" ] || return 1; done; }
 c "no Engine peer key (home/pi/.ssh/idea_engine_ed25519[.pub])" absent "$M/home/pi/.ssh/idea_engine_ed25519" "$M/home/pi/.ssh/idea_engine_ed25519.pub"
 c "no peer-owner stamp (etc/idea/peer-owner)" absent "$M/etc/idea/peer-owner"
+c "no peer quarantine folder (etc/idea/.peer-quarantine)" absent "$M/etc/idea/.peer-quarantine"
 # idea#524: the image's Engine config.yaml must not set settings.skipHardwareId (any value). With it, every card keeps
 # whatever diskId its META.yaml carries and the Engine id can no longer follow the hardware; the id policy is Koen's call
 # (idea#524), so an image must leave it unset. ENGINE_PATH overrides the Engine folder inside the image.

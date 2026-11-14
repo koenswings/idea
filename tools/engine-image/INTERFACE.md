@@ -42,8 +42,9 @@ After the Engine build, `sanitise.sh` re-applies the identity rules idempotently
 image if machine-id is non-empty, any /etc/ssh/ssh_host_* key exists, ssh key regeneration is not enabled,
 /var/lib/tailscale has state, /etc/tailscale/debug-authkey exists, /META.yaml carries a diskId, or the secret scan hits.
 idea#524: it also fails when the per-Pi Engine peer key `/home/pi/.ssh/idea_engine_ed25519` (or `.pub`) or the
-peer-owner stamp `/etc/idea/peer-owner` exists (`sanitise.sh` removes them; the Engine's `IDENTITY_PATHS` lists them
-too), and when the image's Engine `config.yaml` (`$ENGINE_PATH`, default `/home/pi/idea/agents/agent-engine-dev`) sets
+peer-owner stamp `/etc/idea/peer-owner` or sync-peers' copies of earlier peer files `/etc/idea/.peer-quarantine/`
+(the whole folder, even empty) exists (`sanitise.sh` removes them; the Engine's `IDENTITY_PATHS` lists them too, and
+its own verify refuses the same `skipHardwareId` setting), and when the image's Engine `config.yaml` (`$ENGINE_PATH`, default `/home/pi/idea/agents/agent-engine-dev`) sets
 `settings.skipHardwareId` to any value. `sanitise.sh` never edits config.yaml, so that one is a hard refusal; the
 Engine id policy (freeze or not) is open in idea#524. `sanitise.sh` refuses `/` as its root.
 It also has one positive check (idea#453): the image must carry the baked fleet operator key list
