@@ -3,6 +3,8 @@
 # Engine's own offline build (agent-engine-dev); verify-sanitised.sh checks the result.
 set -euo pipefail
 M="${1:?usage: sanitise.sh ROOT}"; [ -d "$M/etc" ] || { echo "not a root fs: $M" >&2; exit 2; }
+# never the running system (this deletes host keys and the Engine's peer identity)
+[ "$(cd "$M" && pwd -P)" != / ] || { echo "refusing / as the root fs to sanitise" >&2; exit 2; }
 : > "$M/etc/machine-id"; rm -f "$M/var/lib/dbus/machine-id"; ln -s /etc/machine-id "$M/var/lib/dbus/machine-id" 2>/dev/null || true
 rm -f "$M"/etc/ssh/ssh_host_*
 # regenerate host keys on first boot (Raspberry Pi OS ships regenerate_ssh_host_keys.service)
@@ -13,4 +15,8 @@ if [ -d "$M/var/lib/tailscale" ]; then find "$M/var/lib/tailscale" -mindepth 1 -
 rm -f "$M/etc/tailscale/debug-authkey"
 if [ -f "$M/META.yaml" ]; then sed -i '/^diskId:/d;/^isHardwareId:/d' "$M/META.yaml"; fi
 rm -f "$M"/root/.bash_history "$M"/home/*/.bash_history
+# idea#524: the per-Pi Engine peer key (Engine PeerAccess PEER_KEY_PATH) and the v15 peer-owner stamp (idea-app-data
+# sync-peers). Copied into every card they make peers distrust all copies (one shared key) and make sync-peers refuse
+# PEER_OWNER_MISMATCH. The Engine makes a new key at its first start; sync-peers records the owner on its first run.
+rm -f "$M/home/pi/.ssh/idea_engine_ed25519" "$M/home/pi/.ssh/idea_engine_ed25519.pub" "$M/etc/idea/peer-owner"
 echo "sanitised: $M"

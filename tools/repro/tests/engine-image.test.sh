@@ -11,6 +11,9 @@ F="$W/root"; mkdir -p "$F/etc/ssh" "$F/var/lib/tailscale" "$F/var/lib/dbus" "$F/
 echo 0123456789abcdef > "$F/etc/machine-id"; echo k > "$F/etc/ssh/ssh_host_ed25519_key"; echo k > "$F/etc/ssh/ssh_host_ed25519_key.pub"
 echo s > "$F/var/lib/tailscale/tailscaled.state"; echo k > "$F/etc/tailscale/debug-authkey"; echo u > "$F/lib/systemd/system/regenerate_ssh_host_keys.service"
 printf 'diskId: abc\nisHardwareId: true\nversion: 1\n' > "$F/META.yaml"; echo h > "$F/home/pi/.bash_history"
+# idea#524: a Pi that has run carries its Engine peer key and the v15 peer-owner stamp
+mkdir -p "$F/home/pi/.ssh" "$F/etc/idea"; echo k > "$F/home/pi/.ssh/idea_engine_ed25519"; echo k > "$F/home/pi/.ssh/idea_engine_ed25519.pub"
+echo 'ENGINE_AA000000000000055000 2VroEUvDkmYsDAwE5oG9YeFNadWH' > "$F/etc/idea/peer-owner"
 # idea#453: the baked operator key list (public keys only) is part of a good image, not identity
 OPK="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP5pJ426w/HVTUBn4wIfxv4XGnRjoQnihRAavat+ww/p atlas-box@grok-bot"
 mkdir -p "$F/etc/ssh/idea_operator_keys"; printf '# fleet operators\n%s\n' "$OPK" > "$F/etc/ssh/idea_operator_keys/pi"
@@ -18,7 +21,7 @@ mkdir -p "$F/etc/ssh/idea_operator_keys"; printf '# fleet operators\n%s\n' "$OPK
 CLB='console=serial0,115200 console=tty1 root=PARTUUID=abcd1234-02 rootfstype=ext4 fsck.repair=yes rootwait'
 printf '%s' "$CLB" > "$F/boot/firmware/cmdline.txt"
 nope "verify fails on a dirty root" "$EI/verify-sanitised.sh" "$F"
-check "verify reports every identity item + missing cmdline flag (7 FAIL lines)" bash -c "[ \"\$('$EI/verify-sanitised.sh' '$F' | grep -c '^FAIL')\" = 7 ]"
+check "verify reports every identity item + missing cmdline flag (9 FAIL lines)" bash -c "[ \"\$('$EI/verify-sanitised.sh' '$F' | grep -c '^FAIL')\" = 9 ]"
 check "sanitise succeeds" "$EI/sanitise.sh" "$F"
 nope "verify fails without cgroup_enable=memory in cmdline.txt" "$EI/verify-sanitised.sh" "$F"
 check "kernel-cmdline.sh appends the configured flag" "$EI/kernel-cmdline.sh" "$F"
@@ -33,6 +36,29 @@ check "ssh regen via sysinit.target.wants recorded enabled" bash -c "'$EI/firstb
 check "ssh regen via sysinit.target.wants passes our verify check" bash -c "'$EI/verify-sanitised.sh' '$F2' | grep -q '^ok   ssh host keys regenerate'"
 check "ssh key regeneration enabled" test -L "$F/etc/systemd/system/multi-user.target.wants/regenerate_ssh_host_keys.service"
 check "shell history removed" test ! -e "$F/home/pi/.bash_history"
+# idea#524: Engine peer key + peer-owner stamp removed; verify fails on each (a symlink too); skipHardwareId refused
+check "Engine peer key removed" bash -c "test ! -e '$F/home/pi/.ssh/idea_engine_ed25519' && test ! -e '$F/home/pi/.ssh/idea_engine_ed25519.pub'"
+check "peer-owner stamp removed" test ! -e "$F/etc/idea/peer-owner"
+check "verify reports the peer key and peer-owner checks ok" bash -c "'$EI/verify-sanitised.sh' '$F' | grep -q '^ok   no Engine peer key' && '$EI/verify-sanitised.sh' '$F' | grep -q '^ok   no peer-owner stamp'"
+echo k > "$F/home/pi/.ssh/idea_engine_ed25519.pub"; nope "verify fails on a leftover Engine peer key .pub" "$EI/verify-sanitised.sh" "$F"; rm -f "$F/home/pi/.ssh/idea_engine_ed25519.pub"
+ln -s /nonexistent "$F/etc/idea/peer-owner"; nope "verify fails on a dangling peer-owner symlink" "$EI/verify-sanitised.sh" "$F"; rm -f "$F/etc/idea/peer-owner"
+EC="$F/home/pi/idea/agents/agent-engine-dev/config.yaml"; mkdir -p "$(dirname "$EC")"
+printf 'settings:\n  isDev: false\n  testMode: false\n  # skipHardwareId: true\nskipHardwareId: true\n' > "$EC"
+check "verify passes: skipHardwareId only commented or outside settings" "$EI/verify-sanitised.sh" "$F"
+for v in true false '"yes"' ''; do
+  printf 'settings:\n  isDev: false\n  skipHardwareId: %s\n  testMode: false\n' "$v" > "$EC"
+  nope "verify refuses settings.skipHardwareId: ${v:-<empty>}" "$EI/verify-sanitised.sh" "$F"
+done
+printf 'settings:\r\n    skipHardwareId:   true\r\n' > "$EC"; nope "verify refuses skipHardwareId (CRLF, deeper indent)" "$EI/verify-sanitised.sh" "$F"
+printf 'settings: {isDev: false, skipHardwareId: true}\n' > "$EC"; nope "verify refuses skipHardwareId in a flow-style settings map" "$EI/verify-sanitised.sh" "$F"
+printf 'settings:\n  skipHardwareId: true\n' > "$EC"
+check "the refusal says why on stderr" bash -c "'$EI/verify-sanitised.sh' '$F' 2>&1 >/dev/null | grep -q 'refused: .*config.yaml sets settings.skipHardwareId'"
+check "the refusal is a FAIL line on stdout" bash -c "'$EI/verify-sanitised.sh' '$F' 2>/dev/null | grep -q '^FAIL Engine config.yaml does not set settings.skipHardwareId'"
+check "sanitise does not edit config.yaml (verify still refuses)" bash -c "'$EI/sanitise.sh' '$F' >/dev/null && ! '$EI/verify-sanitised.sh' '$F'"
+mkdir -p "$W/alt/etc"; printf 'settings:\n  skipHardwareId: false\n' > "$W/alt/cfg.yaml"; mkdir -p "$F/opt/eng"; cp "$W/alt/cfg.yaml" "$F/opt/eng/config.yaml"
+check "ENGINE_PATH points the check at another Engine folder" bash -c "ENGINE_PATH=/opt/eng '$EI/verify-sanitised.sh' '$F' 2>&1 | grep -q 'refused: .*/opt/eng/config.yaml'"
+rm -rf "$F/opt/eng" "$W/alt"
+printf 'settings:\n  isDev: false\n  testMode: false\n' > "$EC"; check "verify passes with skipHardwareId unset" "$EI/verify-sanitised.sh" "$F"
 check "sanitise keeps the operator key list" test -s "$F/etc/ssh/idea_operator_keys/pi"
 check "verify reports the operator key check ok" bash -c "'$EI/verify-sanitised.sh' '$F' | grep -q '^ok   operator keys'"
 # operator key list (idea#453): several keys ok; missing, empty, symlink, options, junk, private key all fail
