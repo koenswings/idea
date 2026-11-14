@@ -23,6 +23,19 @@ Facts come from the proposal #408 inventory (read-only, 2026-11-04, graphify and
 
 Proposal #408 notes that no owner list exists yet (gap 6), and per-service owners are **not yet assigned**; fill them in as each service moves in. What the proposal does fix: changes reach the hub only via a merged PR plus a re-run of that service's `install.sh`, deploys go service by service with Koen's OK, and the Engine fix for the dotted Nextcloud backup instance ids is owned by Axle.
 
+## Drift check: `check.sh` (idea#483)
+
+`hub/check.sh` is **read-only**: it compares what is deployed on the hub with this checkout and prints `ok` / `DRIFT` lines. It never writes files, never touches units, cron or services, and compares env files by key **name** only (values are never printed).
+
+    hub/check.sh                     # on the hub, as pi, from a checkout of main
+    hub/check.sh --service telegram-relay
+    hub/check.sh --no-state          # file checks only, skip systemd enabled/active
+    hub/check.sh --root DIR --home /home/pi   # against a fake tree (tests)
+
+Exit 0 = no drift, 1 = drift, 2 = usage error. Today it checks the Telegram relay: deployed `~/tg-relay/{tg_relay.py,tg-send}` and `~/.config/systemd/user/tg-relay.service` byte for byte against `services/telegram-relay/`, the `~/.local/bin/tg-send` link, modes (700 dirs, 600 env), env key names against `.env.example`, no unexpected files in `~/tg-relay/` beyond the relay's own state and logs, and that `tg-relay.service` is enabled and active (`systemctl --user`). Later issues add kit-watch, mail-watch, graphify and the host pieces as more `check_<service>` functions.
+
+Tests (box only, fake tree): `bash hub/tests/check.test.sh`.
+
 ## Rules (from proposal #408)
 
 - **Secrets** live only in `~/.config/<service>/env`, mode 600, on the Pi. The repo holds an `.env.example` with key names only. No service reads another service's env file.
