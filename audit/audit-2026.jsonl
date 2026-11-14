@@ -2022,3 +2022,5 @@
 {"ts":"2026-11-14T08:38:16Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid: kid-kolibri-demo learner1 progress cleanup (Steve go)","previous":null}
 {"ts":"2026-11-14T08:40:06Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid: kid-kolibri-demo learner1 progress cleanup (Steve go)"}
 {"ts":"2026-11-14T08:40:06Z","bot":"Kid","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T08:43:09Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: idea system-disk read-only rescue (moved from idea02 per Steve 09:27); Engine stopped"}
+{"ts":"2026-11-14T08:43:09Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
