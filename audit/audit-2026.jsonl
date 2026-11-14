@@ -2348,3 +2348,6 @@
 {"ts":"2026-11-14T20:57:59Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas (IDEA Ops)"}
 {"ts":"2026-11-14T20:58:00Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-14T20:58:00Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T21:04:46Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"version","value":"engine main@6b44c8a3e9fdcc2360c06d37dc865336b4416acd, console main@6fda988f8903ec393d7620dbf8110b08fa8c87cc","previous":"engine main@bd9f92701587ebd5c2cc959f3808f041979db822, console main@6fda988f8903ec393d7620dbf8110b08fa8c87cc"}
+{"ts":"2026-11-14T21:05:24Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"version","value":"engine main@6b44c8a3e9fdcc2360c06d37dc865336b4416acd, console main@4272c4fb717d1c9412f429f71aa40ec5ac650ee1","previous":"engine main@6b44c8a3e9fdcc2360c06d37dc865336b4416acd, console main@6fda988f8903ec393d7620dbf8110b08fa8c87cc"}
+{"ts":"2026-11-14T21:05:31Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Atlas (IDEA Ops)"}
