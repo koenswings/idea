@@ -75,7 +75,17 @@
     "claim": "Kid: app-kolibri#25 demo pack hook dry run (throwaway Kolibri, ~30min)",
     "branch": null,
     "review_url": "http://100.108.39.45:8080/",
-    "idle_since": "2026-11-14T10:29:37Z"
+    "idle_since": "2026-11-14T10:29:37Z",
+    "scratch_stick": {
+      "use": "engine#355 + console#187 scratch stick (erase OK per Koen t3118u via Steve; erase only by those tests, after Kid dry run)",
+      "model": "Samsung Flash Drive FIT",
+      "usb_id": "090c:1000",
+      "serial": "0373219120013886",
+      "size_bytes": 128320801792,
+      "partition": "sdb1 vfat label WDW_JD724F6 uuid 57C0-1B0D (Windows setup, 5.8G used)",
+      "engine_view": "USB stick (read-only /run/idea-usb), not an App Disk",
+      "identified": "2026-11-14 11:39 CET by Atlas, read-only, Kid OK"
+    }
   },
   "wizardly-hugle": {
     "role": "production",
