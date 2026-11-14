@@ -38,7 +38,7 @@ Tests (box only, fake tree): `bash hub/tests/check.test.sh`.
 ## Rules (from proposal #408)
 
 - **Secrets** live only in `~/.config/<service>/env`, mode 600, on the Pi. The repo holds an `.env.example` with key names only. No service reads another service's env file.
-- **Read-only checkout.** The Pi pulls `koenswings/idea` over plain https (no token in the remote URL). Nobody edits files in place on the hub.
+- **Read-only checkout.** The hub Pi pulls its checkouts over plain https, with no token in the remote URL and none stored in git config. That includes the three remotes switched on 13 Nov: `idea`, `agent-engine-dev` and `agent-app-dev` (the repos are public). Nobody edits files in place on the hub. The `gh` CLI login on the Pi is left as it is unless Koen asks for a change.
 - **Changes** reach the hub only via a merged PR followed by a re-run of that service's `install.sh`. A drift check (`check.sh`, idea#483) reports anything else.
 - **Each service folder** has the same shape: code, unit file(s), `install.sh`, `.env.example`, `README.md`, tests where it makes sense. Its README covers: what it does; how it runs; state and where it lives; env keys; logs; how to install; how to roll back.
 - Units run as `pi` (systemd `--user`); the Engine's pm2 process stays as `pi`.
