@@ -1,8 +1,12 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 13 November 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 November 2026
 
 # SCREENSHOTS — IDEA tutorial
 
+**Password rule:** a password field may show its masked dots (as in NA-04), but no shot may show a password in readable text, typed out or revealed with the eye icon.
+
 Kolibri shots (CON-03, K*, E1–E3, S1–S2 as used in chapters 3 and 4) were taken with headless Playwright (Chromium, viewport 1280×800) on the shared agent box, from the Kolibri Demo test instance (Kolibri 0.19.5, IDEA Demo School, class Grade 5). The welcome window was dismissed in the browser and the page reloaded; forms for create, enroll and edit were filled and then cancelled, without saving. No passwords are visible. Console and Nextcloud shots are unchanged from earlier captures.
+
+v2.2 (14 November 2026): NA-01 to NA-05 (chapter 5, *Before you start*) were taken with headless Playwright (Chromium, viewport 1280×800, light theme) on the shared agent box, from a test Nextcloud 31 instance with the school seed (`admin`, `teacher1`, `learner1`; groups `teachers` and `learners`). Signed in as `admin`; the first-run welcome window was closed. NA-01: sign-in page with only the account name typed, cropped to the sign-in box. NA-02: user menu, cropped. NA-03 and NA-05: Accounts page, cropped below the list. NA-04: New account form for `teacher2` in group `teachers`; the password field shows only dots, email left empty. The demo account `teacher2` was created for NA-05 and deleted again afterwards. No error or warning messages, no addresses or device names in any shot.
 
 v2.1.1 (13 November 2026): E1-03 / S1-05 retaken after the **Correct** pop-up faded; E2-01 / S2-01 recropped so a full quiz question is visible and no heading is cut (the seed title **IDEA demo quiz** was cropped out of the frame). S2-02 was removed (unused). K5-04 was kept: cropping the hidden fourth lesson would have left a misleading **0 of 4**, so the appendix now names that hidden lesson.
 
@@ -46,6 +50,11 @@ Earlier non-Kolibri retakes (15–16 October 2026) used the demo school **IDEA D
 | S2-01 | 04-kolibri-learners.md | learner3 | yes |
 | S2-03a (unused in v2.1) | 04-kolibri-learners.md | learner1 | yes |
 | S2-03 | 04-kolibri-learners.md | learner1 | yes |
+| NA-01 | 05-nextcloud-teachers.md | admin (sign-in page) | yes |
+| NA-02 | 05-nextcloud-teachers.md | admin | yes |
+| NA-03 | 05-nextcloud-teachers.md | admin | yes |
+| NA-04 | 05-nextcloud-teachers.md | admin | yes |
+| NA-05 | 05-nextcloud-teachers.md | admin | yes |
 | N0-01 | 05-nextcloud-teachers.md | teacher1 | yes |
 | N1-01 | 05-nextcloud-teachers.md | teacher1 | yes |
 | N1-03 | 05-nextcloud-teachers.md | teacher1 | yes |
@@ -74,7 +83,7 @@ Not captured (skipped by rule): F1 files disk, B2–B4 backup/restore, C3–C4 o
 
 ## To retake for IDEA Demo School (2026-10-15)
 
-The text now uses the demo school **IDEA Demo School**, class **Grade 5** and the accounts `admin`, `teacher1`, `teacher2`, `learner1`–`learner3` (staff passwords follow `<name>911!`; learners sign in with their username only; see the appendix). Shots that show the old `demo-…` / `demo_…` names, `demo-Grade5A` or `demo-School` must be retaken on the Kolibri Demo test instance (this is now done for the Kolibri shots in chapters 3 and 4). No error messages or password fields with typed text in any shot.
+The text now uses the demo school **IDEA Demo School**, class **Grade 5** and the accounts `admin`, `teacher1`, `teacher2`, `learner1`–`learner3` (staff passwords follow `<name>911!`; learners sign in with their username only; see the appendix). Shots that show the old `demo-…` / `demo_…` names, `demo-Grade5A` or `demo-School` must be retaken on the Kolibri Demo test instance (this is now done for the Kolibri shots in chapters 3 and 4). No error messages and no readable passwords in any shot (see the password rule at the top).
 
 - Kolibri teacher (ch. 3): K1-01–K1-03, K2-01–K2-03, K3-01a, K3-01–K3-05, K3-03a, K4-01–K4-03, K4-03a, K5-01–K5-04 (sign in as `teacher1`; K1-03/K2 class creation and enrolment as `admin`).
 - Kolibri learner (ch. 4): S1-01, S1-03–S1-05, S2-01, S2-03, S2-03a (S2-02 was removed in v2.1.1; S2-03a is unused since v2.1) (sign in as `learner1` with the username only, then **NEXT**; learners have no password. An earlier version of this note said the learner sign-in asks for a password; that no longer applies).

@@ -15,7 +15,7 @@ Learners open Nextcloud from the Console, like Kolibri: **IDEA** on the desktop,
 
 ## 6.2 Hand in homework
 
-1. Open the File drop link from 6.3. The page says **File drop** and shows an **Upload** button; the learner cannot see other files.
+1. Open the File drop link from 5.3. The page says **File drop** and shows an **Upload** button; the learner cannot see other files.
    ![File drop](../screenshots/S4-01.png)
 2. Click **Upload** and choose the file (e.g. a photo of written work). If asked, type your name.
    ![Uploading: the bar shows the progress. When it is gone, the file is in the teacher's folder](../screenshots/S4-02.png)
