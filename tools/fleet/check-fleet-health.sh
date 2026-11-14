@@ -32,7 +32,10 @@
 #              Known-offline hosts (fleet-state .known_offline.issue, typically a kit
 #              tracked on an open issue such as idea#288) still appear in the report
 #              (.known_offline, with the issue reference) and in the --alert signature,
-#              but do not create or keep PAUSED. An unmarked unreachable kit still pauses.
+#              but do not create or keep PAUSED. Kits (role kit*, or status "kit") never create or
+#              keep PAUSED either, marked or not: an offline field kit must not stop pool work.
+#              They are still reported (.unhealthy, .alert, .alert.pause_excluded). Only pool,
+#              golden and production Pis trip PAUSED.
 #              Manual walk hold: while $HEALTH_DIR/HOLD exists, PAUSED is kept (created if
 #              missing) and never removed, even on a healthy run; the report then shows
 #              alert.hold=true, alert.fleet_changes_paused=true and alert.hold_file.
@@ -298,8 +301,11 @@ if [ $ALERT -eq 1 ]; then
   hold=false; [ -e "$HOLD_FILE" ] && hold=true
   # Alert signature is unchanged (known-offline problems still alert). PAUSED only
   # follows problems that are not on a known-offline host. HOLD always wins.
-  pause_sig="$(jq -c --argjson ko "$(jq -c '.known_offline // []' <<<"$report")" \
-    '($ko | map(.pi)) as $skip | [.[] | select(.pi as $p | ($skip | index($p) | not))]' <<<"$sig")"
+  # Kits never pause pool work (role kit*/status kit), nor do known-offline hosts.
+  kits="$(jq -c '[to_entries[] | select((.key|startswith("_")|not) and (.value|type=="object"))
+                 | select(((.value.role // "")|startswith("kit")) or (.value.status == "kit")) | .key]' "$STATE_FILE")"
+  pause_excluded="$(jq -c --argjson kits "$kits" '[(.known_offline // [] | map(.pi))[], $kits[]] | unique' <<<"$report")"
+  pause_sig="$(jq -c --argjson skip "$pause_excluded" '[.[] | select(.pi as $p | ($skip | index($p) | not))]' <<<"$sig")"
   if $hold; then
     # Manual walk hold: keep (or create) PAUSED and never remove it here.
     [ -f "$HEALTH_DIR/PAUSED" ] || echo "fleet changes paused (manual hold $HOLD_FILE) since $(date -u -d "@$NOW" +%FT%TZ)" > "$HEALTH_DIR/PAUSED"
@@ -308,10 +314,11 @@ if [ $ALERT -eq 1 ]; then
   else
     rm -f "$HEALTH_DIR/PAUSED"
   fi
-  report="$(jq -c --argjson d "$decision" --argjson pause_sig "$pause_sig" --arg paused "$HEALTH_DIR/PAUSED" --arg holdf "$HOLD_FILE" --argjson hold "$hold" \
+  report="$(jq -c --argjson d "$decision" --argjson pause_sig "$pause_sig" --argjson sig "$sig" --argjson excl "$pause_excluded" --arg paused "$HEALTH_DIR/PAUSED" --arg holdf "$HOLD_FILE" --argjson hold "$hold" \
     '.alert = {send:$d.send, reason:$d.reason, unhealthy_since:(if $d.since then ($d.since|todate) else null end),
                fleet_changes_paused: ($hold or ($pause_sig|length>0)), pause_file:$paused,
-               hold:$hold, hold_file:(if $hold then $holdf else null end)}' <<<"$report")"
+               hold:$hold, hold_file:(if $hold then $holdf else null end),
+               pause_excluded:[$sig[] | .pi | select(. as $p | $excl | index($p))]}' <<<"$report")"
 fi
 
 jq . <<<"$report"

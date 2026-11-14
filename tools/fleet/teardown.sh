@@ -34,7 +34,7 @@ if [[ "${REPO##*/}" == app-* ]]; then
   fl_checkout_remote "$HOST" "$APP_DIR/${REPO##*/}" "$REPO" main || fl_finish 1 false "app restore failed on $PI; left claimed" "$EXTRA"
 fi
 sleep "${POST_WAIT}"
-fl_post_check "$HOST" "$(fl_get "$PI" console_port)" || fl_finish 1 false "restored main, but the post-check failed on $PI; left claimed" "$EXTRA"
+fl_post_check_wait "$HOST" "$(fl_get "$PI" console_port)" || fl_finish 1 false "restored main, but the post-check failed on $PI; left claimed" "$EXTRA"
 fl_set "$PI" version "engine main@$ESHA, console main@$CSHA"
 for f in pr branch repo claim; do fl_set --null "$PI" "$f"; done
 fl_set "$PI" status idle; fl_set "$PI" idle_since "$(date -u +%FT%TZ)"

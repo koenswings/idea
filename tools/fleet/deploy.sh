@@ -45,5 +45,5 @@ case "$COMP" in
   app-disk) fl_checkout_remote "$HOST" "$APP_DIR/$NAME" "$SLUG" "$BRANCH" ;;
 esac || fl_finish 1 false "deploy step failed on $PI; Pi stays claimed for inspection (teardown.sh restores main)" "$EXTRA"
 sleep "${POST_WAIT}"
-fl_post_check "$HOST" "$(fl_get "$PI" console_port)" || fl_finish 1 false "deployed, but the post-check failed on $PI" "$EXTRA"
+fl_post_check_wait "$HOST" "$(fl_get "$PI" console_port)" || fl_finish 1 false "deployed, but the post-check failed on $PI" "$EXTRA"
 fl_finish 0 true "deployed $COMP $SLUG@$BRANCH ($SHA) to $PI" "$EXTRA"

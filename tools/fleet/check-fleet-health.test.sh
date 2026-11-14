@@ -337,8 +337,23 @@ jq '.kit={"role":"kit-engine","status":"kit","tailscale":"10.0.0.3"}' \
   "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
 echo 255 > "$FAKE/10.0.0.3.ssh_rc"; echo 000 > "$FAKE/10.0.0.3.http"
 NOW=31000 run --alert
-check "unmarked kit offline: exit 1, PAUSED created" test "$RC:$(j '.unhealthy|join(",")'):$(test -e "$HEALTH_DIR/PAUSED" && echo p || echo n)" = "1:kit:p"
-check "unmarked kit offline: known_offline empty, paused true" test "$(j '.known_offline|length'):$(j .alert.fleet_changes_paused)" = "0:true"
+check "unmarked kit offline: exit 1, listed unhealthy, but NO PAUSED" test "$RC:$(j '.unhealthy|join(",")'):$(test -e "$HEALTH_DIR/PAUSED" && echo p || echo n)" = "1:kit:n"
+check "unmarked kit offline: alert sent, paused false, listed in pause_excluded" test "$(j .alert.send):$(j '.known_offline|length'):$(j .alert.fleet_changes_paused):$(j '.alert.pause_excluded|join(",")')" = "true:0:false:kit"
+mkdir -p "$HEALTH_DIR"; echo "fleet changes paused by check-fleet-health.sh since 2026-01-01T00:00:00Z" > "$HEALTH_DIR/PAUSED"
+NOW=31100 run --alert
+check "unmarked kit offline: stale script PAUSED removed" test ! -e "$HEALTH_DIR/PAUSED"
+
+reset
+jq '.kit2={"role":"field","status":"kit","tailscale":"10.0.0.3"}' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+echo 255 > "$FAKE/10.0.0.3.ssh_rc"; echo 000 > "$FAKE/10.0.0.3.http"
+NOW=31500 run --alert
+check "status kit (any role) offline: no PAUSED" test "$RC:$(test -e "$HEALTH_DIR/PAUSED" && echo p || echo n):$(j .alert.fleet_changes_paused)" = "1:n:false"
+
+reset
+jq '.kit={"role":"kit-engine","status":"kit","tailscale":"10.0.0.3"}' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+echo 255 > "$FAKE/10.0.0.3.ssh_rc"; echo 000 > "$FAKE/10.0.0.3.http"; echo 255 > "$FAKE/10.0.0.2.ssh_rc"; echo 000 > "$FAKE/10.0.0.2.http"
+NOW=31700 run --alert
+check "unmarked kit offline + pool Pi offline: PAUSED (pool trips it)" test "$RC:$(test -e "$HEALTH_DIR/PAUSED" && echo p || echo n):$(j .alert.fleet_changes_paused):$(j '.alert.pause_excluded|join(",")')" = "1:p:true:kit"
 
 reset
 jq '.kit={"role":"kit-engine","status":"kit","tailscale":"10.0.0.3",

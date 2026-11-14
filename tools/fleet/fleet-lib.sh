@@ -12,7 +12,15 @@
 #   FLEET_DENY    space-separated Pis these scripts never touch (default "idea02")
 #   DENY_HOSTS    addresses never touched (default "100.115.60.6", the wh/'idea' production host)
 #   ENGINE_DIR / CONSOLE_DIR / APP_DIR   checkout paths on the Pi (locked nested layout)
-#   POST_WAIT     seconds to wait after a pm2 restart before the post-check (default 20)
+#   POST_WAIT     seconds to wait after a pm2 restart before the first post-check (default 20)
+#   POST_TIMEOUT  the post-check polls until it passes or this many seconds have passed since its first
+#                 try (default 120; an Engine can need 30-60 s before :8080 answers after a restart)
+#   POST_POLL     seconds between post-check tries (default 10)
+#
+# Claims: a Pi counts as ours only when its claim STARTS WITH the exact $BOT_NAME, e.g.
+#   BOT_NAME="Atlas (IDEA Ops)"  ->  claim "Atlas (IDEA Ops): golden update ..." is ours,
+#   "Atlas: ..." or "waiting for Atlas (IDEA Ops)" are not (prefix match on purpose: a claim that merely
+#   mentions the bot name is someone else's). The scripts write claims in that format themselves.
 set -o pipefail
 
 FLEET_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -27,6 +35,8 @@ ENGINE_DIR="${ENGINE_DIR:-/home/pi/idea/agents/agent-engine-dev}"
 CONSOLE_DIR="${CONSOLE_DIR:-/home/pi/idea/agents/agent-console-dev}"
 APP_DIR="${APP_DIR:-/home/pi/idea/agents/agent-app-dev}"
 POST_WAIT="${POST_WAIT:-20}"
+POST_TIMEOUT="${POST_TIMEOUT:-120}"
+POST_POLL="${POST_POLL:-10}"
 UFS="$FLEET_DIR/update-fleet-state.sh"
 
 # Result accumulator: steps[] of {step,ok,detail}; emitted once as JSON by fl_finish.
@@ -94,7 +104,7 @@ fl_guard_pi() {
     golden) [ "$role" = golden ] || fl_die "$pi has role '$role', not golden" ;;
   esac
   case "$status" in hold|paused|production|kit) fl_die "$pi status is '$status': not touched" ;; esac
-  if [ -n "$claim" ] && [[ "$claim" != "$BOT_NAME"* ]]; then fl_die "$pi is claimed by someone else ($claim)"; fi
+  if [ -n "$claim" ] && [[ "$claim" != "$BOT_NAME"* ]]; then fl_die "$pi is claimed by someone else ($claim); a claim is yours only when it starts with BOT_NAME '$BOT_NAME'"; fi
   fl_step guard true "$pi role=$role status=${status:-?} host=$host"
 }
 
@@ -137,8 +147,24 @@ REMOTE
     [ -n "$l" ] || continue
     code="${l##*:}"; [[ "$code" =~ ^[1-4][0-9][0-9]$ ]] || { ok=false; bad+="instance ${l%:*} HTTP $code; "; }
   done < <(sed -n 's/^INSTANCE=//p' <<<"$out")
-  fl_step post_check "$ok" "engine=${eng:-?} console=${con:-?} instances=$(sed -n 's/^INSTANCE=//p' <<<"$out" | tr '\n' ' ')${bad:+ FAIL: $bad}"
+  FL_PC_OK="$ok"
+  FL_PC_DETAIL="engine=${eng:-?} console=${con:-?} instances=$(sed -n 's/^INSTANCE=//p' <<<"$out" | tr '\n' ' ')${bad:+ FAIL: $bad}"
   $ok
+}
+
+# fl_post_check (above) is one try: it sets FL_PC_OK (true/false) and FL_PC_DETAIL and records no step.
+# fl_post_check_wait <host> [port]: poll fl_post_check every $POST_POLL s until it passes or $POST_TIMEOUT s
+# have passed since the first try (an Engine restart can take 30-60 s before the Console answers). One step.
+fl_post_check_wait() {
+  local start tries=0; start=$(date +%s)
+  while :; do
+    tries=$((tries+1))
+    fl_post_check "$@" && break
+    [ $(( $(date +%s) - start + POST_POLL )) -le "$POST_TIMEOUT" ] || break
+    sleep "$POST_POLL"
+  done
+  fl_step post_check "$FL_PC_OK" "$FL_PC_DETAIL (try $tries, $(( $(date +%s) - start ))s, timeout ${POST_TIMEOUT}s)"
+  $FL_PC_OK
 }
 
 # fl_checkout_remote <host> <dir> <repo-url> <ref> [build]: fetch + detached checkout of <ref> in <dir> on the Pi.
@@ -147,13 +173,22 @@ REMOTE
 fl_checkout_remote() {
   local host="$1" dir="$2" url="$3" ref="$4" build="${5:-}"
   [[ "$url" == */* && "$url" != *://* && "$url" != git@* ]] && url="https://github.com/$url"
-  local script
+  local script backup=""
+  # Console: back up the served dist (and dist.prev) plus the old HEAD before anything changes, so a bad
+  # build can be rolled back byte for byte: /home/pi/quarantine/console-deploy-<ts>/ (never deleted here).
+  if [ "$build" = console ]; then
+    backup="B=/home/pi/quarantine/console-deploy-\$(date +%Y%m%d-%H%M%S); mkdir -p \"\$B\"
+[ ! -d dist ] || cp -a dist \"\$B/dist\"
+[ ! -d dist.prev ] || cp -a dist.prev \"\$B/dist.prev\"
+git rev-parse HEAD > \"\$B/HEAD\"; echo \"CONSOLE_BACKUP \$B\""
+  fi
   script="set -e
 if [ ! -d '$dir/.git' ]; then mkdir -p \"\$(dirname '$dir')\"; git clone -q '$url' '$dir'; fi
 cd '$dir'
 git fetch -q '$url' '$ref'
 want=\$(git rev-parse FETCH_HEAD)
 if [ \"\$(git rev-parse HEAD)\" = \"\$want\" ] && [ -z \"\$(git status --porcelain --untracked-files=no)\" ]; then echo \"ALREADY \$want\"; exit 0; fi
+$backup
 [ -z \"\$(git status --porcelain --untracked-files=no)\" ] || git stash push -q -m \"fleet-deploy \$(date +%Y%m%d-%H%M%S)\"
 git checkout -q --detach \"\$want\"
 echo \"CHECKED_OUT \$want\""
@@ -161,6 +196,7 @@ echo \"CHECKED_OUT \$want\""
   out="$(fl_ssh "$host" "$script" 2>&1)"; rc=$?
   if [ $rc -ne 0 ]; then fl_step "checkout $dir" false "$(tail -3 <<<"$out" | tr '\n' ' ')"; return 1; fi
   fl_step "checkout $dir" true "$(tail -1 <<<"$out")"
+  if grep -q '^CONSOLE_BACKUP ' <<<"$out"; then fl_step "console backup" true "$(sed -n 's/^CONSOLE_BACKUP //p' <<<"$out" | tail -1)"; fi
   if [ "$build" = console ] && ! grep -q '^ALREADY' <<<"$out"; then
     out="$(fl_ssh "$host" "cd '$dir' && pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 && bash -s -- --dir '$dir'" < "$FLEET_DIR/build-console-pi.sh" 2>&1)"; rc=$?
     fl_step "console build" "$([ $rc = 0 ] && echo true || echo false)" "$(tail -1 <<<"$out")"
@@ -176,8 +212,20 @@ echo \"CHECKED_OUT \$want\""
 
 # fl_engine_deploy <host> <ref-branch> <sha> : reuse deploy-engine-remote.sh (keeps config + store identity).
 fl_engine_deploy() {
-  local host="$1" branch="$2" sha="$3" out rc
-  out="$(SSH_CMD="${SSH_CMD:-}" PROXY="$PROXY" "$FLEET_DIR/deploy-engine-remote.sh" "$host" "$sha" --fetch "$branch" --yes 2>&1)"; rc=$?
+  local host="$1" branch="$2" sha="$3" out rc hold=()
+  # the caller already passed fl_fleet_hold_check; hand an explicit override on to deploy-engine-remote.sh
+  [ "$IGNORE_FLEET_HOLD" = 1 ] && hold=(--ignore-fleet-hold)
+  out="$(SSH_CMD="${SSH_CMD:-}" PROXY="$PROXY" HEALTH_DIR="$HEALTH_DIR" "$FLEET_DIR/deploy-engine-remote.sh" "$host" "$sha" --fetch "$branch" --yes "${hold[@]}" 2>&1)"; rc=$?
   fl_step "engine deploy $sha" "$([ $rc = 0 ] && echo true || echo false)" "$(tail -2 <<<"$out" | tr '\n' ' ')"
   [ $rc = 0 ]
+}
+
+# fl_engine_current <host> <sha>: true when the Engine checkout is at <sha> and pm2 "engine" is online as pi
+# (update-golden's "already on <version>: only re-check"). Records one step either way.
+fl_engine_current() {
+  local host="$1" sha="$2" out head st
+  out="$(fl_ssh "$host" "echo ENGINE_CURRENT_CHECK; echo HEAD=\$(git -C '$ENGINE_DIR' rev-parse HEAD 2>/dev/null); pm2 jlist 2>/dev/null | node -e 'let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{try{const p=JSON.parse(s).find(x=>x.name===\"engine\");console.log(\"ENGINE=\"+(p?p.pm2_env.status+\" \"+(p.pm2_env.username||\"\"):\"missing\"))}catch(e){console.log(\"ENGINE=error\")}})'" 2>/dev/null)"
+  head="$(sed -n 's/^HEAD=//p' <<<"$out" | head -1)"; st="$(sed -n 's/^ENGINE=//p' <<<"$out" | head -1)"
+  if [ "$head" = "$sha" ] && [ "$st" = "online pi" ]; then fl_step engine_current true "already at $sha, engine online as pi: re-check only"; return 0; fi
+  fl_step engine_current true "HEAD ${head:-?} engine ${st:-?}: deploy needed"; return 1
 }

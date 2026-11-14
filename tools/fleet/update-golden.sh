@@ -7,13 +7,16 @@
 # component's part of .version ("engine main@<sha>, console main@<sha>") is updated with
 # update-fleet-state.sh. Status stays idle. JSON result on stdout.
 # Refuses when no Pi or more than one Pi has role golden, and for FLEET_DENY / the wh host.
-# Without --yes: dry run. Idempotent: a golden Pi already on <version> is only re-checked.
+# Without --yes: dry run. Idempotent: a golden Pi already on <version> is only re-checked (Engine: HEAD at the
+# sha and pm2 engine online as pi; Console: checkout already at the sha). The post-check polls up to POST_TIMEOUT
+# (default 120 s). The Console build backs up dist first (/home/pi/quarantine/console-deploy-<ts>/).
+# Claims: see fleet-lib.sh (a claim is ours only when it starts with the exact BOT_NAME).
 # Exit: 0 ok · 1 refused/failed · 2 usage.
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/fleet-lib.sh"
 YES=0; ARGS=()
-for a in "$@"; do case "$a" in --yes) YES=1 ;; --ignore-fleet-hold) IGNORE_FLEET_HOLD=1 ;; -h|--help) fl_usage 12 ;; *) ARGS+=("$a") ;; esac; done
-[ ${#ARGS[@]} -eq 2 ] || fl_usage 12
+for a in "$@"; do case "$a" in --yes) YES=1 ;; --ignore-fleet-hold) IGNORE_FLEET_HOLD=1 ;; -h|--help) fl_usage 14 ;; *) ARGS+=("$a") ;; esac; done
+[ ${#ARGS[@]} -eq 2 ] || fl_usage 14
 COMP="${ARGS[0]}"; VER="${ARGS[1]}"
 case "$COMP" in engine) SLUG=koenswings/agent-engine-dev ;; console) SLUG=koenswings/agent-console-dev ;;
   *) fl_die "component must be engine or console" usage 2 ;; esac
@@ -37,11 +40,11 @@ EXTRA="$(jq -nc --arg pi "$PI" --arg c "$COMP" --arg s "$SHA" '{pi:$pi,component
 
 fl_temp_ok "$HOST" || fl_finish 1 false "$PI above 75 C; retry once below 65 C" "$EXTRA"
 case "$COMP" in
-  engine)  fl_engine_deploy "$HOST" main "$SHA" ;;
+  engine)  fl_engine_current "$HOST" "$SHA" || fl_engine_deploy "$HOST" main "$SHA" ;;
   console) fl_checkout_remote "$HOST" "$CONSOLE_DIR" "$SLUG" "$SHA" console ;;
 esac || fl_finish 1 false "golden $COMP deploy failed on $PI; version not updated" "$EXTRA"
 sleep "${POST_WAIT}"
-fl_post_check "$HOST" "$(fl_get "$PI" console_port)" || fl_finish 1 false "golden deployed but post-check failed on $PI; version not updated" "$EXTRA"
+fl_post_check_wait "$HOST" "$(fl_get "$PI" console_port)" || fl_finish 1 false "golden deployed but post-check failed on $PI; version not updated" "$EXTRA"
 OLD="$(fl_get "$PI" version)"
 E="$(sed -n 's/.*engine [^@,]*@\([0-9a-f]\{7,40\}\).*/\1/p' <<<"$OLD")"; C="$(sed -n 's/.*console [^@,]*@\([0-9a-f]\{7,40\}\).*/\1/p' <<<"$OLD")"
 [ "$COMP" = engine ] && E="$SHA"; [ "$COMP" = console ] && C="$SHA"

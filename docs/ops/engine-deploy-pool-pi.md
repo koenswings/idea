@@ -38,8 +38,10 @@ Hosts: pool Pis idea01/03/04 expect `automerge:2VroE…`; kit Engines sunny-robi
 shared kit store `automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk` (kits only after Steve's GO naming the Engine). Any other
 host is refused; a store mismatch aborts before anything changes.
 
-From the box, prefer `tools/fleet/deploy-engine-remote.sh <ts-ip> <tip-sha> [--fetch main] [--dry-run|--yes] [--allow-midnight]`: it holds a
-per-host box lock (`/tmp/idea-deploy-<host>.lock`) and the script holds `/tmp/idea-deploy.lock` on the Pi; either busy
+From the box, prefer `tools/fleet/deploy-engine-remote.sh <ts-ip> <tip-sha> [--fetch main] [--dry-run|--yes] [--allow-midnight] [--ignore-fleet-hold]`: it
+refuses (exit 1, dry runs too) while the box's fleet-wide `~/.cache/idea-fleet-health/PAUSED` or `HOLD` exists, like
+the other `tools/fleet` scripts, unless `--ignore-fleet-hold` is given (a warning; the flag is never forwarded to the Pi
+and the files are never touched). It holds a per-host box lock (`/tmp/idea-deploy-<host>.lock`) and the script holds `/tmp/idea-deploy.lock` on the Pi; either busy
 exits 75 without changing anything (two routines or two bots can no longer deploy the same Pi at once). If HEAD already
 equals the tip, the helpers (including `idea-usage-settings` and `idea-usage-export`) match the
 repo assets, pm2 `engine` is online, **and the running process sha equals the tip**, it prints `already on <sha>, skipping` and exits 0.
