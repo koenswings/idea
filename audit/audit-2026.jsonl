@@ -2110,4 +2110,36 @@
 {"ts":"2026-11-14T13:57:13Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@6b318e494f24ac33c92e38e910a8a8c8cfb061dc, console main@67972db9fde3a1b342573d58ed3572f39f5f4de3","previous":"engine main@bdbaf0dccd4885993a06409ac203a4529273b874, console main@67972db9fde3a1b342573d58ed3572f39f5f4de3"}
 {"ts":"2026-11-14T13:57:13Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: deploy Engine main 6b318e4 (Steve 14:29)"}
 {"ts":"2026-11-14T13:57:13Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T13:59:33Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Kid (app-nextcloud#26 demo hook rerun after display-name fix)"}
+{"ts":"2026-11-14T13:59:33Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T14:00:40Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: deploy Engine main 6b318e4 (Steve 14:29)","previous":null}
+{"ts":"2026-11-14T14:00:41Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-14T14:04:43Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@6b318e494f24ac33c92e38e910a8a8c8cfb061dc, console main@67972db9fde3a1b342573d58ed3572f39f5f4de3","previous":"engine main@bdbaf0dccd4885993a06409ac203a4529273b874, console main@67972db9fde3a1b342573d58ed3572f39f5f4de3"}
+{"ts":"2026-11-14T14:04:43Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: deploy Engine main 6b318e4 (Steve 14:29)"}
+{"ts":"2026-11-14T14:04:43Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T14:05:44Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"claim","value":"Atlas: idea#498 timing proof on 6b318e4 (Steve 14:29)","previous":null}
+{"ts":"2026-11-14T14:05:44Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: idea#498 timing proof on 6b318e4 (Steve 14:29)","previous":null}
+{"ts":"2026-11-14T14:05:44Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-14T14:05:44Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: idea#498 timing proof on 6b318e4 (Steve 14:29)","previous":null}
+{"ts":"2026-11-14T14:05:44Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-14T14:28:26Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"claim","value":null,"previous":"Atlas: idea#498 timing proof on 6b318e4 (Steve 14:29)"}
+{"ts":"2026-11-14T14:28:26Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: idea#498 timing proof on 6b318e4 (Steve 14:29)"}
+{"ts":"2026-11-14T14:28:26Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: idea#498 timing proof on 6b318e4 (Steve 14:29)"}
+{"ts":"2026-11-14T14:28:26Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T14:28:26Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T14:28:32Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: deploy Engine main 26febac (Steve 15:20)","previous":null}
+{"ts":"2026-11-14T14:28:32Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-14T14:32:33Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@26febacaa579dfb0729581d364e00a9ff9263c9d, console main@67972db9fde3a1b342573d58ed3572f39f5f4de3","previous":"engine main@6b318e494f24ac33c92e38e910a8a8c8cfb061dc, console main@67972db9fde3a1b342573d58ed3572f39f5f4de3"}
+{"ts":"2026-11-14T14:32:33Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas: deploy Engine main 26febac (Steve 15:20)"}
+{"ts":"2026-11-14T14:32:33Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T14:32:39Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: deploy Engine main 26febac (Steve 15:20)","previous":null}
+{"ts":"2026-11-14T14:32:39Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-14T14:34:31Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@26febacaa579dfb0729581d364e00a9ff9263c9d, console main@67972db9fde3a1b342573d58ed3572f39f5f4de3","previous":"engine main@6b318e494f24ac33c92e38e910a8a8c8cfb061dc, console main@67972db9fde3a1b342573d58ed3572f39f5f4de3"}
+{"ts":"2026-11-14T14:34:31Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas: deploy Engine main 26febac (Steve 15:20)"}
+{"ts":"2026-11-14T14:34:31Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-14T14:34:46Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"claim","value":"Atlas: idea#498 timing proof on 26febac (Steve 15:20)","previous":null}
+{"ts":"2026-11-14T14:34:46Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas: idea#498 timing proof on 26febac (Steve 15:20)","previous":null}
+{"ts":"2026-11-14T14:34:46Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-14T14:34:46Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas: idea#498 timing proof on 26febac (Steve 15:20)","previous":null}
+{"ts":"2026-11-14T14:34:46Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-14T13:58:42Z","bot":"Marco","action":"doc_update","file":"docs/manuals/teachers/teacher-tutorial/idea-for-teachers-tutorial-v2.2.pdf","summary":"Teacher tutorial v2.2: chapter 5 opens with an explicit first step (sign in to Nextcloud as admin, open Accounts, create teacher and learner accounts, no self-signup) after Justice's idea-support report and Koen's request; new screenshots NA-01 to NA-05; v2.1.1 moved to superseded/"}
