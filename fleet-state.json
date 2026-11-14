@@ -24,7 +24,7 @@
     "role": "spare",
     "domain": "any",
     "pr": null,
-    "status": "testing",
+    "status": "idle",
     "host": "100.126.117.80",
     "tailscale": "100.126.117.80",
     "lan": "192.168.0.228",
@@ -37,7 +37,7 @@
     "review_url": "http://100.126.117.80:8080/",
     "claim": null,
     "repo": null,
-    "idle_since": "2026-11-14T12:13:02Z",
+    "idle_since": "2026-11-14T12:15:41Z",
     "offline_note": null
   },
   "idea01": {
