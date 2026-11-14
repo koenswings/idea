@@ -31,5 +31,13 @@ operator_keys_ok() {
   [ "$keys" -gt 0 ]
 }
 c "operator keys: /etc/ssh/idea_operator_keys/pi holds plain public keys" operator_keys_ok "$M"
+# Positive check (idea#518): boot/firmware/cmdline.txt is one line and carries cgroup_enable=memory exactly once
+# (kernel-cmdline.sh appends it); without it the firmware's cgroup_disable=memory leaves Docker without memory accounting.
+cmdline_memcg_ok() {
+  local f="$1/boot/firmware/cmdline.txt"
+  [ -f "$f" ] && [ ! -L "$f" ] && [ "$(grep -c '' "$f")" = 1 ] || return 1
+  [ "$(tr -s '[:blank:]' '\n' < "$f" | grep -cxF cgroup_enable=memory)" = 1 ]
+}
+c "kernel cmdline: cgroup_enable=memory once in boot/firmware/cmdline.txt" cmdline_memcg_ok "$M"
 echo "verify-sanitised: $((n-fail))/$n passed"
 [ "$fail" = 0 ]
