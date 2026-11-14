@@ -375,6 +375,30 @@ NOW=33000 run --alert
 check "hold + known-offline kit: PAUSED created" test -e "$HEALTH_DIR/PAUSED"
 check "hold + known-offline kit: hold and paused true" test "$(j .alert.hold):$(j .alert.fleet_changes_paused)" = "true:true"
 
+# 16. production (fleet-state role "production"): alert, but do not PAUSED
+reset
+jq '.prod={"role":"production","status":"production","tailscale":"10.0.0.4"}'   "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+echo 255 > "$FAKE/10.0.0.4.ssh_rc"; echo 000 > "$FAKE/10.0.0.4.http"
+mkdir -p "$HEALTH_DIR"
+echo "fleet changes paused by check-fleet-health.sh since 2026-01-01T00:00:00Z" > "$HEALTH_DIR/PAUSED"
+NOW=34000 run --alert
+check "production offline: exit 1, listed unhealthy, but NO PAUSED" test "$RC:$(j '.unhealthy|join(",")'):$(test -e "$HEALTH_DIR/PAUSED" && echo p || echo n)" = "1:prod:n"
+check "production offline: alert sent, paused false, listed in pause_excluded" test "$(j .alert.send):$(j '.known_offline|length'):$(j .alert.fleet_changes_paused):$(j '.alert.pause_excluded|join(",")')" = "true:0:false:prod"
+NOW=34100 run --alert
+check "production offline: second run silent, still no PAUSED" test "$(j .alert.send):$(j .alert.reason):$(test -e "$HEALTH_DIR/PAUSED" && echo p || echo n)" = "false:already alerted:n"
+
+reset
+jq '.prod={"role":"production","status":"idle","tailscale":"10.0.0.4"}'   "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+echo 255 > "$FAKE/10.0.0.4.ssh_rc"; echo 000 > "$FAKE/10.0.0.4.http"
+NOW=34500 run --alert
+check "role production (any status) offline: no PAUSED" test "$RC:$(test -e "$HEALTH_DIR/PAUSED" && echo p || echo n):$(j .alert.fleet_changes_paused):$(j '.alert.pause_excluded|join(",")')" = "1:n:false:prod"
+
+reset
+jq '.prod={"role":"production","status":"production","tailscale":"10.0.0.4"}'   "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+echo 255 > "$FAKE/10.0.0.4.ssh_rc"; echo 000 > "$FAKE/10.0.0.4.http"; echo 255 > "$FAKE/10.0.0.2.ssh_rc"; echo 000 > "$FAKE/10.0.0.2.http"
+NOW=34700 run --alert
+check "production offline + pool Pi offline: PAUSED (pool trips it)" test "$RC:$(test -e "$HEALTH_DIR/PAUSED" && echo p || echo n):$(j .alert.fleet_changes_paused):$(j '.alert.pause_excluded|join(",")')" = "1:p:true:prod"
+
 check "real fleet-state.json untouched" test "$(real_fp)" = "$REAL_BEFORE"
 echo "---"
 echo "passed=$pass failed=$fail"

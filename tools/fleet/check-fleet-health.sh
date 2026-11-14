@@ -32,10 +32,11 @@
 #              Known-offline hosts (fleet-state .known_offline.issue, typically a kit
 #              tracked on an open issue such as idea#288) still appear in the report
 #              (.known_offline, with the issue reference) and in the --alert signature,
-#              but do not create or keep PAUSED. Kits (role kit*, or status "kit") never create or
-#              keep PAUSED either, marked or not: an offline field kit must not stop pool work.
-#              They are still reported (.unhealthy, .alert, .alert.pause_excluded). Only pool,
-#              golden and production Pis trip PAUSED.
+#              but do not create or keep PAUSED. Kits (role kit*, or status "kit") and production
+#              (role "production") never create or keep PAUSED either, marked or not: an offline
+#              field kit or production host must not stop pool work (pool deploys never touch
+#              production). They are still reported (.unhealthy, .alert, .alert.pause_excluded).
+#              Only pool and golden Pis trip PAUSED.
 #              Manual walk hold: while $HEALTH_DIR/HOLD exists, PAUSED is kept (created if
 #              missing) and never removed, even on a healthy run; the report then shows
 #              alert.hold=true, alert.fleet_changes_paused=true and alert.hold_file.
@@ -301,10 +302,12 @@ if [ $ALERT -eq 1 ]; then
   hold=false; [ -e "$HOLD_FILE" ] && hold=true
   # Alert signature is unchanged (known-offline problems still alert). PAUSED only
   # follows problems that are not on a known-offline host. HOLD always wins.
-  # Kits never pause pool work (role kit*/status kit), nor do known-offline hosts.
-  kits="$(jq -c '[to_entries[] | select((.key|startswith("_")|not) and (.value|type=="object"))
-                 | select(((.value.role // "")|startswith("kit")) or (.value.status == "kit")) | .key]' "$STATE_FILE")"
-  pause_excluded="$(jq -c --argjson kits "$kits" '[(.known_offline // [] | map(.pi))[], $kits[]] | unique' <<<"$report")"
+  # Kits (role kit*/status kit) and production (role production) never pause pool
+  # work, nor do known-offline hosts.
+  pause_skip="$(jq -c '[to_entries[] | select((.key|startswith("_")|not) and (.value|type=="object"))
+                 | select(((.value.role // "")|startswith("kit")) or (.value.status == "kit")
+                           or ((.value.role // "") == "production")) | .key]' "$STATE_FILE")"
+  pause_excluded="$(jq -c --argjson skip "$pause_skip" '[(.known_offline // [] | map(.pi))[], $skip[]] | unique' <<<"$report")"
   pause_sig="$(jq -c --argjson skip "$pause_excluded" '[.[] | select(.pi as $p | ($skip | index($p) | not))]' <<<"$sig")"
   if $hold; then
     # Manual walk hold: keep (or create) PAUSED and never remove it here.
