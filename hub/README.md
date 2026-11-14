@@ -17,7 +17,6 @@ Facts come from the proposal #408 inventory (read-only, 2026-11-04, graphify and
 | Caddy, caddy-api | system units `caddy`, `caddy-api` | not recorded | not yet (`host/caddy/`) | `/etc/caddy` | not recorded | not recorded | not recorded |
 | Host cron (root) | root crontab: 05:00 reboot, hourly avahi restart, `@reboot /usr/local/bin/boot.sh` | — | not yet (`host/`) | `/usr/local/bin/boot.sh` | — | not recorded | — |
 | IDEA Engine + Console | pm2 process `engine` as `pi` | Console 8081 on idea (fleet-state `console_port`) | no — Engine install, not a hub service | `/home/pi/idea` + agent checkouts | Engine store | pm2 | — |
-| MilkWise (production) | container | 3333, 3334 (`tools/fleet/field-usage-lockdown-flows.md` F3) | no — not a hub service | — | — | — | — |
 
 ## Owners
 
