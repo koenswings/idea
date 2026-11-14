@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 13 November 2026 (v2.1.1: hidden Demo lesson named; v2.1: Kolibri 0.19.5 demo content)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 November 2026 (v2.2: Nextcloud accounts are created by the admin; v2.1.1: hidden Demo lesson named; v2.1: Kolibri 0.19.5 demo content)
 
 # Appendix: demo accounts
 
@@ -20,7 +20,7 @@ The demo school in Kolibri Demo is **IDEA Demo School**. The same usernames work
 | learner2 | none (username only) | Kolibri Demo | Learner in Grade 5 | 4 |
 | learner3 | none (username only) | Kolibri Demo | Learner in Grade 5 | 3.5, 3.6 |
 | learner4 | none (username only) | Kolibri Demo | Learner in the school, not in Grade 5 | 3.3 |
-| admin | admin911! | Nextcloud Demo | Nextcloud administrator | |
+| admin | admin911! | Nextcloud Demo | Nextcloud administrator: creates the accounts (no self-signup) | 5 |
 | teacher1 | teacher1911! | Nextcloud Demo | Teacher (group teachers) | 5, 8 |
 | teacher2 | teacher2911! | Nextcloud Demo | Teacher (group teachers) | 5.2 |
 | learner1 | learner1911! | Nextcloud Demo | Learner (group learners) | 6, 8.2 |
@@ -37,6 +37,6 @@ The demo school in Kolibri Demo is **IDEA Demo School**. The same usernames work
 - Nextcloud Demo: the folders **Worksheets** and **Teacher Notes** for `teacher1` and `teacher2`. You make the **Drop Zone** folder and the document **Lesson plan** yourself in chapter 5.
 - Wikipedia (Demo): Wikipedia in simple English.
 
-**The school's own apps** (not demo) start almost empty: **Kolibri** has only `admin` (the school creates its teachers and learners), **Nextcloud** has `admin`, `teacher1` and `learner1`. The passwords follow the same rule. Learners need a password in Nextcloud, not in Kolibri.
+**The school's own apps** (not demo) start almost empty: **Kolibri** has only `admin` (the school creates its teachers and learners), **Nextcloud** has `admin`, `teacher1` and `learner1`. Nextcloud has no self-signup: the admin creates the other accounts (chapter 5, *Before you start*). The passwords follow the same rule. Learners need a password in Nextcloud, not in Kolibri.
 
 The pictures in the demo content are from Zimbabwe for now. The file `CREDITS.txt` in the demo content gives the source and licence of every file.

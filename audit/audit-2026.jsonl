@@ -2105,3 +2105,4 @@
 {"ts":"2026-11-14T13:36:29Z","bot":"Pixel","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-14T13:39:48Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-14T13:39:48Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid (app-nextcloud#26 demo hook rerun after display-name fix)","previous":null}
+{"ts":"2026-11-14T13:58:42Z","bot":"Marco","action":"doc_update","file":"docs/manuals/teachers/teacher-tutorial/idea-for-teachers-tutorial-v2.2.pdf","summary":"Teacher tutorial v2.2: chapter 5 opens with an explicit first step (sign in to Nextcloud as admin, open Accounts, create teacher and learner accounts, no self-signup) after Justice's idea-support report and Koen's request; new screenshots NA-01 to NA-05; v2.1.1 moved to superseded/"}

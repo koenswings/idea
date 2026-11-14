@@ -1,8 +1,10 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 13 November 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 November 2026
 
 # SCREENSHOTS — IDEA tutorial
 
 Kolibri shots (CON-03, K*, E1–E3, S1–S2 as used in chapters 3 and 4) were taken with headless Playwright (Chromium, viewport 1280×800) on the shared agent box, from the Kolibri Demo test instance (Kolibri 0.19.5, IDEA Demo School, class Grade 5). The welcome window was dismissed in the browser and the page reloaded; forms for create, enroll and edit were filled and then cancelled, without saving. No passwords are visible. Console and Nextcloud shots are unchanged from earlier captures.
+
+v2.2 (14 November 2026): NA-01 to NA-05 (chapter 5, *Before you start*) were taken with headless Playwright (Chromium, viewport 1280×800, light theme) on the shared agent box, from a test Nextcloud 31 instance with the school seed (`admin`, `teacher1`, `learner1`; groups `teachers` and `learners`). Signed in as `admin`; the first-run welcome window was closed. NA-01: sign-in page with only the account name typed, cropped to the sign-in box. NA-02: user menu, cropped. NA-03 and NA-05: Accounts page, cropped below the list. NA-04: New account form for `teacher2` in group `teachers`; the password field shows only dots, email left empty. The demo account `teacher2` was created for NA-05 and deleted again afterwards. No error or warning messages, no addresses or device names in any shot.
 
 v2.1.1 (13 November 2026): E1-03 / S1-05 retaken after the **Correct** pop-up faded; E2-01 / S2-01 recropped so a full quiz question is visible and no heading is cut (the seed title **IDEA demo quiz** was cropped out of the frame). S2-02 was removed (unused). K5-04 was kept: cropping the hidden fourth lesson would have left a misleading **0 of 4**, so the appendix now names that hidden lesson.
 
@@ -46,6 +48,11 @@ Earlier non-Kolibri retakes (15–16 October 2026) used the demo school **IDEA D
 | S2-01 | 04-kolibri-learners.md | learner3 | yes |
 | S2-03a (unused in v2.1) | 04-kolibri-learners.md | learner1 | yes |
 | S2-03 | 04-kolibri-learners.md | learner1 | yes |
+| NA-01 | 05-nextcloud-teachers.md | admin (sign-in page) | yes |
+| NA-02 | 05-nextcloud-teachers.md | admin | yes |
+| NA-03 | 05-nextcloud-teachers.md | admin | yes |
+| NA-04 | 05-nextcloud-teachers.md | admin | yes |
+| NA-05 | 05-nextcloud-teachers.md | admin | yes |
 | N0-01 | 05-nextcloud-teachers.md | teacher1 | yes |
 | N1-01 | 05-nextcloud-teachers.md | teacher1 | yes |
 | N1-03 | 05-nextcloud-teachers.md | teacher1 | yes |
