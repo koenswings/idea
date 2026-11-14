@@ -2007,3 +2007,4 @@
 {"ts":"2026-11-14T07:54:31Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-14T08:16:10Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-14T08:16:17Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid: app-nextcloud#22 7-step on-Pi check (throwaway compose project; Steve go)","previous":null}
+{"ts":"2026-11-14T08:24:03Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"claim","value":"Atlas: idea system-disk read-only rescue (Koen plugged it into idea02; via Steve 09:22)","previous":null}
