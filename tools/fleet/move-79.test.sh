@@ -31,7 +31,48 @@ echo "temp=$(cat "$FAKE_R/temp" 2>/dev/null || echo 50.0)'C"
 SH
 cat > "$W/bin/pm2" <<'SH'
 #!/usr/bin/env bash
-cat "$FAKE_R/pm2.json"
+echo "pm2 $*" >> "$FAKE_R/pm2.log"
+j="$FAKE_R/pm2.json"
+merge_env() {
+  python3 - "$j" <<'PY'
+import json, os, sys
+p = sys.argv[1]
+try:
+    data = json.load(open(p))
+except Exception:
+    data = [{"name":"engine","pm2_env":{"status":"online","username":"pi","env":{}}}]
+if not data:
+    data = [{"name":"engine","pm2_env":{"status":"online","username":"pi","env":{}}}]
+env = data[0].setdefault("pm2_env", {}).setdefault("env", {})
+root = os.environ.get("FAKE_R") or ""
+for k in ("IDEA_TEST_MODE","IDEA_DISKS_ROOT","IDEA_WATCH_DIR","IDEA_CONFIG_FILE","IDEA_STORE_DIR"):
+    if k in os.environ:
+        v = os.environ[k]
+        if root and v.startswith(root):
+            v = "@ROOT@" + v[len(root):]
+        env[k] = v
+data[0]["pm2_env"]["status"] = "online"
+data[0]["pm2_env"]["username"] = "pi"
+json.dump(data, open(p, "w"))
+PY
+}
+clear_env() {
+  python3 - "$j" <<'PY'
+import json, sys
+p = sys.argv[1]
+data = [{"name":"engine","pm2_env":{"status":"online","username":"pi","env":{}}}]
+json.dump(data, open(p, "w"))
+PY
+}
+case "$*" in
+  jlist|"") cat "$j" ;;
+  "restart engine --update-env"|*"restart engine"*) merge_env; cat "$j" >/dev/null ;;
+  "restart idea-usage"*|"restart idea-usage --update-env") ;;
+  "delete engine"|"delete idea-usage") ;;
+  "start pm2.config.cjs") clear_env ;;
+  save) ;;
+  *) cat "$j" ;;
+esac
 SH
 cat > "$W/bin/curl" <<'SH'
 #!/usr/bin/env bash
@@ -170,7 +211,7 @@ chmod +x "$W/bin/"*
 REALPATH="$PATH"
 export PATH="$W/bin:$PATH" SSH_CMD="$W/bin/fakessh" STATE_FILE="$W/fleet-state.json" BOT_NAME=Atlas \
   MV_SCRATCH="@ROOT@/scratch" MV_FIXTURE_ROOT="@ROOT@/fixroot" MV_FIXTURE_WATCH="@ROOT@/watch" MV_ENGINE_DIR="@ROOT@/engine" \
-  DOCK_WAIT=10 TEMP_POLL=0
+  DOCK_WAIT=10 TEMP_POLL=0 MV_FIXTURE_SLEEP=0
 MV_FIX_ROOT_FOR() { echo "$W/$1/fixroot"; }
 
 reset_state() {  # $1 = claim for idea03/idea04
@@ -192,11 +233,17 @@ reset_hosts() {
     echo "automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH" > "$W/$h/engine/store-identity/store-url.txt"
     git -C "$W/$h/engine" init -q && GIT_AUTHOR_DATE=@1763000000 GIT_COMMITTER_DATE=@1763000000 git -C "$W/$h/engine" -c user.email=t@t -c user.name=t commit -q --allow-empty -m x
     printf '/home/pi/idea/other-root\n' > "$W/$h/app-data-roots"; chmod 644 "$W/$h/app-data-roots"; chmod 755 "$W/$h/fixroot"
-    printf 'settings:\n  isDev: false\n  peerAccess: false\n' > "$W/$h/engine/config.yaml"; chmod 640 "$W/$h/engine/config.yaml"
+    printf 'settings:\n  isDev: false\n  peerAccess: false\n  storeIdentityFolder: store-identity\n  storeDataFolder: store-data\n' > "$W/$h/engine/config.yaml"; chmod 640 "$W/$h/engine/config.yaml"
+    printf '{}
+' > "$W/$h/engine/store-identity/store-template.json"
+    mkdir -p "$W/$h/engine/store-identity-scratch" "$W/$h/engine/store-data-scratch"
+    cp "$W/$h/engine/store-identity/store-template.json" "$W/$h/engine/store-identity-scratch/store-template.json"
+    echo "automerge:3NuVdsXJzcUjn6J4Qb2k96wmrTBJ" > "$W/$h/engine/store-identity-scratch/store-url.txt"
+    printf 'settings:\n  isDev: false\n  peerAccess: false\n  storeIdentityFolder: store-identity-scratch\n  storeDataFolder: store-data-scratch\n' > "$W/$h/engine/config.fixture.yaml"
     echo "ssh-ed25519 AAAAC3k${h//./} idea-engine" > "$W/$h/engine.pub"; echo "sha256:$(printf 'a%.0s' {1..64})" > "$W/$h/image-id"
     touch "$W/$h/image-present"; echo 50.1 > "$W/$h/temp"
     printf 'Matching Defaults entries for pi on x:\n    env_reset\n\nUser pi may run the following commands on x:\n    (ALL : ALL) ALL\n    (ALL) NOPASSWD: ALL\n' > "$W/$h/sudo-l"
-    jq -n --arg r "@ROOT@" '[{name:"engine",pm2_env:{status:"online",username:"pi",env:{IDEA_TEST_MODE:"true",IDEA_DISKS_ROOT:($r+"/fixroot"),IDEA_WATCH_DIR:($r+"/watch")}}}]' > "$W/$h/pm2.json"
+    jq -n --arg r "@ROOT@" '[{name:"engine",pm2_env:{status:"online",username:"pi",env:{IDEA_TEST_MODE:"true",IDEA_DISKS_ROOT:($r+"/fixroot"),IDEA_WATCH_DIR:($r+"/watch"),IDEA_CONFIG_FILE:"./config.fixture.yaml",IDEA_STORE_DIR:"./store-data-scratch"}}}]' > "$W/$h/pm2.json"
     : > "$W/$h/docker-ps"; : > "$W/$h/docker-started"
   done
   echo AA202000000000004820 > "$W/$SRC/root-serial"; echo AA202000000000002167 > "$W/$TGT/root-serial"
@@ -457,6 +504,46 @@ reset_state; reset_hosts; add_roots; export MOVE_WORK="$W/work-tamper"
 run --setup-window --ref test; run --create-disks --size-gb 1 --data-mb 1 --ref test
 touch "$W/tamper"; run --move --ref test; rm -f "$W/tamper"
 check "move stops when kid-kolibri-demo's StartedAt changes" bash -c "[ $(rc) = 3 ] && grep -q 'hands-off containers on idea03 changed' '$W/out'"
+
+echo "== scratch store: fixture mode must not use 2VroE"
+reset_state; reset_hosts; add_roots
+export MOVE_WORK="$W/work-scratch-guard"
+# Strip the scratch config so the Engine would open live 2VroE while still in fixture mode (the 13 Nov failure).
+for h in "$SRC" "$TGT"; do
+  jq '.[0].pm2_env.env.IDEA_CONFIG_FILE="" | .[0].pm2_env.env.IDEA_STORE_DIR=""' "$W/$h/pm2.json" > "$W/t" && mv "$W/t" "$W/$h/pm2.json"
+done
+run --preflight
+check "NOT READY when fixture mode would use the shared 2VroE store" bash -c "[ $(rc) = 1 ] && grep -q 'fixture mode is using' '$W/out' && grep -q '2VroE' '$W/out'"
+
+echo "== start-fixture / stop-fixture (scratch store, live 2VroE untouched)"
+reset_state; reset_hosts; add_roots
+export MOVE_WORK="$W/work-start-fixture"
+# Begin in normal mode on the live 2VroE store (no scratch identity yet).
+for h in "$SRC" "$TGT"; do
+  jq '.[0].pm2_env.env={}' "$W/$h/pm2.json" > "$W/t" && mv "$W/t" "$W/$h/pm2.json"
+  rm -f "$W/$h/engine/config.fixture.yaml" "$W/$h/engine/store-identity-scratch/store-url.txt"
+done
+LIVE0="$(cat "$W/$SRC/engine/store-identity/store-url.txt")"
+run --setup-window --ref test
+check "setup-window still works from normal mode (2VroE live store)" bash -c "[ $(rc) = 0 ]"
+run --start-fixture --ref test
+check "start-fixture ok" bash -c "[ $(rc) = 0 ] && grep -q 'FIXTURE STARTED' '$W/out'"
+check "  live store-url.txt still 2VroE on both Pis" bash -c "[ \"\$(cat '$W/$SRC/engine/store-identity/store-url.txt')\" = '$LIVE0' ] && [ \"\$(cat '$W/$TGT/engine/store-identity/store-url.txt')\" = '$LIVE0' ]"
+check "  scratch identity written, not 2VroE" bash -c "u=\$(cat '$W/$SRC/engine/store-identity-scratch/store-url.txt'); [ -n \"\$u\" ] && [[ \$u == automerge:* ]] && [[ \$u != automerge:2VroE* ]] && [ \"\$u\" = \"\$(cat '$W/$TGT/engine/store-identity-scratch/store-url.txt')\" ]"
+check "  pm2 env is fixture + config.fixture.yaml" bash -c "jq -e '.[0].pm2_env.env.IDEA_TEST_MODE==\"true\" and .[0].pm2_env.env.IDEA_CONFIG_FILE==\"./config.fixture.yaml\"' '$W/$SRC/pm2.json' >/dev/null"
+check "  both Pis share this run's scratch URL" bash -c "[ -s '$MOVE_WORK/scratch-store-url.txt' ] && [ \"\$(cat '$W/$SRC/engine/store-identity-scratch/store-url.txt')\" = \"\$(cat '$MOVE_WORK/scratch-store-url.txt')\" ]"
+run --preflight
+check "preflight ALL PASS after --start-fixture" bash -c "[ $(rc) = 0 ] && grep -q 'ALL PASS' '$W/out' && grep -q 'scratch, not 2VroE' '$W/out'"
+# Guard: prepare-scratch refuses the shared store (and does not rewrite the live file).
+out="$(FAKE_R=$W/$SRC FAKE_HOST=$SRC bash "$R" prepare-scratch "$W/$SRC/engine" automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH 2>&1)" || true
+check "prepare-scratch refuses 2VroE" bash -c "grep -q 'shared fleet store' <<<'$out' || grep -q '2VroE' <<<'$out'"
+check "  refuse left live store-url.txt unchanged" test "$(cat "$W/$SRC/engine/store-identity/store-url.txt")" = "$LIVE0"
+out="$(FAKE_R=$W/$SRC FAKE_HOST=$SRC bash "$R" start-fixture "$W/$SRC/engine" automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH "$W/$SRC/fixroot" "$W/$SRC/watch" 0 2>&1)" || true
+check "start-fixture refuses a 2VroE URL" bash -c "grep -qE '2VroE|shared|refusing' <<<'$out'"
+run --stop-fixture --ref test
+check "stop-fixture ok" bash -c "[ $(rc) = 0 ] && grep -q 'FIXTURE STOPPED' '$W/out'"
+check "  Engines back in normal mode (no fixture env)" bash -c "jq -e '(.[0].pm2_env.env.IDEA_TEST_MODE | not) and (.[0].pm2_env.env.IDEA_CONFIG_FILE | not)' '$W/$SRC/pm2.json' >/dev/null"
+check "  live store-url.txt still 2VroE after stop" test "$(cat "$W/$SRC/engine/store-identity/store-url.txt")" = "$LIVE0"
 
 echo "== remote unit checks"
 reset_hosts

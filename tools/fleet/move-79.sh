@@ -4,12 +4,14 @@
 #
 #   BOT_NAME=Atlas tools/fleet/move-79.sh --preflight                              # read-only
 #   BOT_NAME=Atlas tools/fleet/move-79.sh --setup-window --ref "<who said go>"     # back up + set the 3 window prerequisites
+#   BOT_NAME=Atlas tools/fleet/move-79.sh --start-fixture --ref "<ref>"            # scratch Automerge store + fixture pm2 env; refuses 2VroE
 #   BOT_NAME=Atlas tools/fleet/move-79.sh --load-image   --ref "<ref>"             # optional: scratch image source -> target
 #   BOT_NAME=Atlas tools/fleet/move-79.sh --create-disks --ref "<ref>"             # make + dock mv289-src/-dst
 #   BOT_NAME=Atlas tools/fleet/move-79.sh --move       --ref "<ref>"               # source -> target
 #   BOT_NAME=Atlas tools/fleet/move-79.sh --move-back  --ref "<ref>"               # target -> source
 #   BOT_NAME=Atlas tools/fleet/move-79.sh --teardown   --ref "<ref>"               # disks out + window restored exactly
-#   BOT_NAME=Atlas tools/fleet/move-79.sh --release-check                          # read-only, after Axle's normal-mode restart
+#   BOT_NAME=Atlas tools/fleet/move-79.sh --stop-fixture --ref "<ref>"             # normal-mode pm2 restart; live store-url.txt left on 2VroE
+#   BOT_NAME=Atlas tools/fleet/move-79.sh --release-check                          # read-only, after --stop-fixture
 # Options (env in brackets):
 #   --source <pi> [MOVE_SOURCE, default idea03]   --target <pi> [MOVE_TARGET, default idea04]
 #   --src-disk <id> [default mv289-src]  --dst-disk <id> [default mv289-dst]  (must start with --prefix)
@@ -19,12 +21,14 @@
 #   --image <repo:tag> [MV_IMAGE, default nginx:alpine; same image ID on both Pis, --load-image copies it]
 #   --image-id sha256:<64 hex> [MV_IMAGE_ID; optional pin, checked by preflight, never written to compose]  --data-mb <n> [default 16]
 # Guards (every mode): both Pis claimed by $BOT_NAME in fleet-state; neither is wizardly-hugle/idea, idea01,
-# idea02, a golden/production/kit Pi; Engine store is 2VroE; scratch never on Disk B / WD / a boot disk; only
-# loop devices this script created are mounted or detached (by their own /dev/loopN, never losetup -D);
+# idea02, a golden/production/kit Pi; the live store-identity/store-url.txt stays 2VroE (never rewritten);
+# a fixture-mode Engine must use a scratch Automerge store (not 2VroE); scratch never on Disk B / WD / a boot
+# disk; only loop devices this script created are mounted or detached (by their own /dev/loopN, never losetup -D);
 # kid-kolibri-demo and the hands-off containers must be identical (id, state, StartedAt) before and after.
-# Loop disks dock only on an Engine in fixture (testMode) mode: pm2 env IDEA_TEST_MODE=true,
-# IDEA_DISKS_ROOT=/home/pi/idea/duration-disks, IDEA_WATCH_DIR=/home/pi/idea/duration-watch. This script never
-# changes the Engine's mode or pm2 env; --preflight reports it. It never adds or changes an SSH key. Docs: move-79.md.
+# Loop disks dock only on an Engine in fixture (testMode) mode: --start-fixture sets pm2 env IDEA_TEST_MODE=true,
+# IDEA_DISKS_ROOT=/home/pi/idea/duration-disks, IDEA_WATCH_DIR=/home/pi/idea/duration-watch, plus IDEA_CONFIG_FILE
+# and IDEA_STORE_DIR pointing at a scratch identity/data dir. It refuses to start if that store would be 2VroE.
+# --stop-fixture returns the Engine to pm2.config.cjs (normal mode). Never adds or changes an SSH key. Docs: move-79.md.
 # pf never fails, so `cond && pf PASS .. || pf FAIL ..` is a safe if/else here.
 # shellcheck disable=SC2015
 set -euo pipefail
@@ -36,6 +40,8 @@ REMOTE="$HERE/move-79-remote.sh"
 ENGINE_DIR="${MV_ENGINE_DIR:-/home/pi/idea/agents/agent-engine-dev}"; HELPER_REMOTE=script/.zz-move-79.ts
 EXPECT_STORE="automerge:2VroE"
 FIXTURE_ROOT="${MV_FIXTURE_ROOT:-/home/pi/idea/duration-disks}"; FIXTURE_WATCH="${MV_FIXTURE_WATCH:-/home/pi/idea/duration-watch}"
+FIXTURE_CFG="./config.fixture.yaml"; FIXTURE_IDENT="store-identity-scratch"
+MV_FIXTURE_SLEEP="${MV_FIXTURE_SLEEP:-20}"
 SCRATCH="${MV_SCRATCH:-/home/pi/mv289-scratch}"
 KID_PROJECT="kid-kolibri-demo"; KID_PI="${KID_PI:-idea03}"
 # Disk B, the WD, and every boot disk listed in tools/fleet/field-usage-rollout.md (idea01, idea02, happy-zebra,
@@ -53,10 +59,11 @@ DISKB_PI="${DISKB_PI:-idea03}"; DISKB_ID=diskb202610301247; DISKB_INSTANCE=nextc
 APPDATA_PATH=/etc/idea/app-data-roots; DATA_MB=16
 MV_IMAGE="${MV_IMAGE:-nginx:alpine}"; MV_IMAGE_ID="${MV_IMAGE_ID:-}"   # compose uses the repo:tag; IDs are only compared
 SUDO_NEEDED="/usr/bin/chown /usr/bin/chmod /usr/bin/tee /usr/bin/cp /usr/bin/install /usr/bin/rmdir"   # window setup/restore
-usage() { sed -n '2,27p' "$0"; }
+usage() { sed -n '2,29p' "$0"; }
 while [ $# -gt 0 ]; do case "$1" in
   --preflight) MODE=preflight ;; --create-disks) MODE=create ;; --move) MODE=move ;;
   --move-back) MODE=move-back ;; --teardown) MODE=teardown ;; --setup-window) MODE=setup ;;
+  --start-fixture) MODE=start-fixture ;; --stop-fixture) MODE=stop-fixture ;;
   --load-image) MODE=load-image ;; --release-check) MODE=release-check ;;
   --ref) REF="${2:?}"; shift ;; --source) SRC_PI="${2:?}"; shift ;; --target) TGT_PI="${2:?}"; shift ;;
   --src-disk) SRC_DISK="${2:?}"; shift ;; --dst-disk) DST_DISK="${2:?}"; shift ;;
@@ -81,7 +88,13 @@ rsh() { local host="$1"; shift
     $SSH_CMD "pi@$host" "$@"
   else ssh -o BatchMode=yes -o ConnectTimeout=15 -o ProxyCommand="$HOME/.local/bin/socks-connect %h %p" "pi@$host" "$@"; fi; }
 remote() { local host="$1"; shift; rsh "$host" "bash -s -- $(printf '%q ' "$@")" < "$REMOTE"; }
-helper() { local host="$1"; shift; rsh "$host" "cd $ENGINE_DIR && MOVE_TIMEOUT=${MOVE_TIMEOUT:-5400} npx tsx $HELPER_REMOTE $*"; }
+helper() {  # when --start-fixture is active, the Engine + this reader use the scratch store, not 2VroE
+  local host="$1"; shift
+  local extra=""
+  if [ "$MODE" != release-check ] && [ "$MODE" != stop-fixture ] && [ -e "$WORK/fixture-store-active" ]; then
+    extra="MV79_STORE_IDENTITY=$FIXTURE_IDENT MV79_CONFIG_FILE=config.fixture.yaml"
+  fi
+  rsh "$host" "cd $ENGINE_DIR && $extra MOVE_TIMEOUT=${MOVE_TIMEOUT:-5400} npx tsx $HELPER_REMOTE $*"; }
 upload_helper() {  # the one write --preflight makes: the untracked store-reader script (skipped when identical)
   local want; want="$(sha256sum < "$HERE/move-79-engine.ts" | cut -d' ' -f1)"
   [ "$(rsh "$1" "sha256sum < $ENGINE_DIR/$HELPER_REMOTE 2>/dev/null | cut -d' ' -f1" || true)" = "$want" ] && return 0
@@ -161,15 +174,24 @@ probe_pi() {  # probe_pi <pi> <host> <role>
   if [ -z "$t" ]; then pf FAIL "$pi temperature unreadable"
   elif awk -v t="$t" -v p=$TEMP_PAUSE 'BEGIN{exit !(t>p)}'; then pfb FAIL "$pi temp ${t} C > ${TEMP_PAUSE} C (pause; resume below ${TEMP_RESUME} C)"
   else pf PASS "$pi temp ${t} C"; fi
-  local su; su="$(kv "$r" STORE_URL)"
-  [[ "$su" == "$EXPECT_STORE"* ]] && pf PASS "$pi store ${su:0:20}… (2VroE)" || pfb FAIL "$pi store '${su:-none}' is not 2VroE"
+  local live eff; live="$(kv "$r" LIVE_STORE_URL)"; [ -n "$live" ] || live="$(kv "$r" STORE_URL)"
+  eff="$(kv "$r" EFFECTIVE_STORE_URL)"
+  [[ "$live" == "$EXPECT_STORE"* ]] && pf PASS "$pi live store-url.txt ${live:0:20}… (2VroE, never rewritten)" || pfb FAIL "$pi live store '${live:-none}' is not 2VroE"
   local head; head="$(kv "$r" ENGINE_HEAD)"
   if [ -n "$ENGINE_SHA" ]; then [[ "$head" == "$ENGINE_SHA"* ]] && pf PASS "$pi Engine HEAD ${head:0:7} = expected" || pf FAIL "$pi Engine HEAD ${head:0:7}, expected ${ENGINE_SHA:0:7}"
   else pf INFO "$pi Engine HEAD ${head:-?} (no --engine-sha given)"; fi
   [ "$(kv "$r" PM2_ENGINE)" = "online pi" ] && pf PASS "$pi pm2 engine online as pi" || pf FAIL "$pi pm2 engine '$(kv "$r" PM2_ENGINE)'"
   local tm dr wd; tm="$(kv "$r" IDEA_TEST_MODE)"; dr="$(kv "$r" IDEA_DISKS_ROOT)"; wd="$(kv "$r" IDEA_WATCH_DIR)"
-  if [ "$tm" = true ] && [ "$dr" = "$FIXTURE_ROOT" ] && [ "$wd" = "$FIXTURE_WATCH" ]; then pf PASS "$pi Engine in fixture mode ($dr, $wd)"
-  else pf FAIL "$pi Engine not in fixture mode (IDEA_TEST_MODE='${tm}' IDEA_DISKS_ROOT='${dr}' IDEA_WATCH_DIR='${wd}'): a live Engine ignores loop/idea-test-N disks. Switching modes is Axle's call (see move-79.md), not this script's"; fi
+  if [ "$tm" = true ] && [ "$dr" = "$FIXTURE_ROOT" ] && [ "$wd" = "$FIXTURE_WATCH" ]; then
+    pf PASS "$pi Engine in fixture mode ($dr, $wd)"
+    if [ -z "$eff" ] || [[ "$eff" == "$EXPECT_STORE"* ]]; then
+      pf FAIL "$pi fixture mode is using ${eff:-the live store} (2VroE); refusing that combination (it publishes Disk B undocks into the shared store). Use --start-fixture"
+    elif [ -s "$WORK/scratch-store-url.txt" ] && [ "$eff" != "$(cat "$WORK/scratch-store-url.txt")" ]; then
+      pf FAIL "$pi fixture store $eff does not match this run's scratch $(cat "$WORK/scratch-store-url.txt")"
+    else
+      pf PASS "$pi fixture store ${eff:0:20}… (scratch, not 2VroE)"
+    fi
+  else pf FAIL "$pi Engine not in fixture mode (IDEA_TEST_MODE='${tm}' IDEA_DISKS_ROOT='${dr}' IDEA_WATCH_DIR='${wd}'): a live Engine ignores loop/idea-test-N disks. Use --start-fixture (see move-79.md)"; fi
   prereqs "$pi" "$r"
   [ "$(kv "$r" SUDO_LOSETUP)" = yes ] && pf PASS "$pi sudo -n losetup available" || pf FAIL "$pi sudo -n /usr/sbin/losetup not allowed"
   if [ "$(kv "$r" IMAGE_PRESENT)" = yes ]; then P_IMAGEID[$pi]="$(kv "$r" IMAGE_ID)"; pf PASS "$pi scratch App image $img present (${P_IMAGEID[$pi]:0:19}…)"
@@ -211,7 +233,13 @@ prereqs() {  # the window prerequisites: app-data-roots + fixture root, peerAcce
   if [ -z "$x" ]; then pf PASS "$pi $FIXTURE_ROOT root-owned, not group/other writable ($(kv "$r" FIXROOT_STAT))"
   elif [ "$x" = missing ] || [ "$x" = "is a symlink" ]; then pfb FAIL "$pi $FIXTURE_ROOT $x"; else todo "$pi $FIXTURE_ROOT $x"; fi
   x="$(kv "$r" IDEA_CONFIG_FILE)"
-  case "$x" in ""|config.yaml|./config.yaml|"$ENGINE_DIR/config.yaml") ;; *) pfb FAIL "$pi Engine uses IDEA_CONFIG_FILE=$x; this script only handles $ENGINE_DIR/config.yaml" ;; esac
+  tm="$(kv "$r" IDEA_TEST_MODE)"
+  if [ "$tm" = true ]; then
+    case "$x" in ./config.fixture.yaml|config.fixture.yaml|"$ENGINE_DIR/config.fixture.yaml"|"$ENGINE_DIR/./config.fixture.yaml") ;;
+      *) pfb FAIL "$pi fixture mode IDEA_CONFIG_FILE=$x (need $FIXTURE_CFG so the Engine does not open 2VroE)" ;; esac
+  else
+    case "$x" in ""|config.yaml|./config.yaml|"$ENGINE_DIR/config.yaml") ;; *) pfb FAIL "$pi Engine uses IDEA_CONFIG_FILE=$x; this script only handles $ENGINE_DIR/config.yaml or, in fixture mode, $FIXTURE_CFG" ;; esac
+  fi
   x="$(kv "$r" CONFIG_PEERACCESS)"
   if [ "$x" = true ]; then pf PASS "$pi config.yaml peerAccess: true"; else todo "$pi config.yaml peerAccess is '$x' (testMode turns peer access off unless it is true)"; fi
   section "$r" SUDO_L > "$EVID/sudo-l-$pi.txt"; x="$(sudo_missing "$EVID/sudo-l-$pi.txt")"
@@ -296,6 +324,27 @@ orig_matches() {  # orig_matches <pi> <probe-output>: app-data-roots, fixture ro
   return $bad; }
 reprobe() { remote "$2" probe "$SCRATCH" "$MV_IMAGE" "$ENGINE_DIR" "" "$FIXTURE_ROOT" "" "$MIN_RELEASE_SHA" 2>>"$LOG" | tee "$EVID/probe-$1-after.txt"; }
 
+# A well-formed automerge-repo URL (bs58check of a UUID v4). Shared by both Pis in this run.
+new_scratch_store_url() {
+  python3 - <<'PY'
+import hashlib, uuid
+ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+def b58encode(b):
+    n = int.from_bytes(b, "big"); out = ""
+    while n:
+        n, r = divmod(n, 58); out = ALPHABET[r] + out
+    pad = 0
+    for x in b:
+        if x == 0: pad += 1
+        else: break
+    return ALPHABET[0]*pad + (out or "")
+payload = uuid.uuid4().bytes
+check = hashlib.sha256(hashlib.sha256(payload).digest()).digest()[:4]
+print("automerge:" + b58encode(payload + check))
+PY
+}
+
+
 # ---------- modes ----------
 case "$MODE" in
 preflight) run_preflight; exit $(( 1 - PF_OK )) ;;
@@ -319,7 +368,71 @@ setup)
     grep -q '^SETUP_OK' <<<"$out" || die "window setup on $pi failed (what was changed is recorded on the Pi; --teardown restores it)"
     date '+%F %T %Z' > "$WORK/window-$pi.ok"
     guard_now "$pi" "$host"; done
-  log "WINDOW SET UP (backups in $SCRATCH/quarantine-window-$STAMP/ on each Pi). Next: Axle deploys ${ENGINE_SHA:0:7} and restarts both Engines in fixture mode; peerAccess: true takes effect at that restart" ;;
+  log "WINDOW SET UP (backups in $SCRATCH/quarantine-window-$STAMP/ on each Pi). Next: --start-fixture (scratch store, refuses 2VroE), then --create-disks; peerAccess: true is in config.yaml and is copied into config.fixture.yaml" ;;
+start-fixture)
+  win_ok "$SRC_PI" && win_ok "$TGT_PI" || die "run --setup-window first (config.yaml peerAccess: true is copied into the fixture config)"
+  if [ -e "$WORK/fixture-store-active" ] && [ -s "$WORK/scratch-store-url.txt" ]; then
+    log "fixture store already active ($(cat "$WORK/scratch-store-url.txt")); re-applying on both Pis"
+  else
+    [ -s "$WORK/scratch-store-url.txt" ] || new_scratch_store_url > "$WORK/scratch-store-url.txt"
+  fi
+  URL="$(cat "$WORK/scratch-store-url.txt")"
+  case "$URL" in automerge:2VroE*|automerge:3Vvv*|automerge:6f8m*|automerge:4GQm*|automerge:3zoqd*|"")
+    die "refusing to start fixture mode against a shared store ('$URL')" ;; esac
+  for pair in "$SRC_PI|$SRC_HOST" "$TGT_PI|$TGT_HOST"; do
+    IFS='|' read -r pi host <<<"$pair"
+    guard_now "$pi" "$host"
+    r="$(reprobe "$pi" "$host")" || die "$pi probe failed before start-fixture"
+    live="$(kv "$r" LIVE_STORE_URL)"; [ -n "$live" ] || live="$(kv "$r" STORE_URL)"
+    [[ "$live" == "$EXPECT_STORE"* ]] || die "$pi live store-url.txt is '${live:-none}', not 2VroE; leaving it untouched"
+    out="$(remote "$host" prepare-scratch "$ENGINE_DIR" "$URL" 2>&1)" || true
+    printf '%s
+' "$out" > "$EVID/prepare-scratch-$pi.txt"; log "$pi prepare-scratch: $(tr '
+' ';' <<<"$out")"
+    grep -q '^PREPARE_OK' <<<"$out" || die "prepare-scratch failed on $pi (live store-url.txt is not modified)"
+    # confirm live file unchanged
+    r2="$(reprobe "$pi" "$host")" || die "$pi probe failed after prepare-scratch"
+    live2="$(kv "$r2" LIVE_STORE_URL)"; [ -n "$live2" ] || live2="$(kv "$r2" STORE_URL)"
+    [ "$live2" = "$live" ] || die "$pi live store-url.txt changed from $live to $live2; abort"
+    out="$(remote "$host" start-fixture "$ENGINE_DIR" "$URL" "$FIXTURE_ROOT" "$FIXTURE_WATCH" "$MV_FIXTURE_SLEEP" 2>&1)" || true
+    printf '%s
+' "$out" > "$EVID/start-fixture-$pi.txt"; log "$pi start-fixture: $(tr '
+' ';' <<<"$out")"
+    grep -q '^START_OK' <<<"$out" || die "start-fixture failed on $pi"
+    r3="$(reprobe "$pi" "$host")" || die "$pi probe failed after start-fixture"
+    live3="$(kv "$r3" LIVE_STORE_URL)"; [ -n "$live3" ] || live3="$(kv "$r3" STORE_URL)"
+    [ "$live3" = "$live" ] || die "$pi live store-url.txt changed during start-fixture ($live -> $live3)"
+    [[ "$live3" == "$EXPECT_STORE"* ]] || die "$pi live store-url.txt is no longer 2VroE"
+    eff="$(kv "$r3" EFFECTIVE_STORE_URL)"
+    [ "$eff" = "$URL" ] || die "$pi effective store is '${eff:-empty}', want scratch $URL (refusing to leave fixture mode on 2VroE)"
+    case "$eff" in automerge:2VroE*) die "$pi still on 2VroE after start-fixture; refusing to continue" ;; esac
+    [ "$(kv "$r3" IDEA_TEST_MODE)" = true ] || die "$pi not in fixture mode after start-fixture"
+    guard_now "$pi" "$host"
+  done
+  date '+%F %T %Z' > "$WORK/fixture-store-active"
+  log "FIXTURE STARTED on scratch store $URL (live store-url.txt still 2VroE on both Pis)" ;;
+stop-fixture)
+  for pair in "$SRC_PI|$SRC_HOST" "$TGT_PI|$TGT_HOST"; do
+    IFS='|' read -r pi host <<<"$pair"
+    guard_now "$pi" "$host"
+    r="$(reprobe "$pi" "$host")" || die "$pi probe failed before stop-fixture"
+    live="$(kv "$r" LIVE_STORE_URL)"; [ -n "$live" ] || live="$(kv "$r" STORE_URL)"
+    [[ "$live" == "$EXPECT_STORE"* ]] || die "$pi live store-url.txt is '${live:-none}', not 2VroE; not restarting"
+    out="$(remote "$host" stop-fixture "$ENGINE_DIR" "$MV_FIXTURE_SLEEP" 2>&1)" || true
+    printf '%s
+' "$out" > "$EVID/stop-fixture-$pi.txt"; log "$pi stop-fixture: $(tr '
+' ';' <<<"$out")"
+    grep -q '^STOP_OK' <<<"$out" || die "stop-fixture failed on $pi"
+    r2="$(reprobe "$pi" "$host")" || die "$pi probe failed after stop-fixture"
+    live2="$(kv "$r2" LIVE_STORE_URL)"; [ -n "$live2" ] || live2="$(kv "$r2" STORE_URL)"
+    [ "$live2" = "$live" ] || die "$pi live store-url.txt changed during stop-fixture"
+    [ -z "$(kv "$r2" IDEA_TEST_MODE)" ] && [ -z "$(kv "$r2" IDEA_DISKS_ROOT)" ] && [ -z "$(kv "$r2" IDEA_WATCH_DIR)" ] \
+      && { case "$(kv "$r2" IDEA_CONFIG_FILE)" in ""|config.yaml|./config.yaml|"$ENGINE_DIR/config.yaml") true ;; *) false ;; esac; } \
+      || die "$pi still has fixture pm2 env after stop-fixture"
+    guard_now "$pi" "$host"
+  done
+  rm -f "$WORK/fixture-store-active"
+  log "FIXTURE STOPPED (Engines on pm2.config.cjs, live store-url.txt still 2VroE)" ;;
 load-image)
   [[ "$MV_IMAGE" =~ ^[a-z0-9][a-z0-9._/-]*:[A-Za-z0-9._-]+$ ]] || die "--load-image needs a plain repo:tag image (got '$MV_IMAGE')"
   qi="$(printf '%q' "$MV_IMAGE")"

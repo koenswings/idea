@@ -18,6 +18,9 @@
 #   freeslot <scratch> <root> <watch>                 first idea-test-N (1..8): no sentinel, not recorded, absent or empty + unmounted
 #   manifest <dir>                                    "sha256  relpath" per file, sorted (read-only)
 #   guardsnap                                         hands-off containers: id|name|state|startedAt (read-only)
+#   prepare-scratch <engineDir> <storeUrl>            write store-identity-scratch + config.fixture.yaml (never touches live store-url.txt); refuses 2VroE
+#   start-fixture <engineDir> <storeUrl> <root> <watch> [<sleep>]  prepare-scratch first; pm2 restart engine in fixture mode against the scratch store; refuses 2VroE
+#   stop-fixture  <engineDir> [<sleep>]               pm2 start from pm2.config.cjs (normal mode); live store-url.txt left unchanged
 set -uo pipefail
 # Read-only losetup and mkfs paths; overridable only by the offline test (env does not cross ssh).
 LOSETUP_RO="${MV79_LOSETUP:-/usr/sbin/losetup}"; MKFS="${MV79_MKFS:-/usr/sbin/mkfs.ext4}"
@@ -62,6 +65,8 @@ probe)
   echo "TEMP=$(vcgencmd measure_temp 2>/dev/null | grep -oE '[0-9]+(\.[0-9]+)?' | head -1)"
   echo "ENGINE_HEAD=$(git -C "$ED" rev-parse HEAD 2>/dev/null)"
   echo "STORE_URL=$(cat "$ED/store-identity/store-url.txt" 2>/dev/null)"
+  echo "LIVE_STORE_URL=$(cat "$ED/store-identity/store-url.txt" 2>/dev/null)"
+  echo "SCRATCH_STORE_URL=$(cat "$ED/store-identity-scratch/store-url.txt" 2>/dev/null)"
   rs="$(findmnt -n -o SOURCE / | sed 's/\[.*\]$//')"; rpk="$(lsblk -no PKNAME "$rs" 2>/dev/null | head -1)"
   echo "ROOT_DISK=${rpk:-$(basename "$rs")}"; echo "ROOT_SERIAL=$(disk_serial_of_path /)"
   mkdir -p "$scratch" 2>/dev/null || true
@@ -80,16 +85,34 @@ probe)
   echo "WINDOW_ACTIVE=$([ -f "$scratch/window.win" ] && echo yes || echo no)"
   echo "ENGINE_PUB=$(awk '{print $2}' "$PEER_PUB" 2>/dev/null)"
   echo "AUTHZ_READABLE=$([ -r "$AUTHZ" ] && echo yes || echo no)"
-  pm2 jlist 2>/dev/null | python3 -c '
-import json,sys
+  pm2 jlist 2>/dev/null | MV79_ENGINE_DIR="$ED" python3 -c '
+import json,sys,os,re
 try: ps=json.load(sys.stdin)
 except Exception: ps=[]
+ed=os.environ.get("MV79_ENGINE_DIR","")
 for p in ps:
   if p.get("name")=="engine":
     e=p.get("pm2_env",{}); env=e.get("env",{}) or {}
     g=lambda k: e.get(k, env.get(k,""))
     print("PM2_ENGINE=%s %s" % (e.get("status",""), e.get("username","")))
-    for k in ("IDEA_TEST_MODE","IDEA_DISKS_ROOT","IDEA_WATCH_DIR","IDEA_CONFIG_FILE"): print("%s=%s" % (k, g(k)))' 2>/dev/null
+    for k in ("IDEA_TEST_MODE","IDEA_DISKS_ROOT","IDEA_WATCH_DIR","IDEA_CONFIG_FILE","IDEA_STORE_DIR"): print("%s=%s" % (k, g(k)))
+    cf=g("IDEA_CONFIG_FILE") or "config.yaml"
+    if cf and not os.path.isabs(cf) and ed: cf=os.path.join(ed, cf)
+    ident="store-identity"
+    try:
+      txt=open(cf).read()
+      m=re.search(r"^\s*storeIdentityFolder:\s*(\S+)", txt, re.M)
+      if m: ident=m.group(1).strip().strip(chr(34)+chr(39))
+    except Exception:
+      pass
+    path=os.path.join(ed, ident, "store-url.txt") if ed else os.path.join(ident, "store-url.txt")
+    try: eff=open(path).read().strip()
+    except Exception: eff=""
+    print("EFFECTIVE_STORE_URL=%s" % eff)
+    break
+else:
+    print("EFFECTIVE_STORE_URL=")
+' 2>/dev/null
   echo "APP_DATA_ROOTS=$(tr '\n' ' ' < "$APPDATA" 2>/dev/null)"
   echo "CONSOLE_HTTP=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1/ 2>/dev/null)"
   echo "--- LSBLK"; lsblk -dnro NAME,SERIAL,SIZE,TYPE 2>/dev/null
@@ -271,5 +294,76 @@ freeslot)
     [ -z "$(ls -A "$d" 2>/dev/null)" ] && { echo "idea-test-$n"; exit 0; }
   done; exit 1 ;;
 guardsnap) guardsnap ;;
-*) echo "usage: probe|winsetup|winrestore|create|dock|undock|detach|freeslot|manifest|guardsnap" >&2; exit 2 ;;
+*prepare-scratch)
+  ED="${1:-}"; URL="${2:-}"
+  [ -n "$ED" ] && [ -n "$URL" ] || refuse "usage: prepare-scratch <engineDir> <storeUrl>"
+  case "$URL" in automerge:*) ;; *) refuse "store URL must start with automerge:" ;; esac
+  case "$URL" in automerge:2VroE*|automerge:3Vvv*|automerge:6f8m*|automerge:4GQm*|automerge:3zoqd*)
+    refuse "scratch store URL is a shared fleet store ($URL); fixture mode must not use automerge:2VroE (or 3Vvv/6f8m)" ;; esac
+  live="$(cat "$ED/store-identity/store-url.txt" 2>/dev/null)"
+  [ -n "$live" ] || refuse "live store-identity/store-url.txt is missing"
+  case "$live" in automerge:2VroE*) ;; *) refuse "live store-url.txt is not 2VroE ('$live'); leaving it untouched" ;; esac
+  [ "$URL" = "$live" ] && refuse "scratch store URL equals the live store-url.txt"
+  tpl="$ED/store-identity/store-template.json"
+  [ -f "$tpl" ] || refuse "live store-template.json missing; not creating a scratch identity"
+  mkdir -p "$ED/store-identity-scratch" "$ED/store-data-scratch"
+  cp -a "$tpl" "$ED/store-identity-scratch/store-template.json"
+  printf '%s\n' "$URL" > "$ED/store-identity-scratch/store-url.txt.tmp"
+  mv "$ED/store-identity-scratch/store-url.txt.tmp" "$ED/store-identity-scratch/store-url.txt"
+  python3 - "$ED/config.yaml" "$ED/config.fixture.yaml" <<'PY'
+import re, sys
+src, dst = sys.argv[1], sys.argv[2]
+text = open(src).read()
+def setkey(text, key, val):
+    pat = r'^([ \t]*' + re.escape(key) + r':[ \t]*).*$'
+    if re.search(pat, text, re.M):
+        return re.sub(pat, r'\g<1>' + val, text, count=1, flags=re.M)
+    if re.search(r'^settings:\s*$', text, re.M):
+        return re.sub(r'^settings:\s*$', 'settings:\n  %s: %s' % (key, val), text, count=1, flags=re.M)
+    return text + '\nsettings:\n  %s: %s\n' % (key, val)
+text = setkey(text, 'storeIdentityFolder', 'store-identity-scratch')
+text = setkey(text, 'storeDataFolder', 'store-data-scratch')
+open(dst, 'w').write(text)
+PY
+  [ "$(cat "$ED/store-identity/store-url.txt")" = "$live" ] || refuse "live store-url.txt changed during prepare; abort"
+  echo "SCRATCH_STORE_URL=$(cat "$ED/store-identity-scratch/store-url.txt")"
+  echo "LIVE_STORE_URL=$live"
+  echo "PREPARE_OK"
+  ;;
+start-fixture)
+  ED="${1:-}"; URL="${2:-}"; root="${3:-}"; watch="${4:-}"; sl="${5:-20}"
+  [ -n "$ED" ] && [ -n "$URL" ] && [ -n "$root" ] && [ -n "$watch" ] || refuse "usage: start-fixture <engineDir> <storeUrl> <disksRoot> <watchDir> [<sleep>]"
+  live="$(cat "$ED/store-identity/store-url.txt" 2>/dev/null)"
+  case "$live" in automerge:2VroE*) ;; *) refuse "live store-url.txt is not 2VroE ('$live'); leaving it untouched" ;; esac
+  got="$(cat "$ED/store-identity-scratch/store-url.txt" 2>/dev/null)"
+  [ "$got" = "$URL" ] || refuse "scratch store-url.txt is '${got:-missing}', expected '$URL' (run prepare-scratch first)"
+  case "$URL" in automerge:2VroE*) refuse "refusing to start fixture mode against the shared 2VroE store" ;; esac
+  cd "$ED" || refuse "cannot cd $ED"
+  IDEA_TEST_MODE=true IDEA_DISKS_ROOT="$root" IDEA_WATCH_DIR="$watch" \
+    IDEA_CONFIG_FILE=./config.fixture.yaml IDEA_STORE_DIR=./store-data-scratch \
+    pm2 restart engine --update-env >/dev/null
+  pm2 restart idea-usage --update-env >/dev/null 2>/dev/null || true
+  sleep "$sl"
+  [ "$(cat "$ED/store-identity/store-url.txt")" = "$live" ] || refuse "live store-url.txt changed during start-fixture; abort"
+  echo "START_OK"
+  echo "SCRATCH_STORE_URL=$URL"
+  echo "LIVE_STORE_URL=$live"
+  ;;
+stop-fixture)
+  ED="${1:-}"; sl="${2:-20}"
+  [ -n "$ED" ] || refuse "usage: stop-fixture <engineDir> [<sleep>]"
+  live="$(cat "$ED/store-identity/store-url.txt" 2>/dev/null)"
+  case "$live" in automerge:2VroE*) ;; *) refuse "live store-url.txt is not 2VroE ('$live'); not restarting" ;; esac
+  cd "$ED" || refuse "cannot cd $ED"
+  pm2 delete engine >/dev/null 2>&1 || true
+  pm2 delete idea-usage >/dev/null 2>&1 || true
+  env -u IDEA_TEST_MODE -u IDEA_DISKS_ROOT -u IDEA_WATCH_DIR -u IDEA_CONFIG_FILE -u IDEA_STORE_DIR \
+    pm2 start pm2.config.cjs >/dev/null
+  pm2 save >/dev/null || true
+  sleep "$sl"
+  [ "$(cat "$ED/store-identity/store-url.txt")" = "$live" ] || refuse "live store-url.txt changed during stop-fixture; abort"
+  echo "STOP_OK"
+  echo "LIVE_STORE_URL=$live"
+  ;;
+*) echo "usage: probe|winsetup|winrestore|create|dock|undock|detach|freeslot|manifest|guardsnap|prepare-scratch|start-fixture|stop-fixture" >&2; exit 2 ;;
 esac
