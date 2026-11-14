@@ -77,14 +77,27 @@
     "review_url": "http://100.108.39.45:8080/",
     "idle_since": "2026-11-14T12:13:02Z",
     "scratch_stick": {
-      "use": "engine#355 + console#187 scratch stick (erase OK per Koen t3118u via Steve; erase only by those tests, after Kid dry run)",
+      "use": "App Disk scratch for setupDemo: console#197 (Pixel) then Kolibri demo (Kid); then back to #355/#187 scratch (erase OK per Koen t3118u via Steve)",
       "model": "Samsung Flash Drive FIT",
       "usb_id": "090c:1000",
       "serial": "0373219120013886",
       "size_bytes": 128320801792,
-      "partition": "sdb1 vfat label WDW_JD724F6 uuid 57C0-1B0D (Windows setup, 5.8G used)",
-      "engine_view": "USB stick (read-only /run/idea-usb), not an App Disk",
-      "identified": "2026-11-14 11:39 CET by Atlas, read-only, Kid OK"
+      "partition": "sdb1 ext4 label 'IDEA Disk' uuid ae37b78c-1608-4275-b376-9c218ed83b38, GPT (erased by Engine eraseDisk 2026-11-14 13:24 CET; was vfat WDW_JD724F6 57C0-1B0D)",
+      "engine_view": "docked App Disk, mount /disks/sdb1, diskTypes ['app']",
+      "identified": "2026-11-14 11:39 CET by Atlas, read-only, Kid OK",
+      "app_disk": {
+        "diskId": "0373219120013886",
+        "name": "IDEA Disk",
+        "mount": "/disks/sdb1",
+        "diskTypes": [
+          "app"
+        ],
+        "apps": [
+          "kolibri-1.2-0.19.5 (app-kolibri a0daee7, git clone copied as the Engine's GitHub route does)"
+        ],
+        "instances": []
+      },
+      "prepared": "2026-11-14 13:27 CET by Atlas under Pixel's claim (Steve go): summariseDisk + eraseDisk via store commands, mkdir apps/ + kolibri bundle, pm2 restart engine (pi) to redock"
     }
   },
   "wizardly-hugle": {
