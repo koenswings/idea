@@ -8,13 +8,19 @@
 //   cmd <command...>      push ONE Engine command to THIS Engine and wait for its trace (MOVE_TIMEOUT s, default 5400)
 import { Repo, DocumentId } from '@automerge/automerge-repo'
 import { WebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
-import fs from 'fs'; import os from 'os'
+import fs from 'fs'; import os from 'os'; import path from 'path'
 const [mode, ...rest] = process.argv.slice(2); const CMD = rest.join(' ')
 const LIMIT = Number(process.env.MOVE_TIMEOUT || 5400)
 const out = (o: unknown) => console.log(JSON.stringify(o))
-const su = fs.readFileSync('store-identity/store-url.txt', 'utf8').trim()
-const lu = fs.readFileSync('store-identity/command-log-url.txt', 'utf8').trim()
-const port = (fs.readFileSync('config.yaml', 'utf8').match(/^\s*port:\s*(\d+)/m) || [])[1] || '4321'
+// Default: the live store-identity/. After --start-fixture the box sets
+// MV79_STORE_IDENTITY=store-identity-scratch and MV79_CONFIG_FILE=config.fixture.yaml
+// so this reader talks to the scratch store, never 2VroE, while the live file stays put.
+const identDir = process.env.MV79_STORE_IDENTITY || 'store-identity'
+const cfgFile = process.env.MV79_CONFIG_FILE || 'config.yaml'
+const su = fs.readFileSync(path.join(identDir, 'store-url.txt'), 'utf8').trim()
+const luPath = path.join(identDir, 'command-log-url.txt')
+const lu = fs.existsSync(luPath) ? fs.readFileSync(luPath, 'utf8').trim() : ''
+const port = (fs.readFileSync(cfgFile, 'utf8').match(/^\s*port:\s*(\d+)/m) || [])[1] || '4321'
 const repo = new Repo({ network: [new WebSocketClientAdapter('ws://127.0.0.1:' + port)] })
 const to = setTimeout(() => { out({ error: 'timeout' }); process.exit(3) }, (LIMIT + 120) * 1000)
 const h = await repo.find<any>(su.replace('automerge:', '') as DocumentId); await h.whenReady()
