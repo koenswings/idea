@@ -28,7 +28,7 @@ cat > "$WORK/bin/gh" <<'SH'
 case "$*" in *compare/bad1234...main*) echo diverged ;; *compare/*) echo ahead ;;
   *commits/*) echo "eeee111111111111111111111111111111111111" ;; esac
 SH
-cat > "$WORK/bin/fakessh" <<'SH'
+cat > "$WORK/bin/fakessh-base" <<'SH'
 #!/usr/bin/env bash
 host="${1#pi@}"; shift; cmd="$*"
 echo "$host :: ${cmd//$'\n'/ }" >> "$WORK/ssh.log"
@@ -44,9 +44,24 @@ case "$cmd" in
   *) echo "unexpected: $cmd" >&2; exit 9 ;;
 esac
 SH
+# Front for fakessh-base: the golden Engine re-check, and post-checks that fail the first FAKE_PC_FAILS tries.
+cat > "$WORK/bin/fakessh" <<'SH'
+#!/usr/bin/env bash
+host="${1#pi@}"; cmd="${*:2}"
+case "$cmd" in
+  *ENGINE_CURRENT_CHECK*)
+    echo "$host :: ${cmd//$'\n'/ }" >> "$WORK/ssh.log"
+    [ -n "${FAKE_UNREACH:-}" ] && [[ " $FAKE_UNREACH " == *" $host "* ]] && exit 255
+    echo ENGINE_CURRENT_CHECK; echo "HEAD=${FAKE_HEAD:-0000000000000000000000000000000000000000}"; echo "ENGINE=${FAKE_ENGINE:-online pi}"; exit 0 ;;
+  PORT=*)
+    n=$(( $(cat "$WORK/pc.count" 2>/dev/null || echo 0) + 1 )); echo "$n" > "$WORK/pc.count"
+    [ "$n" -le "${FAKE_PC_FAILS:-0}" ] && export FAKE_INST=000 ;;
+esac
+exec "$WORK/bin/fakessh-base" "$@"
+SH
 chmod +x "$WORK/bin/"*
 export PATH="$WORK/bin:$PATH" WORK SSH_CMD="$WORK/bin/fakessh" STATE_FILE="$WORK/fleet-state.json" \
-       HEALTH_DIR="$WORK/health" BOT_NAME=Atlas POST_WAIT=0 BOX_LOCK_DIR="$WORK"
+       HEALTH_DIR="$WORK/health" BOT_NAME=Atlas POST_WAIT=0 POST_TIMEOUT=0 POST_POLL=1 BOX_LOCK_DIR="$WORK"
 reset_state() {
 cat > "$STATE_FILE" <<'JSON'
 { "_comment": "test",
@@ -58,7 +73,7 @@ cat > "$STATE_FILE" <<'JSON'
   "kit1":   {"role":"kit-engine","status":"kit","tailscale":"10.0.0.9"},
   "gold":   {"role":"golden","status":"idle","claim":null,"tailscale":"10.0.0.7","version":"engine main@1111111, console main@2222222"} }
 JSON
-rm -f "$WORK/ssh.log" "$HEALTH_DIR"/*; }
+rm -f "$WORK/ssh.log" "$WORK/pc.count" "$HEALTH_DIR"/*; }
 j() { jq -r "$1" <<<"$OUT"; }
 st() { jq -r --arg p "$1" --arg f "$2" '.[$p][$f] // "null"' "$STATE_FILE"; }
 run() { OUT="$("$@" 2>/dev/null)"; RC=$?; }
@@ -232,6 +247,48 @@ check "override: update-golden still refuses 2 golden" test "$RC" = 1
 rm -f "$HEALTH_DIR/HOLD" "$HEALTH_DIR/PAUSED"
 run "$D/deploy.sh" idea01 engine agent-engine-dev x --ignore-fleet-hold
 check "override without hold: no field"         test "$(j '.fleet_hold_ignored // "absent"')" = absent
+
+# --- update-golden.sh fixes: re-check only, post-check polling, console backup, claim format, hold pass-through ---
+one_golden() { reset_state; jq 'del(.idea02)' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"; }
+TIPSHA=eeee000000000000000000000000000000000001
+one_golden; FAKE_HEAD=$TIPSHA run "$D/update-golden.sh" engine main --yes
+check "golden engine already current: ok"                 test "$RC" = 0
+check "golden engine already current: no redeploy"        bash -c '! grep -q "bash -s --" "$0"' "$WORK/ssh.log"
+check "golden engine already current: re-check step"      bash -c '[[ "$(jq -r ".steps[]|select(.step==\"engine_current\").detail" <<<"$0")" == *"re-check only"* ]]' "$OUT"
+check "golden engine already current: version written"    test "$(st gold version)" = "engine main@$TIPSHA, console main@2222222"
+one_golden; FAKE_HEAD=1111111111111111111111111111111111111111 run "$D/update-golden.sh" engine main --yes
+check "golden engine at another sha: deploys"            bash -c 'grep -q "bash -s --" "$0"' "$WORK/ssh.log"
+one_golden; FAKE_HEAD=$TIPSHA FAKE_ENGINE="stopped pi" FAKE_PC_FAILS=0 run "$D/update-golden.sh" engine main --yes
+check "golden engine at sha but not online: deploys"     bash -c 'grep -q "bash -s --" "$0"' "$WORK/ssh.log"
+one_golden; POST_TIMEOUT=10 FAKE_PC_FAILS=2 run "$D/update-golden.sh" engine main --yes
+check "post-check polls: passes on try 3"                 bash -c '[ "$1" = 0 ] && [[ "$(jq -r ".steps[]|select(.step==\"post_check\").detail" <<<"$0")" == *"try 3"* ]]' "$OUT" "$RC"
+check "post-check polls: version written after the wait"  test "$(st gold version)" = "engine main@$TIPSHA, console main@2222222"
+one_golden; POST_TIMEOUT=2 FAKE_PC_FAILS=99 run "$D/update-golden.sh" engine main --yes
+check "post-check timeout: fails, no version write"      bash -c '[ "$1" = 1 ] && [ "$2" = "engine main@1111111, console main@2222222" ] && [ "$(jq -r .ok <<<"$0")" = false ]' "$OUT" "$RC" "$(st gold version)"
+check "post-check timeout: tried more than once"          bash -c '[ "$(cat "$0")" -ge 2 ]' "$WORK/pc.count"
+check "post-check default timeout is 120 s"               bash -c 'env -u POST_TIMEOUT bash -c ". \"$0/fleet-lib.sh\"; [ \"\$POST_TIMEOUT\" = 120 ]"' "$D"
+one_golden; run "$D/update-golden.sh" console main --yes
+check "golden console: dist backed up before checkout"   bash -c 'l=$(grep "git fetch" "$0" | tail -1); [[ "$l" == *"console-deploy-"*"cp -a dist"*"git checkout -q --detach"* ]]' "$WORK/ssh.log"
+check "golden console: backup keeps dist.prev and HEAD"  bash -c 'l=$(grep "git fetch" "$0" | tail -1); [[ "$l" == *"cp -a dist.prev"* && "$l" == *"rev-parse HEAD >"* ]]' "$WORK/ssh.log"
+reset_state; run "$D/deploy.sh" idea03 app-disk app-kolibri feat-a --yes
+check "app-disk checkout makes no console backup"        bash -c '! grep -q "console-deploy-" "$0"' "$WORK/ssh.log"
+one_golden; jq '.gold.claim="Atlas: golden work"' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+OUT="$(BOT_NAME="Atlas (IDEA Ops)" "$D/update-golden.sh" engine main --yes 2>/dev/null)"; RC=$?
+check "claim must start with the exact BOT_NAME (refused)" test "$RC" = 1
+check "claim refusal explains the format"                 bash -c '[[ "$(jq -r .message <<<"$0")" == *"starts with BOT_NAME"* ]]' "$OUT"
+jq '.gold.claim="Atlas (IDEA Ops): golden work"' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+OUT="$(BOT_NAME="Atlas (IDEA Ops)" "$D/update-golden.sh" engine main --yes 2>/dev/null)"; RC=$?
+check "claim starting with BOT_NAME is ours"              test "$RC" = 0
+jq '.gold.claim="waiting for Atlas (IDEA Ops)"' "$STATE_FILE" > "$WORK/s" && mv "$WORK/s" "$STATE_FILE"
+OUT="$(BOT_NAME="Atlas (IDEA Ops)" "$D/update-golden.sh" engine main --yes 2>/dev/null)"; RC=$?
+check "claim merely mentioning BOT_NAME is refused"       test "$RC" = 1
+one_golden; echo paused > "$HEALTH_DIR/PAUSED"
+run "$D/update-golden.sh" engine main --yes
+check "golden under PAUSED refuses"                       test "$RC" = 1
+run "$D/update-golden.sh" engine main --yes --ignore-fleet-hold
+check "golden --ignore-fleet-hold reaches the Engine deploy (override passed to deploy-engine-remote)" bash -c '[ "$1" = 0 ] && grep -q "bash -s --" "$0" && ! grep -q -- "--ignore-fleet-hold" "$0"' "$WORK/ssh.log" "$RC"
+check "golden PAUSED file untouched"                      test "$(cat "$HEALTH_DIR/PAUSED")" = paused
+rm -f "$HEALTH_DIR/PAUSED"
 
 check "real fleet-state and audit untouched" test "$(real_fp)" = "$REAL_BEFORE"
 echo "passed $pass, failed $fail"

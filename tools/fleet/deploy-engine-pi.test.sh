@@ -175,11 +175,27 @@ setup lk2; run lk2 --yes; rc=$?
 check "lock free deploys" [ "$rc" = 0 ]
 # Box-side lock (deploy-engine-remote.sh)
 REMOTE="$(dirname "$SCRIPT")/deploy-engine-remote.sh"
+export HEALTH_DIR="$WORK/health-none"   # never the box's real PAUSED/HOLD (deploy-engine-remote.sh honours them)
 ( flock -x 8; sleep 5 ) 8>>"$WORK/idea-deploy-idea04.lock" & LKPID=$!; sleep 0.5
 BOX_LOCK_DIR="$WORK" SSH_CMD=true bash "$REMOTE" idea04 abc --dry-run > "$WORK/out" 2>&1; rc=$?; kill $LKPID 2>/dev/null; wait $LKPID 2>/dev/null
 check "box lock busy exits 75" [ "$rc" = 75 ]
 BOX_LOCK_DIR="$WORK" SSH_CMD=true bash "$REMOTE" idea04 abc --dry-run > "$WORK/out" 2>&1; rc=$?
 check "box lock free runs ssh" [ "$rc" = 0 ]
+# Fleet-wide pause: deploy-engine-remote.sh honours PAUSED/HOLD like the fleet-lib scripts
+printf '#!/usr/bin/env bash\ncat >/dev/null; echo "$*" >> "%s/remote-ssh.log"\n' "$WORK" > "$WORK/logssh"; chmod +x "$WORK/logssh"
+mkdir -p "$HEALTH_DIR"; echo "paused by test" > "$HEALTH_DIR/PAUSED"
+BOX_LOCK_DIR="$WORK" SSH_CMD="$WORK/logssh" bash "$REMOTE" idea04 abc --yes > "$WORK/out" 2>&1; rc=$?
+check "remote: PAUSED refuses (exit 1, no ssh)" [ "$rc" = 1 ] && grep -q "REFUSED: fleet changes are paused" "$WORK/out" && [ ! -e "$WORK/remote-ssh.log" ]
+BOX_LOCK_DIR="$WORK" SSH_CMD="$WORK/logssh" bash "$REMOTE" idea04 abc --dry-run > "$WORK/out" 2>&1; rc=$?
+check "remote: PAUSED refuses a dry run too (same as update-golden)" [ "$rc" = 1 ]
+BOX_LOCK_DIR="$WORK" SSH_CMD="$WORK/logssh" bash "$REMOTE" idea04 abc --yes --ignore-fleet-hold > "$WORK/out" 2>&1; rc=$?
+check "remote: --ignore-fleet-hold proceeds with a warning" [ "$rc" = 0 ] && grep -q "WARNING: --ignore-fleet-hold" "$WORK/out"
+check "remote: --ignore-fleet-hold is not forwarded to the Pi" grep -q -- "--yes" "$WORK/remote-ssh.log" && ! grep -q -- "--ignore-fleet-hold" "$WORK/remote-ssh.log"
+check "remote: PAUSED file untouched" [ "$(cat "$HEALTH_DIR/PAUSED")" = "paused by test" ]
+rm -f "$HEALTH_DIR/PAUSED"; touch "$HEALTH_DIR/HOLD"
+BOX_LOCK_DIR="$WORK" SSH_CMD="$WORK/logssh" bash "$REMOTE" idea04 abc --yes > "$WORK/out" 2>&1; rc=$?
+check "remote: HOLD refuses too" [ "$rc" = 1 ]
+rm -f "$HEALTH_DIR/HOLD"
 
 # Already on target
 cat > "$WORK/bin/pm2" <<'SH'
