@@ -45,7 +45,7 @@ The agents can **only filter**. They answer obvious questions, say politely when
 
 ## Telegram: main channel (decided 2026-10-20, built)
 
-Details are in [the Telegram proposal](2026-10-20-telegram-field-support.md) (#289) and `tools/telegram-relay/README.md` (#290). In short:
+Details are in [the Telegram proposal](2026-10-20-telegram-field-support.md) (#289) and `hub/services/telegram-relay/README.md` (#290; moved from `tools/telegram-relay/` in #482). In short:
 
 - **Bot:** **@IDEA_SupportBot** (`https://t.me/IDEA_SupportBot`). The first-choice username `@IdeaSupportBot` was not used.
 - **Relay:** `tg-relay`, a small stdlib-only Python service on **wizardly-hugle** (systemd user unit). It long-polls Telegram (no AI on empty polls), drops messages from anyone not on the allowlist, stores photos and documents, and calls the "Box watcher events" webhook once per message (`type: telegram_message`). The Support Engineer answers with `tg-send`.

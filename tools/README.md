@@ -57,6 +57,10 @@ Quality scan and version monitoring scripts. Lead Bot and App Dev Bot call these
 
 Installation: `apt-get install -y python3-markdown` (chromium already on Pi).
 
+## telegram-relay/ (moved)
+
+The field-support Telegram relay moved to `hub/services/telegram-relay/` (idea#482). `tools/telegram-relay/README.md` is only a pointer. Hub services are listed in `hub/README.md`.
+
 ## Checkout paths
 
 Fleet and quality scripts assume the locked nested layout (Koen 2026-09-24; apps under agent-app-dev):
