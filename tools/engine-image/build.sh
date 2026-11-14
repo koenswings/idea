@@ -59,6 +59,8 @@ case $erc in 0) ;; 2) echo "engine offline build: usage error (interface mismatc
   *) echo "engine offline build failed (rc $erc)" >&2; [ ! -f "$OUT/engine-build.json" ] || cat "$OUT/engine-build.json" >&2; exit 1;; esac
 "$HERE/engine-report.sh" "$OUT/engine-build.json" "$ENGINE_SRC" | tee "$OUT/$NAME.engine-verify.txt"
 "$HERE/firstboot-units.sh" "$MNT" | tee "$OUT/$NAME.firstboot.txt"
+# idea#518: memory cgroup on (firmware passes cgroup_disable=memory); verify-sanitised.sh fails the image without it
+"$HERE/kernel-cmdline.sh" "$MNT" | tee "$OUT/$NAME.cmdline.txt"
 chroot "$MNT" dpkg-query -W -f='${Package}\t${Version}\t${Architecture}\n' | LC_ALL=C sort -u > "$OUT/$NAME.MANIFEST.txt"
 
 rm -f "$MNT/usr/bin/qemu-aarch64-static" "$MNT/etc/resolv.conf"; mv "$MNT/etc/resolv.conf.idea-orig" "$MNT/etc/resolv.conf" 2>/dev/null || true

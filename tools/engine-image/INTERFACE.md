@@ -45,3 +45,18 @@ It also has one positive check (idea#453): the image must carry the baked fleet 
 `/etc/ssh/idea_operator_keys/pi` (installed by the Engine build; sshd is key-only), as a regular file (not a symlink)
 with at least one key, where every non-comment line is a bare public key (no options) that `ssh-keygen -lf` accepts
 and nothing looks like a private key. `sanitise.sh` never touches it.
+
+## Kernel command line (idea#518)
+The Raspberry Pi firmware adds `cgroup_disable=memory` to the kernel command line, so without an override Docker
+has no memory accounting (`docker info`: "No memory limit support"; `docker stats` and the Engine's
+`idea/metrics` `memUsageBytes`/`memLimitBytes` read 0). After the Engine step, `build.sh` runs
+`kernel-cmdline.sh <MNT>`. It appends `KERNEL_CMDLINE_APPEND` from `engine-image.conf` (`cgroup_enable=memory`) to the
+single line of `<MNT>/boot/firmware/cmdline.txt`: on the same line, never a new line, and only if that exact token
+is missing. `verify-sanitised.sh` then fails the image unless cmdline.txt is one line carrying `cgroup_enable=memory`
+exactly once. The Engine side (`build-engine-offline --boot`) may append the same token; the append is idempotent,
+so doing it on both sides is safe.
+
+**Post-boot check** (first boot of a new image, and after `tools/fleet/enable-memory-cgroup.sh <pi> --yes` on a
+running Pi): `grep -qw memory /sys/fs/cgroup/cgroup.controllers`, `/proc/cmdline` contains `cgroup_enable=memory`,
+`docker info` prints no "No memory limit support" warning, and `docker stats --no-stream` shows non-zero MEM USAGE
+for running containers. Note: Compose `mem_limit` values become enforced once memory cgroups are on.
