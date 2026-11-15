@@ -60,10 +60,10 @@ This section is for a disk the Console already shows as an empty IDEA Disk. Beca
 
 1. Click the empty disk on the left. On the right, click the card **Make this a Backup Disk** (*"Back up every App every day at 02:30"*).
 2. The Console asks **Make &lt;disk name&gt; a Backup Disk?** and says: *"Nothing on this disk is erased. It will back up every App on this Pi every day at 02:30. The first backup starts right after. You can change the time later."* (The Pi is the IDEA box.)
-
-   If you see a form with **Backup mode** and **Link to instances** instead, the IDEA box has not been updated for this flow yet. Follow *IDEA for Operators: Tutorial*, section 3.5, instead.
 3. Click **Make this a Backup Disk**. The Console says the request was sent and is waiting for confirmation, and then shows two steps: **Checking the disk** and **Setting up the Backup Disk**.
 4. When it is finished, the Console says *"Done. This disk is now a Backup Disk."* and *"The first backup starts within a minute. After that, it runs every day at 02:30."* Click **← Back**.
+
+If, after step 1, you see a form with **Backup mode** and **Link to instances** instead, the IDEA box has not been updated for this flow yet. Follow *IDEA for Operators: Tutorial*, section 3.5, instead.
 
 ## 4. When the backups run
 
