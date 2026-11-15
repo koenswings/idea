@@ -14,6 +14,8 @@
 #   --no-state      skip systemd enabled/active checks (file checks only).
 #   --list          print the known services and exit.
 # Env: HUB_CHECK_SYSTEMCTL  systemctl command to use (default: systemctl). Tests set a stub.
+#      HUB_CHECK_CRONTAB   crontab command to use (default: crontab). Only "-l" is ever called.
+#      HUB_CHECK_LOGINCTL  loginctl command to use (default: loginctl). Only "show-user" is called.
 #
 # Exit: 0 = no drift, 1 = drift found, 2 = usage error.
 #
@@ -22,7 +24,7 @@
 # no_extra_files) and add <name> to SERVICES.
 set -u
 
-SERVICES="telegram-relay"
+SERVICES="telegram-relay kit-watch"
 
 HUB_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT=""
@@ -30,8 +32,10 @@ HOME_D=${HOME:-/home/pi}
 STATE=1
 ONLY=()
 SYSTEMCTL=${HUB_CHECK_SYSTEMCTL:-systemctl}
+CRONTAB=${HUB_CHECK_CRONTAB:-crontab}
+LOGINCTL=${HUB_CHECK_LOGINCTL:-loginctl}
 
-usage() { sed -n '3,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '3,22p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -118,6 +122,20 @@ unit_state() {
   if [ "$a" = active ]; then ok "unit active: $1"; else drift "unit $1 is-active=$a (want active)"; fi
 }
 
+# linger_on: the deployed user has linger, so --user units start at boot (read-only query).
+linger_on() {
+  [ "$STATE" = 1 ] || { echo "skip  [$SVC] linger (--no-state)"; return; }
+  local u l; u=$(basename "$HOME_D")
+  l=$($LOGINCTL show-user "$u" -p Linger --value 2>/dev/null); l=${l:-unknown}
+  if [ "$l" = yes ]; then ok "linger on: $u"; else drift "linger=$l for $u (want yes; user timers would not start at boot)"; fi
+}
+
+# cron_lacks REGEX WHY: the deployed user's crontab (crontab -l, read-only) has no line matching REGEX.
+cron_lacks() {
+  local c; c=$($CRONTAB -l 2>/dev/null || true)
+  if grep -v '^[[:space:]]*#' <<<"$c" | grep -qE "$1"; then drift "crontab still has: $2"; else ok "crontab has no: $2"; fi
+}
+
 # no_extra_files DIR NAME...: DIR (top level) holds only the listed names.
 no_extra_files() {
   local d=$1; shift
@@ -148,6 +166,25 @@ check_telegram_relay() {
   # Deployed code plus the relay's own runtime state (state.json, its lock/tmp, logs, files/).
   no_extra_files "$D" tg_relay.py tg-send state.json state.json.lock state.json.tmp relay.log relay.log.1 files __pycache__
   unit_state tg-relay.service
+}
+
+# kit-watch + mail-watch: matches what hub/services/kit-watch/install.sh deploys (idea#484).
+check_kit_watch() {
+  local S="$HUB_DIR/services/kit-watch" D="$HOME_D/kit-watch" C="$HOME_D/.config/kit-watch" U="$HOME_D/.config/systemd/user"
+  same_file "$S/kit-watch.py" "$D/kit-watch.py"
+  same_file "$S/mail-watch.py" "$D/mail-watch.py"
+  same_file "$S/kit-watch.service" "$U/kit-watch.service"
+  same_file "$S/kit-watch.timer" "$U/kit-watch.timer"
+  expect_mode "$D" 700
+  expect_mode "$C" 700
+  expect_mode "$C/env" 600
+  env_keys "$S/.env.example" "$C/env"
+  # Deployed code plus the watchers' own state, locks and logs.
+  no_extra_files "$D" kit-watch.py mail-watch.py state.json state.json.tmp mail-state.json mail-state.json.tmp \
+    watch.log watch.log.1 .lock .mail.lock DISABLED __pycache__
+  unit_state kit-watch.timer
+  linger_on
+  cron_lacks '/kit-watch/(kit|mail)-watch\.py' "kit-watch/mail-watch (they run from kit-watch.timer now)"
 }
 
 echo "hub drift check (read-only): repo=$HUB_DIR home=$HOME_D${ROOT:+ root=$ROOT}"
