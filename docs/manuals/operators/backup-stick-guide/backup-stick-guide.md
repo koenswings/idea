@@ -35,9 +35,9 @@ Click the stick to open it on the right.
 
 This section walks you through the four steps the IDEA box takes when it turns a stick into a Backup Disk: it checks the stick, erases it, waits for it to come back, and sets it up.
 
-1. On the right, click **Make a Backup Disk**. Under the button the Console says: *"Erases this stick, then sets it up to back up every App every day at 02:30."*
+1. On the right, click **Make a Backup Disk**. Under the button the Console says: *"Erases this stick, then makes it a Backup Disk with daily backups at 02:30."*, followed by the size the stick needs. If the stick is too small, the button stays grey and the Console says instead that it is too small and needs more than 8 GB.
 2. A window opens with the title **Make a Backup Disk from &lt;stick name&gt;?** The Console first says **Reading the disk…**, then shows what it found on the stick: its name, size and anything stored on it.
-3. Read the warning: *"This erases everything on the disk. Apps, backups and files cannot be recovered."* Below it the Console says that, after erasing, the stick will back up every App on this IDEA box every day at 02:30, that the first backup starts right after, and that you can change the time later.
+3. Read the warning: *"This erases everything on the disk. Apps, backups and files cannot be recovered."* Below it the Console says: *"After erasing, backups run every day at 02:30 for every App on this Pi. You can change the time later."* (The Pi is the IDEA box.)
 4. The Console asks you to type the stick's name. Type it in the box exactly as it is shown in bold. The red button **Erase and make a Backup Disk** turns on when the name matches. Click it. If you change your mind, click **Cancel**: nothing has been changed yet.
 5. The window now shows the four steps and ticks them off as the box works through them:
 
@@ -48,7 +48,7 @@ This section walks you through the four steps the IDEA box takes when it turns a
 | Re-dock | **Waiting for the disk to come back** | The box picks the erased stick up again as an IDEA Disk. |
 | Create | **Setting up the Backup Disk** | The box makes the stick a Backup Disk for every app. |
 
-6. When it is finished the Console says: *"Done. This disk is now a Backup Disk. The first backup starts within a minute. After that, it runs every day at 02:30."* Click **Done**. The Console then shows the stick as a Backup Disk.
+6. When it is finished the Console says: *"Done. This disk is now a Backup Disk."* and *"Backups run every day at 02:30 for every App on this Pi. Apps pause for a moment while a backup runs."* Click **Done**. The Console then shows the stick as a Backup Disk.
 
 Leave the stick plugged into the IDEA box. Please don't unplug it while the steps are running. If a step takes a long time, the Console says *"This is taking longer than expected. Don't unplug the disk."*: that is normal for a big stick, so just give it more time.
 
@@ -58,10 +58,10 @@ If the window waits more than ten minutes on the stick's details before you conf
 
 This section is for a disk the Console already shows as an empty IDEA Disk. Because the disk is already an IDEA Disk with nothing on it, the box skips the Erase and Re-dock steps and nothing is erased.
 
-1. Click the empty disk on the left. On the right, click the card **Make this a Backup Disk** (*"Back up every App every day at 02:30"*).
-2. The Console asks **Make &lt;disk name&gt; a Backup Disk?** and says: *"Nothing on this disk is erased. It will back up every App on this Pi every day at 02:30. The first backup starts right after. You can change the time later."* (The Pi is the IDEA box.)
+1. Click the empty disk on the left. On the right, click the card **Make this a Backup Disk** (*"Daily backups at 02:30, nothing erased"*). If the disk is too small, the card is grey and says it is too small and needs more than 8 GB.
+2. The Console asks **Make &lt;disk name&gt; a Backup Disk?** and says: *"Nothing on this disk is erased. Backups run every day at 02:30 for every App on this Pi. You can change the time later."*
 3. Click **Make this a Backup Disk**. The Console says the request was sent and is waiting for confirmation, and then shows two steps: **Checking the disk** and **Setting up the Backup Disk**.
-4. When it is finished, the Console says *"Done. This disk is now a Backup Disk."* and *"The first backup starts within a minute. After that, it runs every day at 02:30."* Click **← Back**.
+4. When it is finished, the Console says *"Done. This disk is now a Backup Disk."* and *"Backups run every day at 02:30 for every App on this Pi. Apps pause for a moment while a backup runs."* Click **← Back**.
 
 If, after step 1, you see a form with **Backup mode** and **Link to instances** instead, the IDEA box has not been updated for this flow yet. Follow *IDEA for Operators: Tutorial*, section 3.5, instead.
 
@@ -95,7 +95,7 @@ This section lists the other messages the Console may show, and what to do.
 
 | The Console says | What to do |
 |---|---|
-| This stick is too small to be a Backup Disk. It needs at least 8 GB. | Use a bigger stick (16 GB or more). |
+| Too small: needs more than 8 GB (followed by a size tip) | Use a bigger stick or disk, big enough for the school's apps (section 1). |
 | The name you typed doesn't match the disk's name. | Type the name exactly as it is shown in bold. |
 | This is not the disk that was checked. Check the disk again. | Another stick was plugged in. Close the window and start again with the stick you want. |
 | Something else is running on this Pi. Wait for it to finish, then try again. | Wait a few minutes, then try again. |
