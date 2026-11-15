@@ -325,7 +325,7 @@ lognot "idea-usage: TERM did not start a process that was not stopped" "pm2 stop
 # Known box exceptions (PR #343, Steve option c)
 K1='dist-test/test/automated/instance-lifecycle.test.js > Instance lifecycle (automated, real containers) > instance reaches Running and container responds to HTTP after dock'
 K2='dist-test/test/automated/app-versioning.test.js > App versioning (automated, real containers) > v1.0 dock: version is read from disk and stored in instanceOf'
-K3='dist-test/test/automated/app-versioning.test.js > App versioning (automated, real containers) > minor upgrade (v1.0→v1.1): instanceOf updated, lastStarted refreshed'
+K3='dist-test/test/automated/app-versioning.test.js > App versioning (automated, real containers) > in-place minor upgrade (v1.0→v1.1, same diskId): instanceOf updated, lastStarted refreshed'
 O1='dist-test/test/automated/other.test.js > Other > breaks'
 printf ' FAIL  %s\n' "$K1" "$K2" "$K3" >"$T/known3.out"
 cp "$T/known3.out" "$T/known3plus.out"; printf ' FAIL  %s\n' "$O1" >>"$T/known3plus.out"
