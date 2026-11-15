@@ -2640,3 +2640,5 @@
 {"ts": "2026-11-15T22:39:42Z", "bot": "Marco", "action": "doc_update", "file": "docs/manuals/field/nextcloud-update/idea-nextcloud-update-1.8-31.0.14.pdf", "summary": "Field release note for Nextcloud App 1.8-31.0.14 (31.0.1 to 31.0.14): safety copy on the same disk, no Backup Disk needed; about 3¼ minutes unavailable on one small-school test; failed update rolls back by itself. Draft for Steve and Koen; not yet given to schools."}
 {"ts":"2026-11-15T22:49:33Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"claim","value":null,"previous":"Atlas (IDEA Ops)"}
 {"ts":"2026-11-15T22:49:33Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"status","value":"hold","previous":"testing"}
+{"ts":"2026-11-15T22:50:02Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-15T22:50:02Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas (IDEA Ops)","previous":null}
