@@ -23,6 +23,7 @@ Not managed here: `/etc/cron.d/*` (one file there belongs to a non-IDEA personal
 - **Backups first.** Every replaced file or crontab is copied to `/var/backups/idea-hub/host/<stamp>/` (mode 700) before it changes. To roll back, put the file back (`sudo cp …`, or `sudo crontab -u root …/crontab.root`) and run `sudo systemctl reload caddy` for the Caddyfile.
 - **Safe to re-run.** A matching host gives `ok` lines only and takes no backup.
 - `hub/bootstrap.sh` calls this step (idea#487). Comparisons use **active** crontab lines only, the same as `hub/check.sh`.
+- Never run `--apply` on the pool Pis idea03 or idea04 while their 05:00 reboot is on hold (D5-HOLD). `cron.root` carries the 05:00 reboot line, so `--apply` would put that reboot back and end the hold. Use the plan (no `--apply`) there only.
 - Do not use `--apply` on idea for a new 05:00 reboot or a Caddy change until Koen has OK'd that deploy. Today's `cron.root` equals the live one, so `--apply` there changes nothing until the placeholders are filled.
 
 ## `capture.sh`: read-only capture of what is still missing
