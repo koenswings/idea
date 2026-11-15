@@ -17,7 +17,7 @@ This section helps you pick a stick and get to the right place in the Console.
 **Pick a stick or disk.** Good to know:
 
 - **Size: more than 8 GB.** The Console refuses anything smaller. A stick sold as "8 GB" is a little smaller than that inside, so it is refused too.
-- **Big enough for the school's apps.** The Backup Disk keeps a full copy of every app on the IDEA box, and kit backups are large: on the IDEA kit the apps take about 164 GB together (chapter 9). Choose a stick or disk big enough for the school's apps, with room to spare, so that it can keep several backups.
+- **Larger than all the App data on the IDEA box.** The Backup Disk keeps a full copy of every app on the box, and kit backups are large: on the IDEA kit the apps take about 164 GB together (chapter 9). Choose a stick or disk larger than all the App data on the box, with room to spare, so that it can keep several backups.
 - **A USB stick is erased.** Everything on it is removed for good. Use a new stick, or one with nothing anyone needs on it. Don't use a stick that holds lesson material the teachers still want.
 - **An empty IDEA Disk is not erased.** If the Console already shows the disk as an empty IDEA Disk, nothing on it is removed (section 3).
 
@@ -35,7 +35,7 @@ Click the stick to open it on the right.
 
 This section walks you through the four steps the IDEA box takes when it turns a stick into a Backup Disk: it checks the stick, erases it, waits for it to come back, and sets it up.
 
-1. On the right, click **Make a Backup Disk**. Under the button the Console says: *"Erases this stick, then makes it a Backup Disk with daily backups at 02:30."*, followed by the size the stick needs. If the stick is too small, the button stays grey and the Console says instead that it is too small and needs more than 8 GB.
+1. On the right, click **Make a Backup Disk**. Under the button the Console says: *"Erases this stick, then makes it a Backup Disk with daily backups at 02:30. Needs a disk larger than 8 GB. Choose a disk larger than all the App data on this Pi."* If the stick is too small, the button stays grey and the Console says: *"Too small: needs more than 8 GB. Choose a disk larger than all the App data on this Pi."*
 2. A window opens with the title **Make a Backup Disk from &lt;stick name&gt;?** The Console first says **Reading the disk…**, then shows what it found on the stick: its name, size and anything stored on it.
 3. Read the warning: *"This erases everything on the disk. Apps, backups and files cannot be recovered."* Below it the Console says: *"After erasing, backups run every day at 02:30 for every App on this Pi. You can change the time later."* (The Pi is the IDEA box.)
 4. The Console asks you to type the stick's name. Type it in the box exactly as it is shown in bold. The red button **Erase and make a Backup Disk** turns on when the name matches. Click it. If you change your mind, click **Cancel**: nothing has been changed yet.
@@ -58,7 +58,7 @@ If the window waits more than ten minutes on the stick's details before you conf
 
 This section is for a disk the Console already shows as an empty IDEA Disk. Because the disk is already an IDEA Disk with nothing on it, the box skips the Erase and Re-dock steps and nothing is erased.
 
-1. Click the empty disk on the left. On the right, click the card **Make this a Backup Disk** (*"Daily backups at 02:30, nothing erased"*). If the disk is too small, the card is grey and says it is too small and needs more than 8 GB.
+1. Click the empty disk on the left. On the right, click the card **Make this a Backup Disk** (*"Daily backups at 02:30, nothing erased"*). If the disk is too small, the card is grey and the Console says: *"Too small: needs more than 8 GB. Choose a disk larger than all the App data on this Pi."*
 2. The Console asks **Make &lt;disk name&gt; a Backup Disk?** and says: *"Nothing on this disk is erased. Backups run every day at 02:30 for every App on this Pi. You can change the time later."*
 3. Click **Make this a Backup Disk**. The Console says the request was sent and is waiting for confirmation, and then shows two steps: **Checking the disk** and **Setting up the Backup Disk**.
 4. When it is finished, the Console says *"Done. This disk is now a Backup Disk."* and *"Backups run every day at 02:30 for every App on this Pi. Apps pause for a moment while a backup runs."* Click **← Back**.
@@ -114,12 +114,21 @@ This section lists the other messages the Console may show, and what to do.
 
 | The Console says | What to do |
 |---|---|
-| Too small: needs more than 8 GB (followed by a size tip) | Use a bigger stick or disk, big enough for the school's apps (section 1). |
+| Too small: needs more than 8 GB. Choose a disk larger than all the App data on this Pi. | Use a bigger stick or disk, larger than all the App data on the IDEA box (section 1). |
 | The name you typed doesn't match the disk's name. | Type the name exactly as it is shown in bold. |
 | This is not the disk that was checked. Check the disk again. | Another stick was plugged in. Close the window and start again with the stick you want. |
+| The check of this disk is too old. Check the disk again. | Click **Check the disk again**, or close the window and start again. |
+| This disk is no longer available. Check that it is plugged in. | Check the stick is plugged into the IDEA box, then try again. |
+| This disk is not plugged into this Pi. | Plug the stick into this IDEA box and try again. |
 | Something else is running on this Pi. Wait for it to finish, then try again. | Wait a few minutes, then try again. |
+| An app is using this disk. Stop or move the app first. | In the Console, stop or move the app that is on this disk, then try again. |
 | This disk is already a Backup Disk. | Nothing to do: it is already a Backup Disk. |
+| This is the Pi's own system disk, so it can't be a Backup Disk. | This is the box's own disk, not a stick you can use. Choose a USB stick or an empty IDEA Disk instead. |
+| This disk has hidden parts, so it was not erased. | The stick was left as it is. Write to your IDEA contact; don't try to erase it yourself. |
+| This disk holds an operating system, so it was not erased. | The stick was left as it is, so that what is on it is kept. Use a different stick. |
 | Setting up the Backup Disk failed. Try again. | Try again. If it happens again, write to your IDEA contact. |
+| Something went wrong sending this. Close this window and try again. | Close the window and try again. |
+| The Engine didn't respond. Check History for this command. | Wait a moment and look at History for this IDEA box. If it didn't finish, try again, or write to your IDEA contact. |
 
 The Backup Disk panel can also show these lines about the backups themselves:
 
