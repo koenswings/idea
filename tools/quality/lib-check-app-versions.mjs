@@ -16,8 +16,8 @@
  * 22-alpine false positives (idea#543).
  *
  * App version in the report comes from compose.yaml x-app.version (Engine bundle
- * name is <x-app.name>-<x-app.version>). A warning is added when app.yaml
- * idea_app_version differs.
+ * name is <x-app.name>-<x-app.version>). app.yaml idea_app_version is not read
+ * (dropped; compose is the only App version).
  *
  * stdout: JSON report. exit 0 when the scan ran; exit 2 on usage error.
  */
@@ -514,7 +514,7 @@ function listAppYamls(dir) {
   return out;
 }
 
-function composeWarnings(ideaAppVersion, compose) {
+function composeWarnings(compose) {
   const warnings = [];
   if (!compose) return warnings;
   if (compose.error) {
@@ -529,12 +529,6 @@ function composeWarnings(ideaAppVersion, compose) {
     warnings.push({
       code: 'compose_label_mismatch',
       message: `${compose.file} x-app.version is ${compose.xAppVersion} but x-app-version label(s) are ${uniqueLabels.join(', ')}`,
-    });
-  }
-  if (ideaAppVersion != null && compose.xAppVersion != null && String(ideaAppVersion) !== String(compose.xAppVersion)) {
-    warnings.push({
-      code: 'idea_app_version_mismatch',
-      message: `app.yaml idea_app_version is ${ideaAppVersion} but ${compose.file} x-app.version is ${compose.xAppVersion} (compose is the source of truth for Engine bundle naming)`,
     });
   }
   return warnings;
@@ -556,8 +550,7 @@ export async function runCheck({ appsDir, fetchImpl, timeoutMs, now } = {}) {
     }
     const appName = doc.app || appDir.replace(/^app-/, '');
     const compose = readComposeAppVersion(root);
-    const ideaAppVersion = doc.idea_app_version ?? null;
-    const appWarnings = composeWarnings(ideaAppVersion, compose);
+    const appWarnings = composeWarnings(compose);
     const serviceResults = [];
     for (const svc of doc.services || []) {
       const results = [];
@@ -588,7 +581,6 @@ export async function runCheck({ appsDir, fetchImpl, timeoutMs, now } = {}) {
     const appEntry = {
       app: appName,
       path,
-      idea_app_version: ideaAppVersion,
       compose_app_version: compose?.xAppVersion ?? null,
       compose_file: compose?.file ?? null,
       x_app_version_label: compose?.labelVersions?.[0] ?? null,
