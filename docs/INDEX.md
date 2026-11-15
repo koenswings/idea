@@ -102,6 +102,13 @@ A short note for Justice to give each school when a kit is handed over: what the
 
 Files: `manuals/field/school-handover-note/README.md`, `manuals/field/school-handover-note/build.py`, `manuals/field/school-handover-note/school-handover-note.md`, `manuals/field/school-handover-note/idea-school-handover-note-v1.0.pdf`
 
+### Nextcloud update for schools (idea-nextcloud-update-1.8-31.0.14.pdf)
+**Status:** Draft  ·  **Maintained by:** Marco
+A short note for school operators and teachers about the Nextcloud same-major patch update to App version 1.8-31.0.14 (31.0.1 to 31.0.14). It says what changes, how long Nextcloud is unavailable, that the box makes a safety copy on the same disk as Nextcloud (no Backup Disk is needed), and that a failed update rolls back by itself. Draft for Steve and Koen; not yet given to schools.
+→ [docs/manuals/field/nextcloud-update/](manuals/field/nextcloud-update/)
+
+Files: `manuals/field/nextcloud-update/README.md`, `manuals/field/nextcloud-update/build.py`, `manuals/field/nextcloud-update/nextcloud-update.md`, `manuals/field/nextcloud-update/idea-nextcloud-update-1.8-31.0.14.pdf`
+
 ## ops/boot-recovery.md
 **Status:** Authoritative  ·  **Maintained by:** Atlas
 What comes back after a reboot (Engine-managed instances vs non-store fixtures), fstab loop mounts for duration-test images, the 05:00 reboot (as of 2026-11-13 17:45 CET: idea01 still `#D5-HOLD-IDEA01-20261010#` and left untouched; idea03 and idea04 now `#D5-HOLD-<pi>-20261113#`), quarantined idea03/idea04 leftovers (`quarantine-20261113-*`), idea01 idea166 leftovers left in place (golden), after-reboot checklist. Current pool is idea03/idea04; production hostname is idea.
