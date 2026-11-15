@@ -45,9 +45,11 @@ fi
 # overlay: static files + generated first-boot copies of the manual scripts
 F="$WORK/files"; rm -rf "$F"; cp -a "$HERE/files" "$F"
 mkdir -p "$F/usr/share/idea" "$F/etc/idea"   # empty dirs are not tracked by git
-# Router scripts: from SETUP_REF (default: idea#211 head 7eedd03 with the avahi reflector +
-# idea.local hotplug, until #211 is merged; then set SETUP_REF=HEAD).
-SETUP_REF=${SETUP_REF:-7eedd03}; S="$WORK/scripts"; rm -rf "$S"; mkdir -p "$S"
+# Router scripts: from SETUP_REF (default: idea#540 restore of #211 behaviour on main:
+# --check, avahi reflector, idea.local hotplug, Teachers-Internet ON, dnsmasq
+# local=/lan/ + server=/local/). Pin is the script-restore commit; it is on main
+# after a merge commit (not a squash).
+SETUP_REF=${SETUP_REF:-ae849ba4d859a2c81263af0b42cd62cc5dcca21e}; S="$WORK/scripts"; rm -rf "$S"; mkdir -p "$S"
 for f in school-router-setup.sh router-tailscale-zone.sh router-starlink-cgnat-exception.sh; do
   git -C "$REPO" show "$SETUP_REF:docs/manuals/install/scripts/$f" > "$S/$f"; done
 # school-router-setup.sh minus its final commit/restart/reboot block (uci-defaults must not reboot)
