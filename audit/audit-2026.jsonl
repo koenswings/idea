@@ -2580,3 +2580,4 @@
 {"ts":"2026-11-15T18:17:40Z","bot":"Pixel","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-15T18:17:40Z","bot":"Pixel","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Pixel","previous":null}
 {"ts":"2026-11-15T18:17:40Z","bot":"Pixel","action":"fleet_state_update","pi":"idea03","field":"branch","value":"console pixel/next-run-catchup-210 (PR #212 @ddf532c) Pi check, dist deployed to served path then restored","previous":null}
+{"ts": "2026-11-15T18:44:32Z", "bot": "Marco", "action": "doc_update", "file": "docs/house-style/README.md", "summary": "idea#540: refresh docs/house-style/README.md to current housestyle.py and official build.py usage; housestyle.py unchanged (matches install-manual style)"}
