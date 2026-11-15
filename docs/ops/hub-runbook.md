@@ -30,7 +30,7 @@ Do one service at a time. Run `hub/check.sh` before and after each. Stop at the 
 2. **Capture what the repo does not hold yet**, read-only: `hub/host/capture.sh`. Review the folder it prints, on idea. Any non-zero secret count must be fixed first: move the value into an env file and do not copy it. Bring `boot.sh`, the Caddyfile and the live graphify unit and kit-watch scripts to the box, and open a PR that replaces the `HUB-PLACEHOLDER` files. That PR also aligns `services/` if the live copies differ. Merge with Koen's OK, then pull again.
 3. **kit-watch** (#484): `sh hub/services/kit-watch/install.sh`. Wait for a good run (`journalctl --user -u kit-watch.service -n 20`, `tail ~/kit-watch/watch.log`). Then run `sh hub/services/kit-watch/install.sh --remove-cron`, then `hub/check.sh --service kit-watch`.
 4. **graphify** (#485): `sh hub/services/graphify/install.sh`. Then `curl -sI http://127.0.0.1:8083/graph.html` must return 200, and `hub/check.sh --service graphify`.
-5. **Host** (#486): `sudo hub/host/install.sh` (plan) and read it. Then `sudo hub/host/install.sh --apply` only if the plan shows the intended changes and nothing else. Then `hub/check.sh --service host`.
+5. **Host** (#486): `sudo hub/host/install.sh` (plan) and read it. Then `sudo hub/host/install.sh --apply` only if the plan shows the intended changes and nothing else. Never `--apply` on idea03 or idea04 while their 05:00 reboot is on hold (D5-HOLD): it would put the reboot back. Then `hub/check.sh --service host`.
 6. **Reboot acceptance** (one Pi, idea only, outside the midnight guard, with Koen's OK): after the reboot, `systemctl --user list-timers kit-watch.timer`, `systemctl --user is-active tg-relay graphify-serve`, `systemctl is-active caddy`, `pm2 ls` (engine online as pi), `hub/check.sh` (no drift). Also check `boot.sh` ran: `journalctl -b -t CRON` shows `/usr/local/bin/boot.sh`.
 7. Release the claim (flag-first, check that it reads JSON null).
 
@@ -67,8 +67,8 @@ Revoke the old value at its source only after the new one works.
 
 1. Agree the new Pi and a window with Steve. Claim both Pis. Only one Pi is down at a time.
 2. On the new Pi: Engine install, then §4 steps 2–3 (clone, secrets). Bootstrap with `--spare <its hostname>` first. Install the services, but keep **kit-watch disabled** (`systemctl --user disable --now kit-watch.timer`) and the relay stopped. Two relays polling one bot token, or two watchers posting, would duplicate messages.
-3. On old idea: stop the relay and the kit-watch timer, or comment out the cron lines if the migration has not happened there yet. Copy the state files (§4 step 4) to the new Pi over SSH, as pi.
-4. On the new Pi: give it the hub's name (`idea`) and Tailscale identity as agreed with Steve and Koen. That covers the hostname, the Tailscale node and DNS, and any Caddy TLS name (see `renew-tailscale-cert` in `hub/host/capture.sh` output). Then run `hub/bootstrap.sh --apply`, start the relay and timer, and do the §3 step 6 checks.
+3. On old idea: stop the relay and the kit-watch timer, or comment out the cron lines if the migration has not happened there yet. Copy the state files (§4 step 4) to the new Pi over SSH, as pi, straight to that Pi's Tailscale IP (or `idea.tail2d60.ts.net` once the name has moved), key-only. Never go through a jump host such as idea01 or idea04.
+4. On the new Pi: give it the hub's name (`idea`) and Tailscale identity as agreed with Steve and Koen. The node keeps the fleet tag `tag:idea`. `tag:idea-hub` is never put on the Pi itself. That covers the hostname, the Tailscale node and DNS, and any Caddy TLS name (see `renew-tailscale-cert` in `hub/host/capture.sh` output). Then run `hub/bootstrap.sh --apply`, start the relay and timer, and do the §3 step 6 checks.
 5. Keep the old card untouched as the rollback for at least a week. Record the move in fleet-state.
 
 ## 7. Roll back
