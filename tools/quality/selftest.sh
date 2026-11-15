@@ -198,6 +198,13 @@ else
   echo "FAIL commented-block: run tools/quality/commented-block.test.sh"; fail=$((fail + 1))
 fi
 
+# idea#543: check-app-versions unit tests (mocked network)
+if bash "${SCRIPT_DIR}/check-app-versions.test.sh"; then
+  echo "PASS check-app-versions"; pass=$((pass + 1))
+else
+  echo "FAIL check-app-versions: run tools/quality/check-app-versions.test.sh"; fail=$((fail + 1))
+fi
+
 echo "---"
 echo "selftest: $pass passed, $fail failed"
 if [[ $fail -gt 0 ]]; then

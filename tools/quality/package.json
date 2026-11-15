@@ -1,0 +1,12 @@
+{
+  "name": "idea-quality-check-app-versions",
+  "private": true,
+  "type": "module",
+  "description": "Local dependencies for tools/quality/check-app-versions.sh (idea#88, idea#543).",
+  "scripts": {
+    "test": "node --test lib-check-app-versions.test.mjs"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1"
+  }
+}
