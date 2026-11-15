@@ -1,0 +1,7 @@
+# HUB-PLACEHOLDER: not captured from idea yet (idea#486).
+# The real file is /etc/caddy/Caddyfile on the hub Pi "idea" (system units caddy and caddy-api).
+# It was not read for this PR because no Pi was touched. Fill this file from
+# "hub/host/capture.sh" output (run on idea under a claim, read-only) in a follow-up PR,
+# after checking it holds no secrets (Caddyfiles can embed basic-auth hashes or API tokens:
+# move those to an env file such as /etc/caddy/env and reference them with {env.NAME}).
+# hub/host/install.sh refuses to deploy any file that still has the HUB-PLACEHOLDER line.
