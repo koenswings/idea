@@ -1,5 +1,7 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 14 November 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 15 November 2026
 
+> v2.3 (15 November 2026): `idea-for-teachers-tutorial-v2.3.pdf`. Chapter 9 (Backup Disk) rewritten with the Engine answers (idea#529): each app pauses only while it is being copied; a missed backup runs once after the box starts again; old backups are cleaned up automatically and "Backup Disk full: add a bigger disk" means a bigger stick or disk; the operator can change the time under **Backup mode** with **Save backup settings**; a Backup Disk backs up every app on its box (engine#424). No new screenshots.
+>
 > v2.2 (14 November 2026): `idea-for-teachers-tutorial-v2.2.pdf`. Chapter 5 opens with an explicit first step: sign in to Nextcloud as `admin`, open **Accounts** and create the teacher and learner accounts (`<account name>911!`); Nextcloud has no self-signup. New screenshots NA-01 to NA-05.
 >
 > v2.1.1 (13 November 2026): `idea-for-teachers-tutorial-v2.1.1.pdf`. Review fixes: quiz and exercise screenshots recropped or retaken; the hidden Demo lesson is named in the appendix; S2-02 removed.
@@ -15,7 +17,7 @@
 > v1.7 (27 October 2026): chapter 7 (Wikipedia offline) rewritten to match its Wikipedia (Demo) screenshots (idea#295).
 >
 > v1.6 (25 October 2026): teaching one class period, reading Reports and troubleshooting added to chapter 3 (3.6, 3.7).
-> The v2.1.1, v2.1, v2.0, v1.9, v1.8, v1.7, v1.6 and v1.5 PDFs are kept in `superseded/`.
+> The v2.2, v2.1.1, v2.1, v2.0, v1.9, v1.8, v1.7, v1.6 and v1.5 PDFs are kept in `superseded/`.
 
 # Teacher tutorial
 
