@@ -2544,13 +2544,10 @@
 {"ts":"2026-11-15T16:18:12Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-15T16:18:23Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas","previous":null}
 {"ts":"2026-11-15T16:18:23Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
-<<<<<<< HEAD
-{"ts":"2026-11-15T16:21:18Z","bot":"Marco","action":"doc_update","file":"docs/manuals/operators/operator-tutorial/idea-for-operators-tutorial-v1.2.pdf","summary":"Operator tutorial v1.2: sections 3.5 and 3.6 rewritten against 'IDEA for Operators: Make a Backup Stick' (idea#529): a Backup Disk backs up every App (engine#424), each App pauses only while it is copied; quoted Console size rule, hint and success match console#187 1035460e; school-server install manual v1.9 points backups to teacher tutorial chapter 9 (not 12) and the same wording; v1.1 and v1.8 PDFs moved to superseded/"}
-=======
 {"ts":"2026-11-15T16:20:46Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@d366432c14495a6552316708dcc290f2f87dcf57, console main@073dfc5ee3fb0b692c06c55586b7e77fe719dba2","previous":"engine axle/418-restore-reclaim@f542229709fcd3991fb09452c8726cef0cd120d8 (PR #420), console main@073dfc5ee3fb0b692c06c55586b7e77fe719dba2"}
 {"ts":"2026-11-15T16:20:46Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas"}
 {"ts":"2026-11-15T16:20:46Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-15T16:21:18Z","bot":"Marco","action":"doc_update","file":"docs/manuals/operators/operator-tutorial/idea-for-operators-tutorial-v1.2.pdf","summary":"Operator tutorial v1.2: sections 3.5 and 3.6 rewritten against 'IDEA for Operators: Make a Backup Stick' (idea#529): a Backup Disk backs up every App (engine#424), each App pauses only while it is copied; quoted Console size rule, hint and success match console#187 1035460e; school-server install manual v1.9 points backups to teacher tutorial chapter 9 (not 12) and the same wording; v1.1 and v1.8 PDFs moved to superseded/"}
 {"ts":"2026-11-15T16:21:19Z","bot":"Pixel","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-15T16:21:19Z","bot":"Pixel","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Pixel","previous":null}
 {"ts":"2026-11-15T16:21:19Z","bot":"Pixel","action":"fleet_state_update","pi":"idea04","field":"branch","value":"console pixel/backup-blank-stick-404 (PR #187 @1035460) phase1 read-only, served from box","previous":"engine main@4b57456 deploy (#420 incl #355 makeBackupDisk; Steve 15:33)"}
->>>>>>> origin/main
