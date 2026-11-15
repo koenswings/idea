@@ -2594,3 +2594,6 @@
 {"ts":"2026-11-15T20:24:28Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-15T20:24:28Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid","previous":null}
 {"ts":"2026-11-15T20:24:28Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"pr","value":"app-nextcloud#36 pre-merge Pi proof (updateApp 1.7-31.0.1 -> 1.8-31.0.14, FIT backup link, throwaway kid36-*)","previous":"idea#76 WD fixtures written (sdb1-4); sdb3/sdb4 not docked: 90-docking.rules only matches sd?1|sd?2"}
+{"ts":"2026-11-15T20:41:47Z","bot":"Pixel","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-15T20:41:47Z","bot":"Pixel","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Pixel"}
+{"ts":"2026-11-15T20:41:47Z","bot":"Pixel","action":"fleet_state_update","pi":"idea03","field":"branch","value":null,"previous":"console pixel/next-run-catchup-210 (PR #212 @ddf532c), Koen review console#212"}
