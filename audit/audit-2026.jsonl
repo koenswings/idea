@@ -2513,3 +2513,5 @@
 {"ts":"2026-11-15T12:13:39Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle: switch FIT 0373219120013886 Backup Disk to on-demand via setBackupMode (Steve 13:12); no restart","previous":null}
 {"ts":"2026-11-15T12:15:43Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle: switch FIT 0373219120013886 Backup Disk to on-demand via setBackupMode (Steve 13:12); no restart"}
 {"ts":"2026-11-15T12:15:43Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-15T12:55:45Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Axle: deploy engine #420 gated tip (engine#418 restore-reclaim) for Kid's Pi proof (Steve 13:55); Engine only, helper as-is; Disk B/WD/kid-kolibri-demo/nextcloud-files-b-001 untouched","previous":null}
+{"ts":"2026-11-15T12:55:45Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
