@@ -38,7 +38,7 @@ This section walks you through the four steps the IDEA box takes when it turns a
 1. On the right, click **Make a Backup Disk**. Under the button the Console says: *"Erases this stick, then makes it a Backup Disk with daily backups at 02:30. Needs a disk larger than 8 GB. Choose a disk larger than all the App data on this Pi."* If the stick is too small, the button stays grey and the Console says: *"Too small: needs more than 8 GB. Choose a disk larger than all the App data on this Pi."*
 2. A window opens with the title **Make a Backup Disk from &lt;stick name&gt;?** The Console first says **Reading the disk…**, then shows what it found on the stick: its name, size and anything stored on it.
 3. Read the warning: *"This erases everything on the disk. Apps, backups and files cannot be recovered."* Below it the Console says: *"After erasing, backups run every day at 02:30 for every App on this Pi. You can change the time later."* (The Pi is the IDEA box.)
-4. The Console asks you to type the stick's name. Type it in the box exactly as it is shown in bold. The red button **Erase and make a Backup Disk** turns on when the name matches. Click it. If you change your mind, click **Cancel**: nothing has been changed yet.
+4. The Console asks you to type the stick's name. Type the disk's name as shown; capitals don't matter. The red button **Erase and make a Backup Disk** turns on when the name matches. Click it. If you change your mind, click **Cancel**: nothing has been changed yet.
 5. The window now shows the four steps and ticks them off as the box works through them:
 
 | Step | What the Console shows | What happens |
@@ -52,7 +52,7 @@ This section walks you through the four steps the IDEA box takes when it turns a
 
 Leave the stick plugged into the IDEA box. Please don't unplug it while the steps are running. If a step takes a long time, the Console says *"This is taking longer than expected. Don't unplug the disk."*: that is normal for a big stick, so just give it more time.
 
-If the window waits more than ten minutes on the stick's details before you confirm, the Console asks you to look again (*"The summary is out of date. Check the disk again."*). Click **Check the disk again** and type the name once more.
+If the window waits more than ten minutes on the stick's details before you confirm, the Console asks you to look again (*"The summary is out of date. Check the disk again."*). Click **Check the disk again** and type the disk's name as shown once more; capitals don't matter.
 
 ## 3. Make a Backup Disk from an empty IDEA Disk
 
@@ -115,7 +115,7 @@ This section lists the other messages the Console may show, and what to do.
 | The Console says | What to do |
 |---|---|
 | Too small: needs more than 8 GB. Choose a disk larger than all the App data on this Pi. | Use a bigger stick or disk, larger than all the App data on the IDEA box (section 1). |
-| The name you typed doesn't match the disk's name. | Type the name exactly as it is shown in bold. |
+| The name you typed doesn't match the disk's name. | Type the disk's name as shown; capitals don't matter. |
 | This is not the disk that was checked. Check the disk again. | Another stick was plugged in. Close the window and start again with the stick you want. |
 | The check of this disk is too old. Check the disk again. | Click **Check the disk again**, or close the window and start again. |
 | This disk is no longer available. Check that it is plugged in. | Check the stick is plugged into the IDEA box, then try again. |
