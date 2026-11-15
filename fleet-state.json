@@ -83,22 +83,11 @@
       "usb_id": "090c:1000",
       "serial": "0373219120013886",
       "size_bytes": 128320801792,
-      "partition": "sdb1 ext4 label 'IDEA Disk' uuid ae37b78c-1608-4275-b376-9c218ed83b38, GPT (erased by Engine eraseDisk 2026-11-14 13:24 CET; was vfat WDW_JD724F6 57C0-1B0D)",
-      "engine_view": "docked App Disk, mount /disks/sdb1, diskTypes ['app']",
+      "partition": "sdb1 ext4 label 'IDEA Disk' uuid a8b19869-7f71-46cc-8e98-9ce656bf1f3d (wiped by Pixel for console#187 2026-11-15; earlier ae37b78c-1608-4275-b376-9c218ed83b38 from the 2026-11-14 eraseDisk)",
+      "engine_view": "docked Backup Disk, mount /disks/sdb1, diskTypes ['backup'], scheduled daily 02:30, links []",
       "identified": "2026-11-14 11:39 CET by Atlas, read-only, Kid OK",
-      "app_disk": {
-        "diskId": "0373219120013886",
-        "name": "IDEA Disk",
-        "mount": "/disks/sdb1",
-        "diskTypes": [
-          "app"
-        ],
-        "apps": [
-          "kolibri-1.2-0.19.5 (app-kolibri a0daee7, git clone copied as the Engine's GitHub route does)"
-        ],
-        "instances": []
-      },
-      "prepared": "2026-11-14 13:27 CET by Atlas under Pixel's claim (Steve go): summariseDisk + eraseDisk via store commands, mkdir apps/ + kolibri bundle, pm2 restart engine (pi) to redock"
+      "prepared": "2026-11-14 13:27 CET by Atlas under Pixel's claim (Steve go): summariseDisk + eraseDisk via store commands, mkdir apps/ + kolibri bundle, pm2 restart engine (pi) to redock",
+      "app_disk_history": "App Disk until 2026-11-14/15 (kolibri-1.2-0.19.5); superseded by the Backup Disk role"
     },
     "versions": null
   },
@@ -354,16 +343,16 @@
     "fit-0373219120013886": {
       "model": "USB flash drive (FIT)",
       "disk_serial": "0373219120013886",
-      "owner": "Ops (Atlas) record; Backup Disk made by Axle for engine#355",
-      "purpose": "Backup Disk on idea04 (engine#355 proof); formerly Kid's demo leftover",
-      "history": "Kid demo leftover on idea04; erased and made a Backup Disk by Axle for engine#355 (Axle reported 2026-11-15 12:45 CET via Steve)",
+      "owner": "Ops (Atlas) record; Backup Disk made by Pixel for console#187",
+      "purpose": "Scheduled Backup Disk on idea04 (console#187 blank-stick test); formerly Axle's engine#355 Backup Disk and Kid's demo leftover",
+      "history": "Kid demo leftover on idea04; erased and made a Backup Disk by Axle for engine#355 (Axle reported 2026-11-15 12:45 CET via Steve); wiped by Pixel for console#187 (Steve OK 2026-11-15 17:33 CET, Axle agreed), old content quarantined at /home/pi/quarantine/fit-0373219120013886-pixel187-20261115T162508Z on idea04, then made a scheduled Backup Disk (Pixel reported 2026-11-15, released idea04 77bafcc)",
       "location": "docked on idea04",
       "docked_on": "idea04",
       "device": "match by disk_serial, never by device name",
       "diskId": "0373219120013886",
-      "partition": "ext4 label IDEA Disk, fs UUID 410cf0e3-693a-441f-86d3-f6926ccca385",
-      "fs_uuid": "410cf0e3-693a-441f-86d3-f6926ccca385",
-      "state": "[backup] mode on-demand, no links (switched from scheduled 02:30 by Axle 2026-11-15 ~13:15 CET, setBackupMode trace b173a85e; BACKUP.yaml keeps 02:30 as a dormant value the scheduler ignores)"
+      "partition": "sdb1 ext4 label IDEA Disk, fs UUID a8b19869-7f71-46cc-8e98-9ce656bf1f3d (fresh ext4 from the console#187 wipe)",
+      "fs_uuid": "a8b19869-7f71-46cc-8e98-9ce656bf1f3d",
+      "state": "[backup] mode scheduled, daily 02:30, no links (BACKUP.yaml read by Atlas 2026-11-15, read-only under claim c42bbcf)"
     }
   }
 }
