@@ -31,7 +31,6 @@ This is how you add learners to a class.
 
 1. Click the class name. On the class page (with **Coaches** and **Learners**), click **ENROLL LEARNERS**. The enroll page opens. It only lists people who are not yet in the class (in the Demo that is **Learner Four**).
    ![Enroll learners page](../screenshots/K2-01.png)
-   The picture was taken before the Demo was refreshed and still shows the admin account as well; in the current Demo the list is only **Learner Four**.
 2. Tick each learner you want to add (here: **Learner Four**), then click **CONFIRM**. (In the demo we closed the page without confirming, so Grade 5 stays as it is.)
    ![Learner ticked](../screenshots/K2-02.png)
 3. Learners already in the class appear under **Learners**. In the Demo, Grade 5 already has Learner One, Learner Two and Learner Three. Learner Four is in the school but not in this class, so you can practise the step above.
@@ -120,7 +119,6 @@ In Kolibri 0.19 you read reports on the lesson, the quiz or the learner, rather 
    ![Quiz report](../screenshots/K5-03.png)
 4. **Learners > (a name)**: that learner's lessons and quizzes. In the Demo, Coach shows the three Grade 5 lessons (**Maths lesson**, **Grade 5 Science lesson** and **Early Reading lesson**). There is no hidden lesson.
    ![Learner report](../screenshots/K5-04.png)
-   The picture was taken before the Demo was refreshed and still shows a fourth **Khan Academy (English - US curriculum) lesson** and **Lessons completed 0 of 4**. In the current Demo, **Lessons completed** counts only the three lessons.
 Reports can be printed or exported as CSV (icons top right).
 
 > **Tip.** Do not chase 100%. Look for the question most learners got wrong and teach it again.

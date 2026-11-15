@@ -1,6 +1,6 @@
 **Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 15 November 2026
 
-> v2.3.1 (15 November 2026): `idea-for-teachers-tutorial-v2.3.1.pdf`. After the Kolibri Demo was re-seeded (app-kolibri#23), the hidden **Khan Academy (English - US curriculum) lesson** is gone: Coach shows only the three Grade 5 lessons, and Enroll learners lists only Learner Four. The quiz name is already **Grade 5 Practice Quiz**. No new screenshots; K5-04 and K2-01 still show the old demo and are listed for retake in `SCREENSHOTS.md`.
+> v2.3.1 (15 November 2026): `idea-for-teachers-tutorial-v2.3.1.pdf`. After the Kolibri Demo was re-seeded (app-kolibri#23), the hidden **Khan Academy (English - US curriculum) lesson** is gone: Coach shows only the three Grade 5 lessons, and Enroll learners lists only Learner Four. The quiz name is already **Grade 5 Practice Quiz**. K5-04 and K2-01 were retaken from the clean demo (look-only).
 >
 > v2.3 (15 November 2026): `idea-for-teachers-tutorial-v2.3.pdf`. Chapter 9 (Backup Disk) rewritten with the Engine answers (idea#529): each app pauses only while it is being copied; a missed backup runs once after the box starts again; old backups are cleaned up automatically and "Backup Disk full: add a bigger disk" means a bigger stick or disk; the operator can change the time under **Backup mode** with **Save backup settings**; a Backup Disk backs up every app on its box (engine#424). No new screenshots.
 >
