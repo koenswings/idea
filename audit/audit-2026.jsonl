@@ -2619,3 +2619,6 @@
 {"ts":"2026-11-15T22:25:33Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@930e9f25ddbd33983c5b6272c46b1a0a62833985, console main@2ce289d507dec798b7f31b0e83adf8779a103e92","previous":"engine main@0038e31dc379447e02fb2644f5894fd9c8285acf, console main@073dfc5ee3fb0b692c06c55586b7e77fe719dba2"}
 {"ts":"2026-11-15T22:25:54Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-15T22:25:55Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas (IDEA Ops)","previous":null}
+{"ts":"2026-11-15T22:30:38Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-15T22:30:38Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Kid"}
+{"ts":"2026-11-15T22:30:38Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"pr","value":"idea#76 WD fixtures written (sdb1-4); sdb3/sdb4 not docked: 90-docking.rules only matches sd?1|sd?2","previous":"app-nextcloud#36 pre-merge Pi proof (updateApp 1.7-31.0.1 -> 1.8-31.0.14, FIT backup link, throwaway kid36-*)"}
