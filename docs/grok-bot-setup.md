@@ -468,7 +468,7 @@ These rules apply both at the PR gate and in the scheduled scan:
 
 - No hardcoded credentials — `process.env` or `import.meta.env` only
 - No `console.log` in production code paths
-- No commented-out blocks longer than 5 lines without an explanatory comment
+- No commented-out *code* blocks longer than 5 lines. JSDoc (`/** … */`), a file's leading header comment (including after a shebang), and mid-file prose comments are not flagged; a run of more than 5 lines of commented-out code (after stripping `//` or `#`) is a warning. See `tools/quality/lib-commented-block.py`.
 - No `TODO` or `FIXME` without a linked GitHub issue number
 
 **Documentation currency**
@@ -1061,7 +1061,7 @@ settings:
 - No source files in docs/ — .md, .pdf, .png, .svg only
 - No hardcoded credentials — process.env only
 - No console.log in src/ production paths
-- No commented-out blocks >5 lines without explanation
+- No commented-out *code* blocks >5 lines (JSDoc, file headers, and prose comments are skipped; see `tools/quality/lib-commented-block.py`)
 - No TODO/FIXME without linked GitHub issue
 - Build/deploy changed → update this file in same PR
 - New doc in docs/ → update docs/INDEX.md in same PR
@@ -1138,7 +1138,7 @@ The fleet scripts handle deployment. For reference, the fleet deploy script:
 - No source files in docs/ — .md, .pdf, .png, .svg only
 - No hardcoded credentials — import.meta.env only
 - No console.log in production paths
-- No commented-out blocks >5 lines without explanation
+- No commented-out *code* blocks >5 lines (JSDoc, file headers, and prose comments are skipped; see `tools/quality/lib-commented-block.py`)
 - No TODO/FIXME without linked GitHub issue
 - All <For> loops ID-keyed — never index-keyed
 - No broad store subscriptions — use derived signals

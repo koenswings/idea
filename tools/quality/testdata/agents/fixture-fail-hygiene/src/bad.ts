@@ -9,3 +9,9 @@ console.log("debug");
 // line6
 // line7
 export const y = 2;
+// const leftoverA = 1;
+// const leftoverB = 2;
+// const leftoverC = 3;
+// const leftoverD = 4;
+// const leftoverE = 5;
+// const leftoverF = 6;
