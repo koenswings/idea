@@ -4,6 +4,7 @@
 # Koen's OK for the deploy. Never prints secrets.
 #
 #   sh hub/services/kit-watch/install.sh               install/refresh code + units, enable the timer
+#   sh hub/services/kit-watch/install.sh --stage        code, units and env only, no systemctl/crontab (tests, bootstrap --stage)
 #   sh hub/services/kit-watch/install.sh --remove-cron  then (separate step, once the timer has run
 #                                                      fine) drop the two old pi crontab lines
 #
@@ -16,13 +17,15 @@
 #  - --remove-cron backs up the crontab first, removes only the kit-watch.py / mail-watch.py lines,
 #    and refuses unless kit-watch.timer is enabled + active and kit-watch.service has run successfully.
 set -eu
+SELF=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
 cd "$(dirname "$0")"
 [ "$(id -u)" != 0 ] || { echo "run as pi, not root (systemd --user units)" >&2; exit 2; }
-REMOVE_CRON=0
+REMOVE_CRON=0; STAGE=0
 case "${1:-}" in
   "") ;;
   --remove-cron) REMOVE_CRON=1 ;;
-  -h|--help) sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  --stage) STAGE=1 ;;
+  -h|--help) sed -n '2,20p' "$SELF" | sed 's/^# \{0,1\}//'; exit 0 ;;
   *) echo "unknown option: $1" >&2; exit 2 ;;
 esac
 
@@ -73,6 +76,7 @@ else
 fi
 chmod 600 "$C/env"
 cp kit-watch.service kit-watch.timer "$U/"
+[ "$STAGE" = 0 ] || { echo "staged code + units only; no session or crontab operations"; exit 0; }
 systemctl --user daemon-reload
 systemctl --user enable kit-watch.timer
 systemctl --user start kit-watch.timer
