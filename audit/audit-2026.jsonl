@@ -2658,3 +2658,5 @@
 {"ts":"2026-11-15T23:09:35Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"claim","value":"Atlas (IDEA Ops)","previous":null}
 {"ts":"2026-11-15T23:10:22Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"claim","value":null,"previous":"Atlas (IDEA Ops)"}
 {"ts":"2026-11-15T23:10:22Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"status","value":"hold","previous":"testing"}
+{"ts":"2026-11-15T23:14:02Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-15T23:14:02Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas (IDEA Ops)","previous":null}
