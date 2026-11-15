@@ -17,7 +17,7 @@ This section helps you pick a stick and get to the right place in the Console.
 **Pick a stick or disk.** Good to know:
 
 - **Size: more than 8 GB; 16 GB or more recommended.** The IDEA box checks the size before it changes anything. A stick sold as "8 GB" is a little smaller than that inside, so the box turns it down. A **16 GB stick or bigger** works.
-- **Bigger is better.** The Backup Disk keeps a full copy of the apps it backs up. On the IDEA kit the apps take about 164 GB together (chapter 9), so a large stick or disk gives the backup room to grow.
+- **Bigger is better.** The Backup Disk keeps a full copy of every app on the IDEA box. On the IDEA kit the apps take about 164 GB together (chapter 9), so a large stick or disk gives the backup room to grow.
 - **A USB stick is erased.** Everything on it is removed for good. Use a new stick, or one with nothing anyone needs on it. Don't use a stick that holds lesson material the teachers still want.
 - **An empty IDEA Disk is not erased.** If the Console already shows the disk as an empty IDEA Disk, nothing on it is removed (section 3).
 
@@ -72,7 +72,7 @@ This section tells you when the new Backup Disk does its work, so you know what 
 - **The first backup starts within a minute** of the Console saying *Done*. A first full backup can take a few hours. Leave the stick plugged in until it has finished.
 - **After that, a backup runs every day at 02:30**, at night, outside lesson time. Leave the stick plugged into the IDEA box so that it is there at 02:30.
 - **Apps pause for a moment while a backup runs.** The nightly backup at 02:30 is outside lesson time; the first backup starts straight away, so it is best to make a Backup Disk when no lessons are using the apps.
-- The Console says the Backup Disk backs up **every App** on the IDEA box, and you don't pick the apps. **(PENDING: which apps a new Backup Disk backs up is waiting on a decision.)**
+- **The Backup Disk backs up every App on the IDEA box**, including apps added later. You don't need to pick the apps.
 - The Console says you can change the time later.
 
 ## 5. If the stick was unplugged during Erase

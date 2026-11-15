@@ -6,7 +6,7 @@
 
 Every label and message in the guide is taken from the code of console#187 at `ae40516` (`src/store/makeBackupDisk.ts`, `EraseDialog.tsx`, `UnformattedDiskView.tsx`, `EmptyDiskPanel.tsx`, `src/store/erase.ts`). console#187 was not merged when this guide was written. If its wording changes before it merges, update this guide. Once it merges, *IDEA for Operators: Tutorial* section 3.5 (the older Backup mode / Link to instances form) needs to point here too.
 
-Marked PENDING in the guide: which apps a new Backup Disk backs up (the Console says every App) is waiting on a decision.
+A new Backup Disk backs up every App on its IDEA box, including Apps added later (Koen's decision, agent-engine-dev#424).
 
 This is a standalone guide next to the operator tutorial. Chapter 9 of *IDEA for Teachers: Tutorial* can point to it.
 
