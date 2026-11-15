@@ -1,0 +1,8 @@
+# hub/host/cron.pi: pi crontab on the hub Pi "idea" (idea#486). No active entries remain:
+# kit-watch and mail-watch run from the systemd --user timer kit-watch.timer
+# (hub/services/kit-watch, idea#484), and their old lines are removed by that service's
+# "install.sh --remove-cron", never by the host step. The lines below were already
+# commented out on idea (read-only capture 2026-11-13) and are kept as a record.
+# 0 3 * * * /home/pi/idea/scripts/backup-agent-identities.sh >> /home/pi/idea/logs/agent-backup.log 2>&1  # disabled by Atlas 2026-10-07 openclaw wipe
+# */5 * * * * bash /home/pi/idea/scripts/check-graph-stale.sh  # disabled by Atlas 2026-10-07 openclaw wipe
+# 30 3 * * * bash /home/pi/idea/scripts/backup-platform.sh >> /home/pi/idea/logs/backup.log 2>&1  # disabled by Atlas 2026-10-07 openclaw wipe
