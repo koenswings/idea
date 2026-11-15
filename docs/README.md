@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Koen / Steve (manuals: Marco; ops docs: Atlas) · 14 November 2026
+**Status:** Authoritative · **Maintained by:** Koen / Steve (manuals: Marco; ops docs: Atlas) · 15 November 2026
 
 # docs/: IDEA's documentation as it is today
 
@@ -25,6 +25,7 @@ This section lists the user-facing manuals and their current PDF versions. Each 
 | Router setup scripts (used by the install manuals) | — | [`manuals/install/scripts/`](manuals/install/scripts/) |
 | IDEA Demo Server: Remote Access | v1.2 | [`manuals/field/remote-access-guide/`](manuals/field/remote-access-guide/) |
 | IDEA kit: a note for your school | v1.0 | [`manuals/field/school-handover-note/`](manuals/field/school-handover-note/) |
+| Nextcloud update for schools | 1.8-31.0.14 | [`manuals/field/nextcloud-update/`](manuals/field/nextcloud-update/) |
 
 At a school, people reach the Console at `http://idea.local` or `http://<sticker>.local` (the name on the box's sticker). The manuals use only those two addresses.
 
