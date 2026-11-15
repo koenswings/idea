@@ -1,10 +1,10 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 13 November 2026 (v2.1.1: screenshot and appendix fixes; v2.1: Kolibri 0.19.5 paths and screenshots)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 15 November 2026 (v2.3.1: hidden Khan lesson removed from the Demo notes after the re-seed, app-kolibri#23; v2.1.1: screenshot and appendix fixes; v2.1: Kolibri 0.19.5 paths and screenshots)
 
 # 3. Kolibri for teachers
 
 **About the examples in this chapter.** Every IDEA box comes with the demo setup switched on: the app **Kolibri Demo**, with the school **IDEA Demo School**, the class **Grade 5** and the demo accounts. The screens in this chapter come from it. Open the **Kolibri Demo** card in the Console, not the **Kolibri** card. The steps work the same in the school's own Kolibri, with your own school, class and account names. The demo accounts are listed in *Appendix: demo accounts* at the end of this tutorial.
 
-In the demo, you sign in as `teacher1` (or `teacher2`). The Library has the channels **Maths**, **Grade 5 Science** and **Early Reading**, and also a **Khan Academy (English - US curriculum)** channel if you want more practice later. This chapter uses **Maths**. The ready-made **Maths lesson** for Grade 5 includes the Fractions items (pictures, short videos and **Fractions practice**) and the rest of the Maths channel. Section 3.4 shows how you would make a smaller Fractions lesson of your own from **Maths > Fractions**. The demo quiz is **Grade 5 Practice Quiz**.
+In the demo, you sign in as `teacher1` (or `teacher2`). The Library has the channels **Maths**, **Grade 5 Science** and **Early Reading**. This chapter uses **Maths**. The ready-made **Maths lesson** for Grade 5 includes the Fractions items (pictures, short videos and **Fractions practice**) and the rest of the Maths channel. Section 3.4 shows how you would make a smaller Fractions lesson of your own from **Maths > Fractions**. The demo quiz is **Grade 5 Practice Quiz**.
 
 ## 3.1 Signing in
 
@@ -29,8 +29,9 @@ Creating classes needs a Kolibri admin account (in the demo school, `admin`, pas
 
 This is how you add learners to a class.
 
-1. Click the class name. On the class page (with **Coaches** and **Learners**), click **ENROLL LEARNERS**. The enroll page opens. It only lists people who are not yet in the class (in the Demo that includes **Learner Four**, and it may also list the admin account — tick only the learner you want).
+1. Click the class name. On the class page (with **Coaches** and **Learners**), click **ENROLL LEARNERS**. The enroll page opens. It only lists people who are not yet in the class (in the Demo that is **Learner Four**).
    ![Enroll learners page](../screenshots/K2-01.png)
+   The picture was taken before the Demo was refreshed and still shows the admin account as well; in the current Demo the list is only **Learner Four**.
 2. Tick each learner you want to add (here: **Learner Four**), then click **CONFIRM**. (In the demo we closed the page without confirming, so Grade 5 stays as it is.)
    ![Learner ticked](../screenshots/K2-02.png)
 3. Learners already in the class appear under **Learners**. In the Demo, Grade 5 already has Learner One, Learner Two and Learner Three. Learner Four is in the school but not in this class, so you can practise the step above.
@@ -117,8 +118,9 @@ In Kolibri 0.19 you read reports on the lesson, the quiz or the learner, rather 
    ![Lesson report](../screenshots/K5-02.png)
 3. **Quizzes > (the quiz)**: status and score per learner; **Difficult questions** shows what to re-teach.
    ![Quiz report](../screenshots/K5-03.png)
-4. **Learners > (a name)**: that learner's lessons and quizzes. A lesson that is hidden from learners can still appear on this report (in the Demo, the **Khan Academy (English - US curriculum) lesson**, counted in **Lessons completed**).
+4. **Learners > (a name)**: that learner's lessons and quizzes. In the Demo, Coach shows the three Grade 5 lessons (**Maths lesson**, **Grade 5 Science lesson** and **Early Reading lesson**). There is no hidden lesson.
    ![Learner report](../screenshots/K5-04.png)
+   The picture was taken before the Demo was refreshed and still shows a fourth **Khan Academy (English - US curriculum) lesson** and **Lessons completed 0 of 4**. In the current Demo, **Lessons completed** counts only the three lessons.
 Reports can be printed or exported as CSV (icons top right).
 
 > **Tip.** Do not chase 100%. Look for the question most learners got wrong and teach it again.

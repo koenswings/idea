@@ -1,10 +1,10 @@
 ---
 title: "IDEA for Teachers: Tutorial"
 subtitle: "Kolibri, Nextcloud, Wikipedia offline, Files Disk and Backup Disk"
-audience: "Version 2.3, 15 November 2026"
+audience: "Version 2.3.1, 15 November 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 15 November 2026 (v2.3: chapter 9 rewritten with the Engine answers: each app pauses only while it is copied, a missed backup runs once after the box starts, a full Backup Disk cleans up old backups, the operator can change the backup time, and a Backup Disk backs up every app on its box (engine#424); v2.2: chapter 5 opens with an explicit first step, the admin creates the Nextcloud accounts (no self-signup); v2.1.1: review fixes to Kolibri screenshots and the appendix; v2.1: chapters 3, 4 and the appendix rewritten for Kolibri 0.19.5, with new screenshots; v2.0: chapter 1.4 how IDEA looks after the kit (U-8); v1.9: merges v1.7 and v1.8; v1.8: classroom computers may join IDEA-Teachers from their Wi-Fi menu (idea#285); v1.7: chapter 7 rewritten to match its Wikipedia (Demo) screenshots (idea#295); v1.6: teaching one class period and troubleshooting added to chapter 3; v1.3: operator part moved to IDEA for Operators: Tutorial; demo setup on every IDEA box)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 15 November 2026 (v2.3.1: hidden Khan lesson removed from chapter 3.6 and the appendix after the Kolibri Demo re-seed, app-kolibri#23; v2.3: chapter 9 rewritten with the Engine answers: each app pauses only while it is copied, a missed backup runs once after the box starts, a full Backup Disk cleans up old backups, the operator can change the backup time, and a Backup Disk backs up every app on its box (engine#424); v2.2: chapter 5 opens with an explicit first step, the admin creates the Nextcloud accounts (no self-signup); v2.1.1: review fixes to Kolibri screenshots and the appendix; v2.1: chapters 3, 4 and the appendix rewritten for Kolibri 0.19.5, with new screenshots; v2.0: chapter 1.4 how IDEA looks after the kit (U-8); v1.9: merges v1.7 and v1.8; v1.8: classroom computers may join IDEA-Teachers from their Wi-Fi menu (idea#285); v1.7: chapter 7 rewritten to match its Wikipedia (Demo) screenshots (idea#295); v1.6: teaching one class period and troubleshooting added to chapter 3; v1.3: operator part moved to IDEA for Operators: Tutorial; demo setup on every IDEA box)
 
 # IDEA for Teachers: Tutorial
 
