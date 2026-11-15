@@ -14,6 +14,9 @@
 #   --no-state      skip systemd enabled/active checks (file checks only).
 #   --list          print the known services and exit.
 # Env: HUB_CHECK_SYSTEMCTL  systemctl command to use (default: systemctl). Tests set a stub.
+#      HUB_CHECK_CRONTAB   crontab command to use (default: crontab). Only "-l" is ever called.
+#      HUB_CHECK_LOGINCTL  loginctl command to use (default: loginctl). Only "show-user" is called.
+#      HUB_CHECK_SUDO      prefix for reading the root crontab (default: "sudo -n"; "" when run as root).
 #
 # Exit: 0 = no drift, 1 = drift found, 2 = usage error.
 #
@@ -22,7 +25,7 @@
 # no_extra_files) and add <name> to SERVICES.
 set -u
 
-SERVICES="telegram-relay"
+SERVICES="telegram-relay kit-watch graphify host"
 
 HUB_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT=""
@@ -30,8 +33,11 @@ HOME_D=${HOME:-/home/pi}
 STATE=1
 ONLY=()
 SYSTEMCTL=${HUB_CHECK_SYSTEMCTL:-systemctl}
+CRONTAB=${HUB_CHECK_CRONTAB:-crontab}
+LOGINCTL=${HUB_CHECK_LOGINCTL:-loginctl}
+if [ "$(id -u)" = 0 ]; then SUDO=${HUB_CHECK_SUDO-}; else SUDO=${HUB_CHECK_SUDO-sudo -n}; fi
 
-usage() { sed -n '3,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '3,23p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -118,6 +124,20 @@ unit_state() {
   if [ "$a" = active ]; then ok "unit active: $1"; else drift "unit $1 is-active=$a (want active)"; fi
 }
 
+# linger_on: the deployed user has linger, so --user units start at boot (read-only query).
+linger_on() {
+  [ "$STATE" = 1 ] || { echo "skip  [$SVC] linger (--no-state)"; return; }
+  local u l; u=$(basename "$HOME_D")
+  l=$($LOGINCTL show-user "$u" -p Linger --value 2>/dev/null); l=${l:-unknown}
+  if [ "$l" = yes ]; then ok "linger on: $u"; else drift "linger=$l for $u (want yes; user timers would not start at boot)"; fi
+}
+
+# cron_lacks REGEX WHY: the deployed user's crontab (crontab -l, read-only) has no line matching REGEX.
+cron_lacks() {
+  local c; c=$($CRONTAB -l 2>/dev/null || true)
+  if grep -v '^[[:space:]]*#' <<<"$c" | grep -qE "$1"; then drift "crontab still has: $2"; else ok "crontab has no: $2"; fi
+}
+
 # no_extra_files DIR NAME...: DIR (top level) holds only the listed names.
 no_extra_files() {
   local d=$1; shift
@@ -148,6 +168,71 @@ check_telegram_relay() {
   # Deployed code plus the relay's own runtime state (state.json, its lock/tmp, logs, files/).
   no_extra_files "$D" tg_relay.py tg-send state.json state.json.lock state.json.tmp relay.log relay.log.1 files __pycache__
   unit_state tg-relay.service
+}
+
+# kit-watch + mail-watch: matches what hub/services/kit-watch/install.sh deploys (idea#484).
+check_kit_watch() {
+  local S="$HUB_DIR/services/kit-watch" D="$HOME_D/kit-watch" C="$HOME_D/.config/kit-watch" U="$HOME_D/.config/systemd/user"
+  same_file "$S/kit-watch.py" "$D/kit-watch.py"
+  same_file "$S/mail-watch.py" "$D/mail-watch.py"
+  same_file "$S/kit-watch.service" "$U/kit-watch.service"
+  same_file "$S/kit-watch.timer" "$U/kit-watch.timer"
+  expect_mode "$D" 700
+  expect_mode "$C" 700
+  expect_mode "$C/env" 600
+  env_keys "$S/.env.example" "$C/env"
+  # Deployed code plus the watchers' own state, locks and logs.
+  no_extra_files "$D" kit-watch.py mail-watch.py state.json state.json.tmp mail-state.json mail-state.json.tmp \
+    watch.log watch.log.1 .lock .mail.lock DISABLED __pycache__
+  unit_state kit-watch.timer
+  linger_on
+  cron_lacks '/kit-watch/(kit|mail)-watch\.py' "kit-watch/mail-watch (they run from kit-watch.timer now)"
+}
+
+check_graphify() {
+  same_file "$HUB_DIR/services/graphify/graphify-serve.service" "$HOME_D/.config/systemd/user/graphify-serve.service"
+  expect_mode "$HOME_D/.config/systemd/user/graphify-serve.service" 644
+  if [ -d "$(dp "$HOME_D/graphify-out")" ]; then ok "served dir exists: $HOME_D/graphify-out"
+  else drift "missing served dir: $HOME_D/graphify-out (restore it; never rebuild)"; fi
+  unit_state graphify-serve.service
+  linger_on
+}
+
+# active_lines: crontab lines that are not comments or blank (what cron actually runs).
+active_lines() { grep -vE '^[[:space:]]*(#|$)' || true; }
+
+# cron_same LABEL REPO_FILE CMD...: the active lines of "CMD" (a crontab -l call) equal REPO_FILE's.
+cron_same() {
+  local label=$1 src=$2 live; shift 2
+  if ! live=$("$@" 2>/dev/null); then drift "cannot read $label crontab (read-only: $*)"; return; fi
+  if [ "$(active_lines <<<"$live")" = "$(active_lines < "$src")" ]; then ok "crontab $label: active lines match ${src#"$HUB_DIR"/}"
+  else drift "crontab $label: active lines differ from ${src#"$HUB_DIR"/}"; fi
+}
+
+# host_file REPO DEPLOYED: like same_file, but a repo copy still marked HUB-PLACEHOLDER is drift
+# (the live file has not been captured into the repo yet), without reading the live contents.
+host_file() {
+  if grep -q 'HUB-PLACEHOLDER' "$1"; then drift "repo copy not captured yet: ${1#"$HUB_DIR"/} (live: $2; see host/capture.sh)"
+  else same_file "$1" "$2"; fi
+}
+
+# Host (idea#486): boot.sh, Caddyfile, root + pi crontabs, system caddy units. Read-only.
+check_host() {
+  local S="$HUB_DIR/host"
+  host_file "$S/boot.sh" /usr/local/bin/boot.sh
+  host_file "$S/caddy/Caddyfile" /etc/caddy/Caddyfile
+  # shellcheck disable=SC2086  # $SUDO is a word list ("sudo -n") or empty
+  cron_same root "$S/cron.root" $SUDO "$CRONTAB" -l -u root
+  cron_same "$(basename "$HOME_D")" "$S/cron.pi" "$CRONTAB" -l
+  if [ "$STATE" = 1 ]; then
+    local a e
+    a=$($SYSTEMCTL --system is-active caddy.service 2>/dev/null); a=${a:-unknown}
+    if [ "$a" = active ]; then ok "system unit active: caddy.service"; else drift "system unit caddy.service is-active=$a (want active)"; fi
+    e=$($SYSTEMCTL --system is-enabled caddy-api.service 2>/dev/null); a=$($SYSTEMCTL --system is-active caddy-api.service 2>/dev/null)
+    echo "info  [$SVC] caddy-api.service is-enabled=${e:-unknown} is-active=${a:-unknown} (reported, not judged)"
+  else
+    echo "skip  [$SVC] system unit state (--no-state)"
+  fi
 }
 
 echo "hub drift check (read-only): repo=$HUB_DIR home=$HOME_D${ROOT:+ root=$ROOT}"

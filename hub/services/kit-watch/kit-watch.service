@@ -1,0 +1,18 @@
+[Unit]
+Description=IDEA hub: kit-watch + mail-watch, one run (started every minute by kit-watch.timer)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Skips cleanly (no failed runs every minute) until the webhook URL is set in the env file.
+ExecCondition=/bin/sh -c 'grep -qE "^KIT_WEBHOOK_URL=.+" %h/.config/kit-watch/env'
+# Same commands as the old pi crontab lines, minus flock: systemd never starts this unit
+# again while a run is still active, and each script also takes its own lock.
+# "-" = a failure of one watcher does not stop the other; each logs its own errors
+# to ~/kit-watch/watch.log (secrets are never logged).
+ExecStart=-/usr/bin/timeout 90 /usr/bin/python3 %h/kit-watch/kit-watch.py
+ExecStart=-/usr/bin/timeout 90 /usr/bin/python3 %h/kit-watch/mail-watch.py
+TimeoutStartSec=200
+UMask=0077
+Nice=10

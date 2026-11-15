@@ -1,0 +1,9 @@
+# crontab commands
+# hub/host/cron.root: root crontab on the hub Pi "idea" (idea#486). Installed only by
+# hub/host/install.sh --apply (as root, with Koen's OK). Taken from idea's live root crontab
+# (read-only captures 2026-11-13 and 2026-11-15; same active lines as the Engine image crondefs).
+# check.sh and install.sh compare the ACTIVE lines only; comments are documentation.
+0 5 * * * /sbin/shutdown -r now  # D5 re-enabled by Atlas 2026-10-07 after reboot test PASS (was disabled 2026-04-26)
+0 * * * * systemctl restart avahi-daemon
+@reboot /usr/local/bin/boot.sh
+# 30 6 * * 1-5 /home/pi/idea/scripts/standup-seed.sh >> /home/pi/idea/logs/standup-seed.log 2>&1  # disabled by Atlas 2026-10-07 openclaw wipe

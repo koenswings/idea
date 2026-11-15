@@ -114,6 +114,11 @@ Files: `manuals/field/school-handover-note/README.md`, `manuals/field/school-han
 What comes back after a reboot (Engine-managed instances vs non-store fixtures), fstab loop mounts for duration-test images, the 05:00 reboot (as of 2026-11-13 17:45 CET: idea01 still `#D5-HOLD-IDEA01-20261010#` and left untouched; idea03 and idea04 now `#D5-HOLD-<pi>-20261113#`), quarantined idea03/idea04 leftovers (`quarantine-20261113-*`), idea01 idea166 leftovers left in place (golden), after-reboot checklist. Current pool is idea03/idea04; production hostname is idea.
 → [docs/ops/boot-recovery.md](ops/boot-recovery.md)
 
+## ops/hub-runbook.md
+**Status:** Authoritative for the repo side; hub migration not deployed yet (waits for #375 item 9 and Koen's OK)  ·  **Maintained by:** Atlas
+Hub Pi `idea`: first cutover order for idea#484–#486, restore from scratch with `hub/bootstrap.sh`, secret rotation on the Pi (never in the repo), moving to new hardware, rollback.
+→ [docs/ops/hub-runbook.md](ops/hub-runbook.md)
+
 ## ops/engine-deploy-pool-pi.md
 **Status:** Authoritative  ·  **Maintained by:** Atlas
 Option-2 Engine deploy on a pool Pi: save, discard, check out and restore config.yaml, pm2.config.cjs and every store-identity file; abort before pm2 restart unless store-url.txt is still 2VroE. Script `tools/fleet/deploy-engine-pi.sh`.
