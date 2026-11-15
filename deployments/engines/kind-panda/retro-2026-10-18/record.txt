@@ -44,4 +44,5 @@ secrets=Tailscale auth key at build time (name only; value never recorded)
 deployedAt=2026-10-18 10:43:40 CEST (Engine); Console dist 2026-10-17
 evidence=fleet-state.json @4e515d4 (version/deployed/note); agent-engine-dev git adfd9d3
 confidence=likely: fleet-state version line, Steve-confirmed deploy; not captured on the device
+observedTailnet=Tailscale node kind-panda 100.80.238.59, created 2026-10-17 07:35 CEST, LastSeen 2026-10-18 21:41:46 CEST (box tailscale status capture /workspace/idea-archive/captures/tailnet-117-20261029T104013Z.json); not seen online since (idea#288 watch, last run 2026-11-15 12:00 CET)
 open=capture with capture-engine-record.sh: packages.tsv, images.tsv, dist.sha256, tool versions, local overrides
