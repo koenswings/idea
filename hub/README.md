@@ -2,7 +2,7 @@
 
 The Pi `idea` (formerly `wizardly-hugle`, "wh"; Tailscale 100.115.60.6; fleet-state key `wizardly-hugle`) runs an IDEA Engine and is also the organisation's **hub**: the field-support Telegram relay, the kit and mail watchers, the graphify server and the Caddy web server. This folder is the hub's one home in the repo. Layout, rules and migration plan: [`proposals/2026-11-04-hub-services.md`](../proposals/2026-11-04-hub-services.md) (proposal #408, approved by Koen 2026-11-13).
 
-Status: phase 3 of the migration in progress. The Telegram relay (idea#482), kit-watch + mail-watch (idea#484), graphify-serve (idea#485) and the host step (idea#486: crontabs captured; `boot.sh` and the Caddyfile still placeholders, see [`host/README.md`](host/README.md)) are in `hub/`. The other rows below are still only on the Pi and come into `hub/` in later issues. Nothing in this folder is deployed automatically: each deploy waits for the personal app's Backup Disk (#375 item 9) and Koen's OK.
+Status: phase 3 of the migration in progress. The Telegram relay (idea#482), kit-watch + mail-watch (idea#484), graphify-serve (idea#485) and the host step (idea#486: crontabs captured; `boot.sh` and the Caddyfile still placeholders, see [`host/README.md`](host/README.md)) are in `hub/`, with `bootstrap.sh` and the runbook [`docs/ops/hub-runbook.md`](../docs/ops/hub-runbook.md) (idea#487). The other rows below are still only on the Pi and come into `hub/` in later issues. Nothing in this folder is deployed automatically: each deploy waits for the personal app's Backup Disk (#375 item 9) and Koen's OK.
 
 ## What runs on the hub
 
@@ -32,7 +32,15 @@ Proposal #408 notes that no owner list exists yet (gap 6), and per-service owner
 
 Exit 0 = no drift, 1 = drift, 2 = usage error. It checks the Telegram relay, kit-watch, graphify and the host. For the relay: deployed `~/tg-relay/{tg_relay.py,tg-send}` and `~/.config/systemd/user/tg-relay.service` byte for byte against `services/telegram-relay/`, the `~/.local/bin/tg-send` link, modes (700 dirs, 600 env), env key names against `.env.example`, no unexpected files in `~/tg-relay/` beyond the relay's own state and logs, and that `tg-relay.service` is enabled and active (`systemctl --user`). For kit-watch (idea#484) it checks: both scripts and both units byte for byte, the modes, the env key names, no unexpected files in `~/kit-watch/`, that `kit-watch.timer` is enabled and active, that linger is on, and that the pi crontab (`crontab -l`, read-only) has no kit-watch or mail-watch line left. For graphify (idea#485): the unit byte for byte and its mode, that `~/graphify-out` exists, that `graphify-serve.service` is enabled and active, and linger. For the host (idea#486): `boot.sh` and the Caddyfile byte for byte (a placeholder is drift), the active root and pi crontab lines, and that `caddy.service` is active; see [`host/README.md`](host/README.md).
 
-Tests (box only, fake tree): `bash hub/tests/check.test.sh`.
+Tests (box only, fake tree): `bash hub/tests/check.test.sh`, `bash hub/tests/bootstrap.test.sh`, `bash hub/host/tests/host.test.sh`.
+
+## Bootstrap: `bootstrap.sh` (idea#487)
+
+    hub/bootstrap.sh                          # PLAN (read-only): steps and blockers
+    hub/bootstrap.sh --apply                  # on idea as pi, with Koen's OK
+    hub/bootstrap.sh --stage --home D --root R  # box-only offline proof into scratch paths
+
+It only calls each service's `install.sh` plus `host/install.sh`. `--apply` refuses before changing anything unless it runs as pi on idea (or an agreed `--spare`), the checkout is clean with a plain-https origin, the host placeholders are captured, `~/graphify-out` exists and both env files are restored. It enables linger if needed and ends with `check.sh`. Procedures: [`docs/ops/hub-runbook.md`](../docs/ops/hub-runbook.md).
 
 ## Rules (from proposal #408)
 
@@ -47,7 +55,7 @@ Tests (box only, fake tree): `bash hub/tests/check.test.sh`.
 ```
 hub/
   README.md          this file
-  bootstrap.sh       later: fresh Pi -> installs every service (idempotent)
+  bootstrap.sh       fresh Pi -> every service install.sh + host step (plan by default; idea#487)
   check.sh           read-only drift report (idea#483)
   host/              cron.pi, cron.root, boot.sh, caddy/Caddyfile, install.sh, capture.sh (idea#486)
   services/

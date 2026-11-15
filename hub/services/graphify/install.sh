@@ -11,13 +11,14 @@
 # env file or key (no LLM key, as today). If a different unit is already there, it is backed up to
 # ~/.idea-hub-backups/graphify/<stamp>/ before it is replaced.
 set -eu
+SELF=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
 cd "$(dirname "$0")"
 [ "$(id -u)" != 0 ] || { echo "run as pi, not root (systemd --user unit)" >&2; exit 2; }
 STAGE=0
 case "${1:-}" in
   "") ;;
   --stage) STAGE=1 ;;
-  -h|--help) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  -h|--help) sed -n '2,12p' "$SELF" | sed 's/^# \{0,1\}//'; exit 0 ;;
   *) echo "unknown option: $1" >&2; exit 2 ;;
 esac
 OUT=$HOME/graphify-out; U=$HOME/.config/systemd/user; UNIT=graphify-serve.service

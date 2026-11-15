@@ -1,9 +1,12 @@
 #!/bin/sh
 # Install on the hub Pi "idea" (formerly wizardly-hugle) as user pi (user service; linger is already on). Never prints secrets.
+# --stage: copy code, unit and env only, no systemctl calls (used by hub/bootstrap.sh --stage tests).
 # Safe to re-run: code and unit are refreshed from this checkout; an existing ~/.config/tg-relay/env is never
 # rewritten, so a real token is never replaced by empty or example values. .env.example is never copied.
 set -e
 cd "$(dirname "$0")"
+STAGE=0
+case "${1:-}" in '') ;; --stage) STAGE=1 ;; *) echo 'usage: install.sh [--stage]' >&2; exit 2;; esac
 D=$HOME/tg-relay; C=$HOME/.config/tg-relay
 mkdir -p "$D/files" "$C" "$HOME/.config/systemd/user" "$HOME/.local/bin"
 chmod 700 "$D" "$D/files" "$C"
@@ -26,6 +29,7 @@ else
 fi
 chmod 600 "$C/env"
 cp tg-relay.service "$HOME/.config/systemd/user/"
+[ "$STAGE" = 0 ] || { echo "staged relay files only; no systemctl calls"; exit 0; }
 systemctl --user daemon-reload
 systemctl --user enable tg-relay.service
 systemctl --user restart tg-relay.service || true
