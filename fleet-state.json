@@ -354,7 +354,7 @@
       "diskId": "0373219120013886",
       "partition": "ext4 label IDEA Disk, fs UUID 410cf0e3-693a-441f-86d3-f6926ccca385",
       "fs_uuid": "410cf0e3-693a-441f-86d3-f6926ccca385",
-      "state": "[backup] mode scheduled 02:30, no links"
+      "state": "[backup] mode on-demand, no links (switched from scheduled 02:30 by Axle 2026-11-15 ~13:15 CET, setBackupMode trace b173a85e; BACKUP.yaml keeps 02:30 as a dormant value the scheduler ignores)"
     }
   }
 }
