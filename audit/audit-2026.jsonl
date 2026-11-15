@@ -2511,3 +2511,5 @@
 {"ts":"2026-11-15T12:09:18Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-15T12:13:39Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-15T12:13:39Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle: switch FIT 0373219120013886 Backup Disk to on-demand via setBackupMode (Steve 13:12); no restart","previous":null}
+{"ts":"2026-11-15T12:15:43Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle: switch FIT 0373219120013886 Backup Disk to on-demand via setBackupMode (Steve 13:12); no restart"}
+{"ts":"2026-11-15T12:15:43Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
