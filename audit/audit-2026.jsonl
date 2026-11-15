@@ -2566,3 +2566,5 @@
 {"ts":"2026-11-15T17:06:20Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"pr","value":"431","previous":null}
 {"ts":"2026-11-15T17:09:49Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Kid"}
 {"ts":"2026-11-15T17:09:49Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-15T17:15:55Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas (IDEA Ops): idea#374 kit-path proof (adfd9d3 pin on throwaway store, Kolibri 1.0 on system disk, upgrade to d366432, Kid capture); Steve OK 18:07","previous":null}
+{"ts":"2026-11-15T17:15:55Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
