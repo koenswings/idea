@@ -2662,3 +2662,5 @@
 {"ts":"2026-11-15T23:14:02Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas (IDEA Ops)","previous":null}
 {"ts":"2026-11-15T23:14:50Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas (IDEA Ops)"}
 {"ts":"2026-11-15T23:14:50Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-15T23:15:10Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-15T23:15:10Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas (IDEA Ops)","previous":null}
