@@ -25,5 +25,6 @@ rebuildCheck=2026-10-26: offline rebuild from the archived apks is byte-identica
 secrets=baked default root password in this image (value not recorded); Tailscale key at enrol time
 evidence=router-fix-out/SHA256SUMS (box) lists only b2f00bc; #271
 status=not yet installed
+observedTailnet=Tailscale node kind-panda-router 100.86.136.9, created 2026-10-16 23:54 CEST, LastSeen 2026-10-18 21:41:53 CEST (box tailscale status capture /workspace/idea-archive/captures/tailnet-117-20261029T104013Z.json); not seen online since (idea#288 watch, last run 2026-11-15 12:00 CET). The device itself was never read by a bot.
 confidence=planned kit image only; device not installed, nothing observed
 open=capture with tools/repro/capture-device.sh when the router is installed and online
