@@ -28,6 +28,18 @@ STUB
 chmod 755 "$BIN/systemctl"
 echo enabled > "$STATE/enabled"; echo active > "$STATE/active"
 export HUB_CHECK_SYSTEMCTL=$BIN/systemctl
+# Stub crontab (-l reads $STATE/crontab; anything else writes it) and loginctl (linger from $STATE/linger).
+cat > "$BIN/crontab" <<STUB
+#!/bin/sh
+if [ "\$1" = -l ]; then cat "$STATE/crontab" 2>/dev/null; else cat "\$1" > "$STATE/crontab"; fi
+STUB
+cat > "$BIN/loginctl" <<STUB
+#!/bin/sh
+cat "$STATE/linger" 2>/dev/null || echo no
+STUB
+chmod 755 "$BIN/crontab" "$BIN/loginctl"
+echo yes > "$STATE/linger"; echo '0 3 * * * echo unrelated' > "$STATE/crontab"
+export HUB_CHECK_CRONTAB=$BIN/crontab HUB_CHECK_LOGINCTL=$BIN/loginctl
 
 # Build the matching fake tree the same way the hub gets it (fake kit-watch env first).
 mkdir -p "$FH/.config/kit-watch"; printf 'KIT_WEBHOOK_URL=http://hook.invalid\nKIT_WEBHOOK_KEY=fake\n' > "$FH/.config/kit-watch/env"
@@ -36,6 +48,9 @@ SECRET=fake-token-$RANDOM$RANDOM
 printf 'TELEGRAM_BOT_TOKEN=%s\nKIT_WEBHOOK_URL=http://hook.invalid/%s\nKIT_WEBHOOK_KEY=%s\n' "$SECRET" "$SECRET" "$SECRET" > "$FH/.config/tg-relay/env"
 chmod 600 "$FH/.config/tg-relay/env"
 echo '{}' > "$FH/tg-relay/state.json"; : > "$FH/tg-relay/relay.log"
+HOME=$FH PATH=$BIN:$PATH sh "$HUB/services/kit-watch/install.sh" >/dev/null
+printf 'KIT_WEBHOOK_URL=http://hook.invalid/%s\nKIT_WEBHOOK_KEY=%s\nAGENTMAIL_API_KEY=%s\n' "$SECRET" "$SECRET" "$SECRET" > "$FH/.config/kit-watch/env"
+echo '{}' > "$FH/kit-watch/state.json"; echo '{}' > "$FH/kit-watch/mail-state.json"; : > "$FH/kit-watch/watch.log"; : > "$FH/kit-watch/.lock"
 
 OUT=""; RC=0
 run() { OUT=$("$CHECK" --root "$T" --home "$H" "$@" 2>&1); RC=$?; }
@@ -106,11 +121,34 @@ mv "$T/tg-send.aside" "$FH/tg-relay/tg-send"; clean "missing file restored: no d
 # 10. Options.
 "$CHECK" --bogus >/dev/null 2>&1; [ $? = 2 ] && pass "unknown option exits 2" || fail "unknown option exits 2"
 "$CHECK" --service nope >/dev/null 2>&1; [ $? = 2 ] && pass "unknown service exits 2" || fail "unknown service exits 2"
-[ "$("$CHECK" --list)" = telegram-relay ] && pass "--list" || fail "--list"
+[ "$("$CHECK" --list | tr '\n' ' ')" = "telegram-relay kit-watch " ] && pass "--list" || fail "--list"
 echo disabled > "$STATE/enabled"; run --no-state
 [ $RC = 0 ] && grep -q '^skip' <<<"$OUT" && pass "--no-state skips unit state" || { fail "--no-state (rc=$RC)"; echo "$OUT"; }
 echo enabled > "$STATE/enabled"
 run --service telegram-relay; [ $RC = 0 ] && pass "--service telegram-relay" || fail "--service telegram-relay (rc=$RC)"
+
+# 11. kit-watch (idea#484).
+K=$FH/kit-watch
+cp -p "$K/mail-watch.py" "$T/mail-watch.py.orig"; echo "# hot-fix" >> "$K/mail-watch.py"
+expect_drift "kit-watch: code change reported" "differs from repo: $H/kit-watch/mail-watch.py"
+cp -p "$T/mail-watch.py.orig" "$K/mail-watch.py"; clean "kit-watch: code change undone"
+TU=$FH/.config/systemd/user/kit-watch.timer; cp -p "$TU" "$T/timer.orig"; sed -i 's/AccuracySec=1s/AccuracySec=1min/' "$TU"
+expect_drift "kit-watch: timer unit change reported" "differs from repo: $H/.config/systemd/user/kit-watch.timer"
+cp -p "$T/timer.orig" "$TU"; clean "kit-watch: timer unit undone"
+cp "$STATE/crontab" "$T/crontab.orig"
+echo '* * * * * flock -n /home/pi/kit-watch/.cron-kit.lock timeout 90 /usr/bin/python3 /home/pi/kit-watch/kit-watch.py >/dev/null 2>&1' >> "$STATE/crontab"
+expect_drift "kit-watch: old cron line reported" "crontab still has: kit-watch/mail-watch"
+cp "$T/crontab.orig" "$STATE/crontab"; echo '#* * * * * /usr/bin/python3 /home/pi/kit-watch/mail-watch.py' >> "$STATE/crontab"
+clean "kit-watch: commented-out cron line is not drift"
+cp "$T/crontab.orig" "$STATE/crontab"
+echo no > "$STATE/linger"; expect_drift "kit-watch: linger off reported" "linger=no for pi"
+echo yes > "$STATE/linger"; clean "kit-watch: linger back on"
+: > "$K/.cron-kit.lock"; expect_drift "kit-watch: leftover cron lock reported" "unexpected file in $H/kit-watch: .cron-kit.lock"
+mv "$K/.cron-kit.lock" "$T/"; clean "kit-watch: leftover moved aside"
+sed -i '/^AGENTMAIL_API_KEY=/d' "$FH/.config/kit-watch/env"
+expect_drift "kit-watch: missing env key reported" "env key missing: AGENTMAIL_API_KEY"; no_secret "kit-watch env"
+echo "AGENTMAIL_API_KEY=$SECRET" >> "$FH/.config/kit-watch/env"; clean "kit-watch: env restored"
+run --service kit-watch; [ $RC = 0 ] && ! grep -q '\[telegram-relay\]' <<<"$OUT" && pass "--service kit-watch" || fail "--service kit-watch (rc=$RC)"
 
 # Scratch is left under $TMPDIR (no rm -rf); it holds only fake values.
 echo "scratch: $T"

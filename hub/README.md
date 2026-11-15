@@ -2,7 +2,7 @@
 
 The Pi `idea` (formerly `wizardly-hugle`, "wh"; Tailscale 100.115.60.6; fleet-state key `wizardly-hugle`) runs an IDEA Engine and is also the organisation's **hub**: the field-support Telegram relay, the kit and mail watchers, the graphify server and the Caddy web server. This folder is the hub's one home in the repo. Layout, rules and migration plan: [`proposals/2026-11-04-hub-services.md`](../proposals/2026-11-04-hub-services.md) (proposal #408, approved by Koen 2026-11-13).
 
-Status: phase 2 of the migration (idea#482). Only the Telegram relay is in `hub/` so far. The other rows below are still only on the Pi and come into `hub/` in later issues (phase 3). Nothing in this folder is deployed automatically.
+Status: phase 3 of the migration in progress. The Telegram relay (idea#482) and kit-watch + mail-watch (idea#484) are in `hub/`. The other rows below are still only on the Pi and come into `hub/` in later issues. Nothing in this folder is deployed automatically: each deploy waits for the personal app's Backup Disk (#375 item 9) and Koen's OK.
 
 ## What runs on the hub
 
@@ -11,8 +11,7 @@ Facts come from the proposal #408 inventory (read-only, 2026-11-04, graphify and
 | Service | Runs as | Port | In `hub/` | Code / config on the Pi | State | Logs | Secrets (env, mode 600) |
 |---|---|---|---|---|---|---|---|
 | Telegram relay (`@IDEA_SupportBot`) | systemd `--user` unit `tg-relay.service`, user `pi` (linger) | none (outbound long-poll to Telegram) | [`services/telegram-relay/`](services/telegram-relay/) | `~/tg-relay/` | `~/tg-relay/state.json`, `~/tg-relay/files/` | `~/tg-relay/relay.log`; `journalctl --user -u tg-relay.service` | `~/.config/tg-relay/env` |
-| kit-watch | pi crontab, every minute (to become a systemd `--user` timer + oneshot service) | not recorded | not yet (`services/kit-watch/`) | `~/kit-watch/*.py` | not recorded | not recorded | `~/.config/kit-watch/env` (kit webhook keys) |
-| mail-watch (`idea-support@agentmail.to`) | pi crontab, every minute (to become a systemd `--user` timer + oneshot service) | not recorded | not yet (`services/kit-watch/`) | `~/kit-watch/*.py` | not recorded | not recorded | not recorded |
+| kit-watch + mail-watch (`idea-support@agentmail.to`) | systemd `--user` timer `kit-watch.timer` (every minute) + oneshot `kit-watch.service`, user `pi` (linger); today still the pi crontab until the idea#484 deploy | none (outbound only: tailscale status, AgentMail API, routine webhook) | [`services/kit-watch/`](services/kit-watch/) | `~/kit-watch/{kit-watch,mail-watch}.py` | `~/kit-watch/state.json`, `mail-state.json`, `DISABLED` | `~/kit-watch/watch.log`; `journalctl --user -u kit-watch.service` | `~/.config/kit-watch/env` (`KIT_WEBHOOK_URL`, `KIT_WEBHOOK_KEY`, `AGENTMAIL_API_KEY`) |
 | graphify-serve | systemd `--user` unit | 8083, all interfaces | not yet (`services/graphify/`) | `~/graphify-env` | serves `/home/pi/graphify-out` (5 May 2026 graph; rebuild retired) | journal (`--user` unit) | none (no LLM key) |
 | Caddy, caddy-api | system units `caddy`, `caddy-api` | not recorded | not yet (`host/caddy/`) | `/etc/caddy` | not recorded | not recorded | not recorded |
 | Host cron (root) | root crontab: 05:00 reboot, hourly avahi restart, `@reboot /usr/local/bin/boot.sh` | — | not yet (`host/`) | `/usr/local/bin/boot.sh` | — | not recorded | — |
@@ -31,7 +30,7 @@ Proposal #408 notes that no owner list exists yet (gap 6), and per-service owner
     hub/check.sh --no-state          # file checks only, skip systemd enabled/active
     hub/check.sh --root DIR --home /home/pi   # against a fake tree (tests)
 
-Exit 0 = no drift, 1 = drift, 2 = usage error. Today it checks the Telegram relay: deployed `~/tg-relay/{tg_relay.py,tg-send}` and `~/.config/systemd/user/tg-relay.service` byte for byte against `services/telegram-relay/`, the `~/.local/bin/tg-send` link, modes (700 dirs, 600 env), env key names against `.env.example`, no unexpected files in `~/tg-relay/` beyond the relay's own state and logs, and that `tg-relay.service` is enabled and active (`systemctl --user`). Later issues add kit-watch, mail-watch, graphify and the host pieces as more `check_<service>` functions.
+Exit 0 = no drift, 1 = drift, 2 = usage error. It checks the Telegram relay and kit-watch. For the relay: deployed `~/tg-relay/{tg_relay.py,tg-send}` and `~/.config/systemd/user/tg-relay.service` byte for byte against `services/telegram-relay/`, the `~/.local/bin/tg-send` link, modes (700 dirs, 600 env), env key names against `.env.example`, no unexpected files in `~/tg-relay/` beyond the relay's own state and logs, and that `tg-relay.service` is enabled and active (`systemctl --user`). For kit-watch (idea#484) it checks: both scripts and both units byte for byte, the modes, the env key names, no unexpected files in `~/kit-watch/`, that `kit-watch.timer` is enabled and active, that linger is on, and that the pi crontab (`crontab -l`, read-only) has no kit-watch or mail-watch line left. Later issues add graphify and the host pieces as more `check_<service>` functions.
 
 Tests (box only, fake tree): `bash hub/tests/check.test.sh`.
 
@@ -53,6 +52,6 @@ hub/
   host/              later: cron.pi, cron.root, boot.sh, caddy/Caddyfile
   services/
     telegram-relay/  moved from tools/telegram-relay (idea#482)
-    kit-watch/       later: kit-watch + mail-watch as a systemd --user timer
+    kit-watch/       kit-watch + mail-watch as a systemd --user timer (idea#484)
     graphify/        later
 ```

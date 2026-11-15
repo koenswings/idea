@@ -1,0 +1,11 @@
+[Unit]
+Description=IDEA hub: run kit-watch + mail-watch every minute (replaces the pi crontab lines)
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+AccuracySec=1s
+Persistent=false
+Unit=kit-watch.service
+
+[Install]
+WantedBy=timers.target
