@@ -34,3 +34,6 @@ fleet-state.json.lock
 # Router backups hold radio calibration and, after enrol, the router's Tailscale identity: never in git (idea#278)
 router-backups/
 *sysupgrade-backup*
+
+# check-app-versions.sh local install (tools/quality/package.json, idea#543)
+tools/quality/node_modules/
