@@ -7,7 +7,7 @@
 # One entry per line: "<compiled test file> > <suite> > <test>", exactly as vitest prints it.
 dist-test/test/automated/instance-lifecycle.test.js > Instance lifecycle (automated, real containers) > instance reaches Running and container responds to HTTP after dock
 dist-test/test/automated/app-versioning.test.js > App versioning (automated, real containers) > v1.0 dock: version is read from disk and stored in instanceOf
-dist-test/test/automated/app-versioning.test.js > App versioning (automated, real containers) > minor upgrade (v1.0→v1.1): instanceOf updated, lastStarted refreshed
+dist-test/test/automated/app-versioning.test.js > App versioning (automated, real containers) > in-place minor upgrade (v1.0→v1.1, same diskId): instanceOf updated, lastStarted refreshed
 # File-level entries ("[docker-setup] ..."): the whole file fails in setup. They count
 # as an exception ONLY when that failure's first Error line is the missing-Docker
 # error "docker: command not found" or "Cannot connect to the Docker daemon"
