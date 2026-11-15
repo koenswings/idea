@@ -102,9 +102,7 @@ This section tells you how to carry on if the stick came out while the box was e
 
 1. The Console says: *"The disk was unplugged during setup. Plug it back in and try again."* Click **Close**.
 2. Plug the stick back into the same IDEA box and wait until it shows in the list on the left again.
-3. Start again from the way the stick now shows:
-   - shown as a **USB stick** or **unformatted**: follow section 2 again. The box checks the stick again, so you type its name once more;
-   - shown as an **empty IDEA Disk** (the erase had already finished): follow section 3. Nothing more is erased.
+3. Start again from the way the stick now shows. If it shows as a **USB stick** or **unformatted**, follow section 2 again: the box checks the stick again, so you type its name once more. If it shows as an **empty IDEA Disk** (the erase had already finished), follow section 3: nothing more is erased.
 
 What was on the stick before may already be gone, because the erase had started. The box doesn't pick up where it stopped; it always starts again from the beginning.
 
