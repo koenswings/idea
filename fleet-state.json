@@ -341,6 +341,20 @@
       "mount": "/disks/sdc1",
       "state": "[empty] (no instance registered)",
       "note": "Holds /disks/sdc1/.idea-quarantine/nextcloud-mgxodewb6at8ve1gwjs-orphan-20261115T110948Z-moved-20261115T111426Z (~1.96 GB, leftover of an earlier restore attempt; Kid). Hands off unless Kid/Steve say otherwise."
+    },
+    "fit-0373219120013886": {
+      "model": "USB flash drive (FIT)",
+      "disk_serial": "0373219120013886",
+      "owner": "Ops (Atlas) record; Backup Disk made by Axle for engine#355",
+      "purpose": "Backup Disk on idea04 (engine#355 proof); formerly Kid's demo leftover",
+      "history": "Kid demo leftover on idea04; erased and made a Backup Disk by Axle for engine#355 (Axle reported 2026-11-15 12:45 CET via Steve)",
+      "location": "docked on idea04",
+      "docked_on": "idea04",
+      "device": "match by disk_serial, never by device name",
+      "diskId": "0373219120013886",
+      "partition": "ext4 label IDEA Disk, fs UUID 410cf0e3-693a-441f-86d3-f6926ccca385",
+      "fs_uuid": "410cf0e3-693a-441f-86d3-f6926ccca385",
+      "state": "[backup] mode scheduled 02:30, no links"
     }
   }
 }
