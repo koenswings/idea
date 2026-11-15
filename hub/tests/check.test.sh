@@ -49,6 +49,8 @@ printf 'TELEGRAM_BOT_TOKEN=%s\nKIT_WEBHOOK_URL=http://hook.invalid/%s\nKIT_WEBHO
 chmod 600 "$FH/.config/tg-relay/env"
 echo '{}' > "$FH/tg-relay/state.json"; : > "$FH/tg-relay/relay.log"
 HOME=$FH PATH=$BIN:$PATH sh "$HUB/services/kit-watch/install.sh" >/dev/null
+HOME=$FH sh "$HUB/services/graphify/install.sh" --stage >/dev/null
+mkdir -p "$FH/graphify-out"
 printf 'KIT_WEBHOOK_URL=http://hook.invalid/%s\nKIT_WEBHOOK_KEY=%s\nAGENTMAIL_API_KEY=%s\n' "$SECRET" "$SECRET" "$SECRET" > "$FH/.config/kit-watch/env"
 echo '{}' > "$FH/kit-watch/state.json"; echo '{}' > "$FH/kit-watch/mail-state.json"; : > "$FH/kit-watch/watch.log"; : > "$FH/kit-watch/.lock"
 
@@ -121,7 +123,7 @@ mv "$T/tg-send.aside" "$FH/tg-relay/tg-send"; clean "missing file restored: no d
 # 10. Options.
 "$CHECK" --bogus >/dev/null 2>&1; [ $? = 2 ] && pass "unknown option exits 2" || fail "unknown option exits 2"
 "$CHECK" --service nope >/dev/null 2>&1; [ $? = 2 ] && pass "unknown service exits 2" || fail "unknown service exits 2"
-[ "$("$CHECK" --list | tr '\n' ' ')" = "telegram-relay kit-watch " ] && pass "--list" || fail "--list"
+[ "$("$CHECK" --list | tr '\n' ' ')" = "telegram-relay kit-watch graphify " ] && pass "--list" || fail "--list"
 echo disabled > "$STATE/enabled"; run --no-state
 [ $RC = 0 ] && grep -q '^skip' <<<"$OUT" && pass "--no-state skips unit state" || { fail "--no-state (rc=$RC)"; echo "$OUT"; }
 echo enabled > "$STATE/enabled"
@@ -149,6 +151,16 @@ sed -i '/^AGENTMAIL_API_KEY=/d' "$FH/.config/kit-watch/env"
 expect_drift "kit-watch: missing env key reported" "env key missing: AGENTMAIL_API_KEY"; no_secret "kit-watch env"
 echo "AGENTMAIL_API_KEY=$SECRET" >> "$FH/.config/kit-watch/env"; clean "kit-watch: env restored"
 run --service kit-watch; [ $RC = 0 ] && ! grep -q '\[telegram-relay\]' <<<"$OUT" && pass "--service kit-watch" || fail "--service kit-watch (rc=$RC)"
+
+# 12. graphify (idea#485).
+GU=$FH/.config/systemd/user/graphify-serve.service; cp -p "$GU" "$T/graphify.orig"
+sed -i 's/--bind 0.0.0.0/--bind 127.0.0.1/' "$GU"
+expect_drift "graphify: unit change reported" "differs from repo: $H/.config/systemd/user/graphify-serve.service"
+cp -p "$T/graphify.orig" "$GU"; clean "graphify: unit undone"
+mv "$FH/graphify-out" "$T/graphify-out.aside"
+expect_drift "graphify: missing served dir reported" "missing served dir: $H/graphify-out"
+mv "$T/graphify-out.aside" "$FH/graphify-out"; clean "graphify: served dir back"
+run --service graphify; [ $RC = 0 ] && grep -q '\[graphify\] ok    *\|ok    \[graphify\]' <<<"$OUT" && pass "--service graphify" || { fail "--service graphify (rc=$RC)"; echo "$OUT"; }
 
 # Scratch is left under $TMPDIR (no rm -rf); it holds only fake values.
 echo "scratch: $T"
