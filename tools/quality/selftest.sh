@@ -172,6 +172,25 @@ for want in 'QUALITY_SCAN_ENGINE_PI="${QUALITY_SCAN_ENGINE_PI-idea04}"' \
   else echo "FAIL default missing: $want"; fail=$((fail + 1)); fi
 done
 
+# engine#435: a shallow clone's graft-root HEAD must not count as touching store-template.json;
+# a real second commit that changes it must still be flagged.
+st_rules() { "$SCAN" --repo-root "$1" --repos "$2" 2>/dev/null | jq -r '[.findings[].rule] | map(select(. == "engine.store_template_touch")) | length' || echo err; }
+st_tmp="$(mktemp -d)"
+mkdir -p "$st_tmp/src/store-identity" "$st_tmp/r/agents"
+( cd "$st_tmp/src" && git init -q -b main && git config user.email t@t && git config user.name t \
+  && echo '{"a":1}' > store-identity/store-template.json && echo a > README.md && git add -A && git commit -qm one \
+  && echo b >> README.md && git commit -qam two )
+git clone -q --depth 1 --no-local "$st_tmp/src" "$st_tmp/r/agents/fixture-engine-shallow"
+n="$(st_rules "$st_tmp/r" fixture-engine-shallow)"
+if [[ "$n" == "0" ]]; then echo "PASS store-template shallow clone not flagged (engine#435)"; pass=$((pass + 1))
+else echo "FAIL store-template shallow clone flagged ($n)"; fail=$((fail + 1)); fi
+( cd "$st_tmp/src" && echo '{"a":2}' > store-identity/store-template.json && git commit -qam three )
+git clone -q --no-local "$st_tmp/src" "$st_tmp/r/agents/fixture-engine-touch"
+n="$(st_rules "$st_tmp/r" fixture-engine-touch)"
+if [[ "$n" != "0" && "$n" != "err" ]]; then echo "PASS store-template change in latest commit flagged"; pass=$((pass + 1))
+else echo "FAIL store-template change in latest commit not flagged ($n)"; fail=$((fail + 1)); fi
+mv "$st_tmp" "${TMPDIR:-/tmp}/qs-selftest-st-$$-done" 2>/dev/null || true
+
 # Commented-out-code heuristic (JSDoc / header skipped; real dead code flagged)
 if bash "${SCRIPT_DIR}/commented-block.test.sh"; then
   echo "PASS commented-block (lib-commented-block.py)"; pass=$((pass + 1))
