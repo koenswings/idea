@@ -8,7 +8,8 @@ by sha256 in `config.env`) for profile `cudy_wr3000s-v1`. No compiling, ~1-4 min
 * OpenWrt 25.12.5 + `packages.txt`: LuCI (https), full wpad-mbedtls, tailscale, umdns,
   avahi-nodbus-daemon (mDNS reflector, idea#211), sqm (off), prometheus-node-exporter-lua.
 * `/etc/uci-defaults/90-idea-setup` (first boot, once): runs `school-router-setup.sh`
-  from idea#211 head `7eedd03` (`SETUP_REF`) without its reboot: LAN 10.42.0.1/24, Wi-Fi
+  from `SETUP_REF` (default `ae849ba4d859a2c81263af0b42cd62cc5dcca21e`, idea#540 restore
+  of #211 behaviour on main) without its reboot: LAN 10.42.0.1/24, Wi-Fi
   `IDEA` / `idea911!` (students 10.42.1.0/24, isolated) and `IDEA-Teachers` /
   `idea-teachers911!` (10.42.2.0/24), country ZW, Engines .2-.9 by vendor class
   `idea-engine`, firewall zones, `Teachers-Internet` rule **on** (idea#209: teacher internet on by default; untick the rule, or
