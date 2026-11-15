@@ -36,12 +36,12 @@ Sources: `fleet-state.json`, `deployments/` records, [idea#288](https://github.c
 
 | Device | Sticker name | Site | Hardware | Software | Last seen read-only |
 |---|---|---|---|---|---|
-| School server (Engine) | sunny-robin | 1 | Raspberry Pi 5 (Waveshare D case), USB SSD Intenso AA000000000000003120 | Engine `adfd9d3`, Console checkout `654224e` (dist from agent-console-dev#162) | 26 Oct 2026 capture |
-| School server (Engine) | happy-zebra | 2 | Raspberry Pi 5 (Waveshare case), USB SSD Intenso AA000000000000010473 | Engine `adfd9d3`, Console checkout `654224e` | 28 Oct 2026 capture; 30 Oct 2026 capture-engine-record |
-| School server (Engine) | kind-panda | not yet observed | Raspberry Pi 5, NVMe (cloned from the FIT stick) | Engine `adfd9d3` (fleet-state) | Not seen yet (offline about 9 days as of 28 Oct 2026, idea#288) |
-| Router | sunny-robin-router | 1 | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ce:7e | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (likely, retro record) | 26 Oct 2026 |
-| Router | happy-zebra-router | 2 | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ca:c8 | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (likely, retro record) | 28 Oct 2026 |
-| Router | kind-panda-router | not yet observed | Cudy WR3000S v1 | Not installed yet; recorded when it comes online | Not yet observed |
+| School server (Engine) | sunny-robin | 1 | Raspberry Pi 5 (Waveshare D case), USB SSD Intenso AA000000000000003120 | Engine `adfd9d3`, Console checkout `654224e` (dist from agent-console-dev#162) | 26 Oct 2026 capture; 5 Nov 2026 first-contact read; boot reads 14 and 15 Nov 2026 |
+| School server (Engine) | happy-zebra | 2 | Raspberry Pi 5 (Waveshare case), USB SSD Intenso AA000000000000010473 | Engine `adfd9d3`, Console checkout `654224e` | 28 Oct 2026 capture; 30 Oct 2026 capture-engine-record; 6 Nov 2026 SSH read (hostname, uptime, temperature) |
+| School server (Engine) | kind-panda | not yet observed | Raspberry Pi 5, NVMe (cloned from the FIT stick) | Engine `adfd9d3` (fleet-state) | Never read at a site. Last seen on Tailscale 18 Oct 2026 21:41 CEST; offline since (idea#288 watch, 15 Nov 2026) |
+| Router | sunny-robin-router | 1 | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ce:7e | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (confirmed on the device 29 Oct 2026, `/etc/idea/version`) | 29 Oct 2026 capture; 5 Nov 2026 ubus read |
+| Router | happy-zebra-router | 2 | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ca:c8 | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (confirmed on the device 29 Oct 2026, `/etc/idea/version`) | 29 Oct 2026 capture |
+| Router | kind-panda-router | not yet observed | Cudy WR3000S v1 | Not installed yet; recorded when it comes online | Device never read. Its Tailscale node (100.86.136.9) was last seen 18 Oct 2026 21:41 CEST |
 | Switch | n/a | 1 | TP-Link TL-SG105PE, MAC 58:d8:12:34:aa:81 | n/a | 30 Oct 2026 (sunny-robin-router DHCP lease) |
 | Switch | n/a | 2 | TP-Link TL-SG105PE, MAC 58:d8:12:34:a9:ef | n/a | 29 Oct 2026 (happy-zebra-router DHCP lease) |
 | Classroom computers | n/a | 1 | 3: idea-pc-fc95 (Raspberry Pi 500), idea-pc-7d02 and idea-pc-9f95 (Raspberry Pi 400) | Client image f00748e (patched) or s15 | 27 Oct 2026 |
@@ -59,7 +59,7 @@ Engines were installed on 18 October 2026 (Console dist 17 October). The three k
 ## Kolibri IDs
 
 Each Kolibri has its own `MORANGO_SYSTEM_ID` (app-kolibri#8), so the schools' Kolibris can sync without clashing.
-Checked so far: sunny-robin (26 Oct) and happy-zebra (28 Oct); all ids are unique and nothing needed changing.
+Checked so far: sunny-robin (26 Oct, read again unchanged on 5 Nov) and happy-zebra (28 Oct); all ids are unique and nothing needed changing.
 kind-panda is checked when it comes online. The same values are in `fleet-state.json` (`kolibri` on each Engine).
 
 | School server | Port | Kolibri | `MORANGO_SYSTEM_ID` | Kolibri instance_id | Checked |
@@ -105,14 +105,35 @@ today (`sunny-robin-router-leases-hints-20261030T0818Z.json`), so it joined late
 fails, as expected: the kit firewall doesn't let the Engine reach the student network. Its site column in the tables
 above reflects 28 Oct.
 
+## sunny-robin first contact, 5 Nov 2026
+
+Read by Atlas on 5 Nov 2026, about 10:26 to 10:36 CET, read-only; nothing was installed, restarted or changed.
+Evidence on the box: `/workspace/idea288/first-contact-sunny-robin-20261105-1026/`.
+
+- Engine `adfd9d3` and Console checkout `654224e`, the same as on 26 Oct. pm2 shows `engine` online as `pi` with 0 restarts.
+- `store-identity/store-url.txt` in the Engine checkout holds the shared kit store `automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk`
+  (file dated 18 Oct 2026), and the Engine's `/api/store-url` returns the same id. `/var/lib/idea/client-images` is empty.
+- Console: `:80` answers HTTP 200; `:8080` is refused.
+- Apps: 2 Kiwix, 2 Nextcloud and 2 Kolibri stacks up, including Nextcloud `zq54tg24tjrkwrar2va`, which was stopped
+  (Exited 255) on 26 Oct. Kolibri ids unchanged.
+- Disk: root SSD only, `/` 194 GB of 469 GB used (43%); no other disk docked. eth0 `10.42.0.4`, MAC `98:fe:54:3f:22:f3`.
+- Temperature 64.8 to 68.6 °C. `vcgencmd get_throttled` = `0x50000`: under-voltage and the soft temperature limit
+  have occurred since boot; no throttling was active at the time.
+- sunny-robin-router (ubus over Tailscale): same model, firmware and MACs as on 29 Oct.
+
+Later read-only boot reads of sunny-robin (box `down-watch-*` folders): it had booted at 05:48 CET on 14 Nov and at
+05:58 CET on 15 Nov 2026, and `get_throttled` was `0x50000` both times. The Engine keeps no journal across reboots,
+so the reason for a reboot can't be read afterwards. These are recorded in `fleet-state.json`
+(`sunny-robin.observed`, `sunny-robin.power_observed`).
+
 ## Still open
 
-From ops (Atlas). Status on 30 Oct 2026, 09:25 CET:
+From ops (Atlas). Status on 15 Nov 2026, 15:30 CET (first written 30 Oct 2026):
 
 - **kind-panda: BLOCKED (offline).** The Kolibri ID check, `df -h /` and the on-device capture all wait for it.
-  It was last seen on Tailscale 9 days ago.
-- **kind-panda-router: not yet installed.** Nothing about it is recorded until our watcher sees it online and we
-  read it ourselves.
+  It was last seen on Tailscale on 18 Oct 2026 at 21:41 CEST and has not been online since (idea#288 watch, 15 Nov 2026).
+- **kind-panda-router: not yet installed.** Nothing about the device is recorded until our watcher sees it online
+  and we read it ourselves. Its Tailscale node (100.86.136.9) was last seen on 18 Oct 2026 at 21:41 CEST.
 - **happy-zebra-router WAN MAC: DONE.** It's `d4:0d:ab:50:ca:c9`, read through ubus.
 - **Router release file and full captures (sunny-robin-router, happy-zebra-router): DONE 29 Oct 2026.** See
   "Routers observed on 29 Oct 2026" above. We made no router changes.
@@ -122,7 +143,7 @@ From ops (Atlas). Status on 30 Oct 2026, 09:25 CET:
 - **Router host keys (ed25519):** happy-zebra-router `SHA256:TBywMXMvqm4/ZGOeWt08itc0p+GE/HFc3lmq7UnsWzs`,
   sunny-robin-router `SHA256:TiKa2HFDh4SH+0Y0TzBAQlSrPfGb3imK84wBU/iKVtE`. Both were read on 28 Oct 2026 from the
   Engine on the same LAN. happy-zebra's `known_hosts` (last written 18 Oct 2026, 19:10) holds a different key for
-  10.42.0.1. Either a router was swapped or reflashed after that date, or it saw another router at that address.
+  10.42.0.1. Why they differ has not been observed; that file stays unchanged until a device on the kit LAN can check the key.
 - **Further classroom computers and the card-to-machine mapping: not yet observed.** Our card log has no mapping.
   The happy-zebra router's leases on 28 Oct showed only machines we already know (35f2, 5b4c, 671c, 841d, 58c3).
   We record any other computer, and its card, when a bot sees it online (for example with `capture-device.sh`).
@@ -137,8 +158,12 @@ From ops (Atlas). Status on 30 Oct 2026, 09:25 CET:
   (`https://drive.google.com/drive/folders/1BKVarlwlNxf7uJUtRhuMGUqeCa5KpMnj`, `WR3000S 1.0.zip`), linked from Cudy's
   *OpenWrt Software Download* page. The box's build report of 16 Oct 2026 shows it staged on wh with that MD5. No bot
   record of the actual download (URL, time) was found. Mirror: the `field/zimbabwe-2026-10` release asset.
-- **120 GB test disk (`_test_disks.wds120-20070Q450002`):** label and diskId are still pending; they will be pushed to
-  this record once Axle releases idea04.
+- **120 GB test disk (`_test_disks.wds120-20070Q450002`): DONE.** Label `IDEA Disk` and diskId `20070Q450002` are in
+  `fleet-state.json` (idea#526, 15 Nov 2026).
+- **idea-pc-35f2 rename: DONE.** The client reported `idea-pc-35f2` after the reboot that ended the rename (27 Oct 2026,
+  about 18:43 CET) and again on 28 Oct 2026 at 11:21 CET via happy-zebra.
+- **happy-zebra Console port:** answered HTTP 200 on `:80` (idea#288 watch, 29 Oct 2026), now `console_port` 80 in
+  `fleet-state.json`, the same as sunny-robin.
 
 ## Detailed records
 
