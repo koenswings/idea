@@ -23,6 +23,11 @@ Two places need this information:
 
 ## `app.yaml` — Single Source of Truth
 
+> **Update (2026-11-15, after idea#543):** compose `x-app.version` is the only App
+> version (Engine bundle name `<x-app.name>-<x-app.version>`). `idea_app_version`
+> was dropped from `app.yaml` and is not written to `META.yaml`. `app.yaml` still
+> describes build approach and upstream monitors.
+
 Each app repo contains an `app.yaml` file that defines how the App is built, how each
 Service is monitored, and the App's compatibility with the IDEA Engine. This replaces
 the previously proposed `monitoring.yaml` — build configuration and monitoring strategy
@@ -46,7 +51,6 @@ new versions. Monitoring is a consequence of the build approach — not a separa
 ```yaml
 # app-kolibri/app.yaml
 app: kolibri
-idea_app_version: "1.1"
 
 compatibility:
   engine_min: "0.9.0"     # minimum Engine version this App Disk requires
@@ -79,7 +83,6 @@ services:
 ```yaml
 # app-nextcloud/app.yaml
 app: nextcloud
-idea_app_version: "1.0"
 
 compatibility:
   engine_min: "0.8.0"
@@ -146,7 +149,6 @@ diskId: "abc123"
 diskName: "Kolibri v1.1"
 created: 1700000000000
 app: kolibri
-idea_app_version: "1.1"
 requires_engine_min: "0.9.0"   # copied from app.yaml compatibility.engine_min
 ```
 

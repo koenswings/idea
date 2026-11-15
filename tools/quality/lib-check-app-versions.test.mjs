@@ -158,7 +158,7 @@ function mockFetch(routes) {
   };
 }
 
-test('runCheck: milkwise exact base tag is not an update; collabora picks numeric max; ghcr/pypi work; idea_app_version mismatch is a warning', async () => {
+test('runCheck: milkwise exact base tag is not an update; collabora picks numeric max; ghcr/pypi work; leftover idea_app_version is ignored', async () => {
   const root = mkdtempSync(join(tmpdir(), 'check-app-versions-'));
   try {
     writeApp(root, 'app-milkwise', {
@@ -315,10 +315,14 @@ services:
     assert.equal(kolibriMon.current, '0.19.5');
     assert.equal(kolibriMon.update_available, false);
 
-    // idea_app_version 1.0 vs compose 1.7 / 1.3 is a warning, not an update
-    assert.ok(byApp.nextcloud.warnings.some((w) => w.code === 'idea_app_version_mismatch'));
-    assert.ok(byApp.kiwix.warnings.some((w) => w.code === 'idea_app_version_mismatch'));
-    assert.ok(byApp.kolibri.warnings.some((w) => w.code === 'idea_app_version_mismatch'));
+    // leftover app.yaml idea_app_version is ignored (compose x-app.version is the only App version)
+    for (const app of ['nextcloud', 'kiwix', 'kolibri', 'milkwise']) {
+      assert.equal('idea_app_version' in byApp[app], false);
+      assert.ok(!(byApp[app].warnings || []).some((w) => w.code === 'idea_app_version_mismatch'));
+    }
+    assert.equal(byApp.nextcloud.compose_app_version, '1.7-31.0.1');
+    assert.equal(byApp.kiwix.compose_app_version, '1.3-3.8.2');
+    assert.equal(byApp.kolibri.compose_app_version, '1.3-0.19.5');
     assert.deepEqual(report.updates.map((u) => `${u.app}:${u.service}:${u.latest}`), [
       'nextcloud:nextcloud-app:35-apache',
     ]);
