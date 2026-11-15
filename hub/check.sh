@@ -24,7 +24,7 @@
 # no_extra_files) and add <name> to SERVICES.
 set -u
 
-SERVICES="telegram-relay kit-watch"
+SERVICES="telegram-relay kit-watch graphify"
 
 HUB_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT=""
@@ -185,6 +185,15 @@ check_kit_watch() {
   unit_state kit-watch.timer
   linger_on
   cron_lacks '/kit-watch/(kit|mail)-watch\.py' "kit-watch/mail-watch (they run from kit-watch.timer now)"
+}
+
+check_graphify() {
+  same_file "$HUB_DIR/services/graphify/graphify-serve.service" "$HOME_D/.config/systemd/user/graphify-serve.service"
+  expect_mode "$HOME_D/.config/systemd/user/graphify-serve.service" 644
+  if [ -d "$(dp "$HOME_D/graphify-out")" ]; then ok "served dir exists: $HOME_D/graphify-out"
+  else drift "missing served dir: $HOME_D/graphify-out (restore it; never rebuild)"; fi
+  unit_state graphify-serve.service
+  linger_on
 }
 
 echo "hub drift check (read-only): repo=$HUB_DIR home=$HOME_D${ROOT:+ root=$ROOT}"

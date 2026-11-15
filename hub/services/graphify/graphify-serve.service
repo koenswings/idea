@@ -1,0 +1,16 @@
+[Unit]
+Description=IDEA hub: graphify-serve, static web server for ~/graphify-out on port 8083 (no rebuild, no LLM key)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Same behaviour as today: stdlib python http.server on all interfaces, port 8083, serving the
+# existing 5 May 2026 graph. Read-only use of the folder; nothing here rebuilds it.
+ExecStart=/usr/bin/python3 -m http.server 8083 --bind 0.0.0.0 --directory %h/graphify-out
+Restart=on-failure
+RestartSec=10
+UMask=0022
+
+[Install]
+WantedBy=default.target
