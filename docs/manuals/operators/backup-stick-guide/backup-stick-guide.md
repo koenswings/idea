@@ -16,8 +16,8 @@ This section helps you pick a stick and get to the right place in the Console.
 
 **Pick a stick or disk.** Good to know:
 
-- **Size: more than 8 GB; 16 GB or more recommended.** The IDEA box checks the size before it changes anything. A stick sold as "8 GB" is a little smaller than that inside, so the box turns it down. A **16 GB stick or bigger** works.
-- **Bigger is better.** The Backup Disk keeps a full copy of every app on the IDEA box. On the IDEA kit the apps take about 164 GB together (chapter 9), so a large stick or disk gives the backup room to grow.
+- **Size: more than 8 GB.** The Console refuses anything smaller. A stick sold as "8 GB" is a little smaller than that inside, so it is refused too.
+- **Big enough for the school's apps.** The Backup Disk keeps a full copy of every app on the IDEA box, and kit backups are large: on the IDEA kit the apps take about 164 GB together (chapter 9). Choose a stick or disk big enough for the school's apps, with room to spare, so that it can keep several backups.
 - **A USB stick is erased.** Everything on it is removed for good. Use a new stick, or one with nothing anyone needs on it. Don't use a stick that holds lesson material the teachers still want.
 - **An empty IDEA Disk is not erased.** If the Console already shows the disk as an empty IDEA Disk, nothing on it is removed (section 3).
 
@@ -69,13 +69,34 @@ If, after step 1, you see a form with **Backup mode** and **Link to instances** 
 
 This section tells you when the new Backup Disk does its work, so you know what to expect and can tell the teachers.
 
+- **The Backup Disk backs up every App on the IDEA box**, including apps added later. You don't need to pick the apps.
 - **The first backup starts within a minute** of the Console saying *Done*. A first full backup can take a few hours. Leave the stick plugged in until it has finished.
 - **After that, a backup runs every day at 02:30**, at night, outside lesson time. Leave the stick plugged into the IDEA box so that it is there at 02:30.
-- **Apps pause for a moment while a backup runs.** The nightly backup at 02:30 is outside lesson time; the first backup starts straight away, so it is best to make a Backup Disk when no lessons are using the apps.
-- **The Backup Disk backs up every App on the IDEA box**, including apps added later. You don't need to pick the apps.
-- The Console says you can change the time later.
+- **Each App pauses only while it is being copied.** The box backs up the apps one after another, so only the app being copied is closed for a short while, and it starts again by itself. The other apps keep working. Because the first backup starts straight away, it is best to make a Backup Disk when no lessons are using the apps. Some apps can be copied while they keep running; if one of them had to be paused after all, the Console says *"Backed up, but the App was briefly stopped"*.
+- **A missed backup runs once, as soon as it can.** If the box was switched off at 02:30, the missed backup starts once, usually within a minute of the box starting again. If the stick was unplugged at 02:30, it starts once when you plug the stick back into the same box. After several missed nights there is still only one catch-up backup, and the Console may say, for example, *"1 scheduled backup was missed."*
+- **Don't wait for the "Next run" line after a missed night.** The Backup Disk panel may still say *"Next run tomorrow at 02:30"* while the catch-up backup is already about to start.
 
-## 5. If the stick was unplugged during Erase
+### Change the backup time
+
+This part shows you how to move the daily backup to another time, for example to the evening when the box is still on.
+
+1. In the list on the left, click the Backup Disk. The right side shows the Backup Disk panel, with the **Backup Disk** badge and the text *"Choose how this disk backs up its Apps."*
+2. Under **Backup mode**, keep **Scheduled** chosen.
+3. In **Daily time (24-hour, this Pi's local time)**, type the new time, for example 21:00.
+4. Click **Save backup settings**. The Console confirms: *"Saved. This disk will back up every day at 21:00 (this Pi's local time)."* If the disk has not made a scheduled backup yet, it says *"A first backup starts now, then daily at 21:00."* instead.
+
+If the Console says *"That isn't a valid time. Use 24-hour time, for example 02:30."*, type the time with a colon, from 00:00 to 23:59.
+
+## 5. When the Backup Disk gets full
+
+This section explains how the Backup Disk makes room for new backups, and what to do when it can't.
+
+- **Old backups are cleaned up automatically.** Before and after each backup, the box checks how much room is left. When the stick gets full, it removes the oldest backups by itself, but it always keeps the newest three backups of each app. While it does this, the Backup Disk panel says *"Cleaning up old backups"*. The panel also shows how much room is left, for example *"18% free"*.
+- **If the Console says "Backup Disk full: add a bigger disk"**, the newest three backups of each app already fill the stick and the next backup doesn't fit. Get a bigger stick or disk and make it the Backup Disk.
+- **The first backup on a stick that is too small** can stop half-way with *"The backup did not finish."* That also means the stick is too small for the school's apps: use a bigger one.
+- **If the Console says "Cleanup paused: Pi needs an update"** or *"This Pi needs an update before backups can clean up old copies"*, backups still run but old ones are not removed, so the stick fills up faster. Write to your IDEA contact so the box can be updated.
+
+## 6. If the stick was unplugged during Erase
 
 This section tells you how to carry on if the stick came out while the box was erasing it or waiting for it to come back. Nothing is broken: you simply start again.
 
@@ -89,7 +110,7 @@ What was on the stick before may already be gone, because the erase had started.
 
 If the Console says *"The disk was erased but didn't come back. Unplug it, plug it back in and try again."*, the erase finished but the box didn't pick the stick up again. Unplug the stick, plug it back in, and then carry on with step 3 above.
 
-## 6. Other messages you may see
+## 7. Other messages you may see
 
 This section lists the other messages the Console may show, and what to do.
 
@@ -101,5 +122,13 @@ This section lists the other messages the Console may show, and what to do.
 | Something else is running on this Pi. Wait for it to finish, then try again. | Wait a few minutes, then try again. |
 | This disk is already a Backup Disk. | Nothing to do: it is already a Backup Disk. |
 | Setting up the Backup Disk failed. Try again. | Try again. If it happens again, write to your IDEA contact. |
+
+The Backup Disk panel can also show these lines about the backups themselves:
+
+| The Console says | What to do |
+|---|---|
+| The backup was interrupted. | A backup stopped half-way, for example because of a power cut. It is not started again by itself. Write to your IDEA contact so it can be finished. |
+| Backup time unknown: this Pi's clock may be wrong | The box doesn't know the time, so it can't use 02:30. It then makes a backup after about every 24 hours that it has been switched on. Keep the box switched on, and write to your IDEA contact if the line stays. |
+| The saved backup time is not valid, so this disk runs at 02:30 until it is fixed. | Set the time again (section 4, Change the backup time). |
 
 If you would like a hand, write to your IDEA contact, or send a message to the IDEA support bot on Telegram (@IDEA_SupportBot). You do not need to telephone anyone.
