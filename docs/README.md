@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Koen / Steve (manuals: Marco; ops docs: Atlas) · 14 November 2026
+**Status:** Authoritative · **Maintained by:** Koen / Steve (manuals: Marco; ops docs: Atlas) · 15 November 2026
 
 # docs/: IDEA's documentation as it is today
 
@@ -17,6 +17,7 @@ This section lists the user-facing manuals and their current PDF versions. Each 
 | Manual | Current PDF | Folder |
 |---|---|---|
 | IDEA for Teachers: Tutorial | v2.2 | [`manuals/teachers/teacher-tutorial/`](manuals/teachers/teacher-tutorial/) |
+| IDEA for Teachers: Make a Backup Stick | v1.0 | [`manuals/teachers/backup-stick-guide/`](manuals/teachers/backup-stick-guide/) |
 | Lesson manuals: Grade 5A — Add and subtract fractions, Form 3 — Variables and expressions | v1.3 | [`manuals/teachers/lesson-manuals/`](manuals/teachers/lesson-manuals/) |
 | IDEA for Operators: Tutorial | v1.1 | [`manuals/operators/operator-tutorial/`](manuals/operators/operator-tutorial/) |
 | IDEA Field Install Manual: School Server | v1.8 | [`manuals/install/install-manual-school-server/`](manuals/install/install-manual-school-server/) |
