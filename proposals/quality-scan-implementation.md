@@ -100,7 +100,7 @@ There is no `--skip-tests` flag: both modes attempt tests under the Pi-selection
 
 - Hardcoded credentials (conservative patterns; exclude `process.env` / `import.meta.env`)
 - `console.log` in production `src/` (exclude mocks/tests)
-- Commented-out blocks >5 lines → **`warning`** initially (Design Review consensus)
+- Commented-out *code* blocks >5 lines → **`warning`** (Design Review consensus). JSDoc (`/** … */`), a file's leading header comment (the first comment block before any code, including after a shebang), and mid-file prose `//` / `#` comments are skipped. A line counts as code after the comment marker is stripped if it ends with `;` `{` `}` or `)` (the last only when the line also has `(`), or matches a JS/TS statement / assignment / call, or, for shell `#`, looks like a command. Heuristic and tests: `tools/quality/lib-commented-block.py`, `tools/quality/commented-block.test.sh`.
 - `TODO`/`FIXME` without `#N` or issue URL → error
 
 **Domain bake-ins**

@@ -376,25 +376,15 @@ scan_hygiene_file() {
     fi
   done <"$abs"
 
-  # Commented-out blocks >5 consecutive comment lines → warning
-  local comment_run=0 comment_start=0
-  lineno=0
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    lineno=$((lineno + 1))
-    if echo "$line" | grep -qE '^\s*(//|#|\*)'; then
-      if [[ $comment_run -eq 0 ]]; then comment_start=$lineno; fi
-      comment_run=$((comment_run + 1))
-    else
-      if [[ $comment_run -gt 5 ]]; then
-        add_finding "$repo" "hygiene.commented_block" "warning" "${rel}:${comment_start}" \
-          "Commented-out block longer than 5 lines (${comment_run} lines)"
-      fi
-      comment_run=0
-    fi
-  done <"$abs"
-  if [[ $comment_run -gt 5 ]]; then
-    add_finding "$repo" "hygiene.commented_block" "warning" "${rel}:${comment_start}" \
-      "Commented-out block longer than 5 lines (${comment_run} lines)"
+  # Commented-out blocks >5 lines of commented-out *code* → warning.
+  # JSDoc, a file's leading header, and mid-file prose comments are skipped
+  # (tools/quality/lib-commented-block.py).
+  local helper="${SCRIPT_DIR}/lib-commented-block.py"
+  if [[ -f "$helper" ]]; then
+    while IFS=$'\t' read -r marker path msg; do
+      [[ "$marker" == "FIND" ]] || continue
+      add_finding "$repo" "hygiene.commented_block" "warning" "$path" "$msg"
+    done < <(python3 "$helper" "$abs" "$rel" 2>/dev/null || true)
   fi
 }
 

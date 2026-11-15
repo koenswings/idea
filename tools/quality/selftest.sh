@@ -172,6 +172,13 @@ for want in 'QUALITY_SCAN_ENGINE_PI="${QUALITY_SCAN_ENGINE_PI-idea04}"' \
   else echo "FAIL default missing: $want"; fail=$((fail + 1)); fi
 done
 
+# Commented-out-code heuristic (JSDoc / header skipped; real dead code flagged)
+if bash "${SCRIPT_DIR}/commented-block.test.sh"; then
+  echo "PASS commented-block (lib-commented-block.py)"; pass=$((pass + 1))
+else
+  echo "FAIL commented-block: run tools/quality/commented-block.test.sh"; fail=$((fail + 1))
+fi
+
 echo "---"
 echo "selftest: $pass passed, $fail failed"
 if [[ $fail -gt 0 ]]; then
