@@ -1,14 +1,14 @@
 ---
-title: "IDEA for Teachers: Make a Backup Stick"
+title: "IDEA for Operators: Make a Backup Stick"
 subtitle: "Turn a USB stick or an empty IDEA Disk into a Backup Disk from the Console"
 audience: "Version 1.0, 15 November 2026"
 cover_logo: "yes"
 ---
 **Status:** Draft · **Maintained by:** Marco · 15 November 2026
 
-This short guide shows you how to turn a USB stick, or an empty IDEA Disk, into a **Backup Disk** in the Console. A Backup Disk keeps a copy of the apps on your IDEA box, so that your classes, learners and files can be brought back if the box ever breaks. It takes a few clicks, and the Console tells you what is happening at each step.
+This short guide is for the **operator**: the person at the school who looks after the IDEA box. It shows you how to turn a USB stick, or an empty IDEA Disk, into a **Backup Disk** in the Console. A Backup Disk keeps a copy of the apps on the IDEA box, so that the school's classes, learners and files can be brought back if the box ever breaks. It takes a few clicks, and the Console tells you what is happening at each step.
 
-*IDEA for Teachers: Tutorial*, chapter 9, explains what a Backup Disk is and what it saves.
+*IDEA for Teachers: Tutorial*, chapter 9, explains what a Backup Disk is and what it saves; *IDEA for Operators: Tutorial*, chapter 3, covers the disks and backups in general. The words used here (IDEA box, Console, IDEA Disk, Backup Disk) are explained in chapter 1 of the teacher tutorial.
 
 ## 1. Before you start
 
@@ -16,14 +16,14 @@ This section helps you pick a stick and get to the right place in the Console.
 
 **Pick a stick or disk.** Good to know:
 
-- **It must be at least 8 GB.** The IDEA box checks the size before it changes anything. A stick sold as "8 GB" is a little smaller than that inside, so the box turns it down. A **16 GB stick or bigger** works.
-- **Bigger is better.** The Backup Disk keeps a full copy of every app on the IDEA box. On the IDEA kit the apps take about 164 GB together (chapter 9), so a large stick or disk gives the backup room to grow.
-- **A USB stick is erased.** Everything on it is removed for good. Use a new stick, or one with nothing you need on it. Don't use a stick that holds lesson material you still want.
+- **Size: more than 8 GB; 16 GB or more recommended.** The IDEA box checks the size before it changes anything. A stick sold as "8 GB" is a little smaller than that inside, so the box turns it down. A **16 GB stick or bigger** works.
+- **Bigger is better.** The Backup Disk keeps a full copy of the apps it backs up. On the IDEA kit the apps take about 164 GB together (chapter 9), so a large stick or disk gives the backup room to grow.
+- **A USB stick is erased.** Everything on it is removed for good. Use a new stick, or one with nothing anyone needs on it. Don't use a stick that holds lesson material the teachers still want.
 - **An empty IDEA Disk is not erased.** If the Console already shows the disk as an empty IDEA Disk, nothing on it is removed (section 3).
 
-**Open the Console.** On a classroom computer, open the browser and go to **http://idea.local** (or **http://&lt;sticker&gt;.local**, using the name on your box's sticker).
+**Open the Console and log in.** On a classroom computer, open the browser and go to **http://idea.local** (or **http://&lt;sticker&gt;.local**, using the name on the box's sticker). Log in as operator with the person icon, top right (*IDEA for Operators: Tutorial*, section 2.1).
 
-**Plug in the stick.** Plug the stick into your IDEA box and wait a moment. It appears in the list on the left, under your IDEA box:
+**Plug in the stick.** Plug the stick into the IDEA box and wait a moment. It appears in the list on the left, under the IDEA box:
 
 - a new shop stick usually shows as **USB stick: … (read-only, …)** with a **read-only** badge;
 - other disks show their name and size with an **unformatted** badge;
@@ -43,7 +43,7 @@ This section walks you through the four steps the IDEA box takes when it turns a
 
 | Step | What the Console shows | What happens |
 |---|---|---|
-| Check | **Checking the disk** | The box checks that this is the stick you confirmed and that it is at least 8 GB. |
+| Check | **Checking the disk** | The box checks that this is the stick you confirmed and that it is more than 8 GB. |
 | Erase | **Erasing the disk** | Everything on the stick is removed. |
 | Re-dock | **Waiting for the disk to come back** | The box picks the erased stick up again as an IDEA Disk. |
 | Create | **Setting up the Backup Disk** | The box makes the stick a Backup Disk for every app. |
@@ -59,17 +59,20 @@ If the window waits more than ten minutes on the stick's details before you conf
 This section is for a disk the Console already shows as an empty IDEA Disk. Because the disk is already an IDEA Disk with nothing on it, the box skips the Erase and Re-dock steps and nothing is erased.
 
 1. Click the empty disk on the left. On the right, click the card **Make this a Backup Disk** (*"Back up every App every day at 02:30"*).
-2. The Console asks **Make &lt;disk name&gt; a Backup Disk?** and says: *"Nothing on this disk is erased. It will back up every App on this Pi every day at 02:30. The first backup starts right after. You can change the time later."* (The Pi is your IDEA box.)
+2. The Console asks **Make &lt;disk name&gt; a Backup Disk?** and says: *"Nothing on this disk is erased. It will back up every App on this Pi every day at 02:30. The first backup starts right after. You can change the time later."* (The Pi is the IDEA box.)
+
+   If you see a form with **Backup mode** and **Link to instances** instead, the IDEA box has not been updated for this flow yet. Follow *IDEA for Operators: Tutorial*, section 3.5, instead.
 3. Click **Make this a Backup Disk**. The Console says the request was sent and is waiting for confirmation, and then shows two steps: **Checking the disk** and **Setting up the Backup Disk**.
 4. When it is finished, the Console says *"Done. This disk is now a Backup Disk."* and *"The first backup starts within a minute. After that, it runs every day at 02:30."* Click **← Back**.
 
 ## 4. When the backups run
 
-This section tells you when your new Backup Disk does its work, so you know what to expect.
+This section tells you when the new Backup Disk does its work, so you know what to expect and can tell the teachers.
 
 - **The first backup starts within a minute** of the Console saying *Done*. A first full backup can take a few hours. Leave the stick plugged in until it has finished.
 - **After that, a backup runs every day at 02:30**, at night, outside lesson time. Leave the stick plugged into the IDEA box so that it is there at 02:30.
-- The Backup Disk backs up **every app** on the IDEA box. You don't need to pick the apps.
+- **Apps pause for a moment while a backup runs.** The nightly backup at 02:30 is outside lesson time; the first backup starts straight away, so it is best to make a Backup Disk when no lessons are using the apps.
+- The Console says the Backup Disk backs up **every App** on the IDEA box, and you don't pick the apps. **(PENDING: which apps a new Backup Disk backs up is waiting on a decision.)**
 - The Console says you can change the time later.
 
 ## 5. If the stick was unplugged during Erase
@@ -97,6 +100,6 @@ This section lists the other messages the Console may show, and what to do.
 | This is not the disk that was checked. Check the disk again. | Another stick was plugged in. Close the window and start again with the stick you want. |
 | Something else is running on this Pi. Wait for it to finish, then try again. | Wait a few minutes, then try again. |
 | This disk is already a Backup Disk. | Nothing to do: it is already a Backup Disk. |
-| Setting up the Backup Disk failed. Try again. | Try again. If it happens again, write to IDEA. |
+| Setting up the Backup Disk failed. Try again. | Try again. If it happens again, write to your IDEA contact. |
 
-If you would like a hand, write to IDEA through the person who looks after your kit, or send a message to the IDEA support bot on Telegram (@IDEA_SupportBot). You do not need to telephone anyone.
+If you would like a hand, write to your IDEA contact, or send a message to the IDEA support bot on Telegram (@IDEA_SupportBot). You do not need to telephone anyone.
