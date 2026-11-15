@@ -6,8 +6,13 @@
 # Never touches a Pi or a real ~/.config file.
 set -u
 HUB=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-CHECK=$HUB/check.sh
 T=$(mktemp -d "${TMPDIR:-/tmp}/hub-check-test.XXXXXX")
+# Run against a copy of hub/ whose host placeholders are replaced by fake "captured" files,
+# so a fully matching tree is possible; section 13 also checks the real repo's placeholders.
+cp -a "$HUB/." "$T/hubcopy/" 2>/dev/null || { mkdir -p "$T/hubcopy" && cp -a "$HUB/." "$T/hubcopy/"; }
+printf '#!/bin/sh\necho captured boot\n' > "$T/hubcopy/host/boot.sh"
+printf ':80 {\n  respond "captured"\n}\n' > "$T/hubcopy/host/caddy/Caddyfile"
+CHECK=$T/hubcopy/check.sh
 H=/home/pi                      # home as the hub sees it
 FH=$T$H                         # the same home inside the fake tree
 BIN=$T/bin; STATE=$T/unit-state
@@ -38,8 +43,16 @@ cat > "$BIN/loginctl" <<STUB
 cat "$STATE/linger" 2>/dev/null || echo no
 STUB
 chmod 755 "$BIN/crontab" "$BIN/loginctl"
-echo yes > "$STATE/linger"; echo '0 3 * * * echo unrelated' > "$STATE/crontab"
-export HUB_CHECK_CRONTAB=$BIN/crontab HUB_CHECK_LOGINCTL=$BIN/loginctl
+# Root crontab: the stub reads $STATE/crontab.root for "-u root". Pi crontab = cron.pi (comments only).
+cat > "$BIN/crontab" <<STUB
+#!/bin/sh
+f=$STATE/crontab; [ "\$*" = "-l -u root" ] && f=$STATE/crontab.root
+if [ "\$1" = -l ]; then cat "\$f" 2>/dev/null; else cat "\$1" > "$STATE/crontab"; fi
+STUB
+echo yes > "$STATE/linger"; cp "$HUB/host/cron.pi" "$STATE/crontab"; grep -v '^#' "$HUB/host/cron.root" > "$STATE/crontab.root"
+export HUB_CHECK_CRONTAB=$BIN/crontab HUB_CHECK_LOGINCTL=$BIN/loginctl HUB_CHECK_SUDO=""
+mkdir -p "$T/usr/local/bin" "$T/etc/caddy"
+cp "$T/hubcopy/host/boot.sh" "$T/usr/local/bin/boot.sh"; cp "$T/hubcopy/host/caddy/Caddyfile" "$T/etc/caddy/Caddyfile"
 
 # Build the matching fake tree the same way the hub gets it (fake kit-watch env first).
 mkdir -p "$FH/.config/kit-watch"; printf 'KIT_WEBHOOK_URL=http://hook.invalid\nKIT_WEBHOOK_KEY=fake\n' > "$FH/.config/kit-watch/env"
@@ -123,7 +136,7 @@ mv "$T/tg-send.aside" "$FH/tg-relay/tg-send"; clean "missing file restored: no d
 # 10. Options.
 "$CHECK" --bogus >/dev/null 2>&1; [ $? = 2 ] && pass "unknown option exits 2" || fail "unknown option exits 2"
 "$CHECK" --service nope >/dev/null 2>&1; [ $? = 2 ] && pass "unknown service exits 2" || fail "unknown service exits 2"
-[ "$("$CHECK" --list | tr '\n' ' ')" = "telegram-relay kit-watch graphify " ] && pass "--list" || fail "--list"
+[ "$("$CHECK" --list | tr '\n' ' ')" = "telegram-relay kit-watch graphify host " ] && pass "--list" || fail "--list"
 echo disabled > "$STATE/enabled"; run --no-state
 [ $RC = 0 ] && grep -q '^skip' <<<"$OUT" && pass "--no-state skips unit state" || { fail "--no-state (rc=$RC)"; echo "$OUT"; }
 echo enabled > "$STATE/enabled"
@@ -161,6 +174,25 @@ mv "$FH/graphify-out" "$T/graphify-out.aside"
 expect_drift "graphify: missing served dir reported" "missing served dir: $H/graphify-out"
 mv "$T/graphify-out.aside" "$FH/graphify-out"; clean "graphify: served dir back"
 run --service graphify; [ $RC = 0 ] && grep -q '\[graphify\] ok    *\|ok    \[graphify\]' <<<"$OUT" && pass "--service graphify" || { fail "--service graphify (rc=$RC)"; echo "$OUT"; }
+
+# 13. host (idea#486).
+echo '30 4 * * * /usr/local/bin/hand-added.sh' >> "$STATE/crontab.root"
+expect_drift "host: extra root cron job reported" "crontab root: active lines differ from host/cron.root"
+sed -i '/hand-added/d' "$STATE/crontab.root"; clean "host: root crontab back"
+echo '# 0 1 * * * a comment only' >> "$STATE/crontab.root"; clean "host: comment-only change is not drift"
+mv "$STATE/crontab.root" "$T/crontab.root.aside"
+expect_drift "host: unreadable root crontab reported" "cannot read root crontab"
+mv "$T/crontab.root.aside" "$STATE/crontab.root"; clean "host: root crontab readable again"
+echo "echo hand-edit" >> "$T/usr/local/bin/boot.sh"
+expect_drift "host: boot.sh change reported" "differs from repo: /usr/local/bin/boot.sh"
+cp "$T/hubcopy/host/boot.sh" "$T/usr/local/bin/boot.sh"; clean "host: boot.sh undone"
+mv "$T/etc/caddy/Caddyfile" "$T/Caddyfile.aside"
+expect_drift "host: missing Caddyfile reported" "missing: /etc/caddy/Caddyfile"
+mv "$T/Caddyfile.aside" "$T/etc/caddy/Caddyfile"; clean "host: Caddyfile back"
+echo failed > "$STATE/active"; expect_drift "host: caddy inactive reported" "caddy.service is-active=failed"; echo active > "$STATE/active"
+O2=$("$HUB/check.sh" --root "$T" --home "$H" --service host 2>&1); R2=$?
+[ $R2 = 1 ] && grep -q "repo copy not captured yet: host/boot.sh" <<<"$O2" && grep -q "repo copy not captured yet: host/caddy/Caddyfile" <<<"$O2" && pass "host: real repo placeholders reported as drift" || { fail "host: placeholders (rc=$R2)"; echo "$O2"; }
+grep -q "captured boot" <<<"$O2" && fail "host: live contents printed" || pass "host: live contents never printed"
 
 # Scratch is left under $TMPDIR (no rm -rf); it holds only fake values.
 echo "scratch: $T"
