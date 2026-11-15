@@ -111,7 +111,7 @@
     "lan": "192.168.0.231",
     "runner": "none",
     "grok_build": null,
-    "version": "engine main@4522d7ff9a2652a44e2135ed279e55302b2b90a7, console main@6f314a0ab264b8b5d5e20ec6b355e45fa7518717",
+    "version": "engine main@cba91a688491b61fd990e374e7942283d6ccaea9, console main@073dfc5ee3fb0b692c06c55586b7e77fe719dba2",
     "mdns": false,
     "store": "automerge:6f8m5KxzARv9xwv4Lw18LgVUJzu",
     "console_port": 8081,
@@ -122,7 +122,7 @@
       "instance": "milkwise-wizardly-hugle-001",
       "since": "2026-10-08"
     },
-    "claim": "Atlas (IDEA Ops)"
+    "claim": null
   },
   "sunny-robin": {
     "role": "kit-engine",
