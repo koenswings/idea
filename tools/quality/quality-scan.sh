@@ -591,9 +591,13 @@ check_bakeins_engine() {
           add_finding "$repo" "engine.store_template_touch" "error" "$f" \
             "store-template.json has local modifications (must not be modified)"
         fi
-        if git_in "$root" log -1 --name-only --pretty=format: HEAD 2>/dev/null | grep -qxF "$f"; then
-          add_finding "$repo" "engine.store_template_touch" "error" "$f" \
-            "Latest commit modified store-template.json (must not be modified)"
+        # Compare HEAD with its parent. In a shallow clone HEAD can be a graft root whose
+        # log lists every file as added, so with no parent there is nothing to compare (engine#435).
+        if git_in "$root" rev-parse -q --verify HEAD^ >/dev/null 2>&1; then
+          if git_in "$root" diff --name-only HEAD^ HEAD 2>/dev/null | grep -qxF "$f"; then
+            add_finding "$repo" "engine.store_template_touch" "error" "$f" \
+              "Latest commit modified store-template.json (must not be modified)"
+          fi
         fi
       else
         # Non-git fixtures: presence of store-template marks a deliberate fail case
