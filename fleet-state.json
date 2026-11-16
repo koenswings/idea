@@ -240,7 +240,7 @@
     "console_port": 80,
     "observed": "First-contact read 2026-11-05 ~10:26-10:36 CET (Atlas, read-only, nothing changed; box evidence /workspace/idea288/first-contact-sunny-robin-20261105-1026/): Debian 13 trixie, kernel 6.18.50+rpt-rpi-2712; eth0 10.42.0.4 MAC 98:fe:54:3f:22:f3; Engine adfd9d3 (untracked files only), Console checkout 654224e; pm2 engine online as pi, 0 restarts; store-identity/store-url.txt in the Engine checkout = automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk (mtime 2026-10-18 21:19 CEST), same as GET :80/api/store-url; /var/lib/idea/client-images empty; Console :80 HTTP 200, :8080 refused; 2 Kiwix, 2 Nextcloud and 2 Kolibri stacks up (zq54tg24tjrkwrar2va, Exited 255 on 2026-10-26, now up); root SSD only, / 194G of 469G used (43%), no docked disks; Kolibri ids unchanged. Temp 64.8-68.6 C. Boot reads (read-only): uptime -s 2026-11-05 09:02:34 CET (who -b showed Nov 4 18:23), 2026-11-14 05:48:47 CET and 2026-11-15 05:58:20 CET; no persistent journal (journalctl -b -1 not available).",
     "power_observed": "vcgencmd get_throttled = 0x50000 (under-voltage has occurred; soft temperature limit has occurred; no current throttling bits) at every read: 2026-11-05 10:26-10:36, 2026-11-14 07:10 and 2026-11-15 06:42 CET (box: idea288/first-contact-sunny-robin-20261105-1026/, down-watch-20261113/sunny-robin-20261114T0709/, down-watch-20261114-sunny/sunny-robin-20261115-064220/).",
-    "claim": null
+    "claim": "Atlas (IDEA Ops): read-only df/du for idea#374 space check"
   },
   "kind-panda": {
     "role": "kit-engine",
