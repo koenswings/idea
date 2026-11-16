@@ -2697,3 +2697,11 @@
 {"ts":"2026-11-16T03:42:33Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-16T03:42:33Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"pr","value":"idea#76 WD fixtures written (sdb1-4); sdb3/sdb4 not docked: 90-docking.rules only matches sd?1|sd?2","previous":"app-nextcloud#42 Pi proof (updateApp 4.0-34.0.6 -> 5.0-34.0.6, MariaDB 11.8, FIT link, throwaway kid42-*)"}
 {"ts":"2026-11-16T03:42:48Z","bot":"Kid","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"null"}
+{"ts":"2026-11-16T06:41:16Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-16T06:41:17Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas (IDEA Ops): Stage 2 disk survey + fixture rebuild (Koen disk rule 07:36)","previous":null}
+{"ts":"2026-11-16T06:41:17Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-16T06:41:17Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas (IDEA Ops): Stage 2 disk survey + fixture rebuild (Koen disk rule 07:36)","previous":null}
+{"ts":"2026-11-16T06:41:17Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-16T06:41:17Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas (IDEA Ops): Stage 2 disk survey + fixture rebuild (Koen disk rule 07:36)","previous":null}
+{"ts":"2026-11-16T06:53:20Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas (IDEA Ops): Stage 2 disk survey + fixture rebuild (Koen disk rule 07:36)"}
+{"ts":"2026-11-16T06:53:20Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
