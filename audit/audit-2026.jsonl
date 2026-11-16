@@ -2717,3 +2717,13 @@
 {"ts":"2026-11-16T07:27:16Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"claim","value":"Atlas (IDEA Ops): Stage 2 cover-all walk host (was hold; restore hold after)","previous":null}
 {"ts":"2026-11-16T07:28:29Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-16T07:28:29Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas (IDEA Ops): Stage 2 fixture build (FIT) + cover-all walk","previous":null}
+{"ts":"2026-11-16T08:21:43Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas (IDEA Ops): Stage 2 disk survey + fixture rebuild (Koen disk rule 07:36)"}
+{"ts":"2026-11-16T08:21:43Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-16T08:21:43Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas (IDEA Ops): Stage 2 fixture build (FIT) + cover-all walk"}
+{"ts":"2026-11-16T08:21:43Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-16T08:21:43Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas Ops: cover-all-a79766d-pathA walk Pi (Kolibri Path A; role golden so duration-test-claim refuses it; manual claim, released manually after walk)","previous":"Atlas (IDEA Ops): Stage 2 disk survey + fixture rebuild (Koen disk rule 07:36)"}
+{"ts":"2026-11-16T08:21:43Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-16T08:21:43Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas Ops: duration-walk cover-all-a79766d-pathA idea#166","previous":null}
+{"ts":"2026-11-16T08:21:43Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-16T08:21:43Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas Ops: duration-walk cover-all-a79766d-pathA idea#166","previous":null}
+{"ts":"2026-11-16T08:21:43Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea02","field":"claim","value":"Atlas Ops: walker host for duration-walk-host cover-all-a79766d-pathA (was hold; restore hold after)","previous":"Atlas (IDEA Ops): Stage 2 cover-all walk host (was hold; restore hold after)"}
