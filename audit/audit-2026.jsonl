@@ -2744,3 +2744,4 @@
 {"ts":"2026-11-16T09:47:09Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas (IDEA Ops): idea#374 kit-replica (adfd9d3 + kit Console, fresh scratch store); walk fixtures unbound, kept","previous":"Atlas Ops: walk-ready, held for kit-candidate deploy"}
 {"ts":"2026-11-16T09:50:31Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-16T09:50:31Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas (IDEA Ops): kit-candidate deploy staging + Kid seed swap","previous":null}
+{"ts":"2026-11-16T10:02:34Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea02","field":"claim","value":"Atlas (IDEA Ops): walker-side kit-candidate harness staging (Engine untouched; launch.sh 641bd99 + Console 762f805)","previous":null}
