@@ -68,7 +68,7 @@
     "host": "100.108.39.45",
     "tailscale": "100.108.39.45",
     "lan": "192.168.0.113",
-    "version": "engine main@80ba4af71fd1f6dd29de30dd90096f28b47a7bef, console main@6e359bdda538e5b9fc4b9a90c1be9b5d52544b96",
+    "version": "engine main@8593b6b, console 762f805",
     "mdns": true,
     "runner": "none",
     "grok_build": null,
