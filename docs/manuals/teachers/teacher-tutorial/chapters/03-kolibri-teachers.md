@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 13 November 2026 (v2.1.1: screenshot and appendix fixes; v2.1: Kolibri 0.19.5 paths and screenshots)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 16 November 2026 (v2.2.1: new section "Make a teacher the coach of the class" after 3.2; v2.1.1: screenshot and appendix fixes; v2.1: Kolibri 0.19.5 paths and screenshots)
 
 # 3. Kolibri for teachers
 
@@ -24,6 +24,16 @@ Creating classes needs a Kolibri admin account (in the demo school, `admin`, pas
    ![Classes list](../screenshots/K1-02.png)
 2. Click **NEW CLASS**, type the class name, click **SAVE**. (In the demo we pressed **CANCEL** because `Grade 5` already exists.)
    ![Create new class](../screenshots/K1-03.png)
+
+## Make a teacher the coach of the class
+
+A new class has no coach yet. This step gives the class its teacher, so they see the class in **Coach**. You also do it as the admin.
+
+1. In **Facility > Classes**, click the class name. On the class page, under **Coaches**, click **ASSIGN COACHES**.
+2. Tick the teacher (here: **Teacher One**, `teacher1`), then click **CONFIRM**. The teacher now appears under **Coaches** on the class page (see 3.3, step 3). The list only shows accounts with the user type Coach, Facility coach or Admin; if a teacher is missing, change their **User type** first in **Facility > Users** (**OPTIONS > Edit details**). In the demo, `teacher1` and `teacher2` are already coaches of Grade 5.
+   ![Assign a coach to Grade 5](../screenshots/K1-04.png)
+
+On the kits' current Kolibri 0.15.5, the steps and button names are the same.
 
 ## 3.3 Enroll learners
 
