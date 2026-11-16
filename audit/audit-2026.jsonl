@@ -2739,3 +2739,4 @@
 {"ts":"2026-11-16T09:05:27Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas Ops: restartFailed e2e (scheduled after #472)","previous":null}
 {"ts":"2026-11-16T09:05:27Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea02","field":"claim","value":null,"previous":"Atlas Ops: walker host for duration-walk-host cover-all-a79766d-pathA (was hold; restore hold after)"}
 {"ts":"2026-11-16T09:05:27Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea02","field":"status","value":"hold","previous":"testing"}
+{"ts":"2026-11-16T09:11:44Z","bot":"Atlas Ops","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas Ops: restartFailed e2e RUNNING (Steve 10:08; scratch store, testMode, Engine fac5b1a temporarily)","previous":"Atlas Ops: restartFailed e2e (scheduled after #472)"}
