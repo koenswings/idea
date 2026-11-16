@@ -2777,3 +2777,4 @@
 {"ts":"2026-11-16T16:58:35Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-16T17:02:11Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-16T17:02:11Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas (IDEA Ops) — kc9 walk-state reset + cover-all","previous":null}
+{"ts":"2026-11-16T17:41:17Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@9040e73, console 481a09a","previous":"engine main@6821ae1, console 481a09a"}
