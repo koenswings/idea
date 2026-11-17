@@ -2840,3 +2840,5 @@
 {"ts":"2026-11-17T12:34:21Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-17T12:41:18Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-17T12:41:19Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas walk-ready reset after #456 Disk B staging"}
+{"ts":"2026-11-17T13:44:02Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-17T13:44:02Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid (IDEA App Dev) — staging for Axle's #505 runner proof (Steve): 2.0 bundle + Pi-saved tars, disposable NC 1.8 instance on a pool App Disk (not the FIT); release to Axle after","previous":null}
