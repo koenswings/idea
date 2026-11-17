@@ -2792,3 +2792,4 @@
 {"ts":"2026-11-17T08:23:38Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@8c384bc, console 80173ca","previous":"engine main@9040e73, console 481a09a"}
 {"ts":"2026-11-17T08:23:38Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas (IDEA Ops): baseline deploy Engine 8c384bc + Console 80173ca"}
 {"ts":"2026-11-17T08:23:38Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-17T08:23:53Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas engine#489 erase round-trip","previous":"Atlas (IDEA Ops) — kc11 walk-state reset + cover-all"}
