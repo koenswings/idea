@@ -2864,3 +2864,5 @@
 {"ts":"2026-11-17T16:40:01Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle engine#511 cross-Engine resume proof","previous":null}
 {"ts":"2026-11-17T17:00:10Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas engine#512 Engine restart","previous":null}
 {"ts":"2026-11-17T17:00:10Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-17T17:09:47Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-17T17:09:47Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Atlas engine#512 Engine restart"}
