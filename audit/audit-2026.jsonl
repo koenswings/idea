@@ -2779,3 +2779,4 @@
 {"ts":"2026-11-16T17:02:11Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas (IDEA Ops) — kc9 walk-state reset + cover-all","previous":null}
 {"ts":"2026-11-16T17:41:17Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@9040e73, console 481a09a","previous":"engine main@6821ae1, console 481a09a"}
 {"ts":"2026-11-16T19:46:33Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas (IDEA Ops) — kc11 walk-state reset + cover-all","previous":"Atlas (IDEA Ops) — kc9 walk-state reset + cover-all"}
+{"ts":"2026-11-17T08:03:46Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Atlas (IDEA Ops): baseline deploy Engine 8c384bc + Console 80173ca (idea01 first)","previous":"Atlas (IDEA Ops): kit-candidate deploy 8593b6b + 762f805 for cover-all walk"}
