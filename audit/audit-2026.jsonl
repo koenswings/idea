@@ -2898,3 +2898,5 @@
 {"ts":"2026-11-17T21:02:10Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-17T22:11:01Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-17T22:11:01Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle"}
+{"ts":"2026-11-17T22:13:21Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-17T22:13:21Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid (IDEA App Dev) — #510 leftover cleanup on idea04 (stop/remove kid-505-nc18 and kid-510-nc18, quarantine bundles/tars, restore systemDiskSkip); then idle for Axle #511","previous":null}
