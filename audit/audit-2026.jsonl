@@ -2848,3 +2848,5 @@
 {"ts":"2026-11-17T13:48:37Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid (IDEA App Dev) — #505 proof staging on idea04 SYSTEM disk (Steve approved): config.yaml systemDiskSkip=false temporarily, unreleased /apps/nextcloud-1.8 moved to /home/pi/axle-505-quarantine, disposable NC 1.8 instance; FIT untouched","previous":null}
 {"ts":"2026-11-17T14:06:59Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-17T14:06:59Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Axle engine#509 stage 3 Part A proof","previous":null}
+{"ts":"2026-11-17T14:11:08Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Axle engine#509 stage 3 Part A proof"}
+{"ts":"2026-11-17T14:11:08Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
