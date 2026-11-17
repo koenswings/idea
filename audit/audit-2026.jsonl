@@ -2814,3 +2814,5 @@
 {"ts":"2026-11-17T10:49:26Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-17T10:51:42Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-17T10:51:42Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"claim","value":"Axle #501 deploy for Pixel Remove test (separate checkout /home/pi/axle-501)","previous":null}
+{"ts":"2026-11-17T11:08:44Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"claim","value":null,"previous":"Axle #501 deploy for Pixel Remove test (separate checkout /home/pi/axle-501)"}
+{"ts":"2026-11-17T11:08:44Z","bot":"Axle","action":"fleet_state_update","pi":"idea01","field":"status","value":"idle","previous":"testing"}
