@@ -2810,3 +2810,5 @@
 {"ts":"2026-11-17T09:10:26Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-17T09:28:50Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-17T09:28:50Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle (IDEA Engine Dev): engine#497 stage 2 on-Pi kill-mid-op proof (PR #500 head d138222, separate checkout /home/pi/axle-497; restores main 8c384bc)","previous":null}
+{"ts":"2026-11-17T10:49:26Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle (IDEA Engine Dev): engine#497 stage 2 on-Pi kill-mid-op proof (PR #500 head d138222, separate checkout /home/pi/axle-497; restores main 8c384bc)"}
+{"ts":"2026-11-17T10:49:26Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
