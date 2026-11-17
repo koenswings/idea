@@ -2836,3 +2836,5 @@
 {"ts":"2026-11-17T12:18:02Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-17T12:27:26Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-17T12:27:26Z","bot":"Ops Bot","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid (IDEA App Dev) — engine#456 hand-driven NC chain rehearsal 1.8→6.0-35 on Disk B 4ufqqspwd1r7uxv7ee8 (Steve 2026-11-17); throwaway instance only; pm2 Engine stopped during hops; release before Atlas cover-all"}
+{"ts":"2026-11-17T12:34:20Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas walk-ready reset after #456 Disk B staging","previous":null}
+{"ts":"2026-11-17T12:34:21Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
