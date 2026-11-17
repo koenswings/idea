@@ -2888,3 +2888,5 @@
 {"ts":"2026-11-17T19:30:50Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Axle","previous":null}
 {"ts":"2026-11-17T20:39:05Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Axle"}
 {"ts":"2026-11-17T20:39:06Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-17T20:41:14Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid (IDEA App Dev) — #510 idea03 cleanup after Axle proof (remove kid-510-nc18 g68mkrcnp0iz4jwccrp, restore systemDiskSkip)","previous":null}
+{"ts":"2026-11-17T20:41:14Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
