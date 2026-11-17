@@ -2870,3 +2870,5 @@
 {"ts":"2026-11-17T18:06:33Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-17T18:06:33Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Axle engine#511 cross-Engine resume proof"}
 {"ts":"2026-11-17T18:06:33Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-17T18:09:28Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-17T18:09:28Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Kid (IDEA App Dev) — #510 restage second NC 1.8 instance on system disk for Axle #510/#506 swap-quarantine proof; do not touch kid-505-nc18; systemDiskSkip stays false","previous":null}
