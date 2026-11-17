@@ -2892,3 +2892,5 @@
 {"ts":"2026-11-17T20:41:14Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-17T20:51:22Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid (IDEA App Dev) — #510 idea03 cleanup after Axle proof (remove kid-510-nc18 g68mkrcnp0iz4jwccrp, restore systemDiskSkip)"}
 {"ts":"2026-11-17T20:51:22Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-17T20:54:40Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-17T20:54:40Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas walk-readiness re-check after #510","previous":null}
