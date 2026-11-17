@@ -2882,3 +2882,5 @@
 {"ts":"2026-11-17T18:23:09Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle","previous":null}
 {"ts":"2026-11-17T19:16:17Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Kid (IDEA App Dev) — #510 restage throwaway NC 1.8 instance on system disk for Axle #510/#506 swap-quarantine proof (idea04 offline)","previous":null}
 {"ts":"2026-11-17T19:16:17Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-17T19:28:55Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Kid (IDEA App Dev) — #510 restage throwaway NC 1.8 instance on system disk for Axle #510/#506 swap-quarantine proof (idea04 offline)"}
+{"ts":"2026-11-17T19:28:55Z","bot":"Kid (IDEA App Dev)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
