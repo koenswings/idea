@@ -66,6 +66,13 @@ Files: `manuals/teachers/teacher-tutorial/README.md`, `manuals/teachers/teacher-
 
 Files: `manuals/operators/operator-tutorial/operator-tutorial.md`, `manuals/operators/operator-tutorial/build.py`, `manuals/operators/operator-tutorial/chapters/01-introduction.md`, `manuals/operators/operator-tutorial/chapters/02-operator-console.md`, `manuals/operators/operator-tutorial/chapters/03-operator-disks.md`, `manuals/operators/operator-tutorial/chapters/04-operator-student-computers.md`, `manuals/operators/operator-tutorial/screenshots/*.png`, `manuals/operators/operator-tutorial/idea-for-operators-tutorial-v1.1.pdf`
 
+### Make a Backup Stick, operator guide (idea-backup-stick-guide-v1.0.pdf)
+**Status:** Draft  ·  **Maintained by:** Marco
+"IDEA for Operators: Make a Backup Stick" v1.0, for the operator who looks after the IDEA box: the Console's Make a Backup Disk flow (console#187, idea#404) from a USB stick or an empty IDEA Disk. Covers the steps Check, Erase, Re-dock and Create (an empty IDEA Disk skips Erase and Re-dock), the size (more than 8 GB, and big enough for the school's apps), every App on the box backed up, the first backup within a minute and then daily at 02:30, each App pausing only while it is copied, missed backups, changing the time, clean-up when the stick gets full, and what to do if the stick is unplugged during Erase. Text only for now; the screenshots to add are listed in its README.
+→ [docs/manuals/operators/backup-stick-guide/](manuals/operators/backup-stick-guide/)
+
+Files: `manuals/operators/backup-stick-guide/README.md`, `manuals/operators/backup-stick-guide/build.py`, `manuals/operators/backup-stick-guide/backup-stick-guide.md`, `manuals/operators/backup-stick-guide/idea-backup-stick-guide-v1.0.pdf`
+
 ### Field support channel design (idea-field-support-channel-design-v1.0.pdf)
 **Status:** Authoritative  ·  **Maintained by:** Marco
 Design of the field support channel (Telegram @IDEA_SupportBot and idea-support email): what the bot answers itself, what goes to the IDEA admin.
