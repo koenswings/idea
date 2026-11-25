@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (kit: red dot for an absent box)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (apps of a box with a red dot: Open is greyed out; earlier: red dot for an absent box)
 
 # 2. The Console for the operator
 
@@ -24,7 +24,7 @@
    ![App details](../screenshots/O3-01.png)
 3. To check that an app really works, click **Open ↗**: the app's page must load.
 4. Only start or stop an app when your IDEA contact asks you to. Do not touch apps your IDEA contact did not mention.
-5. **Known problem.** The apps of an IDEA box with a red dot still show as running, in **ALL APPS** and on the teachers' **Apps** page, but they won't open. There is no fix yet. Do not try to start or stop them: just tell the teachers to use the apps of your own box.
+5. **Apps of a box with a red dot.** The apps of an IDEA box with a red dot are still listed, in **ALL APPS** and on the teachers' **Apps** page. Their **Open** button is greyed out, with the words "*name* is offline, so this app can't be opened right now". Do not try to start or stop them: just tell the teachers to use the apps of your own box. On an older Console the button may not be greyed out yet, and the app simply won't open.
 
 ## 2.4 Command History
 

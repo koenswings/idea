@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (kit: 'on <box>' labels, reset on restart, known problem with switched-off boxes)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (apps of a switched-off box: Open is greyed out; earlier: 'on <box>' labels, reset on restart)
 
 # 2. Getting connected and opening an app
 
@@ -69,7 +69,7 @@ If the Console does not open, type the address on the second line of the box's s
 Good to know:
 
 - A card that is greyed out and says **Not available** is not running. Do not try to fix it: tell your school operator.
-- **Known problem: apps that don't open.** If an IDEA box is switched off, or was once connected to yours and is now at another school, the Console still shows its apps as if they worked. **Open** then gives a page that doesn't load. There is no fix yet. Use the apps that are **on** your own school's IDEA box (the name on its sticker).
+- **Apps of an IDEA box that is not here.** If an IDEA box is switched off, or was once connected to yours and is now at another school, the Console still lists its apps. Their **Open** button is greyed out, with the words "*name* is offline, so this app can't be opened right now". Use the apps that are **on** your own school's IDEA box (the name on its sticker). On an older Console the button may not be greyed out yet: **Open** then gives a page that doesn't load.
 - **The classroom computers reset at every restart.** Anything saved on the computer itself is gone after a restart. Save work in Nextcloud (chapter 6).
 - Do not type numbers (addresses or ports) into the address bar. Always start from the Console and use **Open**.
 - A student computer that no longer works properly is not repaired: the operator resets its card (*IDEA for Operators: Tutorial*). Students lose only what they saved on the computer itself, so let them save their work in Nextcloud (chapter 6).

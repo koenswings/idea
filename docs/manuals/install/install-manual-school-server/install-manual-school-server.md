@@ -1,10 +1,10 @@
 ---
 title: "IDEA Field Install Manual: School Server"
 subtitle: "Raspberry Pi 5 Engines + Cudy router + PoE switch + Starlink"
-audience: "Version 1.8, 25 October 2026"
+audience: "Version 1.8.1, 25 November 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 October 2026 (v1.8: sticker names, idea.local as the easy way in; v1.7: opening paragraph, parts list = what IDEA delivers, diagram arrows fixed)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (v1.8.1: apps of an Engine that is not there have a greyed-out Open button (5.2, checklist, Appendix A); the checklist opens the Console only by idea.local or sticker name; v1.8: sticker names, idea.local as the easy way in; v1.7: opening paragraph, parts list = what IDEA delivers, diagram arrows fixed)
 
 
 # Introduction
@@ -179,9 +179,10 @@ The Engines arrive installed: operating system, IDEA Engine and Console, Tailsca
 The Demo apps are for training: the *IDEA for Teachers: Tutorial* uses them for all its exercises (chapters 3 to 8), with the demo accounts in its appendix *Demo accounts*. So the school's own apps stay clean.
 
 <div class="warn">
-<b>Known problem: apps of an Engine that is not there.</b> Once two Engines have been on the same network, each one keeps
-listing the other one and its apps after they are apart (switched off, or at another school). Those apps look normal in
-the Console, but they <b>won't open</b>. There is no fix yet. Tell the teachers to use the apps marked
+<b>Apps of an Engine that is not there.</b> Once two Engines have been on the same network, each one keeps
+listing the other one and its apps after they are apart (switched off, or at another school). The Console greys out the
+<b>Open</b> button of those apps and says "<i>name</i> is offline, so this app can't be opened right now". On an older
+Console the button is not greyed out yet and those apps simply won't open. Tell the teachers to use the apps marked
 "on <i>their own Engine's name</i>".
 </div>
 
@@ -239,9 +240,9 @@ Starlink is only the internet on the Cudy **WAN** port. The school network works
 |---|---|---|---|
 | ☐ | Laptop on **IDEA** opens Console | Join Wi-Fi `IDEA` with `idea911!`, browse to `http://idea.local` | IDEA Console loads, every Engine listed. The laptop has an address `10.42.1.x`. |
 | ☐ | Console by sticker name | Laptop on Wi-Fi `IDEA`: browse to `http://<STICKER>.local` (each sticker) | That Engine's Console loads, every Engine listed |
-| ☐ | Every Engine reachable | Browse to `http://<ENGINE-IP>` for each Engine | Console loads on each |
+| ☐ | Every Engine has an Engine address | LuCI **Status → Overview → DHCP leases**, each sticker name | Each Engine's address is between `10.42.0.2` and `.9` (5.1) |
 | ☐ | **Apps open from the Wi-Fi** | Laptop on `IDEA`: in the Console, click **Open** on each app of each Engine | Every app opens. "Refused" for all apps of one Engine: its address is outside `.2`-`.9` (5.1). |
-| ☐ | Only this school's Engines | Console → Operator Login → the network list | Every Engine of this school has a green dot. A red dot is an Engine that is not here: see the known problem in 5.2. |
+| ☐ | Only this school's Engines | Console → Operator Login → the network list | Every Engine of this school has a green dot. A red dot is an Engine that is not here: see 5.2. |
 | ☐ | Disks | The same list, under each Engine | The Files Disk (badge *files*) and the Backup Disk (badge *backup*) are listed |
 | ☐ | **No internet on IDEA** | Browse to `https://example.com`. In a terminal: `ping -c2 1.1.1.1`, `nslookup example.com 1.1.1.1` | All fail (time-out / refused) |
 | ☐ | Router admin closed on IDEA | Browse to `http://10.42.1.1` and `http://10.42.0.1` | Fails |
@@ -263,7 +264,7 @@ Starlink is only the internet on the Cudy **WAN** port. The school network works
 | `throttled` is not `0x0` | Power problem: check the cable and HAT and switch budget. |
 | Console doesn't load from Wi-Fi but does from LAN | Is the Engine in `10.42.0.2`-`.9` (5.1)? Try `http://<STICKER>.local` as well as `http://idea.local`: if only one of them fails, tell the IDEA team which one. |
 | All apps of one Engine "refused" from Wi-Fi, fine on a cable | The Engine's address is outside `10.42.0.2`-`.9`. Check its lease in LuCI and tell the IDEA team. |
-| The Console shows apps that don't open | Their Engine is switched off or at another school: known problem (5.2). Use the apps of this school's Engines. |
+| The Console shows apps with a greyed-out Open button | Their Engine is switched off or at another school (5.2). Use the apps of this school's Engines. |
 | Tailscale offline after a move | `ssh` in and run `tailscale status`. Check the WAN on the router. Starlink must be in bypass mode. |
 
 # Appendix B. Fill-in sheet for this school

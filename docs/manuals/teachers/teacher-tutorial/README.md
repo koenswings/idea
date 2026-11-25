@@ -1,5 +1,7 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 16 November 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026
 
+> v2.2.2 (25 November 2026): `idea-for-teachers-tutorial-v2.2.2.pdf`. Chapter 2.3: apps of an IDEA box that is not here are still listed, but their **Open** button is greyed out (Console #175); the old "known problem, no fix yet" note is gone. Numbered v2.2.2 because v2.3 and v2.3.1 are taken by the open PRs #530 and #536.
+>
 > v2.2.1 (16 November 2026): `idea-for-teachers-tutorial-v2.2.1.pdf`. Chapter 3 has a new section after 3.2, *Make a teacher the coach of the class*: the admin opens the class, clicks **ASSIGN COACHES**, ticks the teacher and confirms (same steps on Kolibri 0.15.5). New screenshot K1-04. Numbered v2.2.1 because v2.3 and v2.3.1 are taken by the open PRs #530 and #536.
 >
 > v2.2 (14 November 2026): `idea-for-teachers-tutorial-v2.2.pdf`. Chapter 5 opens with an explicit first step: sign in to Nextcloud as `admin`, open **Accounts** and create the teacher and learner accounts (`<account name>911!`); Nextcloud has no self-signup. New screenshots NA-01 to NA-05.
@@ -17,7 +19,7 @@
 > v1.7 (27 October 2026): chapter 7 (Wikipedia offline) rewritten to match its Wikipedia (Demo) screenshots (idea#295).
 >
 > v1.6 (25 October 2026): teaching one class period, reading Reports and troubleshooting added to chapter 3 (3.6, 3.7).
-> The v2.2, v2.1.1, v2.1, v2.0, v1.9, v1.8, v1.7, v1.6 and v1.5 PDFs are kept in `superseded/`.
+> The v2.2.1, v2.2, v2.1.1, v2.1, v2.0, v1.9, v1.8, v1.7, v1.6 and v1.5 PDFs are kept in `superseded/`.
 
 # Teacher tutorial
 
