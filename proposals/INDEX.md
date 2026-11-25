@@ -87,7 +87,7 @@ Options for tracing all agent activity. Decision: GitHub Actions logs for coding
 MilkWise standalone product Grok Bot setup — Lead and Dev Bots, extraction steps.
 
 ## design-per-pi-engine-key.md
-**Status:** Decided (Koen, 2026-10-06; not built yet) · **Author:** Engine Dev (Axle), filed by Atlas
+**Status:** Decided (Koen, 2026-10-06); implemented in the Engine (`src/data/PeerAccess.ts`, peer keys exchanged through the store, 7-day expiry; checked 25 Nov 2026) · **Author:** Engine Dev (Axle), filed by Atlas
 Each Engine has its own SSH key, exchanged through the shared store, so Pis move between schools with no ops step.
 
 ## design-school-engine-key.md
@@ -95,7 +95,7 @@ Each Engine has its own SSH key, exchanged through the shared store, so Pis move
 One Engine key per school for cross-Pi copy/move; kept for the record.
 
 ## design-root-helper.md
-**Status:** Proposal (borg/root helpers since merged in engine #184) · **Author:** Engine Dev (Axle), filed by Atlas
+**Status:** Proposal; implemented: the `idea-app-data` root helper is in the Engine (engine #184 and later; version 25 today, `APP_DATA_HELPER_VERSION` in `src/utils/appDataHelper.ts`; checked 25 Nov 2026) · **Author:** Engine Dev (Axle), filed by Atlas
 Root helper `idea-app-data`: fixed verbs (copy, delete, borg on one repo), checked tokens, single sudoers line.
 
 ## 2026-10-13-avahi-hostname-clash.md
@@ -115,12 +115,12 @@ Tailscale always on at schools; one fleet tag `tag:idea` and one fleet auth key,
 IDEA Field Support Channel – Design: one contact point for field people (Justice first). Router sends technical questions to a new Support Engineer agent and teaching/manual questions to Marco; agents only filter and report, never change anything; Steve escalates to Koen. Phase 0 email to one Grok Bot address, phase 1 WhatsApp Business (Meta Cloud API), phase 2 more schools. PDF, diagram and build script in `proposals/2026-10-14-field-support-channel/`.
 
 ## 2026-10-14-teacher-usb-sticks.md
-**Status:** Draft · **Author:** Steve (Lead Bot)
+**Status:** Draft; implemented in the Engine (`src/data/UsbSticks.ts`, idea#193, capability `usbSticks`; checked 25 Nov 2026) · **Author:** Steve (Lead Bot)
 Teacher USB sticks: any FAT/exFAT stick is mounted read-only (`ro,nosuid,nodev,noexec`) under `/run/idea-usb`, published as `Engine.usbSticks` (not an IDEA disk), and shown in Nextcloud as a read-only "USB: <name>" folder for teachers (static rslave bind, no recreate) and as a source in the Kolibri channel builder. Amends files-disk.md's "never mounts FAT/exFAT" rule (erase still possible). On insert the Engine starts the channel builder (if docked on that Pi and not operator-stopped; Koen 2026-10-14) and it auto-builds one channel per subfolder of a top-level `kolibri` folder on an inserted stick (rebuild only on change; Kolibri Import stays the human gate). Writable marker mode deferred; Files Disk backup is a later proposal. Builder added to Console demo mode (Koen). Includes the teacher-tutorial changes (builder/USB chapter placed before the Files Disk chapter).
 
 
 ## 2026-10-16-console-demo-setup.md
-**Status:** Draft · **Author:** Steve (Lead Bot)
+**Status:** Draft; implemented (`setupDemo` / `removeDemo` in the Engine, `DemoApps.ts`, engine#369; checked 25 Nov 2026) · **Author:** Steve (Lead Bot)
 Console "Set up demo" button (Koen 2026-10-16, replaces the IDEA-DEMO disk idea): an Engine `setupDemo` command installs separate `Kolibri (Demo)` and `Nextcloud (Demo)` instances alongside any real ones, marked `demo: true`, runs app-provided demo hooks (content download from a versioned demo pack, or a local pack offline; IDEA Demo School; learners username-only, `<name>911!` for others), and `removeDemo` removes only `demo: true` instances. Issue #233. PDF in `proposals/2026-10-16-console-demo-setup/`.
 
 ## 2026-10-28-update-app.md
