@@ -24,7 +24,7 @@ Good to know:
 
    ![Client cards: one card in a reader, with Flash…](../screenshots/SC-01.png)
 
-2. Check that the **size** matches your card. If the card is not listed, see 13.5.
+2. Check that the **size** matches your card. If the card is not listed, see 4.5.
 
 > **Never pick an IDEA Disk.** The Files Disk, the Backup Disk and app disks are never offered here, but always check the name and size before you continue.
 

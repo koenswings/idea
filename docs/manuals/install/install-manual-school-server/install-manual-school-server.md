@@ -4,7 +4,7 @@ subtitle: "Raspberry Pi 5 Engines + Cudy router + PoE switch + Starlink"
 audience: "Version 1.8.1, 25 November 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (v1.8.1: apps of an Engine that is not there have a greyed-out Open button (5.2, checklist, Appendix A); the checklist opens the Console only by idea.local or sticker name; v1.8: sticker names, idea.local as the easy way in; v1.7: opening paragraph, parts list = what IDEA delivers, diagram arrows fixed)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (v1.8.1: apps of an Engine that is not there have a greyed-out Open button (5.2, checklist, Appendix A); the checklist opens the Console only by idea.local or sticker name; chapter 6 points to the operator tutorial 3.6 for backups; v1.8: sticker names, idea.local as the easy way in; v1.7: opening paragraph, parts list = what IDEA delivers, diagram arrows fixed)
 
 
 # Introduction
@@ -196,7 +196,7 @@ Send the IDEA team one short message per school: the school name and the sticker
 
 *Keep a copy of every app on the Backup Disk.*
 
-Each Engine's **Backup Disk** takes full backups of every app, with its content. A full backup of all apps takes about 2 h 15 min and stops each app while it runs, so run backups outside lesson time. How to run one: *IDEA for Teachers: Tutorial*, chapter 12.
+Each Engine's **Backup Disk** takes full backups of every app, with its content. A full backup of all apps takes about 2 h 15 min and stops each app while it runs, so run backups outside lesson time. How to run one: *IDEA for Operators: Tutorial*, 3.6.
 
 # 7. On site: connect Starlink and final cabling
 

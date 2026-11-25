@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (apps of a box with a red dot: Open is greyed out; earlier: red dot for an absent box)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (Back up, Update and Eject named; apps of a box with a red dot: Open is greyed out)
 
 # 2. The Console for the operator
 
@@ -19,7 +19,7 @@
 
 ## 2.3 App status
 
-1. Each app row shows the app name and version, a coloured status dot, and the buttons **Start**, **Stop** and **Open ↗**.
+1. Each app row shows the app name and version, a coloured status dot, and the buttons **Start**, **Stop** and **Open ↗**, plus **Back up** (when a Backup Disk is linked to the app) or **Update** (when an update is offered).
 2. Click the status dot (**Show details**) to see **STATUS** (for example **Running**), **VERSION**, **PORT**, **CREATED**, **LAST STARTED**, **LAST BACKUP** and the description.
    ![App details](../screenshots/O3-01.png)
 3. To check that an app really works, click **Open ↗**: the app's page must load.
@@ -39,5 +39,8 @@ The clipboard icon (top right) lists recent Console commands with ✓ (done) or 
 - **Make this a Files Disk** turns an empty IDEA Disk into a Files Disk for Nextcloud (chapter 3).
 - **Make this a Backup Disk** turns an empty IDEA Disk into a Backup Disk (chapter 3).
 - **Restore** brings an app back from the Backup Disk onto a spare disk (chapter 3).
+- **Back up** copies an app to its Backup Disk (chapter 3.6). Run it outside lesson time.
+- **Update** appears on an app row when a newer version of that app is offered. Only use it when your IDEA contact asks.
+- **Eject** (on an IDEA Disk) prepares a disk to be unplugged (chapter 3.4).
 - **Erase this disk…** deletes everything on a disk. The System Disk has no Erase button.
 - The small **↺** next to the IDEA box name is **Reboot**. It restarts the whole IDEA box, so all apps are away for a few minutes. Use it outside lesson time.
