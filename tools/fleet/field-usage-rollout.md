@@ -9,7 +9,7 @@
 
 Do not treat this file as permission to touch idea, a kit, golden idea01, or
 a Pi another bot has claimed. Kits are read-only outside an approved idea#374
-window (current versions are in `fleet-state.json`; on 22 Nov 2026 kind-panda and sunny-robin moved to Engine `6c47f09` with helper v25, happy-zebra is still on `adfd9d3`).
+window (current versions are in `fleet-state.json`; on 22 Nov 2026 kind-panda and sunny-robin moved to Engine `6c47f09` with helper v25, happy-zebra stays on Engine `adfd9d3` with Console pr162 and is left untouched until Koen has checked it).
 
 ACL paste and tests: [`field-usage-acl.md`](field-usage-acl.md).
 Post-U-step checklist and dry-run script: [`field-usage-u-steps.md`](field-usage-u-steps.md), [`field-usage-after-u-steps.sh`](field-usage-after-u-steps.sh).
@@ -127,7 +127,7 @@ Steve presents these; Atlas prepares everything around them.
 
 Separately, later, on idea#374 (not #375): approve the field update that
 moves kits off `adfd9d3` (done for kind-panda and sunny-robin on 22 Nov 2026;
-happy-zebra is still on `adfd9d3`; see `fleet-state.json`).
+happy-zebra stays on Engine `adfd9d3` with Console pr162 and is left untouched until Koen has checked it; see `fleet-state.json`).
 
 Related, not part of U-1–U-9: T-b (read the live ACL so the paste matches
 the admin source) and T-c (tag idea01, idea03, idea04 and idea02 with
@@ -247,7 +247,7 @@ standing key. The §4 proof key is throwaway and is quarantined.
 ## 7. Kits, only in the approved idea#374 window
 
 Kits: sunny-robin, happy-zebra, kind-panda. Read-only outside an approved
-window (current versions are in `fleet-state.json`; on 22 Nov 2026 kind-panda and sunny-robin moved to Engine `6c47f09` with helper v25, happy-zebra is still on `adfd9d3`). kind-panda's router is "not yet installed".
+window (current versions are in `fleet-state.json`; on 22 Nov 2026 kind-panda and sunny-robin moved to Engine `6c47f09` with helper v25, happy-zebra stays on Engine `adfd9d3` with Console pr162 and is left untouched until Koen has checked it). kind-panda's router is "not yet installed".
 Do not contact Justice. Record only what we observe ourselves.
 
 The kit-side pieces travel together, one kit per window (they are

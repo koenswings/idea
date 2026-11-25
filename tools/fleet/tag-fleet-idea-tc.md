@@ -92,7 +92,7 @@ Do later (refused by the script):
   Current T-c text also lists `idea`; Steve should narrow T-c to defer it
   until Koen's OK / idea#374.
 - Kits (sunny-robin, happy-zebra, kind-panda) and their routers — already
-  `tag:idea`, read-only outside an approved idea#374 window (current versions are in `fleet-state.json`; on 22 Nov 2026 kind-panda and sunny-robin moved to Engine `6c47f09` with helper v25, happy-zebra is still on `adfd9d3`).
+  `tag:idea`, read-only outside an approved idea#374 window (current versions are in `fleet-state.json`; on 22 Nov 2026 kind-panda and sunny-robin moved to Engine `6c47f09` with helper v25, happy-zebra stays on Engine `adfd9d3` with Console pr162 and is left untouched until Koen has checked it).
 
 ## 3. Order: idea03 first
 

@@ -40,7 +40,7 @@ Development runs on Grok Bot. Five Bots plus a programme manager:
 | Ops Bot | Pi fleet, scripts, review environments |
 | Marco Bot | App scouting, field coordination, teacher guides |
 
-Koen is the CEO — every PR requires his review and merge.
+Koen is the CEO. Koen merges idea and App-repo PRs; app-kolibri PRs always need Koen's own words. Steve (Lead) may squash-merge his delegated agent-engine-dev and app-nextcloud PRs, and merges Console PRs, under Koen's standing approval.
 
 ---
 

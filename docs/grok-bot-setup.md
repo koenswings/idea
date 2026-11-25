@@ -199,7 +199,7 @@ Lead Bot notifies Koen: "PR #X ready — live at http://idea<N>.tail…"
   ▼
 Koen evaluates on real Pi hardware via Tailscale
   ├── changes requested → Lead Bot discusses, updates issue comment, re-delegates
-  └── approved → merged on GitHub (idea PRs: Koen; Engine and Console PRs: Steve under Koen's standing approval) → issue auto-closes
+  └── approved → merged on GitHub (idea and App-repo PRs: Koen (app-kolibri always needs Koen's own words); Steve may squash-merge his delegated agent-engine-dev and app-nextcloud PRs, and merges Console PRs, under Koen's standing approval) → issue auto-closes
   │
   ▼
 Ops Bot calls teardown.sh <pi>
@@ -256,7 +256,7 @@ Every decision that leads to code being written must be recorded on GitHub befor
 
 ## 4. Fleet Review Environments
 
-Every PR is evaluated on real Pi hardware before Koen merges it. All fleet logic runs through scripts — Ops Bot orchestrates them, it does not implement the allocation or deployment logic itself.
+Every PR is evaluated on real Pi hardware before it is merged (who merges: §3.1). All fleet logic runs through scripts — Ops Bot orchestrates them, it does not implement the allocation or deployment logic itself.
 
 Pis in this section are **review / golden / test** targets. Coding work does **not** run on Pi runners while the Grok Build path is parked (§2.2). Dev Bots claim an idle pool Pi to run tests before opening a PR (§4.6); Ops then deploys the PR branch to an idle pool Pi for Koen's live evaluation.
 
@@ -563,8 +563,7 @@ IDEA REPOS (ignore all other koenswings/ repos):
 - koenswings/app-<name> — per-App repos (Kolibri, Nextcloud, Kiwix,
   app-milkwise, …)
 
-MilkWise standalone (koenswings/baby-milk-tracker, koenswings/milkwise)
-has its own Bots — never mix it with IDEA work.
+app-milkwise is the IDEA App Disk for MilkWise; it is separate from the standalone MilkWise product, which IDEA does not maintain.
 
 TASKS: GitHub Issues on koenswings/idea
 FLEET STATE: koenswings/idea/fleet-state.json (Ops Bot maintains via scripts)
@@ -779,7 +778,7 @@ REPOS YOU MAINTAIN:
 - koenswings/app-kolibri — Kolibri educational platform
 - koenswings/app-nextcloud — Nextcloud file sharing
 - koenswings/app-kiwix — Kiwix offline Wikipedia
-- koenswings/app-milkwise — MilkWise as an IDEA App
+- koenswings/app-milkwise — MilkWise as an IDEA App Disk (separate from the standalone MilkWise product, which IDEA does not maintain)
 - ... and any future App repos
 
 VERSION MONITORING:
@@ -1156,11 +1155,11 @@ The workspace and harness. Each App lives in its own repo:
 - `koenswings/app-kolibri` — Kolibri
 - `koenswings/app-nextcloud` — Nextcloud
 - `koenswings/app-kiwix` — Kiwix
-- `koenswings/app-milkwise` — MilkWise IDEA App
+- `koenswings/app-milkwise` — MilkWise as an IDEA App Disk (separate from the standalone MilkWise product, which IDEA does not maintain)
 
 This repo:
 - App Harness (`lib/harness.mjs`, smoke tests in `tests/<app>/smoke.mjs`)
-- apps/app-milkwise/ (to be extracted to koenswings/app-milkwise)
+- apps/app-milkwise/ (to be extracted to koenswings/app-milkwise). `koenswings/app-milkwise` is the IDEA App Disk for MilkWise, separate from the standalone MilkWise product, which IDEA does not maintain.
 - Fleet provisioning scripts
 
 **Repo layout**
