@@ -93,7 +93,7 @@ Files: `manuals/install/README.md`, `manuals/install/accounts-and-passwords/acco
 How the IDEA admin shares the demo server idea (earlier name wizardly-hugle) and how the field engineer reaches it over Tailscale. Contains the demo server's Tailscale IP on purpose (see its README).
 → [docs/manuals/field/remote-access-guide/](manuals/field/remote-access-guide/)
 
-Files: `manuals/field/remote-access-guide/README.md`, `manuals/field/remote-access-guide/build.py`, `manuals/field/remote-access-guide/diagrams/checks.svg`, `manuals/field/remote-access-guide/diagrams/flow.svg`, `manuals/field/remote-access-guide/diagrams/make_diagrams.py`, `manuals/field/remote-access-guide/diagrams/overview.svg`, `manuals/field/remote-access-guide/diagrams/privacy.svg`, `manuals/field/remote-access-guide/remote-access-guide.md`, `manuals/field/remote-access-guide/idea-demo-server-remote-access-guide-v1.2.pdf`
+Files: `manuals/field/remote-access-guide/README.md`, `manuals/field/remote-access-guide/build.py`, `manuals/field/remote-access-guide/diagrams/checks.svg`, `manuals/field/remote-access-guide/diagrams/flow.svg`, `manuals/field/remote-access-guide/diagrams/make_diagrams.py`, `manuals/field/remote-access-guide/diagrams/overview.svg`, `manuals/field/remote-access-guide/diagrams/privacy.svg`, `manuals/field/remote-access-guide/remote-access-guide.md`, `manuals/field/remote-access-guide/idea-demo-server-remote-access-guide-v1.2.1.pdf`, `manuals/field/remote-access-guide/superseded/idea-demo-server-remote-access-guide-v1.2.pdf`
 
 ### School handover note (idea-school-handover-note-v1.0.pdf)
 **Status:** Draft  ·  **Maintained by:** Marco

@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (restore matches the Console: question, target list, old copy kept; Done cards close by themselves; earlier: full backups of every app, timings)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (restore matches the Console: question, target list, old copy kept; Done cards close by themselves; Wikipedia backup from Kiwix App 1.3 on; earlier: full backups of every app, timings)
 
 # 3. Disks: Files Disk and Backup Disk
 
@@ -41,7 +41,7 @@ An IDEA Disk has a small eject icon next to its name in the Network list and an 
    ![Empty disk options](../screenshots/B2-10.png)
 2. Choose when backups run: **On demand** (only when you press **Back up**), **Immediate** (as soon as the disk is plugged in) or **Scheduled**. Your IDEA contact tells you which.
    ![Backup mode](../screenshots/B2-11.png)
-3. Under **LINK TO INSTANCES**, tick every app of this IDEA box (on the kit: all six). Backups are full: they include the Kolibri channels and Wikipedia, so a restore needs no internet.
+3. Under **LINK TO INSTANCES**, tick every app of this IDEA box (on the kit: all six). Backups are full: they include the Kolibri channels and, on the kit as delivered, Wikipedia, so a restore needs no internet. From version 1.3 of the Wikipedia app (Kiwix), Wikipedia itself is not copied to the Backup Disk; if it is lost, your IDEA contact reinstalls it and copies the Wikipedia files back.
    ![Linked apps](../screenshots/B2-12.png)
 4. Click **Configure Backup Disk**. The disk gets the **backup** badge and a **Backups** list with each linked app.
    ![Backup Disk configured](../screenshots/B2-13.png)
@@ -50,7 +50,7 @@ An IDEA Disk has a small eject icon next to its name in the Network list and an 
 
 1. In **ALL APPS**, each linked app row has a **Back up** button next to Start, Stop and Open. Click it for Kolibri. The row shows **Backing up…** with a progress bar, and the **OPERATIONS** box at the top shows the same job.
    ![Back up clicked](../screenshots/B3-10a.png)
-2. The app is stopped while it is copied, then starts again by itself. When the job is finished, its card in the OPERATIONS box shows **Done** for a moment and then disappears by itself. A card that says **Failed** stays until you close it with **✕**. A small app takes a few minutes, but the first backup of a big one takes much longer: on the kit about 37 minutes for Kolibri, an estimated 1 h 30 for the full Wikipedia and about 2 h 15 for all apps together. Do this outside lesson time.
+2. The app is stopped while it is copied, then starts again by itself. When the job is finished, its card in the OPERATIONS box shows **Done** for a moment and then disappears by itself. A card that says **Failed** stays until you close it with **✕**. A small app takes a few minutes, but the first backup of a big one takes much longer: on the kit about 37 minutes for Kolibri, an estimated 1 h 30 for the full Wikipedia and about 2 h 15 for all apps together (on the kit as delivered; from version 1.3 of the Wikipedia app its backup takes almost no time, because Wikipedia itself is not copied). Do this outside lesson time.
 3. When it is done, the Backup Disk's **Backups** list shows **Last backup** with the date and time for each app. Repeat for each other app.
    ![Last backup for both apps](../screenshots/B4-20.png)
 
