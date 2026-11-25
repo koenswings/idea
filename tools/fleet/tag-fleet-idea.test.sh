@@ -33,16 +33,18 @@ check "refuses --unsafe-cli-reauth" test $? = 2
 
 OUT="$("$D/tag-fleet-idea.sh" order)"
 check "order lists idea03 first" bash -c 'jq -e ".order[0]==\"idea03\" and .order[-1]==\"idea01\"" >/dev/null <<<"$0"' "$OUT"
+check "order reason has no hard-coded 2026-12-02 deadline" bash -c 'jq -e ".reason | test(\"2026-12-02\") | not" >/dev/null <<<"$0"' "$OUT"
 
 # status fixture: kits tagged but offline; fleet untagged
 cat > "$WORK/status.json" <<'JSON'
 {
   "Self": {"HostName":"box-2-1","Online":true,"TailscaleIPs":["100.64.66.119"],"Tags":null,"KeyExpiry":"2027-04-15T09:29:40Z"},
   "Peer": {
-    "a": {"HostName":"idea03","Online":true,"TailscaleIPs":["100.126.117.80"],"Tags":null,"KeyExpiry":"2026-12-02T13:36:43Z"},
+    "a": {"HostName":"idea03","Online":true,"TailscaleIPs":["100.126.117.80"],"Tags":null,"KeyExpiry":"2027-06-01T12:00:00Z"},
     "b": {"HostName":"idea01","Online":true,"TailscaleIPs":["100.99.231.94"],"Tags":null,"KeyExpiry":"2027-03-27T14:01:31Z"},
     "c": {"HostName":"sunny-robin","Online":false,"TailscaleIPs":["100.96.98.10"],"Tags":["tag:idea"],"KeyExpiry":""},
-    "d": {"HostName":"openclaw-pi","Online":true,"TailscaleIPs":["100.115.60.6"],"Tags":null,"KeyExpiry":"2027-04-06T08:20:17Z"}
+    "d": {"HostName":"openclaw-pi","Online":true,"TailscaleIPs":["100.115.60.6"],"Tags":null,"KeyExpiry":"2027-04-06T08:20:17Z"},
+    "e": {"HostName":"idea02","Online":true,"TailscaleIPs":["100.85.108.118"],"Tags":null,"KeyExpiry":""}
   }
 }
 JSON
@@ -91,6 +93,12 @@ check "refuses kit sunny-robin" test $? = 2
 
 OUT="$("$D/tag-fleet-idea.sh" precheck --pi idea03)"
 check "precheck idea03 ok and untagged" bash -c 'jq -e ".ok==true and .pi==\"idea03\" and .node.has_idea==false and .expected_ip==\"100.126.117.80\"" >/dev/null <<<"$0"' "$OUT"
+check "precheck reports live KeyExpiry" bash -c 'jq -e "[.notes[] | select(test(\"2027-06-01T12:00:00Z\"))] | length > 0" >/dev/null <<<"$0"' "$OUT"
+check "precheck notes have no hard-coded 2026-12-02 deadline" bash -c 'jq -e "[.notes[] | select(test(\"2026-12-02\"))] | length == 0" >/dev/null <<<"$0"' "$OUT"
+
+OUT="$("$D/tag-fleet-idea.sh" precheck --pi idea02)"
+check "precheck idea02 ok (hold / walker host)" bash -c 'jq -e ".ok==true and .pi==\"idea02\"" >/dev/null <<<"$0"' "$OUT"
+check "precheck idea02 note has no hard-coded 2026-12-02 deadline" bash -c 'jq -e "[.notes[] | select(test(\"2026-12-02\"))] | length == 0" >/dev/null <<<"$0"' "$OUT"
 
 # claimed by someone else
 python3 - "$STATE_FILE" <<'PY'
@@ -124,6 +132,27 @@ check "wait succeeds once tagged" bash -c 'jq -e ".ok==true and .node.has_idea==
 
 OUT="$(SKIP_SSH=1 "$D/tag-fleet-idea.sh" postcheck --pi idea03)"
 check "postcheck pass when tagged and IP matches" bash -c 'jq -e ".ok==true and .node.has_idea==true and .ssh.detail==\"skipped\"" >/dev/null <<<"$0"' "$OUT"
+check "postcheck reports expiry disabled when KeyExpiry empty" bash -c 'jq -e "[.notes[] | select(test(\"expiry is disabled\"))] | length > 0" >/dev/null <<<"$0"' "$OUT"
+check "postcheck empty-expiry notes have no hard-coded 2026-12-02 deadline" bash -c 'jq -e "[.notes[] | select(test(\"2026-12-02\"))] | length == 0" >/dev/null <<<"$0"' "$OUT"
+
+# Tagged node that still has KeyExpiry: report the live date, no fixed deadline.
+python3 - "$WORK/status.json" <<'PY'
+import json,sys
+p=sys.argv[1]
+d=json.load(open(p))
+d["Peer"]["a"]["KeyExpiry"]="2027-08-15T09:00:00Z"
+json.dump(d, open(p,"w"))
+PY
+OUT="$(SKIP_SSH=1 "$D/tag-fleet-idea.sh" postcheck --pi idea03)"
+check "postcheck reports live KeyExpiry when still set" bash -c 'jq -e "[.notes[] | select(test(\"2027-08-15T09:00:00Z\"))] | length > 0" >/dev/null <<<"$0"' "$OUT"
+check "postcheck live-expiry notes have no hard-coded 2026-12-02 deadline" bash -c 'jq -e "[.notes[] | select(test(\"2026-12-02\"))] | length == 0" >/dev/null <<<"$0"' "$OUT"
+python3 - "$WORK/status.json" <<'PY'
+import json,sys
+p=sys.argv[1]
+d=json.load(open(p))
+d["Peer"]["a"]["KeyExpiry"]=""
+json.dump(d, open(p,"w"))
+PY
 
 # IP mismatch fails
 python3 - "$WORK/status.json" <<'PY'
@@ -144,7 +173,7 @@ cat > "$WORK/status-router-first.json" <<'JSON'
     "r": {"HostName":"happy-zebra-router","DNSName":"happy-zebra-router.tailnet.","Online":true,"TailscaleIPs":["100.110.73.52"],"Tags":["tag:idea"],"KeyExpiry":""},
     "e1": {"HostName":"happy-zebra","DNSName":"happy-zebra.tailnet.","Online":true,"TailscaleIPs":["100.102.94.100"],"Tags":["tag:idea"],"KeyExpiry":""},
     "e2": {"HostName":"sunny-robin","Online":true,"TailscaleIPs":["100.96.98.10"],"Tags":["tag:idea"],"KeyExpiry":""},
-    "a": {"HostName":"idea03","Online":true,"TailscaleIPs":["100.126.117.80"],"Tags":null,"KeyExpiry":"2026-12-02T13:36:43Z"}
+    "a": {"HostName":"idea03","Online":true,"TailscaleIPs":["100.126.117.80"],"Tags":null,"KeyExpiry":"2027-06-01T12:00:00Z"}
   }
 }
 JSON
