@@ -1,4 +1,4 @@
-**Status:** Authoritative (follows the school network design; not yet run on hardware) · **Maintained by:** Marco (with Atlas) · 19 October 2026
+**Status:** Authoritative (follows the school network design; not yet run on hardware) · **Maintained by:** Marco (with Atlas) · 25 November 2026
 
 # Field Install Manuals
 
@@ -23,6 +23,6 @@ Addressing and naming (school network design): every school uses the same subnet
 key for all schools.
 
 **Sticker names:** merged in agent-engine-dev#201 (installer names the Pi, prints it and saves `/home/pi/STICKER.txt`) and agent-console-dev#152 (the Console lists every Engine from the network database). `http://idea.local` stays as the easy way in (idea#184).
-The classroom computer manual describes the IDEA client image, which is built but not yet boot-tested on a Pi 400 and a Pi 500.
+The classroom computer manual describes the IDEA client image. Classroom computers with the October 2026 card images (seven Pi 500 and two Pi 400) were seen running on a kit's school network on 27 October 2026. The image's formal first-login check (`first-login-check.sh`) has no recorded PASS run yet, and this manual has not yet been followed step by step on hardware.
 
 No auth keys or tokens: everything in `<ANGLE BRACKETS>` is a placeholder. The router defaults (`IDEA`/`idea911!`, `IDEA-Teachers`/`idea-teachers911!`, `root`/`admin911!`) follow the public `<name>911!` convention (*IDEA School Router – Image and Automated Flashing* proposal); the client image's `admin` account uses `admin911!`.
