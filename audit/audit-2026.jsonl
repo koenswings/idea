@@ -2996,3 +2996,5 @@
 {"ts":"2026-11-25T15:44:14Z","bot":"Pixel","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-25T15:44:44Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":null}
 {"ts":"2026-11-25T15:44:44Z","bot":"Axle","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"idle"}
+{"ts":"2026-11-25T15:50:11Z","bot":"Pixel","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Pixel (IDEA Console Dev): B4-21/B4-22/B4-23a restore screenshots on idea04 (Marco idea#560); no erase"}
+{"ts":"2026-11-25T15:50:11Z","bot":"Pixel","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
