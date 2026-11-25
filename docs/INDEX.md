@@ -66,6 +66,11 @@ Files: `manuals/teachers/teacher-tutorial/README.md`, `manuals/teachers/teacher-
 
 Files: `manuals/operators/operator-tutorial/operator-tutorial.md`, `manuals/operators/operator-tutorial/build.py`, `manuals/operators/operator-tutorial/chapters/01-introduction.md`, `manuals/operators/operator-tutorial/chapters/02-operator-console.md`, `manuals/operators/operator-tutorial/chapters/03-operator-disks.md`, `manuals/operators/operator-tutorial/chapters/04-operator-student-computers.md`, `manuals/operators/operator-tutorial/screenshots/*.png`, `manuals/operators/operator-tutorial/idea-for-operators-tutorial-v1.1.pdf`
 
+### Field support log
+**Status:** Authoritative  ·  **Maintained by:** Marco
+Running record of field-support contacts (email via idea-support@agentmail.to and Telegram @IDEA_SupportBot) and what was answered or sent, newest first. Started 25 November 2026 with the 16 November Kolibri reply to Justice.
+→ [docs/field-support/log.md](field-support/log.md)
+
 ### Field support channel design (idea-field-support-channel-design-v1.0.pdf)
 **Status:** Authoritative  ·  **Maintained by:** Marco
 Design of the field support channel (Telegram @IDEA_SupportBot and idea-support email): what the bot answers itself, what goes to the IDEA admin.
