@@ -25,15 +25,53 @@ The Engine is the core software running on each school Pi. It is a Node.js/TypeS
 - Synchronises state across multiple Pis using Automerge CRDTs (no central server)
 - Serves the Console UI over HTTP on port 80
 
-The Engine runs unattended. Reliability is the primary design constraint.
+The Engine runs unattended. Reliability is the primary design constraint. pm2 (as user `pi`, never root) runs two processes from `pm2.config.cjs`: `engine` and `idea-usage` (field usage monitoring, see below). Root-only work goes through small root helpers installed with `install-root-helpers` (for example `idea-app-data`, `idea-engine-identity`); the Engine calls them through `sudo -n`. Technical detail: `agent-engine-dev/docs/ARCHITECTURE.md` (what is implemented) and `docs/COMMANDS.md` (every command).
 
 ### Console
 
-The Console is a Solid.js web app served by the Engine on port 80. Accessible from any browser on the school's local network at `http://<engine-hostname>.local/` or via Tailscale remotely. Two audiences: Users (browse and open apps) and Operators (manage the fleet).
+The Console is a Solid.js web app served by the Engine on port 80. Two audiences: Users (browse and open apps) and Operators (manage the fleet). It connects to one Engine over WebSocket, reads the whole shared store from it, and sends commands by writing them into the target Engine's command queue in the store (`engineDB[<engineId>].commands`). An app of an Engine that is offline is still listed, but its **Open** button is greyed out with the hint "*<name>* is offline, so this app can't be opened right now" (Console #175).
+
+### Names and addresses
+
+- Every Engine has a unique **sticker name**: two lowercase words, an adjective and a noun, no digits (for example `brave-otter`). It is the hostname, the Tailscale name and the name on the case sticker (`/home/pi/STICKER.txt`).
+- Every Engine also publishes the shared mDNS name **`idea.local`** (`ideaLocal.ts`, idea#203): the first Engine to claim it answers, and another takes over when it leaves.
+- At a school, people open the Console only at **`http://idea.local`** or **`http://<sticker>.local`**. Manuals and teacher material use only those two addresses.
+- Every school uses the **`10.42.x`** LAN: Engines get `10.42.0.2`–`.9`, the student Wi-Fi `IDEA` is `10.42.1.0/24` and the teacher Wi-Fi `IDEA-Teachers` is `10.42.2.0/24`. The Engine prefers a `10.42.x` address when it reports its LAN address (`lanPreferCidrs`).
+
+### One shared store per fleet
+
+All Engines of one fleet share **one** Automerge store document, named in `store-identity/store-url.txt`. An Engine only syncs with Engines of its own store (store-scoped peering). Today there are three stores:
+
+| Store | Who uses it |
+|---|---|
+| `automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk` (kit store) | The Zimbabwe kit Engines, and every new Engine image (idea#452) |
+| `automerge:2VroE…` (dev pool) | The test pool `idea01`, `idea03`, `idea04` |
+| `automerge:6f8m…` | Production `idea`, on its own |
+
+Liveness is kept out of the store history: every 10 s each Engine sends an ephemeral heartbeat (`idea/hb`) and every 15 s its container metrics (`idea/metrics`); neither is stored. The stored "last seen" (`lastRun`) is written at boot and at most once an hour. A peer that has not been seen for 7 days loses its peer SSH key on the other Engines. Finished operations older than 7 days are moved out of the store into the Engine's own CommandLog document.
+
+### Remote access and security defaults
+
+- **Tailscale:** one fleet tag `tag:idea` and one reusable fleet key; admins can reach `tag:idea`, and `tag:idea` reaches nothing. A new Engine joins once at first boot and then deletes the key (engine#291). Details: `docs/ops/tailscale-field-access.md`.
+- **Production `idea`** is reached as `idea.tail2d60.ts.net` (ports in the remote-access guide).
+- **SSH** to every Pi is key-only, as `pi`.
+- **Default passwords** follow the public convention `<accountname>911!`. The values themselves are only in the private Accounts and Passwords sheet; they are never written in a doc, issue or log.
+- **Disk detection:** the udev rule `/etc/udev/rules.d/90-docking.rules` makes the `/dev/engine` links the Engine watches. `boot.sh` reinstalls it when it differs from the shipped copy, and the Engine log shows `[diskDetection] self-check passed` at startup.
 
 ### App Disks
 
 An App Disk is a USB drive or SSD with ext4 filesystem containing a META.yaml and Docker Compose definitions. When docked into a school Pi, the Engine reads the metadata and starts the containers automatically. App Disks are the distribution mechanism — no download, no installer, no internet.
+
+The Apps in use today (version = IDEA App version, then the upstream version):
+
+| App | Repo | Current version |
+|---|---|---|
+| Kolibri | `app-kolibri` | 1.3-0.19.5 |
+| Nextcloud | `app-nextcloud` | 1.8-31.0.14 |
+| Kiwix (offline Wikipedia) | `app-kiwix` | 1.3-3.8.2 |
+| Usage dashboard (production `idea` only, not on school kits) | `app-usage-dashboard` | 1.6 |
+
+Kolibri and Nextcloud can also run as separate **Demo** instances (`setupDemo`) for teacher training; the teacher tutorial uses them.
 
 ### Disk roles: App, Backup and Files
 
@@ -51,14 +89,14 @@ Every component works without internet. This is the foundational constraint that
 
 ### Field usage monitoring
 
-IDEA measures whether donated kits are used as taught in the teacher tutorial. The existing Engine, Console, Automerge sync and Apps do not depend on this path: monitoring reads from them, and nothing old waits for it. The design is approved (PR #410); it is not yet running on field kits.
+IDEA measures whether donated kits are used as taught in the teacher tutorial. The existing Engine, Console, Automerge sync and Apps do not depend on this path: monitoring reads from them, and nothing old waits for it. The design is approved (PR #410) and implemented (idea#411–#416 closed). It is **not running on the field kits**: on kind-panda and sunny-robin the `idea-usage` process is not started (fleet-state, 22 November 2026).
 
 - **On each kit:** a separate pm2 process, `idea-usage`, runs as `pi` alongside the Engine. When enabled it records presence every five minutes and calls each App's usage hook (`x-app.usage`), writing role-level day summaries to `/var/lib/idea/usage/` (usernames stay on the kit). It never opens the Automerge store; a unit test fails if `src/usage/` imports Automerge or the store modules. A persistent Engine setting `usageMonitoring` ships **off**, survives a reboot and an Engine update, and is turned on one kit at a time. Engines without monitoring ignore the hook field. The Engine reports a `usageSummaries` capability flag; nothing old requires it.
 - **Export:** the programme collector on idea pulls summaries over SSH through helper v7's forced command `/usr/local/sbin/idea-usage-export` (only `since YYYY-MM-DD` and `archive-and-clear --before YYYY-MM-DD`). The key lives in root-owned `/etc/ssh/idea_usage_keys/%u`, restricted to the dashboard sidecar's Tailscale IPv4.
 - **On idea:** the `app-usage-dashboard` App runs a collector with its own userspace Tailscale sidecar tagged `tag:idea-hub` (idea itself stays `tag:idea`). It watches Tailscale's LocalAPI — no LLM — stores uplink history and pulled summaries in SQLite on idea, and serves the programme dashboard. It does not touch MilkWise (ports 3333 and 3334) or idea's Engine. A school-local Console Usage panel (D2) is a later follow-up and is not in the first delivery.
 - **Turning it off:** fleet-wide, remove the `tag:idea-hub → tag:idea` tcp/22 ACL; per kit, set `usageMonitoring` to off; on idea, stop the dashboard App; in an emergency, remove the key file. Stopping the `idea-usage` process by hand is not enough: without the persistent switch, a reboot or an Engine update would start it again.
 
-Field Engines stay pinned at commit `adfd9d3` until Koen approves the field update (idea#374). The Engine update can ship with the switch off.
+Field Engines: kind-panda and sunny-robin were updated on 22 November 2026 (idea#374) to Engine `6c47f09` (main `c1cc4bb` plus the store-durability fix #568), Console `df13dbfa`, root helper v25, Apps Nextcloud 1.8, Kolibri 1.3 and Kiwix 1.3. happy-zebra is still on Engine `adfd9d3`. `fleet-state.json` is the source of truth for what each kit runs.
 
 Design: `proposals/2026-11-09-field-usage-monitoring.md` (PR #410). Implementation: idea#411–#417 (D2 is #417). Koen's Tailscale and threshold items stay on idea#375.
 
