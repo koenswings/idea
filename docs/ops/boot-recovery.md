@@ -1,21 +1,50 @@
 # Boot recovery: fstab loop mounts and what comes back after a reboot
 
-**Status:** Authoritative (current roles as of 2026-11-13; historical incidents dated below) · **Maintained by:** Atlas (Ops)
+**Status:** Authoritative (current roles as of 2026-11-25; historical incidents dated below) · **Maintained by:** Atlas (Ops)
 Sources: Engine main (`AutoStart.ts`, `usbDeviceMonitor.ts` watch dir `/dev/engine`, `script/build_image_assets/crondefs`), `docs/grok-bot-setup.md` §4.6, `tools/README.md`, `fleet-state.json`, `tools/engine-image/`, and the 2026-10 ops-box notes cited in the historical sections (`duration-evidence/path-a-ready-r33/BOOT-RECOVERY.md`, `path-a-ready-r39/READY.md`, `testmode-audit.md`, `post-reboot-20261008/HANG-ANALYSIS.md`, `path-a-stage2-20261009/D5-REBOOT-HOLD.md`).
 
-## Current fleet (2026-11-13)
+## Current fleet (2026-11-25)
 
-| Host | Role now | Addresses |
-|---|---|---|
-| idea03 | Shared test/review pool (`role: spare`); Console main `ffab96d` | Tailscale 100.126.117.80, LAN 192.168.0.228 |
-| idea04 | Shared test/review pool (`role: spare`); Console main `ffab96d` | Tailscale 100.108.39.45, LAN 192.168.0.113 |
-| idea01 | Golden, read-only for tests (since 2026-10-28); never claimed | Tailscale 100.99.231.94, LAN 192.168.0.138 |
-| idea02 | On hold (`role: fleet-pending`); not a pool Pi, never claimed | Tailscale 100.85.108.118, LAN 10.99.0.12 |
-| Production | Hostname `idea` (fleet-state key `wizardly-hugle`) | `idea.tail2d60.ts.net`, Tailscale 100.115.60.6, LAN 192.168.0.231 |
+This section records which host does what today and how each one comes back after a reboot. Read-only checks by Atlas on 2026-11-25, 15:45–15:48 CET (live SSH: crontab, fstab, pm2, Engine/Console git, `store-url`; and `fleet-state.json`).
 
-pm2 runs as user `pi` (systemd unit `pm2-pi.service`). Engine and Console process changes must survive a reboot (`pm2 save`, and the unit enabled with `pm2 startup systemd -u pi`). Do not run pm2 as root.
+| Host | Role now | Addresses | Engine (live git HEAD) | Console | 05:00 reboot (root crontab) |
+|---|---|---|---|---|---|
+| idea03 | Shared test/review pool (`role: spare`, `status: idle`, claim None) | Tailscale 100.126.117.80, LAN 192.168.0.228 | `bdd7800` (#536); store `2VroEUvDkmYsDAwE5oG9YeFNadWH`; helper `idea-app-data 25`; `httpPort` 8080; engine online since 25 Nov 15:16:49 CET | `df13dbfa` (checkout + dist; `index.html` sha256 `7bff1338143a2d0901f7e9dde4b42ce47392e81f9d9f391f39dbc2d5e0358579`) | Held: `#D5-HOLD-idea03-20261113# 0 5 * * * /sbin/shutdown -r now` (unchanged since 13 Nov). Hourly avahi + `@reboot boot.sh` still active. |
+| idea04 | Shared test/review pool (`role: spare`, `status: testing`). **Claimed by Axle** on 25 Nov for an Automerge 3.5.0 / automerge-repo 2.5.6 upgrade proof (scratch Engines on a copy of 2VroE, ports 4398/4399). Read-only only while claimed. | Tailscale 100.108.39.45, LAN 192.168.0.113 | Checkout `bdd7800` (fleet-state version line still said `c1cc4bb` earlier today — stale vs live HEAD). pm2 `engine` online since 25 Nov 15:27:06 CET on the pool tree; helper has v25 verbs. Store URL not re-read on idea04 this pass (Axle's scratch work). | `df13dbfa` (checkout) | Held: `#D5-HOLD-idea04-20261113# 0 5 * * * /sbin/shutdown -r now` (unchanged since 13 Nov). Hourly avahi + `@reboot boot.sh` still active. |
+| idea01 | Golden, read-only for tests (since 2026-10-28). fleet-state still shows an Atlas Markov-relaunch claim and `status: testing` — treat as stale unless Steve refreshes it; do not claim over golden. | Tailscale 100.99.231.94, LAN 192.168.0.138 | `c1cc4bb` (#522); engine online since 21 Nov 05:58:09 CET; helper has v25 verbs | `df13dbfa` (checkout) | Held: `#D5-HOLD-IDEA01-20261010# 0 5 * * * /sbin/shutdown -r now` (unchanged; golden, do not edit without Steve's window). Hourly avahi + `@reboot boot.sh` still active. |
+| idea02 | On hold (`role: fleet-pending`); not a pool Pi, never claimed for tests | Tailscale 100.85.108.118, LAN 10.99.0.12 | Checkout `9040e73` (fleet-state version still lists engine `745f2c3` / console `cda87d2` — the console checkout matches `cda87d2`; Engine checkout is newer than that version line). pm2 `engine` was **stopped** at 15:40 CET; `:80`/`:8080` were not serving | Console checkout `cda87d2` | **Held:** `#DISKSTATION-HOLD 0 5 * * * /sbin/shutdown -r now`. The 13 Nov text ("last recorded 2026-10-11 as still having the live 05:00 line") is stale. Hourly avahi + `@reboot boot.sh` still active. |
+| Production | Hostname `idea` (fleet-state key `wizardly-hugle`) | `idea.tail2d60.ts.net`, Tailscale 100.115.60.6, LAN 192.168.0.231 | `cba91a688491b61fd990e374e7942283d6ccaea9` (idea#524 / #412); engine online since **25 Nov 05:00:36 CET** | `073dfc5ee3fb0b692c06c55586b7e77fe719dba2` | **Live:** `0 5 * * * /sbin/shutdown -r now  # D5 re-enabled by Atlas 2026-10-07 after reboot test PASS`. Today's Engine start time matches that reboot. Hourly avahi + `@reboot boot.sh` still active. |
 
-idea01, idea03 and idea04 share the dev-pool store `automerge:2VroE…`. Production `idea` has its own store. Kits use the kit store `automerge:3Vvv…` (idea#452).
+pm2 still runs as user `pi` (systemd `pm2-pi.service` enabled+active on every host above). Engine and Console process changes must survive a reboot (`pm2 save`, and the unit enabled with `pm2 startup systemd -u pi`). Do not run pm2 as root.
+
+Store pins (unchanged in kind): idea01, idea03 and idea04 share the dev-pool store `automerge:2VroE…`. Production `idea` has its own store. Kits use the kit store `automerge:3Vvvigx8bKcuwKALqMVz85GhDqrk` (idea#452). Live check: idea03 and sunny-robin `store-url` match those pins.
+
+## fstab loop mounts (re-checked 2026-11-25 15:45 CET)
+
+This section says which hosts have duration-test loop lines in `/etc/fstab`. Unchanged from 2026-11-13:
+
+- **idea01:** four duration-test loop lines still present and still commented with `#STAGE2-20261009#`, so they do not mount at boot. Golden: do not uncomment without Steve's window.
+- **idea03 and idea04:** `/etc/fstab` has only root and `/boot/firmware` (no duration-test loop lines).
+- **idea02 and production `idea`:** root and `/boot/firmware` only (no duration-test lines).
+
+## Kits (useful for boot/recovery behaviour)
+
+This section records the kit Engines' reboot behaviour as far as it could be read on 2026-11-25.
+
+| Host | Role | Engine / Console (25 Nov) | 05:00 reboot | Notes |
+|---|---|---|---|---|
+| sunny-robin | kit-engine, online | Engine `6c47f09` (c1cc4bb + #568); Console checkout stays `654224e` with a dist-only swap — `dist/index.html` sha256 matches idea03's `df13dbfa` dist; helper v25; store `3Vvv…`; `httpPort` 80 | **Live:** `0 5 * * * /sbin/shutdown -r now`. Engine/idea-usage online since 25 Nov 12:01:34 CET (not 05:00; kits also have known power-cut / clock-drift issues, idea#564) | Reachable today. fstab root+boot only. |
+| kind-panda | kit-engine, offline today | Same Engine/Console/helper pins as sunny-robin in fleet-state (`6c47f09`, dist `df13dbfa`, helper v25). Last store `lastBooted` 22 Nov 14:21:58 CET | Not read today (SSH down) | Router still recorded as not installed. |
+| happy-zebra | kit-engine, offline today | Still on Engine `adfd9d3` / Console `62bd2ba` (fleet-state; not upgraded in idea#374; left untouched until Koen has checked it). Not present in the current kit store document | Not read today (SSH down) | Last Tailscale seen 18 Nov. |
+
+## 05:00 line: what to treat as current
+
+This section sums up where the nightly 05:00 reboot is live and where it is held.
+
+- Image default remains `0 5 * * * /sbin/shutdown -r now`.
+- **Live today:** production `idea`, and sunny-robin. Production actually rebooted at 05:00 CET on 25 Nov.
+- **Held today:** idea01 (`#D5-HOLD-IDEA01-20261010#`), idea03 (`#D5-HOLD-idea03-20261113#`), idea04 (`#D5-HOLD-idea04-20261113#`), idea02 (`#DISKSTATION-HOLD`).
+- Never schedule a walk across 05:00 where the reboot is active. Check the root crontab before relying on it.
 
 ## 1. Why this runbook exists
 On 2026-10-06 the pool still used a root cron `0 5 * * * /sbin/shutdown -r now` (plus hourly `systemctl restart avahi-daemon` and `@reboot /usr/local/bin/boot.sh`). After that 05:00 reboot, idea01's duration fixture disks (ext4 **loop images**, mounted by hand) were gone. The Engine then saw bare folders with only `META.yaml`: the empty disks looked right by luck, but `duration-add-files-001` was classified as an empty disk instead of `['app']`. **Not an Engine bug: a missing mount.**
@@ -55,7 +84,7 @@ The 05:00 reboot is defined in the **root crontab** (the same three lines the En
 - **idea01 (observed 2026-11-13 17:29:36 CET; golden, left untouched):** the D5 hold is still in place and was not changed. Root crontab (installed 2026-10-10 10:09:40 CET) has `#D5-HOLD-IDEA01-20261010# 0 5 * * * /sbin/shutdown -r now`. The hourly `systemctl restart avahi-daemon` and `@reboot /usr/local/bin/boot.sh` lines are still active. Backups remain in `~/idea/quarantine-stage2-20261009/` (`root-crontab.bak-20261009-1452`, `root-crontab.bak-20261010-1011`, plus `fstab.stage1`). Rollback: uncomment the 05:00 line with `sudo crontab -e` (remove only the `#D5-HOLD-IDEA01-20261010#` prefix), or restore from `~/idea/quarantine-stage2-20261009/root-crontab.bak-20261010-1011`. Do not edit idea01 without Steve's window.
 - **idea03 (hold applied 2026-11-13 17:42:21 CET, under Atlas claim):** the 05:00 reboot is now held. Root crontab has `#D5-HOLD-idea03-20261113# 0 5 * * * /sbin/shutdown -r now`. The hourly avahi restart and `@reboot boot.sh` lines were left unchanged. Backup taken immediately before the hold: `/home/pi/crontab-root-backup-20261113T174221`. Rollback: uncomment the 05:00 line with `sudo crontab -e` (remove only the `#D5-HOLD-idea03-20261113#` prefix), or restore the backup with `sudo crontab /home/pi/crontab-root-backup-20261113T174221`.
 - **idea04 (marker replaced 2026-11-13 17:44:59 CET, under Atlas claim):** the 05:00 reboot remains held; the previous `#DISKSTATION-HOLD` prefix was replaced with the D5 marker. Root crontab has `#D5-HOLD-idea04-20261113# 0 5 * * * /sbin/shutdown -r now`. The hourly avahi restart and `@reboot boot.sh` lines are still active and were not changed. Backup taken immediately before the replacement: `/home/pi/crontab-root-backup-20261113T174459`. Rollback: uncomment the 05:00 line with `sudo crontab -e` (remove only the `#D5-HOLD-idea04-20261113#` prefix), or restore the backup with `sudo crontab /home/pi/crontab-root-backup-20261113T174459` (that backup still has the `#DISKSTATION-HOLD` prefix).
-- Production `idea` and idea02 were last recorded (2026-10-11) as still having the live 05:00 line; they were not re-checked here.
+- **Re-checked 2026-11-25 15:45–15:48 CET (Atlas, read-only):** idea02's 05:00 line is **held** (`#DISKSTATION-HOLD 0 5 * * * /sbin/shutdown -r now`). Production `idea` and the kit sunny-robin have the **live** 05:00 line; production's Engine came up at 05:00:36 CET on 25 Nov, so it ran that morning. The idea01, idea03 and idea04 holds above are unchanged.
 - The image default remains `0 5 * * * /sbin/shutdown -r now`. Later runbooks (scheduled backup, field-usage, hub services) still treat that reboot as current on production `idea` and on kits.
 - Never schedule a walk across 05:00 where the reboot is active. Check the root crontab before relying on it.
 
@@ -72,6 +101,8 @@ Open suggestions (not applied): persistent journal on the pool, EEPROM update, c
 
 ## 7. Quarantined containers (2026-11-13)
 
+> These names were recorded on 2026-11-13 and were **not re-verified on 2026-11-25**.
+
 Under Atlas claims, leftover Exited fixtures on idea03 and idea04 were renamed with `docker rename` only (not stopped, started, or removed). Reference checks found no Engine instance, process/pm2 arg, restart-policy, or running-container volume/network link that used those names or ids (a shared Docker `host` network is not a real coupling). idea01 was not touched.
 
 | Pi | Old name | New name | Id | Image | Date |
@@ -86,7 +117,7 @@ idea03 apply window 17:42 CET: all three leftovers stayed Exited after the renam
 
 idea04 apply window 17:44 CET: both leftovers stayed Exited after the rename. No containers were Running on idea04.
 
-**idea01 leftovers left in place** (golden; observed 2026-11-13 17:29:36 CET; not renamed). No `idea168-*`. All listed containers are Exited:
+**idea01 leftovers left in place** (golden; observed 2026-11-13 17:29:36 CET; not renamed; not re-verified on 2026-11-25). No `idea168-*`. All listed containers are Exited:
 
 | Name | Status | Created | Image |
 |---|---|---|---|
