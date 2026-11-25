@@ -3004,3 +3004,6 @@
 {"ts":"2026-11-25T15:59:32Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas (IDEA Ops): deploy Engine ff413e1 (#575)","previous":null}
 {"ts":"2026-11-25T15:59:44Z","bot":"Pixel","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Pixel (IDEA Console Dev): B4-22 retake + B4-23a restore screenshots on idea04 (Marco idea#560); no erase"}
 {"ts":"2026-11-25T15:59:44Z","bot":"Pixel","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-25T16:04:08Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-25T16:04:08Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas (IDEA Ops): deploy Engine ff413e1 (#575)"}
+{"ts":"2026-11-25T16:04:08Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@ff413e1, console df13dbfa","previous":"engine main@bdd7800, console df13dbfa"}
