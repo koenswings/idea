@@ -1,10 +1,10 @@
 ---
 title: "IDEA Field Install Manual: Classroom Computer"
 subtitle: "Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor + the IDEA client image"
-audience: "Version 2.6, 27 October 2026"
+audience: "Version 2.6.1, 25 November 2026"
 cover_logo: "yes"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 27 October 2026 (v2.6: learners may join any Wi-Fi network, including IDEA-Teachers (idea#285); v2.5: sticker names, idea.local as the easy way in; v2.4: opening paragraph restored, wiring diagram arrows fixed)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (v2.6.1: Appendix troubleshooting, apps of an Engine that is not there now have a greyed-out Open button; v2.6: learners may join any Wi-Fi network, including IDEA-Teachers (idea#285); v2.5: sticker names, idea.local as the easy way in; v2.4: opening paragraph restored, wiring diagram arrows fixed)
 
 
 # Introduction
@@ -244,6 +244,6 @@ Nothing on the computer needs saving first: students keep their work on the Engi
 | Start page says no Engine found | Is an Engine switched on? Type a sticker name in the field, or try `http://<STICKER>.local` (4.2.2). Check that the computer is on IDEA/IDEA-Teachers. |
 | `IDEA-Teachers` is not in the Wi-Fi menu | Move closer to the router and open the menu again. If it still doesn't show, check the router (*IDEA Field Install Manual: School Server*) or ask the IDEA team (4.3). |
 | Files or settings are gone after a restart | Expected: the reset on restart (4.4). Save work in Nextcloud. |
-| An app in the Console does not open | Its Engine may be switched off or at another school: the Console still shows its apps (known problem, no fix yet). Use the apps of this school's Engine. |
+| An app in the Console does not open, or its Open button is greyed out | Its Engine may be switched off or at another school: the Console still lists its apps and greys out their Open button (on an older Console the button is not greyed out yet). Use the apps of this school's Engine. |
 | Desktop IDEA icon shows a red cross | Use the IDEA icon in the dock; log out and in once. Report it to the IDEA team. |
 | Something is broken beyond repair | Write the card again from the Console (chapter 6). Nothing on the computer needs saving: students keep their work on the Engine (Nextcloud). |
