@@ -61,7 +61,7 @@ Liveness is kept out of the store history: every 10 s each Engine sends an ephem
 
 ### App Disks
 
-An App Disk is a USB drive or SSD with ext4 filesystem containing a META.yaml and Docker Compose definitions. When docked into a school Pi, the Engine reads the metadata and starts the containers automatically. App Disks are the distribution mechanism — no download, no installer, no internet.
+An App Disk is a USB drive or SSD with ext4 filesystem containing a META.yaml and Docker Compose definitions. When docked into a school Pi, the Engine reads the metadata and starts the containers automatically. Instance data lives in `instances/<id>/data` on the disk, bind-mounted into the containers as `./data`. App compose files must not use Docker named volumes or absolute host paths (idea#141); Engine-generated Files Disk binds are allowed. App Disks are the distribution mechanism — no download, no installer, no internet.
 
 The Apps in use today (version = IDEA App version, then the upstream version):
 
