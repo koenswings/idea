@@ -1,9 +1,9 @@
 ---
 title: "IDEA Demo Server: Remote Access"
 subtitle: "Reaching idea over Tailscale"
-audience: "Version 1.2, 22 October 2026"
+audience: "Version 1.2.1, 25 November 2026"
 ---
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 22 October 2026 (v1.2: machine renamed to idea, main address `http://idea.tail2d60.ts.net:<port>` with the IP as fallback; v1.1: demo apps by default, Telegram support bot, Accounts and Passwords sheet for logins, cover version + date only, no personal names)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (v1.2.1: the demo apps are installed on idea, not an Engine default; v1.2: machine renamed to idea, main address `http://idea.tail2d60.ts.net:<port>` with the IP as fallback; v1.1: demo apps by default, Telegram support bot, Accounts and Passwords sheet for logins, cover version + date only, no personal names)
 
 # How to use this guide
 
@@ -33,7 +33,7 @@ Each step has:
 
 idea is a Raspberry Pi in Belgium. It runs the same IDEA software as the school servers (Engines) that go to the schools: the **IDEA Console** and the apps **Kolibri**, **Nextcloud** and **Wikipedia** (offline, through Kiwix).
 
-Like every Engine, idea comes with the **demo setup** on by default: a **Kolibri Demo** with the school "IDEA Demo School", class Grade 5, demo teachers and learners and some content, and Nextcloud with demo teachers and learners. You can show IDEA straight away, without creating accounts first.
+idea has the **demo setup** installed: a **Kolibri Demo** with the school "IDEA Demo School", class Grade 5, demo teachers and learners and some content, and Nextcloud with demo teachers and learners. You can show IDEA straight away, without creating accounts first.
 
 idea is **not** open to the public internet. To reach it from far away, we use **Tailscale**. Tailscale is a free app that builds a private, encrypted connection ("tunnel") between devices over the normal internet. Each Tailscale user has their own private network of devices, called a **tailnet**.
 

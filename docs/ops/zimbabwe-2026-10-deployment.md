@@ -36,9 +36,9 @@ Sources: `fleet-state.json`, `deployments/` records, [idea#288](https://github.c
 
 | Device | Sticker name | Site | Hardware | Software | Last seen read-only |
 |---|---|---|---|---|---|
-| School server (Engine) | sunny-robin | 1 | Raspberry Pi 5 (Waveshare D case), USB SSD Intenso AA000000000000003120 | Engine `adfd9d3`, Console checkout `654224e` (dist from agent-console-dev#162) | 26 Oct 2026 capture; 5 Nov 2026 first-contact read; boot reads 14 and 15 Nov 2026 |
-| School server (Engine) | happy-zebra | 2 | Raspberry Pi 5 (Waveshare case), USB SSD Intenso AA000000000000010473 | Engine `adfd9d3`, Console checkout `654224e` | 28 Oct 2026 capture; 30 Oct 2026 capture-engine-record; 6 Nov 2026 SSH read (hostname, uptime, temperature) |
-| School server (Engine) | kind-panda | not yet observed | Raspberry Pi 5, NVMe (cloned from the FIT stick) | Engine `adfd9d3` (fleet-state) | Never read at a site. Last seen on Tailscale 18 Oct 2026 21:41 CEST; offline since (idea#288 watch, 15 Nov 2026) |
+| School server (Engine) | sunny-robin | 1 | Raspberry Pi 5 (Waveshare D case), USB SSD Intenso AA000000000000003120 | Since 22 Nov 2026 (idea#374): Engine `6c47f09`, Console `df13dbfa`, helper v25 (see below). Before: Engine `adfd9d3`, Console checkout `654224e` (dist from agent-console-dev#162) | 26 Oct 2026 capture; 5 Nov 2026 first-contact read; boot reads 14 and 15 Nov 2026; idea#374 update 22 Nov 2026 |
+| School server (Engine) | happy-zebra | 2 | Raspberry Pi 5 (Waveshare case), USB SSD Intenso AA000000000000010473 | Engine `adfd9d3`, Console pr162 (`62bd2ba`, agent-console-dev#162, served as a dist-only swap; the checkout stays `main@654224e`); left untouched until Koen has checked it | 28 Oct 2026 capture; 30 Oct 2026 capture-engine-record; 6 Nov 2026 SSH read (hostname, uptime, temperature) |
+| School server (Engine) | kind-panda | not yet observed | Raspberry Pi 5, NVMe (cloned from the FIT stick) | Since 22 Nov 2026 (idea#374): Engine `6c47f09`, Console `df13dbfa`, helper v25 (see below). Before: Engine `adfd9d3` | Offline on Tailscale from 18 Oct to at least 15 Nov 2026 (idea#288 watch); online again and updated over Tailscale on 22 Nov 2026 (idea#374) |
 | Router | sunny-robin-router | 1 | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ce:7e | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (confirmed on the device 29 Oct 2026, `/etc/idea/version`) | 29 Oct 2026 capture; 5 Nov 2026 ubus read |
 | Router | happy-zebra-router | 2 | Cudy WR3000S v1, LAN MAC d4:0d:ab:50:ca:c8 | OpenWrt 25.12.5 r33051-f5dae5ece4; IDEA router image `b2f00bc` (confirmed on the device 29 Oct 2026, `/etc/idea/version`) | 29 Oct 2026 capture |
 | Router | kind-panda-router | not yet observed | Cudy WR3000S v1 | Not installed yet; recorded when it comes online | Device never read. Its Tailscale node (100.86.136.9) was last seen 18 Oct 2026 21:41 CEST |
@@ -105,6 +105,16 @@ today (`sunny-robin-router-leases-hints-20261030T0818Z.json`), so it joined late
 fails, as expected: the kit firewall doesn't let the Engine reach the student network. Its site column in the tables
 above reflects 28 Oct.
 
+## Field update of sunny-robin and kind-panda, 22 Nov 2026 (idea#374)
+
+This section records what the two updated kit Engines run now. Source: `fleet-state.json` (key `kit374`, recorded by Atlas on 22 Nov 2026). happy-zebra was not part of this update: it stays on Engine `adfd9d3` with Console pr162 and is left untouched until Koen has checked it.
+
+- Engine `6c47f09` (main `c1cc4bb` plus the store-durability fix, agent-engine-dev #568), Console `df13dbfa`, root helper `idea-app-data` v25.
+- Apps, each with its Demo instance: Nextcloud 1.8-31.0.14, Kolibri 1.3-0.19.5, Kiwix 1.3-3.8.2. 12 containers up.
+- Memory cgroup on; the system journal now survives a reboot (`99-idea-persistent.conf`, at most 200 MB).
+- pm2 runs `engine` only; `idea-usage` is not started, so field usage monitoring is not running on the kits.
+- Checked after a reboot on 22 Nov 2026: Engine restarts 0, Console HTTP 200, all containers up.
+
 ## sunny-robin first contact, 5 Nov 2026
 
 Read by Atlas on 5 Nov 2026, about 10:26 to 10:36 CET, read-only; nothing was installed, restarted or changed.
@@ -130,8 +140,9 @@ so the reason for a reboot can't be read afterwards. These are recorded in `flee
 
 From ops (Atlas). Status on 15 Nov 2026, 15:30 CET (first written 30 Oct 2026):
 
-- **kind-panda: BLOCKED (offline).** The Kolibri ID check, `df -h /` and the on-device capture all wait for it.
+- **kind-panda: BLOCKED (offline) until 22 Nov 2026.** The Kolibri ID check, `df -h /` and the on-device capture all wait for it.
   It was last seen on Tailscale on 18 Oct 2026 at 21:41 CEST and has not been online since (idea#288 watch, 15 Nov 2026).
+  Update 25 Nov 2026 (doc check): kind-panda came back online and was updated on 22 Nov 2026 (idea#374, section above). Whether the Kolibri ID check and the on-device capture have been redone is for Atlas to confirm.
 - **kind-panda-router: not yet installed.** Nothing about the device is recorded until our watcher sees it online
   and we read it ourselves. Its Tailscale node (100.86.136.9) was last seen on 18 Oct 2026 at 21:41 CEST.
 - **happy-zebra-router WAN MAC: DONE.** It's `d4:0d:ab:50:ca:c9`, read through ubus.

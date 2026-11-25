@@ -1,4 +1,4 @@
-**Status:** Draft (feature not live yet; lands with idea#201 and idea#203: Console Client cards, Flash and the IDEA shortcut) · **Maintained by:** Marco (with Atlas) · 15 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (Client cards, Flash and the IDEA shortcut are live: the kit Engines advertise `flashCard`, checked by Atlas on 25 November 2026; 4.2 points to 4.5; earlier: 15 October 2026 draft for idea#201 and idea#203)
 
 # 4. Student computers: reset a card from the Console
 
@@ -24,7 +24,7 @@ Good to know:
 
    ![Client cards: one card in a reader, with Flash…](../screenshots/SC-01.png)
 
-2. Check that the **size** matches your card. If the card is not listed, see 13.5.
+2. Check that the **size** matches your card. If the card is not listed, see 4.5.
 
 > **Never pick an IDEA Disk.** The Files Disk, the Backup Disk and app disks are never offered here, but always check the name and size before you continue.
 
