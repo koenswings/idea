@@ -72,6 +72,12 @@ separately with `tools/fleet/build-console-pi.sh`, which keeps `dist/hidden-inst
    NetworkManager is active, `nmcli general reload conf` (no NM restart, no link change).
    A failure there only warns; `check-fleet-health.sh` reports a missing drop-in.
 8. **Verify the store again**, then `pm2 restart engine --update-env`.
+9. **pm2 config drift (warning only).** Because `pm2.config.cjs` is kept from before the deploy and
+   only `engine` is restarted, pm2 settings that the new commit adds (crash backoff engine#567, the
+   `idea-usage` process idea#411) do not take effect. The script prints `WARN:` when the kept file
+   differs from the tip's, or when the tip defines `idea-usage` and pm2 shows it stopped or missing.
+   Apply by hand after reviewing the diff: `git checkout -- pm2.config.cjs; pm2 delete engine idea-usage;
+   pm2 start pm2.config.cjs --env production; pm2 save`.
 
 Any failed check aborts with exit 3 **before** `pm2 restart`, so the running Engine keeps its
 store. The backup folder stays for a manual restore.

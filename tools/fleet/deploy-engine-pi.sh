@@ -8,7 +8,8 @@
 # -> discard those local edits -> git checkout --detach <tip> -> restore the saved files
 # -> verify store-url.txt is still the expected store (command-log-url/day may rotate; never restore the old URL)
 # -> pnpm install + build -> DHCP vendor class (idea#284) -> ./install-root-helpers (flash/app-data/
-# erase/usage-settings/usage-export helpers + sudoers, then sha256 vs the repo and visudo -c) -> verify again -> pm2 restart engine + pm2 save.
+# erase/usage-settings/usage-export helpers + sudoers, then sha256 vs the repo and visudo -c) -> verify again -> pm2 restart engine + pm2 save
+# -> warn (never fail) when the kept pm2.config.cjs differs from the new commit's or idea-usage is not online.
 # Any failed check aborts BEFORE pm2 restart (exit 3); the running Engine keeps its old store.
 # ALWAYS kept, whatever git status says (skip-worktree files included): config.yaml, pm2.config.cjs,
 # the whole store-identity/ dir and ~/.idea-local; backed up first, restored byte-for-byte, sha256-checked.
@@ -313,6 +314,32 @@ verify_kept "after checkout"
 check_store "after checkout"
 echo "restored: config.yaml sha $(sha256sum config.yaml | cut -c1-16), store $(store_now)"
 
+# pm2 config drift (field failure analysis 2026-11-25): pm2.config.cjs is KEPT from before the
+# deploy and only "pm2 restart engine" runs, so pm2 settings that a new Engine commit adds (crash
+# backoff engine#567, the idea-usage process idea#411) never take effect. Warn only; never fails.
+pm2_drift_warn() {
+  local repo_cfg
+  repo_cfg="$(git show HEAD:pm2.config.cjs 2>/dev/null)" || { echo "pm2 config: HEAD has no pm2.config.cjs, not compared"; return 0; }
+  if [ "$repo_cfg" != "$(cat pm2.config.cjs 2>/dev/null)" ]; then
+    echo "WARN: pm2.config.cjs on this Pi differs from $(git rev-parse --short HEAD)'s (kept from before the deploy)." >&2
+    echo "WARN:   pm2 settings in the new commit (e.g. exp_backoff_restart_delay, idea-usage) are NOT applied." >&2
+    echo "WARN:   Review: git diff HEAD -- pm2.config.cjs (old file saved in $BK). To apply, as pi:" >&2
+    echo "WARN:   git checkout -- pm2.config.cjs; pm2 delete engine idea-usage; pm2 start pm2.config.cjs --env production; pm2 save" >&2
+  fi
+  if printf '%s' "$repo_cfg" | grep -q '"idea-usage"'; then
+    local st
+    st="$(pm2 jlist 2>/dev/null | python3 -c 'import sys,json
+try: l=json.load(sys.stdin)
+except Exception: print("unreadable"); sys.exit()
+print(next((p["pm2_env"]["status"] for p in l if p.get("name")=="idea-usage"),"missing"))' 2>/dev/null)"
+    case "$st" in
+      online|unreadable|"") ;;
+      *) echo "WARN: $(git rev-parse --short HEAD) defines the idea-usage pm2 process but pm2 shows it $st (pm2 restart engine does not start it; idea#411)" >&2 ;;
+    esac
+  fi
+  return 0
+}
+
 # 7. Build, verify again, restart
 temp_guard engine-install
 pnpm install --frozen-lockfile
@@ -359,5 +386,6 @@ pm2 restart engine --update-env
 pm2 save
 sleep "${POST_RESTART_WAIT:-5}"
 check_store "after pm2 restart"
+pm2_drift_warn
 peak_summary
 echo "DEPLOYED $HOST_NAME HEAD $(git rev-parse --short HEAD) store $(store_now) backup $BK"
