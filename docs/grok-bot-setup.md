@@ -133,17 +133,9 @@ Proposal / migration notes: [`proposals/pi-checkout-layout.md`](../proposals/pi-
 
 All deterministic fleet operations are implemented as scripts in `koenswings/idea/tools/fleet/`. Bots call these scripts and act on their output — they do not reimplement the logic.
 
-| Script | Purpose |
-|--------|---------|
-| `find-available-pi.sh [domain]` | Prints the hostname of one idle Pi, or exits 1 if none. **Known gap (Atlas is fixing the script):** its affinity map and fallback still date from before the idea03/idea04 pool and it ignores the `claim` field, so do not treat it as the pool gate; pick idea03/idea04 by the §4.6 rules. |
-| `deploy.sh <pi> <component> <repo> <branch> [--yes] [--ignore-fleet-hold]` | Deploys a PR branch to a pool Pi (see §4.3). Dry run unless `--yes`. Writes `status=deployed`, `claim`, `pr`, `repo`, `branch`. |
-| `teardown.sh <pi> [--yes] [--ignore-fleet-hold]` | Restores the Pi to `main` (Engine and Console, and the `app-*` repo if that was deployed), runs its own post-check, then writes `version`, clears `pr`/`branch`/`repo`/`claim` and sets `status=idle`. Dry run unless `--yes`. Never tears down the golden Pi. |
-| `update-golden.sh <component> <version> [--yes]` | Moves the golden Pi to the given version of one component and updates that half of `version`; `status` stays `idle`. Dry run unless `--yes`. |
-| `set-golden-pi.sh [--pi <name>] [--yes]` | No change if the current golden Pi answers. If it is missing or unreachable, the most recently idle, unclaimed, reachable pool Pi becomes golden and the old one gets `role: golden-unavailable`. With `--pi`, that Pi becomes golden and a reachable old golden becomes `spare`. It does not move the new golden to `main` (it prints `next_steps`). Dry run unless `--yes`. |
-| `check-fleet-health.sh [--origin] [--pi <pi>] [--alert] [--dhcp]` | Checks every Pi in `fleet-state.json` (SSH, Console on `console_port`, pm2 `engine` as `pi`, versions when unclaimed, disk, DHCP vendor class). Details in §4.5. |
-| `update-fleet-state.sh [--create] [--json\|--null] <pi> <field> [<value>]` | Locked (flock), atomic read-modify-write of `fleet-state.json`, plus an audit line. `--null` clears a field to JSON `null`; unknown Pis are refused unless `--create`. Setting `status` to `idle` from another status also writes `idle_since`. It does **not** commit or push (see §4.6). |
+The single catalog of fleet scripts, with every synopsis and what each one writes to `fleet-state.json`, is the fleet table in [`tools/README.md`](../tools/README.md). Keep it there; do not copy the table into this file. The rules for picking a Pi are in §4.2 and §4.6; health checks in §4.5.
 
-The idea#107 scripts (`deploy.sh`, `teardown.sh`, `update-golden.sh`, `set-golden-pi.sh`) are a dry run unless `--yes` and print one JSON result. `--ignore-fleet-hold` skips only the fleet-wide HOLD/PAUSED check for that run; per-Pi refusals and the 75 °C guard still apply. `find-available-pi.sh` prints a bare hostname; `update-fleet-state.sh` prints a one-line confirmation. The full catalog, with every other fleet script, is in [`tools/README.md`](../tools/README.md).
+The idea#107 scripts (`deploy.sh`, `teardown.sh`, `update-golden.sh`, `set-golden-pi.sh`) are a dry run unless `--yes` and print one JSON result. `--ignore-fleet-hold` skips only the fleet-wide HOLD/PAUSED check for that run; per-Pi refusals and the 75 °C guard still apply. `find-available-pi.sh` prints a bare hostname; `update-fleet-state.sh` prints a one-line confirmation.
 
 Fleet and quality scripts also append one JSON event line to `audit/audit-<YYYY>.jsonl` in `koenswings/idea` after every significant action. This provides a permanent, inspectable record of all system-level events (see the Audit Trail section below for the full design).
 
@@ -291,9 +283,9 @@ Production `idea` (key `wizardly-hugle`) and the kit Engines also have entries; 
 
 ### 4.2 Pi Allocation
 
-The rule: review and test work goes to an idle, unclaimed pool Pi (`idea03` or `idea04`). The golden Pi (`role: golden`) is never used for PR review, whatever its `status`, and neither are `idea02`, production or a kit. Its designation can shift if it goes down (`set-golden-pi.sh`). If no pool Pi is free, the PR is queued.
+The rule: review and test work goes to an idle, unclaimed pool Pi (`idea03` or `idea04`). The golden Pi (`role: golden`) is never used for PR review, whatever its `status`, and neither are `idea02`, production or a kit. Its designation can shift if it goes down (`set-golden-pi.sh`). If no pool Pi is free, the PR is queued. There is no domain affinity to `idea01` or `idea02` (decided 25 Nov 2026).
 
-**Known gap:** `find-available-pi.sh` does not yet implement this rule. Its affinity map still prefers `idea01` and `idea02`, its fallback is any idle non-golden Pi, and it ignores the `claim` field. Atlas is fixing the script; until then, pick the pool Pi by the rule above.
+**Script not yet compliant:** `find-available-pi.sh` does not yet implement this rule. Its affinity map still prefers `idea01` and `idea02`, its fallback is any idle non-golden Pi, and it ignores the `claim` field. Atlas is fixing the script; until then, pick the pool Pi by the rule above.
 
 ### 4.3 Deployment
 
@@ -352,7 +344,7 @@ Ops review deploys skip claimed Pis because `deploy.sh` refuses another bot's cl
 
 **Rules (everyone):**
 - Never use golden `idea01`, and never claim `idea02` (LAN client / test-walk host).
-- Leave each Pi's isolated store, `mdns: false` and local `config.yaml` untouched.
+- Leave each Pi's store URL, `mdns` setting, `config.yaml` and existing `note` untouched. The pool shares `automerge:2VroE…` with `mdns: true`; never point a pool Engine at the kit store (`3Vvv…`) or production (`6f8m…`).
 - Never take more than one Pi down at a time.
 
 **Engine (Axle):**
@@ -622,9 +614,13 @@ QUALITY AND LIVING DOCS:
   months, suggest diffs, present for Koen's approval.
 
 PDF GENERATION:
-After writing any proposal or design document, generate a PDF:
-  python3 /path/to/koenswings/idea/tools/pdf/md-to-pdf.py <file.md>
-This produces a PDF with a clickable ToC. Share the PDF with Koen.
+After writing any proposal or design document that needs a PDF, build it
+with the IDEA house style (DOCUMENTATION-RULES.md rule 7): keep a build.py in
+proposals/<YYYY-MM-DD>-<topic>/ that imports docs/house-style/housestyle.py
+(see docs/house-style/README.md, "Proposal PDFs") and run
+  python3 build.py
+in that folder. Do not use tools/pdf/md-to-pdf.py for project PDFs; it is not
+the house style. Share the PDF with Koen.
 
 GitHub is the paper trail. Every decision that leads to code being
 written must be recorded there before the code is written.
