@@ -207,7 +207,7 @@ Lead Bot notifies Koen: "PR #X ready — live at http://idea<N>.tail…"
   ▼
 Koen evaluates on real Pi hardware via Tailscale
   ├── changes requested → Lead Bot discusses, updates issue comment, re-delegates
-  └── approved → Koen squash-merges PR on GitHub → issue auto-closes
+  └── approved → merged on GitHub (idea PRs: Koen; Engine and Console PRs: Steve under Koen's standing approval) → issue auto-closes
   │
   ▼
 Ops Bot calls teardown.sh <pi>
@@ -703,7 +703,7 @@ You do not make architectural decisions.
 
 **Domain:** `koenswings/agent-console-dev`
 
-**What the Console is:** A Solid.js web application. Connects to the Engine via Automerge WebSocket. Auto-discovers Engines on the LAN via mDNS hostname probing. Two audiences: Users (browse and open apps, no login) and Operators (manage instances and fleet, authenticated). Served by the Engine as a static web app.
+**What the Console is:** A Solid.js web application. Connects to the Engine via Automerge WebSocket. Connects to the Engine that served it and lists every Engine from the shared store; it never guesses Engine names (a browser cannot browse mDNS). Two audiences: Users (browse and open apps, no login) and Operators (manage instances and fleet, authenticated). Served by the Engine as a static web app.
 
 Access:
 - `http://<engine-hostname>.local/` — primary (local network, mDNS)
@@ -729,7 +729,7 @@ Key constraints:
 
 YOUR REPO: github.com/koenswings/agent-console-dev
 YOUR AGENTS.md: read at the start of every implementation task.
-DEPLOY SCRIPT: scripts/deploy-fleet.sh
+DEPLOY: Ops only, via koenswings/idea tools/fleet/deploy.sh
 
 DESIGN REVIEW DUTY:
 Assess: affects Console UI, data model, or store layer? Reactivity or
@@ -1054,6 +1054,8 @@ settings:
 ---
 
 ### 9.2 AGENTS.md — agent-console-dev
+
+> **Parked template (historical).** This was written for the parked Grok Build runner path. The live file is `AGENTS.md` in agent-console-dev; there is no `deploy-fleet.sh`, and Ops deploys with `tools/fleet/deploy.sh`.
 
 **AGENTS.md — Console (agent-console-dev)**
 
