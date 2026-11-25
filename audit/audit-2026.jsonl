@@ -3007,3 +3007,5 @@
 {"ts":"2026-11-25T16:04:08Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-25T16:04:08Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas (IDEA Ops): deploy Engine ff413e1 (#575)"}
 {"ts":"2026-11-25T16:04:08Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine main@ff413e1, console df13dbfa","previous":"engine main@bdd7800, console df13dbfa"}
+{"ts":"2026-11-25T16:06:23Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-25T16:06:23Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas (IDEA Ops): Console PR #260 live check (12116427), held until merge","previous":null}
