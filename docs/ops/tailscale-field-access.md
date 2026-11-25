@@ -82,7 +82,7 @@ These are facts already recorded in the repo, not a new audit.
 
 **Still open, tracked elsewhere**
 
-- The five fleet nodes (idea01–04 and production idea) were still **untagged** and user-owned on 10 November 2026, with node-key expiry on. idea02 and idea03 expire on **2 December 2026 14:36 Europe/Brussels** unless they are tagged with re-authentication or Koen clicks Disable key expiry. Tagging the pool (and idea02) is idea#375 T-c; the runbook is ready and is **not** permission to apply a tag. Production idea is deferred until Koen OKs it.
+- Done since 10 November 2026: the five fleet nodes (idea01–04 and production idea) are tagged `tag:idea` (idea#375 T-c, 11 November 2026; `tools/fleet/field-usage-lockdown-flows.md`). Key expiry is **disabled on every tagged IDEA node** (pool, idea02, production, kits, kit routers, idea-hub), read by Atlas on 25 November 2026. The old 2 December 2026 expiry for idea02 and idea03 no longer applies.
 - A console-only "Edit tags" click does not by itself disable key expiry (see the T-c runbook).
 - The live fleet key's tag, reusable/ephemeral flags and expiry are still unconfirmed in the admin console (idea#375 T-a).
 - Engine first-boot join-once and key deletion are implemented (engine#291, merged 13 November 2026). Engine docs in agent-engine-dev (`docs/PI_FLEET.md` and the `installTailscale` comment) may still carry the old ephemeral / single-use wording (owner: Axle; flagged in the 25 November doc check).
