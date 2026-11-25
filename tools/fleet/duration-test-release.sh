@@ -3,8 +3,8 @@
 #
 # Clears claim + status=idle via update-fleet-state.sh for Pis claimed for a walk.
 # Does **not** SSH to Pis (Tailscale may be absent). Prints the Design Review
-# teardown restore checklist: unique Automerge store + mdns:false. Wraps the
-# existing teardown.sh stub when --run-teardown is set (still a stub today).
+# teardown restore checklist. With --run-teardown it runs the real teardown.sh <pi> --yes
+# (idea#107: restores main, post-check, marks the Pi idle) and keeps the claim when it fails.
 #
 # Usage:
 #   duration-test-release.sh [--dry-run] --walk-id <id>
@@ -14,7 +14,8 @@
 # Options:
 #   --walk-id ID   release Pis whose claim contains "duration-walk <ID>"
 #   --pis LIST     explicit comma-separated Pis (must be pool; never idea02)
-#   --run-teardown also invoke tools/fleet/teardown.sh <pi> (stub until idea#107)
+#   --run-teardown run tools/fleet/teardown.sh <pi> --yes first; a Pi whose teardown fails keeps
+#                  its claim and status (exit 1), so it is never marked idle off main
 #   --dry-run      print plan only
 #   -h|--help      show this help
 #
@@ -25,7 +26,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 UFS="${SCRIPT_DIR}/update-fleet-state.sh"
-TEARDOWN="${SCRIPT_DIR}/teardown.sh"
+TEARDOWN="${TEARDOWN:-${SCRIPT_DIR}/teardown.sh}"
 POOL_ALLOWED='idea01 idea03 idea04'
 
 usage() { sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; }
@@ -102,7 +103,7 @@ mapfile -t TARGETS < <(
 echo "Duration-test release plan:"
 echo "  walk-id: ${WALK_ID:-"(explicit --pis)"}"
 echo "  pis:     ${TARGETS[*]}"
-echo "  teardown stub: $([ "$RUN_TEARDOWN" = 1 ] && echo yes || echo no)"
+echo "  teardown:  $([ "$RUN_TEARDOWN" = 1 ] && echo "yes (teardown.sh <pi> --yes)" || echo no)"
 
 for pi in "${TARGETS[@]}"; do
   jq -e --arg p "$pi" 'has($p)' "$STATE_FILE" >/dev/null || die "unknown Pi '$pi'"
@@ -117,11 +118,15 @@ if [ "$DRY_RUN" = 1 ]; then
   exit 0
 fi
 
+TEARDOWN_FAILED=()
 for pi in "${TARGETS[@]}"; do
   if [ "$RUN_TEARDOWN" = 1 ]; then
-    echo "note: invoking teardown.sh $pi (stub until idea#107)" >&2
-    if ! "$TEARDOWN" "$pi"; then
-      echo "WARN: teardown.sh $pi failed/stubbed — continuing with fleet-state release" >&2
+    echo "note: running teardown.sh $pi --yes" >&2
+    if ! "$TEARDOWN" "$pi" --yes; then
+      # Never mark a Pi idle that may still be off main: keep its claim and status for a human.
+      echo "ERROR: teardown.sh $pi --yes failed; claim and status kept, Pi NOT released" >&2
+      TEARDOWN_FAILED+=("$pi")
+      continue
     fi
   fi
   BOT_NAME="$BOT_NAME" STATE_FILE="$STATE_FILE" "$UFS" --null "$pi" claim
@@ -140,9 +145,14 @@ For each released Pi, confirm over SSH when Tailscale is available:
 4. pm2 engine online as user pi on merged main (or the intended post-walk tree).
 5. Optional: tools/fleet/check-fleet-health.sh --origin --pi <pi>
 
-teardown.sh is still a stub (idea#107). This release only clears fleet-state
-claim/status; the restore steps above are the live teardown contract for walks.
+Without --run-teardown this release only clears fleet-state claim/status; the restore steps
+above are then the teardown contract for walks.
 See tools/fleet/DURATION_TESTS.md
 RESTORE
 
-echo "Released ${#TARGETS[@]} Pi(s): ${TARGETS[*]}"
+echo "Released $(( ${#TARGETS[@]} - ${#TEARDOWN_FAILED[@]} )) of ${#TARGETS[@]} Pi(s): ${TARGETS[*]}"
+
+if [ ${#TEARDOWN_FAILED[@]} -gt 0 ]; then
+  echo "NOT released (teardown failed): ${TEARDOWN_FAILED[*]}" >&2
+  exit 1
+fi

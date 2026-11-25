@@ -151,5 +151,26 @@ check "--count claims idea01+idea04" test -n "$(claim_val idea01)" -a -n "$(clai
 "$CLAIM" --count 3 walk-g2 >/dev/null 2>&1; rc=$?
 check "--count 3 with one golden refuses" test "$rc" = 1
 
+# 9. --run-teardown runs the real teardown with --yes; a failed teardown keeps the claim
+cat > "$WORK/td-ok" <<'SH'
+#!/usr/bin/env bash
+echo "$*" >> "$WORK/td.log"; exit 0
+SH
+cat > "$WORK/td-fail" <<'SH'
+#!/usr/bin/env bash
+echo "$*" >> "$WORK/td.log"; exit 1
+SH
+chmod +x "$WORK/td-ok" "$WORK/td-fail"; export WORK
+set_pi() { jq --arg c "$1" --arg s "$2" '.idea04.role="spare" | .idea04.claim=$c | .idea04.status=$s' "$STATE_FILE" > "$WORK/s.tmp" && mv "$WORK/s.tmp" "$STATE_FILE"; }
+set_pi "selftest-atlas duration-walk td1" testing; rm -f "$WORK/td.log"
+TEARDOWN="$WORK/td-ok" "$RELEASE" --walk-id td1 --run-teardown >/dev/null 2>&1; rc=$?
+check "run-teardown: teardown called with --yes" grep -qx "idea04 --yes" "$WORK/td.log"
+check "run-teardown ok: released" test "$rc:$(claim_val idea04):$(status_val idea04)" = "0::idle"
+set_pi "selftest-atlas duration-walk td2" testing
+TEARDOWN="$WORK/td-fail" "$RELEASE" --walk-id td2 --run-teardown >/dev/null 2>&1; rc=$?
+check "run-teardown failed: exit 1" test "$rc" = 1
+check "run-teardown failed: claim kept" test "$(claim_val idea04)" = "selftest-atlas duration-walk td2"
+check "run-teardown failed: status kept" test "$(status_val idea04)" = testing
+
 echo "$pass passed, $fail failed"
 [ "$fail" -eq 0 ]
