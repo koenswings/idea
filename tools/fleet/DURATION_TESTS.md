@@ -60,7 +60,7 @@ tools/fleet/duration-test-health-wrap.sh before --pause \
   --pis idea01,idea03
 ```
 
-- `--origin` loads claims from `origin/main` (claimed Pis never fail / alert).
+- `--origin` loads claims from `origin/main`. Problems on claimed Pis go to `claimed_with_problems` and do not fail the run, except a claimed Pi that is unreachable over Tailscale SSH: that one is listed in `unhealthy` and can trip `PAUSED`.
 - `--pause` writes `$HEALTH_DIR/PAUSED` with a duration-test marker so fleet
   changes stay paused during expected reboot noise.
 
@@ -78,8 +78,9 @@ Re-baselines pm2 restart counts and removes our PAUSED marker only.
 ```bash
 BOT_NAME="Atlas Ops" tools/fleet/duration-test-release.sh \
   --walk-id walk-2026-10-01a
-# optional: --run-teardown  (calls stub teardown.sh until idea#107)
 ```
+
+Do not use `--run-teardown` as a "restore main" switch today: it calls `teardown.sh` without `--yes` (a dry run) and then clears the claim anyway. Until Atlas updates the hook, restore main with `tools/fleet/teardown.sh <pi> --yes` yourself, then run the release hook without `--run-teardown`.
 
 Then, when Tailscale/SSH is available, confirm per Pi:
 
