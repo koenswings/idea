@@ -2984,3 +2984,5 @@
 {"ts":"2026-11-25T15:16:11Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine main@ff413e1, console df13dbfa","previous":"engine main@c1cc4bb, console df13dbfa"}
 {"ts":"2026-11-25T15:16:11Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"status","value":"idle","previous":"testing"}
 {"ts":"2026-11-25T15:16:11Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":null,"previous":"Atlas (IDEA Ops): deploy Engine ff413e1 (#575)"}
+{"ts":"2026-11-25T15:18:50Z","bot":"Pixel","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Pixel (IDEA Console Dev): B4-21/B4-22/B4-23a restore screenshots on idea04 (Marco idea#560)","previous":null}
+{"ts":"2026-11-25T15:18:50Z","bot":"Pixel","action":"fleet_state_update","pi":"idea04","field":"status","value":"testing","previous":"idle"}
