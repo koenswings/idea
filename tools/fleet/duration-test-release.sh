@@ -3,18 +3,22 @@
 #
 # Clears claim + status=idle via update-fleet-state.sh for Pis claimed for a walk.
 # Does **not** SSH to Pis (Tailscale may be absent). Prints the Design Review
-# teardown restore checklist: unique Automerge store + mdns:false. Wraps the
-# existing teardown.sh stub when --run-teardown is set (still a stub today).
+# restore checklist: leave the shared pool store (2VroE, mdns: true). Pool is
+# idea03 and idea04 only (never golden idea01, never walker-host idea02).
+# Honours fleet-state claims: never clears a claim that is not this duration
+# walk (or, with --pis only, a duration-walk claim).
+# --run-teardown invokes teardown.sh (not a stub; see that script). It is not
+# documented here as a complete restore.
 #
 # Usage:
 #   duration-test-release.sh [--dry-run] --walk-id <id>
-#   duration-test-release.sh [--dry-run] --pis idea01,idea03
+#   duration-test-release.sh [--dry-run] --pis idea03,idea04
 #   duration-test-release.sh [--dry-run] --walk-id <id> --run-teardown
 #
 # Options:
 #   --walk-id ID   release Pis whose claim contains "duration-walk <ID>"
-#   --pis LIST     explicit comma-separated Pis (must be pool; never idea02)
-#   --run-teardown also invoke tools/fleet/teardown.sh <pi> (stub until idea#107)
+#   --pis LIST     explicit comma-separated pool Pis (idea03/idea04 only)
+#   --run-teardown also invoke tools/fleet/teardown.sh <pi>
 #   --dry-run      print plan only
 #   -h|--help      show this help
 #
@@ -26,9 +30,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 UFS="${SCRIPT_DIR}/update-fleet-state.sh"
 TEARDOWN="${SCRIPT_DIR}/teardown.sh"
-POOL_ALLOWED='idea01 idea03 idea04'
+POOL_ALLOWED='idea03 idea04'
 
-usage() { sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,27p' "$0" | sed 's/^# \{0,1\}//'; }
 die() { echo "ERROR: $*" >&2; exit 1; }
 usage_error() { echo "ERROR: $*" >&2; echo "Run with --help for usage." >&2; exit 2; }
 
@@ -79,6 +83,26 @@ refuse_golden() {
   fi
 }
 
+# Never clear another bot's claim, or a claim that is not this duration walk.
+assert_releasable_claim() {
+  local pi="$1"
+  local claim
+  claim="$(jq -r --arg p "$pi" '.[$p].claim // empty' "$STATE_FILE")"
+  if [ -z "$claim" ] || [ "$claim" = "null" ]; then
+    return 0
+  fi
+  if [ -n "$WALK_ID" ]; then
+    if [[ "$claim" == *"duration-walk ${WALK_ID}"* ]]; then
+      return 0
+    fi
+    die "refusing to release '$pi': claim is not this duration walk (claim=${claim})"
+  fi
+  if [[ "$claim" == *"duration-walk "* ]]; then
+    return 0
+  fi
+  die "refusing to release '$pi': existing claim is not a duration-walk claim (claim=${claim})"
+}
+
 mapfile -t TARGETS < <(
   if [ ${#PIS_EXPLICIT[@]} -gt 0 ]; then
     for pi in "${PIS_EXPLICIT[@]}"; do
@@ -102,14 +126,15 @@ mapfile -t TARGETS < <(
 echo "Duration-test release plan:"
 echo "  walk-id: ${WALK_ID:-"(explicit --pis)"}"
 echo "  pis:     ${TARGETS[*]}"
-echo "  teardown stub: $([ "$RUN_TEARDOWN" = 1 ] && echo yes || echo no)"
+echo "  teardown: $([ "$RUN_TEARDOWN" = 1 ] && echo yes || echo no)"
 
 for pi in "${TARGETS[@]}"; do
   jq -e --arg p "$pi" 'has($p)' "$STATE_FILE" >/dev/null || die "unknown Pi '$pi'"
   refuse_golden "$pi"
   if ! is_pool_name "$pi"; then
-    die "refusing '$pi': duration-test pool is idea01/idea03/idea04 only"
+    die "refusing '$pi': duration-test pool is idea03 and idea04 only (idea01 is golden, idea02 is the walker host)"
   fi
+  assert_releasable_claim "$pi"
 done
 
 if [ "$DRY_RUN" = 1 ]; then
@@ -119,9 +144,9 @@ fi
 
 for pi in "${TARGETS[@]}"; do
   if [ "$RUN_TEARDOWN" = 1 ]; then
-    echo "note: invoking teardown.sh $pi (stub until idea#107)" >&2
+    echo "note: invoking teardown.sh $pi" >&2
     if ! "$TEARDOWN" "$pi"; then
-      echo "WARN: teardown.sh $pi failed/stubbed — continuing with fleet-state release" >&2
+      echo "WARN: teardown.sh $pi failed — continuing with fleet-state release" >&2
     fi
   fi
   BOT_NAME="$BOT_NAME" STATE_FILE="$STATE_FILE" "$UFS" --null "$pi" claim
@@ -133,15 +158,15 @@ cat <<'RESTORE'
 === Pi restore checklist (Design Review Ops gate) ===
 For each released Pi, confirm over SSH when Tailscale is available:
 
-1. Unique Automerge store still isolated (do NOT point at golden's store).
-   Check Engine config / note in fleet-state for the Pi's own automerge: URL.
-2. mDNS remains off: Engine config mdns: false (fleet-state .mdns should stay false).
-3. Local config.yaml isolation details untouched (do not overwrite the Pi note).
+1. Leave the shared dev store in place (automerge:2VroE…). Do not restore a
+   unique store, and do not point at the kit store or production.
+2. mDNS stays on: Engine config mdns: true (fleet-state .mdns should stay true).
+3. Local config.yaml and the Pi note untouched (do not overwrite the Pi note).
 4. pm2 engine online as user pi on merged main (or the intended post-walk tree).
 5. Optional: tools/fleet/check-fleet-health.sh --origin --pi <pi>
 
-teardown.sh is still a stub (idea#107). This release only clears fleet-state
-claim/status; the restore steps above are the live teardown contract for walks.
+This release only clears fleet-state claim/status. Leave 2VroE and mdns: true
+as they are; do not force a unique store or mdns: false.
 See tools/fleet/DURATION_TESTS.md
 RESTORE
 
