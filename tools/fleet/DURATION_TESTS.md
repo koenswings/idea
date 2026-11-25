@@ -8,10 +8,11 @@ Atlas Ops gates for unified Markov duration walks (Design Review; proposal
 
 1. **Multi-Pi claim for the whole walk** — every participating pool Pi is claimed
    before the walker starts and stays claimed until teardown.
-2. **Golden never selected** — `idea02` / `role: golden` is refused by the claim
-   and release hooks.
-3. **Teardown → unique store + mDNS off** — after release, each Pi keeps its own
-   Automerge store and `mdns: false` (isolation from golden).
+2. **Golden and idea02 never claimed** — golden (`role: golden`, today idea01) and
+   idea02 are never claimed. The duration-test pool is idea03 and idea04.
+3. **Teardown leaves the pool store alone** — after release, each Pi stays on the
+   shared pool store `2VroE…` with `mdns: true`; do not restore a unique store or
+   force `mdns: false`.
 4. **Health around intentional reboots** — push claims, then
    `check-fleet-health.sh --origin` (and optional PAUSED) before/after reboot churn.
 
@@ -37,9 +38,9 @@ Offline selftest (no Pi / no Tailscale): `duration-test-ops.test.sh`.
 # Default: first 2 idle pool Pis
 BOT_NAME="Atlas Ops" tools/fleet/duration-test-claim.sh walk-2026-10-01a
 
-# Or explicit set for a 3-Pi walk
+# Or an explicit set
 BOT_NAME="Atlas Ops" tools/fleet/duration-test-claim.sh \
-  --pis idea01,idea03,idea04 walk-2026-10-01a
+  --pis idea03,idea04 walk-2026-10-01a
 ```
 
 - Sets `status=testing` and
@@ -57,10 +58,10 @@ hooks — hand the claimed hostnames to the Engine run.
 
 ```bash
 tools/fleet/duration-test-health-wrap.sh before --pause \
-  --pis idea01,idea03
+  --pis idea03,idea04
 ```
 
-- `--origin` loads claims from `origin/main` (claimed Pis never fail / alert).
+- `--origin` loads claims from `origin/main`. Problems on claimed Pis go to `claimed_with_problems` and do not fail the run, except a claimed Pi that is unreachable over Tailscale SSH: that one is listed in `unhealthy` and can trip `PAUSED`.
 - `--pause` writes `$HEALTH_DIR/PAUSED` with a duration-test marker so fleet
   changes stay paused during expected reboot noise.
 
@@ -68,7 +69,7 @@ tools/fleet/duration-test-health-wrap.sh before --pause \
 
 ```bash
 tools/fleet/duration-test-health-wrap.sh after --clear-pause \
-  --pis idea01,idea03
+  --pis idea03,idea04
 ```
 
 Re-baselines pm2 restart counts and removes our PAUSED marker only.
@@ -78,16 +79,15 @@ Re-baselines pm2 restart counts and removes our PAUSED marker only.
 ```bash
 BOT_NAME="Atlas Ops" tools/fleet/duration-test-release.sh \
   --walk-id walk-2026-10-01a
-# optional: --run-teardown  (calls stub teardown.sh until idea#107)
 ```
+
+Do not use `--run-teardown` as a "restore main" switch today: it calls `teardown.sh` without `--yes` (a dry run) and then clears the claim anyway. Until Atlas updates the hook, restore main with `tools/fleet/teardown.sh <pi> --yes` yourself, then run the release hook without `--run-teardown`.
 
 Then, when Tailscale/SSH is available, confirm per Pi:
 
-1. Unique Automerge store (not golden's).
-2. `mdns: false` in Engine config; fleet-state `.mdns` stays false.
-3. Pi `note` / isolation `config.yaml` untouched.
-4. pm2 `engine` online as `pi`.
-5. Optional: `tools/fleet/check-fleet-health.sh --origin --pi <pi>`.
+1. Store URL, `mdns` setting (`mdns: true`), `config.yaml` and Pi `note` untouched; the Pi is still on the pool store `2VroE…`.
+2. pm2 `engine` online as `pi`.
+3. Optional: `tools/fleet/check-fleet-health.sh --origin --pi <pi>`.
 
 ### 6. Health clear
 

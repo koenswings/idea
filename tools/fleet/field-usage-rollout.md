@@ -8,8 +8,8 @@
 [idea#374](https://github.com/koenswings/idea/issues/374).
 
 Do not treat this file as permission to touch idea, a kit, golden idea01, or
-a Pi another bot has claimed. Kits stay pinned at Engine `adfd9d3` and
-read-only until Koen approves idea#374.
+a Pi another bot has claimed. Kits are read-only outside an approved idea#374
+window (current versions are in `fleet-state.json`; on 22 Nov 2026 kind-panda and sunny-robin moved to Engine `6c47f09` with helper v25, happy-zebra stays on Engine `adfd9d3` with Console pr162 and is left untouched until Koen has checked it).
 
 ACL paste and tests: [`field-usage-acl.md`](field-usage-acl.md).
 Post-U-step checklist and dry-run script: [`field-usage-u-steps.md`](field-usage-u-steps.md), [`field-usage-after-u-steps.sh`](field-usage-after-u-steps.sh).
@@ -41,8 +41,8 @@ Recorded so the next run does not rediscover it:
   (`tailscale status --json`: idea01–04 and idea user-owned; kits already
   `tag:idea`). T-c runbook and check-only script:
   [`tag-fleet-idea-tc.md`](tag-fleet-idea-tc.md),
-  [`tag-fleet-idea.sh`](tag-fleet-idea.sh). Not applied. idea03 and idea02
-  expire 2026-12-02 14:36 Europe/Brussels.
+  [`tag-fleet-idea.sh`](tag-fleet-idea.sh). Applied on 11 Nov 2026; key expiry is now disabled on every tagged IDEA node (Atlas, 25 Nov 2026), so this deadline no longer applies (idea03 and idea02 would have
+  expired 2026-12-02 14:36 Europe/Brussels).
 - Live ACL text is not in git (T-b). The paste in `field-usage-acl.md`
   is a merge-in block; substitute the live admin source if it is not
   `group:admins`.
@@ -126,12 +126,13 @@ Steve presents these; Atlas prepares everything around them.
 | U-9 | Who besides Koen may open the programme dashboard. | No Ops action. Pin the web port off 80, 3333, 3334 and 8081 regardless. |
 
 Separately, later, on idea#374 (not #375): approve the field update that
-moves kits off `adfd9d3`.
+moves kits off `adfd9d3` (done for kind-panda and sunny-robin on 22 Nov 2026;
+happy-zebra stays on Engine `adfd9d3` with Console pr162 and is left untouched until Koen has checked it; see `fleet-state.json`).
 
 Related, not part of U-1–U-9: T-b (read the live ACL so the paste matches
 the admin source) and T-c (tag idea01, idea03, idea04 and idea02 with
 `tag:idea` via console Edit tags, then disable key expiry; idea02 and
-idea03 before 2026-12-02 14:36 Europe/Brussels). Defer tagging `idea`
+idea03 before 2026-12-02 14:36 Europe/Brussels; done on 11 Nov 2026, and key expiry is now disabled on every tagged IDEA node (Atlas, 25 Nov 2026), so this deadline no longer applies). Defer tagging `idea`
 until Koen's OK / idea#374. See [`tag-fleet-idea-tc.md`](tag-fleet-idea-tc.md).
 
 ## 2. Sidecar registration
@@ -245,8 +246,8 @@ standing key. The §4 proof key is throwaway and is quarantined.
 
 ## 7. Kits, only in the approved idea#374 window
 
-Kits: sunny-robin, happy-zebra, kind-panda. Pinned at `adfd9d3`,
-read-only until then. kind-panda's router is "not yet installed".
+Kits: sunny-robin, happy-zebra, kind-panda. Read-only outside an approved
+window (current versions are in `fleet-state.json`; on 22 Nov 2026 kind-panda and sunny-robin moved to Engine `6c47f09` with helper v25, happy-zebra stays on Engine `adfd9d3` with Console pr162 and is left untouched until Koen has checked it). kind-panda's router is "not yet installed".
 Do not contact Justice. Record only what we observe ourselves.
 
 The kit-side pieces travel together, one kit per window (they are
@@ -273,7 +274,8 @@ Rules for each kit:
 6. Leave `usageMonitoring` **off** until it is switched on deliberately
    with `tools/fleet/usage-monitoring.sh` (idea#411).
    Toggling must not restart the Engine or the Apps.
-7. Rollback puts Engine `adfd9d3` back (and the matching helper /
+7. Rollback puts back the Engine the kit ran before the window, as recorded
+   in `fleet-state.json` (for happy-zebra today `adfd9d3`) (and the matching helper /
    drop-in / key file by quarantining the new files and restoring the
    pinned copies). Do not `rm -rf`.
 

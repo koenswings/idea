@@ -66,7 +66,7 @@ Link your SuperGrok Heavy account to a free Cursor account once. That grants Gro
 
 Historically the design was: all coding on the Pi fleet via **Grok Build** (xAI's open-source terminal coding agent on ARM64), triggered headless on a GitHub Actions self-hosted runner. That path is not the live workflow. Grok Build and/or a self-hosted runner **may remain installed on `idea02`** for health-check purposes only. Pis are **not** coding agents while this path is parked.
 
-**State on idea02 (idea#147):** after this change merges, Atlas stops the self-hosted runner service on idea02 and sets `runner: parked` in `fleet-state.json`. The Grok Build binary (1.0.40, default model `grok-4.6`) stays installed. The only workflow in `koenswings/idea` is the manual `runner-test.yml` (`workflow_dispatch`); it will fail while the runner service is stopped, which is expected.
+**State on idea02 (idea#147):** the self-hosted runner service on idea02 is stopped and `runner` is `parked` in `fleet-state.json`. The Grok Build binary (1.0.40, default model `grok-4.6`) stays installed for health checks only. No fleet script changes the `runner` field. The only workflow in `koenswings/idea` is the manual `runner-test.yml` (`workflow_dispatch`); it fails while the runner service is stopped, which is expected.
 
 Preserved reference (for revival only):
 
@@ -75,7 +75,7 @@ Preserved reference (for revival only):
 
 ### 2.3 Pi Fleet
 
-The IDEA fleet is a variable number of Raspberry Pis — any Pi enrolled in Tailscale with a hostname matching `idea*` is automatically discovered and available for work. There is no hardcoded Pi count.
+The IDEA fleet is a variable number of Raspberry Pis. Pis are enrolled in `fleet-state.json` with `tools/fleet/update-fleet-state.sh --create` (hostname, Tailscale address, role, status); fleet scripts never discover a Tailscale node by themselves. Production `idea` and the kit Engines also have entries, but they are not pool Pis.
 
 Each Pi runs:
 
@@ -88,9 +88,9 @@ Each Pi runs:
 - **Golden:** `idea01` (`role: golden`, since 2026-10-28) — never used for testing or review.
 - **`idea02`:** a LAN client and test-walk host, not a pool Pi (`role: fleet-pending`, `status: hold`); never claimed or deployed to.
 
-**Parked on idea02 only:** Grok Build stays installed; the self-hosted runner service is stopped after idea#147 merges (`runner: parked`). Neither is used for coding.
+**Parked on idea02 only:** Grok Build stays installed; the self-hosted runner service is stopped (`runner: parked`, idea#147). Neither is used for coding.
 
-**Roles are assigned dynamically at runtime** by the fleet scripts (see Section 2.4). By convention, the first available Pi for a given domain is used. One Pi is the dedicated golden Pi (`role: golden`, currently `idea01`); `idea03` and `idea04` form the shared non-golden test/review pool (`role: spare` or `review`). These assignments are recorded in `fleet-state.json` and update as Pis come and go.
+**Roles are recorded in `fleet-state.json`** and changed by Ops with the fleet scripts (Section 2.4). One Pi is the dedicated golden Pi (`role: golden`, currently `idea01`); `idea03` and `idea04` form the shared non-golden test/review pool (`role: spare` or `review`).
 
 ### 2.3.1 Pi filesystem layout (canonical — test, dev, production)
 
@@ -133,17 +133,9 @@ Proposal / migration notes: [`proposals/pi-checkout-layout.md`](../proposals/pi-
 
 All deterministic fleet operations are implemented as scripts in `koenswings/idea/tools/fleet/`. Bots call these scripts and act on their output — they do not reimplement the logic.
 
-| Script | Purpose |
-|--------|---------|
-| `find-available-pi.sh <domain>` | Read `fleet-state.json`, apply domain affinity, return the first idle Pi. Returns empty if none available. |
-| `deploy.sh <pi> <component> <repo> <branch>` | Full deploy sequence for the given component type (engine/console/app-disk): checkout, build, start, health check |
-| `teardown.sh <pi>` | Reverse deploy: clean state, restore main, mark Pi idle in `fleet-state.json` |
-| `update-golden.sh <component> <version>` | Update the golden Pi to the given version of a component |
-| `set-golden-pi.sh` | Designate the most recently idle Pi as the new golden instance, or a named pool Pi with `--pi <name>` |
-| `check-fleet-health.sh` | HTTP health check all deployed Pis, return JSON status |
-| `update-fleet-state.sh [--create] [--json\|--null] <pi> <field> [<value>]` | Locked (flock), atomic read-modify-write of `fleet-state.json`. `--null` clears a field to JSON `null`; unknown Pis are refused unless `--create` |
+The single catalog of fleet scripts, with every synopsis and what each one writes to `fleet-state.json`, is the fleet table in [`tools/README.md`](../tools/README.md). Keep it there; do not copy the table into this file. The rules for picking a Pi are in §4.2 and §4.6; health checks in §4.5.
 
-All scripts are idempotent. They write their results to stdout as structured JSON for Bot consumption.
+The idea#107 scripts (`deploy.sh`, `teardown.sh`, `update-golden.sh`, `set-golden-pi.sh`) are a dry run unless `--yes` and print one JSON result. `--ignore-fleet-hold` skips only the fleet-wide HOLD/PAUSED check for that run; per-Pi refusals and the 75 °C guard still apply. `find-available-pi.sh` prints a bare hostname; `update-fleet-state.sh` prints a one-line confirmation.
 
 Fleet and quality scripts also append one JSON event line to `audit/audit-<YYYY>.jsonl` in `koenswings/idea` after every significant action. This provides a permanent, inspectable record of all system-level events (see the Audit Trail section below for the full design).
 
@@ -207,7 +199,7 @@ Lead Bot notifies Koen: "PR #X ready — live at http://idea<N>.tail…"
   ▼
 Koen evaluates on real Pi hardware via Tailscale
   ├── changes requested → Lead Bot discusses, updates issue comment, re-delegates
-  └── approved → Koen squash-merges PR on GitHub → issue auto-closes
+  └── approved → merged on GitHub (idea and App-repo PRs: Koen (app-kolibri always needs Koen's own words); Steve may squash-merge his delegated agent-engine-dev, agent-console-dev and app-nextcloud PRs under Koen's standing approval; the merge tool may ask Koen to confirm Console merges on a card) → issue auto-closes
   │
   ▼
 Ops Bot calls teardown.sh <pi>
@@ -264,7 +256,7 @@ Every decision that leads to code being written must be recorded on GitHub befor
 
 ## 4. Fleet Review Environments
 
-Every PR is evaluated on real Pi hardware before Koen merges it. All fleet logic runs through scripts — Ops Bot orchestrates them, it does not implement the allocation or deployment logic itself.
+Every PR is evaluated on real Pi hardware before it is merged (who merges: §3.1). All fleet logic runs through scripts — Ops Bot orchestrates them, it does not implement the allocation or deployment logic itself.
 
 Pis in this section are **review / golden / test** targets. Coding work does **not** run on Pi runners while the Grok Build path is parked (§2.2). Dev Bots claim an idle pool Pi to run tests before opening a PR (§4.6); Ops then deploys the PR branch to an idle pool Pi for Koen's live evaluation.
 
@@ -274,68 +266,42 @@ Pis in this section are **review / golden / test** targets. Coding work does **n
 
 ```json
 {
-  "idea02": {
-    "role": "golden", "pr": null, "status": "idle",
-    "version": "engine main@b233ccb, console main@af473f1"
+  "idea01": {
+    "role": "golden", "pr": null, "status": "idle", "runner": "none",
+    "version": "engine main@<sha>, console main@<sha>"
   },
   "idea03": {
-    "role": "review", "pr": null, "status": "idle",
-    "version": "engine main@b233ccb, console main@af473f1"
+    "role": "spare", "pr": null, "status": "testing", "claim": "<bot>: <repo>#<issue/PR>",
+    "version": "engine main@<sha>, console main@<sha>"
   }
 }
 ```
+
+Production `idea` (key `wizardly-hugle`) and the kit Engines also have entries; they are not pool Pis. Fields the fleet scripts write: `status` (including `testing`, `deployed`, `idle`), `claim`, `pr`, `repo`, `branch`, `version`, `idle_since` and `role` (including `golden-unavailable`). `update-fleet-state.sh` writes any field name; it does not check a schema. `BOT_NAME` defaults to `Ops Bot` unless the caller sets it.
 
 `idea01` is the dedicated golden Pi (since 2026-10-28) and `idea03` / `idea04` are the pool (idea#118); `idea02` is a LAN client and test-walk host, not a pool Pi; see §4.4. Every Pi records the mains or PR it runs in `version` / `pr`. New Pis are built with the Engine's `build-engine` (via `script/provision-fleet.sh` in agent-engine-dev) and added to `fleet-state.json` with `tools/fleet/update-fleet-state.sh --create` (the old `idea-setup.sh` stub was removed, idea#273).
 
 ### 4.2 Pi Allocation
 
-`find-available-pi.sh <domain>` implements all allocation logic:
+The rule: review and test work goes to an idle, unclaimed pool Pi (`idea03` or `idea04`). The golden Pi (`role: golden`) is never used for PR review, whatever its `status`, and neither are `idea02`, production or a kit. Its designation can shift if it goes down (`set-golden-pi.sh`). If no pool Pi is free, the PR is queued. There is no domain affinity to `idea01` or `idea02` (decided 25 Nov 2026).
 
-1. Read `fleet-state.json`
-2. Find a Pi with `status: idle` and matching domain (domain affinity)
-3. If none with matching domain, find any idle non-golden Pi (overflow)
-4. If none idle, return empty (PR is queued)
-
-The golden Pi (`role: golden`) is never used for PR review, whatever its `status`. Its designation can shift if it goes down (`set-golden-pi.sh`).
-
-Ops Bot calls the script, reads the result, and acts. It does not reimplement the selection logic.
+**Script not yet compliant:** `find-available-pi.sh` does not yet implement this rule. Its affinity map still prefers `idea01` and `idea02`, its fallback is any idle non-golden Pi, and it ignores the `claim` field. Atlas is fixing the script; until then, pick the pool Pi by the rule above.
 
 ### 4.3 Deployment
 
-`deploy.sh <pi> <component> <repo> <branch>` handles the full deploy sequence for each component type. Agent git/build work happens **inside** `/home/pi/idea/agents/<repo>`; App repos use `/home/pi/idea/agents/agent-app-dev/<app-*>` (see §2.3.1). There is no separate primary rsync target at `/home/pi/console-dist`.
+`deploy.sh <pi> <component> <repo> <branch> --yes` handles the deploy for each component type. Without `--yes` it is a dry run. It refuses unknown Pis, `idea02`, production, the golden Pi, kits, Pis on hold, another bot's claim, a fleet-wide HOLD/PAUSED, and a Pi above 75 °C. Agent git/build work happens **inside** `/home/pi/idea/agents/<repo>`; App repos use `/home/pi/idea/agents/agent-app-dev/<app-*>` (see §2.3.1). There is no separate primary rsync target at `/home/pi/console-dist`.
 
-**Engine** (pm2, not Docker):
-```
-ssh to pi
-  cd /home/pi/idea/agents/agent-engine-dev
-  git fetch origin && git checkout <branch>
-  pnpm install --frozen-lockfile && pnpm build
-  pm2 restart engine                  (cwd = this tree; ENGINE_CWD / ENGINE_BIN under it)
-  pm2 logs engine --lines 20          (verify clean start)
-  curl http://localhost:80/api/store-url  (health check)
-```
+**Engine** (pm2, not Docker): `deploy.sh` calls `deploy-engine-remote.sh`, which runs `deploy-engine-pi.sh` on the Pi (runbook: [`docs/ops/engine-deploy-pool-pi.md`](ops/engine-deploy-pool-pi.md)). It makes a detached checkout, keeps `config.yaml`, `pm2.config.cjs`, all of `store-identity/` and `~/.idea-local`, aborts unless the store is the expected one (`2VroE…` on the pool), runs `install-root-helpers`, sets the DHCP vendor class, then `pm2 restart engine --update-env` and `pm2 save`. Do not run a plain `git checkout <branch>` on a pool Engine yourself: that would bring back the tracked kit store default.
 
-**Console** (built in-tree, served by Engine):
-```
-ssh to pi
-  cd /home/pi/idea/agents/agent-console-dev
-  git fetch origin && git checkout <branch>
-  pnpm install --frozen-lockfile && pnpm build   # → dist/ (keeps dist.prev; rollback: rename dist.prev to dist)
-  # Engine config.yaml: consolePath: /home/pi/idea/agents/agent-console-dev/dist
-  pm2 restart engine
-HTTP check on http://<pi>/            (expect 200)
-```
+**Console** (built in-tree, served by Engine): a detached checkout plus `build-console-pi.sh` (with its hide-list guard) into `dist/`, then an Engine restart and `pm2 save`. The Engine's `config.yaml` points `consolePath` at `/home/pi/idea/agents/agent-console-dev/dist`.
+
+**Post-check** (`fleet-lib.sh`): pm2 `engine` online as `pi`, Console HTTP 200 on the Pi's `console_port` (default 8080), and every published container port answers.
 
 Migration note for existing Pis that still have `/home/pi/console-dist`: point `consolePath` at `agents/agent-console-dev/dist`, then remove or stop documenting the old directory. Optional one-time rsync into the new tree is fine during cutover; it is not the ongoing primary path.
 
-**App Disk** (simulates physical dock):
-```
-rsync apps/<app>/ to pi:/tmp/<app>-pr-<N>/
-ssh: docker compose up -d
-ssh: docker compose ps                (verify running)
-```
+**App Disk:** a detached checkout of the `app-*` repo under `/home/pi/idea/agents/agent-app-dev/<repo>`. The script does not rsync anything to `/tmp` and does not start Compose.
 
-`teardown.sh <pi>` reverses the deploy and restores the Pi to a clean main-branch state under `idea/agents/`.
+`teardown.sh <pi> --yes` restores `main` with the same Engine and Console helpers (and the `app-*` repo if that was deployed), runs the same post-check, and only then writes `version`, clears `pr`/`branch`/`repo`/`claim` and sets `status=idle`. If the post-check fails, the Pi stays claimed. It never tears down the golden Pi.
 
 ### 4.4 Golden Instance
 
@@ -345,13 +311,13 @@ PR review deploys go to an idle Pi from the shared pool (`idea03` or `idea04`; `
 
 ### 4.5 Health Monitoring
 
-`tools/fleet/check-fleet-health.sh` (idea#149) checks every Pi in `fleet-state.json` and prints a JSON report. Per Pi it checks that the Pi answers ssh over Tailscale, that the Console returns HTTP 200 on the Pi's `console_port` from fleet-state (`:8080` when unset; wizardly-hugle uses `:8081`), that the pm2 process `engine` is online, runs as `pi` and has not restarted since the previous run, that the deployed Engine and Console HEADs match the Pi's `version` in fleet-state, and that the root disk is below 90% full. It also checks the DHCP vendor class (idea#284, `checks.dhcp`): the NetworkManager drop-in `/etc/NetworkManager/conf.d/90-idea-dhcp-vendor-class.conf` sets `ipv4.dhcp-vendor-class-identifier=idea-engine` (on a Pi without NetworkManager, `/etc/dhcpcd.conf` has `vendorclassid idea-engine`), and every address the Pi holds on a kit LAN (10.42.0.0/24) is in 10.42.0.2–.9. Pis failing it are listed in `dhcp_unhealthy`; `--dhcp` makes the run exit 1 for them even when they are claimed (kit Engines have status `kit`), e.g. `check-fleet-health.sh --pi kind-panda --dhcp` as a field check. It exits 0 when every unclaimed Pi is healthy, 1 when at least one is not, and 2 on a usage or state error. A Pi with a claim (or a status other than `idle`) is still checked and reported under `claimed_with_problems`, but never counts as a failure, and its versions are not compared because it runs a review branch.
+`tools/fleet/check-fleet-health.sh` (idea#149) checks every Pi in `fleet-state.json` and prints a JSON report. Per Pi it checks that the Pi answers ssh over Tailscale, that the Console returns HTTP 200 on the Pi's `console_port` from fleet-state (`:8080` when unset; wizardly-hugle uses `:8081`), that the pm2 process `engine` is online, runs as `pi` and has not restarted since the previous run, that the deployed Engine and Console HEADs match the Pi's `version` in fleet-state, and that the root disk is below 90% full. It also checks the DHCP vendor class (idea#284, `checks.dhcp`): the NetworkManager drop-in `/etc/NetworkManager/conf.d/90-idea-dhcp-vendor-class.conf` sets `ipv4.dhcp-vendor-class-identifier=idea-engine` (on a Pi without NetworkManager, `/etc/dhcpcd.conf` has `vendorclassid idea-engine`), and every address the Pi holds on a kit LAN (10.42.0.0/24) is in 10.42.0.2–.9. Pis failing it are listed in `dhcp_unhealthy`; `--dhcp` makes the run exit 1 for them even when they are claimed (kit Engines have status `kit`), e.g. `check-fleet-health.sh --pi kind-panda --dhcp` as a field check. It exits 0 when every unclaimed Pi is healthy, 1 when at least one is not, and 2 on a usage or state error. A Pi with a claim (or a status other than `idle`) is still checked; its versions are not compared because it runs a review branch. Problems expected under test are reported in `claimed_with_problems` and do not fail the run. **Exception:** if a claimed Pi is unreachable over Tailscale SSH, it is listed in `unhealthy`, counts as a failure, and can trip `PAUSED` (kits, production and `known_offline` hosts are reported but never create or keep `PAUSED`).
 
 It runs as an Atlas routine every 30 minutes on Atlas's box, over the tailnet the box is already on: no GitHub Actions workflow and no Tailscale secret. The routine calls it with `--origin --alert`: `--origin` reads fleet-state from `origin/main` so fresh claims are seen, and `--alert` keeps state in `~/.cache/idea-fleet-health/` and decides whether to alert. Atlas stays silent while the fleet is healthy. When an unclaimed Pi is unhealthy, Atlas messages Lead Bot (who tells Koen) and pauses fleet changes while `~/.cache/idea-fleet-health/PAUSED` exists. Kits (role `kit*`, or status `kit`) and production (role `production`) are still reported and alerted when down, and listed in `.alert.pause_excluded`, but they never create or keep `PAUSED`: an offline field kit or production host must not stop pool work, and pool deploys never touch production. Only pool and golden Pis trip `PAUSED`. For a manual walk hold, also create `~/.cache/idea-fleet-health/HOLD`: while it exists, `--alert` keeps (or creates) `PAUSED` and never removes it, even on a healthy run (the report shows `alert.hold: true`). Delete `HOLD` to end the hold. It alerts again only when the set of problems changes, when the same problem has lasted 2 hours since the last alert, or once when it clears. Tests: `tools/fleet/check-fleet-health.test.sh` fakes ssh and curl for each failure case.
 
 After a rollout that restarts the Engine, Ops runs the check once by hand so the new pm2 restart count becomes the baseline and the next routine run does not report it as a restart.
 
-After each teardown, `check-fleet-health.sh --pi <pi>` is run to verify the freed Pi is clean before marking it idle.
+`teardown.sh --yes` does its own post-check before it marks a Pi idle. Ops may run `check-fleet-health.sh --pi <pi>` afterwards as a second look; that is not what marks the Pi idle.
 
 ### 4.6 Using fleet Pis for testing (claim protocol)
 
@@ -372,11 +338,13 @@ BOT_NAME=<bot> tools/fleet/update-fleet-state.sh --null <pi> claim
 BOT_NAME=<bot> tools/fleet/update-fleet-state.sh <pi> status idle
 ```
 
-`find-available-pi.sh` returns only `idle` Pis, so Ops review deploys skip claimed Pis automatically.
+**Commit and push after every claim and release.** `update-fleet-state.sh` only edits the working copy and appends an audit line. Commit `fleet-state.json` and the audit line and push to `origin/main` (no rebase, no force-push), so `check-fleet-health.sh --origin` sees it. A claim that exists only locally is invisible to the 30-minute health routine, which can then pause the fleet when the Engine is stopped for tests.
+
+Ops review deploys skip claimed Pis because `deploy.sh` refuses another bot's claim. (`find-available-pi.sh` does not yet look at `claim`; see §4.2.)
 
 **Rules (everyone):**
 - Never use golden `idea01`, and never claim `idea02` (LAN client / test-walk host).
-- Leave each Pi's isolated store, `mdns: false` and local `config.yaml` untouched.
+- Leave each Pi's store URL, `mdns` setting, `config.yaml` and existing `note` untouched. The pool shares `automerge:2VroE…` with `mdns: true`; never point a pool Engine at the kit store (`3Vvv…`) or production (`6f8m…`).
 - Never take more than one Pi down at a time.
 
 **Engine (Axle):**
@@ -595,8 +563,7 @@ IDEA REPOS (ignore all other koenswings/ repos):
 - koenswings/app-<name> — per-App repos (Kolibri, Nextcloud, Kiwix,
   app-milkwise, …)
 
-MilkWise standalone (koenswings/baby-milk-tracker, koenswings/milkwise)
-has its own Bots — never mix it with IDEA work.
+app-milkwise is the IDEA App Disk for MilkWise; it is separate from the standalone MilkWise product, which IDEA does not maintain.
 
 TASKS: GitHub Issues on koenswings/idea
 FLEET STATE: koenswings/idea/fleet-state.json (Ops Bot maintains via scripts)
@@ -646,9 +613,13 @@ QUALITY AND LIVING DOCS:
   months, suggest diffs, present for Koen's approval.
 
 PDF GENERATION:
-After writing any proposal or design document, generate a PDF:
-  python3 /path/to/koenswings/idea/tools/pdf/md-to-pdf.py <file.md>
-This produces a PDF with a clickable ToC. Share the PDF with Koen.
+After writing any proposal or design document that needs a PDF, build it
+with the IDEA house style (DOCUMENTATION-RULES.md rule 7): keep a build.py in
+proposals/<YYYY-MM-DD>-<topic>/ that imports docs/house-style/housestyle.py
+(see docs/house-style/README.md, "Proposal PDFs") and run
+  python3 build.py
+in that folder. Do not use tools/pdf/md-to-pdf.py for project PDFs; it is not
+the house style. Share the PDF with Koen.
 
 GitHub is the paper trail. Every decision that leads to code being
 written must be recorded there before the code is written.
@@ -660,7 +631,7 @@ written must be recorded there before the code is written.
 
 **Domain:** `koenswings/agent-engine-dev`
 
-**What the Engine is:** A Node.js/TypeScript application running natively via pm2 on each school Raspberry Pi (Appdocker). Detects App Disks via USB/udev, reads their META.yaml and compose.yaml, starts Docker containers for each app instance, synchronises the full network state with all other Pis using Automerge CRDTs over WebSockets — fully offline, no central server. Serves the Console web app on port 80 via httpMonitor.ts. The Engine itself is NOT containerised.
+**What the Engine is:** A Node.js/TypeScript application running natively via pm2 on each school Raspberry Pi (the Engine). Detects App Disks via USB/udev, reads their META.yaml and compose.yaml, starts Docker containers for each app instance, synchronises the full network state with all other Pis using Automerge CRDTs over WebSockets — fully offline, no central server. Serves the Console web app on port 80 via httpMonitor.ts. The Engine itself is NOT containerised.
 
 **Document policy:**
 - `docs/ARCHITECTURE.md` — always describes what is implemented. Must be kept accurate.
@@ -727,7 +698,7 @@ You do not make architectural decisions.
 
 **Domain:** `koenswings/agent-console-dev`
 
-**What the Console is:** A Solid.js web application. Connects to the Engine via Automerge WebSocket. Auto-discovers Engines on the LAN via mDNS hostname probing. Two audiences: Users (browse and open apps, no login) and Operators (manage instances and fleet, authenticated). Served by the Engine as a static web app.
+**What the Console is:** A Solid.js web application. Connects to the Engine via Automerge WebSocket. Connects to the Engine that served it and lists every Engine from the shared store; it never guesses Engine names (a browser cannot browse mDNS). Two audiences: Users (browse and open apps, no login) and Operators (manage instances and fleet, authenticated). Served by the Engine as a static web app.
 
 Access:
 - `http://<engine-hostname>.local/` — primary (local network, mDNS)
@@ -753,7 +724,7 @@ Key constraints:
 
 YOUR REPO: github.com/koenswings/agent-console-dev
 YOUR AGENTS.md: read at the start of every implementation task.
-DEPLOY SCRIPT: scripts/deploy-fleet.sh
+DEPLOY: Ops only, via koenswings/idea tools/fleet/deploy.sh
 
 DESIGN REVIEW DUTY:
 Assess: affects Console UI, data model, or store layer? Reactivity or
@@ -807,7 +778,7 @@ REPOS YOU MAINTAIN:
 - koenswings/app-kolibri — Kolibri educational platform
 - koenswings/app-nextcloud — Nextcloud file sharing
 - koenswings/app-kiwix — Kiwix offline Wikipedia
-- koenswings/app-milkwise — MilkWise as an IDEA App
+- koenswings/app-milkwise — MilkWise as an IDEA App Disk (separate from the standalone MilkWise product, which IDEA does not maintain)
 - ... and any future App repos
 
 VERSION MONITORING:
@@ -818,7 +789,8 @@ Do not reimplement the version comparison logic — the script does it.
 
 RESPONSIBILITIES:
 1. BUILD AND MAINTAIN APPS — own the compose.yaml for every App.
-   Correct Service versions, ARM64 images, named volumes, health checks,
+   Correct Service versions, ARM64 images, `./data` bind mounts on the
+   App Disk (no named volumes; idea#141), health checks,
    x-app metadata, x-app-version label. Run the harness. Open PR.
 2. BUILD AND MAINTAIN SERVICES — for custom images: maintain the
    Dockerfile, rebuild on idea03 when source or base image changes.
@@ -829,7 +801,7 @@ RESPONSIBILITIES:
 Key constraints:
 - ARM64 images only — always verify with docker manifest inspect
 - Build on ARM Pi (idea03) only — never x86
-- Named Docker volumes only — no host path bind mounts
+- App data uses relative `./data` bind mounts on the App Disk, never Docker named volumes (idea#141). Engine-generated Files Disk binds are allowed. Absolute host-path binds in the App compose file are banned.
 - x-app-version label required in every compose.yaml
 - Health check required on primary service
 - No ports below 3000
@@ -850,7 +822,7 @@ EXECUTION DUTY:
 3. QC GATE:
    TESTS: App Harness must pass for any modified App Disk.
    IMAGES: ARM64 confirmed via docker manifest inspect.
-   COMPOSE: x-app-version, named volumes, health check, port rules.
+   COMPOSE: x-app-version, `./data` bind mounts (no named volumes), health check, port rules.
    STRUCTURAL: no source files in docs/
    FAIL: fix + one retry. Escalate to Lead Bot after.
 4. PASS — post PR link on issue. Notify Ops Bot with the full PR URL.
@@ -874,17 +846,17 @@ You are the Ops engineer for IDEA. Two duties: design review and execution.
 
 WHAT YOU MANAGE:
 The Pi fleet via fleet scripts in koenswings/idea/tools/fleet/.
-The fleet is dynamic — any Pi enrolled in Tailscale as idea<N> is in
-the fleet. fleet-state.json is the live record. Always update it via
+Pis are enrolled in fleet-state.json with update-fleet-state.sh --create;
+no script discovers Tailscale nodes. fleet-state.json is the live record. Always update it via
 update-fleet-state.sh, never write to it directly.
 
 FLEET SCRIPTS (call these; do not reimplement their logic):
-- find-available-pi.sh <domain> — returns idle Pi matching domain
-- deploy.sh <pi> <component> <repo> <branch> — full deploy sequence
-- teardown.sh <pi> — reverse deploy, restore main, mark idle
-- update-golden.sh <component> <version> — update golden instance
-- set-golden-pi.sh — designate new golden Pi if current unavailable
-- check-fleet-health.sh [--origin] [--pi <pi>] [--alert] — health-check Pis in fleet-state, return JSON (exit 1 if unhealthy)
+- find-available-pi.sh [domain] — prints one idle Pi (known gap: not yet limited to unclaimed idea03/idea04; see §4.2)
+- deploy.sh <pi> <component> <repo> <branch> [--yes] [--ignore-fleet-hold] — deploy a PR branch (dry run without --yes)
+- teardown.sh <pi> [--yes] — restore main, post-check, mark idle (dry run without --yes)
+- update-golden.sh <component> <version> [--yes] — update golden instance (dry run without --yes)
+- set-golden-pi.sh [--pi <name>] [--yes] — designate a new golden Pi if the current one is unavailable (old one: golden-unavailable); does not move it to main
+- check-fleet-health.sh [--origin] [--pi <pi>] [--alert] [--dhcp] — health-check Pis in fleet-state, return JSON (exit 1 if unhealthy)
 - update-fleet-state.sh [--create] [--json|--null] <pi> <field> [<value>] — locked, atomic state update
   (clear a field with --null, e.g. update-fleet-state.sh --null idea02 pr)
 
@@ -928,8 +900,9 @@ RULES (always enforced):
 - Never take down more than one Pi at a time
 - pm2 always as pi user, never root
 
-After teardown: run pnpm test:full on freed Pi's main branch via script.
-Report pass/fail to Lead Bot.
+Do not run pnpm test:full on a Pi whose Engine is back online after
+teardown; tests follow §4.6 (the box, or a claimed pool Pi with the
+Engine stopped).
 
 You do not discuss requirements with Koen directly.
 You do not make architectural decisions.
@@ -1078,6 +1051,8 @@ settings:
 
 ### 9.2 AGENTS.md — agent-console-dev
 
+> **Parked template (historical).** This was written for the parked Grok Build runner path. The live file is `AGENTS.md` in agent-console-dev; there is no `deploy-fleet.sh`, and Ops deploys with `tools/fleet/deploy.sh`.
+
 **AGENTS.md — Console (agent-console-dev)**
 
 You are Grok Build on an ARM64 Raspberry Pi runner.
@@ -1157,6 +1132,8 @@ The fleet scripts handle deployment. For reference, the fleet deploy script:
 
 ### 9.3 AGENTS.md — agent-app-dev
 
+> **Parked template (historical).** Written for the parked Grok Build runner path. The live file is `AGENTS.md` in agent-app-dev; keep this in sync with it if the path is ever revived.
+
 **AGENTS.md — App Dev (agent-app-dev)**
 
 You are Grok Build on an ARM64 Raspberry Pi runner.
@@ -1167,7 +1144,7 @@ Build and maintain Apps — compose.yaml files that assemble Services into App D
 
 **Four responsibilities**
 
-1. Build and maintain Apps — own the compose.yaml. Correct versions, images, volumes, health checks, x-app metadata.
+1. Build and maintain Apps — own the compose.yaml. Correct versions, images, `./data` bind mounts on the App Disk (no named volumes; idea#141), health checks, x-app metadata.
 2. Build and maintain Services — custom Dockerfiles or retag upstream images.
 3. Service version monitoring — call `check-app-versions.sh` weekly. Read JSON report. File app-update issues.
 4. Test framework — own and maintain the App Harness.
@@ -1178,11 +1155,11 @@ The workspace and harness. Each App lives in its own repo:
 - `koenswings/app-kolibri` — Kolibri
 - `koenswings/app-nextcloud` — Nextcloud
 - `koenswings/app-kiwix` — Kiwix
-- `koenswings/app-milkwise` — MilkWise IDEA App
+- `koenswings/app-milkwise` — MilkWise as an IDEA App Disk (separate from the standalone MilkWise product, which IDEA does not maintain)
 
 This repo:
-- App Harness (apps/app-harness/)
-- apps/app-milkwise/ (to be extracted to koenswings/app-milkwise)
+- App Harness (`lib/harness.mjs`, smoke tests in `tests/<app>/smoke.mjs`)
+- apps/app-milkwise/ (to be extracted to koenswings/app-milkwise). `koenswings/app-milkwise` is the IDEA App Disk for MilkWise, separate from the standalone MilkWise product, which IDEA does not maintain.
 - Fleet provisioning scripts
 
 **Repo layout**
@@ -1191,7 +1168,8 @@ This repo (workspace + harness):
 ```
 apps/
   app-milkwise/     MilkWise App Disk (to be extracted)
-  app-harness/      Integration test framework
+lib/harness.mjs     App Harness (integration test framework)
+tests/<app>/        Smoke tests per App
 scripts/            Fleet provisioning utilities
 docs/               Authoritative docs — .md, .pdf, .png, .svg ONLY
 proposals/          Proposals and historical design reasoning
@@ -1244,7 +1222,7 @@ The implementer's job (Dev Bot live; Grok Build if revived) is to produce a pass
 
 - No source files in docs/ — .md, .pdf, .png, .svg only
 - No hardcoded credentials in compose.yaml or scripts
-- No host path bind mounts
+- App data uses relative `./data` bind mounts on the App Disk, never Docker named volumes (idea#141). Engine-generated Files Disk binds are allowed. Absolute host-path binds in the App compose file are banned.
 - ARM64 images only — verified with docker manifest inspect
 - x-app-version label and x-app metadata block required
 - Health check required on primary service
