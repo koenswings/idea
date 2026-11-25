@@ -794,7 +794,8 @@ Do not reimplement the version comparison logic — the script does it.
 
 RESPONSIBILITIES:
 1. BUILD AND MAINTAIN APPS — own the compose.yaml for every App.
-   Correct Service versions, ARM64 images, named volumes, health checks,
+   Correct Service versions, ARM64 images, `./data` bind mounts on the
+   App Disk (no named volumes; idea#141), health checks,
    x-app metadata, x-app-version label. Run the harness. Open PR.
 2. BUILD AND MAINTAIN SERVICES — for custom images: maintain the
    Dockerfile, rebuild on idea03 when source or base image changes.
@@ -805,7 +806,7 @@ RESPONSIBILITIES:
 Key constraints:
 - ARM64 images only — always verify with docker manifest inspect
 - Build on ARM Pi (idea03) only — never x86
-- Named Docker volumes only — no host path bind mounts
+- App data uses relative `./data` bind mounts on the App Disk, never Docker named volumes (idea#141). Engine-generated Files Disk binds are allowed. Absolute host-path binds in the App compose file are banned.
 - x-app-version label required in every compose.yaml
 - Health check required on primary service
 - No ports below 3000
@@ -826,7 +827,7 @@ EXECUTION DUTY:
 3. QC GATE:
    TESTS: App Harness must pass for any modified App Disk.
    IMAGES: ARM64 confirmed via docker manifest inspect.
-   COMPOSE: x-app-version, named volumes, health check, port rules.
+   COMPOSE: x-app-version, `./data` bind mounts (no named volumes), health check, port rules.
    STRUCTURAL: no source files in docs/
    FAIL: fix + one retry. Escalate to Lead Bot after.
 4. PASS — post PR link on issue. Notify Ops Bot with the full PR URL.
@@ -1136,6 +1137,8 @@ The fleet scripts handle deployment. For reference, the fleet deploy script:
 
 ### 9.3 AGENTS.md — agent-app-dev
 
+> **Parked template (historical).** Written for the parked Grok Build runner path. The live file is `AGENTS.md` in agent-app-dev; keep this in sync with it if the path is ever revived.
+
 **AGENTS.md — App Dev (agent-app-dev)**
 
 You are Grok Build on an ARM64 Raspberry Pi runner.
@@ -1146,7 +1149,7 @@ Build and maintain Apps — compose.yaml files that assemble Services into App D
 
 **Four responsibilities**
 
-1. Build and maintain Apps — own the compose.yaml. Correct versions, images, volumes, health checks, x-app metadata.
+1. Build and maintain Apps — own the compose.yaml. Correct versions, images, `./data` bind mounts on the App Disk (no named volumes; idea#141), health checks, x-app metadata.
 2. Build and maintain Services — custom Dockerfiles or retag upstream images.
 3. Service version monitoring — call `check-app-versions.sh` weekly. Read JSON report. File app-update issues.
 4. Test framework — own and maintain the App Harness.
@@ -1160,7 +1163,7 @@ The workspace and harness. Each App lives in its own repo:
 - `koenswings/app-milkwise` — MilkWise IDEA App
 
 This repo:
-- App Harness (apps/app-harness/)
+- App Harness (`lib/harness.mjs`, smoke tests in `tests/<app>/smoke.mjs`)
 - apps/app-milkwise/ (to be extracted to koenswings/app-milkwise)
 - Fleet provisioning scripts
 
@@ -1170,7 +1173,8 @@ This repo (workspace + harness):
 ```
 apps/
   app-milkwise/     MilkWise App Disk (to be extracted)
-  app-harness/      Integration test framework
+lib/harness.mjs     App Harness (integration test framework)
+tests/<app>/        Smoke tests per App
 scripts/            Fleet provisioning utilities
 docs/               Authoritative docs — .md, .pdf, .png, .svg ONLY
 proposals/          Proposals and historical design reasoning
@@ -1223,7 +1227,7 @@ The implementer's job (Dev Bot live; Grok Build if revived) is to produce a pass
 
 - No source files in docs/ — .md, .pdf, .png, .svg only
 - No hardcoded credentials in compose.yaml or scripts
-- No host path bind mounts
+- App data uses relative `./data` bind mounts on the App Disk, never Docker named volumes (idea#141). Engine-generated Files Disk binds are allowed. Absolute host-path binds in the App compose file are banned.
 - ARM64 images only — verified with docker manifest inspect
 - x-app-version label and x-app metadata block required
 - Health check required on primary service
