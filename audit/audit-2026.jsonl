@@ -3011,3 +3011,6 @@
 {"ts":"2026-11-25T16:06:23Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Atlas (IDEA Ops): Console PR #260 live check (12116427), held until merge","previous":null}
 {"ts":"2026-11-25T16:48:47Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
 {"ts":"2026-11-25T16:48:47Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas (IDEA Ops): deploy Engine #579 ec7e82d","previous":null}
+{"ts":"2026-11-25T16:56:23Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
+{"ts":"2026-11-25T16:56:24Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas (IDEA Ops): deploy Engine #579 ec7e82d"}
+{"ts":"2026-11-25T16:56:24Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine #579@ec7e82d, console df13dbfa","previous":"engine main@ff413e1, console df13dbfa"}
