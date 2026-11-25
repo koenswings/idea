@@ -3015,3 +3015,5 @@
 {"ts":"2026-11-25T16:56:24Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Atlas (IDEA Ops): deploy Engine #579 ec7e82d"}
 {"ts":"2026-11-25T16:56:24Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"version","value":"engine #579@ec7e82d, console df13dbfa","previous":"engine main@ff413e1, console df13dbfa"}
 {"ts":"2026-11-25T17:08:08Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea04","field":"version","value":"engine #579@ec7e82d, console 12116427","previous":"engine main@ff413e1, console df13dbfa"}
+{"ts":"2026-11-25T17:35:40Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-25T17:35:40Z","bot":"Atlas (IDEA Ops)","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Atlas (IDEA Ops): deploy Engine main@e6569ce (#579 merged)","previous":null}
