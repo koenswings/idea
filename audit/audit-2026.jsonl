@@ -2970,3 +2970,5 @@
 {"ts":"2026-11-25T14:57:17Z","bot":"Axle","action":"fleet_state_update","pi":"idea04","field":"claim","value":"Axle (IDEA Dev): http hardening proof — local build in a scratch dir, scratch port only, pool Engine and 2VroE untouched, empty disks untouched; release right after","previous":null}
 {"ts":"2026-11-25T14:57:33Z","bot":"Pixel","action":"fleet_state_update","pi":"idea03","field":"claim","value":"Pixel: B4-22 restore screenshot","previous":null}
 {"ts":"2026-11-25T14:57:33Z","bot":"Pixel","action":"fleet_state_update","pi":"idea03","field":"status","value":"testing","previous":"idle"}
+{"ts":"2026-11-25T14:59:53Z","bot":"Pixel","action":"fleet_state_update","pi":"idea03","field":"claim","value":null,"previous":"Pixel: B4-22 restore screenshot"}
+{"ts":"2026-11-25T14:59:53Z","bot":"Pixel","action":"fleet_state_update","pi":"idea03","field":"status","value":"idle","previous":"testing"}
