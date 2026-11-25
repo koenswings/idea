@@ -85,7 +85,7 @@ Do not use `--run-teardown` as a "restore main" switch today: it calls `teardown
 
 Then, when Tailscale/SSH is available, confirm per Pi:
 
-1. Store URL, `mdns` setting (`mdns: true`), `config.yaml` and Pi `note` untouched; the Pi is still on the pool store `2VroE…`. Ignore the old unique-store / `mdns: false` checklist that `duration-test-release.sh` still prints (Atlas is updating it).
+1. Store URL, `mdns` setting (`mdns: true`), `config.yaml` and Pi `note` untouched; the Pi is still on the pool store `2VroE…`.
 2. pm2 `engine` online as `pi`.
 3. Optional: `tools/fleet/check-fleet-health.sh --origin --pi <pi>`.
 
