@@ -44,6 +44,13 @@ Short orientation for the `docs/` folder.
 Extends proposals/README.md and docs/README.md: adds docs/manuals/<audience>/<name>/ and docs/house-style/; naming, build and secrets rules; inventory with current locations.
 → [docs/DOCUMENTATION-RULES.md](DOCUMENTATION-RULES.md)
 
+## architecture-v2/ (IDEA System Architecture — Concepts and Vision)
+**Status:** Draft (Koen's request of 25 Nov 2026)  ·  **Maintained by:** Steve
+A ground-up, concept-level architecture document for partners and new team members: mission and design principles, core vocabulary, system context, component view, data and sync concepts, lifecycle views (install, App Disk journey, updates, backup and restore, field support), security model, operating realities (power, heat, connectivity, time), evolution and vision, glossary. Mermaid diagrams; PDF built with `build.py` (renders Mermaid, then `tools/pdf/md-to-pdf.py`). Complements, does not replace, the Engine and Console `docs/ARCHITECTURE.md`.
+→ [docs/architecture-v2/architecture-v2.md](architecture-v2/architecture-v2.md)
+
+Files: `architecture-v2/architecture-v2.md`, `architecture-v2/build.py`, `architecture-v2/diagrams/fig-01.svg`, `architecture-v2/diagrams/fig-02.svg`, `architecture-v2/diagrams/fig-03.svg`, `architecture-v2/diagrams/fig-04.svg`, `architecture-v2/diagrams/fig-05.svg`, `architecture-v2/diagrams/fig-06.svg`, `architecture-v2/diagrams/fig-07.svg`, `architecture-v2/diagrams/fig-08.svg`, `architecture-v2/diagrams/fig-09.svg`, `architecture-v2/diagrams/fig-10.svg`, `architecture-v2/diagrams/fig-11.svg`, `architecture-v2/diagrams/fig-12.svg`, `architecture-v2/diagrams/fig-13.svg`, `architecture-v2/idea-architecture-v2.pdf`
+
 ## Manuals and house style (docs/manuals/, docs/house-style/)
 
 ### House style module
