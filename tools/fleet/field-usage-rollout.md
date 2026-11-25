@@ -41,8 +41,8 @@ Recorded so the next run does not rediscover it:
   (`tailscale status --json`: idea01–04 and idea user-owned; kits already
   `tag:idea`). T-c runbook and check-only script:
   [`tag-fleet-idea-tc.md`](tag-fleet-idea-tc.md),
-  [`tag-fleet-idea.sh`](tag-fleet-idea.sh). Not applied. idea03 and idea02
-  expire 2026-12-02 14:36 Europe/Brussels.
+  [`tag-fleet-idea.sh`](tag-fleet-idea.sh). Applied on 11 Nov 2026; key expiry is now disabled on every tagged IDEA node (Atlas, 25 Nov 2026), so this deadline no longer applies (idea03 and idea02 would have
+  expired 2026-12-02 14:36 Europe/Brussels).
 - Live ACL text is not in git (T-b). The paste in `field-usage-acl.md`
   is a merge-in block; substitute the live admin source if it is not
   `group:admins`.
@@ -132,7 +132,7 @@ happy-zebra stays on Engine `adfd9d3` with Console pr162 and is left untouched u
 Related, not part of U-1–U-9: T-b (read the live ACL so the paste matches
 the admin source) and T-c (tag idea01, idea03, idea04 and idea02 with
 `tag:idea` via console Edit tags, then disable key expiry; idea02 and
-idea03 before 2026-12-02 14:36 Europe/Brussels). Defer tagging `idea`
+idea03 before 2026-12-02 14:36 Europe/Brussels; done on 11 Nov 2026, and key expiry is now disabled on every tagged IDEA node (Atlas, 25 Nov 2026), so this deadline no longer applies). Defer tagging `idea`
 until Koen's OK / idea#374. See [`tag-fleet-idea-tc.md`](tag-fleet-idea-tc.md).
 
 ## 2. Sidecar registration

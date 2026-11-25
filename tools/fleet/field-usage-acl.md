@@ -51,8 +51,8 @@ still differs from that design:
 
 - Kit Pis and kit routers already carry `tag:idea`.
 - The five fleet nodes (idea01–04 and `idea` / wizardly-hugle, 100.115.60.6)
-  were **untagged**, with node-key expiry still on. Tagging them is idea#375 T-c
-  and is separate from this change.
+  were **untagged**, with node-key expiry still on, when this was written. They were tagged in idea#375 T-c on
+  11 Nov 2026, and key expiry is now disabled on every tagged IDEA node (Atlas, 25 Nov 2026).
 - It was not confirmed in the console whether the live admin source is
   `group:admins`, `autogroup:admin`, or another existing group.
 

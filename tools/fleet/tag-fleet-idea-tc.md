@@ -1,6 +1,8 @@
 # T-c: tag the fleet Pis as `tag:idea` (idea#375)
 
-**Status:** Ready to run, not yet applied · **Maintained by:** Atlas · 2026-11-10
+**Status:** Applied on 2026-11-11 (kept as the record of the run) · **Maintained by:** Atlas · 2026-11-10, status updated 2026-11-25
+
+> **Update 2026-11-25:** idea01–04 and production `idea` are tagged `tag:idea` (11 Nov 2026; see `field-usage-lockdown-flows.md`), and key expiry is disabled on every tagged IDEA node (pool, idea02, production, kits, kit routers, idea-hub; read by Atlas on 25 Nov 2026). The 2 December 2026 expiry for idea02 and idea03 mentioned below no longer applies.
 **Do not treat this file as permission to tag a node.** Atlas does not apply
 the tag. Koen (or Steve walking him through #375) clicks Edit tags; this
 runbook and [`tag-fleet-idea.sh`](tag-fleet-idea.sh) are the pre-check, wait,
@@ -73,9 +75,8 @@ work (it does for the kits) before any fleet Pi is tagged.
 Console Edit tags does **not** by itself disable key expiry. Tailscale
 disables expiry when a node is tagged **and re-authenticated** (for example
 joined with a tagged auth key). After a console-only tag change, also click
-**Disable key expiry**. idea02 and idea03 drop off the tailnet on
-**2026-12-02 14:36 Europe/Brussels** if neither tagging-with-reauth nor
-Disable key expiry happens.
+**Disable key expiry**. idea02 and idea03 would have dropped off the tailnet on
+**2026-12-02 14:36 Europe/Brussels** without it; key expiry is now disabled on every tagged IDEA node (Atlas, 25 Nov 2026), so this deadline no longer applies.
 
 ## 2. Who this run covers
 
@@ -221,8 +222,8 @@ change (not a new item):
 - Scope T-c to idea01, idea03, idea04, and idea02. Defer `idea`
   (100.115.60.6) until Koen's OK / idea#374.
 - After each Edit tags, also Disable key expiry (console tagging does
-  not turn expiry off by itself). idea02 and idea03 remain the
-  2026-12-02 14:36 Europe/Brussels deadline.
+  not turn expiry off by itself). idea02 and idea03 had the
+  2026-12-02 14:36 Europe/Brussels deadline; key expiry is now disabled on every tagged IDEA node (Atlas, 25 Nov 2026), so this deadline no longer applies.
 - Atlas runs `tag-fleet-idea.sh` before and after each click; Koen
   does one machine at a time in the order idea03, idea04, idea02,
   idea01.
