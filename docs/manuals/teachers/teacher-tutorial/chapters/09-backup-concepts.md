@@ -1,11 +1,11 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 19 October 2026 (full backups with content)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (Wikipedia from Kiwix App 1.3 on; earlier: full backups with content)
 
 # 9. Keeping data safe: the Backup Disk
 
 The operator looks after backups (*IDEA for Operators: Tutorial*). As a teacher you should know:
 
 - A **Backup Disk** is a separate **IDEA Disk** with the **backup** badge in the Console.
-- It saves **every app in full**: Kolibri (classes, learners, progress, and the channels), Nextcloud (accounts, and the files inside Nextcloud) and Wikipedia. On the kit that is about 164 GB per IDEA box, which fits on its 240 GB Backup Disk.
+- It saves **every app in full**: Kolibri (classes, learners, progress, and the channels), Nextcloud (accounts, and the files inside Nextcloud) and, on the kit as delivered, Wikipedia. On the kit that is about 164 GB per IDEA box, which fits on its 240 GB Backup Disk. From version 1.3 of the Wikipedia app, Wikipedia itself is not copied to the Backup Disk: if it is lost, your IDEA contact puts it back.
 - It does **not** save the **School Files** folder (chapter 8).
 - **During its backup, an app is stopped and can't be opened.** It starts again by itself when its backup is done. The first backup of all apps takes about 2 h 15 min, so backups are planned outside lesson time.
 - How often backups run (on request, each time the disk is plugged in, or on a schedule) is set by your IDEA contact.
