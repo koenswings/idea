@@ -199,7 +199,7 @@ Lead Bot notifies Koen: "PR #X ready — live at http://idea<N>.tail…"
   ▼
 Koen evaluates on real Pi hardware via Tailscale
   ├── changes requested → Lead Bot discusses, updates issue comment, re-delegates
-  └── approved → merged on GitHub (idea and App-repo PRs: Koen (app-kolibri always needs Koen's own words); Steve may squash-merge his delegated agent-engine-dev and app-nextcloud PRs, and merges Console PRs, under Koen's standing approval) → issue auto-closes
+  └── approved → merged on GitHub (idea and App-repo PRs: Koen (app-kolibri always needs Koen's own words); Steve may squash-merge his delegated agent-engine-dev, agent-console-dev and app-nextcloud PRs under Koen's standing approval; the merge tool may ask Koen to confirm Console merges on a card) → issue auto-closes
   │
   ▼
 Ops Bot calls teardown.sh <pi>
