@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (restore matches the Console: question, target list, old copy kept; Done cards close by themselves; Wikipedia backup from Kiwix App 1.3 on; earlier: full backups of every app, timings)
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026 (restore matches the Console: question, target list, old copy set aside in .idea-quarantine, new screenshots B4-21, B4-22, B4-23a; Done cards close by themselves; Wikipedia backup from Kiwix App 1.3 on; earlier: full backups of every app, timings)
 
 # 3. Disks: Files Disk and Backup Disk
 
@@ -60,13 +60,13 @@ You need a **spare disk** (an empty IDEA Disk) to restore onto.
 
 1. Open the **Backup Disk**. Each app in the **Backups** list shows **Last backup**, a **Select target disk…** list and a **Restore** button (grey until a target is chosen).
 2. In **Select target disk…** choose the spare disk. The list shows every disk docked on this IDEA box that is an empty IDEA Disk or an App Disk (not the Backup Disk itself). App Disks are listed too: do not pick them, pick the empty spare disk. Click **Restore**.
-   ![Target chosen](../screenshots/B4-21.png)
-3. The Console asks: "Restore **kolibri** from the backup of *<date>* onto **IDEA Disk**?" and lists what will happen: the running copy on the old disk is stopped, from now on the app runs from the spare disk, and the old copy is not deleted. Click **Restore to IDEA Disk** (or **Cancel**).
-   [[pending-shot: B4-22 | The restore question: Restore kolibri from the backup onto IDEA Disk, with the buttons Restore to IDEA Disk and Cancel]]
-4. When the restore is finished, the spare disk shows the **app** badge and lists the restored app. A small app takes about a minute; Kolibri with its channels or Wikipedia takes much longer, so wait.
-   ![Restore done](../screenshots/B4-23a.png)
-5. The restore **moves** the app: its row is now listed on the spare disk. The old copy is not deleted; it stays on the old disk until your IDEA contact removes it. If the app was running and its old disk is still docked, the IDEA box starts it again on the spare disk by itself. Only when the old disk is gone (the breakdown case) does the restored app stay **stopped** (orange dot, **Start** button); until you start it, the app cannot be opened. A restore is for a real breakdown, not for practice on a working school box.
-6. Click **Start** on the restored app's row. After about 30 seconds it runs again and the row shows **Open ↗**.
+   ![Backup Disk with the spare disk chosen as target](../screenshots/B4-21.png)
+3. The Console asks: "Restore **kolibri** from the backup of *(date and time)* onto **IDEA Disk**?" and lists what will happen: the running copy on the old disk is stopped, from now on the app runs from the spare disk, and the old copy is not deleted. Click **Restore to IDEA Disk** (or **Cancel**).
+   ![The restore question with Cancel and Restore to IDEA Disk](../screenshots/B4-22.png)
+4. When the restore is finished, the OPERATIONS box shows **Done**, the spare disk shows the **app** badge, and a line under the app says that it was restored and where it runs now. A small app takes about a minute; Kolibri with its channels or Wikipedia takes much longer, so wait.
+   ![Restore done: kolibri runs from IDEA Disk](../screenshots/B4-23a.png)
+5. The restore **moves** the app: its row is now listed on the spare disk. The previous copy on the old disk is set aside in that disk's `.idea-quarantine` folder, not deleted. The IDEA contact can clear it later; do not clear it yourself. If the app was running and its old disk is still docked, the IDEA box starts it again on the spare disk by itself. Only when the old disk is gone (the breakdown case) does the restored app stay **stopped** (orange dot, **Start** button); until you start it, the app cannot be opened. A restore is for a real breakdown, not for practice on a working school box.
+6. If the restored app shows **Start** (orange dot), click **Start** on its row. After about 30 seconds it runs again and the row shows **Open ↗**.
    ![Start clicked](../screenshots/B4-28.png)
 7. Open the app from its card on the **Apps** page (as in *IDEA for Teachers: Tutorial*, 2.3) and sign in as the teacher (coach).
 8. Check that the data is back: classes, learners, lessons, quizzes and reports, as at the last backup.
