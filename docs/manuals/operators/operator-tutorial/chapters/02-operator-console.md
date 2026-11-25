@@ -24,7 +24,7 @@
    ![App details](../screenshots/O3-01.png)
 3. To check that an app really works, click **Open ↗**: the app's page must load.
 4. Only start or stop an app when your IDEA contact asks you to. Do not touch apps your IDEA contact did not mention.
-5. **Apps of a box with a red dot.** The apps of an IDEA box with a red dot are still listed, in **ALL APPS** and on the teachers' **Apps** page. Their **Open** button is greyed out, with the words "*name* is offline, so this app can't be opened right now". Do not try to start or stop them: just tell the teachers to use the apps of your own box. On an older Console the button may not be greyed out yet, and the app simply won't open.
+5. **Apps of a box with a red dot.** The apps of an IDEA box with a red dot are still listed, in **ALL APPS** and on the teachers' **Apps** page. Their **Open** button is greyed out, with the words "*name* is offline, so this app can't be opened right now". Just after the page opens, while the Console is still checking a box, the line can say "Connecting to *name*…" for a few seconds. Do not try to start or stop these apps: just tell the teachers to use the apps of your own box. On an older Console the button may not be greyed out yet, and the app simply won't open.
 
 ## 2.4 Command History
 

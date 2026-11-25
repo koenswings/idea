@@ -50,7 +50,7 @@ An IDEA Disk has a small eject icon next to its name in the Network list and an 
 
 1. In **ALL APPS**, each linked app row has a **Back up** button next to Start, Stop and Open. Click it for Kolibri. The row shows **Backing up…** with a progress bar, and the **OPERATIONS** box at the top shows the same job.
    ![Back up clicked](../screenshots/B3-10a.png)
-2. The app is stopped while it is copied, then starts again by itself. When the job is finished, its card in the OPERATIONS box shows **Done** for a moment and then disappears by itself. A card that says **Failed** stays until you close it with **✕**. A small app takes a few minutes, but the first backup of a big one takes much longer: on the kit about 37 minutes for Kolibri, an estimated 1 h 30 for the full Wikipedia and about 2 h 15 for all apps together (on the kit as delivered; from version 1.3 of the Wikipedia app its backup takes almost no time, because Wikipedia itself is not copied). Do this outside lesson time.
+2. The app is stopped while it is copied, then starts again by itself. When the job is finished, its card in the OPERATIONS box shows **Done** for a moment and then disappears by itself. A card that says **Failed** stays until you close it with **✕**: read it out to your IDEA contact first. A small app takes a few minutes, but the first backup of a big one takes much longer: on the kit about 37 minutes for Kolibri, an estimated 1 h 30 for the full Wikipedia and about 2 h 15 for all apps together (on the kit as delivered; from version 1.3 of the Wikipedia app its backup takes almost no time, because Wikipedia itself is not copied). Do this outside lesson time.
 3. When it is done, the Backup Disk's **Backups** list shows **Last backup** with the date and time for each app. Repeat for each other app.
    ![Last backup for both apps](../screenshots/B4-20.png)
 
@@ -59,13 +59,13 @@ An IDEA Disk has a small eject icon next to its name in the Network list and an 
 You need a **spare disk** (an empty IDEA Disk) to restore onto.
 
 1. Open the **Backup Disk**. Each app in the **Backups** list shows **Last backup**, a **Select target disk…** list and a **Restore** button (grey until a target is chosen).
-2. In **Select target disk…** choose the spare disk. The list shows every disk on this IDEA box that is an empty IDEA Disk or an App Disk, so App Disks are listed too: pick the empty spare disk. Click **Restore**.
+2. In **Select target disk…** choose the spare disk. The list shows every disk docked on this IDEA box that is an empty IDEA Disk or an App Disk (not the Backup Disk itself). App Disks are listed too: do not pick them, pick the empty spare disk. Click **Restore**.
    ![Target chosen](../screenshots/B4-21.png)
 3. The Console asks: "Restore **kolibri** from the backup of *<date>* onto **IDEA Disk**?" and lists what will happen: the running copy on the old disk is stopped, from now on the app runs from the spare disk, and the old copy is not deleted. Click **Restore to IDEA Disk** (or **Cancel**).
    [[pending-shot: B4-22 | The restore question: Restore kolibri from the backup onto IDEA Disk, with the buttons Restore to IDEA Disk and Cancel]]
 4. When the restore is finished, the spare disk shows the **app** badge and lists the restored app. A small app takes about a minute; Kolibri with its channels or Wikipedia takes much longer, so wait.
    ![Restore done](../screenshots/B4-23a.png)
-5. The restore **moves** the app: its row is now listed on the spare disk. The old copy is not deleted; it stays on the old disk until your IDEA contact removes it. After a breakdown (the old disk is gone) the restored app is **stopped** (orange dot, **Start** button), and until you start it, the app cannot be opened. If the old disk is still docked and the app was running, the IDEA box starts it again on the spare disk by itself. A restore is for a real breakdown, not for practice on a working school box.
+5. The restore **moves** the app: its row is now listed on the spare disk. The old copy is not deleted; it stays on the old disk until your IDEA contact removes it. If the app was running and its old disk is still docked, the IDEA box starts it again on the spare disk by itself. Only when the old disk is gone (the breakdown case) does the restored app stay **stopped** (orange dot, **Start** button); until you start it, the app cannot be opened. A restore is for a real breakdown, not for practice on a working school box.
 6. Click **Start** on the restored app's row. After about 30 seconds it runs again and the row shows **Open ↗**.
    ![Start clicked](../screenshots/B4-28.png)
 7. Open the app from its card on the **Apps** page (as in *IDEA for Teachers: Tutorial*, 2.3) and sign in as the teacher (coach).
