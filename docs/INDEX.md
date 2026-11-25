@@ -21,7 +21,7 @@ Ops view of IDEA security: Tailscale tag:idea/ACL, school network zones, the <ac
 
 ## ops/tailscale-field-access.md
 **Status:** Authoritative (idea#117, docs side)  ·  **Maintained by:** Atlas
-How IDEA staff reach schools and Pis over Tailscale: one `tag:idea` and one reusable fleet key, ACL (admins → tag:idea, tag:idea → nothing), always-on at schools, SSH key-only to each Pi's Tailscale IP with no jump host, production idea as `idea.tail2d60.ts.net:<port>`, school LANs on `10.42.x` with sticker names, and the remaining gaps (idea#375 T-a/T-c, engine#291). Contains no secret values.
+How IDEA staff reach schools and Pis over Tailscale: one `tag:idea` and one reusable fleet key, ACL (admins → tag:idea, tag:idea → nothing), always-on at schools, SSH key-only to each Pi's Tailscale IP with no jump host, production idea as `idea.tail2d60.ts.net:<port>`, school LANs on `10.42.x` with sticker names, first-boot join-once with key deletion (engine#291, merged), and the remaining gaps (idea#375 T-a/T-c). Contains no secret values.
 → [docs/ops/tailscale-field-access.md](ops/tailscale-field-access.md)
 
 ## ops/zimbabwe-2026-10-deployment.md
@@ -123,7 +123,7 @@ Files: `manuals/field/nextcloud-update/README.md`, `manuals/field/nextcloud-upda
 
 ## ops/boot-recovery.md
 **Status:** Authoritative  ·  **Maintained by:** Atlas
-What comes back after a reboot (Engine-managed instances vs non-store fixtures), fstab loop mounts for duration-test images, the 05:00 reboot (as of 2026-11-13 17:45 CET: idea01 still `#D5-HOLD-IDEA01-20261010#` and left untouched; idea03 and idea04 now `#D5-HOLD-<pi>-20261113#`), quarantined idea03/idea04 leftovers (`quarantine-20261113-*`), idea01 idea166 leftovers left in place (golden), after-reboot checklist. Current pool is idea03/idea04; production hostname is idea.
+What comes back after a reboot (Engine-managed instances vs non-store fixtures), fstab loop mounts for duration-test images, a current fleet table with each host's Engine, Console and 05:00 reboot (as of 2026-11-25: held on idea01, idea02, idea03 and idea04; live on production idea and the kit sunny-robin), quarantined idea03/idea04 leftovers (`quarantine-20261113-*`), idea01 idea166 leftovers left in place (golden), after-reboot checklist. Current pool is idea03/idea04; production hostname is idea.
 → [docs/ops/boot-recovery.md](ops/boot-recovery.md)
 
 ## ops/hub-runbook.md
