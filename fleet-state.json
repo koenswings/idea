@@ -49,7 +49,7 @@
     "host": "100.99.231.94",
     "tailscale": "100.99.231.94",
     "lan": "192.168.0.138",
-    "version": "engine main@c1cc4bb, console df13dbfa",
+    "version": "engine main@e6569ce, console main@df13dbfa",
     "mdns": true,
     "note": "Spare fleet Pi (2026-09-28). Pi 5 / Debian 13 trixie / Intenso SSD. Duration pool (idea#168, 2026-10-06): Engine config mdns:true, shared store automerge:2VroEUvDkmYsDAwE5oG9YeFNadWH, no static peers. On Tailscale as idea01 (100.99.231.94).",
     "runner": "none",
