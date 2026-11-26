@@ -4,26 +4,36 @@ Shared scripts used by Grok Build and Bots across all IDEA work.
 
 ## fleet/
 
-Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment, and health logic lives here, not in Bot descriptions.
+Fleet management scripts. Ops Bot calls these — all Pi allocation, deployment, and health logic lives here, not in Bot descriptions. **This table is the single catalog of fleet scripts**; `docs/grok-bot-setup.md` §2.4 points here.
+
+The idea#107 scripts (`deploy.sh`, `teardown.sh`, `update-golden.sh`, `set-golden-pi.sh`) are a dry run unless `--yes` and print one JSON result. `--ignore-fleet-hold` skips only the fleet-wide HOLD/PAUSED check for that run; per-Pi refusals and the 75 °C guard still apply.
 
 | Script | Purpose |
 |--------|---------|
-| `strip-cloud-init-sudoers.sh` | Remove cloud-init `pi ALL=(ALL) NOPASSWD:ALL` so Engine sudoers win (idea#153). **Implemented.** |
-| `find-available-pi.sh <domain>` | Return first idle Pi matching domain from fleet-state.json |
-| `deploy.sh <pi> <component> <repo> <branch>` | Full deploy sequence (engine/console/app-disk) |
+| `strip-cloud-init-sudoers.sh` | Remove cloud-init's `/etc/sudoers.d/90-cloud-init-users` (`pi ALL=(ALL) NOPASSWD:ALL`) so Engine sudoers win (idea#153). **Implemented.** It does not touch Pi OS's `010_pi-nopasswd`, which is still on idea01–04 and production. Not yet run on the kits: sunny-robin and happy-zebra still have the cloud-init file (Atlas, 25 Nov 2026; see `docs/ops/security-overview.md`) |
+| `find-available-pi.sh [domain]` | Prints the hostname of one idle, unclaimed pool Pi (`role: review` or `spare`; today `idea03` / `idea04`) and exits 0, or exits 1 if none is free. It never returns the golden Pi, `idea02`, production or a kit, and must not prefer `idea01` or `idea02`; `domain` is kept only for a possible later preference among pool Pis. **Script not yet compliant (Atlas is fixing it):** its affinity map still prefers `idea01`/`idea02` and it ignores `claim`, so until then pick the pool Pi by `docs/grok-bot-setup.md` §4.2 and §4.6 yourself. |
+| `deploy.sh <pi> <component> <repo> <branch> [--yes] [--ignore-fleet-hold]` | Deploy a PR branch to a pool Pi (engine via `deploy-engine-remote.sh`, console via `build-console-pi.sh`, app-disk = checkout only, no Compose). Dry run unless `--yes`; writes `status=deployed` |
 | `deploy-engine-pi.sh <tip> [--fetch <branch>] [--yes] [--allow-midnight]` | Option-2 Engine deploy on ONE pool Pi (run via `ssh <pi> bash -s`): keeps config.yaml, pm2.config.cjs and store-identity/ across the checkout, aborts before pm2 restart if store-url.txt is not 2VroE; treats a command-log-url rotation as fine when the store URL is unchanged (idea#512); skips only when the running pm2 Engine sha matches the tip; refuses 23:55–00:05 local unless `--allow-midnight`; applies the Engine's DHCP vendor class (idea#284) after the build. **Implemented**; tests: `deploy-engine-pi.test.sh`. Runbook: `docs/ops/engine-deploy-pool-pi.md` |
 | `build-console-pi.sh [--dir <console dir>]` | Builds the Console on a Pi with plain `pnpm build` (run via `ssh <pi> bash -s`). Since agent-console-dev#188 that writes into `dist.new-<ts>/` and swaps into `dist/` only after success, keeping one `dist.prev` (rollback: rename `dist.prev` to `dist`). Since agent-console-dev#189 (Console main `cdda261`) the build itself carries `dist/hidden-instances.json` (idea#212) into the new tree. A small guard restores that file only if it was present before the build and missing afterwards (pool Consoles still on `6c15bcf`, kits pinned older, or any pre-#189 `--dir`). If the file is absent, nothing is created. **Implemented**; tests: `build-console-pi.test.sh` |
-| `teardown.sh <pi>` | Reverse deploy, restore main, mark Pi idle |
-| `update-golden.sh <component> <version>` | Update golden Pi to new version of a component |
-| `set-golden-pi.sh` | Designate new golden Pi if current unavailable; `--pi <name>` moves golden to a named idle, unclaimed, reachable pool Pi (old golden goes back to `spare`) |
+| `teardown.sh <pi> [--yes] [--ignore-fleet-hold]` | Restores the Pi to `main` (Engine and Console, and the `app-*` repo if that was deployed), runs its own post-check, then writes `version`, clears `pr`/`branch`/`repo`/`claim` and sets `status=idle`. Dry run unless `--yes`. Never tears down the golden Pi. |
+| `update-golden.sh <component> <version> [--yes]` | Moves the golden Pi to the given version of one component and updates that half of `version`; `status` stays `idle`. Dry run unless `--yes`. |
+| `set-golden-pi.sh [--pi <name>] [--yes]` | No change if the current golden Pi answers. If it is missing or unreachable, the most recently idle, unclaimed, reachable pool Pi becomes golden and the old one gets `role: golden-unavailable`. With `--pi`, that Pi becomes golden and a reachable old golden becomes `spare`. It does not move the new golden to `main` (it prints `next_steps`). Dry run unless `--yes`. |
 | `prove-helper-v7.sh` | Offline-first proof of helper v7 (idea#412 / engine PR #309). Live run is `--yes` only. Rollback is fail-closed (idea#422): helper, drop-in, Engine SHA and pm2 online are asserted. Tests: `prove-helper-v7.test.sh` (bash -n, truncation guard, mocked-ssh rollback). |
 | `tag-fleet-idea.sh` | idea#375 T-c pre/wait/post-check for tagging fleet Pis `tag:idea` (order idea03, idea04, idea02, idea01). **Never applies a tag.** Tests: `tag-fleet-idea.test.sh`. Runbook: `tag-fleet-idea-tc.md` |
 | `usage-monitoring.sh <pi> on/off/status` | Operator toggle for kit/pool `usageMonitoring` (idea#411). Calls `/usr/local/sbin/idea-usage-settings` over SSH as `pi`; never restarts the Engine or Apps. Refuses kits unless `--approve-kit-window`, plus golden, idea/wizardly-hugle, idea02, hold/paused/production and other bots' claims. Prints JSON (`ok`, `previous`, `value`). Tests: `usage-monitoring.test.sh`. |
 | `field-usage-after-u-steps.sh` | Dry-run-default orchestrator for the idea#416 steps that run after Koen's idea#375 U-items (T-b/T-c, ACL matrix, sidecar usage-key plan). `--apply` never tags a node and currently refuses key install (prepare only). Tests: `field-usage-after-u-steps.test.sh`. Checklist: `fleet/field-usage-u-steps.md` |
-| `check-fleet-health.sh` | Health-check every Pi in fleet-state (Tailscale ssh, Console on `console_port` (default :8080), pm2 engine, versions, disk, DHCP vendor-class drop-in + kit LAN lease in 10.42.0.2-.9 (idea#284; `--dhcp` also fails on claimed/kit Pis)); JSON out, exit 1 if unhealthy. Tests: `check-fleet-health.test.sh` |
-| `update-fleet-state.sh [--create] [--json\|--null] <pi> <field> [<value>]` | Locked (flock), atomic read-modify-write of one field in fleet-state.json. `--null` clears a field to JSON `null`, `--json` stores a typed JSON value, unknown Pis are refused unless `--create`. Audit line goes to `audit/` next to `STATE_FILE`. **Implemented**; `selftest.sh` exercises it against a temp copy |
+| `check-fleet-health.sh [--origin] [--pi <pi>] [--alert] [--dhcp]` | Health-check every Pi in fleet-state (Tailscale ssh, Console on `console_port` (default :8080), pm2 engine, versions, disk, DHCP vendor-class drop-in + kit LAN lease in 10.42.0.2-.9 (idea#284; `--dhcp` also fails on claimed/kit Pis)); JSON out, exit 1 if unhealthy. Tests: `check-fleet-health.test.sh` |
+| `update-fleet-state.sh [--create] [--json\|--null] <pi> <field> [<value>]` | Locked (flock), atomic read-modify-write of one field in fleet-state.json. `--null` clears a field to JSON `null`, `--json` stores a typed JSON value, unknown Pis are refused unless `--create`. Audit line goes to `audit/` next to `STATE_FILE`. **Implemented**; `selftest.sh` exercises it against a temp copy. Setting `status` to `idle` from another status also writes `idle_since`. It does **not** commit or push (see `docs/grok-bot-setup.md` §4.6). |
+| `deploy-engine-remote.sh <ts-ip> <tip-sha> [--fetch <branch>] [--dry-run\|--yes] [--allow-midnight] [--ignore-fleet-hold]` | Box-side wrapper: holds a per-host box lock and runs `deploy-engine-pi.sh` on the Pi. Runbook: `docs/ops/engine-deploy-pool-pi.md` |
+| `enable-memory-cgroup.sh <host-or-ip> [--yes]` | Appends `cgroup_enable=memory` to `cmdline.txt` and reboots (idea#518). Dry run without `--yes`; claim the Pi first |
+| `probe-field-usage-acl.sh` | idea#416 ACL probe; see `field-usage-u-steps.md` |
+| `prove-usage-export-key.sh` | idea#412/#416 usage export key proof; see `field-usage-rollout.md` |
+| `kit-kolibri-morango.sh` | Kit Kolibri Morango check; see `kit-kolibri-morango.md` |
+| `move-79.sh --preflight` / `--go --koen-yes` | idea#79 one-off move, not a general fleet tool; `--go` needs Koen's yes |
+| `idea-usage-export.stub.sh` | Stub export helper for pool-Pi proofs only. Never install it on kits, golden or production |
+| `fleet-lib.sh` | Shared shell library sourced by the fleet scripts (post-check, deny list); not run directly |
 | `duration-test-claim.sh` | Claim N pool Pis (idea03/04; refuses `role: golden`, today idea01, and idea02 by name) for a duration-walk id via `update-fleet-state.sh` (idea#166). **Implemented**; offline tests in `duration-test-ops.test.sh` |
-| `duration-test-release.sh` | Clear duration-walk claims → idle; print unique-store + mDNS-off restore checklist (see also `teardown.sh`) |
+| `duration-test-release.sh` | Clear duration-walk claims → idle (see also `teardown.sh`; its `--run-teardown` is only a dry run today, see `DURATION_TESTS.md`). The printed unique-store / mDNS-off checklist is out of date: leave the pool's `2VroE` store and `mdns: true` alone |
 | `duration-test-health-wrap.sh` | `before`/`after` wrapper: `check-fleet-health.sh --origin` + optional intentional `PAUSED` around reboot churn |
 | `DURATION_TESTS.md` | Ops checklist for duration walks: claim → run → reboot baseline → teardown → health clear |
 
@@ -53,7 +63,7 @@ Quality scan and version monitoring scripts. Lead Bot and App Dev Bot call these
 
 | Script | Purpose |
 |--------|---------|
-| `md-to-pdf.py` | Markdown to PDF with clickable two-level ToC via Chromium headless |
+| `md-to-pdf.py` | Markdown to PDF with clickable two-level ToC via Chromium headless. Not the house style: project PDFs (manuals and proposals) are built with a `build.py` that imports `docs/house-style/housestyle.py` (DOCUMENTATION-RULES.md rule 7) |
 
 Installation: `apt-get install -y python3-markdown` (chromium already on Pi).
 
