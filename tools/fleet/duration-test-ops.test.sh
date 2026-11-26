@@ -62,12 +62,19 @@ before="$(sha256sum < "$STATE_FILE")"
 "$CLAIM" --dry-run --pis idea04 walk-t3 >/dev/null
 check "dry-run claim leaves state unchanged" test "$(sha256sum < "$STATE_FILE")" = "$before"
 
-# 5. release by walk-id
+# 5. release by walk-id (pool is idea03/idea04 only).
+# #2 claimed idea01+idea03 for walk-t1. idea01 is no longer in the release pool, so
+# --walk-id would also select idea01 and fail closed. Clear idea01 first, claim
+# free idea04 for the same walk, then release the pool Pis.
+jq '.idea01.claim=null | .idea01.status="idle"' "$STATE_FILE" > "$WORK/s.tmp" && mv "$WORK/s.tmp" "$STATE_FILE"
+"$CLAIM" --pis idea04 walk-t1 >/dev/null
 "$RELEASE" --walk-id walk-t1 >/dev/null
-check "release clears idea01 claim" test "$(claim_val idea01)" = ""
-check "release sets idea01 idle" test "$(status_val idea01)" = idle
 check "release clears idea03 claim" test "$(claim_val idea03)" = ""
+check "release sets idea03 idle" test "$(status_val idea03)" = idle
+check "release clears idea04 claim" test "$(claim_val idea04)" = ""
+check "release sets idea04 idle" test "$(status_val idea04)" = idle
 check "golden untouched after release" test "$(status_val idea02):$(claim_val idea02)" = "idle:"
+check "idea01 not in release pool stays idle/unclaimed" test "$(status_val idea01):$(claim_val idea01)" = "idle:"
 
 # 6. release refuses golden
 "$RELEASE" --pis idea02 >/dev/null 2>&1; rc=$?
@@ -110,12 +117,12 @@ sed -i "s|CFH=\"\${SCRIPT_DIR}/check-fleet-health.sh\"|CFH=\"$SHIM/check-fleet-h
 bash "$WORK/wrap.sh" after --clear-pause >/dev/null
 check "after --clear-pause removes duration-test marker" test ! -e "$HEALTH_DIR/PAUSED"
 
-# 8. explicit --pis claim + release
-"$CLAIM" --pis idea01,idea04 walk-t4 >/dev/null
-check "explicit claim idea01" test -n "$(claim_val idea01)"
+# 8. explicit --pis claim + release (pool Pis only)
+"$CLAIM" --pis idea03,idea04 walk-t4 >/dev/null
+check "explicit claim idea03" test -n "$(claim_val idea03)"
 check "explicit claim idea04" test -n "$(claim_val idea04)"
-"$RELEASE" --pis idea01,idea04 >/dev/null
-check "explicit release idea01 idle" test "$(status_val idea01)" = idle
+"$RELEASE" --pis idea03,idea04 >/dev/null
+check "explicit release idea03 idle" test "$(status_val idea03)" = idle
 check "explicit release idea04 idle" test "$(status_val idea04)" = idle
 
 # 9. App#10 fixture pack pointers in Ops checklist
@@ -151,7 +158,37 @@ check "--count claims idea01+idea04" test -n "$(claim_val idea01)" -a -n "$(clai
 "$CLAIM" --count 3 walk-g2 >/dev/null 2>&1; rc=$?
 check "--count 3 with one golden refuses" test "$rc" = 1
 
-# 9. --run-teardown runs the real teardown with --yes; a failed teardown keeps the claim
+# Release pool membership, claim honouring, and shared-store checklist.
+cat > "$STATE_FILE" <<'JSON'
+{
+  "idea01": {"role":"spare","status":"testing","claim":"selftest-atlas: duration-walk leftover idea#166","mdns":false},
+  "idea02": {"role":"fleet-pending","status":"hold","claim":null,"mdns":true},
+  "idea03": {"role":"review","status":"testing","claim":"Pixel: B4-23a restore screenshots","mdns":true},
+  "idea04": {"role":"spare","status":"testing","claim":"selftest-atlas: duration-walk walk-ok idea#166","mdns":true}
+}
+JSON
+"$RELEASE" --pis idea01 >/dev/null 2>&1; rc=$?
+check "release refuses idea01 even if role is spare" test "$rc" = 1
+check "idea01 claim left in place" test "$(claim_val idea01)" = "selftest-atlas: duration-walk leftover idea#166"
+
+"$RELEASE" --pis idea03 >/dev/null 2>&1; rc=$?
+check "release refuses another bot's claim" test "$rc" = 1
+check "foreign claim left in place" test "$(claim_val idea03)" = "Pixel: B4-23a restore screenshots"
+check "foreign status left testing" test "$(status_val idea03)" = testing
+
+"$RELEASE" --pis idea03 --walk-id walk-ok >/dev/null 2>&1; rc=$?
+check "release --pis + --walk-id refuses non-matching claim" test "$rc" = 1
+check "foreign claim still in place after walk-id mismatch" test "$(claim_val idea03)" = "Pixel: B4-23a restore screenshots"
+
+out="$("$RELEASE" --walk-id walk-ok)"
+check "release by walk-id still releases matching pool Pi" test "$(claim_val idea04):$(status_val idea04)" = ":idle"
+check "restore checklist keeps 2VroE" grep -q '2VroE' <<<"$out"
+check "restore checklist keeps mdns: true" grep -q 'mdns: true' <<<"$out"
+check "restore checklist does not ask for unique Automerge store" bash -c '! grep -qi "unique Automerge" <<<"$0"' "$out"
+check "restore checklist does not require mdns remains off" bash -c '! grep -q "mDNS remains off" <<<"$0"' "$out"
+check "foreign idea03 still untouched after walk-ok release" test "$(claim_val idea03)" = "Pixel: B4-23a restore screenshots"
+
+#  --run-teardown runs the real teardown with --yes; a failed teardown keeps the claim
 cat > "$WORK/td-ok" <<'SH'
 #!/usr/bin/env bash
 echo "$*" >> "$WORK/td.log"; exit 0

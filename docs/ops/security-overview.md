@@ -1,4 +1,4 @@
-**Status:** Draft (idea#181, ops side) · **Maintained by:** Atlas / Steve · 13 November 2026 (Tailscale section aligned with idea#117)
+**Status:** Draft (idea#181, ops side) · **Maintained by:** Atlas / Steve · 25 November 2026 (key expiry disabled on all tagged nodes; sudoers files per host; earlier: Tailscale section aligned with idea#117)
 
 # IDEA security overview (ops view)
 
@@ -19,9 +19,9 @@ The Tailscale field-access model (how staff reach Pis and schools, enrolment, an
 - Tagged devices don't expire and don't belong to a person.
 - **The auth key is never written into a document, repo, image or log.** A new Engine joins once at first boot (engine#291, idea#117 option 3) and then deletes the key. Ops boxes keep their copy in a 0600 file outside any repo.
 - Ops reaches Pis directly on their Tailscale IP, never through a jump host. Production idea is reached as `idea.tail2d60.ts.net:<port>` (IPv4 fallback `100.115.60.6`).
-- **Current state versus this design** (audits 29 Oct and 10 Nov 2026, recorded on [idea#117](https://github.com/koenswings/idea/issues/117) and in `tools/fleet/tag-fleet-idea-tc.md`):
+- **Current state versus this design** (audits 29 Oct, 10 Nov and 25 Nov 2026, recorded on [idea#117](https://github.com/koenswings/idea/issues/117) and in `tools/fleet/tag-fleet-idea-tc.md`):
   - The kit Pis and kit routers (sunny-robin, happy-zebra, kind-panda) carry `tag:idea` and have no node-key expiry.
-  - The five fleet Pis (idea01–04 and `idea`) were still **untagged** on 10 November 2026 and their node keys expire; idea02 and idea03 expire on 2 December 2026 14:36 Europe/Brussels unless Koen tags them (with re-auth or Disable key expiry) in the admin console (idea#375 T-c).
+  - The five fleet Pis (idea01–04 and `idea`) are tagged `tag:idea` since 11 November 2026 (idea#375 T-c). Key expiry is disabled on every tagged IDEA node (read by Atlas on 25 November 2026), so no node key in the fleet expires.
   - Not yet confirmed in the admin console (idea#375 T-a): whether the fleet auth key itself is tagged, reusable or ephemeral, and its expiry.
 
 ## 2. School network
@@ -48,7 +48,9 @@ The Tailscale field-access model (how staff reach Pis and schools, enrolment, an
 - **sudoers:**
   - The Engine may run only a narrow, named set of root helpers (flash helper, app-data, erase-disk, the read-only mount line).
   - `deploy-engine-pi.sh` installs them and checks them with `visudo -c`.
-  - The cloud-init blanket `pi ALL=(ALL) NOPASSWD:ALL` is removed by `tools/fleet/strip-cloud-init-sudoers.sh` (idea#153).
+  - **A blanket `pi ALL=(ALL) NOPASSWD: ALL` rule is still in place on every Pi** (read by Atlas on 25 November 2026). There are two files, and only one has a strip script:
+    - Pi OS's `/etc/sudoers.d/010_pi-nopasswd` is still present on idea01–04 and production `idea`. No script removes it yet; removing it is a follow-up once the Engine's own sudoers file has run cleanly on the fleet.
+    - cloud-init's `/etc/sudoers.d/90-cloud-init-users` is what `tools/fleet/strip-cloud-init-sudoers.sh` (idea#153) removes. It is absent on idea01–04 and production `idea`, but still present on the kits sunny-robin and happy-zebra: the strip script has not been run on the kits yet. kind-panda was not reachable and is not recorded.
 - In the apps, the Console has an Operator Login, and the apps have teacher, learner and admin roles.
 
 ## 5. Secrets and code
