@@ -113,7 +113,7 @@
     "lan": "192.168.0.231",
     "runner": "none",
     "grok_build": null,
-    "version": "engine main@cba91a688491b61fd990e374e7942283d6ccaea9, console main@073dfc5ee3fb0b692c06c55586b7e77fe719dba2",
+    "version": "engine main@ff413e11cf8ce01bade3db982fbdf0c5982783d3, console main@90bd63e8545bb4bcd86b84b65a3ccd96a312f455 (release field/zimbabwe-2026-11-25/engine-ff413e1 + zimbabwe-2026-11-25)",
     "mdns": false,
     "store": "automerge:6f8m5KxzARv9xwv4Lw18LgVUJzu",
     "console_port": 8081,
@@ -124,7 +124,9 @@
       "instance": "milkwise-wizardly-hugle-001",
       "since": "2026-10-08"
     },
-    "claim": null
+    "claim": null,
+    "hostname": "idea",
+    "deployed": "engine ff413e1 + console 90bd63e 2026-11-25 19:15 CET (prev engine cba91a6, console 073dfc5; backup ~/quarantine/security-update-20261125-190931). Atlas."
   },
   "sunny-robin": {
     "role": "kit-engine",
@@ -141,8 +143,8 @@
       "old_tailscale_node": "sunny-robin 100.99.84.61 removed deliberately by Koen 2026-10-17 (dead NVMe identity); replaced by 100.96.98.10.",
       "power": "Recurring brief under-voltage ~2 s on cold boot (FIT, 3120 boots), EXT5V idle 5.18 V, min 5.127 V over 10 min of apt load; cable/port vs HAT comparison pending."
     },
-    "version": "engine axle/567-kit-c1cc4bb@6c47f09494b0bc73d5c91119d33e8df49d3910b8 (c1cc4bb + #568, engine#567 merged as 63c4550), console df13dbfa (dist-only swap, hash 1f24750459cba93f; checkout stays main@654224e), helper idea-app-data v25",
-    "deployed": "engine c1cc4bb 2026-11-22 13:38 CET (prev adfd9d3), then 6c47f09 2026-11-22 14:28 CET (pre-567 backup ~/quarantine/pre-567-20261122T142510, deploy backup ~/quarantine/engine-deploy-20261122-142557); console dist df13dbfa 13:39 CET; memory-cgroup reboot 14:31 CET (cmdline.txt.bak-20261122-143145). idea#374, Atlas.",
+    "version": "engine main@ff413e11cf8ce01bade3db982fbdf0c5982783d3, console main@90bd63e8545bb4bcd86b84b65a3ccd96a312f455 (release field/zimbabwe-2026-11-25/engine-ff413e1 + zimbabwe-2026-11-25), helper idea-app-data v25",
+    "deployed": "engine ff413e1 + console 90bd63e 2026-11-26 08:49 CET (prev engine 6c47f09, console df13dbfa; backups ~/quarantine/security-update-20261126-083106, engine-deploy-20261126-083153, console-deploy-20261126-084013). Atlas.",
     "router": {
       "name": "sunny-robin-router",
       "model": "Cudy WR3000S v1 (cudy,wr3000s-v1)",
@@ -297,7 +299,8 @@
       "kolibri_demo_content_copy": "~/kit374-preupdate-content/",
       "pm2": "engine only from pm2.config.cjs 6c47f09 (exp_backoff 1000, min_uptime 5000, no max_restarts); idea-usage not started",
       "verified": "2026-11-22 after reboot: engine restarts 0, :80 200, 12/12 containers Up, journalctl --list-boots shows previous boot"
-    }
+    },
+    "pending_update": "update to engine ff413e1 + console 90bd63e (release field/zimbabwe-2026-11-25/engine-ff413e1) pending; kit offline on 2026-11-25, will be updated when it comes online"
   },
   "happy-zebra": {
     "role": "kit-engine",
@@ -355,7 +358,8 @@
     },
     "console_port": 80,
     "observed": "Last SSH read 2026-11-06 19:11 CET (Atlas kit watch, read-only, nothing changed): hostname happy-zebra, uptime ~14 min, 60.4 C, Tailscale 100.102.94.100 via DERP jnb. Console answered HTTP 200 on :80 in the idea#288 watch runs of 2026-10-29 02:10-08:10 CET (state.md run log). Tailscale seen online again 2026-11-09 06:48, 2026-11-10 07:35, 2026-11-11 07:27 and 2026-11-12 08:00 CET (ping only, no SSH); offline at the 2026-11-15 12:00 CET watch run.",
-    "claim": null
+    "claim": null,
+    "pending_update": "update from engine adfd9d3 pending"
   },
   "_test_disks": {
     "wds120-20070Q450002": {
