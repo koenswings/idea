@@ -1,4 +1,4 @@
-**Status:** Authoritative · **Maintained by:** Koen / Steve (manuals: Marco; ops docs: Atlas) · 15 November 2026
+**Status:** Authoritative · **Maintained by:** Koen / Steve (manuals: Marco; ops docs: Atlas; field-support log: Marco) · 25 November 2026
 
 # docs/: IDEA's documentation as it is today
 
@@ -16,14 +16,14 @@ This section lists the user-facing manuals and their current PDF versions. Each 
 
 | Manual | Current PDF | Folder |
 |---|---|---|
-| IDEA for Teachers: Tutorial | v2.2.1 | [`manuals/teachers/teacher-tutorial/`](manuals/teachers/teacher-tutorial/) |
+| IDEA for Teachers: Tutorial | v2.2.2 | [`manuals/teachers/teacher-tutorial/`](manuals/teachers/teacher-tutorial/) |
 | Lesson manuals: Grade 5A — Add and subtract fractions, Form 3 — Variables and expressions | v1.3 | [`manuals/teachers/lesson-manuals/`](manuals/teachers/lesson-manuals/) |
-| IDEA for Operators: Tutorial | v1.1 | [`manuals/operators/operator-tutorial/`](manuals/operators/operator-tutorial/) |
-| IDEA Field Install Manual: School Server | v1.8 | [`manuals/install/install-manual-school-server/`](manuals/install/install-manual-school-server/) |
-| IDEA Field Install Manual: Classroom Computer | v2.6 | [`manuals/install/install-manual-classroom-computer/`](manuals/install/install-manual-classroom-computer/) |
+| IDEA for Operators: Tutorial | v1.1.1 | [`manuals/operators/operator-tutorial/`](manuals/operators/operator-tutorial/) |
+| IDEA Field Install Manual: School Server | v1.8.1 | [`manuals/install/install-manual-school-server/`](manuals/install/install-manual-school-server/) |
+| IDEA Field Install Manual: Classroom Computer | v2.6.1 | [`manuals/install/install-manual-classroom-computer/`](manuals/install/install-manual-classroom-computer/) |
 | IDEA Kit: Accounts and Passwords (private, for the install team) | v1.1 | [`manuals/install/accounts-and-passwords/`](manuals/install/accounts-and-passwords/) |
 | Router setup scripts (used by the install manuals) | — | [`manuals/install/scripts/`](manuals/install/scripts/) |
-| IDEA Demo Server: Remote Access | v1.2 | [`manuals/field/remote-access-guide/`](manuals/field/remote-access-guide/) |
+| IDEA Demo Server: Remote Access | v1.2.1 | [`manuals/field/remote-access-guide/`](manuals/field/remote-access-guide/) |
 | IDEA kit: a note for your school | v1.0 | [`manuals/field/school-handover-note/`](manuals/field/school-handover-note/) |
 | Nextcloud update for schools | 1.8-31.0.14 | [`manuals/field/nextcloud-update/`](manuals/field/nextcloud-update/) |
 
@@ -45,9 +45,10 @@ This section points to the docs about the platform and day-to-day operations.
 | [`ops/engine-deploy-pool-pi.md`](ops/engine-deploy-pool-pi.md) | Deploying the Engine on a test-pool device |
 | [`ops/boot-recovery.md`](ops/boot-recovery.md) | What comes back after a reboot, and how to recover mounts |
 | [`ops/store-compaction-devpool.md`](ops/store-compaction-devpool.md) | Runbook for compacting the test-pool store |
+| [`field-support/log.md`](field-support/log.md) | Running record of field-support contacts (email and Telegram) and what was answered or sent |
 
-The field support channel design is a proposal, so it lives in [`../proposals/2026-10-14-field-support-channel/`](../proposals/2026-10-14-field-support-channel/).
+The running field-support log is in [`field-support/log.md`](field-support/log.md). The channel design is a proposal, so it lives in [`../proposals/2026-10-14-field-support-channel/`](../proposals/2026-10-14-field-support-channel/).
 
 ## Keeping this page current
 
-This section says who updates what. When you add, rename or version a doc, update [`INDEX.md`](INDEX.md) in the same PR, and this page too if the change affects a row above. Atlas looks after `ops/` and the folder rules with Steve; Marco looks after the manuals.
+This section says who updates what. When you add, rename or version a doc, update [`INDEX.md`](INDEX.md) in the same PR, and this page too if the change affects a row above. Atlas looks after `ops/` and the folder rules with Steve; Marco looks after the manuals and the field-support log.

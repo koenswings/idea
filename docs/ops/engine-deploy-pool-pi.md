@@ -8,7 +8,7 @@ A pool Pi (idea03, idea04; golden idea01 runs the same way and stays on the shar
 `/home/pi/idea/agents/agent-engine-dev` with **local, uncommitted edits** to tracked files:
 `config.yaml`, `pm2.config.cjs` and the files in `store-identity/`. Option 2 (Axle, 2026-10-13)
 keeps those edits across a checkout of a new Engine commit: save, discard, check out, restore.
-Never on idea02, wizardly-hugle or Milkwise; the script refuses other hosts.
+Never on idea02. Production `idea` (fleet-state key `wizardly-hugle`) is allowed only with `--production` and only after Koen's GO via Steve: the store must stay `automerge:6f8m…` and the DHCP vendor class step is skipped there. The script refuses `--production` on any other host, and refuses every host not listed in section 3.
 
 ## 2. Why store-identity must be saved too
 The repo's tracked `store-identity/store-url.txt` and `store-identity/command-log-url.txt`
@@ -59,7 +59,7 @@ separately with `tools/fleet/build-console-pi.sh`, which keeps `dist/hidden-inst
 
 1. **Guard:** host is a pool Pi; `store-url.txt` is the expected store (2VroE); only
    `config.yaml`, `pm2.config.cjs` and `store-identity/*` have tracked local edits.
-2. **Save** `config.yaml`, `pm2.config.cjs` and the whole `store-identity/` folder
+2. **Save** `config.yaml`, `pm2.config.cjs`, `~/.idea-local` and the whole `store-identity/` folder
    (`store-url.txt`, `command-log-url.txt`, `store-template.json`, anything else) to
    `/home/pi/quarantine/engine-deploy-<ts>/`, plus the old `HEAD`.
 3. **Discard** the local edits of exactly those files (`git checkout -- …`).
@@ -71,13 +71,15 @@ separately with `tools/fleet/build-console-pi.sh`, which keeps `dist/hidden-inst
    it to `/usr/local/sbin/idea-dhcp-vendor-class` (root, 0755), run it (idempotent) and, if
    NetworkManager is active, `nmcli general reload conf` (no NM restart, no link change).
    A failure there only warns; `check-fleet-health.sh` reports a missing drop-in.
-8. **Verify the store again**, then `pm2 restart engine --update-env`.
-9. **pm2 config drift (warning only).** Because `pm2.config.cjs` is kept from before the deploy and
-   only `engine` is restarted, pm2 settings that the new commit adds (crash backoff engine#567, the
-   `idea-usage` process idea#411) do not take effect. The script prints `WARN:` when the kept file
-   differs from the tip's, or when the tip defines `idea-usage` and pm2 shows it stopped or missing.
-   Apply by hand after reviewing the diff: `git checkout -- pm2.config.cjs; pm2 delete engine idea-usage;
-   pm2 start pm2.config.cjs --env production; pm2 save`.
+8. **Root helpers:** `./install-root-helpers`, a sha256 check of each helper against the tip, and `visudo -c`
+   (a tip without `install-root-helpers` only warns).
+9. **Verify the store again**, then `pm2 restart engine --update-env` and `pm2 save`, then verify the store once more.
+10. **pm2 config drift (warning only).** Because `pm2.config.cjs` is kept from before the deploy and
+    only `engine` is restarted, pm2 settings that the new commit adds (crash backoff engine#567, the
+    `idea-usage` process idea#411) do not take effect. The script prints `WARN:` when the kept file
+    differs from the tip's, or when the tip defines `idea-usage` and pm2 shows it stopped or missing.
+    Apply by hand after reviewing the diff: `git checkout -- pm2.config.cjs; pm2 delete engine idea-usage;
+    pm2 start pm2.config.cjs --env production; pm2 save`.
 
 Any failed check aborts with exit 3 **before** `pm2 restart`, so the running Engine keeps its
 store. The backup folder stays for a manual restore.
