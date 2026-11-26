@@ -7,8 +7,9 @@
 # idea03 and idea04 only (never golden idea01, never walker-host idea02).
 # Honours fleet-state claims: never clears a claim that is not this duration
 # walk (or, with --pis only, a duration-walk claim).
-# --run-teardown invokes teardown.sh (not a stub; see that script). It is not
-# documented here as a complete restore.
+# --run-teardown runs teardown.sh <pi> --yes (idea#107: restores main, post-check,
+# marks the Pi idle). A Pi whose teardown fails keeps its claim and status (exit 1);
+# the other Pis are still released. It is not documented here as a complete restore.
 #
 # Usage:
 #   duration-test-release.sh [--dry-run] --walk-id <id>
@@ -18,7 +19,8 @@
 # Options:
 #   --walk-id ID   release Pis whose claim contains "duration-walk <ID>"
 #   --pis LIST     explicit comma-separated pool Pis (idea03/idea04 only)
-#   --run-teardown also invoke tools/fleet/teardown.sh <pi>
+#   --run-teardown run tools/fleet/teardown.sh <pi> --yes first; a Pi whose teardown fails keeps
+#                  its claim and status (exit 1), so it is never marked idle off main
 #   --dry-run      print plan only
 #   -h|--help      show this help
 #
@@ -29,10 +31,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 UFS="${SCRIPT_DIR}/update-fleet-state.sh"
-TEARDOWN="${SCRIPT_DIR}/teardown.sh"
+TEARDOWN="${TEARDOWN:-${SCRIPT_DIR}/teardown.sh}"
 POOL_ALLOWED='idea03 idea04'
 
-usage() { sed -n '2,27p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'; }
 die() { echo "ERROR: $*" >&2; exit 1; }
 usage_error() { echo "ERROR: $*" >&2; echo "Run with --help for usage." >&2; exit 2; }
 
@@ -126,7 +128,7 @@ mapfile -t TARGETS < <(
 echo "Duration-test release plan:"
 echo "  walk-id: ${WALK_ID:-"(explicit --pis)"}"
 echo "  pis:     ${TARGETS[*]}"
-echo "  teardown: $([ "$RUN_TEARDOWN" = 1 ] && echo yes || echo no)"
+echo "  teardown: $([ "$RUN_TEARDOWN" = 1 ] && echo "yes (teardown.sh <pi> --yes)" || echo no)"
 
 for pi in "${TARGETS[@]}"; do
   jq -e --arg p "$pi" 'has($p)' "$STATE_FILE" >/dev/null || die "unknown Pi '$pi'"
@@ -142,11 +144,15 @@ if [ "$DRY_RUN" = 1 ]; then
   exit 0
 fi
 
+TEARDOWN_FAILED=()
 for pi in "${TARGETS[@]}"; do
   if [ "$RUN_TEARDOWN" = 1 ]; then
-    echo "note: invoking teardown.sh $pi" >&2
-    if ! "$TEARDOWN" "$pi"; then
-      echo "WARN: teardown.sh $pi failed — continuing with fleet-state release" >&2
+    echo "note: running teardown.sh $pi --yes" >&2
+    if ! "$TEARDOWN" "$pi" --yes; then
+      # Never mark a Pi idle that may still be off main: keep its claim and status for a human.
+      echo "ERROR: teardown.sh $pi --yes failed; claim and status kept, Pi NOT released" >&2
+      TEARDOWN_FAILED+=("$pi")
+      continue
     fi
   fi
   BOT_NAME="$BOT_NAME" STATE_FILE="$STATE_FILE" "$UFS" --null "$pi" claim
@@ -165,9 +171,14 @@ For each released Pi, confirm over SSH when Tailscale is available:
 4. pm2 engine online as user pi on merged main (or the intended post-walk tree).
 5. Optional: tools/fleet/check-fleet-health.sh --origin --pi <pi>
 
-This release only clears fleet-state claim/status. Leave 2VroE and mdns: true
-as they are; do not force a unique store or mdns: false.
+Without --run-teardown this release only clears fleet-state claim/status. Leave 2VroE
+and mdns: true as they are; do not force a unique store or mdns: false.
 See tools/fleet/DURATION_TESTS.md
 RESTORE
 
-echo "Released ${#TARGETS[@]} Pi(s): ${TARGETS[*]}"
+echo "Released $(( ${#TARGETS[@]} - ${#TEARDOWN_FAILED[@]} )) of ${#TARGETS[@]} Pi(s): ${TARGETS[*]}"
+
+if [ ${#TEARDOWN_FAILED[@]} -gt 0 ]; then
+  echo "NOT released (teardown failed): ${TEARDOWN_FAILED[*]}" >&2
+  exit 1
+fi
