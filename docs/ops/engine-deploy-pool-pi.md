@@ -74,6 +74,12 @@ separately with `tools/fleet/build-console-pi.sh`, which keeps `dist/hidden-inst
 8. **Root helpers:** `./install-root-helpers`, a sha256 check of each helper against the tip, and `visudo -c`
    (a tip without `install-root-helpers` only warns).
 9. **Verify the store again**, then `pm2 restart engine --update-env` and `pm2 save`, then verify the store once more.
+10. **pm2 config drift (warning only).** Because `pm2.config.cjs` is kept from before the deploy and
+    only `engine` is restarted, pm2 settings that the new commit adds (crash backoff engine#567, the
+    `idea-usage` process idea#411) do not take effect. The script prints `WARN:` when the kept file
+    differs from the tip's, or when the tip defines `idea-usage` and pm2 shows it stopped or missing.
+    Apply by hand after reviewing the diff: `git checkout -- pm2.config.cjs; pm2 delete engine idea-usage;
+    pm2 start pm2.config.cjs --env production; pm2 save`.
 
 Any failed check aborts with exit 3 **before** `pm2 restart`, so the running Engine keeps its
 store. The backup folder stays for a manual restore.

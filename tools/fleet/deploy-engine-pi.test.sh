@@ -15,6 +15,9 @@ mkdir -p "$WORK/bin"
 cat > "$WORK/bin/pm2" <<'SH'
 #!/usr/bin/env bash
 echo "$*" >> "$WORK/pm2.log"
+# FAKE_PM2_JLIST=<json>: what "pm2 jlist" prints (pm2 drift check)
+[ "$1" = jlist ] && [ -n "${FAKE_PM2_JLIST:-}" ] && printf '%s' "$FAKE_PM2_JLIST"
+exit 0
 SH
 cat > "$WORK/bin/pnpm" <<'SH'
 #!/usr/bin/env bash
@@ -63,9 +66,10 @@ for a in script/build_image_assets/idea-flash-card script/build_image_assets/ide
 done
 IRH
     chmod +x install-root-helpers; fi
+  [ -n "${TIP_PM2:-}" ] && printf '%s\n' "$TIP_PM2" > pm2.config.cjs   # pm2 drift tests: the tip's own pm2 config
   git add -A; git commit -qm tip
   TIP=$(git rev-parse HEAD); git checkout -q HEAD~1
-  echo "mdns: true # local" > config.yaml; echo "module.exports={local:1}" > pm2.config.cjs
+  echo "mdns: true # local" > config.yaml; echo "${LOCAL_PM2:-module.exports={local:1\}}" > pm2.config.cjs
   echo "$POOL" > store-identity/store-url.txt; echo "automerge:cmdlogPool" > store-identity/command-log-url.txt
   echo "{}" > store-identity/store-template.json   # untracked, must survive
   cd "$WORK" || exit 1
@@ -302,5 +306,26 @@ check "temp: peak summary per step" grep -q "TEMP PEAKS" "$WORK/out" && grep -qE
 setup cool; printf '%s\n' 50.0 > "$WORK/temps"; TEMP_POLL=0 run cool --yes; rc=$?
 check "temp: cool never pauses" [ "$rc" = 0 ] && ! grep -q "TEMP PAUSE" "$WORK/out"
 rm -f "$WORK/bin/vcgencmd"
+
+# pm2 config drift warning (field failure analysis 2026-11-25): warn only, exit unchanged
+cat > "$WORK/bin/pm2" <<'SH'
+#!/usr/bin/env bash
+echo "$*" >> "$WORK/pm2.log"
+[ "$1" = jlist ] && [ -n "${FAKE_PM2_JLIST:-}" ] && printf '%s' "$FAKE_PM2_JLIST"
+exit 0
+SH
+chmod +x "$WORK/bin/pm2"
+setup drift; run drift --yes; rc=$?
+check "pm2 drift: kept pm2.config.cjs differs -> WARN, deploy still ok" [ "$rc" = 0 ] && grep -q "WARN: pm2.config.cjs on this Pi differs" "$WORK/out"
+check "pm2 drift: kept pm2.config.cjs is still the Pi's own" [ "$(cat "$R/pm2.config.cjs")" = "module.exports={local:1}" ]
+LOCAL_PM2="module.exports={}" setup nodrift; run nodrift --yes; rc=$?
+check "pm2 drift: same file -> no WARN" [ "$rc" = 0 ] && ! grep -q "WARN: pm2.config.cjs" "$WORK/out"
+U='module.exports={apps:[{name:"engine"},{name:"idea-usage"}]}'
+TIP_PM2="$U" LOCAL_PM2="$U" setup usage; FAKE_PM2_JLIST='[{"name":"engine","pm2_env":{"status":"online"}},{"name":"idea-usage","pm2_env":{"status":"stopped"}}]' run usage --yes; rc=$?
+check "pm2 drift: idea-usage stopped -> WARN, deploy still ok" [ "$rc" = 0 ] && grep -q "pm2 shows it stopped" "$WORK/out"
+TIP_PM2="$U" LOCAL_PM2="$U" setup usage2; FAKE_PM2_JLIST='[{"name":"engine","pm2_env":{"status":"online"}}]' run usage2 --yes; rc=$?
+check "pm2 drift: idea-usage missing -> WARN" [ "$rc" = 0 ] && grep -q "pm2 shows it missing" "$WORK/out"
+TIP_PM2="$U" LOCAL_PM2="$U" setup usage3; FAKE_PM2_JLIST='[{"name":"engine","pm2_env":{"status":"online"}},{"name":"idea-usage","pm2_env":{"status":"online"}}]' run usage3 --yes; rc=$?
+check "pm2 drift: idea-usage online -> no WARN" [ "$rc" = 0 ] && ! grep -q "idea-usage pm2 process" "$WORK/out"
 
 echo "passed $pass, failed $fail"; [ "$fail" = 0 ]
