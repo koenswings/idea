@@ -1,8 +1,8 @@
-**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 22 October 2026
+**Status:** Authoritative · **Maintained by:** Marco (with Atlas) · 25 November 2026
 
 # Remote access guide (demo server over Tailscale)
 
-`idea-demo-server-remote-access-guide-v1.2.pdf` ("IDEA Demo Server: Remote Access", v1.2, 23 pages): Part A for the IDEA
+`idea-demo-server-remote-access-guide-v1.2.1.pdf` ("IDEA Demo Server: Remote Access", v1.2.1, 23 pages; v1.2.1 of 25 November 2026 says the demo apps are installed on idea rather than an Engine default; the v1.2 PDF is in `superseded/`): Part A for the IDEA
 admin (share the demo server idea (earlier name wizardly-hugle) from the IDEA tailnet), Part B for the field engineer (install Tailscale, accept
 the share, open the Console and the demo apps, get help from the IDEA support bot @IDEA_SupportBot). Logins come from the
 IDEA Kit: Accounts and Passwords sheet.

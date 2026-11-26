@@ -8,7 +8,7 @@ Update this file whenever a proposal is added, approved, declined, or superseded
 
 ## 2026-11-09-field-usage-monitoring.md
 **Status:** Draft (Design Review complete 2026-11-10 — Pixel, Kid, Axle, Atlas; off switch and reliability added 2026-11-10 after Koen's questions) · **Author:** Steve (Lead Bot)
-Programme dashboard for whether donated field kits are used as taught. Kit-side Option B (`idea-usage` plus per-App hooks) stores role-level day summaries at `/var/lib/idea/usage/<day>/<instanceId>.json`; idea pulls them over restricted SSH (helper v7) through a Tailscale sidecar tagged `tag:idea-hub`. The dashboard App runs on idea (Pixel builds the UI, Kid owns the collector), stores SQLite there, and never uses an LLM or the shared Automerge store. The existing Engine, Console and sync do not depend on monitoring; it ships with a persistent `usageMonitoring` switch **off** and can be turned off at fleet, kit or idea level (§10). D2 is deferred. Field kits stay on Engine `adfd9d3` until idea#374. PDF: `proposals/2026-11-09-field-usage-monitoring/`.
+Programme dashboard for whether donated field kits are used as taught. Kit-side Option B (`idea-usage` plus per-App hooks) stores role-level day summaries at `/var/lib/idea/usage/<day>/<instanceId>.json`; idea pulls them over restricted SSH (`idea-usage-export`, which landed in helper v7 and is still in v25) through a Tailscale sidecar tagged `tag:idea-hub`. The dashboard App runs on idea (Pixel builds the UI, Kid owns the collector), stores SQLite there, and never uses an LLM or the shared Automerge store. The existing Engine, Console and sync do not depend on monitoring; it ships with a persistent `usageMonitoring` switch **off** and can be turned off at fleet, kit or idea level (§10). D2 is deferred. Field kits stayed on Engine `adfd9d3` until idea#374 (the current kit versions are in `fleet-state.json`; kind-panda and sunny-robin moved to `6c47f09` on 22 Nov 2026). PDF: `proposals/2026-11-09-field-usage-monitoring/`.
 
 ## 2026-10-15-router-image-and-flashing.md
 **Status:** Approved by Koen 2026-10-15 · **Author:** Steve (Lead Bot)
@@ -24,7 +24,7 @@ Repeatable Ubuntu Desktop 26.04 LTS image for shared student client Pis (one car
 
 ## dev-bot-workflow.md
 **Status:** Approved (Design Review complete — Axle, Pixel, Kid, Atlas, 2026-09-28) · **Author:** Steve (Lead Bot)
-Officialise the real workflow (idea#147): Dev Bots implement with their own tools, test over SSH on a claimed pool Pi (idea03/04, never golden idea01; before 2026-10-28: idea01/03/04, golden idea02; idea03 golden briefly on 2026-10-28), open PRs; Ops deploys review Pis via fleet scripts; Koen squash-merges; Ops updates golden. Grok Build + GitHub Actions self-hosted runner coding path **parked** (runner stopped on idea02, Grok Build 1.0.40 stays installed). Adds the fleet-Pi test claim protocol (`docs/grok-bot-setup.md` §4.6). Follow-ups: AGENTS.md rewrites per repo, Bot descriptions, `idea-setup.sh` opt-in flag, health-check scheduler.
+Officialise the real workflow (idea#147): Dev Bots implement with their own tools, test over SSH on a claimed pool Pi (idea03/04, never golden idea01; before 2026-10-28: idea01/03/04, golden idea02; idea03 golden briefly on 2026-10-28), open PRs; Ops deploys review Pis via fleet scripts; Koen squash-merges (the proposal's wording; today Koen merges idea and App-repo PRs, app-kolibri always needs Koen's own words, and Steve may squash-merge his delegated agent-engine-dev, agent-console-dev and app-nextcloud PRs under Koen's standing approval; the merge tool may ask Koen to confirm Console merges on a card); Ops updates golden. Grok Build + GitHub Actions self-hosted runner coding path **parked** (runner stopped on idea02, Grok Build 1.0.40 stays installed). Adds the fleet-Pi test claim protocol (`docs/grok-bot-setup.md` §4.6). Follow-ups: AGENTS.md rewrites per repo, Bot descriptions, `idea-setup.sh` opt-in flag, health-check scheduler.
 
 ## files-disk.md
 **Status:** Approved (merged 2026-09-28, #124; implementation #126–#141) · **Author:** Steve (Lead Bot)
@@ -87,7 +87,7 @@ Options for tracing all agent activity. Decision: GitHub Actions logs for coding
 MilkWise standalone product Grok Bot setup — Lead and Dev Bots, extraction steps.
 
 ## design-per-pi-engine-key.md
-**Status:** Decided (Koen, 2026-10-06; not built yet) · **Author:** Engine Dev (Axle), filed by Atlas
+**Status:** Decided (Koen, 2026-10-06); implemented in the Engine (`src/data/PeerAccess.ts`, peer keys exchanged through the store, 7-day expiry; checked 25 Nov 2026) · **Author:** Engine Dev (Axle), filed by Atlas
 Each Engine has its own SSH key, exchanged through the shared store, so Pis move between schools with no ops step.
 
 ## design-school-engine-key.md
@@ -95,7 +95,7 @@ Each Engine has its own SSH key, exchanged through the shared store, so Pis move
 One Engine key per school for cross-Pi copy/move; kept for the record.
 
 ## design-root-helper.md
-**Status:** Proposal (borg/root helpers since merged in engine #184) · **Author:** Engine Dev (Axle), filed by Atlas
+**Status:** Proposal; implemented: the `idea-app-data` root helper is in the Engine (engine #184 and later; version 25 today, `APP_DATA_HELPER_VERSION` in `src/utils/appDataHelper.ts`; checked 25 Nov 2026) · **Author:** Engine Dev (Axle), filed by Atlas
 Root helper `idea-app-data`: fixed verbs (copy, delete, borg on one repo), checked tokens, single sudoers line.
 
 ## 2026-10-13-avahi-hostname-clash.md
@@ -115,12 +115,12 @@ Tailscale always on at schools; one fleet tag `tag:idea` and one fleet auth key,
 IDEA Field Support Channel – Design: one contact point for field people (Justice first). Router sends technical questions to a new Support Engineer agent and teaching/manual questions to Marco; agents only filter and report, never change anything; Steve escalates to Koen. Phase 0 email to one Grok Bot address, phase 1 WhatsApp Business (Meta Cloud API), phase 2 more schools. PDF, diagram and build script in `proposals/2026-10-14-field-support-channel/`.
 
 ## 2026-10-14-teacher-usb-sticks.md
-**Status:** Draft · **Author:** Steve (Lead Bot)
+**Status:** Draft; implemented in the Engine (`src/data/UsbSticks.ts`, idea#193, capability `usbSticks`; checked 25 Nov 2026) · **Author:** Steve (Lead Bot)
 Teacher USB sticks: any FAT/exFAT stick is mounted read-only (`ro,nosuid,nodev,noexec`) under `/run/idea-usb`, published as `Engine.usbSticks` (not an IDEA disk), and shown in Nextcloud as a read-only "USB: <name>" folder for teachers (static rslave bind, no recreate) and as a source in the Kolibri channel builder. Amends files-disk.md's "never mounts FAT/exFAT" rule (erase still possible). On insert the Engine starts the channel builder (if docked on that Pi and not operator-stopped; Koen 2026-10-14) and it auto-builds one channel per subfolder of a top-level `kolibri` folder on an inserted stick (rebuild only on change; Kolibri Import stays the human gate). Writable marker mode deferred; Files Disk backup is a later proposal. Builder added to Console demo mode (Koen). Includes the teacher-tutorial changes (builder/USB chapter placed before the Files Disk chapter).
 
 
 ## 2026-10-16-console-demo-setup.md
-**Status:** Draft · **Author:** Steve (Lead Bot)
+**Status:** Draft; implemented (`setupDemo` / `removeDemo` in the Engine, `DemoApps.ts`, engine#369; checked 25 Nov 2026) · **Author:** Steve (Lead Bot)
 Console "Set up demo" button (Koen 2026-10-16, replaces the IDEA-DEMO disk idea): an Engine `setupDemo` command installs separate `Kolibri (Demo)` and `Nextcloud (Demo)` instances alongside any real ones, marked `demo: true`, runs app-provided demo hooks (content download from a versioned demo pack, or a local pack offline; IDEA Demo School; learners username-only, `<name>911!` for others), and `removeDemo` removes only `demo: true` instances. Issue #233. PDF in `proposals/2026-10-16-console-demo-setup/`.
 
 ## 2026-10-28-update-app.md

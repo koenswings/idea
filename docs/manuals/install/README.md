@@ -1,6 +1,8 @@
-**Status:** Authoritative (follows the school network design; not yet run on hardware) · **Maintained by:** Marco (with Atlas) · 19 October 2026
+**Status:** Authoritative (follows the school network design; not yet run on hardware) · **Maintained by:** Marco (with Atlas) · 25 November 2026
 
 # Field Install Manuals
+
+25 November 2026: school server v1.8.1 and classroom computer v2.6.1: apps of an Engine that is not there have a greyed-out Open button (Console #175), no longer "no fix yet"; the school-server checklist opens the Console only by idea.local or sticker name.
 
 27 October 2026: classroom computer v2.6: learners may join any Wi-Fi network, including IDEA-Teachers (idea#285).
 
@@ -8,8 +10,8 @@
 
 | Folder | PDF | Topic |
 |---|---|---|
-| `install-manual-school-server/` | `idea-field-install-manual-school-server-v1.8.pdf`  | Starlink → Cudy WR3000S (OpenWrt + Tailscale) → TL-SG105PE PoE+ switch → Pi 5 IDEA Engines (one or more) |
-| `install-manual-classroom-computer/` | `idea-field-install-manual-classroom-computer-v2.6.pdf`  | Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor (one PSU) + the IDEA client image (Ubuntu Desktop 26.04.1 LTS, Chrome, IDEA icon) |
+| `install-manual-school-server/` | `idea-field-install-manual-school-server-v1.8.1.pdf`  | Starlink → Cudy WR3000S (OpenWrt + Tailscale) → TL-SG105PE PoE+ switch → Pi 5 IDEA Engines (one or more) |
+| `install-manual-classroom-computer/` | `idea-field-install-manual-classroom-computer-v2.6.1.pdf`  | Raspberry Pi 400 or Pi 500 + Raspberry Pi Monitor (one PSU) + the IDEA client image (Ubuntu Desktop 26.04.1 LTS, Chrome, IDEA icon) |
 | `accounts-and-passwords/` | `idea-accounts-and-passwords-v1.1.pdf` | IDEA Kit: Accounts and Passwords (v1.1). **Private:** every default account and password of the kit (classroom computers, Engines, apps, router, switch, Wi-Fi). For the IDEA team and installers; not left at the school. |
 | `scripts/` | – | `school-router-setup.sh`, `router-tailscale-zone.sh` (OpenWrt 25.12 uci; tested with the 25.12.5 x86 rootfs `uci` + `fw4 print`, not yet on a real Cudy; no longer printed in the school-server manual) and `make-install-diagrams.py` (writes both manuals' `diagrams/*.svg`) |
 
@@ -21,6 +23,6 @@ Addressing and naming (school network design): every school uses the same subnet
 key for all schools.
 
 **Sticker names:** merged in agent-engine-dev#201 (installer names the Pi, prints it and saves `/home/pi/STICKER.txt`) and agent-console-dev#152 (the Console lists every Engine from the network database). `http://idea.local` stays as the easy way in (idea#184).
-The classroom computer manual describes the IDEA client image, which is built but not yet boot-tested on a Pi 400 and a Pi 500.
+The classroom computer manual describes the IDEA client image. Classroom computers with the October 2026 card images (seven Pi 500 and two Pi 400) were seen running on a kit's school network on 27 October 2026. The image's formal first-login check (`first-login-check.sh`) has no recorded PASS run yet, and this manual has not yet been followed step by step on hardware.
 
 No auth keys or tokens: everything in `<ANGLE BRACKETS>` is a placeholder. The router defaults (`IDEA`/`idea911!`, `IDEA-Teachers`/`idea-teachers911!`, `root`/`admin911!`) follow the public `<name>911!` convention (*IDEA School Router – Image and Automated Flashing* proposal); the client image's `admin` account uses `admin911!`.

@@ -1,4 +1,4 @@
-**Status:** Authoritative (idea#117, docs side) · **Maintained by:** Atlas · 13 November 2026
+**Status:** Authoritative (idea#117, docs side) · **Maintained by:** Atlas · 25 November 2026 (first-boot join is in Engine code since engine#291, 13 Nov; doc check by Marco)
 
 # Tailscale field access
 
@@ -57,7 +57,7 @@ On the LAN, the Console is `http://idea.local` or `http://<sticker>.local`. On t
 
 **Option 3 (decided):** a new Engine joins once as `tag:idea` at first boot ([engine#291](https://github.com/koenswings/agent-engine-dev/issues/291)), then **deletes the key**. The generic image stays key-free. The fleet key is only needed on the days we flash or build, not for the life of the Pi. The three kit Engines already match this (tagged, not ephemeral, no expiry) and need no field action.
 
-Until engine#291 lands, first-boot join is not yet in Engine code. Do not treat the old "latent debug / ephemeral activate" scripts as the target model.
+This is in Engine code since [engine#291](https://github.com/koenswings/agent-engine-dev/issues/291) (merged 13 November 2026). At every boot the root helper `idea-engine-identity` (run by `boot.sh`) looks for the key that the flash tool wrote to the boot partition (`idea-secrets/tailscale-authkey`). It moves it to a root-only file, runs `tailscale up --advertise-tags=tag:idea` with the sticker name as the Tailscale name, and deletes the key file after a successful join (`shred -u`, else `rm -f`). A failed join keeps the key so the next boot can try again. Do not treat the old "latent debug / ephemeral activate" scripts as the target model.
 
 **The fleet auth key is a secret.** It is never written into a document, repo, image, issue or log. On a Pi it is root-only (mode 0600) and only until the first successful join deletes it. Ops boxes keep their copy in a 0600 file outside any repo. Whether the live key is reusable and already tagged `tag:idea` is still a console check for Koen (idea#375 T-a).
 
@@ -82,10 +82,10 @@ These are facts already recorded in the repo, not a new audit.
 
 **Still open, tracked elsewhere**
 
-- The five fleet nodes (idea01–04 and production idea) were still **untagged** and user-owned on 10 November 2026, with node-key expiry on. idea02 and idea03 expire on **2 December 2026 14:36 Europe/Brussels** unless they are tagged with re-authentication or Koen clicks Disable key expiry. Tagging the pool (and idea02) is idea#375 T-c; the runbook is ready and is **not** permission to apply a tag. Production idea is deferred until Koen OKs it.
+- Done since 10 November 2026: the five fleet nodes (idea01–04 and production idea) are tagged `tag:idea` (idea#375 T-c, 11 November 2026; `tools/fleet/field-usage-lockdown-flows.md`). Key expiry is **disabled on every tagged IDEA node** (pool, idea02, production, kits, kit routers, idea-hub), read by Atlas on 25 November 2026. The old 2 December 2026 expiry for idea02 and idea03 no longer applies.
 - A console-only "Edit tags" click does not by itself disable key expiry (see the T-c runbook).
 - The live fleet key's tag, reusable/ephemeral flags and expiry are still unconfirmed in the admin console (idea#375 T-a).
-- Engine first-boot join-once and key deletion: engine#291. Engine docs in agent-engine-dev (`docs/PI_FLEET.md` and the `installTailscale` comment) still need to drop the old ephemeral / single-use wording (owner: Axle).
+- Engine first-boot join-once and key deletion are implemented (engine#291, merged 13 November 2026). Engine docs in agent-engine-dev (`docs/PI_FLEET.md` and the `installTailscale` comment) may still carry the old ephemeral / single-use wording (owner: Axle; flagged in the 25 November doc check).
 
 ## 6. What this page does not cover
 

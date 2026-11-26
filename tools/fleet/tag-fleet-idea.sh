@@ -63,7 +63,7 @@ done
 [ -n "$MODE" ] || { echo "ERROR: mode required" >&2; usage >&2; exit 2; }
 
 if [ "$MODE" = order ]; then
-  jq -nc --arg order "$ORDER" --arg reason "idea03 first (spare, shares the 2026-12-02 14:36 Europe/Brussels expiry, SSH recently proven); idea04 next spare; idea02 hold but named by T-c for the same expiry; idea01 golden last. idea/wh and kits later." \
+  jq -nc --arg order "$ORDER" --arg reason "idea03 first (spare, SSH recently proven); idea04 next spare; idea02 hold / walker host but named by T-c; idea01 golden last. idea/wh and kits later." \
     '{script:"tag-fleet-idea.sh",ok:true,mode:"order",order:($order|split(" ")),reason:$reason}'
   exit 0
 fi
@@ -403,9 +403,11 @@ do_precheck() {
   fi
   if [ -n "$expiry" ]; then
     add_note "$PI KeyExpiry is $expiry (UTC). After Edit tags, also Disable key expiry — console tagging does not by itself turn expiry off unless the node is re-authenticated."
+  else
+    add_note "$PI KeyExpiry is empty (expiry is disabled)."
   fi
   if [ "$PI" = idea02 ]; then
-    add_note "idea02 is status hold / not a pool Pi. T-c names it because it expires 2026-12-02 14:36 Europe/Brussels. Do not run deploy/teardown tools on it. Do not change its hold status."
+    add_note "idea02 is status hold / not a pool Pi (LAN client and test-walk host). Do not run deploy/teardown tools on it. Do not change its hold status."
   fi
   if [ "$PI" = idea01 ]; then
     add_note "idea01 is golden. Tag it last, only after idea03 and idea04 (and idea02) succeeded."
@@ -462,9 +464,13 @@ do_postcheck() {
     add_note "$PI still does not show tag:idea."
   fi
   if [ -n "$expiry" ]; then
-    add_note "KeyExpiry is still set ($expiry UTC). Disable key expiry in the console (especially idea02/idea03, deadline 2026-12-02 14:36 Europe/Brussels)."
+    if [ "$tagged" = true ]; then
+      add_note "KeyExpiry is still set ($expiry UTC). Tagged IDEA nodes should have expiry disabled; disable it in the console (Edit tags does not turn expiry off by itself)."
+    else
+      add_note "KeyExpiry is still set ($expiry UTC). After tagging, disable key expiry in the console (Edit tags does not turn expiry off by itself)."
+    fi
   else
-    add_note "KeyExpiry is empty (no expiry)."
+    add_note "KeyExpiry is empty (expiry is disabled)."
   fi
   if [ "${SKIP_SSH:-0}" != 1 ]; then
     if fl_ssh "$ip" true; then
